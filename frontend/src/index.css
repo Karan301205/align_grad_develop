@@ -1,0 +1,273 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: toggle by adding/removing `dark` on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Brand */
+  --c-brand-violet: #9b5de0;
+  --c-brand-blue: #4c5fe8;
+
+  /* Surfaces */
+  --c-background: #f8f9fc;
+  --c-surface-container: #ffffff;
+  --c-surface-container-low: #f3f4f8;
+  --c-surface-container-high: #eef0f6;
+  --c-surface-container-highest: #e6e8f0;
+
+  /* Borders */
+  --c-outline: #b9bdcb;
+  --c-outline-variant: #e2e4ec;
+
+  /* Text */
+  --c-on-surface: #142523;
+  --c-on-surface-variant: #5b6472;
+
+  /* Primary (brand blue) */
+  --c-primary: #4c5fe8;
+  --c-on-primary: #ffffff;
+  --c-primary-container: #eef0fe;
+  --c-on-primary-container: #3646c4;
+
+  /* Secondary (brand violet) */
+  --c-secondary: #9b5de0;
+  --c-on-secondary: #ffffff;
+  --c-secondary-container: #f5eefc;
+  --c-on-secondary-container: #7a3dbe;
+
+  /* Tertiary (amber - certification / upgrade CTAs) */
+  --c-tertiary: #d97706;
+  --c-on-tertiary: #ffffff;
+  --c-tertiary-container: #fef3e2;
+  --c-on-tertiary-container: #92400e;
+
+  /* Error */
+  --c-error: #dc2626;
+  --c-on-error: #ffffff;
+  --c-error-container: #fef2f2;
+  --c-on-error-container: #991b1b;
+
+  /* Success */
+  --c-success: #16a34a;
+  --c-on-success: #ffffff;
+  --c-success-container: #f0fdf4;
+  --c-on-success-container: #166534;
+}
+
+.dark {
+  --c-background: #0e1013;
+  --c-surface-container: #16181c;
+  --c-surface-container-low: #101216;
+  --c-surface-container-high: #1e2126;
+  --c-surface-container-highest: #262a31;
+
+  --c-outline: #565c66;
+  --c-outline-variant: #2b2f36;
+
+  --c-on-surface: #f2f4f7;
+  --c-on-surface-variant: #9aa1ad;
+
+  --c-primary: #7c8cff;
+  --c-on-primary: #10142e;
+  --c-primary-container: #262c5c;
+  --c-on-primary-container: #c3cbff;
+
+  --c-secondary: #c89bf0;
+  --c-on-secondary: #2a1240;
+  --c-secondary-container: #3e2263;
+  --c-on-secondary-container: #e9d5fa;
+
+  --c-tertiary: #f0b84d;
+  --c-on-tertiary: #3a2600;
+  --c-tertiary-container: #4d3405;
+  --c-on-tertiary-container: #fcd888;
+
+  --c-error: #f87171;
+  --c-on-error: #450a0a;
+  --c-error-container: #4c1414;
+  --c-on-error-container: #fecaca;
+
+  --c-success: #4ade80;
+  --c-on-success: #052e16;
+  --c-success-container: #123420;
+  --c-on-success-container: #bbf7d0;
+}
+
+@theme inline {
+  --color-background: var(--c-background);
+  --color-surface-container: var(--c-surface-container);
+  --color-surface-container-low: var(--c-surface-container-low);
+  --color-surface-container-high: var(--c-surface-container-high);
+  --color-surface-container-highest: var(--c-surface-container-highest);
+
+  --color-outline: var(--c-outline);
+  --color-outline-variant: var(--c-outline-variant);
+
+  --color-on-surface: var(--c-on-surface);
+  --color-on-surface-variant: var(--c-on-surface-variant);
+
+  --color-primary: var(--c-primary);
+  --color-on-primary: var(--c-on-primary);
+  --color-primary-container: var(--c-primary-container);
+  --color-on-primary-container: var(--c-on-primary-container);
+
+  --color-secondary: var(--c-secondary);
+  --color-on-secondary: var(--c-on-secondary);
+  --color-secondary-container: var(--c-secondary-container);
+  --color-on-secondary-container: var(--c-on-secondary-container);
+
+  --color-tertiary: var(--c-tertiary);
+  --color-on-tertiary: var(--c-on-tertiary);
+  --color-tertiary-container: var(--c-tertiary-container);
+  --color-on-tertiary-container: var(--c-on-tertiary-container);
+
+  --color-error: var(--c-error);
+  --color-on-error: var(--c-on-error);
+  --color-error-container: var(--c-error-container);
+  --color-on-error-container: var(--c-on-error-container);
+
+  --color-success: var(--c-success);
+  --color-on-success: var(--c-on-success);
+  --color-success-container: var(--c-success-container);
+  --color-on-success-container: var(--c-on-success-container);
+
+  --color-brand-violet: var(--c-brand-violet);
+  --color-brand-blue: var(--c-brand-blue);
+
+  --font-sans: "Inter", sans-serif;
+  --font-headline: "Oswald", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--c-background);
+    color: var(--c-on-surface);
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+.brand-gradient {
+  background-image: linear-gradient(135deg, var(--c-brand-violet) 0%, var(--c-brand-blue) 100%);
+}
+
+.brand-gradient-text {
+  background-image: linear-gradient(135deg, var(--c-brand-violet) 0%, var(--c-brand-blue) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--c-outline);
+  opacity: 0.5;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--c-on-surface-variant);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out;
+}
+
+@keyframes scale-up {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-scale-up {
+  animation: scale-up 0.2s ease-out;
+}
+
+/* Connection Loader Custom Word Spinning Styles */
+.loader-card {
+  background-color: var(--c-background);
+  padding: 1rem 2rem;
+  border-radius: 1.25rem;
+}
+
+.loader-container {
+  color: var(--c-on-surface-variant);
+  font-family: "Inter", "Geist", sans-serif;
+  font-weight: 500;
+  font-size: 25px;
+  box-sizing: content-box;
+  height: 40px;
+  padding: 10px 10px;
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+}
+
+.loader-words {
+  overflow: hidden;
+  position: relative;
+  height: 40px;
+}
+
+.loader-words::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    var(--c-background) 10%,
+    transparent 30%,
+    transparent 70%,
+    var(--c-background) 90%
+  );
+  z-index: 20;
+}
+
+.loader-word {
+  display: block;
+  height: 100%;
+  padding-left: 8px;
+  color: var(--c-primary);
+  animation: spin_4991 4s infinite;
+}
+
+@keyframes spin_4991 {
+  10% {
+    transform: translateY(-102%);
+  }
+  25% {
+    transform: translateY(-100%);
+  }
+  35% {
+    transform: translateY(-202%);
+  }
+  50% {
+    transform: translateY(-200%);
+  }
+  60% {
+    transform: translateY(-302%);
+  }
+  75% {
+    transform: translateY(-300%);
+  }
+  85% {
+    transform: translateY(-402%);
+  }
+  100% {
+    transform: translateY(-400%);
+  }
+}

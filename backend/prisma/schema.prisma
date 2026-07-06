@@ -1,0 +1,187 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  role      String   // "STUDENT" or "RECRUITER"
+  createdAt DateTime @default(now())
+  profile   Profile?
+  company   Company?
+}
+
+model Profile {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String        @unique @db.ObjectId
+  user         User          @relation(fields: [userId], references: [id])
+  name         String
+  resumeUrl    String?
+  skills       Skill[]
+  tests        TestAttempt[]
+  bio          String?
+  nationality  String?
+  gender       String?
+  email        String?
+  dob          String?
+  phone        String?
+  socialLinks  SocialLinks?
+  education    Education[]
+  experience   Experience[]
+  certificates Certificate[]
+  projects     Project[]
+  cocurricular String?
+  introVideoUrl String?
+}
+
+type Skill {
+  name           String
+  rating         Int
+  verifiedRating Int?
+}
+
+type SocialLinks {
+  linkedin         String?
+  github           String?
+  hackerEarth      String?
+  hackerRank       String?
+  codechef         String?
+  leetcode         String?
+  codeforces       String?
+  kaggle           String?
+  portfolio        String?
+  showLinkedin     Boolean?
+  showGithub       Boolean?
+  showHackerEarth  Boolean?
+  showHackerRank   Boolean?
+  showCodechef     Boolean?
+  showLeetcode     Boolean?
+  showCodeforces   Boolean?
+  showKaggle       Boolean?
+  showPortfolio    Boolean?
+}
+
+type Education {
+  eduType      String?
+  institute    String?
+  degree       String?
+  fieldOfStudy String?
+  startDate    String?
+  endDate      String?
+  gradeType    String?
+  gradeValue   String?
+}
+
+type Experience {
+  expType          String?
+  designation      String?
+  involvesTech     Boolean?
+  companyName      String?
+  domain           String?
+  startDate        String?
+  endDate          String?
+  currentlyWorking Boolean?
+  location         String?
+  description      String?
+}
+
+type Certificate {
+  title       String?
+  org         String?
+  startDate   String?
+  link        String?
+  description String?
+}
+
+type Project {
+  title            String?
+  role             String?
+  codeUrl          String?
+  hostedUrl        String?
+  startDate        String?
+  endDate          String?
+  currentlyWorking Boolean?
+  description      String?
+}
+
+model Company {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @unique @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  name       String
+  docUrl     String?
+  verified   Boolean  @default(false)
+  jobs       Job[]
+}
+
+model Job {
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  companyId            String   @db.ObjectId
+  company              Company  @relation(fields: [companyId], references: [id])
+  title                String
+  description          String
+  companyName          String?
+  officialWebsite      String?
+  preferredEducation   String?
+  desiredExperience    String?
+  designation          String?
+  stipendPartTime      String?
+  stipendFullTime      String?
+  duration             String?
+  roleResponsibilities String?
+  location             String?
+  locationUrl          String?
+  edited               Boolean? @default(false)
+  activeDays           Int?     @default(30)
+  joiningMonth         String?
+  openings             Int?
+  selectionProcess     ProcessRound[]
+  requirements         JobRequirement[]
+  applications         Application[]
+  createdAt            DateTime @default(now())
+}
+
+type ProcessRound {
+  roundNumber Int
+  name        String
+  description String
+}
+
+
+type JobRequirement {
+  skillName String
+  minRating Int
+}
+
+type ApplicationRoundStatus {
+  roundNumber Int
+  name        String
+  status      String   @default("PENDING")
+  feedback    String?
+}
+
+model Application {
+  id            String                   @id @default(auto()) @map("_id") @db.ObjectId
+  jobId         String                   @db.ObjectId
+  job           Job                      @relation(fields: [jobId], references: [id])
+  studentId     String                   @db.ObjectId
+  status        String                   @default("APPLIED")
+  roundStatuses ApplicationRoundStatus[]
+  createdAt     DateTime                 @default(now())
+}
+
+model TestAttempt {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId String   @db.ObjectId
+  profile   Profile  @relation(fields: [profileId], references: [id])
+  skillName String
+  score     Int
+  passed    Boolean
+  createdAt DateTime @default(now())
+}

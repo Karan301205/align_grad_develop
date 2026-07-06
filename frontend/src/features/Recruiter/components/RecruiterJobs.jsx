@@ -1,0 +1,292 @@
+import React, { useState } from 'react';
+import { Briefcase, User, ShieldCheck, FileText, RefreshCw, X } from 'lucide-react';
+import JobDetailsModal from '../../../components/JobDetailsModal';
+import EditJobModal from './EditJobModal';
+import PageHeader from '../../../components/ui/PageHeader';
+import StatCard from '../../../components/ui/StatCard';
+import Card from '../../../components/ui/Card';
+import EmptyState from '../../../components/ui/EmptyState';
+import { API_BASE } from '../../../constants';
+
+export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDeleteJob, onRefresh, token }) {
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [editingJob, setEditingJob] = useState(null);
+  const [managingApp, setManagingApp] = useState(null);
+  const totalApplicants = jobs.reduce((acc, job) => acc + (job.applications?.length || 0), 0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    if (onRefresh) {
+      await onRefresh();
+    }
+    setIsRefreshing(false);
+  };
+
+  const getRemainingDays = (createdAt, activeDays) => {
+    const expiryTime = new Date(createdAt).getTime() + (activeDays || 30) * 24 * 60 * 60 * 1000;
+    const remainingMs = expiryTime - Date.now();
+    const remainingDays = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
+    return Math.max(0, remainingDays);
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
+      <PageHeader
+        title="Enterprise Job Dashboard"
+        subtitle="Manage posted roles and review candidate alignment scores"
+      />
+
+      {/* Metrics Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatCard icon={Briefcase} label="Active Roles" value={jobs.length} sublabel="Jobs currently open for matches" accent="secondary" />
+        <StatCard icon={User} label="Total Applicants" value={totalApplicants} sublabel="Applied candidate profiles" accent="tertiary" />
+        <StatCard
+          icon={ShieldCheck}
+          label="Trust Status"
+          value={company?.verified ? 'VERIFIED' : 'PENDING'}
+          sublabel="Enterprise verification level"
+          accent="primary"
+        />
+      </div>
+
+      {/* Jobs listing & Applications */}
+      <div className="space-y-6">
+        <div className="flex justify-between items-center border-b border-outline-variant pb-2">
+          <h3 className="text-lg font-headline font-bold text-on-surface">Active Posted Roles</h3>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface-variant hover:text-on-surface rounded-xl text-xs font-mono transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+          </button>
+        </div>
+
+        {jobs.length === 0 ? (
+          <EmptyState
+            icon={Briefcase}
+            title="No jobs posted yet"
+            description="Click 'Post New Job' in the sidebar to start matching with candidates."
+          />
+        ) : (
+          [...jobs]
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .map(job => (
+            <Card key={job.id} className="space-y-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h4
+                      onClick={() => setSelectedJob(job)}
+                      className="text-xl font-bold text-on-surface hover:text-primary cursor-pointer hover:underline transition-colors w-max"
+                    >
+                      {job.title}
+                    </h4>
+                    {job.edited && (
+                      <span className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[9px] font-mono font-bold rounded-full uppercase tracking-wider shrink-0">
+                        Updated
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedJob(job)}
+                      className="text-primary hover:underline transition-colors text-left"
+                    >
+                      View specifications & rounds →
+                    </button>
+                    <span className="text-on-surface-variant/40 select-none">•</span>
+                    <button
+                      type="button"
+                      onClick={() => setEditingJob(job)}
+                      className="text-secondary hover:underline transition-colors text-left font-bold"
+                    >
+                      Edit Role Details
+                    </button>
+                    <span className="text-on-surface-variant/40 select-none">•</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteJob(job.id)}
+                      className="text-error hover:underline transition-colors text-left font-bold"
+                    >
+                      Remove Manually
+                    </button>
+                  </div>
+                  
+                  <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">{job.description}</p>
+                </div>
+                <span className="px-3 py-1 bg-surface-container-high border border-outline-variant rounded text-xs font-mono text-secondary shrink-0">
+                  {job.applications?.length || 0} applications • {getRemainingDays(job.createdAt, job.activeDays)} days left
+                </span>
+              </div>
+
+              {/* Applicants display */}
+              <div className="bg-surface-container-low rounded-xl p-4 border border-outline-variant">
+                <h5 className="text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-3">Applicants</h5>
+                {(!job.applications || job.applications.length === 0) ? (
+                  <p className="text-xs text-on-surface-variant font-mono">No candidates have applied yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {job.applications.map((app, index) => (
+                      <div key={index} className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-surface-container-high/60 p-3 rounded-lg border border-outline-variant">
+                        <div>
+                          <p className="text-sm font-bold text-on-surface">{app.student?.name || 'Anonymous Student'}</p>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {app.student?.skills?.map((s, idx) => (
+                              <span key={idx} className="text-[10px] bg-primary-container border border-primary/20 text-on-primary-container px-1.5 py-0.5 rounded font-mono">
+                                {s.name}: Lvl {s.rating}/10
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <a href={app.student?.resumeUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                            <FileText className="w-3.5 h-3.5" /> View Resume
+                          </a>
+                          <span className="text-on-surface-variant/20">|</span>
+                          <button
+                            type="button"
+                            onClick={() => setManagingApp(app)}
+                            className="text-xs text-secondary hover:underline flex items-center gap-1 font-bold"
+                          >
+                            Manage Progress
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Reusable Details Modal */}
+      {selectedJob && (
+        <JobDetailsModal
+          job={selectedJob}
+          onClose={() => setSelectedJob(null)}
+          isStudent={false}
+        />
+      )}
+
+      {/* Edit Job Modal */}
+      {editingJob && (
+        <EditJobModal
+          job={editingJob}
+          onClose={() => setEditingJob(null)}
+          handleUpdateJob={handleUpdateJob}
+        />
+      )}
+
+      {managingApp && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-container border border-outline-variant rounded-2xl w-full max-w-xl p-6 space-y-6 animate-fade-in max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center border-b border-outline-variant pb-3">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">Applicant Progress Lab</span>
+                <h4 className="text-xl font-bold text-on-surface">Manage Recruitment Progress</h4>
+                <p className="text-xs text-on-surface-variant font-mono mt-0.5">Candidate: {managingApp.student?.name}</p>
+              </div>
+              <button 
+                onClick={() => setManagingApp(null)}
+                className="p-1 hover:bg-surface-container-high rounded animate-fade-in"
+              >
+                <X className="w-5 h-5 text-on-surface-variant hover:text-on-surface" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-xs text-on-surface-variant leading-relaxed">
+                Update the status and add feedback for each round. Completing or rejecting a round updates the candidate's real-time dashboard.
+              </p>
+
+              <div className="space-y-4">
+                {(managingApp.roundStatuses || []).map((round, idx) => (
+                  <div key={idx} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-bold text-on-surface">Round {round.roundNumber}: {round.name}</span>
+                      <select
+                        value={round.status}
+                        onChange={(e) => {
+                          const updated = [...managingApp.roundStatuses];
+                          updated[idx].status = e.target.value;
+                          setManagingApp({ ...managingApp, roundStatuses: updated });
+                        }}
+                        className="bg-surface-container border border-outline-variant rounded-lg text-xs font-mono text-on-surface px-2 py-1.5 focus:outline-none focus:border-primary"
+                      >
+                        <option value="PENDING">Pending</option>
+                        <option value="IN_PROGRESS">In Progress</option>
+                        <option value="SCHEDULED">Scheduled</option>
+                        <option value="CLEARED">Qualified / Cleared</option>
+                        <option value="REJECTED">Rejected</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider block mb-1">Feedback</label>
+                      <textarea
+                        value={round.feedback || ''}
+                        onChange={(e) => {
+                          const updated = [...managingApp.roundStatuses];
+                          updated[idx].feedback = e.target.value;
+                          setManagingApp({ ...managingApp, roundStatuses: updated });
+                        }}
+                        placeholder="Add round feedback or instructions..."
+                        className="w-full bg-surface-container border border-outline-variant rounded-lg p-2 text-xs text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary h-16 resize-none custom-scrollbar"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2 border-t border-outline-variant">
+              <button
+                onClick={() => setManagingApp(null)}
+                className="px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-on-surface bg-surface-container-high border border-outline-variant rounded-xl hover:brightness-105 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await fetch(`${API_BASE}/recruiter/applications/${managingApp.id}/rounds`, {
+                      method: 'PUT',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                      },
+                      body: JSON.stringify({
+                        roundStatuses: managingApp.roundStatuses
+                      })
+                    });
+                    if (res.ok) {
+                      alert('Progress updated successfully!');
+                      setManagingApp(null);
+                      if (onRefresh) onRefresh();
+                    } else {
+                      const d = await res.json();
+                      alert(d.error || 'Failed to update progress');
+                    }
+                  } catch (err) {
+                    alert('Error updating progress');
+                  }
+                }}
+                className="px-4 py-2 text-xs font-bold text-on-primary bg-primary rounded-xl hover:brightness-110 active:scale-95 transition-all"
+              >
+                Save Progress
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
