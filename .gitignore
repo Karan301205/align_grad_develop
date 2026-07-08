@@ -39,3 +39,5 @@ Thumbs.db
 # ─── AI / Agent Artifacts ──────────────────────────────────
 .gemini/
 .claude/
+scratch/
+test-*.js

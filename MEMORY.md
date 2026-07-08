@@ -9,7 +9,7 @@ This document is the single source of truth for the AlignGrade repository. It de
 * **Purpose**: A premium, full-stack recruitment & skill verification platform.
 * **Business Objective**: Align candidate self-rated proficiencies with recruiter requirements using automated skill matching. Candidates falling below requirements are locked out from applying but can take interactive certification tests to verify their skills and unlock opportunities.
 * **High-Level Architecture**: 
-  - **Frontend**: Single Page React Application (Vite + Tailwind CSS v4) matching the Tech Talent Dashboard's dark, high-fidelity design theme.
+  - **Frontend**: Single Page React Application (Vite + Tailwind CSS v4). Design system: semantic CSS-variable tokens in `src/index.css` (light + class-based dark mode) built on the brand palette — sky `#8ecae6`, teal `#219ebc`, navy `#023047`, amber `#ffb703`, orange `#fb8500`. Typography: Inter (body), Plus Jakarta Sans (headlines/`font-headline`), JetBrains Mono (labels).
   - **Backend**: Express.js REST API using CommonJS (`require` syntax).
   - **Database & ORM**: MongoDB + Prisma ORM. Auto-configures an in-memory mock database store for seamless offline execution if no MongoDB connection is configured.
 
@@ -52,6 +52,13 @@ This document is the single source of truth for the AlignGrade repository. It de
 * **Safe Modifications**: Altering seeded job mock data or mock model methods.
 * **Risk**: High (database client availability depend on this).
 
+#### [backend/src/config/s3.js](file:///Users/karanrawat/Desktop/a_g/backend/src/config/s3.js)
+* **Purpose**: AWS S3 storage client initialization and file operations helper wrapper.
+* **Used By**: Upload, student, and recruiter controllers.
+* **Dependencies**: `@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`.
+* **Safe Modifications**: Customizing file expiration time limit, adding custom bucket parameters.
+* **Risk**: Medium.
+
 #### [backend/src/middleware/auth.js](file:///Users/karanrawat/Desktop/a_g/backend/src/middleware/auth.js)
 * **Purpose**: Intercepts request headers, parses the JWT token, and decodes the user payload.
 * **Used By**: `backend/src/routes/api.js`.
@@ -79,6 +86,13 @@ This document is the single source of truth for the AlignGrade repository. It de
 * **Dependencies**: `backend/src/config/db.js`.
 * **Safe Modifications**: Customizing verification statuses, field additions to job creation parameters.
 * **Risk**: High.
+
+#### [backend/src/controllers/upload.controller.js](file:///Users/karanrawat/Desktop/a_g/backend/src/controllers/upload.controller.js)
+* **Purpose**: Handles secure pre-signed PUT upload URL generation for client-side direct S3 uploads.
+* **Used By**: `backend/src/routes/api.js`.
+* **Dependencies**: `backend/src/config/s3.js`.
+* **Safe Modifications**: File type constraints, path formatting, key generation naming structures.
+* **Risk**: Medium.
 
 #### [backend/src/routes/api.js](file:///Users/karanrawat/Desktop/a_g/backend/src/routes/api.js)
 * **Purpose**: Defines route endpoints and assigns auth middlewares and controllers.
@@ -174,9 +188,11 @@ src/index.js
         └── src/controllers/
               ├── auth.controller.js
               ├── student.controller.js
-              └── recruiter.controller.js
-                    └── src/config/db.js (Prisma / Mock fallback client)
-                          └── prisma/schema.prisma (Database Models)
+              ├── recruiter.controller.js
+              │     └── src/config/db.js (Prisma / Mock fallback client)
+              │           └── prisma/schema.prisma (Database Models)
+              └── upload.controller.js
+                    └── src/config/s3.js (AWS S3 storage helpers)
 ```
 
 ---
@@ -224,6 +240,11 @@ src/index.js
 * **`GET /api/recruiter/candidates`**
   - **Purpose**: Lists all candidate profiles.
   - **Files**: `recruiter.controller.js`, `api.js`
+
+### Upload Endpoints (Bearer JWT Required)
+* **`POST /api/upload/request-url`**
+  - **Purpose**: Generates S3 pre-signed upload URL for files (resume, video, doc).
+  - **Files**: `upload.controller.js`, `api.js`
 
 ---
 
@@ -313,6 +334,10 @@ src/index.js
 * **`DATABASE_URL`**: MongoDB connection string with replica set enabled (`mongodb://...`). Defaults to local in development but is bypassed by the mock datastore if not matching a remote cluster.
 * **`JWT_SECRET`**: Phrase used to sign and verify authorization tokens.
 * **`PORT`**: Network port the backend Express server binds to (default: `5001`).
+* **`AWS_ACCESS_KEY_ID`**: Access credential of S3 user.
+* **`AWS_SECRET_ACCESS_KEY`**: Secret key of S3 user.
+* **`AWS_REGION`**: AWS target region location (e.g. `ap-south-1`).
+* **`S3_BUCKET_NAME`**: Name of the target S3 bucket where file objects are saved.
 
 ---
 
@@ -326,7 +351,8 @@ src/index.js
 ## 9. Search Index (Task-to-File Routing)
 
 * **Task: Change UI Theme or Color Tokens**
-  - Files: `frontend/tailwind.config.js`, `frontend/src/index.css`
+  - Files: `frontend/src/index.css` (all `--c-*` tokens, light in `:root`, dark in `.dark`; gradient uses `--c-grad-from/to`), `frontend/tailwind.config.js` (font families only), `frontend/index.html` (Google Fonts link)
+  - Note: components must use semantic token classes (`bg-primary`, `text-on-surface`, etc.) — never hardcoded hex/zinc utilities. Tertiary (amber/orange) is reserved for certification/upgrade CTAs; secondary is brand navy.
 * **Task: Add New Test Question / Modify Quiz Scoring**
   - Files: `frontend/src/features/SkillTest/TestView.jsx` or `frontend/src/features/Student/components/StudentSkillTests.jsx`
 * **Task: Alter Job Matching Algorithm Logic**

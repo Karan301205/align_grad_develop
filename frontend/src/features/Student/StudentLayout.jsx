@@ -398,63 +398,87 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64Data = event.target.result;
-      setResumeUrl(base64Data);
+    try {
+      setSubmittingProfile(true);
 
-      try {
-        const res = await fetch(`${API_BASE}/student/profile`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            name: profile?.name,
-            resumeUrl: base64Data,
-            skills: skillsList,
-            bio,
-            nationality,
-            gender,
-            email: profileEmail,
-            dob,
-            phone,
-            socialLinks,
-            education: educationList,
-            experience: experienceList,
-            certificates: certificatesList,
-            projects: projectsList,
-            cocurricular
-          })
-        });
-        if (res.ok) {
-          const d = await res.json();
-          setProfile(d);
-          setFeedbackMsg('Resume PDF uploaded and saved successfully!');
-        } else {
-          alert('Failed to save uploaded resume on the server.');
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Network error saving resume PDF.');
+      // 1. Request S3 pre-signed upload URL from backend
+      const urlRes = await fetch(`${API_BASE}/upload/request-url`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          fileType: 'resume',
+          fileName: file.name,
+          contentType: file.type
+        })
+      });
+
+      if (!urlRes.ok) {
+        throw new Error('Failed to request S3 upload URL from server.');
       }
-    };
-    reader.readAsDataURL(file);
+
+      const { uploadUrl, publicUrl } = await urlRes.json();
+
+      // 2. Upload file directly to S3 via pre-signed PUT URL
+      const s3Res = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type
+        },
+        body: file
+      });
+
+      if (!s3Res.ok) {
+        throw new Error('Failed to upload file directly to S3.');
+      }
+
+      // 3. Save the S3 publicUrl to student profile
+      const res = await fetch(`${API_BASE}/student/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: profile?.name,
+          resumeUrl: publicUrl,
+          skills: skillsList,
+          bio,
+          nationality,
+          gender,
+          email: profileEmail,
+          dob,
+          phone,
+          socialLinks,
+          education: educationList,
+          experience: experienceList,
+          certificates: certificatesList,
+          projects: projectsList,
+          cocurricular
+        })
+      });
+
+      if (res.ok) {
+        const d = await res.json();
+        setProfile(d);
+        setResumeUrl(publicUrl);
+        setFeedbackMsg('Resume PDF uploaded and saved to S3 successfully!');
+      } else {
+        alert('Failed to save uploaded resume S3 URL on the server.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'Error uploading resume PDF.');
+    } finally {
+      setSubmittingProfile(false);
+    }
   };
 
   const handleDownloadUploadedResume = () => {
     if (!resumeUrl) return;
-    if (resumeUrl.startsWith('data:application/pdf;')) {
-      const link = document.createElement('a');
-      link.href = resumeUrl;
-      link.download = `${profile?.name || 'Student'}_Uploaded_Resume.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      window.open(resumeUrl, '_blank');
-    }
+    window.open(resumeUrl, '_blank');
   };
 
   const handleDeleteUploadedResume = async () => {

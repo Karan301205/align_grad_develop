@@ -9,7 +9,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
-        headline: ["Oswald", "sans-serif"],
+        headline: ["Plus Jakarta Sans", "Inter", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       }
     },

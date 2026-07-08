@@ -10,13 +10,13 @@ const ACCENT_CLASSES = {
 export default function StatCard({ icon: Icon, label, value, sublabel, accent = 'primary' }) {
   const colors = ACCENT_CLASSES[accent] || ACCENT_CLASSES.primary;
   return (
-    <div className={`p-5 rounded-2xl border border-outline-variant flex flex-col justify-between h-36 ${colors.bg}`}>
+    <div className={`p-5 rounded-2xl border border-outline-variant flex flex-col justify-between h-36 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:shadow-secondary/5 ${colors.bg}`}>
       <div className="flex justify-between items-start">
-        <span className={`text-xs font-mono uppercase tracking-wider ${colors.text}`}>{label}</span>
+        <span className={`text-[11px] font-mono uppercase tracking-wider ${colors.text}`}>{label}</span>
         {Icon && <Icon className={`w-5 h-5 ${colors.icon}`} />}
       </div>
       <div className="mt-auto">
-        <span className="text-3xl font-extrabold text-on-surface">{value}</span>
+        <span className="text-3xl font-headline font-extrabold tracking-tight text-on-surface">{value}</span>
         {sublabel && <p className="text-[11px] text-on-surface-variant mt-1">{sublabel}</p>}
       </div>
     </div>

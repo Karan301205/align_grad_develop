@@ -22,6 +22,24 @@ exports.verifyCompany = async (req, res) => {
   }
 
   try {
+    const existingCompany = await prisma.company.findUnique({
+      where: { userId: req.user.id }
+    });
+
+    if (existingCompany && existingCompany.docUrl && existingCompany.docUrl !== docUrl) {
+      try {
+        const parts = existingCompany.docUrl.split('.amazonaws.com/');
+        if (parts.length > 1) {
+          const oldKey = parts[1];
+          const { deleteObject } = require('../config/s3');
+          console.log(`Deleting old company verification document from S3: ${oldKey}`);
+          await deleteObject(oldKey);
+        }
+      } catch (deleteErr) {
+        console.error('Failed to delete old company doc from S3:', deleteErr);
+      }
+    }
+
     const company = await prisma.company.update({
       where: { userId: req.user.id },
       data: {

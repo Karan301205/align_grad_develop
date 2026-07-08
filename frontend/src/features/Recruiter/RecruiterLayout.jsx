@@ -149,27 +149,63 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     }
   };
 
-  const handleVerification = async (e) => {
-    e.preventDefault();
+  const handleVerification = async (file) => {
     setSubmittingDoc(true);
     try {
+      // 1. Request secure S3 upload URL from backend
+      const urlRes = await fetch(`${API_BASE}/upload/request-url`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          fileType: 'doc',
+          fileName: file.name,
+          contentType: file.type
+        })
+      });
+
+      if (!urlRes.ok) {
+        throw new Error('Failed to request upload URL from server.');
+      }
+
+      const { uploadUrl, publicUrl } = await urlRes.json();
+
+      // 2. Upload file directly to S3
+      const s3Res = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type
+        },
+        body: file
+      });
+
+      if (!s3Res.ok) {
+        throw new Error('Failed to upload verification document to S3.');
+      }
+
+      // 3. Submit document URL to recruiter verification endpoint
       const res = await fetch(`${API_BASE}/recruiter/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ docUrl: docLink })
+        body: JSON.stringify({ docUrl: publicUrl })
       });
+
       if (res.ok) {
         alert('Verification documents uploaded! Trust established.');
+        setDocLink(publicUrl);
         fetchRecruiterData();
       } else {
         const d = await res.json();
         alert(d.error || 'Upload failed');
       }
     } catch (err) {
-      alert('Upload error');
+      console.error(err);
+      alert(err.message || 'Upload error');
     } finally {
       setSubmittingDoc(false);
     }

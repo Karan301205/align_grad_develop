@@ -85,10 +85,10 @@ export default function StudentResume({
                 </div>
                 <div className="overflow-hidden">
                   <p className="text-xs font-bold text-on-surface truncate">
-                    {resumeUrl.startsWith('data:application/pdf;') ? `${profile?.name || 'Student'}_Resume.pdf` : 'linked_portfolio_resume.pdf'}
+                    {resumeUrl.startsWith('http') ? resumeUrl.split('/').pop() : (resumeUrl.startsWith('data:application/pdf;') ? `${profile?.name || 'Student'}_Resume.pdf` : 'linked_portfolio_resume.pdf')}
                   </p>
                   <p className="text-[9px] text-on-surface-variant font-mono mt-0.5">
-                    {resumeUrl.startsWith('data:application/pdf;') ? `${Math.round(resumeUrl.length / 1333)} KB` : 'Linked URL'}
+                    {resumeUrl.startsWith('http') ? 'Stored in AWS S3' : (resumeUrl.startsWith('data:application/pdf;') ? `${Math.round(resumeUrl.length / 1333)} KB` : 'Linked URL')}
                   </p>
                 </div>
               </div>

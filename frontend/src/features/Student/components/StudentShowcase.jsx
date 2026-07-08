@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { 
   Video, 
   Trash2, 
@@ -16,11 +15,6 @@ import {
 } from 'lucide-react';
 import { API_BASE } from '../../../constants';
 import PageHeader from '../../../components/ui/PageHeader';
-
-// Initialize Supabase Client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-const supabase = (supabaseUrl && supabaseAnonKey) ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 export default function StudentShowcase({ profile, token, onVideoSaved }) {
   const [loading, setLoading] = useState(false);
@@ -211,7 +205,10 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ fileName })
+        body: JSON.stringify({
+          fileName,
+          contentType: recordedBlob.type || `video/${fileExt}`
+        })
       });
 
       if (!urlRes.ok) {
@@ -245,7 +242,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
         };
 
         xhr.onerror = () => {
-          reject(new Error('Network error during file upload to Supabase storage.'));
+          reject(new Error('Network error during file upload to S3 storage.'));
         };
 
         xhr.send(recordedBlob);

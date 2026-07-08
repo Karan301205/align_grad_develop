@@ -1,12 +1,4 @@
 const { prisma } = require('../config/db');
-const { createClient } = require('@supabase/supabase-js');
-
-// Initialize Supabase admin client with service role key (bypasses RLS)
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabase = (supabaseUrl && supabaseServiceRoleKey) 
-  ? createClient(supabaseUrl, supabaseServiceRoleKey, { auth: { persistSession: false } }) 
-  : null;
 
 const TECHNICAL_SKILLS = new Set([
   "a2a", "amazon redshift", "analytics", "angularjs", "ansible", "apache airflow", "apache spark",
@@ -521,23 +513,15 @@ exports.saveIntroVideo = async (req, res) => {
     // 2. If there is an old video URL and it's different from the new one, delete the old file
     if (profile.introVideoUrl && profile.introVideoUrl !== introVideoUrl) {
       try {
-        const parts = profile.introVideoUrl.split('intro-videos/');
+        const parts = profile.introVideoUrl.split('.amazonaws.com/');
         if (parts.length > 1) {
-          const oldPath = parts[1];
-          if (supabase) {
-            console.log(`Deleting old video file from storage: ${oldPath}`);
-            const { error: deleteError } = await supabase.storage
-              .from('intro-videos')
-              .remove([oldPath]);
-            if (deleteError) {
-              console.error('Failed to delete old video from storage:', deleteError);
-            } else {
-              console.log('Successfully deleted old video file from storage.');
-            }
-          }
+          const oldKey = parts[1];
+          const { deleteObject } = require('../config/s3');
+          console.log(`Deleting old video file from S3: ${oldKey}`);
+          await deleteObject(oldKey);
         }
       } catch (deleteErr) {
-        console.error('Failed to parse and delete old video:', deleteErr);
+        console.error('Failed to parse and delete old video from S3:', deleteErr);
       }
     }
 
@@ -555,13 +539,9 @@ exports.saveIntroVideo = async (req, res) => {
 };
 
 exports.requestVideoUploadUrl = async (req, res) => {
-  const { fileName } = req.body;
-  if (!fileName) {
-    return res.status(400).json({ error: 'fileName is required' });
-  }
-
-  if (!supabase) {
-    return res.status(500).json({ error: 'Supabase admin client is not configured.' });
+  const { fileName, contentType } = req.body;
+  if (!fileName || !contentType) {
+    return res.status(400).json({ error: 'fileName and contentType are required' });
   }
 
   try {
@@ -573,32 +553,20 @@ exports.requestVideoUploadUrl = async (req, res) => {
     }
 
     const fileExt = fileName.split('.').pop() || 'webm';
-    const path = `${profile.id}/showcase_${Date.now()}.${fileExt}`;
+    const key = `videos/${profile.id}/showcase_${Date.now()}.${fileExt}`;
 
-    // Request signed upload URL from Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('intro-videos')
-      .createSignedUploadUrl(path, {
-        upsert: true
-      });
-
-    if (error) {
-      throw error;
-    }
-
-    // Public URL is static
-    const publicUrl = `${supabaseUrl}/storage/v1/object/public/intro-videos/${path}`;
+    const { getUploadUrl, getPublicUrl } = require('../config/s3');
+    const uploadUrl = await getUploadUrl(key, contentType);
+    const publicUrl = getPublicUrl(key);
 
     res.json({
-      signedUrl: data.signedUrl,
-      token: data.token,
-      path: path,
+      signedUrl: uploadUrl,
       publicUrl: publicUrl
     });
 
   } catch (err) {
-    console.error('Error generating signed upload URL:', err);
-    res.status(500).json({ error: 'Failed to generate signed upload URL' });
+    console.error('Error generating S3 pre-signed upload URL for video:', err);
+    res.status(500).json({ error: 'Failed to generate S3 pre-signed upload URL for video' });
   }
 };
 

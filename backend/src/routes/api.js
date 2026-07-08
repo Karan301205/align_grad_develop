@@ -5,6 +5,7 @@ const authMiddleware = require('../middleware/auth');
 const authController = require('../controllers/auth.controller');
 const studentController = require('../controllers/student.controller');
 const recruiterController = require('../controllers/recruiter.controller');
+const uploadController = require('../controllers/upload.controller');
 
 // Public Auth routes
 router.post('/auth/signup', authController.signup);
@@ -22,6 +23,9 @@ router.post('/student/tests/submit', authMiddleware, studentController.submitSki
 router.get('/student/applications', authMiddleware, studentController.getStudentApplications);
 router.post('/student/intro-video', authMiddleware, studentController.saveIntroVideo);
 router.post('/student/video-upload-url', authMiddleware, studentController.requestVideoUploadUrl);
+
+// Upload routes (protected)
+router.post('/upload/request-url', authMiddleware, uploadController.requestUploadUrl);
 
 // Recruiter routes (protected)
 router.get('/recruiter/company', authMiddleware, recruiterController.getCompany);
