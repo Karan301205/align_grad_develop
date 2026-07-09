@@ -4,13 +4,13 @@ export default function TextArea({ label, error, className = '', containerClassN
   return (
     <div className={containerClassName}>
       {label && (
-        <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">
+        <label className="block text-[10px] font-mono font-bold uppercase tracking-[0.08em] text-on-surface-variant mb-1.5">
           {label}
         </label>
       )}
       <textarea
         rows={rows}
-        className={`w-full bg-surface-container-low border rounded-xl px-4 py-3 text-sm text-on-surface placeholder-on-surface-variant/50 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none ${error ? 'border-error' : 'border-outline-variant focus:border-primary'} ${className}`}
+        className={`w-full bg-surface-container-low neu-recessed border-none rounded-lg px-4 py-3 text-sm font-mono text-on-surface placeholder-on-surface-variant/50 outline-none transition-all focus:outline-none focus-visible:shadow-[var(--shadow-recessed),0_0_0_2px_var(--c-primary)] resize-none ${error ? 'shadow-[var(--shadow-recessed),0_0_0_2px_var(--c-error)]' : ''} ${className}`}
         {...rest}
       />
       {error && <p className="mt-1.5 text-xs text-error">{error}</p>}

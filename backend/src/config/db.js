@@ -65,6 +65,31 @@ mockDb.jobs.push({
   createdAt: new Date()
 });
 
+// Seed initial student candidate to make recruiter searches instantly testable
+const seedStudentId = "student_leo";
+mockDb.users.push({
+  id: seedStudentId,
+  email: "leo@domain.com",
+  role: "STUDENT",
+  createdAt: new Date()
+});
+mockDb.profiles.push({
+  id: "profile_leo",
+  userId: seedStudentId,
+  name: "Leo Carter",
+  username: "leo_carter",
+  profilePic: null,
+  bio: "Frontend Specialist with 3+ years of experience in React.",
+  skills: [
+    { name: "React", rating: 9, verifiedRating: 8 },
+    { name: "CSS", rating: 8, verifiedRating: null }
+  ],
+  education: [],
+  experience: [],
+  certificates: [],
+  projects: []
+});
+
 const mockClient = {
   user: {
     findUnique: async ({ where }) => {
@@ -89,6 +114,16 @@ const mockClient = {
         return { ...profile, user };
       }
       return null;
+    },
+    findFirst: async ({ where }) => {
+      if (!where) return mockDb.profiles[0] || null;
+      if (where.username) {
+        const usernameQuery = where.username;
+        const qVal = typeof usernameQuery === 'string' ? usernameQuery : (usernameQuery.equals || '');
+        return mockDb.profiles.find(p => (p.username || '').toLowerCase() === qVal.toLowerCase()) || null;
+      }
+      const field = Object.keys(where)[0];
+      return mockDb.profiles.find(p => p[field] === where[field]) || null;
     },
     findMany: async (args = {}) => {
       return mockDb.profiles;
@@ -123,6 +158,8 @@ const mockClient = {
         if (data.projects !== undefined) mockDb.profiles[idx].projects = data.projects;
         if (data.cocurricular !== undefined) mockDb.profiles[idx].cocurricular = data.cocurricular;
         if (data.introVideoUrl !== undefined) mockDb.profiles[idx].introVideoUrl = data.introVideoUrl;
+        if (data.username !== undefined) mockDb.profiles[idx].username = data.username;
+        if (data.profilePic !== undefined) mockDb.profiles[idx].profilePic = data.profilePic;
         return mockDb.profiles[idx];
       }
       throw new Error("Profile not found");

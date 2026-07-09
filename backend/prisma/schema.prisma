@@ -22,6 +22,8 @@ model Profile {
   userId       String        @unique @db.ObjectId
   user         User          @relation(fields: [userId], references: [id])
   name         String
+  username     String?       @unique
+  profilePic   String?
   resumeUrl    String?
   skills       Skill[]
   tests        TestAttempt[]
@@ -36,8 +38,14 @@ model Profile {
   experience   Experience[]
   certificates Certificate[]
   projects     Project[]
-  cocurricular String?
+  cocurricular Cocurricular[]
   introVideoUrl String?
+}
+
+type Cocurricular {
+  activity    String?
+  link        String?
+  description String?
 }
 
 type Skill {
@@ -96,7 +104,9 @@ type Certificate {
   org         String?
   startDate   String?
   link        String?
+  certNumber  String?
   description String?
+  attachment  String?
 }
 
 type Project {

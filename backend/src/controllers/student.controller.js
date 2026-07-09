@@ -44,6 +44,8 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   const { 
     name, 
+    username,
+    profilePic,
     resumeUrl, 
     skills,
     bio,
@@ -65,12 +67,34 @@ exports.updateProfile = async (req, res) => {
       where: { userId: req.user.id }
     });
 
+    if (username) {
+      const usernameRegex = /^[a-zA-Z0-9_]{3,15}$/;
+      if (!usernameRegex.test(username)) {
+        return res.status(400).json({ error: 'Invalid username format. 3-15 characters, alphanumeric/underscores only.' });
+      }
+
+      const existingUsernameProfile = await prisma.profile.findFirst({
+        where: {
+          username: {
+            equals: username,
+            mode: 'insensitive'
+          }
+        }
+      });
+
+      if (existingUsernameProfile && existingUsernameProfile.userId !== req.user.id) {
+        return res.status(400).json({ error: 'Username is already taken by another student.' });
+      }
+    }
+
     let profile;
     if (existingProfile) {
       profile = await prisma.profile.update({
         where: { userId: req.user.id },
         data: {
           name,
+          username,
+          profilePic,
           resumeUrl,
           skills: skills ? {
             set: skills // Array of { name: "React", rating: 4 }
@@ -95,6 +119,8 @@ exports.updateProfile = async (req, res) => {
         data: {
           userId: req.user.id,
           name: name || 'Student',
+          username,
+          profilePic,
           resumeUrl,
           skills: skills ? {
             set: skills
@@ -567,6 +593,42 @@ exports.requestVideoUploadUrl = async (req, res) => {
   } catch (err) {
     console.error('Error generating S3 pre-signed upload URL for video:', err);
     res.status(500).json({ error: 'Failed to generate S3 pre-signed upload URL for video' });
+  }
+};
+
+exports.checkUsername = async (req, res) => {
+  const { username } = req.query;
+  if (!username) {
+    return res.status(400).json({ error: 'Username query parameter is required' });
+  }
+
+  const usernameRegex = /^[a-zA-Z0-9_]{3,15}$/;
+  if (!usernameRegex.test(username)) {
+    return res.status(400).json({ error: 'Invalid username format. 3-15 characters, alphanumeric/underscores only.' });
+  }
+
+  try {
+    const existingProfile = await prisma.profile.findFirst({
+      where: {
+        username: {
+          equals: username,
+          mode: 'insensitive'
+        }
+      }
+    });
+
+    if (!existingProfile) {
+      return res.json({ available: true });
+    }
+
+    if (existingProfile.userId === req.user.id) {
+      return res.json({ available: true, isCurrent: true });
+    }
+
+    res.json({ available: false, reason: 'Username is already taken' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error checking username' });
   }
 };
 

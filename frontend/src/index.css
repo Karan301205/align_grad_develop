@@ -4,97 +4,126 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* Brand palette: sky #8ecae6 · teal #219ebc · navy #023047 · amber #ffb703 · orange #fb8500 */
-  --c-brand-violet: #219ebc; /* legacy alias — brand accent (teal) */
-  --c-brand-blue: #023047;   /* legacy alias — brand deep (navy) */
-  --c-grad-from: #219ebc;
-  --c-grad-to: #056b93;
+  /* ─────────────────────────────────────────────────────────────
+     INDUSTRIAL SKEUOMORPHISM — light "workshop" chassis (Level 0)
+     Palette mimics matte ABS plastic under diffuse top-left light.
+     ───────────────────────────────────────────────────────────── */
+  --c-brand-violet: #8750dc; /* legacy alias — now soft violet accent */
+  --c-brand-blue: #2d3436;   /* legacy alias — charcoal ink */
+  --c-grad-from: #c36edc;
+  --c-grad-to: #4678d2;
+  --brand-gradient: linear-gradient(135deg, rgba(195, 110, 220, 1) 0%, rgba(160, 95, 205, 1) 25%, rgba(135, 80, 220, 1) 48%, rgba(100, 90, 215, 1) 76%, rgba(70, 120, 210, 1) 100%);
 
-  /* Surfaces */
-  --c-background: #f5f4e9;
-  --c-surface-container: #ffffff;
-  --c-surface-container-low: #edf3f7;
-  --c-surface-container-high: #e3edf2;
-  --c-surface-container-highest: #d7e5ec;
+  /* Neumorphic light pair — the two halves of the lighting equation */
+  --neu-dark: #babecc;   /* shadow half (bottom-right) */
+  --neu-light: #ffffff;  /* highlight half (top-left)  */
+
+  /* Dual-shadow system (the core visual signature) */
+  --shadow-card: 8px 8px 16px var(--neu-dark), -8px -8px 16px var(--neu-light);
+  --shadow-floating: 12px 12px 24px var(--neu-dark), -12px -12px 24px var(--neu-light), inset 1px 1px 0 rgba(255,255,255,0.5);
+  --shadow-pressed: inset 6px 6px 12px var(--neu-dark), inset -6px -6px 12px var(--neu-light);
+  --shadow-recessed: inset 4px 4px 8px var(--neu-dark), inset -4px -4px 8px var(--neu-light);
+  --shadow-sharp: 4px 4px 8px rgba(0,0,0,0.15), -1px -1px 1px rgba(255,255,255,0.8);
+  --shadow-glow: 0 0 10px 2px rgba(135, 80, 220, 0.55);
+  --shadow-primary-btn: 5px 5px 10px rgba(135, 80, 220, 0.35), -5px -5px 10px rgba(255, 255, 255, 0.6);
+
+  /* Surfaces — panels share the chassis tone and lift via shadow */
+  --c-background: #e0e5ec;             /* chassis (Level 0) */
+  --c-surface-container: #e4e9f0;      /* panel (Level +1)  */
+  --c-surface-container-low: #d1d9e6;  /* recessed well (Level -1) — inputs/screens */
+  --c-surface-container-high: #e9edf3;
+  --c-surface-container-highest: #f0f2f5;
 
   /* Borders */
-  --c-outline: #9cb4c1;
-  --c-outline-variant: #dde8ee;
+  --c-outline: #babecc;
+  --c-outline-variant: #c9d0dd;
 
-  /* Text */
-  --c-on-surface: #071922;
-  --c-on-surface-variant: #4e6b7a;
+  /* Text — dark charcoal ink, softer than pure black */
+  --c-on-surface: #2d3436;
+  --c-on-surface-variant: #4a5568;
 
-  /* Primary (brand teal, darkened for contrast on white) */
-  --c-primary: #11708e;
+  /* Primary (VIOLET/BLUE — interactive triggers, active LEDs, alerts) */
+  --c-primary: #8750dc;
   --c-on-primary: #ffffff;
-  --c-primary-container: #d7edf6;
-  --c-on-primary-container: #0b4a61;
+  --c-primary-container: #f0e6ff;
+  --c-on-primary-container: #3d1480;
 
-  /* Secondary (brand navy) */
-  --c-secondary: #011c2a;
+  /* Secondary (charcoal panels / dark technical strips) */
+  --c-secondary: #2d3436;
   --c-on-secondary: #ffffff;
-  --c-secondary-container: #dbe8f0;
-  --c-on-secondary-container: #023047;
+  --c-secondary-container: #d1d9e6;
+  --c-on-secondary-container: #2d3436;
 
-  /* Tertiary (amber/orange - certification / upgrade CTAs) */
-  --c-tertiary: #b05e00;
+  /* Tertiary (amber — certification / upgrade CTAs) */
+  --c-tertiary: #b45309;
   --c-on-tertiary: #ffffff;
-  --c-tertiary-container: #ffefcb;
+  --c-tertiary-container: #fde6cb;
   --c-on-tertiary-container: #7a4a00;
 
   /* Error */
   --c-error: #dc2626;
   --c-on-error: #ffffff;
-  --c-error-container: #fef2f2;
+  --c-error-container: #fbe3e3;
   --c-on-error-container: #991b1b;
 
-  /* Success */
+  /* Success (online / operational LEDs) */
   --c-success: #15803d;
   --c-on-success: #ffffff;
-  --c-success-container: #ecfdf3;
+  --c-success-container: #dcefe1;
   --c-on-success-container: #166534;
 }
 
 .dark {
-  --c-grad-from: #8ecae6;
-  --c-grad-to: #219ebc;
+  /* Dark-industrial: powder-coated charcoal steel chassis */
+  --c-grad-from: #c36edc;
+  --c-grad-to: #4678d2;
 
-  --c-background: #041c29;
-  --c-surface-container: #072936;
-  --c-surface-container-low: #052230;
-  --c-surface-container-high: #0c3343;
-  --c-surface-container-highest: #123d50;
+  --neu-dark: #23282a;
+  --neu-light: #383f42;
 
-  --c-outline: #4c7186;
-  --c-outline-variant: #12384a;
+  --shadow-card: 8px 8px 16px var(--neu-dark), -8px -8px 16px var(--neu-light);
+  --shadow-floating: 12px 12px 24px var(--neu-dark), -12px -12px 24px var(--neu-light), inset 1px 1px 0 rgba(255,255,255,0.06);
+  --shadow-pressed: inset 6px 6px 12px var(--neu-dark), inset -6px -6px 12px var(--neu-light);
+  --shadow-recessed: inset 4px 4px 8px var(--neu-dark), inset -4px -4px 8px var(--neu-light);
+  --shadow-sharp: 4px 4px 8px rgba(0,0,0,0.45), -1px -1px 1px rgba(255,255,255,0.05);
+  --shadow-glow: 0 0 10px 2px rgba(135, 80, 220, 0.5);
+  --shadow-primary-btn: 5px 5px 10px rgba(0, 0, 0, 0.3), -5px -5px 10px rgba(255, 255, 255, 0.08);
 
-  --c-on-surface: #e8f3f8;
-  --c-on-surface-variant: #92b3c3;
+  --c-background: #2d3436;
+  --c-surface-container: #313a3c;
+  --c-surface-container-low: #262d2f;
+  --c-surface-container-high: #384143;
+  --c-surface-container-highest: #414a4d;
 
-  --c-primary: #5cc2e2;
-  --c-on-primary: #04293a;
-  --c-primary-container: #0d4a63;
-  --c-on-primary-container: #bde6f5;
+  --c-outline: #1e2426;
+  --c-outline-variant: #3a4346;
 
-  --c-secondary: #8ecae6;
-  --c-on-secondary: #062c3f;
-  --c-secondary-container: #134a63;
-  --c-on-secondary-container: #d3ecf8;
+  --c-on-surface: #e6ebf2;
+  --c-on-surface-variant: #a3adb2;
 
-  --c-tertiary: #ffb703;
-  --c-on-tertiary: #402d00;
-  --c-tertiary-container: #543c02;
+  --c-primary: #a375f0;
+  --c-on-primary: #270645;
+  --c-primary-container: #381273;
+  --c-on-primary-container: #f0e6ff;
+
+  --c-secondary: #cdd4dc;
+  --c-on-secondary: #23282a;
+  --c-secondary-container: #384143;
+  --c-on-secondary-container: #e6ebf2;
+
+  --c-tertiary: #f5a623;
+  --c-on-tertiary: #2e2000;
+  --c-tertiary-container: #4a3410;
   --c-on-tertiary-container: #ffd97a;
 
   --c-error: #f87171;
-  --c-on-error: #450a0a;
-  --c-error-container: #4c1414;
+  --c-on-error: #2a0a0a;
+  --c-error-container: #4a1c1c;
   --c-on-error-container: #fecaca;
 
   --c-success: #4ade80;
   --c-on-success: #052e16;
-  --c-success-container: #113627;
+  --c-success-container: #16362a;
   --c-on-success-container: #bbf7d0;
 }
 
@@ -149,26 +178,95 @@
     scroll-behavior: smooth;
   }
   body {
+    position: relative;
     background-color: var(--c-background);
     color: var(--c-on-surface);
     font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
+  /* Matte-plastic micro-texture: fractal noise over the whole chassis */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.28;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  #root {
+    position: relative;
+    z-index: 1;
+  }
   h1, h2, h3, h4 {
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
+  }
+  /* Embossed ink — subtle white highlight beneath dark text */
+  h1, h2, h3 {
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  }
+  .dark h1, .dark h2, .dark h3 {
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
   }
 }
 
 .brand-gradient {
-  background-image: linear-gradient(135deg, var(--c-grad-from) 0%, var(--c-grad-to) 100%);
+  background-image: var(--brand-gradient);
 }
 
 .brand-gradient-text {
-  background-image: linear-gradient(135deg, var(--c-grad-from) 0%, var(--c-grad-to) 100%);
+  background-image: var(--brand-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   NEUMORPHIC UTILITIES — reusable tactile primitives
+   ───────────────────────────────────────────────────────────── */
+.neu-raised   { box-shadow: var(--shadow-card); }
+.neu-floating { box-shadow: var(--shadow-floating); }
+.neu-pressed  { box-shadow: var(--shadow-pressed); }
+.neu-recessed { box-shadow: var(--shadow-recessed); }
+
+/* LED status indicator — solid fill + colored bloom */
+.led {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 9999px;
+  background: var(--c-primary);
+  box-shadow: 0 0 8px 1px var(--c-primary), inset 0 0 2px rgba(255,255,255,0.6);
+}
+.led-success { background: var(--c-success); box-shadow: 0 0 8px 1px var(--c-success), inset 0 0 2px rgba(255,255,255,0.6); }
+.led-tertiary { background: var(--c-tertiary); box-shadow: 0 0 8px 1px var(--c-tertiary), inset 0 0 2px rgba(255,255,255,0.6); }
+
+/* Corner screws — radial-gradient indentations at 12px from each edge */
+.neu-screws {
+  position: relative;
+}
+.neu-screws::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 14px 14px, rgba(0,0,0,0.14) 1.5px, transparent 3px),
+    radial-gradient(circle at calc(100% - 14px) 14px, rgba(0,0,0,0.14) 1.5px, transparent 3px),
+    radial-gradient(circle at 14px calc(100% - 14px), rgba(0,0,0,0.14) 1.5px, transparent 3px),
+    radial-gradient(circle at calc(100% - 14px) calc(100% - 14px), rgba(0,0,0,0.14) 1.5px, transparent 3px);
+}
+
+/* Ventilation slots — three recessed pills */
+.neu-vent {
+  height: 1.5rem;
+  width: 0.2rem;
+  border-radius: 9999px;
+  background: var(--c-surface-container-low);
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.18);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -213,6 +311,7 @@
   background-color: var(--c-background);
   padding: 1rem 2rem;
   border-radius: 1.25rem;
+  box-shadow: var(--shadow-floating);
 }
 
 .loader-container {
@@ -282,35 +381,40 @@
   }
 }
 
-/* Frosted Glassmorphism Styles */
+/* ─────────────────────────────────────────────────────────────
+   "Glass" class names retained for API stability, but re-skinned
+   as neumorphic surfaces — bolted plastic panels & physical keys.
+   ───────────────────────────────────────────────────────────── */
 .glass-card {
-  background-color: color-mix(in srgb, var(--c-surface-container) 35%, transparent);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid color-mix(in srgb, var(--c-outline) 25%, transparent);
-  box-shadow: 0 8px 32px 0 rgba(2, 48, 71, 0.04);
+  background-color: var(--c-background);
+  border: none;
+  box-shadow: var(--shadow-card);
 }
 
+/* Secondary / chassis key — sits flush on the panel, lifts on the surface */
 .glass-button {
-  background-color: color-mix(in srgb, var(--c-surface-container) 25%, transparent);
-  backdrop-filter: blur(10px) saturate(120%);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
-  border: 1px solid color-mix(in srgb, var(--c-outline) 30%, transparent);
-  box-shadow: 0 4px 12px 0 rgba(2, 48, 71, 0.02);
+  background-color: var(--c-background);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: var(--shadow-card);
 }
 
+/* Primary key — injection-moulded custom gradient control */
 .glass-button-primary {
-  background-color: color-mix(in srgb, var(--c-primary) 75%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid color-mix(in srgb, var(--c-primary) 35%, transparent);
-  box-shadow: 0 4px 12px 0 rgba(17, 112, 142, 0.15);
+  background: var(--brand-gradient);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: var(--shadow-primary-btn);
 }
 
+/* Tertiary key — amber certification control */
 .glass-button-secondary {
-  background-color: color-mix(in srgb, var(--c-secondary) 75%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid color-mix(in srgb, var(--c-secondary) 35%, transparent);
-  box-shadow: 0 4px 12px 0 rgba(1, 28, 42, 0.15);
+  background-color: var(--c-tertiary);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 5px 5px 10px rgba(120, 74, 0, 0.3), -5px -5px 10px rgba(240, 170, 60, 0.3);
+}
+
+/* Pressed physics — any glass key inverts its shadow when active */
+.glass-button:active,
+.glass-button-primary:active,
+.glass-button-secondary:active {
+  box-shadow: var(--shadow-pressed);
 }

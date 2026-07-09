@@ -9,7 +9,7 @@ This document is the single source of truth for the AlignGrade repository. It de
 * **Purpose**: A premium, full-stack recruitment & skill verification platform.
 * **Business Objective**: Align candidate self-rated proficiencies with recruiter requirements using automated skill matching. Candidates falling below requirements are locked out from applying but can take interactive certification tests to verify their skills and unlock opportunities.
 * **High-Level Architecture**: 
-  - **Frontend**: Single Page React Application (Vite + Tailwind CSS v4). Design system: semantic CSS-variable tokens in `src/index.css` (light + class-based dark mode) built on the brand palette — sky `#8ecae6`, teal `#219ebc`, navy `#023047`, amber `#ffb703`, orange `#fb8500`. Typography: Inter (body), Plus Jakarta Sans (headlines/`font-headline`), JetBrains Mono (labels).
+  - **Frontend**: Single Page React Application (Vite + Tailwind CSS v4). Design system: **Industrial Skeuomorphism** (neumorphic "workshop chassis") driven by semantic CSS-variable tokens in `src/index.css` (light + class-based dark mode). Light = matte-plastic chassis `#e0e5ec` with white/`#babecc` shadow pairs; dark = charcoal steel `#2d3436`. Accent (`--c-primary`) is **safety-orange `#ff4757`**, reserved for interactive triggers/LEDs; tertiary amber stays for certification CTAs. Depth comes from the neumorphic shadow vars `--shadow-card / -floating / -pressed / -recessed` (used via `shadow-[var(--shadow-*)]` or the `.neu-raised/-floating/-pressed/-recessed` utility classes). Signature helpers in `index.css`: `.neu-screws` (corner-screw pseudo-element), `.neu-vent`, `.led`/`.led-success`/`.led-tertiary`, body fractal-noise overlay, embossed heading text-shadow. The `.glass-card` / `.glass-button*` class names are retained (for API stability) but re-skinned as neumorphic surfaces — so `Card` and `Button` inherit the look automatically. Typography: Inter (body + headlines via `font-headline`), JetBrains Mono (labels/numeric readouts). Cards/inputs restyled centrally in `src/components/ui/` — feature views inherit the style through those primitives + tokens (no per-feature restyling).
   - **Backend**: Express.js REST API using CommonJS (`require` syntax).
   - **Database & ORM**: MongoDB + Prisma ORM. Auto-configures an in-memory mock database store for seamless offline execution if no MongoDB connection is configured.
 
@@ -350,9 +350,9 @@ src/index.js
 
 ## 9. Search Index (Task-to-File Routing)
 
-* **Task: Change UI Theme or Color Tokens**
-  - Files: `frontend/src/index.css` (all `--c-*` tokens, light in `:root`, dark in `.dark`; gradient uses `--c-grad-from/to`), `frontend/tailwind.config.js` (font families only), `frontend/index.html` (Google Fonts link)
-  - Note: components must use semantic token classes (`bg-primary`, `text-on-surface`, etc.) — never hardcoded hex/zinc utilities. Tertiary (amber/orange) is reserved for certification/upgrade CTAs; secondary is brand navy.
+* **Task: Change UI Theme, Color Tokens, or Neumorphic Depth**
+  - Files: `frontend/src/index.css` (all `--c-*` tokens + `--neu-*`/`--shadow-*` depth vars, light in `:root`, dark in `.dark`; `.glass-*`/`.neu-*`/`.led`/`.neu-screws` utilities live here too), `frontend/src/components/ui/*` (shared primitives — restyle here to change the look app-wide), `frontend/tailwind.config.js` (font families only), `frontend/index.html` (Google Fonts link)
+  - Note: components must use semantic token classes (`bg-primary`, `text-on-surface`, etc.) and shadow utilities (`shadow-[var(--shadow-card)]`) — never hardcoded hex/zinc utilities. Design is Industrial Skeuomorphism; safety-orange (`--c-primary`) is the accent, tertiary amber is reserved for certification/upgrade CTAs, secondary is charcoal. To restyle depth globally, edit the `--shadow-*` vars once. Note: `hover:`/`focus:` variants only work on Tailwind utilities — use `hover:shadow-[var(--shadow-floating)]`, not `hover:neu-floating` (the `.neu-*` classes are plain CSS, valid only when applied statically).
 * **Task: Add New Test Question / Modify Quiz Scoring**
   - Files: `frontend/src/features/SkillTest/TestView.jsx` or `frontend/src/features/Student/components/StudentSkillTests.jsx`
 * **Task: Alter Job Matching Algorithm Logic**

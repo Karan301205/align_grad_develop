@@ -6,14 +6,14 @@ export default function SidebarNavItem({ icon: Icon, label, active, locked, onCl
     <button
       onClick={() => !locked && onClick?.()}
       disabled={locked}
-      className={`group relative w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-200 text-sm ${
+      className={`group relative w-full flex items-center justify-between px-4 py-2.5 rounded-lg transition-all duration-200 text-sm ${
         active
-          ? 'bg-primary-container text-on-primary-container font-semibold'
-          : 'font-medium text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+          ? 'bg-surface-container-low neu-recessed text-primary font-bold'
+          : 'font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container hover:shadow-[var(--shadow-card)] active:translate-y-px'
       } ${locked ? 'opacity-40 cursor-not-allowed' : ''}`}
     >
       {active && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-primary" aria-hidden="true" />
+        <span className="absolute left-1 top-1/2 -translate-y-1/2 h-5 w-1 rounded-full bg-primary shadow-[0_0_8px_1px_var(--c-primary)]" aria-hidden="true" />
       )}
       <div className="flex items-center gap-3">
         <Icon className={`w-[18px] h-[18px] transition-transform duration-200 ${active ? '' : 'group-hover:scale-110'}`} />

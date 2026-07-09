@@ -49,6 +49,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   
   // General Section
   const [bio, setBio] = useState('');
+  const [username, setUsername] = useState('');
+  const [profilePic, setProfilePic] = useState('');
   const [nationality, setNationality] = useState('');
   const [gender, setGender] = useState('');
   const [profileEmail, setProfileEmail] = useState('');
@@ -82,13 +84,14 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const [experienceList, setExperienceList] = useState([]);
   const [certificatesList, setCertificatesList] = useState([]);
   const [projectsList, setProjectsList] = useState([]);
-  const [cocurricular, setCocurricular] = useState('');
+  const [cocurricular, setCocurricular] = useState([]);
 
   // Builders local states
   const [newEdu, setNewEdu] = useState({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
   const [newExp, setNewExp] = useState({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
-  const [newCert, setNewCert] = useState({ title: '', org: '', startDate: '', link: '', description: '' });
+  const [newCert, setNewCert] = useState({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
   const [newProj, setNewProj] = useState({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
+  const [newCocurricular, setNewCocurricular] = useState({ activity: '', link: '', description: '' });
 
   const [generatingPdf, setGeneratingPdf] = useState(false);
 
@@ -158,6 +161,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         setSkillsList(profData.skills || []);
 
         setBio(profData.bio || '');
+        setUsername(profData.username || '');
+        setProfilePic(profData.profilePic || '');
         setNationality(profData.nationality || '');
         setGender(profData.gender || '');
         setProfileEmail(profData.email || '');
@@ -187,7 +192,13 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         setExperienceList(profData.experience || []);
         setCertificatesList(profData.certificates || []);
         setProjectsList(profData.projects || []);
-        setCocurricular(profData.cocurricular || '');
+        let cocurArr = [];
+        if (Array.isArray(profData.cocurricular)) {
+          cocurArr = profData.cocurricular;
+        } else if (profData.cocurricular) {
+          cocurArr = [{ activity: 'Co-curricular Activity', link: profData.cocurricular, description: '' }];
+        }
+        setCocurricular(cocurArr);
       }
 
       // Fetch Jobs
@@ -356,6 +367,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         },
         body: JSON.stringify({
           name: profile.name,
+          username,
+          profilePic,
           resumeUrl,
           skills: skillsList,
           bio,
@@ -662,8 +675,12 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
             <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
           </div>
           <div className="flex items-center gap-3 px-2">
-            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold shrink-0">
-              {profile?.name?.charAt(0) || 'S'}
+            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold shrink-0 overflow-hidden">
+              {profilePic ? (
+                <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                profile?.name?.charAt(0) || 'S'
+              )}
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold text-on-surface truncate">{profile?.name || 'Loading...'}</p>
@@ -721,6 +738,11 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
               <StudentProfile
                 profile={profile}
                 setProfile={setProfile}
+                username={username}
+                setUsername={setUsername}
+                profilePic={profilePic}
+                setProfilePic={setProfilePic}
+                token={token}
                 skillsList={skillsList}
                 setSkillsList={setSkillsList}
                 selectedNewSkill={selectedNewSkill}
@@ -759,6 +781,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 setNewCert={setNewCert}
                 newProj={newProj}
                 setNewProj={setNewProj}
+                newCocurricular={newCocurricular}
+                setNewCocurricular={setNewCocurricular}
                 profileTab={profileTab}
                 setProfileTab={setProfileTab}
                 submittingProfile={submittingProfile}

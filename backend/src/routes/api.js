@@ -13,6 +13,7 @@ router.post('/auth/login', authController.login);
 
 // Student routes (protected)
 router.get('/student/profile', authMiddleware, studentController.getProfile);
+router.get('/student/check-username', authMiddleware, studentController.checkUsername);
 router.put('/student/profile', authMiddleware, studentController.updateProfile);
 router.get('/student/jobs', authMiddleware, studentController.getJobs);
 router.post('/student/jobs/:jobId/apply', authMiddleware, studentController.applyJob);
