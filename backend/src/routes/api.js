@@ -1,41 +1,68 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
+const { rateLimiter, checkLoginLock } = require('../middleware/rateLimiter');
+const rateLimitConfig = require('../config/rateLimit.config');
+const validate = require('../middleware/validate');
+
+// Validator schemas
+const { signupSchema, loginSchema } = require('../validators/auth.validator');
+const {
+  updateProfileSchema,
+  applyJobSchema,
+  submitTestSchema,
+  generateTestSchema,
+  submitSkillTestSchema,
+  saveIntroVideoSchema
+} = require('../validators/student.validator');
+const {
+  verifyCompanySchema,
+  postJobSchema,
+  updateJobSchema,
+  deleteJobSchema,
+  updateApplicationRoundsSchema
+} = require('../validators/recruiter.validator');
+const { requestUploadUrlSchema } = require('../validators/upload.validator');
 
 const authController = require('../controllers/auth.controller');
 const studentController = require('../controllers/student.controller');
 const recruiterController = require('../controllers/recruiter.controller');
 const uploadController = require('../controllers/upload.controller');
 
+// Middlewares for different scopes
+const authLimit = rateLimiter(rateLimitConfig.auth);
+const relaxedLimit = rateLimiter(rateLimitConfig.relaxed);
+
 // Public Auth routes
-router.post('/auth/signup', authController.signup);
-router.post('/auth/login', authController.login);
+router.post('/auth/signup', authLimit, validate(signupSchema), authController.signup);
+router.post('/auth/login', authLimit, checkLoginLock, validate(loginSchema), authController.login);
 
 // Student routes (protected)
-router.get('/student/profile', authMiddleware, studentController.getProfile);
-router.get('/student/check-username', authMiddleware, studentController.checkUsername);
-router.put('/student/profile', authMiddleware, studentController.updateProfile);
-router.get('/student/jobs', authMiddleware, studentController.getJobs);
-router.post('/student/jobs/:jobId/apply', authMiddleware, studentController.applyJob);
-router.post('/student/tests', authMiddleware, studentController.submitTest);
-router.get('/student/tests/skills', authMiddleware, studentController.getTechnicalSkills);
-router.post('/student/tests/generate', authMiddleware, studentController.generateSkillTest);
-router.post('/student/tests/submit', authMiddleware, studentController.submitSkillTest);
-router.get('/student/applications', authMiddleware, studentController.getStudentApplications);
-router.post('/student/intro-video', authMiddleware, studentController.saveIntroVideo);
-router.post('/student/video-upload-url', authMiddleware, studentController.requestVideoUploadUrl);
+router.get('/student/profile', authMiddleware, relaxedLimit, studentController.getProfile);
+router.get('/student/check-username', authMiddleware, relaxedLimit, studentController.checkUsername);
+router.put('/student/profile', authMiddleware, relaxedLimit, validate(updateProfileSchema), studentController.updateProfile);
+router.get('/student/jobs', authMiddleware, relaxedLimit, studentController.getJobs);
+router.post('/student/jobs/:jobId/apply', authMiddleware, relaxedLimit, validate(applyJobSchema), studentController.applyJob);
+router.post('/student/tests', authMiddleware, relaxedLimit, validate(submitTestSchema), studentController.submitTest);
+router.get('/student/tests/skills', authMiddleware, relaxedLimit, studentController.getTechnicalSkills);
+router.post('/student/tests/generate', authMiddleware, relaxedLimit, validate(generateTestSchema), studentController.generateSkillTest);
+router.post('/student/tests/submit', authMiddleware, relaxedLimit, validate(submitSkillTestSchema), studentController.submitSkillTest);
+router.get('/student/applications', authMiddleware, relaxedLimit, studentController.getStudentApplications);
+router.post('/student/intro-video', authMiddleware, relaxedLimit, validate(saveIntroVideoSchema), studentController.saveIntroVideo);
+router.post('/student/video-upload-url', authMiddleware, relaxedLimit, studentController.requestVideoUploadUrl);
 
 // Upload routes (protected)
-router.post('/upload/request-url', authMiddleware, uploadController.requestUploadUrl);
+router.post('/upload/request-url', authMiddleware, relaxedLimit, validate(requestUploadUrlSchema), uploadController.requestUploadUrl);
+router.put('/upload/secure-put', authMiddleware, uploadController.securePut);
 
 // Recruiter routes (protected)
-router.get('/recruiter/company', authMiddleware, recruiterController.getCompany);
-router.post('/recruiter/verify', authMiddleware, recruiterController.verifyCompany);
-router.post('/recruiter/jobs', authMiddleware, recruiterController.postJob);
-router.put('/recruiter/jobs/:jobId', authMiddleware, recruiterController.updateJob);
-router.delete('/recruiter/jobs/:jobId', authMiddleware, recruiterController.deleteJob);
-router.get('/recruiter/jobs', authMiddleware, recruiterController.getCompanyJobs);
-router.get('/recruiter/candidates', authMiddleware, recruiterController.getCandidates);
-router.put('/recruiter/applications/:applicationId/rounds', authMiddleware, recruiterController.updateApplicationRounds);
+router.get('/recruiter/company', authMiddleware, relaxedLimit, recruiterController.getCompany);
+router.post('/recruiter/verify', authMiddleware, relaxedLimit, validate(verifyCompanySchema), recruiterController.verifyCompany);
+router.post('/recruiter/jobs', authMiddleware, relaxedLimit, validate(postJobSchema), recruiterController.postJob);
+router.put('/recruiter/jobs/:jobId', authMiddleware, relaxedLimit, validate(updateJobSchema), recruiterController.updateJob);
+router.delete('/recruiter/jobs/:jobId', authMiddleware, relaxedLimit, validate(deleteJobSchema), recruiterController.deleteJob);
+router.get('/recruiter/jobs', authMiddleware, relaxedLimit, recruiterController.getCompanyJobs);
+router.get('/recruiter/candidates', authMiddleware, relaxedLimit, recruiterController.getCandidates);
+router.put('/recruiter/applications/:applicationId/rounds', authMiddleware, relaxedLimit, validate(updateApplicationRoundsSchema), recruiterController.updateApplicationRounds);
 
 module.exports = router;

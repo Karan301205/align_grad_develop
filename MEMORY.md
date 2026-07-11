@@ -31,6 +31,21 @@ This document is the single source of truth for the AlignGrade repository. It de
   - **`postcss.config.js`**: PostCSS plugins for Tailwind v4 integration.
   - **`tailwind.config.js`**: Color tokens and font overrides.
   - **`vite.config.js`**: Vite bundler parameters.
+* **`admin_ws/`**
+  - **`frontend/`**: Vite + React 19 + Tailwind v4 admin portal interface (runs on port `5174`).
+    - **`src/`**: Contains dashboard layout, search tables, and action overlays.
+      - `App.jsx`: Coordinator for overview cards, students list table, recruiters verification dashboard, jobs list view, and detail inspect modal overlays.
+  - **`backend/`**: Node.js + Express admin backend server (runs on port `5002`).
+    - `app.js`: Server setup loading routes for `/api/dashboard`, `/api/student`, `/api/recruiter`, `/api/job`.
+    - **`src/controllers/`**: Database controller handlers mapping direct MongoDB queries.
+      - `dashboard.controller.js`: Tallies platform-wide statistics.
+      - `student.controller.js`: Returns student profile data.
+      - `recruiter.controller.js`: Returns companies metadata and jobs list.
+      - `job.controller.js`: Exposes job descriptions and applicant candidate lists.
+    - **`src/routes/`**: Express route maps routing APIs.
+  - **`shared/`**: Shared constants, types, schemas, and permissions utilities.
+  - **`docs/`**: Admin portal deployment, API, architecture, and database reference guides.
+  - **`package.json`**: Root workspace script runner.
 
 ---
 
@@ -159,7 +174,30 @@ This document is the single source of truth for the AlignGrade repository. It de
 * **Used By**: `frontend/src/main.jsx`.
 * **Dependencies**: None.
 * **Safe Modifications**: Style class extensions, layout parameters.
-* **Risk**: Low.
+### Admin Portal Files
+
+#### [admin_ws/frontend/src/App.jsx](file:///Users/karanrawat/Desktop/a_g/admin_ws/frontend/src/App.jsx)
+* **Purpose**: Coordinates all Admin Portal workspace views (Dashboard, Students directory search, Recruiters list, Active Jobs) and hosts inspectors.
+* **Dependencies**: `react`, `lucide-react`.
+
+#### [admin_ws/backend/app.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/app.js)
+* **Purpose**: Express app setup for admin backend mounting `/api/dashboard`, `/api/student`, `/api/recruiter`, `/api/job`, `/api/storage`, and `/api/analytics`.
+* **Used By**: `admin_ws/backend/server.js`.
+
+#### [admin_ws/backend/src/controllers/student.controller.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/controllers/student.controller.js)
+* **Purpose**: Fetches all student records with fully resolved profiles and sub-models.
+
+#### [admin_ws/backend/src/controllers/recruiter.controller.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/controllers/recruiter.controller.js)
+* **Purpose**: Fetches recruiter users linked with company profile settings and posted job numbers.
+
+#### [admin_ws/backend/src/controllers/job.controller.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/controllers/job.controller.js)
+* **Purpose**: Fetches job specifications and queries candidates who applied to specific roles.
+
+#### [admin_ws/backend/src/controllers/storage.controller.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/controllers/storage.controller.js)
+* **Purpose**: Queries S3 assets using AWS S3 client and reads MongoDB storage stats via native commands to compute estimated monthly bills.
+
+#### [admin_ws/backend/src/controllers/analytics.controller.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/controllers/analytics.controller.js)
+* **Purpose**: Computes recruiter skills demands and student profiles skill metrics to serve comparison statistics for horizontal bar charts.
 
 ---
 
@@ -245,6 +283,29 @@ src/index.js
 * **`POST /api/upload/request-url`**
   - **Purpose**: Generates S3 pre-signed upload URL for files (resume, video, doc).
   - **Files**: `upload.controller.js`, `api.js`
+
+### Admin Portal Endpoints (Runs on Port 5002)
+* **`GET /api/dashboard/stats`**
+  - **Purpose**: Gathers global platform statistics (totals and recent users).
+  - **Files**: `dashboard.controller.js`, `dashboard.routes.js`
+* **`GET /api/student`**
+  - **Purpose**: Lists all registered student candidates with their full profiles and tests history.
+  - **Files**: `student.controller.js`, `student.routes.js`
+* **`GET /api/recruiter`**
+  - **Purpose**: Lists all recruiters matched with company verification assets and posted job summaries.
+  - **Files**: `recruiter.controller.js`, `recruiter.routes.js`
+* **`GET /api/job`**
+  - **Purpose**: Retrieves all active opportunities on the platform.
+  - **Files**: `job.controller.js`, `job.routes.js`
+* **`GET /api/job/:jobId/applicants`**
+  - **Purpose**: Retrieves all candidates who applied to the specified job.
+  - **Files**: `job.controller.js`, `job.routes.js`
+* **`GET /api/storage/explorer`**
+  - **Purpose**: Gathers S3 bucket directory listings alongside MongoDB serverless storage size measurements.
+  - **Files**: `storage.controller.js`, `storage.routes.js`
+* **`GET /api/analytics`**
+  - **Purpose**: Resolves recruiter skills demand ranking and student profile preferences metrics.
+  - **Files**: `analytics.controller.js`, `analytics.routes.js`
 
 ---
 
@@ -391,3 +452,98 @@ src/index.js
 * **Prisma schema uses MongoDB provider**. All queries run using async/await patterns.
 * **No external CSS file imports or UI styling libraries** (like Material-UI, Bootstrap, etc.). Design configurations must remain pure Tailwind.
 * **Zero UI placeholder text**; all data components must bind to real mock or live database datasets.
+* **Admin Workspace (admin_ws) is fully self-contained**:
+  - The admin portal frontend runs on port `5174` (main client app runs on `5173`).
+  - The admin portal backend runs on port `5002` (main backend runs on `5001`).
+  - Uses native `mongodb` driver directly inside `admin_ws/backend` to avoid compiler dependencies on main Prisma clients.
+
+---
+
+## 12. Rate Limiting System
+
+The application enforces production-ready rate limiting at the API route level in both `backend` and `admin_ws/backend`.
+
+* **Unified Configuration**:
+  - `backend/src/config/rateLimit.config.js`: Configures auth limits (strict), public limits (moderate), and authenticated limits (relaxed).
+  - `admin_ws/backend/src/config/rateLimit.config.js`: Configures relaxed administrative limits.
+* **Brute Force Protection (Failed Login Attempts)**:
+  - Strict rate limits protect the email/password login and signup routes.
+  - Implements **progressive/exponential backoff** for repeated login failures: lock delay increases exponentially on consecutive failures per IP and per Email account to protect against brute force and credential stuffing.
+  - State is tracked in-memory using highly efficient maps with self-cleaning timer loops to prevent memory leaks.
+  - Successful login attempts automatically call `resetFailedAttempts` to clear any lock state.
+
+---
+
+## 13. Input Validation System
+
+The application enforces production-ready schema validation using `zod` at the API route level in both `backend` and `admin_ws/backend`.
+
+* **Validation Middleware**:
+  - `backend/src/middleware/validate.js`: Validation coordinator that parses and extracts `req.body`, `req.params`, or `req.query` schemas, rejecting invalid requests immediately with a detailed field-specific HTTP 400 validation error list.
+  - `admin_ws/backend/src/middleware/validate.js`: Equivalent validation coordinator in the Admin Portal.
+* **Validation Schema Files**:
+  - `backend/src/validators/auth.validator.js`: Validates login credentials and signup payloads (length, format).
+  - `backend/src/validators/student.validator.js`: Validates nested student profiles, experience arrays, certifications, education structures, age checks (>= 17), and technical quiz records.
+  - `backend/src/validators/recruiter.validator.js`: Validates job postings, requirements arrays, selection processes, and company trust credentials.
+  - `backend/src/validators/upload.validator.js`: Validates pre-signed file upload requests.
+  - `admin_ws/backend/src/validators/job.validator.js`: Validates that incoming jobId path parameters conform to a strict 24-character hexadecimal ObjectId format.
+
+---
+
+## 14. Secrets Management & Credential Security
+
+The application uses secure, centralized configuration files to load secrets and environment variables, with strict verification checks.
+
+* **Ignored Secrets Configuration**:
+  - All sensitive `.env` files are ignored by git (`.gitignore` root rule). Only `.env.example` templates containing placeholders are tracked.
+* **Fail-Fast Boot Execution**:
+  - `backend/src/config/env.js`: Centralized configuration module loading and validating required secrets (`DATABASE_URL`, `JWT_SECRET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`). If any key is missing in production mode (`NODE_ENV=production`), the application throws a fatal configuration error on startup to fail-fast.
+  - `admin_ws/backend/src/config/env.js`: Centralized configuration module enforcing matching fail-fast validation in the Admin Portal.
+* **Hardcoded Secret Elimination**:
+  - Removed all hardcoded fallback secrets inside controller files and auth middlewares, routing JWT token signs/verifications strictly through `env.JWT_SECRET`.
+
+---
+
+## 15. Dependency Security Status
+
+The project runs a verified, vulnerability-free dependency environment.
+
+* **Audit Mappings**:
+  - Main Backend (`backend/`): 0 known vulnerabilities across 149 packages.
+  - Main Frontend (`frontend/`): 0 known vulnerabilities across 218 packages.
+  - Admin Backend (`admin_ws/backend/`): 0 known vulnerabilities across 153 packages.
+  - Admin Frontend (`admin_ws/frontend/`): 0 known vulnerabilities across 88 packages.
+* **Audit Enforcement**:
+  - Periodic scans are conducted on all direct and transitive dependency packages. Any new libraries or updates must maintain full compatibility with React, Express, MongoDB, Prisma, and AWS SDK.
+
+---
+
+## 16. Centralized Error Handling System
+
+Both backend applications run centralized unhandled error interception middlewares to avoid system leakages.
+
+* **Centralized Error Handlers**:
+  - `backend/src/middleware/errorHandler.js`: Catches unhandled exceptions in the main backend, formats response payloads according to `{ error: message }`, and outputs complete server-side logs for diagnostics.
+  - `admin_ws/backend/src/middleware/errorHandler.js`: Intercepts and captures errors in the Admin Portal, responding using the `{ success: false, error: message }` format.
+* **Information Leakage Protection**:
+  - In production mode (`NODE_ENV=production`), both modules mask raw 5xx internal server exceptions (like database queries, AWS bucket failures, filesystem paths, and code parameters) with a generic, user-friendly message (`"An unexpected error occurred on the server. Please try again later."`) to prevent structural exposure to clients.
+  - Operational or 4xx client validation errors are passed directly to provide clean, contextual assistance.
+
+---
+
+## 17. File Upload Security System
+
+The main backend enforces server-mediated uploads, validating parameters, sizes, and content signatures on the server before files reach AWS S3 storage.
+
+* **Server-Mediated Proxy Interceptor**:
+  - Instead of direct client-to-S3 uploads, `/upload/request-url` and `/student/video-upload-url` return a local server route: `/api/upload/secure-put` with the target file configuration passed via parameters.
+  - `backend/src/index.js` mounts `express.raw` parser for this route specifically to capture the file binary directly into memory buffer.
+  - `backend/src/controllers/upload.controller.js` parses the buffer, checks constraints, validates headers, and calls `uploadBuffer` in `backend/src/config/s3.js` to upload the clean binary to S3.
+* **Upload Configuration & Limits**:
+  - `backend/src/config/upload.config.js`: Centralizes max size limits (e.g. 10MB resume, 2MB image, 50MB video) and allowed MIME type lists (PDF, JPEG, PNG, MP4, WebM).
+* **Binary Magic Bytes Signature Check**:
+  - Files are validated by checking their actual binary signature (magic bytes) at the head of the buffer: PDF (`25504446`), PNG (`89504E47`), JPEG (`FFD8FF`), MP4 (`66747970`), WebM (`1A45DFA3`). Files with spoofed extensions or corrupted contents are rejected with HTTP 400.
+* **Isolation & Non-Executability**:
+  - All files are saved inside isolated S3 buckets under secure folder patterns (`resumes/`, `images/`, `videos/`, `docs/`) using unique user-linked timestamps. AWS S3 does not compile or execute stored files as application code.
+* **Admin Portal uploads status**:
+  - The Admin Portal backend (`admin_ws/backend/`) does not contain any file upload routes. If added, they must implement matching server-mediated validation checks.

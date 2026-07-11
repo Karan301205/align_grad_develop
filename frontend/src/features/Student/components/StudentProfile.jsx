@@ -236,6 +236,20 @@ export default function StudentProfile({
       reader.onerror = (err) => reject(err);
     });
   };
+  const base64ToBlob = (base64Data, contentType) => {
+    const byteCharacters = atob(base64Data.split(',')[1]);
+    const byteArrays = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+      const slice = byteCharacters.slice(offset, offset + 512);
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+    return new Blob(byteArrays, { type: contentType });
+  };
 
   const handleProfilePicChange = async (e) => {
     const file = e.target.files[0];
@@ -250,11 +264,51 @@ export default function StudentProfile({
     setCompressing(true);
 
     try {
+      // 1. Compress image to under 100KB Base64
       const compressedBase64 = await compressImage(file, 100);
-      setProfilePic(compressedBase64);
+
+      // 2. Convert base64 data to binary Blob for S3 upload
+      const imageBlob = base64ToBlob(compressedBase64, 'image/jpeg');
+
+      // 3. Request pre-signed URL from server
+      const urlRes = await fetch(`${API_BASE}/upload/request-url`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          fileType: 'image',
+          fileName: file.name || 'profile_pic.jpg',
+          contentType: 'image/jpeg'
+        })
+      });
+
+      if (!urlRes.ok) {
+        throw new Error('Failed to request S3 upload URL from server.');
+      }
+
+      const { uploadUrl, publicUrl } = await urlRes.json();
+
+      // 4. Upload binary Blob directly to S3 via pre-signed URL
+      const s3Res = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'image/jpeg'
+        },
+        body: imageBlob
+      });
+
+      if (!s3Res.ok) {
+        throw new Error('Failed to upload profile picture to S3.');
+      }
+
+      // 5. Update state with S3 public URL
+      setProfilePic(publicUrl);
+
     } catch (err) {
-      console.error('Image compression error:', err);
-      setPhotoError('Failed to process image. Try another one.');
+      console.error('Profile pic S3 upload error:', err);
+      setPhotoError('Failed to upload image. Please try again.');
     } finally {
       setCompressing(false);
     }
@@ -343,6 +397,22 @@ export default function StudentProfile({
 
   const originalProfileRef = React.useRef(null);
 
+  const calculateAge = (dobString) => {
+    if (!dobString) return null;
+    const birthDate = new Date(dobString);
+    if (isNaN(birthDate.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const age = calculateAge(dob);
+  const isUnderage = age !== null && age < 17;
+
   const [certFileUploadError, setCertFileUploadError] = React.useState('');
   const [processingCertFile, setProcessingCertFile] = React.useState(false);
 
@@ -427,9 +497,12 @@ export default function StudentProfile({
   ]);
 
   const isSaveActive = React.useMemo(() => {
+    const ageValue = calculateAge(dob);
+    if (ageValue !== null && ageValue < 17) return false;
+
     const isFirstTime = !profile || !profile.name;
     return isFirstTime || hasChanges;
-  }, [profile, hasChanges]);
+  }, [profile, hasChanges, dob]);
 
   const handleClass10Change = (val) => {
     setClass10Percent(val);
@@ -472,6 +545,11 @@ export default function StudentProfile({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const ageValue = calculateAge(dob);
+    if (ageValue !== null && ageValue < 17) {
+      alert('You must be at least 17 years old to access this platform.');
+      return;
+    }
     const isValid = validatePhone(countryCode, localPhone);
     if (!isValid) {
       alert('Please fix the phone number validation error before saving.');
@@ -689,6 +767,11 @@ export default function StudentProfile({
                       value={dob}
                       onChange={e => setDob(e.target.value)}
                     />
+                    {isUnderage && (
+                      <p className="text-[10px] text-error font-medium mt-1.5 animate-pulse">
+                        ✗ You must be at least 17 years old to access this platform.
+                      </p>
+                    )}
                   </div>
                 </div>
 

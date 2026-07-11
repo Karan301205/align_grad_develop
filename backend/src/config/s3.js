@@ -50,9 +50,20 @@ const getPublicUrl = (key) => {
   return `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
 };
 
+const uploadBuffer = async (key, buffer, contentType) => {
+  const command = new PutObjectCommand({
+    Bucket: bucketName,
+    Key: key,
+    Body: buffer,
+    ContentType: contentType
+  });
+  return s3Client.send(command);
+};
+
 module.exports = {
   s3Client,
   getUploadUrl,
   deleteObject,
-  getPublicUrl
+  getPublicUrl,
+  uploadBuffer
 };

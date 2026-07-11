@@ -87,6 +87,21 @@ exports.updateProfile = async (req, res) => {
       }
     }
 
+    if (dob) {
+      const birthDate = new Date(dob);
+      if (!isNaN(birthDate.getTime())) {
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        if (age < 17) {
+          return res.status(400).json({ error: 'You must be at least 17 years old to access this platform.' });
+        }
+      }
+    }
+
     let profile;
     if (existingProfile) {
       profile = await prisma.profile.update({
@@ -581,8 +596,8 @@ exports.requestVideoUploadUrl = async (req, res) => {
     const fileExt = fileName.split('.').pop() || 'webm';
     const key = `videos/${profile.id}/showcase_${Date.now()}.${fileExt}`;
 
-    const { getUploadUrl, getPublicUrl } = require('../config/s3');
-    const uploadUrl = await getUploadUrl(key, contentType);
+    const { getPublicUrl } = require('../config/s3');
+    const uploadUrl = `${req.protocol}://${req.get('host')}/api/upload/secure-put?fileType=video&key=${encodeURIComponent(key)}&contentType=${encodeURIComponent(contentType)}`;
     const publicUrl = getPublicUrl(key);
 
     res.json({

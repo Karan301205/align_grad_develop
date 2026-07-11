@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { prisma } = require('../config/db');
+const { recordFailedAttempt, resetFailedAttempts } = require('../middleware/rateLimiter');
+const env = require('../config/env');
 
 exports.signup = async (req, res) => {
   const { email, password, role, name } = req.body;
@@ -43,7 +45,7 @@ exports.signup = async (req, res) => {
 
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'align_grade_super_secret_jwt_key_2026',
+      env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 
@@ -68,14 +70,18 @@ exports.login = async (req, res) => {
     return res.status(400).json({ error: 'Please provide email and password' });
   }
 
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
+      recordFailedAttempt(email, ip);
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      recordFailedAttempt(email, ip);
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
@@ -88,9 +94,12 @@ exports.login = async (req, res) => {
       name = company ? company.name : 'Recruiter';
     }
 
+    // Success - reset locks
+    resetFailedAttempts(email, ip);
+
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'align_grade_super_secret_jwt_key_2026',
+      env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 

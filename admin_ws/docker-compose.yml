@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  admin-backend:
+    build: ./backend
+    ports:
+      - "5002:5002"
+    environment:
+      - PORT=5002
+      - DATABASE_URL=mongodb://mongo:2717/alignGrad
+      - JWT_SECRET=admin_portal_secret_jwt_key_2026
+    depends_on:
+      - mongo
+
+  admin-frontend:
+    build: ./frontend
+    ports:
+      - "5174:5174"
+    depends_on:
+      - admin-backend
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "2717:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
