@@ -289,12 +289,12 @@ const mockClient = {
 
 
 try {
-  if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("localhost")) {
+  if (process.env.DATABASE_URL) {
     prismaInstance = new PrismaClient();
     activeClient = prismaInstance;
     console.log('Prisma Client initialized.');
   } else {
-    console.warn('DATABASE_URL is default/local. Using mock client fallback.');
+    console.warn('DATABASE_URL not found. Using mock client fallback.');
     useMock = true;
     activeClient = mockClient;
   }
