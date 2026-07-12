@@ -52,8 +52,57 @@ export default function App() {
     return <ConnectionLoader theme={theme} onReady={() => setIsReady(true)} />;
   }
 
+  const hostname = window.location.hostname;
+  const isLandingHost = hostname === 'aligngrad.com' || hostname === 'www.aligngrad.com';
+  const isCareerHost = hostname === 'career.aligngrad.com';
+  const isHireHost = hostname === 'hire.aligngrad.com';
+
+  if (isLandingHost) {
+    return <AuthView setToken={setToken} setUser={setUser} theme={theme} toggleTheme={toggleTheme} />;
+  }
+
   if (!token) {
     return <AuthView setToken={setToken} setUser={setUser} theme={theme} toggleTheme={toggleTheme} />;
+  }
+
+  if (isCareerHost && user.role !== 'STUDENT') {
+    return (
+      <div className="min-h-screen bg-background text-on-surface font-sans flex items-center justify-center p-6">
+        <div className="max-w-md w-full glass-card rounded-2xl p-8 text-center space-y-4">
+          <h1 className="font-headline text-xl font-bold text-on-surface">Access denied</h1>
+          <p className="text-sm text-on-surface-variant">
+            This portal is for students only. Please sign in with a student account or use the recruiter portal.
+          </p>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="px-6 py-2.5 rounded-xl glass-button-primary text-on-primary text-sm font-semibold hover:brightness-110 transition-all"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isHireHost && user.role === 'STUDENT') {
+    return (
+      <div className="min-h-screen bg-background text-on-surface font-sans flex items-center justify-center p-6">
+        <div className="max-w-md w-full glass-card rounded-2xl p-8 text-center space-y-4">
+          <h1 className="font-headline text-xl font-bold text-on-surface">Access denied</h1>
+          <p className="text-sm text-on-surface-variant">
+            This portal is for recruiters only. Please sign in with a recruiter account or use the student portal.
+          </p>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="px-6 py-2.5 rounded-xl glass-button-primary text-on-primary text-sm font-semibold hover:brightness-110 transition-all"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -43,6 +43,7 @@ import DotGrid from '../../components/ui/DotGrid';
 export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
   // Authentication & Form States
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [authPopupMode, setAuthPopupMode] = useState(null); // 'login' | 'register' | null
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -198,13 +199,13 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
           <div className="flex items-center gap-3">
             <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
             <button
-              onClick={() => triggerAuthFlow('login')}
+              onClick={() => setAuthPopupMode('login')}
               className="text-xs font-semibold px-4 py-2 text-on-surface-variant hover:text-on-surface transition-colors"
             >
               Sign In
             </button>
             <button
-              onClick={() => triggerAuthFlow('register')}
+              onClick={() => setAuthPopupMode('register')}
               className="text-xs font-semibold px-4 py-2 rounded-lg glass-button-primary text-on-primary hover:brightness-110 transition-all shadow-sm shadow-primary/20"
             >
               Get Started
@@ -236,14 +237,14 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
             <AnimatedContent distance={20} direction="vertical" delay={0.4}>
               <div className="flex flex-col sm:flex-row items-start gap-3 mb-10">
                 <button
-                  onClick={() => triggerAuthFlow('register')}
+                  onClick={() => { window.location.href = 'https://career.aligngrad.com'; }}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl glass-button-secondary text-on-secondary font-semibold text-sm hover:brightness-110 hover:shadow-lg hover:shadow-secondary/20 transition-all shadow-md shadow-secondary/15"
                 >
                   Join as a Candidate
                   <ArrowRight className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => triggerAuthFlow('register')}
+                  onClick={() => { window.location.href = 'https://hire.aligngrad.com'; }}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl glass-button text-on-surface font-semibold text-sm hover:bg-surface-container-high/70 transition-all"
                 >
                   Hire Verified Students
@@ -1107,6 +1108,53 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
         </div>
       </footer>
 
+
+      {/* Navbar auth portal picker */}
+      <div
+        className={`fixed inset-0 z-50 transition-opacity duration-300 ease-out bg-[#023047]/50 backdrop-blur-sm ${
+          authPopupMode ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setAuthPopupMode(null)}
+      >
+        <div
+          className={`absolute top-1/2 left-1/2 w-full max-w-sm glass-card shadow-2xl p-8 rounded-2xl transition-all duration-300 ease-out transform ${
+            authPopupMode ? 'opacity-100 -translate-x-1/2 -translate-y-1/2 scale-100' : 'opacity-0 -translate-x-1/2 -translate-y-1/2 scale-95 pointer-events-none'
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between border-b border-outline-variant pb-4 mb-6">
+            <span className="font-headline text-sm font-bold text-on-surface">
+              {authPopupMode === 'login' ? 'Sign in to AlignGrad' : 'Create your AlignGrad account'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setAuthPopupMode(null)}
+              className="h-8 w-8 rounded-lg hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-all"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            <button
+              type="button"
+              onClick={() => { window.location.href = 'https://career.aligngrad.com'; }}
+              className="py-3 rounded-xl border text-sm font-bold transition-all bg-primary-container border-primary text-on-primary-container hover:brightness-110 flex items-center justify-center gap-2"
+            >
+              <User className="w-4 h-4" />
+              {authPopupMode === 'login' ? 'Candidate Login' : 'Candidate Signup'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { window.location.href = 'https://hire.aligngrad.com'; }}
+              className="py-3 rounded-xl border text-sm font-bold transition-all bg-surface-container-low border-outline-variant text-on-surface hover:bg-surface-container-high flex items-center justify-center gap-2"
+            >
+              <Briefcase className="w-4 h-4" />
+              {authPopupMode === 'login' ? 'Recruiter Login' : 'Recruiter Signup'}
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* 7. Slide-over Auth Drawer (Linear-style panel) */}
       <div 
