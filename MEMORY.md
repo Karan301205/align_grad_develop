@@ -123,7 +123,9 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   └── testQuestions.js  # Static fallback questions for offline skill certifications
 │   │   ├── features/             # Business modules organizing specific portal workspaces
 │   │   │   ├── Auth/
-│   │   │   │   └── AuthView.jsx  # Double-sided Login / Signup dashboard forms
+│   │   │   │   ├── AuthView.jsx  # Marketing landing page with login picker
+│   │   │   │   ├── CandidateAuth.jsx # Dedicated login/signup pages for students
+│   │   │   │   └── RecruiterAuth.jsx # Dedicated login/signup pages for recruiters
 │   │   │   ├── SkillTest/
 │   │   │   │   └── TestView.jsx  # Lockdown fullscreen exam panel executing student skill checks
 │   │   │   ├── Recruiter/
@@ -557,8 +559,10 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **`ThemeToggle.jsx`**: Slide button changing themes between light and dark modes.
 
 #### Feature Views (`frontend/src/features/`)
-* **`Auth/AuthView.jsx`**: Login/Signup forms with toggle animations.
-* **`SkillTest/TestView.jsx`**: Fullscreen lockout panel checking focus state changes and scoring MCQ answers.
+* **`Auth/AuthView.jsx`**: Marketing landing page with popup picker and demo widgets.
+* **`Auth/CandidateAuth.jsx`**: Dedicated Candidate login and signup pages matching the skeuomorphic theme.
+* **`Auth/RecruiterAuth.jsx`**: Dedicated Recruiter login and signup pages matching the skeuomorphic theme.
+* **`SkillTest/TestView.jsx`**: Lockdown fullscreen exam panel checking focus state changes and scoring MCQ answers.
 * **`Recruiter/RecruiterLayout.jsx`**: Sidebar navigation shell managing Recruiter views.
 * **`Recruiter/components/EditJobModal.jsx`**: Recruiter modal to update job parameters and required thresholds.
 * **`Recruiter/components/RecruiterJobs.jsx`**: Active jobs directory with applicant review drawers.

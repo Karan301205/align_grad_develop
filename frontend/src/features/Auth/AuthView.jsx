@@ -141,6 +141,26 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
     setError('');
   };
 
+  const navigateToCandidate = (mode = 'login') => {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocal) {
+      window.history.pushState({}, '', `/candidate/${mode}`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    } else {
+      window.location.href = `https://career.aligngrad.com/${mode}`;
+    }
+  };
+
+  const navigateToRecruiter = (mode = 'login') => {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocal) {
+      window.history.pushState({}, '', `/recruiter/${mode}`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    } else {
+      window.location.href = `https://hire.aligngrad.com/${mode}`;
+    }
+  };
+
   // Run a quick mock verification simulation in the browser
   const runVerificationSimulation = () => {
     setIsSimulatingTest(true);
@@ -236,14 +256,14 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
             <AnimatedContent distance={20} direction="vertical" delay={0.4}>
               <div className="flex flex-col sm:flex-row items-start gap-3 mb-10">
                 <button
-                  onClick={() => { window.location.href = 'https://career.aligngrad.com'; }}
+                  onClick={() => navigateToCandidate('signup')}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl glass-button-secondary text-on-secondary font-semibold text-sm hover:brightness-110 hover:shadow-lg hover:shadow-secondary/20 transition-all shadow-md shadow-secondary/15"
                 >
                   Join as a Candidate
                   <ArrowRight className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => { window.location.href = 'https://hire.aligngrad.com'; }}
+                  onClick={() => navigateToRecruiter('signup')}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl glass-button text-on-surface font-semibold text-sm hover:bg-surface-container-high/70 transition-all"
                 >
                   Hire Verified Students
@@ -1137,7 +1157,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
           <div className="grid grid-cols-1 gap-3">
             <button
               type="button"
-              onClick={() => { window.location.href = 'https://career.aligngrad.com'; }}
+              onClick={() => { navigateToCandidate(authPopupMode === 'login' ? 'login' : 'signup'); setAuthPopupMode(null); }}
               className="py-3 rounded-xl border text-sm font-bold transition-all bg-primary-container border-primary text-on-primary-container hover:brightness-110 flex items-center justify-center gap-2"
             >
               <User className="w-4 h-4" />
@@ -1145,7 +1165,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
             </button>
             <button
               type="button"
-              onClick={() => { window.location.href = 'https://hire.aligngrad.com'; }}
+              onClick={() => { navigateToRecruiter(authPopupMode === 'login' ? 'login' : 'signup'); setAuthPopupMode(null); }}
               className="py-3 rounded-xl border text-sm font-bold transition-all bg-surface-container-low border-outline-variant text-on-surface hover:bg-surface-container-high flex items-center justify-center gap-2"
             >
               <Briefcase className="w-4 h-4" />
