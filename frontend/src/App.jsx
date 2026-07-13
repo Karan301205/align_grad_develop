@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 
 // Import features
 import AuthView from './features/Auth/AuthView';
+import CandidateAuth from './features/Auth/CandidateAuth';
+import RecruiterAuth from './features/Auth/RecruiterAuth';
 import StudentLayout from './features/Student/StudentLayout';
 import RecruiterLayout from './features/Recruiter/RecruiterLayout';
 import ConnectionLoader from './components/ConnectionLoader';
@@ -12,6 +14,8 @@ export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [testSkill, setTestSkill] = useState(null); // { skillName, targetRating, jobId }
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
   const [theme, setTheme] = useState(() => {
     const stored = localStorage.getItem('theme');
     if (stored === 'light' || stored === 'dark') return stored;
@@ -39,6 +43,33 @@ export default function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  useEffect(() => {
+    const handleLocationChange = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    
+    const originalPushState = window.history.pushState;
+    window.history.pushState = function(...args) {
+      originalPushState.apply(window.history, args);
+      handleLocationChange();
+    };
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.history.pushState = originalPushState;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      if (window.location.pathname.startsWith('/candidate') || window.location.pathname.startsWith('/recruiter')) {
+        window.history.pushState({}, '', '/');
+      }
+    }
+  }, [token]);
+
   const toggleTheme = () => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
 
   const handleLogout = () => {
@@ -57,11 +88,57 @@ export default function App() {
   const isCareerHost = hostname === 'career.aligngrad.com';
   const isHireHost = hostname === 'hire.aligngrad.com';
 
-  if (isLandingHost) {
+  if (!token) {
+    if (currentPath.startsWith('/candidate')) {
+      const mode = currentPath.endsWith('signup') ? 'signup' : 'login';
+      return (
+        <CandidateAuth
+          setToken={setToken}
+          setUser={setUser}
+          theme={theme}
+          toggleTheme={toggleTheme}
+          initialMode={mode}
+        />
+      );
+    }
+    if (currentPath.startsWith('/recruiter')) {
+      const mode = currentPath.endsWith('signup') ? 'signup' : 'login';
+      return (
+        <RecruiterAuth
+          setToken={setToken}
+          setUser={setUser}
+          theme={theme}
+          toggleTheme={toggleTheme}
+          initialMode={mode}
+        />
+      );
+    }
+    if (isCareerHost) {
+      return (
+        <CandidateAuth
+          setToken={setToken}
+          setUser={setUser}
+          theme={theme}
+          toggleTheme={toggleTheme}
+          initialMode="login"
+        />
+      );
+    }
+    if (isHireHost) {
+      return (
+        <RecruiterAuth
+          setToken={setToken}
+          setUser={setUser}
+          theme={theme}
+          toggleTheme={toggleTheme}
+          initialMode="login"
+        />
+      );
+    }
     return <AuthView setToken={setToken} setUser={setUser} theme={theme} toggleTheme={toggleTheme} />;
   }
 
-  if (!token) {
+  if (isLandingHost && !currentPath.startsWith('/candidate') && !currentPath.startsWith('/recruiter')) {
     return <AuthView setToken={setToken} setUser={setUser} theme={theme} toggleTheme={toggleTheme} />;
   }
 
