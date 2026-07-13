@@ -1,86 +1,12 @@
 import React from 'react';
 import { CheckCircle, ChevronRight, Plus, ChevronDown } from 'lucide-react';
-import { ALL_SKILLS, API_BASE } from '../../../constants';
+import { ALL_SKILLS } from '../../../constants';
+import { apiFetch } from '../../../services/apiClient';
+import { putFileToS3 } from '../../../services/uploadService';
+import { DOMAIN_OPTIONS } from '../../../constants/domains';
 import Button from '../../../components/ui/Button';
 import PageHeader from '../../../components/ui/PageHeader';
 
-const DOMAIN_OPTIONS = [
-  "Software Engineering",
-  "Frontend Development",
-  "Backend Development",
-  "Full Stack Development",
-  "Mobile App Development",
-  "Game Development",
-  "Embedded Systems",
-  "IoT Development",
-  "Blockchain Development",
-  "AR/VR Development",
-  "Artificial Intelligence",
-  "Machine Learning",
-  "Deep Learning",
-  "Generative AI",
-  "Natural Language Processing",
-  "Computer Vision",
-  "Data Science",
-  "Data Analytics",
-  "Business Intelligence",
-  "Data Engineering",
-  "Cloud Computing",
-  "DevOps",
-  "Site Reliability Engineering",
-  "Cybersecurity",
-  "Network Engineering",
-  "Database Administration",
-  "System Administration",
-  "QA Engineering",
-  "Automation Testing",
-  "Manual Testing",
-  "UI Design",
-  "UX Design",
-  "UI/UX Design",
-  "Graphic Design",
-  "Motion Graphics",
-  "Animation",
-  "3D Design",
-  "Product Design",
-  "Product Management",
-  "Project Management",
-  "Program Management",
-  "Business Analysis",
-  "Operations Management",
-  "Digital Marketing",
-  "Performance Marketing",
-  "Content Marketing",
-  "SEO",
-  "Social Media Marketing",
-  "Brand Management",
-  "Sales",
-  "Business Development",
-  "Finance",
-  "Accounting",
-  "Investment Banking",
-  "Human Resources",
-  "Recruitment",
-  "Customer Success",
-  "Customer Support",
-  "Consulting",
-  "Research",
-  "Education",
-  "Healthcare",
-  "Legal",
-  "Supply Chain",
-  "Logistics",
-  "Manufacturing",
-  "Electrical Engineering",
-  "Mechanical Engineering",
-  "Civil Engineering",
-  "Chemical Engineering",
-  "Biomedical Engineering",
-  "Aerospace Engineering",
-  "Entrepreneurship",
-  "Freelancing",
-  "Other"
-];
 
 export default function StudentProfile({
   profile,
@@ -159,9 +85,7 @@ export default function StudentProfile({
     setUsernameMsg('Checking availability...');
 
     try {
-      const res = await fetch(`${API_BASE}/student/check-username?username=${val}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch(`/student/check-username?username=${val}`, { token });
       const data = await res.json();
       if (res.ok && data.available) {
         setUsernameStatus('available');
@@ -271,17 +195,14 @@ export default function StudentProfile({
       const imageBlob = base64ToBlob(compressedBase64, 'image/jpeg');
 
       // 3. Request pre-signed URL from server
-      const urlRes = await fetch(`${API_BASE}/upload/request-url`, {
+      const urlRes = await apiFetch('/upload/request-url', {
+        token,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
+        json: {
           fileType: 'image',
           fileName: file.name || 'profile_pic.jpg',
           contentType: 'image/jpeg'
-        })
+        }
       });
 
       if (!urlRes.ok) {
@@ -291,13 +212,7 @@ export default function StudentProfile({
       const { uploadUrl, publicUrl } = await urlRes.json();
 
       // 4. Upload binary Blob directly to S3 via pre-signed URL
-      const s3Res = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'image/jpeg'
-        },
-        body: imageBlob
-      });
+      const s3Res = await putFileToS3(uploadUrl, imageBlob, 'image/jpeg');
 
       if (!s3Res.ok) {
         throw new Error('Failed to upload profile picture to S3.');

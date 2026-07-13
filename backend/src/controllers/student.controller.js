@@ -1,30 +1,9 @@
 const { prisma } = require('../config/db');
-
-const TECHNICAL_SKILLS = new Set([
-  "a2a", "amazon redshift", "analytics", "angularjs", "ansible", "apache airflow", "apache spark",
-  "api", "api testing", "aws", "azure", "bash scripting", "bigquery", "bootstrap", "c", "c#", "c++",
-  "celery", "chart.js", "claude code", "concurrency", "crew ai", "css", "cypress", "databricks",
-  "data structure", "data warehousing", "dax", "deep learning (dl)", "distributed systems",
-  "django", "docker", "docker compose", "elasticsearch", "elk stack", "eslint", "etl",
-  "event-driven architecture", "express js", "fastapi", "firebase", "framer motion",
-  "gemini api", "genai", "generative ai", "git and github", "github actions", "go",
-  "google analytics", "google cloud platform", "hadoop hdfs", "haskell", "helm", "html",
-  "hugging face", "j2ee", "jaeger", "java", "javascript", "jest", "jquery", "kafka", "keras",
-  "kubernetes", "langchain", "langgraph", "langsmith", "lightgbm", "linux", "llm",
-  "machine learning", "makefiles", "matplotlib", "matplotlib & seaborn", "mcp", "mlflow",
-  "mongodb", "mysql", "n8n introduction", "natural language processing",
-  "natural language toolkit (nltk)", ".net", "next.js", "next js", "nginx", "node.js",
-  "nosql", "numpy", "oauth 2.0", "openai api", "opencv", "pandas", "perl", "php", "pinecone",
-  "playwright", "postgresql", "postman", "power bi", "prisma orm", "prometheus", "pyspark",
-  "python", "pytorch", "rabbitmq", "rag", "react", "react native", "react testing library",
-  "redhat linux 7.5", "redux", "ruby", "rust", "scikit-learn", "scipy", "sentry", "servicenow",
-  "snowflake", "sql", "storybook", "supabase", "swagger", "swift", "tableau", "tailwind",
-  "tailwind css", "tensorflow", "terraform", "three.js", "transformers", "turborepo",
-  "typescript", "unit testing", "unix", "vector embeddings", "virtualization", "vue.js",
-  "windows", "yum", "zustand"
-]);
-
-
+const { TECHNICAL_SKILLS } = require('../constants/technicalSkills');
+const { buildStudentSkillMap, getMissingRequirements } = require('../services/skillMatching.service');
+const { purgeExpiredJobs } = require('../services/jobLifecycle.service');
+const { deleteS3ObjectFromUrl } = require('../services/fileCleanup.service');
+const mcqService = require('../services/mcq/mcqService');
 
 exports.getProfile = async (req, res) => {
   try {
@@ -166,19 +145,7 @@ exports.updateProfile = async (req, res) => {
 exports.getJobs = async (req, res) => {
   try {
     // Auto-delete expired jobs
-    try {
-      const allJobs = await prisma.job.findMany();
-      for (const job of allJobs) {
-        const activeDays = job.activeDays || 30;
-        const expiryTime = new Date(job.createdAt).getTime() + activeDays * 24 * 60 * 60 * 1000;
-        if (Date.now() > expiryTime) {
-          await prisma.application.deleteMany({ where: { jobId: job.id } });
-          await prisma.job.delete({ where: { id: job.id } });
-        }
-      }
-    } catch (cleanupErr) {
-      console.error('Failed to auto-clean expired jobs:', cleanupErr.message);
-    }
+    await purgeExpiredJobs(prisma);
 
     const profile = await prisma.profile.findUnique({
       where: { userId: req.user.id }
@@ -192,30 +159,10 @@ exports.getJobs = async (req, res) => {
       where: { studentId: profile.id }
     });
 
-    const studentSkills = {};
-    if (profile.skills) {
-      profile.skills.forEach(s => {
-        studentSkills[s.name.toLowerCase()] = s.rating;
-      });
-    }
+    const studentSkills = buildStudentSkillMap(profile);
 
     const matchedJobs = jobs.map(job => {
-      const missingRequirements = [];
-      if (job.requirements) {
-        job.requirements.forEach(reqSkill => {
-          const isTech = TECHNICAL_SKILLS.has(reqSkill.skillName.toLowerCase());
-          if (isTech) {
-            const studentRating = studentSkills[reqSkill.skillName.toLowerCase()] || 0;
-            if (studentRating < reqSkill.minRating) {
-              missingRequirements.push({
-                skillName: reqSkill.skillName,
-                requiredRating: reqSkill.minRating,
-                currentRating: studentRating
-              });
-            }
-          }
-        });
-      }
+      const missingRequirements = getMissingRequirements(job, studentSkills);
 
       const applied = applications.some(app => app.jobId === job.id);
 
@@ -253,19 +200,9 @@ exports.applyJob = async (req, res) => {
       return res.status(404).json({ error: 'Job not found' });
     }
 
-    const studentSkills = {};
-    if (profile.skills) {
-      profile.skills.forEach(s => {
-        studentSkills[s.name.toLowerCase()] = s.rating;
-      });
-    }
+    const studentSkills = buildStudentSkillMap(profile);
 
-    const hasMissing = job.requirements && job.requirements.some(reqSkill => {
-      const isTech = TECHNICAL_SKILLS.has(reqSkill.skillName.toLowerCase());
-      if (!isTech) return false;
-      const studentRating = studentSkills[reqSkill.skillName.toLowerCase()] || 0;
-      return studentRating < reqSkill.minRating;
-    });
+    const hasMissing = getMissingRequirements(job, studentSkills).length > 0;
 
     if (hasMissing) {
       return res.status(400).json({ error: 'You do not meet the minimum rating requirements for this job.' });
@@ -396,72 +333,6 @@ exports.getTechnicalSkills = async (req, res) => {
   }
 };
 
-const generateMcqs = async (skillName) => {
-  const systemPrompt = `You are a technical evaluation engine. Generate exactly 10 multiple choice questions (MCQs) for the skill: '${skillName}'. Each question must have 4 options and exactly one correct answer. Return a JSON object with a key 'questions' containing an array of objects. Each object must have fields: 'id' (number 1 to 10), 'question' (string), 'options' (array of 4 strings), and 'answer' (string, either 'A', 'B', 'C', or 'D'). Include both theory and coding/syntax analysis questions.`;
-  const userPrompt = `Generate 10 MCQs for '${skillName}'.`;
-
-  // 1. Try Claude on AWS Bedrock
-  try {
-    console.log(`Attempting to generate MCQs for ${skillName} using Claude (us-east-1)...`);
-    const bedrockRes = await fetch("https://bedrock-runtime.us-east-1.amazonaws.com/model/anthropic.claude-3-haiku-20240307-v1:0/invoke", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.CLAUDE_API_KEY}`
-      },
-      body: JSON.stringify({
-        anthropic_version: "bedrock-2023-05-31",
-        max_tokens: 4000,
-        system: systemPrompt,
-        messages: [{ role: "user", content: userPrompt }]
-      })
-    });
-
-    if (bedrockRes.ok) {
-      const data = await bedrockRes.json();
-      const content = data.content[0]?.text;
-      const parsed = JSON.parse(content.substring(content.indexOf('{'), content.lastIndexOf('}') + 1));
-      if (parsed.questions && parsed.questions.length === 10) {
-        console.log("Successfully generated MCQs using Bedrock.");
-        return parsed;
-      }
-    } else {
-      console.warn(`Bedrock API responded with status ${bedrockRes.status}`);
-    }
-  } catch (err) {
-    console.error("Bedrock invocation error:", err.message);
-  }
-
-  // 2. Fallback to Groq Llama 3.1 8b
-  console.log(`Falling back to Groq for MCQ generation of ${skillName}...`);
-  const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: "llama-3.1-8b-instant",
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ]
-    })
-  });
-
-  if (!groqRes.ok) {
-    throw new Error(`Groq API failed with status ${groqRes.status}`);
-  }
-
-  const groqData = await groqRes.json();
-  const parsed = JSON.parse(groqData.choices[0].message.content);
-  if (parsed.questions && parsed.questions.length === 10) {
-    return parsed;
-  }
-  throw new Error("Failed to generate exactly 10 questions");
-};
-
 exports.generateSkillTest = async (req, res) => {
   const { skillName } = req.body;
   if (!skillName) {
@@ -469,7 +340,7 @@ exports.generateSkillTest = async (req, res) => {
   }
 
   try {
-    const testData = await generateMcqs(skillName);
+    const testData = await mcqService.generate(skillName);
     res.json(testData);
   } catch (err) {
     console.error(err);
@@ -554,13 +425,7 @@ exports.saveIntroVideo = async (req, res) => {
     // 2. If there is an old video URL and it's different from the new one, delete the old file
     if (profile.introVideoUrl && profile.introVideoUrl !== introVideoUrl) {
       try {
-        const parts = profile.introVideoUrl.split('.amazonaws.com/');
-        if (parts.length > 1) {
-          const oldKey = parts[1];
-          const { deleteObject } = require('../config/s3');
-          console.log(`Deleting old video file from S3: ${oldKey}`);
-          await deleteObject(oldKey);
-        }
+        await deleteS3ObjectFromUrl(profile.introVideoUrl, 'video file');
       } catch (deleteErr) {
         console.error('Failed to parse and delete old video from S3:', deleteErr);
       }

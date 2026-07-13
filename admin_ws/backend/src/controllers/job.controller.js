@@ -1,12 +1,10 @@
-const { getDB } = require('../config/database');
+const { getDbSafe } = require('../config/database');
 const { ObjectId } = require('mongodb');
 
 exports.getAllJobs = async (req, res, next) => {
   try {
-    let db;
-    try {
-      db = getDB();
-    } catch (e) {
+    const db = getDbSafe();
+    if (!db) {
       console.warn('[DB WARNING] Database connection not initialized. Using fallback data.');
     }
 
@@ -80,10 +78,8 @@ exports.getAllJobs = async (req, res, next) => {
 exports.getJobApplicants = async (req, res, next) => {
   try {
     const { jobId } = req.params;
-    let db;
-    try {
-      db = getDB();
-    } catch (e) {
+    const db = getDbSafe();
+    if (!db) {
       console.warn('[DB WARNING] Database connection not initialized. Using fallback data.');
     }
 

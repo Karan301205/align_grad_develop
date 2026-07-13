@@ -32,7 +32,7 @@ import {
   Compass,
   ArrowUpRight
 } from 'lucide-react';
-import { API_BASE } from '../../constants';
+import { apiFetch } from '../../services/apiClient';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import ThemeToggle from '../../components/ui/ThemeToggle';
@@ -114,14 +114,13 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
     setError('');
     setLoading(true);
 
-    const url = isLogin ? `${API_BASE}/auth/login` : `${API_BASE}/auth/signup`;
+    const path = isLogin ? '/auth/login' : '/auth/signup';
     const payload = isLogin ? { email, password } : { email, password, role, name };
 
     try {
-      const res = await fetch(url, {
+      const res = await apiFetch(path, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        json: payload
       });
       const data = await res.json();
       if (!res.ok) {
@@ -1155,6 +1154,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
           </div>
         </div>
       </div>
+
 
       {/* 7. Slide-over Auth Drawer (Linear-style panel) */}
       <div 

@@ -6,7 +6,7 @@ import PageHeader from '../../../components/ui/PageHeader';
 import StatCard from '../../../components/ui/StatCard';
 import Card from '../../../components/ui/Card';
 import EmptyState from '../../../components/ui/EmptyState';
-import { API_BASE } from '../../../constants';
+import { apiFetch } from '../../../services/apiClient';
 
 export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDeleteJob, onRefresh, token }) {
   const [selectedJob, setSelectedJob] = useState(null);
@@ -257,15 +257,12 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
               <button
                 onClick={async () => {
                   try {
-                    const res = await fetch(`${API_BASE}/recruiter/applications/${managingApp.id}/rounds`, {
+                    const res = await apiFetch(`/recruiter/applications/${managingApp.id}/rounds`, {
+                      token,
                       method: 'PUT',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`
-                      },
-                      body: JSON.stringify({
+                      json: {
                         roundStatuses: managingApp.roundStatuses
-                      })
+                      }
                     });
                     if (res.ok) {
                       alert('Progress updated successfully!');

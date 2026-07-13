@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { 
-  LayoutDashboard, 
+import { adminApi } from './api/adminApi';
+import {
+  LayoutDashboard,
   Users, 
   Building2, 
   Briefcase, 
@@ -61,8 +62,7 @@ export default function App() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchDashboardStats = () => {
-    return fetch('http://localhost:5002/api/dashboard/stats')
-      .then(res => res.json())
+    return adminApi.getDashboardStats()
       .then(data => {
         if (data.success) {
           setStats(data.stats);
@@ -73,8 +73,7 @@ export default function App() {
 
   const fetchStudents = () => {
     setLoadingStudents(true);
-    return fetch('http://localhost:5002/api/student')
-      .then(res => res.json())
+    return adminApi.getStudents()
       .then(data => {
         if (data.success) {
           setStudents(data.students);
@@ -89,8 +88,7 @@ export default function App() {
 
   const fetchRecruiters = () => {
     setLoadingRecruiters(true);
-    return fetch('http://localhost:5002/api/recruiter')
-      .then(res => res.json())
+    return adminApi.getRecruiters()
       .then(data => {
         if (data.success) {
           setRecruiters(data.recruiters);
@@ -105,8 +103,7 @@ export default function App() {
 
   const fetchJobs = () => {
     setLoadingJobs(true);
-    return fetch('http://localhost:5002/api/job')
-      .then(res => res.json())
+    return adminApi.getJobs()
       .then(data => {
         if (data.success) {
           setJobs(data.jobs);
@@ -121,8 +118,7 @@ export default function App() {
 
   const fetchStorage = () => {
     setLoadingStorage(true);
-    return fetch('http://localhost:5002/api/storage/explorer')
-      .then(res => res.json())
+    return adminApi.getStorage()
       .then(data => {
         if (data.success) {
           setStorageInfo(data);
@@ -137,8 +133,7 @@ export default function App() {
 
   const fetchAnalytics = () => {
     setLoadingAnalytics(true);
-    return fetch('http://localhost:5002/api/analytics')
-      .then(res => res.json())
+    return adminApi.getAnalytics()
       .then(data => {
         if (data.success) {
           setAnalyticsData(data);
@@ -205,8 +200,7 @@ export default function App() {
     setSelectedJobForApplicants(job);
     setLoadingApplicants(true);
     setSelectedJobApplicants([]);
-    fetch(`http://localhost:5002/api/job/${job.id}/applicants`)
-      .then(res => res.json())
+    adminApi.getJobApplicants(job.id)
       .then(data => {
         if (data.success) {
           setSelectedJobApplicants(data.applicants);

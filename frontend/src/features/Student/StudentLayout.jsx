@@ -18,9 +18,15 @@ import {
   ClipboardList,
   Lock
 } from 'lucide-react';
-import html2canvas from 'html2canvas-pro';
-import { jsPDF } from 'jspdf';
-import { API_BASE } from '../../constants';
+import { apiFetch } from '../../services/apiClient';
+import { putFileToS3 } from '../../services/uploadService';
+import { generateResumePdf } from '../../services/resumePdf';
+import {
+  hasGeneralInfo as hasGeneralInfoRule,
+  hasSkills as hasSkillsRule,
+  hasIntroVideo as hasIntroVideoRule,
+  isProfileComplete
+} from '../../utils/profileCompleteness';
 import SidebarNavItem from '../../components/ui/SidebarNavItem';
 import ThemeToggle from '../../components/ui/ThemeToggle';
 
@@ -113,9 +119,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const fetchStudentApplications = async () => {
     setLoadingApplications(true);
     try {
-      const res = await fetch(`${API_BASE}/student/applications`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/student/applications', { token });
       if (res.ok) {
         const data = await res.json();
         setApplications(data);
@@ -133,27 +137,16 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     }
   }, [activeTab, token]);
 
-  const hasGeneralInfo = !!(
-    profile?.name?.trim() &&
-    profile?.bio?.trim() &&
-    profile?.nationality?.trim() &&
-    profile?.gender?.trim() &&
-    profile?.email?.trim() &&
-    profile?.dob?.trim() &&
-    profile?.phone?.trim()
-  );
-
-  const hasSkills = !!(profile?.skills && profile.skills.length > 0);
-  const hasIntroVideo = !!(profile?.introVideoUrl && profile.introVideoUrl.trim());
-  const isComplete = hasGeneralInfo && hasSkills && hasIntroVideo;
+  const hasGeneralInfo = hasGeneralInfoRule(profile);
+  const hasSkills = hasSkillsRule(profile);
+  const hasIntroVideo = hasIntroVideoRule(profile);
+  const isComplete = isProfileComplete(profile);
 
   const fetchProfileAndJobs = async () => {
     setLoading(true);
     try {
       // Fetch Profile
-      const profRes = await fetch(`${API_BASE}/student/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const profRes = await apiFetch('/student/profile', { token });
       const profData = await profRes.json();
       if (profRes.ok) {
         setProfile(profData);
@@ -202,9 +195,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       }
 
       // Fetch Jobs
-      const jobsRes = await fetch(`${API_BASE}/student/jobs`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const jobsRes = await apiFetch('/student/jobs', { token });
       const jobsData = await jobsRes.json();
       if (jobsRes.ok) {
         setJobs(jobsData);
@@ -250,9 +241,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const fetchTechnicalSkills = async () => {
     setLoadingTechSkills(true);
     try {
-      const res = await fetch(`${API_BASE}/student/tests/skills`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/student/tests/skills', { token });
       if (res.ok) {
         const data = await res.json();
         setTechSkills(data.technicalSkills || []);
@@ -279,13 +268,10 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     setTestResult(null);
 
     try {
-      const res = await fetch(`${API_BASE}/student/tests/generate`, {
+      const res = await apiFetch('/student/tests/generate', {
+        token,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ skillName })
+        json: { skillName }
       });
       if (res.ok) {
         const data = await res.json();
@@ -324,16 +310,13 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
 
     setSubmittingTest(true);
     try {
-      const res = await fetch(`${API_BASE}/student/tests/submit`, {
+      const res = await apiFetch('/student/tests/submit', {
+        token,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
+        json: {
           skillName: activeTestSkill,
           score: correctCount
-        })
+        }
       });
       if (res.ok) {
         const data = await res.json();
@@ -359,13 +342,10 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     setSubmittingProfile(true);
     setFeedbackMsg('');
     try {
-      const res = await fetch(`${API_BASE}/student/profile`, {
+      const res = await apiFetch('/student/profile', {
+        token,
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
+        json: {
           name: profile.name,
           username,
           profilePic,
@@ -383,7 +363,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           certificates: certificatesList,
           projects: projectsList,
           cocurricular
-        })
+        }
       });
       if (res.ok) {
         setFeedbackMsg('Profile updated successfully!');
@@ -415,17 +395,14 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       setSubmittingProfile(true);
 
       // 1. Request S3 pre-signed upload URL from backend
-      const urlRes = await fetch(`${API_BASE}/upload/request-url`, {
+      const urlRes = await apiFetch('/upload/request-url', {
+        token,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
+        json: {
           fileType: 'resume',
           fileName: file.name,
           contentType: file.type
-        })
+        }
       });
 
       if (!urlRes.ok) {
@@ -435,26 +412,17 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       const { uploadUrl, publicUrl } = await urlRes.json();
 
       // 2. Upload file directly to S3 via pre-signed PUT URL
-      const s3Res = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': file.type
-        },
-        body: file
-      });
+      const s3Res = await putFileToS3(uploadUrl, file);
 
       if (!s3Res.ok) {
         throw new Error('Failed to upload file directly to S3.');
       }
 
       // 3. Save the S3 publicUrl to student profile
-      const res = await fetch(`${API_BASE}/student/profile`, {
+      const res = await apiFetch('/student/profile', {
+        token,
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
+        json: {
           name: profile?.name,
           resumeUrl: publicUrl,
           skills: skillsList,
@@ -470,7 +438,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           certificates: certificatesList,
           projects: projectsList,
           cocurricular
-        })
+        }
       });
 
       if (res.ok) {
@@ -499,13 +467,10 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     setResumeUrl('');
 
     try {
-      const res = await fetch(`${API_BASE}/student/profile`, {
+      const res = await apiFetch('/student/profile', {
+        token,
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
+        json: {
           name: profile?.name,
           resumeUrl: '',
           skills: skillsList,
@@ -521,7 +486,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           certificates: certificatesList,
           projects: projectsList,
           cocurricular
-        })
+        }
       });
       if (res.ok) {
         const d = await res.json();
@@ -546,23 +511,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         return;
       }
 
-      // Render template using html2canvas-pro
-      const canvas = await html2canvas(element, {
-        scale: 2.5,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.98);
-
-      // Initialize jsPDF
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-      pdf.save(`${profile?.name || 'Resume'}_Generated_Resume.pdf`);
+      // Render template to an A4 PDF and trigger download
+      await generateResumePdf(element, `${profile?.name || 'Resume'}_Generated_Resume.pdf`);
     } catch (err) {
       console.error(err);
       alert('Failed to generate PDF. Check browser console.');
@@ -573,9 +523,9 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
 
   const handleApply = async (jobId) => {
     try {
-      const res = await fetch(`${API_BASE}/student/jobs/${jobId}/apply`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await apiFetch(`/student/jobs/${jobId}/apply`, {
+        token,
+        method: 'POST'
       });
       if (res.ok) {
         alert('Application submitted successfully!');

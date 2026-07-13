@@ -1,4 +1,6 @@
 const { prisma } = require('../config/db');
+const { purgeExpiredJobs } = require('../services/jobLifecycle.service');
+const { deleteS3ObjectFromUrl } = require('../services/fileCleanup.service');
 
 exports.getCompany = async (req, res) => {
   try {
@@ -28,13 +30,7 @@ exports.verifyCompany = async (req, res) => {
 
     if (existingCompany && existingCompany.docUrl && existingCompany.docUrl !== docUrl) {
       try {
-        const parts = existingCompany.docUrl.split('.amazonaws.com/');
-        if (parts.length > 1) {
-          const oldKey = parts[1];
-          const { deleteObject } = require('../config/s3');
-          console.log(`Deleting old company verification document from S3: ${oldKey}`);
-          await deleteObject(oldKey);
-        }
+        await deleteS3ObjectFromUrl(existingCompany.docUrl, 'company verification document');
       } catch (deleteErr) {
         console.error('Failed to delete old company doc from S3:', deleteErr);
       }
@@ -126,19 +122,7 @@ exports.postJob = async (req, res) => {
 exports.getCompanyJobs = async (req, res) => {
   try {
     // Auto-delete expired jobs
-    try {
-      const allJobs = await prisma.job.findMany();
-      for (const job of allJobs) {
-        const activeDays = job.activeDays || 30;
-        const expiryTime = new Date(job.createdAt).getTime() + activeDays * 24 * 60 * 60 * 1000;
-        if (Date.now() > expiryTime) {
-          await prisma.application.deleteMany({ where: { jobId: job.id } });
-          await prisma.job.delete({ where: { id: job.id } });
-        }
-      }
-    } catch (cleanupErr) {
-      console.error('Failed to auto-clean expired jobs:', cleanupErr.message);
-    }
+    await purgeExpiredJobs(prisma);
 
     const company = await prisma.company.findUnique({
       where: { userId: req.user.id }

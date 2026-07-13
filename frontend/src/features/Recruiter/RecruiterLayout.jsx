@@ -9,7 +9,8 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { API_BASE } from '../../constants';
+import { apiFetch } from '../../services/apiClient';
+import { putFileToS3 } from '../../services/uploadService';
 import SidebarNavItem from '../../components/ui/SidebarNavItem';
 import ThemeToggle from '../../components/ui/ThemeToggle';
 
@@ -42,23 +43,17 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     setLoading(true);
     try {
       // Company Details
-      const compRes = await fetch(`${API_BASE}/recruiter/company`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const compRes = await apiFetch('/recruiter/company', { token });
       const compData = await compRes.json();
       if (compRes.ok) setCompany(compData);
 
       // Company Jobs
-      const jobsRes = await fetch(`${API_BASE}/recruiter/jobs`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const jobsRes = await apiFetch('/recruiter/jobs', { token });
       const jobsData = await jobsRes.json();
       if (jobsRes.ok) setJobs(jobsData);
 
       // All Candidates
-      const candRes = await fetch(`${API_BASE}/recruiter/candidates`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const candRes = await apiFetch('/recruiter/candidates', { token });
       const candData = await candRes.json();
       if (candRes.ok) setCandidates(candData);
     } catch (err) {
@@ -75,13 +70,10 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
   const handlePostJob = async (jobData) => {
     setSubmittingJob(true);
     try {
-      const res = await fetch(`${API_BASE}/recruiter/jobs`, {
+      const res = await apiFetch('/recruiter/jobs', {
+        token,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(jobData)
+        json: jobData
       });
       if (res.ok) {
         alert('Job posted successfully!');
@@ -103,13 +95,10 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
 
   const handleUpdateJob = async (jobId, jobData) => {
     try {
-      const res = await fetch(`${API_BASE}/recruiter/jobs/${jobId}`, {
+      const res = await apiFetch(`/recruiter/jobs/${jobId}`, {
+        token,
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(jobData)
+        json: jobData
       });
       if (res.ok) {
         alert('Job updated successfully!');
@@ -131,11 +120,9 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       return;
     }
     try {
-      const res = await fetch(`${API_BASE}/recruiter/jobs/${jobId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const res = await apiFetch(`/recruiter/jobs/${jobId}`, {
+        token,
+        method: 'DELETE'
       });
       if (res.ok) {
         alert('Job deleted successfully.');
@@ -153,17 +140,14 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     setSubmittingDoc(true);
     try {
       // 1. Request secure S3 upload URL from backend
-      const urlRes = await fetch(`${API_BASE}/upload/request-url`, {
+      const urlRes = await apiFetch('/upload/request-url', {
+        token,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
+        json: {
           fileType: 'doc',
           fileName: file.name,
           contentType: file.type
-        })
+        }
       });
 
       if (!urlRes.ok) {
@@ -173,26 +157,17 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       const { uploadUrl, publicUrl } = await urlRes.json();
 
       // 2. Upload file directly to S3
-      const s3Res = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': file.type
-        },
-        body: file
-      });
+      const s3Res = await putFileToS3(uploadUrl, file);
 
       if (!s3Res.ok) {
         throw new Error('Failed to upload verification document to S3.');
       }
 
       // 3. Submit document URL to recruiter verification endpoint
-      const res = await fetch(`${API_BASE}/recruiter/verify`, {
+      const res = await apiFetch('/recruiter/verify', {
+        token,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ docUrl: publicUrl })
+        json: { docUrl: publicUrl }
       });
 
       if (res.ok) {
