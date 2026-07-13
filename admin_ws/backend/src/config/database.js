@@ -25,7 +25,19 @@ function getDB() {
   return db;
 }
 
+// Non-throwing accessor: returns the active db handle, or `null` when the
+// connection is not initialized. Lets controllers replace their repeated
+// try/catch-around-getDB guard while keeping their own fallback messaging.
+function getDbSafe() {
+  try {
+    return getDB();
+  } catch (e) {
+    return null;
+  }
+}
+
 module.exports = {
   connectDB,
-  getDB
+  getDB,
+  getDbSafe
 };

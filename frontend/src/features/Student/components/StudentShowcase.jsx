@@ -13,7 +13,7 @@ import {
   FileVideo,
   Sparkles
 } from 'lucide-react';
-import { API_BASE } from '../../../constants';
+import { apiFetch } from '../../../services/apiClient';
 import PageHeader from '../../../components/ui/PageHeader';
 
 export default function StudentShowcase({ profile, token, onVideoSaved }) {
@@ -199,16 +199,13 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
       const fileName = `showcase.${fileExt}`;
 
       // 1. Request secure signed upload URL from backend
-      const urlRes = await fetch(`${API_BASE}/student/video-upload-url`, {
+      const urlRes = await apiFetch('/student/video-upload-url', {
+        token,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
+        json: {
           fileName,
           contentType: recordedBlob.type || `video/${fileExt}`
-        })
+        }
       });
 
       if (!urlRes.ok) {
@@ -251,13 +248,10 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
       setUploadProgress(90);
 
       // 3. Save the public URL reference to candidate profile in MongoDB
-      const res = await fetch(`${API_BASE}/student/intro-video`, {
+      const res = await apiFetch('/student/intro-video', {
+        token,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ introVideoUrl: publicUrl })
+        json: { introVideoUrl: publicUrl }
       });
 
       if (!res.ok) {
@@ -289,13 +283,10 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
     setSuccessMsg('');
 
     try {
-      const res = await fetch(`${API_BASE}/student/intro-video`, {
+      const res = await apiFetch('/student/intro-video', {
+        token,
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ introVideoUrl: null })
+        json: { introVideoUrl: null }
       });
 
       if (!res.ok) {

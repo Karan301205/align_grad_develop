@@ -1,5 +1,6 @@
-const { getDB } = require('../config/database');
-const { S3Client, ListObjectsV2Command } = require('@aws-sdk/client-s3');
+const { getDbSafe } = require('../config/database');
+const { ListObjectsV2Command } = require('@aws-sdk/client-s3');
+const { createS3Client } = require('../config/s3');
 
 // Helper to get S3 storage size
 async function getS3StorageSize() {
@@ -7,12 +8,10 @@ async function getS3StorageSize() {
     return '84.5 MB';
   }
   try {
-    const s3 = new S3Client({
+    const s3 = createS3Client({
       region: process.env.AWS_REGION || 'ap-south-1',
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-      }
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
     });
     const command = new ListObjectsV2Command({ Bucket: process.env.S3_BUCKET_NAME });
     const response = await s3.send(command);
@@ -35,10 +34,8 @@ async function getS3StorageSize() {
 
 exports.getStats = async (req, res, next) => {
   try {
-    let db;
-    try {
-      db = getDB();
-    } catch (e) {
+    const db = getDbSafe();
+    if (!db) {
       // Return mocked stats if DB is offline or mock config
       console.warn('[DB WARNING] Database connection not initialized. Using fallback data.');
     }

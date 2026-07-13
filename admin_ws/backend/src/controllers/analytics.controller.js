@@ -1,13 +1,11 @@
-const { getDB } = require('../config/database');
+const { getDbSafe } = require('../config/database');
 
 exports.getAnalytics = async (req, res, next) => {
   try {
-    let db;
     let isMock = false;
 
-    try {
-      db = getDB();
-    } catch (e) {
+    const db = getDbSafe();
+    if (!db) {
       console.warn('[DB WARNING] Database connection not initialized. Using mockup analytics.');
       isMock = true;
     }

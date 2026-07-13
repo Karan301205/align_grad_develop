@@ -1,11 +1,9 @@
-const { getDB } = require('../config/database');
+const { getDbSafe } = require('../config/database');
 
 exports.getAllStudents = async (req, res, next) => {
   try {
-    let db;
-    try {
-      db = getDB();
-    } catch (e) {
+    const db = getDbSafe();
+    if (!db) {
       console.warn('[DB WARNING] Database connection not initialized. Using fallback data.');
     }
 
