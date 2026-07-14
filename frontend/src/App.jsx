@@ -114,24 +114,26 @@ export default function App() {
       );
     }
     if (isCareerHost) {
+      const mode = currentPath.endsWith('/signup') ? 'signup' : 'login';
       return (
         <CandidateAuth
           setToken={setToken}
           setUser={setUser}
           theme={theme}
           toggleTheme={toggleTheme}
-          initialMode="login"
+          initialMode={mode}
         />
       );
     }
     if (isHireHost) {
+      const mode = currentPath.endsWith('/signup') ? 'signup' : 'login';
       return (
         <RecruiterAuth
           setToken={setToken}
           setUser={setUser}
           theme={theme}
           toggleTheme={toggleTheme}
-          initialMode="login"
+          initialMode={mode}
         />
       );
     }
