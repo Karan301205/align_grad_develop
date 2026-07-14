@@ -147,7 +147,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
       window.history.pushState({}, '', `/candidate/${mode}`);
       window.dispatchEvent(new PopStateEvent('popstate'));
     } else {
-      window.location.href = `https://career.aligngrad.com/${mode}`;
+      window.location.href = `https://career.aligngrad.com/candidate/${mode}`;
     }
   };
 
@@ -157,7 +157,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
       window.history.pushState({}, '', `/recruiter/${mode}`);
       window.dispatchEvent(new PopStateEvent('popstate'));
     } else {
-      window.location.href = `https://hire.aligngrad.com/${mode}`;
+      window.location.href = `https://hire.aligngrad.com/recruiter/${mode}`;
     }
   };
 
