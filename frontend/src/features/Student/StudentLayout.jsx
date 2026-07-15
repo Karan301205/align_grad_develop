@@ -21,6 +21,7 @@ import {
 import { apiFetch } from '../../services/apiClient';
 import { putFileToS3 } from '../../services/uploadService';
 import { generateResumePdf } from '../../services/resumePdf';
+import { formatAlertMessage } from '../../utils/errorFormatter';
 import {
   hasGeneralInfo as hasGeneralInfoRule,
   hasSkills as hasSkillsRule,
@@ -52,6 +53,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [profileTab, setProfileTab] = useState('general');
   const [wasComplete, setWasComplete] = useState(null);
+  const [alertConfig, setAlertConfig] = useState(null);
   
   // General Section
   const [bio, setBio] = useState('');
@@ -412,7 +414,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       const { uploadUrl, publicUrl } = await urlRes.json();
 
       // 2. Upload file directly to S3 via pre-signed PUT URL
-      const s3Res = await putFileToS3(uploadUrl, file);
+      const s3Res = await putFileToS3(uploadUrl, file, file.type, token);
 
       if (!s3Res.ok) {
         throw new Error('Failed to upload file directly to S3.');
@@ -528,14 +530,14 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         method: 'POST'
       });
       if (res.ok) {
-        alert('Application submitted successfully!');
+        setAlertConfig({ message: 'Application submitted successfully!', type: 'success' });
         fetchProfileAndJobs();
       } else {
         const d = await res.json();
-        alert(d.error || 'Could not apply');
+        setAlertConfig({ message: d.error || 'Could not apply', type: 'error' });
       }
     } catch (err) {
-      alert('Error applying');
+      setAlertConfig({ message: 'Error applying', type: 'error' });
     }
   };
 
@@ -599,7 +601,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
               alt="AlignGrade"
               className="h-12 w-auto object-contain self-start"
             />
-            <p className="text-[9px] font-mono uppercase tracking-wider text-on-surface-variant opacity-70 px-0.5">Student Dashboard</p>
+            <p className="text-[9px] font-mono uppercase tracking-wider text-on-surface-variant opacity-70 px-0.5">Candidate Dashboard</p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 text-on-surface-variant hover:text-on-surface" aria-label="Close menu">
             <X className="w-5 h-5" />
@@ -634,7 +636,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold text-on-surface truncate">{profile?.name || 'Loading...'}</p>
-              <p className="text-xs text-on-surface-variant truncate">Candidate</p>
+              <p className="text-xs text-on-surface-variant truncate">Candidate - {user?.regNo || 'CAN001'}</p>
             </div>
           </div>
           <button
@@ -801,6 +803,15 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           </div>
         )}
       </main>
+
+      {/* Floating Alert Modal Overlay */}
+      {alertConfig && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md shadow-2xl relative">
+            {formatAlertMessage(alertConfig.message, alertConfig.type, () => setAlertConfig(null))}
+          </div>
+        </div>
+      )}
     </>
   );
 }

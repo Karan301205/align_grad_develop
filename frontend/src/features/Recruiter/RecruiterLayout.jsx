@@ -13,6 +13,7 @@ import { apiFetch } from '../../services/apiClient';
 import { putFileToS3 } from '../../services/uploadService';
 import SidebarNavItem from '../../components/ui/SidebarNavItem';
 import ThemeToggle from '../../components/ui/ThemeToggle';
+import { formatAlertMessage } from '../../utils/errorFormatter';
 
 // Import subcomponents
 import RecruiterJobs from './components/RecruiterJobs';
@@ -38,6 +39,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
   // Verification state
   const [docLink, setDocLink] = useState('');
   const [submittingDoc, setSubmittingDoc] = useState(false);
+  const [alertConfig, setAlertConfig] = useState(null);
 
   const fetchRecruiterData = async () => {
     setLoading(true);
@@ -76,17 +78,17 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
         json: jobData
       });
       if (res.ok) {
-        alert('Job posted successfully!');
+        setAlertConfig({ message: 'Job posted successfully!', type: 'success' });
         fetchRecruiterData();
         setActiveTab('dashboard');
         return true;
       } else {
         const d = await res.json();
-        alert(d.error || 'Failed to post job');
+        setAlertConfig({ message: d.error || 'Failed to post job', type: 'error' });
         return false;
       }
     } catch (err) {
-      alert('Error posting job');
+      setAlertConfig({ message: 'Error posting job', type: 'error' });
       return false;
     } finally {
       setSubmittingJob(false);
@@ -101,16 +103,16 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
         json: jobData
       });
       if (res.ok) {
-        alert('Job updated successfully!');
+        setAlertConfig({ message: 'Job updated successfully!', type: 'success' });
         fetchRecruiterData();
         return true;
       } else {
         const d = await res.json();
-        alert(d.error || 'Failed to update job');
+        setAlertConfig({ message: d.error || 'Failed to update job', type: 'error' });
         return false;
       }
     } catch (err) {
-      alert('Error updating job');
+      setAlertConfig({ message: 'Error updating job', type: 'error' });
       return false;
     }
   };
@@ -125,14 +127,14 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
         method: 'DELETE'
       });
       if (res.ok) {
-        alert('Job deleted successfully.');
+        setAlertConfig({ message: 'Job deleted successfully.', type: 'success' });
         fetchRecruiterData();
       } else {
         const d = await res.json();
-        alert(d.error || 'Failed to delete job');
+        setAlertConfig({ message: d.error || 'Failed to delete job', type: 'error' });
       }
     } catch (err) {
-      alert('Error deleting job');
+      setAlertConfig({ message: 'Error deleting job', type: 'error' });
     }
   };
 
@@ -157,7 +159,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       const { uploadUrl, publicUrl } = await urlRes.json();
 
       // 2. Upload file directly to S3
-      const s3Res = await putFileToS3(uploadUrl, file);
+      const s3Res = await putFileToS3(uploadUrl, file, file.type, token);
 
       if (!s3Res.ok) {
         throw new Error('Failed to upload verification document to S3.');
@@ -171,16 +173,16 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       });
 
       if (res.ok) {
-        alert('Verification documents uploaded! Trust established.');
+        setAlertConfig({ message: 'Verification documents uploaded! Trust established.', type: 'success' });
         setDocLink(publicUrl);
         fetchRecruiterData();
       } else {
         const d = await res.json();
-        alert(d.error || 'Upload failed');
+        setAlertConfig({ message: d.error || 'Upload failed', type: 'error' });
       }
     } catch (err) {
       console.error(err);
-      alert(err.message || 'Upload error');
+      setAlertConfig({ message: err.message || 'Upload error', type: 'error' });
     } finally {
       setSubmittingDoc(false);
     }
@@ -270,7 +272,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold text-on-surface truncate">{company?.name || 'Loading...'}</p>
-              <p className="text-xs text-on-surface-variant truncate">Recruiter</p>
+              <p className="text-xs text-on-surface-variant truncate">Recruiter - {user?.regNo || 'REC001'}</p>
             </div>
           </div>
           <button
@@ -325,6 +327,15 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
           </div>
         )}
       </main>
+
+      {/* Floating Alert Modal Overlay */}
+      {alertConfig && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md shadow-2xl relative">
+            {formatAlertMessage(alertConfig.message, alertConfig.type, () => setAlertConfig(null))}
+          </div>
+        </div>
+      )}
     </>
   );
 }

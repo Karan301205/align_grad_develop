@@ -131,6 +131,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   ├── Recruiter/
 │   │   │   │   ├── RecruiterLayout.jsx # Recruiter portal navigation, dashboard layouts, and tabs
 │   │   │   │   └── components/
+│   │   │   │       ├── CandidateProfileModal.jsx # Reusable candidate profile dossier drawer modal
 │   │   │   │       ├── EditJobModal.jsx # Recruiter drawer to update postings and requirements
 │   │   │   │       ├── RecruiterCandidates.jsx # Search directory exploring profiles with filters
 │   │   │   │       ├── RecruiterCompany.jsx # Company details and document uploading check
@@ -150,6 +151,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   ├── resumePdf.js      # Generates a PDF resume from student profile DOM structures
 │   │   │   └── uploadService.js  # Puts raw documents/media directly to AWS S3 buckets
 │   │   └── utils/
+│   │       ├── errorFormatter.jsx    # Parses and presents validation error arrays beautifully
 │   │       └── profileCompleteness.js # Calculates profile percentages & identifies missing fields
 │   ├── package.json
 │   ├── package-lock.json
@@ -521,6 +523,13 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Safe Modifications**: Editing request timeout frames.
 * **Risk**: Medium.
 
+#### [frontend/src/utils/errorFormatter.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/utils/errorFormatter.jsx)
+* **Purpose**: Helper module that dynamically parses raw JSON-stringified Zod error lists from backend validation failures and formats them into themed, presentable list items.
+* **Used By**: [StudentProfile.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/features/Student/components/StudentProfile.jsx), [StudentResume.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/features/Student/components/StudentResume.jsx), [CandidateAuth.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/features/Auth/CandidateAuth.jsx), [RecruiterAuth.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/features/Auth/RecruiterAuth.jsx), [RecruiterLayout.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/features/Recruiter/RecruiterLayout.jsx), and [StudentLayout.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/features/Student/StudentLayout.jsx).
+* **Dependencies**: `react`, `lucide-react`.
+* **Safe Modifications**: Tweaking style tags, error layouts, or text descriptions.
+* **Risk**: Low.
+
 #### [frontend/src/utils/profileCompleteness.js](file:///Users/karanrawat/Desktop/a_g/frontend/src/utils/profileCompleteness.js)
 * **Purpose**: Helper logic validating candidate profile items to compute completeness percentage and list missing fields.
 * **Used By**: Student dashboard and profile layouts.
@@ -564,6 +573,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **`Auth/RecruiterAuth.jsx`**: Dedicated Recruiter login and signup pages matching the skeuomorphic theme.
 * **`SkillTest/TestView.jsx`**: Lockdown fullscreen exam panel checking focus state changes and scoring MCQ answers.
 * **`Recruiter/RecruiterLayout.jsx`**: Sidebar navigation shell managing Recruiter views.
+* **`Recruiter/components/CandidateProfileModal.jsx`**: Reusable candidate profile dossier drawer modal.
 * **`Recruiter/components/EditJobModal.jsx`**: Recruiter modal to update job parameters and required thresholds.
 * **`Recruiter/components/RecruiterJobs.jsx`**: Active jobs directory with applicant review drawers.
 * **`Recruiter/components/RecruiterCandidates.jsx`**: Candidate lookup directories.
@@ -862,6 +872,7 @@ src/index.js
   - `email`: String (Unique)
   - `password`: Hashed String
   - `role`: String ("STUDENT" or "RECRUITER")
+  - `regNo`: String (Unique registration number, e.g. CAN001, REC001)
   - `createdAt`: DateTime
 * **`Profile`** (Student Details)
   - `id`: ObjectId String (Primary Key)

@@ -221,6 +221,9 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
         const xhr = new XMLHttpRequest();
         xhr.open('PUT', signedUrl);
         xhr.setRequestHeader('Content-Type', recordedBlob.type || `video/${fileExt}`);
+        if (token) {
+          xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        }
 
         xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {

@@ -6,12 +6,16 @@
 // PUT step is identical everywhere and lives here.
 //
 // Returns the raw `Response` so callers keep their existing `res.ok` checks.
-export function putFileToS3(uploadUrl, file, contentType = file.type) {
+export function putFileToS3(uploadUrl, file, contentType = file.type, token = null) {
+  const headers = {
+    'Content-Type': contentType
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
   return fetch(uploadUrl, {
     method: 'PUT',
-    headers: {
-      'Content-Type': contentType
-    },
+    headers,
     body: file
   });
 }

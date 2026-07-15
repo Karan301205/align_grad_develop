@@ -3,6 +3,7 @@ import { FileText, CheckCircle, Award, Send } from 'lucide-react';
 import PageHeader from '../../../components/ui/PageHeader';
 import Card from '../../../components/ui/Card';
 import Button from '../../../components/ui/Button';
+import { formatErrorMessage } from '../../../utils/errorFormatter';
 
 export default function StudentResume({
   profile,
@@ -31,13 +32,19 @@ export default function StudentResume({
       />
 
       {feedbackMsg && (
-        <div className={`p-4 rounded-xl border text-sm flex items-center gap-3 ${
+        <div className={`p-4 rounded-xl border text-sm flex items-start gap-3 w-full ${
           feedbackMsg.includes('success')
-            ? 'bg-success-container border-success/30 text-on-success-container'
+            ? 'bg-success-container border-success/30 text-on-success-container items-center'
             : 'bg-error-container border-error/30 text-on-error-container'
         }`}>
-          <CheckCircle className="w-5 h-5" />
-          <span>{feedbackMsg}</span>
+          {feedbackMsg.includes('success') ? (
+            <>
+              <CheckCircle className="w-5 h-5 shrink-0 text-success" />
+              <span className="font-medium">{feedbackMsg}</span>
+            </>
+          ) : (
+            formatErrorMessage(feedbackMsg)
+          )}
         </div>
       )}
 

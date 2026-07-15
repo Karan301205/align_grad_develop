@@ -29,7 +29,7 @@ const postJobSchema = {
     openings: z.number().int().min(1).optional().nullable().or(z.string().regex(/^\d+$/).transform(val => parseInt(val, 10))),
     requirements: z.array(z.object({
       skillName: z.string().min(1, 'Skill name is required'),
-      minRating: z.number().int().min(1).max(5)
+      minRating: z.number().int().min(1).max(10)
     })).min(1, 'At least one requirement is required'),
     selectionProcess: z.array(z.object({
       roundNumber: z.number().int().min(1),

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Briefcase, User, ShieldCheck, FileText, RefreshCw, X } from 'lucide-react';
 import JobDetailsModal from '../../../components/JobDetailsModal';
 import EditJobModal from './EditJobModal';
@@ -7,11 +7,14 @@ import StatCard from '../../../components/ui/StatCard';
 import Card from '../../../components/ui/Card';
 import EmptyState from '../../../components/ui/EmptyState';
 import { apiFetch } from '../../../services/apiClient';
+import CandidateProfileModal from './CandidateProfileModal';
 
 export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDeleteJob, onRefresh, token }) {
   const [selectedJob, setSelectedJob] = useState(null);
   const [editingJob, setEditingJob] = useState(null);
   const [managingApp, setManagingApp] = useState(null);
+  const [viewingApplicantsJob, setViewingApplicantsJob] = useState(null);
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
   const totalApplicants = jobs.reduce((acc, job) => acc + (job.applications?.length || 0), 0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -25,6 +28,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
 
   const getRemainingDays = (createdAt, activeDays) => {
     const expiryTime = new Date(createdAt).getTime() + (activeDays || 30) * 24 * 60 * 60 * 1000;
+    // eslint-disable-next-line react-hooks/purity
     const remainingMs = expiryTime - Date.now();
     const remainingDays = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
     return Math.max(0, remainingDays);
@@ -127,40 +131,25 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
 
               {/* Applicants display */}
               <div className="bg-surface-container-low rounded-xl p-4 border border-outline-variant">
-                <h5 className="text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-3">Applicants</h5>
-                {(!job.applications || job.applications.length === 0) ? (
-                  <p className="text-xs text-on-surface-variant font-mono">No candidates have applied yet.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {job.applications.map((app, index) => (
-                      <div key={index} className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-surface-container-high/60 p-3 rounded-lg border border-outline-variant">
-                        <div>
-                          <p className="text-sm font-bold text-on-surface">{app.student?.name || 'Anonymous Student'}</p>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {app.student?.skills?.map((s, idx) => (
-                              <span key={idx} className="text-[10px] bg-primary-container border border-primary/20 text-on-primary-container px-1.5 py-0.5 rounded font-mono">
-                                {s.name}: Lvl {s.rating}/10
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0">
-                          <a href={app.student?.resumeUrl || '#'} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
-                            <FileText className="w-3.5 h-3.5" /> View Resume
-                          </a>
-                          <span className="text-on-surface-variant/20">|</span>
-                          <button
-                            type="button"
-                            onClick={() => setManagingApp(app)}
-                            className="text-xs text-secondary hover:underline flex items-center gap-1 font-bold"
-                          >
-                            Manage Progress
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                <div className="flex justify-between items-center flex-wrap gap-3">
+                  <div>
+                    <h5 className="text-xs font-mono uppercase tracking-wider text-on-surface-variant">Applicants</h5>
+                    <p className="text-xs text-on-surface-variant font-mono mt-0.5">
+                      {(!job.applications || job.applications.length === 0) 
+                        ? 'No candidates have applied yet.' 
+                        : `${job.applications.length} candidate(s) applied`}
+                    </p>
                   </div>
-                )}
+                  {job.applications && job.applications.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setViewingApplicantsJob(job)}
+                      className="px-4 py-2 bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 text-xs font-bold font-mono rounded-xl transition-all active:scale-95 cursor-pointer"
+                    >
+                      View Applicants
+                    </button>
+                  )}
+                </div>
               </div>
             </Card>
           ))
@@ -181,7 +170,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
         <EditJobModal
           job={editingJob}
           onClose={() => setEditingJob(null)}
-          handleUpdateJob={handleUpdateJob}
+          onUpdate={handleUpdateJob}
         />
       )}
 
@@ -272,7 +261,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                       const d = await res.json();
                       alert(d.error || 'Failed to update progress');
                     }
-                  } catch (err) {
+                  } catch {
                     alert('Error updating progress');
                   }
                 }}
@@ -284,6 +273,95 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
           </div>
         </div>
       )}
+
+      {/* Applicants List Modal */}
+      {viewingApplicantsJob && (
+        <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-container border border-outline-variant rounded-2xl w-full max-w-2xl p-6 space-y-6 animate-fade-in max-h-[90vh] overflow-y-auto custom-scrollbar">
+            
+            <div className="flex justify-between items-center border-b border-outline-variant pb-3">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">Candidate Submissions</span>
+                <h4 className="text-xl font-bold text-on-surface">Applicants for {viewingApplicantsJob.title}</h4>
+                <p className="text-xs text-on-surface-variant font-mono mt-0.5">
+                  Total applications: {viewingApplicantsJob.applications?.length || 0}
+                </p>
+              </div>
+              <button 
+                onClick={() => setViewingApplicantsJob(null)}
+                className="p-1 hover:bg-surface-container-high rounded cursor-pointer"
+              >
+                <X className="w-5 h-5 text-on-surface-variant hover:text-on-surface" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {(!viewingApplicantsJob.applications || viewingApplicantsJob.applications.length === 0) ? (
+                <p className="text-sm text-on-surface-variant text-center font-mono py-4">No candidates have applied yet.</p>
+              ) : (
+                <div className="space-y-4">
+                  {viewingApplicantsJob.applications.map((app, index) => (
+                    <div key={index} className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-surface-container-high/60 p-4 rounded-xl border border-outline-variant text-left">
+                      <div className="space-y-1">
+                        <p className="text-sm font-bold text-on-surface">{app.student?.name || 'Anonymous Student'}</p>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {app.student?.skills?.map((s, idx) => (
+                            <span key={idx} className="text-[10px] bg-primary-container border border-primary/20 text-on-primary-container px-1.5 py-0.5 rounded font-mono">
+                              {s.name}: Lvl {s.rating}/10
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-2 sm:self-center shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCandidate(app.student)}
+                          className="px-2.5 py-1.5 bg-surface-container hover:bg-surface-container-highest border border-outline-variant text-on-surface text-xs font-semibold rounded-lg transition-all active:scale-95 cursor-pointer flex items-center gap-1"
+                        >
+                          <User className="w-3.5 h-3.5 text-primary" /> view profile
+                        </button>
+                        
+                        <a 
+                          href={app.student?.resumeUrl || '#'} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="px-2.5 py-1.5 bg-surface-container hover:bg-surface-container-highest border border-outline-variant text-on-surface text-xs font-semibold rounded-lg transition-all active:scale-95 cursor-pointer flex items-center gap-1"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-secondary" /> View Resume
+                        </a>
+                        
+                        <button
+                          type="button"
+                          onClick={() => setManagingApp(app)}
+                          className="px-2.5 py-1.5 bg-secondary text-on-secondary hover:brightness-105 text-xs font-bold rounded-lg transition-all active:scale-95 cursor-pointer"
+                        >
+                          Manage Progress
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-outline-variant">
+              <button
+                onClick={() => setViewingApplicantsJob(null)}
+                className="px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-on-surface bg-surface-container-high border border-outline-variant rounded-xl hover:brightness-105 transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Selected Candidate Profile Modal */}
+      <CandidateProfileModal
+        candidate={selectedCandidate}
+        onClose={() => setSelectedCandidate(null)}
+      />
     </div>
   );
 }

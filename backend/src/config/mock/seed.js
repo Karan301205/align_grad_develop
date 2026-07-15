@@ -24,6 +24,7 @@ mockDb.jobs.push({
   ],
   location: "San Francisco, CA",
   locationUrl: "https://maps.google.com/?q=San+Francisco",
+  desiredExperience: "2 Years",
   activeDays: 30,
   company: { name: "Aether Corp", verified: true },
   createdAt: new Date()
@@ -40,6 +41,7 @@ mockDb.jobs.push({
   ],
   location: "Seattle, WA",
   locationUrl: "https://maps.google.com/?q=Seattle",
+  desiredExperience: "3+ Years",
   activeDays: 30,
   company: { name: "Nebula Systems", verified: true },
   createdAt: new Date()
@@ -56,6 +58,7 @@ mockDb.jobs.push({
   ],
   location: "Austin, TX (Remote)",
   locationUrl: "",
+  desiredExperience: "1 Year",
   activeDays: 30,
   company: { name: "Vertex AI", verified: false },
   createdAt: new Date()
@@ -67,6 +70,7 @@ mockDb.users.push({
   id: seedStudentId,
   email: "leo@domain.com",
   role: "STUDENT",
+  regNo: "CAN001",
   createdAt: new Date()
 });
 mockDb.profiles.push({

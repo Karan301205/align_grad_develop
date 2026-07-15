@@ -18,6 +18,7 @@ import ThemeToggle from '../../components/ui/ThemeToggle';
 import AnimatedContent from '../../components/ui/AnimatedContent';
 import ClickSpark from '../../components/ui/ClickSpark';
 import DotGrid from '../../components/ui/DotGrid';
+import { formatErrorMessage } from '../../utils/errorFormatter';
 
 export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, initialMode = 'login' }) {
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
@@ -155,9 +156,8 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
                 </div>
 
                 {error && (
-                  <div className="mb-5 p-4 bg-error-container border border-error/20 rounded-xl flex items-start gap-3 text-on-error-container text-xs leading-relaxed animate-fade-in">
-                    <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                    <span>{error}</span>
+                  <div className="mb-5">
+                    {formatErrorMessage(error, () => setError(''))}
                   </div>
                 )}
 

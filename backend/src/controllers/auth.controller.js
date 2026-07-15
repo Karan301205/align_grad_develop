@@ -16,12 +16,19 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ error: 'User with this email already exists' });
     }
 
+    const count = await prisma.user.count({
+      where: { role: role.toUpperCase() }
+    });
+    const prefix = role.toUpperCase() === 'STUDENT' ? 'CAN' : 'REC';
+    const regNo = `${prefix}${String(count + 1).padStart(3, '0')}`;
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
-        role: role.toUpperCase() // STUDENT or RECRUITER
+        role: role.toUpperCase(), // STUDENT or RECRUITER
+        regNo
       }
     });
 
@@ -55,7 +62,8 @@ exports.signup = async (req, res) => {
         id: user.id,
         email: user.email,
         role: user.role,
-        name
+        name,
+        regNo: user.regNo
       }
     });
   } catch (err) {
@@ -109,7 +117,8 @@ exports.login = async (req, res) => {
         id: user.id,
         email: user.email,
         role: user.role,
-        name
+        name,
+        regNo: user.regNo || (user.role === 'STUDENT' ? 'CAN001' : 'REC001')
       }
     });
   } catch (err) {

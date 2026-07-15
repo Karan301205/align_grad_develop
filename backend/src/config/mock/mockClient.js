@@ -14,7 +14,10 @@ const mockClient = {
       mockDb.users.push(newUser);
       return newUser;
     },
-    count: async () => {
+    count: async (args = {}) => {
+      if (args && args.where && args.where.role) {
+        return mockDb.users.filter(u => u.role === args.where.role).length;
+      }
       return mockDb.users.length;
     }
   },

@@ -6,6 +6,7 @@ import { putFileToS3 } from '../../../services/uploadService';
 import { DOMAIN_OPTIONS } from '../../../constants/domains';
 import Button from '../../../components/ui/Button';
 import PageHeader from '../../../components/ui/PageHeader';
+import { formatErrorMessage } from '../../../utils/errorFormatter';
 
 
 export default function StudentProfile({
@@ -212,7 +213,7 @@ export default function StudentProfile({
       const { uploadUrl, publicUrl } = await urlRes.json();
 
       // 4. Upload binary Blob directly to S3 via pre-signed URL
-      const s3Res = await putFileToS3(uploadUrl, imageBlob, 'image/jpeg');
+      const s3Res = await putFileToS3(uploadUrl, imageBlob, 'image/jpeg', token);
 
       if (!s3Res.ok) {
         throw new Error('Failed to upload profile picture to S3.');
@@ -481,13 +482,19 @@ export default function StudentProfile({
       />
 
       {feedbackMsg && (
-        <div className={`p-4 rounded-xl border text-sm flex items-center gap-3 ${
+        <div className={`p-4 rounded-xl border text-sm flex items-start gap-3 w-full ${
           feedbackMsg.includes('success')
-            ? 'bg-success-container border-success/30 text-on-success-container'
+            ? 'bg-success-container border-success/30 text-on-success-container items-center'
             : 'bg-error-container border-error/30 text-on-error-container'
         }`}>
-          <CheckCircle className="w-5 h-5" />
-          <span>{feedbackMsg}</span>
+          {feedbackMsg.includes('success') ? (
+            <>
+              <CheckCircle className="w-5 h-5 shrink-0 text-success" />
+              <span className="font-medium">{feedbackMsg}</span>
+            </>
+          ) : (
+            formatErrorMessage(feedbackMsg)
+          )}
         </div>
       )}
 
@@ -879,11 +886,21 @@ export default function StudentProfile({
                         onChange={handleEduTypeChange}
                       >
                         <option value="">Select level of education</option>
-                        <option value="High School">High School</option>
-                        <option value="Diploma">Diploma</option>
-                        <option value="Bachelors">Bachelors Degree</option>
-                        <option value="Masters">Masters Degree</option>
-                        <option value="Doctorate">Doctorate / PhD</option>
+                        {!educationList.some(e => e.eduType === 'High School') && (
+                          <option value="High School">High School</option>
+                        )}
+                        {!educationList.some(e => e.eduType === 'Diploma') && (
+                          <option value="Diploma">Diploma</option>
+                        )}
+                        {!educationList.some(e => e.eduType === 'Bachelors') && (
+                          <option value="Bachelors">Bachelors Degree</option>
+                        )}
+                        {!educationList.some(e => e.eduType === 'Masters') && (
+                          <option value="Masters">Masters Degree</option>
+                        )}
+                        {!educationList.some(e => e.eduType === 'Doctorate') && (
+                          <option value="Doctorate">Doctorate / PhD</option>
+                        )}
                       </select>
                     </div>
 

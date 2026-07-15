@@ -129,7 +129,7 @@ const submitSkillTestSchema = {
 
 const saveIntroVideoSchema = {
   body: z.object({
-    videoUrl: z.string().url('Invalid intro video URL')
+    introVideoUrl: z.string().url('Invalid intro video URL')
   })
 };
 
