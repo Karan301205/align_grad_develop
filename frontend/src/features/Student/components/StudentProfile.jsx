@@ -78,7 +78,7 @@ export default function StudentProfile({
   const [isSkillDropdownOpen, setIsSkillDropdownOpen] = React.useState(false);
   const [usernameStatus, setUsernameStatus] = React.useState(''); // 'loading', 'available', 'taken', 'invalid', ''
   const [usernameMsg, setUsernameMsg] = React.useState('');
-  
+
   const [editingEduIdx, setEditingEduIdx] = React.useState(null);
   const [editingExpIdx, setEditingExpIdx] = React.useState(null);
   const [editingCertIdx, setEditingCertIdx] = React.useState(null);
@@ -167,7 +167,7 @@ export default function StudentProfile({
 
           let quality = 0.9;
           let dataUrl = canvas.toDataURL('image/jpeg', quality);
-          
+
           while ((dataUrl.length * 0.75) > maxKB * 1024 && quality > 0.1) {
             quality -= 0.1;
             dataUrl = canvas.toDataURL('image/jpeg', quality);
@@ -499,11 +499,10 @@ export default function StudentProfile({
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
-      <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-success-container border border-success/30 text-on-success-container rounded-xl shadow-[var(--shadow-floating)] transition-all duration-500 ease-in-out ${
-        showUploadSuccess 
-          ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' 
+      <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-success-container border border-success/30 text-on-success-container rounded-xl shadow-[var(--shadow-floating)] transition-all duration-500 ease-in-out ${showUploadSuccess
+          ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
           : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
-      }`}>
+        }`}>
         {/* <CheckCircle className="w-5 h-5 text-success animate-bounce" /> */}
         <div className="flex flex-col">
           <span className="text-xs font-bold uppercase tracking-wider font-mono">Success</span>
@@ -516,11 +515,10 @@ export default function StudentProfile({
       />
 
       {feedbackMsg && (
-        <div className={`p-4 rounded-xl border text-sm flex items-start gap-3 w-full ${
-          feedbackMsg.includes('success')
+        <div className={`p-4 rounded-xl border text-sm flex items-start gap-3 w-full ${feedbackMsg.includes('success')
             ? 'bg-success-container border-success/30 text-on-success-container items-center'
             : 'bg-error-container border-error/30 text-on-error-container'
-        }`}>
+          }`}>
           {feedbackMsg.includes('success') ? (
             <>
               <CheckCircle className="w-5 h-5 shrink-0 text-success" />
@@ -533,7 +531,7 @@ export default function StudentProfile({
       )}
 
       <form onSubmit={handleSubmit} className="bg-surface-container border border-outline-variant rounded-2xl overflow-hidden grid grid-cols-12 min-h-[650px]">
-        
+
         {/* Left Side: Sub-tabs Sidebar */}
         <div className="col-span-12 md:col-span-4 bg-surface-container-low border-r border-outline-variant p-6 flex flex-col gap-1">
           {[
@@ -550,11 +548,10 @@ export default function StudentProfile({
               key={tab.id}
               type="button"
               onClick={() => setProfileTab(tab.id)}
-              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all text-xs flex items-center justify-between ${
-                profileTab === tab.id
+              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all text-xs flex items-center justify-between ${profileTab === tab.id
                   ? 'bg-primary/10 text-primary border-l-4 border-primary font-bold'
                   : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-              }`}
+                }`}
             >
               <span>{tab.label}</span>
               <ChevronRight className="w-3.5 h-3.5 opacity-50" />
@@ -616,7 +613,7 @@ export default function StudentProfile({
           })()}
 
           <div className="flex-1 space-y-6 overflow-y-auto max-h-[550px] pr-2 custom-scrollbar">
-            
+
             {/* Panel 1: General */}
             {profileTab === 'general' && (
               <div className="space-y-4">
@@ -662,7 +659,7 @@ export default function StudentProfile({
                     )}
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Full Name</label>
                   <input
@@ -686,11 +683,10 @@ export default function StudentProfile({
                       required
                     />
                     {usernameMsg && (
-                      <p className={`text-[10px] mt-1.5 font-medium ${
-                        usernameStatus === 'available' ? 'text-success' :
-                        usernameStatus === 'loading' ? 'text-warning animate-pulse' :
-                        'text-error'
-                      }`}>
+                      <p className={`text-[10px] mt-1.5 font-medium ${usernameStatus === 'available' ? 'text-success' :
+                          usernameStatus === 'loading' ? 'text-warning animate-pulse' :
+                            'text-error'
+                        }`}>
                         {usernameMsg}
                       </p>
                     )}
@@ -824,7 +820,7 @@ export default function StudentProfile({
               <div className="space-y-4">
                 <h3 className="text-lg font-headline font-bold text-on-surface mb-2">Social Profiles</h3>
                 <p className="text-xs text-on-surface-variant mb-4">Tick the checkbox to show the link on your resume.</p>
-                       {[
+                {[
                   {
                     key: 'linkedin',
                     label: 'LinkedIn Profile Link',
@@ -985,7 +981,7 @@ export default function StudentProfile({
                 {/* Add Form */}
                 <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
                   <h4 className="text-xs font-mono uppercase tracking-wider text-primary">Add Education Record</h4>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Education Type</label>
@@ -1136,7 +1132,7 @@ export default function StudentProfile({
                     </div>
                   )}
 
-                   <div className="flex gap-3">
+                  <div className="flex gap-3">
                     <button
                       type="button"
                       onClick={() => {
@@ -1237,7 +1233,7 @@ export default function StudentProfile({
                 {/* Add Form */}
                 <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
                   <h4 className="text-xs font-mono uppercase tracking-wider text-primary">Add Work Experience</h4>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Experience Type</label>
@@ -1532,7 +1528,7 @@ export default function StudentProfile({
                 {/* Add Form */}
                 <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
                   <h4 className="text-xs font-mono uppercase tracking-wider text-primary">Add Certification</h4>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Certificate Title</label>
@@ -1747,7 +1743,7 @@ export default function StudentProfile({
                 {/* Add Form */}
                 <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
                   <h4 className="text-xs font-mono uppercase tracking-wider text-primary">Add Project Record</h4>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Title</label>
@@ -1885,7 +1881,7 @@ export default function StudentProfile({
             {profileTab === 'skills' && (
               <div className="space-y-4">
                 <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Your Stacks & Skills</label>
-                
+
                 <div className="bg-surface-container-low border border-outline-variant rounded-xl p-6 space-y-5">
                   {/* Searchable input & dropdown to add a skill */}
                   <div className="flex gap-3 pb-3 border-b border-outline-variant">
@@ -1904,18 +1900,18 @@ export default function StudentProfile({
                         }}
                         className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs text-on-surface focus:border-primary focus:outline-none transition-all"
                       />
-                      
+
                       {isSkillDropdownOpen && (
                         <div className="absolute top-full left-0 right-0 mt-1.5 bg-surface-container-high/95 backdrop-blur-md border border-outline-variant rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
                           {ALL_SKILLS.filter(
                             s => s.skill.toLowerCase().includes(selectedNewSkill.toLowerCase()) &&
-                                 !skillsList.some(exist => exist.name.toLowerCase() === s.skill.toLowerCase())
+                              !skillsList.some(exist => exist.name.toLowerCase() === s.skill.toLowerCase())
                           ).length === 0 ? (
                             <div className="px-4 py-3 text-xs text-on-surface-variant font-mono">No matching skills found</div>
                           ) : (
                             ALL_SKILLS.filter(
                               s => s.skill.toLowerCase().includes(selectedNewSkill.toLowerCase()) &&
-                                   !skillsList.some(exist => exist.name.toLowerCase() === s.skill.toLowerCase())
+                                !skillsList.some(exist => exist.name.toLowerCase() === s.skill.toLowerCase())
                             ).map(s => (
                               <button
                                 key={s.skill}
@@ -2062,7 +2058,7 @@ export default function StudentProfile({
                 {/* Add Form */}
                 <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
                   <h4 className="text-xs font-mono uppercase tracking-wider text-primary">Add Co-curricular Activity</h4>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Activity / Title</label>
