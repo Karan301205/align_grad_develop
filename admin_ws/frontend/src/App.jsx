@@ -21,7 +21,9 @@ import {
   Menu,
   X,
   FileCheck,
-  RefreshCw
+  RefreshCw,
+  LogOut,
+  ChevronRight
 } from 'lucide-react';
 
 export default function App() {
@@ -29,6 +31,12 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState('all');
+
+  const [token, setToken] = useState(localStorage.getItem('adminToken') || null);
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
 
   const [stats, setStats] = useState({
     totalStudents: '...',
@@ -163,38 +171,79 @@ export default function App() {
   };
 
   React.useEffect(() => {
-    fetchDashboardStats();
+    const handleUnauthorized = () => {
+      setToken(null);
+    };
+    window.addEventListener('admin-unauthorized', handleUnauthorized);
+    return () => {
+      window.removeEventListener('admin-unauthorized', handleUnauthorized);
+    };
   }, []);
 
   React.useEffect(() => {
-    if (activeTab === 'students') {
+    if (token) {
+      fetchDashboardStats();
+    }
+  }, [token]);
+
+  React.useEffect(() => {
+    if (token && activeTab === 'students') {
       fetchStudents();
     }
-  }, [activeTab]);
+  }, [activeTab, token]);
 
   React.useEffect(() => {
-    if (activeTab === 'recruiters') {
+    if (token && activeTab === 'recruiters') {
       fetchRecruiters();
     }
-  }, [activeTab]);
+  }, [activeTab, token]);
 
   React.useEffect(() => {
-    if (activeTab === 'analytics') {
+    if (token && activeTab === 'analytics') {
       fetchAnalytics();
     }
-  }, [activeTab]);
+  }, [activeTab, token]);
 
   React.useEffect(() => {
-    if (activeTab === 'storage') {
+    if (token && activeTab === 'storage') {
       fetchStorage();
     }
-  }, [activeTab]);
+  }, [activeTab, token]);
 
   React.useEffect(() => {
-    if (activeTab === 'jobs') {
+    if (token && activeTab === 'jobs') {
       fetchJobs();
     }
-  }, [activeTab]);
+  }, [activeTab, token]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    setToken(null);
+    setActiveTab('dashboard');
+  };
+
+  const handleLoginSubmit = (e) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthLoading(true);
+
+    adminApi.login(emailInput, passwordInput)
+      .then(data => {
+        if (data.success && data.token) {
+          localStorage.setItem('adminToken', data.token);
+          setToken(data.token);
+          setEmailInput('');
+          setPasswordInput('');
+        } else {
+          setAuthError(data.error || 'Invalid credentials');
+        }
+        setAuthLoading(false);
+      })
+      .catch(err => {
+        setAuthError(err.message || 'Server error. Please try again.');
+        setAuthLoading(false);
+      });
+  };
 
   const viewJobApplicants = (job) => {
     setSelectedJobForApplicants(job);
@@ -230,6 +279,92 @@ export default function App() {
     { label: 'Active Job Openings', value: stats.activeJobs, change: '+15.2%', color: 'from-emerald-500 to-teal-500', icon: Briefcase },
     { label: 'Certifications Verified', value: stats.verifiedCerts, change: '+22.1%', color: 'from-amber-500 to-orange-500', icon: Award },
   ];
+
+  if (!token) {
+    return (
+      <div className="min-h-screen bg-[#070b13] text-[#f1f5f9] flex items-center justify-center font-sans p-4 relative overflow-hidden select-none">
+        {/* Decorative background gradients */}
+        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-purple-500/10 blur-[120px] pointer-events-none" />
+
+        <div className="w-full max-w-md z-10">
+          {/* Glassmorphic Chassis Container */}
+          <div className="glass-card rounded-2xl p-8 md:p-10 border border-slate-900 relative shadow-2xl">
+            {/* Corner Decorative Dots/Screws to match design details */}
+            <div className="absolute top-3 left-3 w-1 h-1 rounded-full bg-slate-700"></div>
+            <div className="absolute top-3 right-3 w-1 h-1 rounded-full bg-slate-700"></div>
+            <div className="absolute bottom-3 left-3 w-1 h-1 rounded-full bg-slate-700"></div>
+            <div className="absolute bottom-3 right-3 w-1 h-1 rounded-full bg-slate-700"></div>
+
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-mono font-bold uppercase tracking-wider mb-4">
+                <Settings className="w-3.5 h-3.5" />
+                <span>Admin Gateway</span>
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight text-white font-headline">
+                AlignGrade Workspace
+              </h1>
+              <p className="text-xs text-slate-400 mt-2">
+                Enter your administrative credentials to manage verified candidates, audits, and settings.
+              </p>
+            </div>
+
+            {authError && (
+              <div className="mb-6 p-4 rounded-xl bg-red-950/40 border border-red-500/20 text-red-200 text-xs font-semibold flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+                <span>{authError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleLoginSubmit} className="space-y-5">
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2">
+                  Admin Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="admin@aligngrade.com"
+                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-white placeholder-slate-600 transition-all focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30"
+                  value={emailInput}
+                  onChange={e => setEmailInput(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2">
+                  System Security Key
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-white placeholder-slate-600 transition-all focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30"
+                  value={passwordInput}
+                  onChange={e => setPasswordInput(e.target.value)}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={authLoading}
+                className="w-full mt-2 px-5 py-3 rounded-xl bg-indigo-600 text-white hover:bg-indigo-500 font-semibold text-xs tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20"
+              >
+                {authLoading ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <span>Authenticate Access</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#070b13] text-[#f1f5f9] flex font-sans">
@@ -309,6 +444,15 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        {/* Log Out button */}
+        <button
+          onClick={handleLogout}
+          className="mt-auto w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide text-rose-400 hover:bg-rose-950/25 border border-slate-900/40 hover:border-rose-900/30 transition-all cursor-pointer"
+        >
+          <LogOut className="w-4 h-4 text-rose-400" />
+          Log Out Admin
+        </button>
       </aside>
 
       {/* Main Content Area */}

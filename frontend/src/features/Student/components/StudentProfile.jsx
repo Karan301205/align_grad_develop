@@ -117,6 +117,7 @@ export default function StudentProfile({
 
   const [compressing, setCompressing] = React.useState(false);
   const [photoError, setPhotoError] = React.useState('');
+  const [showUploadSuccess, setShowUploadSuccess] = React.useState(false);
 
   const compressImage = (file, maxKB = 100) => {
     return new Promise((resolve, reject) => {
@@ -221,6 +222,10 @@ export default function StudentProfile({
 
       // 5. Update state with S3 public URL
       setProfilePic(publicUrl);
+      setShowUploadSuccess(true);
+      setTimeout(() => {
+        setShowUploadSuccess(false);
+      }, 3000);
 
     } catch (err) {
       console.error('Profile pic S3 upload error:', err);
@@ -476,6 +481,17 @@ export default function StudentProfile({
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
+      <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-success-container border border-success/30 text-on-success-container rounded-xl shadow-[var(--shadow-floating)] transition-all duration-500 ease-in-out ${
+        showUploadSuccess 
+          ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' 
+          : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
+      }`}>
+        {/* <CheckCircle className="w-5 h-5 text-success animate-bounce" /> */}
+        <div className="flex flex-col">
+          <span className="text-xs font-bold uppercase tracking-wider font-mono">Success</span>
+          <span className="text-[11px] opacity-90">Photo uploaded successfully!</span>
+        </div>
+      </div>
       <PageHeader
         title="Profile & Ratings"
         subtitle="Update your professional details, social portfolios, academic history, and self-rate your proficiencies"
@@ -624,7 +640,7 @@ export default function StudentProfile({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Bio</label>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Describe Yourself</label>
                   <textarea
                     rows="3"
                     className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"

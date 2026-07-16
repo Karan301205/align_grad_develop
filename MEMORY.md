@@ -643,6 +643,13 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Safe Modifications**: Changing region settings.
 * **Risk**: Medium.
 
+#### [admin_ws/backend/src/controllers/auth.controller.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/controllers/auth.controller.js)
+* **Purpose**: Manages administrative portal login, verifying credentials against hardcoded values and returning JWT tokens.
+* **Used By**: [admin_ws/backend/src/routes/auth.routes.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/routes/auth.routes.js).
+* **Dependencies**: `jsonwebtoken`, [admin_ws/backend/src/config/env.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/config/env.js).
+* **Safe Modifications**: Tweaking session durations or updating hardcoded credentials.
+* **Risk**: High (controls access keys).
+
 #### [admin_ws/backend/src/controllers/analytics.controller.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/controllers/analytics.controller.js)
 * **Purpose**: Queries MongoDB collections to calculate skill trends (recruiter job demands vs student profile strengths) for horizontal bar charts.
 * **Used By**: [admin_ws/backend/src/routes/analytics.routes.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/routes/analytics.routes.js).
@@ -685,6 +692,13 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Safe Modifications**: Structuring response layouts.
 * **Risk**: Medium.
 
+#### [admin_ws/backend/src/middleware/auth.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/middleware/auth.js)
+* **Purpose**: JWT verification guard protecting administrative routes. Validates signed headers and appends decoded user context to requests.
+* **Used By**: [admin_ws/backend/app.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/app.js).
+* **Dependencies**: `jsonwebtoken`, [admin_ws/backend/src/config/env.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/config/env.js).
+* **Safe Modifications**: Adjusting error response formats.
+* **Risk**: High (handles route authorization).
+
 #### [admin_ws/backend/src/middleware/errorHandler.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/src/middleware/errorHandler.js)
 * **Purpose**: Catches unhandled errors in administrative routes, outputs diagnostics logging, and masks raw database issues in production.
 * **Used By**: [admin_ws/backend/app.js](file:///Users/karanrawat/Desktop/a_g/admin_ws/backend/app.js).
@@ -720,6 +734,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **`recruiter.routes.js`**: Binds routes handling company verify checks.
 * **`student.routes.js`**: Binds routes returning candidate lists.
 * **`storage.routes.js`**: Binds routes fetching storage bills and logs.
+* **`auth.routes.js`**: Exposes the `/login` endpoint mapping to the administrative auth controller.
 
 #### Administrative Storage Services (`admin_ws/backend/src/services/`)
 * **`mongoStorage.service.js`**: Uses native database commands to measure collection sizes and estimates MongoDB Atlas monthly pricing.
