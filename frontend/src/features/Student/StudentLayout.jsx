@@ -38,6 +38,8 @@ import StudentResume from './components/StudentResume';
 import StudentSkillTests from './components/StudentSkillTests';
 import StudentShowcase from './components/StudentShowcase';
 import StudentProgress from './components/StudentProgress';
+import ParsedResumeReviewModal from './components/ParsedResumeReviewModal';
+import OnboardingModal from './components/OnboardingModal';
 
 
 export default function StudentLayout({ user, token, activeTab, setActiveTab, testSkill, setTestSkill, handleLogout, theme, toggleTheme }) {
@@ -54,6 +56,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const [profileTab, setProfileTab] = useState('general');
   const [wasComplete, setWasComplete] = useState(null);
   const [alertConfig, setAlertConfig] = useState(null);
+  const [isHovered, setIsHovered] = useState(false);
   
   // General Section
   const [bio, setBio] = useState('');
@@ -114,6 +117,11 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const [generatingTest, setGeneratingTest] = useState(false);
   const [submittingTest, setSubmittingTest] = useState(false);
   const [testResult, setTestResult] = useState(null);
+
+  const [parsedResumeData, setParsedResumeData] = useState(null);
+  const [showReviewScreen, setShowReviewScreen] = useState(false);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [isParsingOnboarding, setIsParsingOnboarding] = useState(false);
 
   const [applications, setApplications] = useState([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
@@ -194,6 +202,10 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           cocurArr = [{ activity: 'Co-curricular Activity', link: profData.cocurricular, description: '' }];
         }
         setCocurricular(cocurArr);
+
+        if (!profData.isOnboarded) {
+          setShowOnboardingModal(true);
+        }
       }
 
       // Fetch Jobs
@@ -327,13 +339,17 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           passed: true,
           attempt: data.attempt
         });
+        if (data.skills) {
+          setSkillsList(data.skills);
+          setProfile(prev => prev ? { ...prev, skills: data.skills } : prev);
+        }
         fetchTechnicalSkills();
       } else {
-        alert('Failed to submit test results.');
+        setAlertConfig({ message: 'Failed to submit test results.', type: 'error' });
       }
     } catch (err) {
       console.error(err);
-      alert('Network error submitting test.');
+      setAlertConfig({ message: 'Network error submitting test.', type: 'error' });
     } finally {
       setSubmittingTest(false);
     }
@@ -381,20 +397,13 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     }
   };
 
-  const handleResumeUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.type !== 'application/pdf') {
-      alert('Please upload a PDF file.');
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      alert('File size exceeds the 10MB limit.');
-      return;
-    }
-
+  const executeResumeUploadAndParse = async (file, isOnboarding = false) => {
     try {
-      setSubmittingProfile(true);
+      if (isOnboarding) {
+        setIsParsingOnboarding(true);
+      } else {
+        setSubmittingProfile(true);
+      }
 
       // 1. Request S3 pre-signed upload URL from backend
       const urlRes = await apiFetch('/upload/request-url', {
@@ -420,40 +429,276 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         throw new Error('Failed to upload file directly to S3.');
       }
 
-      // 3. Save the S3 publicUrl to student profile
+      // 3. Request resume parsing from backend
+      const parseRes = await apiFetch('/student/resume/parse', {
+        token,
+        method: 'POST',
+        json: {
+          resumeUrl: publicUrl
+        }
+      });
+
+      if (!parseRes.ok) {
+        const errorData = await parseRes.json();
+        throw new Error(errorData.error || 'Failed to parse resume details.');
+      }
+
+      const parsedData = await parseRes.json();
+
+      // Save S3 resumeUrl temporarily
+      setResumeUrl(publicUrl);
+      setParsedResumeData(parsedData);
+      setShowReviewScreen(true);
+      if (isOnboarding) {
+        setShowOnboardingModal(false);
+      }
+      setFeedbackMsg('Resume parsed successfully! Please review the details below.');
+    } catch (err) {
+      console.error(err);
+      throw err;
+    } finally {
+      if (isOnboarding) {
+        setIsParsingOnboarding(false);
+      } else {
+        setSubmittingProfile(false);
+      }
+    }
+  };
+
+  const handleResumeUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      setAlertConfig({ message: 'Please upload a valid PDF or DOCX file.', type: 'error' });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setAlertConfig({ message: 'File size exceeds the 10MB limit.', type: 'error' });
+      return;
+    }
+
+    try {
+      await executeResumeUploadAndParse(file, false);
+    } catch (err) {
+      setAlertConfig({ message: err.message || 'Error processing resume file.', type: 'error' });
+    }
+  };
+
+  const handleSkipOnboarding = async () => {
+    try {
+      setSubmittingProfile(true);
       const res = await apiFetch('/student/profile', {
         token,
         method: 'PUT',
         json: {
-          name: profile?.name,
-          resumeUrl: publicUrl,
-          skills: skillsList,
-          bio,
-          nationality,
+          isOnboarded: true
+        }
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setProfile(d);
+        setShowOnboardingModal(false);
+        setActiveTab('profile');
+        setFeedbackMsg('Onboarding skipped. You can complete your profile manually.');
+      } else {
+        setAlertConfig({ message: 'Failed to skip onboarding on the server.', type: 'error' });
+      }
+    } catch (err) {
+      console.error('Error skipping onboarding:', err);
+      setAlertConfig({ message: 'Error updating onboarding status.', type: 'error' });
+    } finally {
+      setSubmittingProfile(false);
+    }
+  };
+
+  const handleDiscardParsedResume = async () => {
+    try {
+      setSubmittingProfile(true);
+      const res = await apiFetch('/student/profile', {
+        token,
+        method: 'PUT',
+        json: {
+          isOnboarded: true
+        }
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setProfile(d);
+        setShowReviewScreen(false);
+        setActiveTab('profile');
+        setFeedbackMsg('Import cancelled. Resume uploaded but profile not populated.');
+      } else {
+        setAlertConfig({ message: 'Failed to update onboarding status on the server.', type: 'error' });
+      }
+    } catch (err) {
+      console.error(err);
+      setAlertConfig({ message: 'Error canceling profile import.', type: 'error' });
+    } finally {
+      setSubmittingProfile(false);
+    }
+  };
+
+  const saveProfileFromResume = async (updatedData) => {
+    setSubmittingProfile(true);
+    try {
+      const ensureUrlProtocol = (url) => {
+        if (!url) return '';
+        const trimmed = url.trim();
+        if (!trimmed) return '';
+        if (trimmed.includes(' ') || !trimmed.includes('.')) return '';
+        if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+        return `https://${trimmed}`;
+      };
+
+      // 1. Compute merged profile parameters (never overwrite existing values with null/empty)
+      const mergedName = updatedData.basicInfo.name || profile?.name || 'Student';
+      const mergedBio = updatedData.basicInfo.bio || bio;
+      const mergedNationality = updatedData.basicInfo.location || nationality;
+      const mergedEmail = updatedData.basicInfo.email || profileEmail;
+      const mergedPhone = updatedData.basicInfo.phone || phone;
+      const mergedDob = updatedData.basicInfo.dob || dob;
+
+      const mergedSocialLinks = {
+        ...socialLinks,
+        linkedin: ensureUrlProtocol(updatedData.basicInfo.linkedin) || socialLinks.linkedin,
+        showLinkedin: updatedData.basicInfo.linkedin ? true : socialLinks.showLinkedin,
+        github: ensureUrlProtocol(updatedData.basicInfo.github) || socialLinks.github,
+        showGithub: updatedData.basicInfo.github ? true : socialLinks.showGithub,
+        portfolio: ensureUrlProtocol(updatedData.basicInfo.portfolio) || socialLinks.portfolio,
+        showPortfolio: updatedData.basicInfo.portfolio ? true : socialLinks.showPortfolio
+      };
+
+      const mergedEducation = [...educationList];
+      for (const edu of updatedData.education) {
+        if (!mergedEducation.some(e => e.degree?.toLowerCase() === edu.degree?.toLowerCase() && e.institute?.toLowerCase() === edu.institute?.toLowerCase())) {
+          mergedEducation.push(edu);
+        }
+      }
+
+      const mergedExperience = [...experienceList];
+      for (const exp of updatedData.experience) {
+        if (!mergedExperience.some(e => e.designation?.toLowerCase() === exp.designation?.toLowerCase() && e.companyName?.toLowerCase() === exp.companyName?.toLowerCase())) {
+          mergedExperience.push(exp);
+        }
+      }
+
+      const mergedProjects = [...projectsList];
+      for (const proj of updatedData.projects) {
+        if (!mergedProjects.some(p => p.title?.toLowerCase() === proj.title?.toLowerCase())) {
+          mergedProjects.push({
+            ...proj,
+            codeUrl: ensureUrlProtocol(proj.codeUrl),
+            hostedUrl: ensureUrlProtocol(proj.hostedUrl)
+          });
+        }
+      }
+
+      const mergedCertifications = [...certificatesList];
+      for (const cert of updatedData.certifications) {
+        if (!mergedCertifications.some(c => c.title?.toLowerCase() === cert.title?.toLowerCase())) {
+          mergedCertifications.push({
+            ...cert,
+            link: ensureUrlProtocol(cert.link)
+          });
+        }
+      }
+
+      const mergedSkills = [...skillsList];
+      for (const skill of updatedData.skills) {
+        if (!mergedSkills.some(s => s.name?.toLowerCase() === skill.name?.toLowerCase())) {
+          mergedSkills.push({ name: skill.name, rating: skill.rating || 1 });
+        }
+      }
+
+      // 2. Put profile data to database
+      const res = await apiFetch('/student/profile', {
+        token,
+        method: 'PUT',
+        json: {
+          name: mergedName,
+          username: username ? username : null,
+          profilePic,
+          resumeUrl,
+          skills: mergedSkills,
+          bio: mergedBio,
+          nationality: mergedNationality,
           gender,
-          email: profileEmail,
-          dob,
-          phone,
-          socialLinks,
-          education: educationList,
-          experience: experienceList,
-          certificates: certificatesList,
-          projects: projectsList,
-          cocurricular
+          email: mergedEmail,
+          dob: mergedDob,
+          phone: mergedPhone,
+          socialLinks: mergedSocialLinks,
+          education: mergedEducation,
+          experience: mergedExperience,
+          certificates: mergedCertifications,
+          projects: mergedProjects,
+          cocurricular,
+          isOnboarded: true
         }
       });
 
       if (res.ok) {
         const d = await res.json();
+        // Update all local states
         setProfile(d);
-        setResumeUrl(publicUrl);
-        setFeedbackMsg('Resume PDF uploaded and saved to S3 successfully!');
+        setBio(mergedBio);
+        setNationality(mergedNationality);
+        setProfileEmail(mergedEmail);
+        setPhone(mergedPhone);
+        setDob(mergedDob);
+        setSocialLinks(mergedSocialLinks);
+        setEducationList(mergedEducation);
+        setExperienceList(mergedExperience);
+        setProjectsList(mergedProjects);
+        setCertificatesList(mergedCertifications);
+        setSkillsList(mergedSkills);
+
+        const meaningfulDataExtracted = 
+          updatedData.basicInfo.name || 
+          updatedData.basicInfo.email || 
+          updatedData.basicInfo.phone || 
+          updatedData.basicInfo.bio || 
+          updatedData.education.length > 0 || 
+          updatedData.experience.length > 0 || 
+          updatedData.skills.length > 0 || 
+          updatedData.projects.length > 0 || 
+          updatedData.certifications.length > 0;
+
+        if (meaningfulDataExtracted) {
+          setFeedbackMsg('Your profile has been updated using the uploaded resume. We imported all the information that could be identified automatically. Any remaining sections can be completed manually from your profile.');
+        } else {
+          setFeedbackMsg("We couldn't identify enough information from your resume. Please complete your profile manually.");
+        }
+        
+        setShowReviewScreen(false);
+        setActiveTab('profile');
       } else {
-        alert('Failed to save uploaded resume S3 URL on the server.');
+        const errorData = await res.json().catch(() => ({}));
+        console.error('Save profile error details:', errorData);
+        if (errorData.details && Array.isArray(errorData.details)) {
+          const formattedDetails = errorData.details.map(d => ({
+            path: d.field.split('.'),
+            message: d.message
+          }));
+          setAlertConfig({
+            message: JSON.stringify(formattedDetails),
+            type: 'error'
+          });
+        } else {
+          setAlertConfig({
+            message: errorData.error || 'Failed to save imported details on the server.',
+            type: 'error'
+          });
+        }
       }
     } catch (err) {
       console.error(err);
-      alert(err.message || 'Error uploading resume PDF.');
+      setAlertConfig({ message: 'Error updating profile from resume.', type: 'error' });
     } finally {
       setSubmittingProfile(false);
     }
@@ -592,65 +837,91 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         <div className="md:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setSidebarOpen(false)}></div>
       )}
 
+      {/* Desktop hover backdrop blur overlay */}
+      {isHovered && (
+        <div className="hidden md:block fixed inset-0 left-20 bg-black/5 backdrop-blur-[2px] z-40 transition-all duration-300 pointer-events-none animate-fade-in"></div>
+      )}
+
       {/* Sidebar */}
-      <aside className={`h-screen w-64 fixed left-0 top-0 bg-surface-container flex flex-col py-6 px-4 border-r border-outline-variant z-50 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
-        <div className="mb-10 px-2 flex items-center justify-between">
-          <div className="flex flex-col gap-1.5">
-            <img
-              src={theme === 'dark' ? '/a_g_logo_dark.webp' : '/a_g_logo.webp'}
-              alt="AlignGrade"
-              className="h-12 w-auto object-contain self-start"
-            />
-            <p className="text-[9px] font-mono uppercase tracking-wider text-on-surface-variant opacity-70 px-0.5">Candidate Dashboard</p>
-          </div>
-          <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 text-on-surface-variant hover:text-on-surface" aria-label="Close menu">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar">
-          {navItems.map(item => (
-            <SidebarNavItem
-              key={item.id}
-              icon={item.icon}
-              label={item.label}
-              active={activeTab === item.id}
-              locked={item.locked}
-              onClick={() => goToTab(item.id)}
-            />
-          ))}
-        </nav>
-
-        <div className="mt-auto pt-6 border-t border-outline-variant space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">Theme</span>
-            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-          </div>
-          <div className="flex items-center gap-3 px-2">
-            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold shrink-0 overflow-hidden">
-              {profilePic ? (
-                <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                profile?.name?.charAt(0) || 'S'
+      {(() => {
+        const isExpanded = isHovered || sidebarOpen;
+        return (
+          <aside
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            className={`h-screen fixed left-0 top-0 bg-surface-container flex flex-col py-6 px-3 border-r border-outline-variant z-50 transition-all duration-300 ${
+              isExpanded ? 'w-64' : 'w-20'
+            } ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+          >
+            <div className="mb-10 flex items-center justify-between px-2.5">
+              <div className="flex flex-col gap-1.5 min-w-0 w-full">
+                <img
+                  src={isExpanded ? (theme === 'dark' ? '/a_g_logo_dark.webp' : '/a_g_logo.webp') : '/a_g_l_Background_Removed.png'}
+                  alt="AlignGrade"
+                  className={`w-auto object-contain transition-all duration-300 self-start pl-1 ${
+                    isExpanded ? 'h-12' : 'h-10'
+                  }`}
+                />
+                {isExpanded && (
+                  <p className="text-[9px] font-mono uppercase tracking-wider text-on-surface-variant opacity-70 px-1 animate-fade-in">Candidate Dashboard</p>
+                )}
+              </div>
+              {isExpanded && (
+                <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 text-on-surface-variant hover:text-on-surface" aria-label="Close menu">
+                  <X className="w-5 h-5" />
+                </button>
               )}
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-on-surface truncate">{profile?.name || 'Loading...'}</p>
-              <p className="text-xs text-on-surface-variant truncate">Candidate - {user?.regNo || 'CAN001'}</p>
+
+            <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar px-1">
+              {navItems.map(item => (
+                <SidebarNavItem
+                  key={item.id}
+                  icon={item.icon}
+                  label={item.label}
+                  active={activeTab === item.id}
+                  locked={item.locked}
+                  onClick={() => goToTab(item.id)}
+                  collapsed={!isExpanded}
+                />
+              ))}
+            </nav>
+
+            <div className="mt-auto pt-6 border-t border-outline-variant space-y-4 px-1">
+              <div className="flex items-center justify-between px-2.5">
+                {isExpanded && <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant animate-fade-in">Theme</span>}
+                <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+              </div>
+              <div className="flex items-center gap-3 px-2.5">
+                <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold shrink-0 overflow-hidden">
+                  {profilePic ? (
+                    <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    profile?.name?.charAt(0) || 'S'
+                  )}
+                </div>
+                {isExpanded && (
+                  <div className="min-w-0 animate-fade-in">
+                    <p className="text-sm font-bold text-on-surface truncate">{profile?.name || 'Loading...'}</p>
+                    <p className="text-xs text-on-surface-variant truncate">Candidate - {user?.regNo || 'CAN001'}</p>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={handleLogout}
+                title={isExpanded ? undefined : "Log Out"}
+                className="w-full flex items-center gap-3 px-3.5 py-2.5 text-error rounded-xl font-medium hover:bg-error-container transition-all text-sm"
+              >
+                <LogOut className="w-5 h-5 shrink-0" />
+                {isExpanded && <span className="animate-fade-in truncate">Log Out</span>}
+              </button>
             </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-error rounded-xl font-medium hover:bg-error-container transition-all text-sm"
-          >
-            <LogOut className="w-5 h-5" />
-            <span>Log Out</span>
-          </button>
-        </div>
-      </aside>
+          </aside>
+        );
+      })()}
 
       {/* Main stage */}
-      <main ref={mainRef} className="md:ml-64 flex-1 min-h-screen pt-24 md:pt-10 p-6 md:p-10 bg-background overflow-y-auto custom-scrollbar scroll-smooth">
+      <main ref={mainRef} className="md:ml-20 flex-1 min-h-screen pt-24 md:pt-10 p-6 md:p-10 bg-background overflow-y-auto custom-scrollbar scroll-smooth">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <RefreshCw className="w-8 h-8 text-primary animate-spin" />
@@ -747,11 +1018,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
             {activeTab === 'resume' && (
               <StudentResume
                 profile={profile}
-                resumeUrl={resumeUrl}
                 generatingPdf={generatingPdf}
-                handleResumeUpload={handleResumeUpload}
-                handleDownloadUploadedResume={handleDownloadUploadedResume}
-                handleDeleteUploadedResume={handleDeleteUploadedResume}
                 handleDownloadGeneratedResume={handleDownloadGeneratedResume}
                 feedbackMsg={feedbackMsg}
                 phone={phone}
@@ -803,10 +1070,25 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           </div>
         )}
       </main>
+      {showReviewScreen && (
+        <ParsedResumeReviewModal
+          isOpen={showReviewScreen}
+          parsedData={parsedResumeData}
+          onConfirm={saveProfileFromResume}
+          onClose={handleDiscardParsedResume}
+        />
+      )}
+
+      <OnboardingModal
+        isOpen={showOnboardingModal}
+        onUpload={(file) => executeResumeUploadAndParse(file, true)}
+        onSkip={handleSkipOnboarding}
+        isUploading={isParsingOnboarding}
+      />
 
       {/* Floating Alert Modal Overlay */}
       {alertConfig && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-md shadow-2xl relative">
             {formatAlertMessage(alertConfig.message, alertConfig.type, () => setAlertConfig(null))}
           </div>

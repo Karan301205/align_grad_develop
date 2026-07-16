@@ -41,6 +41,7 @@ model Profile {
   projects     Project[]
   cocurricular Cocurricular[]
   introVideoUrl String?
+  isOnboarded   Boolean?      @default(false)
 }
 
 type Cocurricular {

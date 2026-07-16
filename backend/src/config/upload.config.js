@@ -11,7 +11,10 @@ module.exports = {
   },
   // Allowed MIME types
   allowedMimeTypes: {
-    resume: ['application/pdf'],
+    resume: [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ],
     image: ['image/jpeg', 'image/png'],
     video: ['video/mp4', 'video/webm', 'video/x-matroska'],
     doc: [

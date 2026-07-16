@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, CheckCircle, Award, Send } from 'lucide-react';
+import { CheckCircle, Award, Send } from 'lucide-react';
 import PageHeader from '../../../components/ui/PageHeader';
 import Card from '../../../components/ui/Card';
 import Button from '../../../components/ui/Button';
@@ -7,11 +7,7 @@ import { formatErrorMessage } from '../../../utils/errorFormatter';
 
 export default function StudentResume({
   profile,
-  resumeUrl,
   generatingPdf,
-  handleResumeUpload,
-  handleDownloadUploadedResume,
-  handleDeleteUploadedResume,
   handleDownloadGeneratedResume,
   feedbackMsg,
   phone,
@@ -28,7 +24,7 @@ export default function StudentResume({
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
       <PageHeader
         title="Resume Management"
-        subtitle="Upload your resume in PDF format or download a generated resume formatted with your current profile details and ratings"
+        subtitle="Instantly generate and download a clean PDF resume formatted with your current profile details and ratings"
       />
 
       {feedbackMsg && (
@@ -48,82 +44,8 @@ export default function StudentResume({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left Column: Upload Resume */}
-        <Card className="space-y-6">
-          <div>
-            <h3 className="text-lg font-headline font-bold text-on-surface flex items-center gap-2">
-              <FileText className="w-5 h-5 text-primary" /> Uploaded Resume (PDF)
-            </h3>
-            <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
-              Upload your master resume here. Recruiting companies will see this resume when you apply for opportunities.
-            </p>
-          </div>
-
-          {/* Drag and drop or Click zone */}
-          <div
-            className="border-2 border-dashed border-outline-variant rounded-xl p-8 text-center bg-surface-container-low hover:border-primary/50 transition-colors cursor-pointer group relative"
-            onClick={() => document.getElementById('resume-pdf-upload').click()}
-          >
-            <input
-              type="file"
-              id="resume-pdf-upload"
-              className="hidden"
-              accept="application/pdf"
-              onChange={handleResumeUpload}
-            />
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container group-hover:scale-110 transition-transform">
-                <FileText className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-on-surface">Click or tap to select PDF</p>
-                <p className="text-[10px] text-on-surface-variant mt-1">Only PDF format supported (max 10MB)</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Current File Display */}
-          {resumeUrl ? (
-            <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-8 h-8 rounded bg-primary-container flex items-center justify-center text-on-primary-container shrink-0">
-                  <FileText className="w-4 h-4" />
-                </div>
-                <div className="overflow-hidden">
-                  <p className="text-xs font-bold text-on-surface truncate">
-                    {resumeUrl.startsWith('http') ? resumeUrl.split('/').pop() : (resumeUrl.startsWith('data:application/pdf;') ? `${profile?.name || 'Student'}_Resume.pdf` : 'linked_portfolio_resume.pdf')}
-                  </p>
-                  <p className="text-[9px] text-on-surface-variant font-mono mt-0.5">
-                    {resumeUrl.startsWith('http') ? 'Stored in AWS S3' : (resumeUrl.startsWith('data:application/pdf;') ? `${Math.round(resumeUrl.length / 1333)} KB` : 'Linked URL')}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleDownloadUploadedResume}
-                  className="px-3 py-1.5 bg-primary-container border border-primary/20 text-on-primary-container font-mono rounded text-[10px] hover:brightness-105 transition-all"
-                >
-                  Download
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteUploadedResume}
-                  className="px-3 py-1.5 bg-error-container border border-error/20 text-on-error-container font-mono rounded text-[10px] hover:brightness-105 transition-all"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl text-center">
-              <p className="text-xs text-on-surface-variant italic">No resume PDF uploaded yet.</p>
-            </div>
-          )}
-        </Card>
-
-        {/* Right Column: Download Generated Resume */}
+      <div className="max-w-2xl mx-auto">
+        {/* Generated Resume Card */}
         <Card className="flex flex-col justify-between space-y-6">
           <div className="space-y-4">
             <div>
@@ -281,7 +203,7 @@ export default function StudentResume({
                 <ul className="list-disc pl-3.5 space-y-1.5 text-[9.5px] text-neutral-700">
                   {skillsList.map((skill, idx) => (
                     <li key={idx} className="uppercase font-medium">
-                      {skill.name} <span className="text-[8px] text-neutral-500 font-mono italic font-normal">(LVL {skill.rating}/10)</span>
+                      {skill.name} <span className="text-[8px] text-neutral-500 font-mono italic font-normal">(LVL {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? skill.verifiedRating : skill.rating}/10{skill.verifiedRating !== null && skill.verifiedRating !== undefined ? ' VERIFIED' : ''})</span>
                     </li>
                   ))}
                 </ul>

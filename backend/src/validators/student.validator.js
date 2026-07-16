@@ -6,7 +6,7 @@ const objectIdSchema = z.string().regex(objectIdRegex, 'Invalid ID format');
 const updateProfileSchema = {
   body: z.object({
     name: z.string().min(1, 'Name is required').max(100, 'Name must not exceed 100 characters').optional(),
-    username: z.string().regex(/^[a-zA-Z0-9_]{3,15}$/, 'Invalid username format. 3-15 characters, alphanumeric/underscores only.').optional().nullable(),
+    username: z.string().regex(/^[a-zA-Z0-9_]{3,15}$/, 'Invalid username format. 3-15 characters, alphanumeric/underscores only.').or(z.literal('')).optional().nullable(),
     profilePic: z.string().url('Invalid profile picture URL').or(z.literal('')).optional().nullable(),
     resumeUrl: z.string().url('Invalid resume S3 URL').or(z.literal('')).optional().nullable(),
     bio: z.string().max(500, 'Bio must not exceed 500 characters').optional().nullable(),
@@ -14,6 +14,7 @@ const updateProfileSchema = {
     gender: z.string().max(50).optional().nullable(),
     email: z.string().email('Invalid email format').or(z.literal('')).optional().nullable(),
     dob: z.string().refine(val => {
+      if (val === '') return true;
       const birthDate = new Date(val);
       if (isNaN(birthDate.getTime())) return false;
       const today = new Date();
@@ -28,8 +29,8 @@ const updateProfileSchema = {
     introVideoUrl: z.string().url('Invalid intro video URL').or(z.literal('')).optional().nullable(),
     skills: z.array(z.object({
       name: z.string().min(1, 'Skill name is required'),
-      rating: z.number().int().min(1).max(100),
-      verifiedRating: z.number().int().min(1).max(100).optional().nullable()
+      rating: z.number().int().min(0).max(100),
+      verifiedRating: z.number().int().min(0).max(100).optional().nullable()
     })).optional().nullable(),
     socialLinks: z.object({
       linkedin: z.string().url().or(z.literal('')).optional().nullable(),
@@ -96,7 +97,8 @@ const updateProfileSchema = {
       activity: z.string().optional().nullable(),
       link: z.string().url().or(z.literal('')).optional().nullable(),
       description: z.string().optional().nullable()
-    })).optional().nullable()
+    })).optional().nullable(),
+    isOnboarded: z.boolean().optional().nullable()
   })
 };
 
@@ -133,11 +135,18 @@ const saveIntroVideoSchema = {
   })
 };
 
+const parseResumeSchema = {
+  body: z.object({
+    resumeUrl: z.string().url('Invalid resume URL')
+  })
+};
+
 module.exports = {
   updateProfileSchema,
   applyJobSchema,
   submitTestSchema,
   generateTestSchema,
   submitSkillTestSchema,
-  saveIntroVideoSchema
+  saveIntroVideoSchema,
+  parseResumeSchema
 };

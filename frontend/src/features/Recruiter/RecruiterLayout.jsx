@@ -27,6 +27,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const mainRef = useRef(null);
 
   // Job Posting state
@@ -233,60 +234,86 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
         <div className="md:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setSidebarOpen(false)}></div>
       )}
 
+      {/* Desktop hover backdrop blur overlay */}
+      {isHovered && (
+        <div className="hidden md:block fixed inset-0 left-20 bg-black/5 backdrop-blur-[2px] z-40 transition-all duration-300 pointer-events-none animate-fade-in"></div>
+      )}
+
       {/* Sidebar */}
-      <aside className={`h-screen w-64 fixed left-0 top-0 bg-surface-container flex flex-col py-6 px-4 border-r border-outline-variant z-50 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
-        <div className="mb-10 px-2 flex items-center justify-between">
-          <div className="flex flex-col gap-1.5">
-            <img
-              src={theme === 'dark' ? '/a_g_logo_dark.webp' : '/a_g_logo.webp'}
-              alt="AlignGrade"
-              className="h-12 w-auto object-contain self-start"
-            />
-            <p className="text-[9px] font-mono uppercase tracking-wider text-on-surface-variant opacity-70 px-0.5">Recruiter Hub</p>
-          </div>
-          <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 text-on-surface-variant hover:text-on-surface" aria-label="Close menu">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar">
-          {navItems.map(item => (
-            <SidebarNavItem
-              key={item.id}
-              icon={item.icon}
-              label={item.label}
-              active={activeTab === item.id}
-              onClick={() => goToTab(item.id)}
-            />
-          ))}
-        </nav>
-
-        <div className="mt-auto pt-6 border-t border-outline-variant space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">Theme</span>
-            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-          </div>
-          <div className="flex items-center gap-3 px-2">
-            <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold shrink-0">
-              {company?.name?.charAt(0) || 'R'}
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-on-surface truncate">{company?.name || 'Loading...'}</p>
-              <p className="text-xs text-on-surface-variant truncate">Recruiter - {user?.regNo || 'REC001'}</p>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-error rounded-xl font-medium hover:bg-error-container transition-all text-sm"
+      {(() => {
+        const isExpanded = isHovered || sidebarOpen;
+        return (
+          <aside
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            className={`h-screen fixed left-0 top-0 bg-surface-container flex flex-col py-6 px-3 border-r border-outline-variant z-50 transition-all duration-300 ${
+              isExpanded ? 'w-64' : 'w-20'
+            } ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
           >
-            <LogOut className="w-5 h-5" />
-            <span>Log Out</span>
-          </button>
-        </div>
-      </aside>
+            <div className="mb-10 flex items-center justify-between px-2.5">
+              <div className="flex flex-col gap-1.5 min-w-0 w-full">
+                <img
+                  src={isExpanded ? (theme === 'dark' ? '/a_g_logo_dark.webp' : '/a_g_logo.webp') : '/a_g_l_Background_Removed.png'}
+                  alt="AlignGrade"
+                  className={`w-auto object-contain transition-all duration-300 self-start pl-1 ${
+                    isExpanded ? 'h-12' : 'h-10'
+                  }`}
+                />
+                {isExpanded && (
+                  <p className="text-[9px] font-mono uppercase tracking-wider text-on-surface-variant opacity-70 px-1 animate-fade-in">Recruiter Hub</p>
+                )}
+              </div>
+              {isExpanded && (
+                <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 text-on-surface-variant hover:text-on-surface" aria-label="Close menu">
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+
+            <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar px-1">
+              {navItems.map(item => (
+                <SidebarNavItem
+                  key={item.id}
+                  icon={item.icon}
+                  label={item.label}
+                  active={activeTab === item.id}
+                  onClick={() => goToTab(item.id)}
+                  collapsed={!isExpanded}
+                />
+              ))}
+            </nav>
+
+            <div className="mt-auto pt-6 border-t border-outline-variant space-y-4 px-1">
+              <div className="flex items-center justify-between px-2.5">
+                {isExpanded && <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant animate-fade-in">Theme</span>}
+                <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+              </div>
+              <div className="flex items-center gap-3 px-2.5">
+                <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold shrink-0 overflow-hidden">
+                  {company?.name?.charAt(0) || 'R'}
+                </div>
+                {isExpanded && (
+                  <div className="min-w-0 animate-fade-in">
+                    <p className="text-sm font-bold text-on-surface truncate">{company?.name || 'Loading...'}</p>
+                    <p className="text-xs text-on-surface-variant truncate">Recruiter - {user?.regNo || 'REC001'}</p>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={handleLogout}
+                title={isExpanded ? undefined : "Log Out"}
+                className="w-full flex items-center gap-3 px-3.5 py-2.5 text-error rounded-xl font-medium hover:bg-error-container transition-all text-sm"
+              >
+                <LogOut className="w-5 h-5 shrink-0" />
+                {isExpanded && <span className="animate-fade-in truncate">Log Out</span>}
+              </button>
+            </div>
+          </aside>
+        );
+      })()}
 
       {/* Main stage */}
-      <main ref={mainRef} className="md:ml-64 flex-1 min-h-screen pt-24 md:pt-10 p-6 md:p-10 bg-background overflow-y-auto custom-scrollbar scroll-smooth">
+      <main ref={mainRef} className="md:ml-20 flex-1 min-h-screen pt-24 md:pt-10 p-6 md:p-10 bg-background overflow-y-auto custom-scrollbar scroll-smooth">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <RefreshCw className="w-8 h-8 animate-spin text-primary" />

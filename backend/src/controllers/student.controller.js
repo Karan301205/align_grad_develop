@@ -39,7 +39,8 @@ exports.updateProfile = async (req, res) => {
     certificates,
     projects,
     cocurricular,
-    introVideoUrl
+    introVideoUrl,
+    isOnboarded
   } = req.body;
   try {
     const existingProfile = await prisma.profile.findUnique({
@@ -87,7 +88,7 @@ exports.updateProfile = async (req, res) => {
         where: { userId: req.user.id },
         data: {
           name,
-          username,
+          username: username ? username : null,
           profilePic,
           resumeUrl,
           skills: skills ? {
@@ -105,7 +106,8 @@ exports.updateProfile = async (req, res) => {
           certificates,
           projects,
           cocurricular,
-          introVideoUrl
+          introVideoUrl,
+          isOnboarded: isOnboarded !== undefined ? isOnboarded : undefined
         }
       });
     } else {
@@ -113,7 +115,7 @@ exports.updateProfile = async (req, res) => {
         data: {
           userId: req.user.id,
           name: name || 'Student',
-          username,
+          username: username ? username : null,
           profilePic,
           resumeUrl,
           skills: skills ? {
@@ -131,7 +133,8 @@ exports.updateProfile = async (req, res) => {
           certificates,
           projects,
           cocurricular,
-          introVideoUrl
+          introVideoUrl,
+          isOnboarded: isOnboarded !== undefined ? isOnboarded : undefined
         }
       });
     }
@@ -548,6 +551,65 @@ exports.getStudentApplications = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error fetching student applications' });
+  }
+};
+
+const https = require('https');
+const http = require('http');
+
+function downloadFile(url) {
+  return new Promise((resolve, reject) => {
+    const client = url.startsWith('https') ? https : http;
+    client.get(url, (res) => {
+      if (res.statusCode !== 200) {
+        return reject(new Error(`Failed to download file: status code ${res.statusCode}`));
+      }
+      const chunks = [];
+      res.on('data', (chunk) => chunks.push(chunk));
+      res.on('end', () => resolve(Buffer.concat(chunks)));
+      res.on('error', (err) => reject(err));
+    }).on('error', (err) => reject(err));
+  });
+}
+
+exports.parseUploadedResume = async (req, res) => {
+  const { resumeUrl } = req.body;
+  if (!resumeUrl) {
+    return res.status(400).json({ error: 'Resume URL is required.' });
+  }
+
+  try {
+    const buffer = await downloadFile(resumeUrl);
+
+    if (!buffer || buffer.length === 0) {
+      return res.status(400).json({ error: 'The downloaded resume file is empty.' });
+    }
+
+    let rawText = '';
+    const isPdf = buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46;
+    const isDocx = buffer[0] === 0x50 && buffer[1] === 0x4b && buffer[2] === 0x03 && buffer[3] === 0x04;
+
+    if (isPdf) {
+      const pdfParser = require('../services/resume-parser/extractors/pdfExtractor');
+      rawText = await pdfParser.extractText(buffer);
+    } else if (isDocx) {
+      const docxParser = require('../services/resume-parser/extractors/docxExtractor');
+      rawText = await docxParser.extractText(buffer);
+    } else {
+      return res.status(400).json({ error: 'Unsupported file format. Please upload a valid PDF or DOCX resume.' });
+    }
+
+    if (!rawText || rawText.trim().length === 0) {
+      return res.status(400).json({ error: 'Could not extract any text from the resume.' });
+    }
+
+    const { parseResumeText } = require('../services/resume-parser/index');
+    const parsedData = parseResumeText(rawText);
+
+    res.json(parsedData);
+  } catch (err) {
+    console.error('Resume parsing endpoint error:', err);
+    res.status(500).json({ error: err.message || 'Server error parsing the resume.' });
   }
 };
 
