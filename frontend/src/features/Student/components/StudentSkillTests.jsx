@@ -21,6 +21,8 @@ export default function StudentSkillTests({
   setActiveTestSkill,
   setTestResult
 }) {
+  const [filter, setFilter] = React.useState('all'); // 'all', 'verified', 'unverified'
+
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
       <PageHeader
@@ -187,53 +189,109 @@ export default function StudentSkillTests({
 
       {/* 4. Skills Dashboard Grid */}
       {!activeTestSkill && !testResult && (
-        <>
+        <div className="space-y-6">
+          {/* Filtering Tags */}
+          {techSkills.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setFilter('all')}
+                className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all border select-none ${
+                  filter === 'all'
+                    ? 'bg-primary/10 border-primary text-primary font-bold'
+                    : 'bg-surface-container border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
+                }`}
+              >
+                All Skills ({techSkills.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter('verified')}
+                className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all border select-none ${
+                  filter === 'verified'
+                    ? 'bg-success-container border-success/30 text-success font-bold'
+                    : 'bg-surface-container border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
+                }`}
+              >
+                Verified ({techSkills.filter(s => s.verifiedRating !== null && s.verifiedRating !== undefined).length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilter('unverified')}
+                className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all border select-none ${
+                  filter === 'unverified'
+                    ? 'bg-error-container border-error/30 text-error font-bold'
+                    : 'bg-surface-container border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
+                }`}
+              >
+                Unverified ({techSkills.filter(s => s.verifiedRating === null || s.verifiedRating === undefined).length})
+              </button>
+            </div>
+          )}
+
           {loadingTechSkills ? (
             <div className="flex items-center justify-center min-h-[300px]">
               <RefreshCw className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : techSkills.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {techSkills.map((skill, idx) => (
-                <div key={idx} className="p-5 bg-surface-container border border-outline-variant rounded-2xl flex flex-col justify-between h-48 hover:border-primary/20 transition-all">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-start">
-                      <h4 className="text-base font-bold text-on-surface truncate max-w-[150px] uppercase font-headline">
-                        {skill.name}
-                      </h4>
-                      <span className="px-2 py-0.5 bg-surface-container-high border border-outline-variant rounded text-[9px] font-mono text-on-surface-variant uppercase">
-                        Technical
-                      </span>
-                    </div>
-                    
-                    <div className="space-y-1 pt-1">
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-on-surface-variant">Self-Rating:</span>
-                        <span className="text-on-surface font-bold">Lvl {skill.rating}/10</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-on-surface-variant">Verified Rating:</span>
-                        {skill.verifiedRating !== null ? (
-                          <span className="text-primary font-bold flex items-center gap-1">
-                            <ShieldCheck className="w-3.5 h-3.5 text-primary" /> Lvl {skill.verifiedRating}/10
-                          </span>
-                        ) : (
-                          <span className="text-on-surface-variant italic">Unverified</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+            (() => {
+              const filteredSkills = techSkills.filter(skill => {
+                const isVerified = skill.verifiedRating !== null && skill.verifiedRating !== undefined;
+                if (filter === 'verified') return isVerified;
+                if (filter === 'unverified') return !isVerified;
+                return true;
+              });
 
-                  <button
-                    type="button"
-                    onClick={() => handleStartSkillTest(skill.name)}
-                    className="w-full py-2 bg-primary/10 border border-primary/20 text-primary font-bold hover:bg-primary text-xs hover:text-on-primary font-mono rounded-lg transition-all"
-                  >
-                    {skill.verifiedRating !== null ? 'Retake Verification Test' : 'Take Verification Test'}
-                  </button>
+              if (filteredSkills.length === 0) {
+                return (
+                  <div className="text-center py-16 bg-surface-container border border-outline-variant rounded-2xl">
+                    <p className="text-xs text-on-surface-variant italic font-mono">No {filter} skills found.</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredSkills.map((skill, idx) => (
+                    <div key={idx} className="p-5 bg-surface-container border border-outline-variant rounded-2xl flex flex-col justify-between h-35 hover:border-primary/20 transition-all">
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-start">
+                          <h4 className="text-base font-bold text-on-surface truncate max-w-[150px] uppercase font-headline">
+                            {skill.name}
+                          </h4>
+                          <span className="px-2 py-0.5 bg-surface-container-high border border-outline-variant rounded text-[9px] font-mono text-on-surface-variant uppercase">
+                            Technical
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-1 pt-1">
+                          <div className="flex justify-between text-[10px] font-mono">
+                            <span className="text-on-surface-variant">Verified Rating:</span>
+                            {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? (
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-success font-bold flex items-center gap-0.5">
+                                  <ShieldCheck className="w-3.5 h-3.5" /> Lvl {skill.verifiedRating}/10
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-on-surface-variant italic">Unverified</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleStartSkillTest(skill.name)}
+                        className="w-full py-2 bg-primary/10 border border-primary/20 text-primary font-bold hover:bg-primary text-xs hover:text-on-primary font-mono rounded-lg transition-all"
+                      >
+                        {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? 'Retake Verification Test' : 'Take Verification Test'}
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              );
+            })()
           ) : (
             <div className="max-w-lg mx-auto">
               <EmptyState
@@ -243,7 +301,7 @@ export default function StudentSkillTests({
               />
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

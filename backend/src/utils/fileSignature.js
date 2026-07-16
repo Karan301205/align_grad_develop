@@ -11,8 +11,8 @@ const validateMagicBytes = (buffer, fileType) => {
 
   switch (fileType) {
     case 'resume':
-      // Must be PDF: 25504446 (%PDF)
-      return hex === '25504446';
+      // Must be PDF: 25504446 (%PDF) or DOCX: 504B0304 (PK..)
+      return hex === '25504446' || hex === '504B0304';
 
     case 'image':
       // JPEG: FFD8FF

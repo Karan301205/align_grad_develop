@@ -442,6 +442,13 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Safe Modifications**: Customizing error messages.
 * **Risk**: Low.
 
+#### [backend/src/services/resume-parser/index.js](file:///Users/karanrawat/Desktop/a_g/backend/src/services/resume-parser/index.js)
+* **Purpose**: Completely AI-free, offline resume parsing engine coordinating document text extraction (PDF/DOCX), string normalization, section splitting, and rule-based entity parsing.
+* **Used By**: `student.controller.js`.
+* **Dependencies**: `pdf-parse`, `mammoth`.
+* **Safe Modifications**: Enhancing keyword dictionaries, adding extra aliases, updating regex matches.
+* **Risk**: Low.
+
 ---
 
 ### Frontend Files (`frontend/`)
@@ -459,6 +466,43 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Dependencies**: `react`, `react-router-dom`, features and layout modules.
 * **Safe Modifications**: Adjusting root path urls, adding public routing layers.
 * **Risk**: High (routing errors impact application navigation).
+
+#### [frontend/src/constants/index.js](file:///Users/karanrawat/Desktop/a_g/frontend/src/constants/index.js)
+* **Purpose**: Holds application-wide static constants (`ALL_SKILLS`, `API_BASE`).
+* **Used By**: Feature components.
+* **Dependencies**: None.
+
+#### [frontend/src/features/Auth/AuthView.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/features/Auth/AuthView.jsx)
+* **Purpose**: Contains the split login/register dashboard UI forms.
+
+#### [frontend/src/features/SkillTest/TestView.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/features/SkillTest/TestView.jsx)
+* **Purpose**: Renders the lockout-remedial test verification screen and contains static question datasets.
+
+#### [frontend/src/features/Student/StudentLayout.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/features/Student/StudentLayout.jsx)
+* **Purpose**: Student navigation chrome/sidebar and coordinates Student page tabs.
+* **Sub-components**:
+  - `components/StudentDashboard.jsx`: Oppurtunities portal matching grid.
+  - `components/StudentProfile.jsx`: Profile editing general/socials/academics/experience forms.
+  - `components/StudentResume.jsx`: Resume uploader and dynamically compiled PDF resume generator.
+  - `components/StudentSkillTests.jsx`: Your Tests dashboard and interactive verification MCQ card.
+  - `components/StudentShowcase.jsx`: Showcase Yourself page to upload or record a 1-minute 720p introduction video.
+  - `components/ParsedResumeReviewModal.jsx`: Review screen allowing candidates to review and edit extracted resume fields before saving.
+  - `components/OnboardingModal.jsx`: One-time onboarding modal offering resume import or manual configuration upon fresh sign-up.
+
+#### [frontend/src/features/Recruiter/RecruiterLayout.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/features/Recruiter/RecruiterLayout.jsx)
+* **Purpose**: Recruiter navigation sidebar and coordinates Recruiter hub views.
+* **Sub-components**:
+  - `components/RecruiterJobs.jsx`: Active opportunities listings and applicant reviews.
+  - `components/RecruiterCandidates.jsx`: Exploring database profiles and stack filters.
+  - `components/RecruiterPostJob.jsx`: Form builder for job posting and required thresholds.
+  - `components/RecruiterCompany.jsx`: Trust verification status check and document upload.
+
+#### [frontend/tailwind.config.js](file:///Users/karanrawat/Desktop/a_g/frontend/tailwind.config.js)
+* **Purpose**: Declares color tokens and typography parameters matching the design system.
+* **Used By**: PostCSS / Tailwind compiling.
+* **Dependencies**: None.
+* **Safe Modifications**: Adjusting color hex values, changing fallback font stacks.
+* **Risk**: Medium.
 
 #### [frontend/src/index.css](file:///Users/karanrawat/Desktop/a_g/frontend/src/index.css)
 * **Purpose**: Loads Tailwind directives and registers the Industrial Skeuomorphism custom design system rules (light + dark mode, variables, shadow maps, LED badges, embossed text utilities).
@@ -823,6 +867,9 @@ src/index.js
 * **`PUT /api/student/profile`**
   - **Purpose**: Updates candidate name, resume link, and skill parameters.
   - **Files**: `student.controller.js`, `api.js`
+* **`POST /api/student/resume/parse`**
+  - **Purpose**: Downloads and parses uploaded resume PDF/DOCX files offline using rule-based parsing.
+  - **Files**: `student.controller.js`, `api.js`
 * **`GET /api/student/jobs`**
   - **Purpose**: Fetches active jobs and parses requirement matching statuses.
   - **Files**: `student.controller.js`, `api.js`
@@ -1146,3 +1193,4 @@ A structural refactoring separated concerns per SOLID without altering any route
   - `config/database.js` gained `getDbSafe()` (non-throwing) which replaced the duplicated `try/getDB/catch` guard across all six controllers. Admin frontend `fetch`es go through `frontend/src/api/adminApi.js`.
 * **Deliberately preserved quirks** (behavior-parity, not "fixed"): `saveIntroVideo` reads `introVideoUrl` while its validator names `videoUrl`; `submitTest` vs `submitSkillTest` rating-scale differences; `mockClient` lacking `application.update`; the duplicate `Tailwind` entry in `ALL_SKILLS`; dashboard's `'0.00 KB'`/`'84.5 MB'` byte fallbacks (kept distinct from storage's `formatBytes`).
 * **Deferred (not done — future follow-ups)**: JSX-tree decomposition of the large presentational components (`frontend` `StudentProfile.jsx` ~1904, `AuthView.jsx` ~1303, `StudentLayout.jsx` shell, and `admin_ws` `App.jsx` ~1661) into sub-components, and a shared `JobForm`/`PortalShell`. These were intentionally left intact because splitting 1300–1900-line render trees carries behavior-drift risk that outweighs the benefit under the strict no-behavior-change mandate; their non-JSX concerns (network, data, PDF, completeness rules) were already extracted. The `errorHandler`/`asyncHandler` unification was also skipped to preserve each handler's exact 500-response messages.
+

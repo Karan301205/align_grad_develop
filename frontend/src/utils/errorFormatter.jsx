@@ -49,12 +49,14 @@ export const formatAlertMessage = (msg, type = 'error', onClose) => {
       </div>
 
       <div className="space-y-1.5">
-        <div 
-          className="font-headline font-extrabold text-sm tracking-wide"
-          style={{ color: accentColor }}
-        >
-          {titleText}
-        </div>
+        {!isError && (
+          <div 
+            className="font-headline font-extrabold text-sm tracking-wide"
+            style={{ color: accentColor }}
+          >
+            {titleText}
+          </div>
+        )}
         <ul className="space-y-1.5 text-xs leading-relaxed text-on-surface-variant font-medium">
           {errors.map((err, idx) => {
             const pathStr = err.path && err.path.length > 0

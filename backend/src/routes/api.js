@@ -13,7 +13,8 @@ const {
   submitTestSchema,
   generateTestSchema,
   submitSkillTestSchema,
-  saveIntroVideoSchema
+  saveIntroVideoSchema,
+  parseResumeSchema
 } = require('../validators/student.validator');
 const {
   verifyCompanySchema,
@@ -50,6 +51,7 @@ router.post('/student/tests/submit', authMiddleware, relaxedLimit, validate(subm
 router.get('/student/applications', authMiddleware, relaxedLimit, studentController.getStudentApplications);
 router.post('/student/intro-video', authMiddleware, relaxedLimit, validate(saveIntroVideoSchema), studentController.saveIntroVideo);
 router.post('/student/video-upload-url', authMiddleware, relaxedLimit, studentController.requestVideoUploadUrl);
+router.post('/student/resume/parse', authMiddleware, relaxedLimit, validate(parseResumeSchema), studentController.parseUploadedResume);
 
 // Upload routes (protected)
 router.post('/upload/request-url', authMiddleware, relaxedLimit, validate(requestUploadUrlSchema), uploadController.requestUploadUrl);

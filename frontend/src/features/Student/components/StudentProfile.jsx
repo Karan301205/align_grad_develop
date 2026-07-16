@@ -64,9 +64,27 @@ export default function StudentProfile({
   handleUpdateProfile,
   handleRatingChange
 }) {
+  const tabsList = [
+    { id: 'general', label: 'General' },
+    { id: 'socials', label: 'Social Links' },
+    { id: 'education', label: 'Education' },
+    { id: 'experience', label: 'Experience' },
+    { id: 'certificates', label: 'Certificates' },
+    { id: 'projects', label: 'Projects' },
+    { id: 'skills', label: 'Skills' },
+    { id: 'cocurricular', label: 'Co-curricular' }
+  ];
+
   const [isSkillDropdownOpen, setIsSkillDropdownOpen] = React.useState(false);
   const [usernameStatus, setUsernameStatus] = React.useState(''); // 'loading', 'available', 'taken', 'invalid', ''
   const [usernameMsg, setUsernameMsg] = React.useState('');
+  
+  const [editingEduIdx, setEditingEduIdx] = React.useState(null);
+  const [editingExpIdx, setEditingExpIdx] = React.useState(null);
+  const [editingCertIdx, setEditingCertIdx] = React.useState(null);
+  const [editingProjIdx, setEditingProjIdx] = React.useState(null);
+  const [editingCocurricularIdx, setEditingCocurricularIdx] = React.useState(null);
+
   const debouncedCheckRef = React.useRef(null);
 
   const checkUsernameAvailability = async (val) => {
@@ -557,6 +575,46 @@ export default function StudentProfile({
 
         {/* Right Side: Tab Form Panel */}
         <div className="col-span-12 md:col-span-8 p-8 flex flex-col justify-between space-y-6">
+          {(() => {
+            const currentTabIdx = tabsList.findIndex(t => t.id === profileTab);
+            const prevTab = currentTabIdx > 0 ? tabsList[currentTabIdx - 1] : null;
+            const nextTab = currentTabIdx < tabsList.length - 1 ? tabsList[currentTabIdx + 1] : null;
+            return (
+              <div className="flex justify-between items-center border-b border-outline-variant pb-4 select-none">
+                <button
+                  type="button"
+                  disabled={!prevTab}
+                  onClick={() => prevTab && setProfileTab(prevTab.id)}
+                  className="px-3 py-1.5 bg-surface-container-high border border-outline-variant hover:bg-surface-container-highest disabled:opacity-40 disabled:pointer-events-none rounded-xl text-xs font-mono font-bold text-on-surface flex items-center gap-1.5 transition-all"
+                >
+                  &larr; Prev: {prevTab ? prevTab.label : 'None'}
+                </button>
+                <span className="text-xs font-mono font-bold text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-wider">
+                  {tabsList[currentTabIdx]?.label}
+                </span>
+                {nextTab ? (
+                  <button
+                    type="button"
+                    onClick={() => setProfileTab(nextTab.id)}
+                    className="px-3 py-1.5 bg-surface-container-high border border-outline-variant hover:bg-surface-container-highest disabled:opacity-40 disabled:pointer-events-none rounded-xl text-xs font-mono font-bold text-on-surface flex items-center gap-1.5 transition-all"
+                  >
+                    Next: {nextTab.label} &rarr;
+                  </button>
+                ) : (
+                  <Button
+                    type="submit"
+                    loading={submittingProfile}
+                    disabled={!isSaveActive}
+                    size="sm"
+                    className="font-bold uppercase tracking-wider text-[11px] shadow-glow disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none py-1.5 px-4"
+                  >
+                    Save
+                  </Button>
+                )}
+              </div>
+            );
+          })()}
+
           <div className="flex-1 space-y-6 overflow-y-auto max-h-[550px] pr-2 custom-scrollbar">
             
             {/* Panel 1: General */}
@@ -828,16 +886,21 @@ export default function StudentProfile({
                   }
                 ].map(link => {
                   const showKey = `show${link.key.charAt(0).toUpperCase()}${link.key.slice(1)}`;
+                  const hasLink = socialLinks[link.key] !== undefined && socialLinks[link.key] !== null && String(socialLinks[link.key]).trim() !== '';
                   return (
                     <div key={link.key} className="p-4 bg-surface-container-low border border-outline-variant rounded-xl flex items-center gap-4">
-                      <label className="flex items-center gap-2 cursor-pointer flex-shrink-0">
-                        <input
-                           type="checkbox"
-                           className="rounded border-outline-variant text-primary bg-surface-container-low focus:ring-0 focus:ring-offset-0 w-4 h-4"
-                           checked={socialLinks[showKey] || false}
-                           onChange={e => setSocialLinks({ ...socialLinks, [showKey]: e.target.checked })}
-                        />
-                      </label>
+                      <div className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                        {hasLink && (
+                          <label className="flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="rounded border-outline-variant text-primary bg-surface-container-low focus:ring-0 focus:ring-offset-0 w-4 h-4 animate-fade-in"
+                              checked={socialLinks[showKey] || false}
+                              onChange={e => setSocialLinks({ ...socialLinks, [showKey]: e.target.checked })}
+                            />
+                          </label>
+                        )}
+                      </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1.5">
                           {link.logo}
@@ -877,13 +940,43 @@ export default function StudentProfile({
                             {edu.startDate} to {edu.endDate} • {edu.gradeType}: {edu.gradeValue || 'N/A'}
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setEducationList(educationList.filter((_, i) => i !== idx))}
-                          className="text-error hover:text-error/70 text-xs font-mono transition-colors"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const item = educationList[idx];
+                              setNewEdu({ ...item });
+                              if (item.eduType === 'High School') {
+                                const match10 = item.degree.match(/Class 10:\s*([\d.]+)%/);
+                                const match12 = item.degree.match(/Class 12:\s*([\d.]+)%/);
+                                const match11 = item.fieldOfStudy.match(/Class 11 Stream:\s*(.*)/);
+                                if (match10) setClass10Percent(match10[1]);
+                                if (match12) setClass12Percent(match12[1]);
+                                if (match11) setClass11Stream(match11[1]);
+                              }
+                              setEditingEduIdx(idx);
+                            }}
+                            className="text-primary hover:text-primary/70 text-xs font-mono transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEducationList(educationList.filter((_, i) => i !== idx));
+                              if (editingEduIdx === idx) {
+                                setEditingEduIdx(null);
+                                setNewEdu({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
+                                setClass10Percent('');
+                                setClass12Percent('');
+                                setClass11Stream('');
+                              }
+                            }}
+                            className="text-error hover:text-error/70 text-xs font-mono transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1043,23 +1136,47 @@ export default function StudentProfile({
                     </div>
                   )}
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!newEdu.eduType || !newEdu.institute || !newEdu.degree) {
-                        alert('Please fill out Education Type, Institute, and Degree/Class details.');
-                        return;
-                      }
-                      setEducationList([...educationList, newEdu]);
-                      setNewEdu({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
-                      setClass10Percent('');
-                      setClass12Percent('');
-                      setClass11Stream('');
-                    }}
-                    className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Add to List
-                  </button>
+                   <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newEdu.eduType || !newEdu.institute || !newEdu.degree) {
+                          alert('Please fill out Education Type, Institute, and Degree/Class details.');
+                          return;
+                        }
+                        if (editingEduIdx !== null) {
+                          const updatedList = [...educationList];
+                          updatedList[editingEduIdx] = newEdu;
+                          setEducationList(updatedList);
+                          setEditingEduIdx(null);
+                        } else {
+                          setEducationList([...educationList, newEdu]);
+                        }
+                        setNewEdu({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
+                        setClass10Percent('');
+                        setClass12Percent('');
+                        setClass11Stream('');
+                      }}
+                      className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
+                    >
+                      {editingEduIdx !== null ? 'Save Edit' : 'Add to List'}
+                    </button>
+                    {editingEduIdx !== null && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingEduIdx(null);
+                          setNewEdu({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
+                          setClass10Percent('');
+                          setClass12Percent('');
+                          setClass11Stream('');
+                        }}
+                        className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-bold rounded-lg text-xs hover:bg-surface-container-highest transition-all"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -1084,13 +1201,34 @@ export default function StudentProfile({
                             {exp.startDate} to {exp.currentlyWorking ? 'Present' : exp.endDate} • {exp.location || 'Remote'}
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setExperienceList(experienceList.filter((_, i) => i !== idx))}
-                          className="text-error hover:text-error/70 text-xs font-mono transition-colors"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const item = experienceList[idx];
+                              setNewExp({ ...item });
+                              setDomainSearch('');
+                              setEditingExpIdx(idx);
+                            }}
+                            className="text-primary hover:text-primary/70 text-xs font-mono transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setExperienceList(experienceList.filter((_, i) => i !== idx));
+                              if (editingExpIdx === idx) {
+                                setEditingExpIdx(null);
+                                setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
+                                setDomainSearch('');
+                              }
+                            }}
+                            className="text-error hover:text-error/70 text-xs font-mono transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1284,21 +1422,43 @@ export default function StudentProfile({
                     />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!newExp.expType || !newExp.designation || !newExp.companyName) {
-                        alert('Please fill out Experience Type, Designation, and Company Name.');
-                        return;
-                      }
-                      setExperienceList([...experienceList, newExp]);
-                      setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
-                      setDomainSearch('');
-                    }}
-                    className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Add to List
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newExp.expType || !newExp.designation || !newExp.companyName) {
+                          alert('Please fill out Experience Type, Designation, and Company Name.');
+                          return;
+                        }
+                        if (editingExpIdx !== null) {
+                          const updatedList = [...experienceList];
+                          updatedList[editingExpIdx] = newExp;
+                          setExperienceList(updatedList);
+                          setEditingExpIdx(null);
+                        } else {
+                          setExperienceList([...experienceList, newExp]);
+                        }
+                        setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
+                        setDomainSearch('');
+                      }}
+                      className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
+                    >
+                      {editingExpIdx !== null ? 'Save Edit' : 'Add to List'}
+                    </button>
+                    {editingExpIdx !== null && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingExpIdx(null);
+                          setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
+                          setDomainSearch('');
+                        }}
+                        className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-bold rounded-lg text-xs hover:bg-surface-container-highest transition-all"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -1336,13 +1496,34 @@ export default function StudentProfile({
                             )}
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setCertificatesList(certificatesList.filter((_, i) => i !== idx))}
-                          className="text-error hover:text-error/70 text-xs font-mono transition-colors"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const item = certificatesList[idx];
+                              setNewCert({ ...item });
+                              setCertFileUploadError('');
+                              setEditingCertIdx(idx);
+                            }}
+                            className="text-primary hover:text-primary/70 text-xs font-mono transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCertificatesList(certificatesList.filter((_, i) => i !== idx));
+                              if (editingCertIdx === idx) {
+                                setEditingCertIdx(null);
+                                setNewCert({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
+                                setCertFileUploadError('');
+                              }
+                            }}
+                            className="text-error hover:text-error/70 text-xs font-mono transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1459,21 +1640,43 @@ export default function StudentProfile({
                     />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!newCert.title || !newCert.org) {
-                        alert('Please enter Certificate Title and Provider Organisation.');
-                        return;
-                      }
-                      setCertificatesList([...certificatesList, newCert]);
-                      setNewCert({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
-                      setCertFileUploadError('');
-                    }}
-                    className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Add to List
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newCert.title || !newCert.org) {
+                          alert('Please enter Certificate Title and Provider Organisation.');
+                          return;
+                        }
+                        if (editingCertIdx !== null) {
+                          const updatedList = [...certificatesList];
+                          updatedList[editingCertIdx] = newCert;
+                          setCertificatesList(updatedList);
+                          setEditingCertIdx(null);
+                        } else {
+                          setCertificatesList([...certificatesList, newCert]);
+                        }
+                        setNewCert({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
+                        setCertFileUploadError('');
+                      }}
+                      className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
+                    >
+                      {editingCertIdx !== null ? 'Save Edit' : 'Add to List'}
+                    </button>
+                    {editingCertIdx !== null && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingCertIdx(null);
+                          setNewCert({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
+                          setCertFileUploadError('');
+                        }}
+                        className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-bold rounded-lg text-xs hover:bg-surface-container-highest transition-all"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -1510,13 +1713,32 @@ export default function StudentProfile({
                             )}
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setProjectsList(projectsList.filter((_, i) => i !== idx))}
-                          className="text-error hover:text-error/70 text-xs font-mono transition-colors"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const item = projectsList[idx];
+                              setNewProj({ ...item });
+                              setEditingProjIdx(idx);
+                            }}
+                            className="text-primary hover:text-primary/70 text-xs font-mono transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setProjectsList(projectsList.filter((_, i) => i !== idx));
+                              if (editingProjIdx === idx) {
+                                setEditingProjIdx(null);
+                                setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
+                              }
+                            }}
+                            className="text-error hover:text-error/70 text-xs font-mono transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1620,20 +1842,41 @@ export default function StudentProfile({
                     />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!newProj.title || !newProj.role) {
-                        alert('Please fill out Project Title and Role.');
-                        return;
-                      }
-                      setProjectsList([...projectsList, newProj]);
-                      setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
-                    }}
-                    className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Add to List
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newProj.title || !newProj.role) {
+                          alert('Please fill out Project Title and Role.');
+                          return;
+                        }
+                        if (editingProjIdx !== null) {
+                          const updatedList = [...projectsList];
+                          updatedList[editingProjIdx] = newProj;
+                          setProjectsList(updatedList);
+                          setEditingProjIdx(null);
+                        } else {
+                          setProjectsList([...projectsList, newProj]);
+                        }
+                        setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
+                      }}
+                      className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
+                    >
+                      {editingProjIdx !== null ? 'Save Edit' : 'Add to List'}
+                    </button>
+                    {editingProjIdx !== null && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingProjIdx(null);
+                          setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
+                        }}
+                        className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-bold rounded-lg text-xs hover:bg-surface-container-highest transition-all"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -1738,7 +1981,16 @@ export default function StudentProfile({
                             </div>
                             <div className="flex items-center gap-4">
                               {isTech && (
-                                <span className="text-secondary font-mono text-xs">Rating: {skill.rating} / 10</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-secondary font-mono text-xs">
+                                    Rating: {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? `${skill.verifiedRating} / 10` : `${skill.rating} / 10`}
+                                  </span>
+                                  {skill.verifiedRating !== null && skill.verifiedRating !== undefined && (
+                                    <span className="text-[9px] bg-success-container border border-success/30 text-success px-1.5 py-0.5 rounded font-bold uppercase tracking-wide flex items-center gap-1 select-none">
+                                      <span className="text-[8px]">✓</span> Verified
+                                    </span>
+                                  )}
+                                </div>
                               )}
                               <button
                                 type="button"
@@ -1776,13 +2028,32 @@ export default function StudentProfile({
                             {act.link ? <a href={act.link} target="_blank" rel="noopener noreferrer" className="underline text-primary hover:text-primary/70">View Certification Link</a> : 'No Link'}
                           </p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setCocurricular(cocurricular.filter((_, i) => i !== idx))}
-                          className="text-error hover:text-error/70 text-xs font-mono transition-colors"
-                        >
-                          Delete
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const item = cocurricular[idx];
+                              setNewCocurricular({ ...item });
+                              setEditingCocurricularIdx(idx);
+                            }}
+                            className="text-primary hover:text-primary/70 text-xs font-mono transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCocurricular(cocurricular.filter((_, i) => i !== idx));
+                              if (editingCocurricularIdx === idx) {
+                                setEditingCocurricularIdx(null);
+                                setNewCocurricular({ activity: '', link: '', description: '' });
+                              }
+                            }}
+                            className="text-error hover:text-error/70 text-xs font-mono transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1827,23 +2098,57 @@ export default function StudentProfile({
                     />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!newCocurricular.activity) {
-                        alert('Please enter Activity / Title.');
-                        return;
-                      }
-                      setCocurricular([...cocurricular, newCocurricular]);
-                      setNewCocurricular({ activity: '', link: '', description: '' });
-                    }}
-                    className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Add to List
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newCocurricular.activity) {
+                          alert('Please enter Activity / Title.');
+                          return;
+                        }
+                        if (editingCocurricularIdx !== null) {
+                          const updatedList = [...cocurricular];
+                          updatedList[editingCocurricularIdx] = newCocurricular;
+                          setCocurricular(updatedList);
+                          setEditingCocurricularIdx(null);
+                        } else {
+                          setCocurricular([...cocurricular, newCocurricular]);
+                        }
+                        setNewCocurricular({ activity: '', link: '', description: '' });
+                      }}
+                      className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
+                    >
+                      {editingCocurricularIdx !== null ? 'Save Edit' : 'Add to List'}
+                    </button>
+                    {editingCocurricularIdx !== null && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingCocurricularIdx(null);
+                          setNewCocurricular({ activity: '', link: '', description: '' });
+                        }}
+                        className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-bold rounded-lg text-xs hover:bg-surface-container-highest transition-all"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Bottom Save button */}
+          <div className="pt-4 border-t border-outline-variant flex justify-end">
+            {/* <Button
+              type="submit"
+              loading={submittingProfile}
+              disabled={!isSaveActive}
+              size="sm"
+              className="font-bold uppercase tracking-wider text-xs shadow-glow disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none px-6"
+            >
+              Save Profile & Ratings
+            </Button> */}
           </div>
         </div>
       </form>
