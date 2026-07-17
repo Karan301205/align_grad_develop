@@ -12,7 +12,7 @@ model User {
   email     String   @unique
   password  String
   role      String   // "STUDENT" or "RECRUITER"
-  regNo     String   @unique
+  regNo     String?  @unique
   createdAt DateTime @default(now())
   profile   Profile?
   company   Company?
