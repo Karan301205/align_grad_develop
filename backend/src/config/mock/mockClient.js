@@ -200,6 +200,177 @@ const mockClient = {
       if (where.profileId) filtered = filtered.filter(t => t.profileId === where.profileId);
       return filtered;
     }
+  },
+  gig: {
+    findMany: async (args = {}) => {
+      let result = [...mockDb.gigs];
+      if (args && args.where) {
+        const { where } = args;
+        if (where.status) {
+          result = result.filter(g => g.status === where.status);
+        }
+        if (where.ownerId) {
+          result = result.filter(g => g.ownerId === where.ownerId);
+        }
+        if (where.selectedCandidateId) {
+          result = result.filter(g => g.selectedCandidateId === where.selectedCandidateId);
+        }
+        if (where.OR) {
+          // Used for my-gigs tabs
+          result = result.filter(g => {
+            return g.ownerId === where.OR[0].ownerId || g.selectedCandidateId === where.OR[1].selectedCandidateId;
+          });
+        }
+      }
+      return result.map(g => {
+        // Resolve owner details
+        const ownerProfile = mockDb.profiles.find(p => p.userId === g.ownerId) || mockDb.profiles.find(p => p.id === g.ownerId);
+        const ownerCompany = mockDb.companies.find(c => c.userId === g.ownerId) || mockDb.companies.find(c => c.id === g.ownerId);
+        const ownerName = ownerProfile ? ownerProfile.name : (ownerCompany ? ownerCompany.name : "System User");
+        return {
+          ...g,
+          ownerName,
+          ownerRole: ownerProfile ? "STUDENT" : "RECRUITER"
+        };
+      });
+    },
+    findUnique: async ({ where, include }) => {
+      const gig = mockDb.gigs.find(g => g.id === where.id);
+      if (!gig) return null;
+      
+      const ownerProfile = mockDb.profiles.find(p => p.userId === gig.ownerId) || mockDb.profiles.find(p => p.id === gig.ownerId);
+      const ownerCompany = mockDb.companies.find(c => c.userId === gig.ownerId) || mockDb.companies.find(c => c.id === gig.ownerId);
+      const ownerName = ownerProfile ? ownerProfile.name : (ownerCompany ? ownerCompany.name : "System User");
+      
+      const res = {
+        ...gig,
+        ownerName,
+        ownerRole: ownerProfile ? "STUDENT" : "RECRUITER"
+      };
+
+      if (include) {
+        if (include.applicants) {
+          res.applicants = mockDb.gigApplicants
+            .filter(a => a.gigId === gig.id)
+            .map(a => {
+              const candidateProfile = mockDb.profiles.find(p => p.userId === a.candidateId) || mockDb.profiles.find(p => p.id === a.candidateId);
+              return { ...a, candidate: candidateProfile };
+            });
+        }
+        if (include.messages) {
+          res.messages = mockDb.gigMessages.filter(m => m.gigId === gig.id);
+        }
+        if (include.submissions) {
+          res.submissions = mockDb.gigSubmissions.filter(s => s.gigId === gig.id);
+        }
+        if (include.reviews) {
+          res.reviews = mockDb.gigReviews.filter(r => r.gigId === gig.id);
+        }
+      }
+      return res;
+    },
+    create: async ({ data }) => {
+      const newGig = {
+        id: `gig_${Date.now()}`,
+        status: "OPEN",
+        attachments: [],
+        createdAt: new Date(),
+        ...data
+      };
+      mockDb.gigs.push(newGig);
+      return newGig;
+    },
+    update: async ({ where, data }) => {
+      const idx = mockDb.gigs.findIndex(g => g.id === where.id);
+      if (idx !== -1) {
+        const fields = ["status", "selectedCandidateId", "title", "description", "budget", "deliveryTime", "attachments"];
+        fields.forEach(field => {
+          if (data[field] !== undefined) {
+            mockDb.gigs[idx][field] = data[field];
+          }
+        });
+        return mockDb.gigs[idx];
+      }
+      throw new Error("Gig not found");
+    }
+  },
+  gigApplicant: {
+    create: async ({ data }) => {
+      const newApplicant = {
+        id: `applicant_${Date.now()}`,
+        createdAt: new Date(),
+        ...data
+      };
+      mockDb.gigApplicants.push(newApplicant);
+      return newApplicant;
+    },
+    findMany: async ({ where }) => {
+      let filtered = mockDb.gigApplicants;
+      if (where.gigId) filtered = filtered.filter(a => a.gigId === where.gigId);
+      if (where.candidateId) filtered = filtered.filter(a => a.candidateId === where.candidateId);
+      return filtered;
+    },
+    deleteMany: async ({ where }) => {
+      const initialCount = mockDb.gigApplicants.length;
+      if (where && where.gigId) {
+        mockDb.gigApplicants = mockDb.gigApplicants.filter(a => a.gigId !== where.gigId);
+      }
+      return { count: initialCount - mockDb.gigApplicants.length };
+    }
+  },
+  gigMessage: {
+    create: async ({ data }) => {
+      const newMessage = {
+        id: `msg_${Date.now()}`,
+        createdAt: new Date(),
+        ...data
+      };
+      mockDb.gigMessages.push(newMessage);
+      return newMessage;
+    },
+    findMany: async ({ where }) => {
+      return mockDb.gigMessages.filter(m => m.gigId === where.gigId);
+    }
+  },
+  gigSubmission: {
+    create: async ({ data }) => {
+      const newSubmission = {
+        id: `sub_${Date.now()}`,
+        status: "PENDING",
+        createdAt: new Date(),
+        ...data
+      };
+      mockDb.gigSubmissions.push(newSubmission);
+      return newSubmission;
+    },
+    findUnique: async ({ where }) => {
+      return mockDb.gigSubmissions.find(s => s.gigId === where.gigId) || null;
+    },
+    update: async ({ where, data }) => {
+      const idx = mockDb.gigSubmissions.findIndex(s => s.gigId === where.gigId || s.id === where.id);
+      if (idx !== -1) {
+        if (data.status) mockDb.gigSubmissions[idx].status = data.status;
+        return mockDb.gigSubmissions[idx];
+      }
+      throw new Error("Submission not found");
+    }
+  },
+  gigReview: {
+    create: async ({ data }) => {
+      const newReview = {
+        id: `rev_${Date.now()}`,
+        createdAt: new Date(),
+        ...data
+      };
+      mockDb.gigReviews.push(newReview);
+      return newReview;
+    },
+    findMany: async ({ where }) => {
+      let filtered = mockDb.gigReviews;
+      if (where.revieweeId) filtered = filtered.filter(r => r.revieweeId === where.revieweeId);
+      if (where.gigId) filtered = filtered.filter(r => r.gigId === where.gigId);
+      return filtered;
+    }
   }
 };
 

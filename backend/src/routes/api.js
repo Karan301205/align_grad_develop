@@ -24,11 +24,19 @@ const {
   updateApplicationRoundsSchema
 } = require('../validators/recruiter.validator');
 const { requestUploadUrlSchema } = require('../validators/upload.validator');
+const {
+  createGigSchema,
+  applyGigSchema,
+  sendMessageSchema,
+  submitWorkSchema,
+  reviewGigSchema
+} = require('../validators/gig.validator');
 
 const authController = require('../controllers/auth.controller');
 const studentController = require('../controllers/student.controller');
 const recruiterController = require('../controllers/recruiter.controller');
 const uploadController = require('../controllers/upload.controller');
+const gigController = require('../controllers/gig.controller');
 
 // Middlewares for different scopes
 const authLimit = rateLimiter(rateLimitConfig.auth);
@@ -66,5 +74,17 @@ router.delete('/recruiter/jobs/:jobId', authMiddleware, relaxedLimit, validate(d
 router.get('/recruiter/jobs', authMiddleware, relaxedLimit, recruiterController.getCompanyJobs);
 router.get('/recruiter/candidates', authMiddleware, relaxedLimit, recruiterController.getCandidates);
 router.put('/recruiter/applications/:applicationId/rounds', authMiddleware, relaxedLimit, validate(updateApplicationRoundsSchema), recruiterController.updateApplicationRounds);
+
+// Gigs Marketplace routes (protected)
+router.get('/gigs', authMiddleware, relaxedLimit, gigController.getGigs);
+router.post('/gigs', authMiddleware, relaxedLimit, validate(createGigSchema), gigController.createGig);
+router.get('/gigs/my-gigs', authMiddleware, relaxedLimit, gigController.getMyGigs);
+router.get('/gigs/:gigId', authMiddleware, relaxedLimit, gigController.getGigDetails);
+router.post('/gigs/:gigId/apply', authMiddleware, relaxedLimit, validate(applyGigSchema), gigController.applyToGig);
+router.post('/gigs/:gigId/hire', authMiddleware, relaxedLimit, gigController.hireCandidate);
+router.post('/gigs/:gigId/messages', authMiddleware, relaxedLimit, validate(sendMessageSchema), gigController.sendMessage);
+router.post('/gigs/:gigId/submit', authMiddleware, relaxedLimit, validate(submitWorkSchema), gigController.submitWork);
+router.post('/gigs/:gigId/complete', authMiddleware, relaxedLimit, gigController.completeGig);
+router.post('/gigs/:gigId/review', authMiddleware, relaxedLimit, validate(reviewGigSchema), gigController.reviewGig);
 
 module.exports = router;

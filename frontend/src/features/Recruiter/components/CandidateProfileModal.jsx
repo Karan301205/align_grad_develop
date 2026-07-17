@@ -1,4 +1,4 @@
-import { X, Video, Mail, Phone, Globe, Calendar, Briefcase, FolderGit2, GraduationCap, Award, FileText } from 'lucide-react';
+import { X, Video, Mail, Phone, Globe, Calendar, Briefcase, FolderGit2, GraduationCap, Award, FileText, Star } from 'lucide-react';
 
 export default function CandidateProfileModal({ candidate, onClose }) {
   if (!candidate) return null;
@@ -130,22 +130,68 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                 <h4 className="text-sm font-mono uppercase text-on-surface-variant tracking-wider flex items-center gap-1.5">
                   <Briefcase className="w-4 h-4 text-secondary" /> Work Experience
                 </h4>
-                {candidate.experience && candidate.experience.length > 0 ? (
-                  <div className="space-y-3">
-                    {candidate.experience.map((exp, idx) => (
-                      <div key={idx} className="p-3 bg-surface-container-low border border-outline-variant rounded-xl text-xs space-y-1">
-                        <div className="flex justify-between font-bold text-on-surface">
-                          <span>{exp.designation}</span>
-                          <span className="text-on-surface-variant font-mono text-[10px]">{exp.startDate} - {exp.currentlyWorking ? 'Present' : exp.endDate}</span>
+                {(() => {
+                  const gigExperienceItems = (candidate.experience || []).filter(exp => exp.expType === 'Gig');
+                  const completedGigsCount = gigExperienceItems.length;
+                  let totalRating = 0;
+                  let ratedGigsCount = 0;
+                  gigExperienceItems.forEach(exp => {
+                    const match = exp.description?.match(/Rating:\s*(\d+)\/5/);
+                    if (match) {
+                      totalRating += parseInt(match[1]);
+                      ratedGigsCount++;
+                    }
+                  });
+                  const averageRating = ratedGigsCount > 0 ? (totalRating / ratedGigsCount).toFixed(1) : 'N/A';
+
+                  return (
+                    <>
+                      {/* Gigs Stats Summary */}
+                      {gigExperienceItems.length > 0 && (
+                        <div className="grid grid-cols-2 gap-4 bg-surface-container-high/40 p-3.5 rounded-xl border border-outline-variant/50">
+                          <div className="flex items-center gap-2">
+                            <Award className="w-4 h-4 text-emerald-500 shrink-0" />
+                            <div>
+                              <p className="text-[9px] font-mono uppercase text-on-surface-variant">Completed Gigs</p>
+                              <p className="text-xs font-bold text-on-surface">{completedGigsCount} Verified Task{completedGigsCount > 1 ? 's' : ''}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Star className="w-4 h-4 text-warning fill-warning/20 shrink-0" />
+                            <div>
+                              <p className="text-[9px] font-mono uppercase text-on-surface-variant">Average Rating</p>
+                              <p className="text-xs font-bold text-on-surface">{averageRating} / 5.0 Rating</p>
+                            </div>
+                          </div>
                         </div>
-                        <p className="text-secondary font-medium">{exp.companyName} <span className="text-[10px] text-on-surface-variant">({exp.location})</span></p>
-                        <p className="text-on-surface-variant text-[11px] mt-1 leading-relaxed">{exp.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-on-surface-variant">No experience listed.</p>
-                )}
+                      )}
+
+                      {candidate.experience && candidate.experience.length > 0 ? (
+                        <div className="space-y-3">
+                          {candidate.experience.map((exp, idx) => (
+                            <div key={idx} className={`p-3 border rounded-xl text-xs space-y-1 ${exp.expType === 'Gig' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-surface-container-low border-outline-variant'}`}>
+                              <div className="flex justify-between font-bold text-on-surface flex-wrap gap-1">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span>{exp.designation}</span>
+                                  {exp.expType === 'Gig' && (
+                                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[8px] font-mono font-bold border border-emerald-500/10">
+                                      ✓ Verified Gig
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-on-surface-variant font-mono text-[10px]">{exp.startDate} - {exp.currentlyWorking ? 'Present' : exp.endDate}</span>
+                              </div>
+                              <p className="text-secondary font-medium">{exp.companyName} <span className="text-[10px] text-on-surface-variant">({exp.location})</span></p>
+                              <p className="text-on-surface-variant text-[11px] mt-1 leading-relaxed whitespace-pre-line">{exp.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-on-surface-variant">No experience listed.</p>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Projects */}

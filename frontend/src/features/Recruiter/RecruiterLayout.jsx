@@ -7,7 +7,8 @@ import {
   LogOut,
   RefreshCw,
   Menu,
-  X
+  X,
+  DollarSign
 } from 'lucide-react';
 import { apiFetch } from '../../services/apiClient';
 import { putFileToS3 } from '../../services/uploadService';
@@ -20,6 +21,7 @@ import RecruiterJobs from './components/RecruiterJobs';
 import RecruiterCandidates from './components/RecruiterCandidates';
 import RecruiterPostJob from './components/RecruiterPostJob';
 import RecruiterCompany from './components/RecruiterCompany';
+import GigsMarketplace from '../Gigs/GigsMarketplace';
 
 export default function RecruiterLayout({ user, token, activeTab, setActiveTab, handleLogout, theme, toggleTheme }) {
   const [company, setCompany] = useState(null);
@@ -197,6 +199,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     { id: 'dashboard', icon: Briefcase, label: 'Job Dashboard' },
     { id: 'candidates', icon: User, label: 'Search Candidates' },
     { id: 'post-job', icon: Plus, label: 'Post New Job' },
+    { id: 'gigs', icon: DollarSign, label: 'Geeks Marketplace' },
     { id: 'verification', icon: ShieldCheck, label: 'Verification Status' },
   ];
 
@@ -339,6 +342,16 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
               <RecruiterPostJob 
                 submittingJob={submittingJob}
                 handlePostJob={handlePostJob}
+              />
+            )}
+
+            {activeTab === 'gigs' && (
+              <GigsMarketplace
+                user={user}
+                token={token}
+                theme={theme}
+                profile={null}
+                onUpdateProfile={fetchRecruiterData}
               />
             )}
 

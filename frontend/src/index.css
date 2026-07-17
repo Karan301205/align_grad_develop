@@ -127,6 +127,68 @@
   --c-on-success-container: #bbf7d0;
 }
 
+/* ─── Scoped landing theme: "Dream Job Blue" (JobsPlanet-style) ───
+   Redefines the semantic tokens only inside .theme-jobsplanet so the
+   marketing landing page renders in the blue/white job-board palette
+   without touching the portal design system. */
+.theme-jobsplanet {
+  --brand-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%);
+  --c-background: #f6f9fe;
+  --c-surface-container: #ffffff;
+  --c-surface-container-low: #eef3fb;
+  --c-surface-container-high: #ffffff;
+  --c-surface-container-highest: #ffffff;
+
+  --c-outline: #d7e2f2;
+  --c-outline-variant: #e3eaf6;
+
+  --c-on-surface: #16244b;
+  --c-on-surface-variant: #5a6a88;
+
+  --c-primary: #2563eb;
+  --c-on-primary: #ffffff;
+  --c-primary-container: #dbeafe;
+  --c-on-primary-container: #1e3a8a;
+
+  --c-secondary: #16244b;
+  --c-on-secondary: #ffffff;
+  --c-secondary-container: #e3ecfa;
+  --c-on-secondary-container: #16244b;
+
+  --neu-dark: #dbe4f2;
+  --neu-light: #ffffff;
+  --shadow-glow: 0 0 10px 2px rgba(37, 99, 235, 0.35);
+  --shadow-primary-btn: 5px 5px 10px rgba(37, 99, 235, 0.25), -5px -5px 10px rgba(255, 255, 255, 0.7);
+}
+
+.dark .theme-jobsplanet {
+  --brand-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 55%, #2563eb 100%);
+  --c-background: #0d1526;
+  --c-surface-container: #131e33;
+  --c-surface-container-low: #0f1930;
+  --c-surface-container-high: #182742;
+  --c-surface-container-highest: #1d2e4d;
+
+  --c-outline: #1c2a47;
+  --c-outline-variant: #24345a;
+
+  --c-on-surface: #e7eefb;
+  --c-on-surface-variant: #93a5c8;
+
+  --c-primary: #60a5fa;
+  --c-on-primary: #0b1c3d;
+  --c-primary-container: #1e3a8a;
+  --c-on-primary-container: #dbeafe;
+
+  --c-secondary: #cdd9ef;
+  --c-on-secondary: #101c36;
+  --c-secondary-container: #182742;
+  --c-on-secondary-container: #e7eefb;
+
+  --neu-dark: #0a111f;
+  --neu-light: #1a2845;
+}
+
 @theme inline {
   --color-background: var(--c-background);
   --color-surface-container: var(--c-surface-container);
@@ -417,4 +479,39 @@
 .glass-button-primary:active,
 .glass-button-secondary:active {
   box-shadow: var(--shadow-pressed);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Gigs Chat Typing Indicator
+   ───────────────────────────────────────────────────────────── */
+@keyframes dot-bounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateY(-5px);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--c-on-surface-variant);
+  display: inline-block;
+  animation: dot-bounce 1.2s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
 }

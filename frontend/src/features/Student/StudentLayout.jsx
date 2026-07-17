@@ -16,7 +16,8 @@ import {
   AlertCircle,
   CheckCircle2,
   ClipboardList,
-  Lock
+  Lock,
+  DollarSign
 } from 'lucide-react';
 import { apiFetch } from '../../services/apiClient';
 import { putFileToS3 } from '../../services/uploadService';
@@ -40,6 +41,7 @@ import StudentShowcase from './components/StudentShowcase';
 import StudentProgress from './components/StudentProgress';
 import ParsedResumeReviewModal from './components/ParsedResumeReviewModal';
 import OnboardingModal from './components/OnboardingModal';
+import GigsMarketplace from '../Gigs/GigsMarketplace';
 
 
 export default function StudentLayout({ user, token, activeTab, setActiveTab, testSkill, setTestSkill, handleLogout, theme, toggleTheme }) {
@@ -798,6 +800,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     { id: 'dashboard', icon: Briefcase, label: 'Opportunities', locked: !isComplete },
     { id: 'profile', icon: User, label: 'Profile & Ratings', locked: false },
     { id: 'resume', icon: FileText, label: 'Resume', locked: !isComplete },
+    { id: 'gigs', icon: DollarSign, label: 'Gigs Marketplace', locked: !isComplete },
     { id: 'tests', icon: BookOpen, label: 'Your Tests', locked: !isComplete },
     { id: 'showcase', icon: Video, label: 'Showcase Yourself', locked: false },
     { id: 'progress', icon: ClipboardList, label: 'Your Job Progress', locked: !isComplete },
@@ -1058,6 +1061,16 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 profile={profile}
                 token={token}
                 onVideoSaved={(url) => setProfile(prev => ({ ...prev, introVideoUrl: url }))}
+              />
+            )}
+
+            {activeTab === 'gigs' && (
+              <GigsMarketplace
+                user={user}
+                token={token}
+                theme={theme}
+                profile={profile}
+                onUpdateProfile={fetchProfileAndJobs}
               />
             )}
 

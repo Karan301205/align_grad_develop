@@ -9,7 +9,12 @@ const mockDb = {
   companies: [],
   jobs: [],
   applications: [],
-  testAttempts: []
+  testAttempts: [],
+  gigs: [],
+  gigApplicants: [],
+  gigMessages: [],
+  gigSubmissions: [],
+  gigReviews: []
 };
 
 // Seed initial jobs in mock db to make it instantly usable
@@ -88,6 +93,37 @@ mockDb.profiles.push({
   experience: [],
   certificates: [],
   projects: []
+});
+
+// Seed initial gigs
+mockDb.gigs.push({
+  id: "gig_react_modal",
+  title: "Build Responsive Neumorphic Modal",
+  description: "Create a reusable React modal component matching the workspace chassis design language. It must support accessibility overlay close states, smooth CSS transition entries, and custom titles.",
+  skills: ["React", "CSS"],
+  budget: 150.0,
+  deliveryTime: "3 Days",
+  attachments: [],
+  ownerId: "student_leo",
+  selectedCandidateId: null,
+  status: "OPEN",
+  typingUserId: null,
+  createdAt: new Date()
+});
+
+mockDb.gigs.push({
+  id: "gig_python_script",
+  title: "Write CSV Data Normalizer Script",
+  description: "Develop a Python command line utility that reads arbitrary applicant data from CSV formats, maps target headers, validates formatting structures, and dumps output to normalized JSON structures.",
+  skills: ["Python", "SQL"],
+  budget: 200.0,
+  deliveryTime: "5 Days",
+  attachments: [],
+  ownerId: "company_vertex",
+  selectedCandidateId: null,
+  status: "OPEN",
+  typingUserId: null,
+  createdAt: new Date()
 });
 
 module.exports = { mockDb };

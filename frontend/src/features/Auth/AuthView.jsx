@@ -1,36 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  AlertTriangle, 
-  Eye, 
-  EyeOff, 
-  ShieldCheck, 
-  ChevronRight, 
-  Lock, 
-  Unlock, 
-  CheckCircle2,
+import {
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  Lock,
   User,
   Briefcase,
-  ArrowRight,
   X,
   Activity,
   Sliders,
   Target,
   Award,
-  Sparkles,
   FileText,
   Video,
   Play,
   TrendingUp,
   Search,
   CheckCircle,
-  HelpCircle,
   FileCheck,
-  Zap,
   Building2,
   UploadCloud,
   Loader2,
-  Compass,
-  ArrowUpRight
+  ArrowUpRight,
+  UserPlus,
+  Send,
+  CheckCircle2
 } from 'lucide-react';
 import { apiFetch } from '../../services/apiClient';
 import Button from '../../components/ui/Button';
@@ -53,11 +48,6 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-
-  // Interactive Match Simulator State
-  const [simulatedReactRating, setSimulatedReactRating] = useState(3);
-  const [isSimulatingTest, setIsSimulatingTest] = useState(false);
-  const [simQuestionsPassed, setSimQuestionsPassed] = useState(false);
 
   // Interactive Features Showcase States
   const [featuresTab, setFeaturesTab] = useState('students');
@@ -161,23 +151,8 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
     }
   };
 
-  // Run a quick mock verification simulation in the browser
-  const runVerificationSimulation = () => {
-    setIsSimulatingTest(true);
-    setTimeout(() => {
-      setSimulatedReactRating(5);
-      setSimQuestionsPassed(true);
-      setIsSimulatingTest(false);
-    }, 1500);
-  };
-
-  const resetSimulation = () => {
-    setSimulatedReactRating(3);
-    setSimQuestionsPassed(false);
-  };
-
   return (
-    <div className="min-h-screen w-full bg-background text-on-surface font-sans antialiased overflow-x-hidden selection:bg-primary/20 selection:text-primary">
+    <div className="theme-jobsplanet min-h-screen w-full bg-background text-on-surface font-sans antialiased overflow-x-hidden selection:bg-primary/20 selection:text-primary">
       <ClickSpark
         sparkColor={theme === 'dark' ? '#ffffff' : '#000000'}
         sparkSize={10}
@@ -202,230 +177,182 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
       <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-outline-variant">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img 
-              src={theme === 'dark' ? '/a_g_logo_dark.webp' : '/a_g_logo.webp'} 
-              alt="AlignGrad Logo" 
+            <img
+              src={theme === 'dark' ? '/a_g_logo_dark.webp' : '/a_g_logo.webp'}
+              alt="AlignGrad Logo"
               className="h-10 w-auto object-contain"
             />
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-xs font-medium text-on-surface-variant">
-            <a href="#demo" className="hover:text-on-surface transition-colors">Skill Matcher</a>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-on-surface-variant">
+            <a href="#home" className="text-primary font-semibold">Home</a>
+            <a href="#how-it-works" className="hover:text-on-surface transition-colors">How it Works</a>
             <a href="#features" className="hover:text-on-surface transition-colors">Features</a>
-            <a href="#process" className="hover:text-on-surface transition-colors">Verification Loop</a>
+            <a href="#process" className="hover:text-on-surface transition-colors">Process</a>
           </nav>
 
           <div className="flex items-center gap-3">
             <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
             <button
               onClick={() => setAuthPopupMode('login')}
-              className="text-xs font-semibold px-4 py-2 text-on-surface-variant hover:text-on-surface transition-colors"
+              className="text-sm font-semibold px-3 py-2 text-on-surface hover:text-primary transition-colors"
             >
-              Sign In
+              Log in
             </button>
             <button
               onClick={() => setAuthPopupMode('register')}
-              className="text-xs font-semibold px-4 py-2 rounded-lg glass-button-primary text-on-primary hover:brightness-110 transition-all shadow-sm shadow-primary/20"
+              className="text-sm font-semibold px-6 py-2.5 rounded-full glass-button-primary text-on-primary hover:brightness-110 transition-all shadow-sm shadow-primary/20"
             >
-              Get Started
+              Sign Up
             </button>
           </div>
         </div>
       </header>
 
-      {/* 2. Hero Section — asymmetric, product-first */}
-      <section id="demo" className="relative z-10 pt-16 pb-20 md:pt-20 md:pb-28 overflow-hidden">
+      {/* 2. Hero Section — JobsPlanet-style split hero */}
+      <section id="home" className="relative z-10 overflow-hidden">
+        {/* soft tinted hero backdrop */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(115deg, color-mix(in srgb, var(--c-primary) 6%, transparent) 0%, transparent 45%, color-mix(in srgb, var(--c-primary) 10%, transparent) 100%)'
+          }}
+        />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 md:pt-20 pb-0 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
 
-          {/* Left: copy, left-aligned, not centered */}
-          <div className="lg:col-span-5 glass-card rounded-3xl p-8 md:p-10 shadow-lg shadow-secondary/[0.02]">
+          {/* Left: headline, copy, CTA + stat */}
+          <div className="lg:col-span-6 pb-14 md:pb-24">
             <AnimatedContent distance={30} direction="vertical" delay={0.1}>
-              <h1 className="font-headline text-4xl sm:text-5xl font-bold tracking-tight text-on-surface leading-[1.08] mb-5">
-                Resumes lie.<br />
-                Rating <span className="text-primary">4/5 in React</span> shouldn't.
+              <h1 className="font-headline text-4xl sm:text-5xl lg:text-[3.4rem] font-bold tracking-tight leading-[1.15] text-on-surface mb-6">
+                Find Your <span className="text-primary">Dream Job</span><br />
+                With Your Interest<br />
+                And Skills
               </h1>
             </AnimatedContent>
 
             <AnimatedContent distance={25} direction="vertical" delay={0.25}>
-              <p className="text-sm sm:text-base text-on-surface-variant leading-relaxed mb-8 max-w-md">
-                Candidates self-rate their skills. Recruiters set the bar. When a rating doesn't hold up, AlignGrad hands the candidate a short verification test instead of a rejection — pass it, and the door opens.
+              <p className="text-sm sm:text-base text-on-surface-variant leading-relaxed mb-9 max-w-md">
+                Rate your skills, verify them with a quick test, and get matched with
+                roles where you actually qualify — no guesswork and no wasted
+                applications, just opportunities that fit your real abilities.
               </p>
             </AnimatedContent>
 
             <AnimatedContent distance={20} direction="vertical" delay={0.4}>
-              <div className="flex flex-col sm:flex-row items-start gap-3 mb-10">
+              <div className="flex flex-wrap items-center gap-6">
                 <button
                   onClick={() => navigateToCandidate('signup')}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl glass-button-secondary text-on-secondary font-semibold text-sm hover:brightness-110 hover:shadow-lg hover:shadow-secondary/20 transition-all shadow-md shadow-secondary/15"
+                  className="inline-flex items-center px-7 py-3.5 rounded-full glass-button-primary text-on-primary font-semibold text-sm hover:brightness-110 transition-all shadow-md shadow-primary/25"
                 >
-                  Join as a Candidate
-                  <ArrowRight className="w-4 h-4" />
+                  Browse Jobs
                 </button>
-                <button
-                  onClick={() => navigateToRecruiter('signup')}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl glass-button text-on-surface font-semibold text-sm hover:bg-surface-container-high/70 transition-all"
-                >
-                  Hire Verified Students
-                </button>
-              </div>
-            </AnimatedContent>
-
-            {/* Inline stat strip — no boxes, no grid */}
-            <AnimatedContent distance={15} direction="vertical" delay={0.55} stagger={0.12}>
-              <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 text-xs text-on-surface-variant border-t border-outline-variant pt-5">
-                <span><strong className="font-mono text-on-surface text-sm">5,400+</strong> students verified</span>
-                <span><strong className="font-mono text-on-surface text-sm">150+</strong> partner companies</span>
-                <span><strong className="font-mono text-on-surface text-sm">&lt;3 days</strong> avg. interview loop</span>
+                <div className="text-sm leading-tight">
+                  <span className="block font-headline font-bold text-on-surface text-base">5,400+</span>
+                  <span className="text-on-surface-variant">students verified</span>
+                </div>
               </div>
             </AnimatedContent>
           </div>
 
-          {/* Right: the actual product, standing in for a hero screenshot */}
-          <div className="lg:col-span-7">
-            <AnimatedContent distance={50} direction="horizontal" reverse threshold={0.1} delay={0.3}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* Right: hero visual on soft blob with floating stat card */}
+          <div className="lg:col-span-6 relative self-end">
+            <AnimatedContent distance={40} direction="horizontal" reverse threshold={0.1} delay={0.25}>
+              <div className="relative flex justify-center -translate-y-6 md:-translate-y-12">
+                {/* soft radial blob behind the person */}
+                <div
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[85%] aspect-square rounded-full pointer-events-none"
+                  style={{
+                    background:
+                      'radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--c-primary) 22%, transparent) 0%, color-mix(in srgb, var(--c-primary) 8%, transparent) 55%, transparent 75%)'
+                  }}
+                />
+                <img
+                  src="/man_with_offer_letter.png"
+                  alt="Candidate holding a job offer letter"
+                  className="relative z-10 w-full max-w-md object-contain"
+                />
 
-                {/* Candidate card */}
-                <div className="glass-card rounded-2xl p-6 flex flex-col justify-between shadow-sm">
-                  <div>
-                    <div className="flex items-center gap-3 border-b border-outline-variant/60 pb-4 mb-5">
-                      <div className="h-9 w-9 rounded-full bg-primary-container flex items-center justify-center text-sm font-bold text-on-primary-container">
-                        LC
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-on-surface">Leo Carter</h4>
-                        <span className="text-[10px] font-mono text-on-surface-variant uppercase">Pre-Final Year, B.Tech CSE</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-xs mb-1.5 font-medium">
-                          <span>React & Next.js</span>
-                          <span className="font-mono text-primary font-bold">{simulatedReactRating}/5</span>
-                        </div>
-                        <div className="h-2 w-full bg-surface-container-high/40 rounded-full overflow-hidden relative">
-                          <div
-                            className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
-                            style={{ width: `${(simulatedReactRating / 5) * 100}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-xs mb-1.5 font-medium">
-                          <span>Node.js / Databases</span>
-                          <span className="font-mono text-on-surface-variant">4/5</span>
-                        </div>
-                        <div className="h-2 w-full bg-surface-container-high/40 rounded-full overflow-hidden relative">
-                          <div className="h-full bg-on-surface-variant/40 rounded-full w-[80%]" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {!simQuestionsPassed && (
-                      <div className="mt-6 p-4 glass-card rounded-xl border border-primary/10">
-                        <p className="text-xs text-on-surface-variant leading-relaxed">
-                          Leo's React rating is <strong>3/5</strong>. The role on the right needs <strong>4/5</strong> — locked. Try the test.
-                        </p>
-                        <button
-                          onClick={runVerificationSimulation}
-                          disabled={isSimulatingTest}
-                          className="mt-3 w-full py-2 glass-button-primary hover:brightness-110 disabled:opacity-50 text-on-primary font-bold text-xs rounded-lg transition-all flex items-center justify-center gap-2"
-                        >
-                          {isSimulatingTest ? (
-                            <>
-                              <Activity className="w-3.5 h-3.5 animate-spin" />
-                              <span>Running 12 React MCQs...</span>
-                            </>
-                          ) : (
-                            <>
-                              <ShieldCheck className="w-3.5 h-3.5" />
-                              <span>Run Skill Verification Test</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    )}
-
-                    {simQuestionsPassed && (
-                      <div className="mt-6 p-4 bg-success-container/30 rounded-xl border border-success-container text-success font-medium text-xs flex flex-col items-center text-center gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-success" />
-                        <span>Passed with 92%. React verified at 5/5.</span>
-                        <button
-                          onClick={resetSimulation}
-                          className="mt-1 text-[10px] uppercase font-mono tracking-wider text-on-surface-variant hover:text-on-surface underline"
-                        >
-                          Reset Demo
-                        </button>
-                      </div>
-                    )}
+                {/* Floating jobs stat card */}
+                <div className="absolute z-20 top-6 left-0 sm:left-4 flex items-center gap-3 glass-card rounded-2xl px-4 py-3 shadow-xl">
+                  <span className="h-10 w-10 rounded-xl bg-primary-container flex items-center justify-center flex-shrink-0">
+                    <Briefcase className="w-5 h-5 text-primary" />
+                  </span>
+                  <div className="text-xs leading-tight">
+                    <span className="block font-headline font-bold text-on-surface text-sm">250+ Jobs</span>
+                    <span className="text-on-surface-variant">Posted Daily</span>
                   </div>
+                </div>
 
-                  <div className="border-t border-outline-variant/60 pt-4 mt-5 flex items-center justify-between text-[10px] font-mono text-on-surface-variant">
-                    <span>STATUS:</span>
-                    <span className={simQuestionsPassed ? "text-success font-bold" : "text-tertiary font-bold"}>
-                      {simQuestionsPassed ? "VERIFIED L5" : "SELF-RATED"}
+                {/* Floating hired card */}
+                <div className="absolute z-20 bottom-10 right-0 sm:right-2 flex items-center gap-2.5 glass-card rounded-full pl-1.5 pr-4 py-1.5 shadow-xl">
+                  <img
+                    src="/happy_candidate.png"
+                    alt="Recently hired candidate"
+                    className="h-9 w-9 rounded-full object-cover object-top"
+                  />
+                  <div className="text-[11px] leading-tight">
+                    <span className="font-bold text-on-surface flex items-center gap-1">
+                      Leo got hired
+                      <CheckCircle2 className="w-3.5 h-3.5 text-success" />
                     </span>
-                  </div>
-                </div>
-
-                {/* Job card */}
-                <div className="glass-card rounded-2xl p-6 flex flex-col justify-between shadow-sm sm:mt-8">
-                  <div>
-                    <div className="flex items-center justify-between border-b border-outline-variant/60 pb-4 mb-5">
-                      <h4 className="text-sm font-bold text-on-surface">Frontend Engineer</h4>
-                      <span className="text-[10px] font-mono text-on-surface-variant">$8k/mo</span>
-                    </div>
-
-                    <div className="space-y-2 mb-4">
-                      <div className="flex justify-between items-center bg-surface-container-high/40 rounded-xl p-3 border border-outline-variant/60 text-xs">
-                        <span className="font-medium">React</span>
-                        <span className="font-mono px-2 py-0.5 rounded font-bold">Min 4/5</span>
-                      </div>
-                      <div className="flex justify-between items-center bg-surface-container-high/40 rounded-xl p-3 border border-outline-variant/60 text-xs">
-                        <span className="font-medium">Node.js</span>
-                        <span className="font-mono px-2 py-0.5 rounded font-bold">Min 3/5</span>
-                      </div>
-                    </div>
-
-                    {simulatedReactRating >= 4 ? (
-                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-success-container/20 border border-success-container/30 text-success text-xs">
-                        <Unlock className="w-4 h-4" />
-                        <span>Thresholds met. Unlocked.</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2.5 p-3 rounded-xl bg-error-container/20 border border-error-container/30 text-error text-xs">
-                        <Lock className="w-4 h-4" />
-                        <span>React rating below requirement.</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-6">
-                    {simulatedReactRating >= 4 ? (
-                      <button
-                        onClick={() => alert("Mock application submitted successfully!")}
-                        className="w-full py-3 glass-button-secondary text-on-secondary rounded-xl font-bold text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-md shadow-secondary/15 animate-fade-in"
-                      >
-                        <span>Submit Application</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    ) : (
-                      <button
-                        disabled
-                        className="w-full py-3 glass-button text-on-surface-variant/50 rounded-xl font-semibold text-sm cursor-not-allowed flex items-center justify-center gap-2 opacity-60"
-                      >
-                        <Lock className="w-4 h-4" />
-                        <span>Application Locked</span>
-                      </button>
-                    )}
+                    <span className="text-on-surface-variant">Frontend Engineer</span>
                   </div>
                 </div>
               </div>
             </AnimatedContent>
           </div>
+        </div>
+      </section>
+
+      {/* 3. How it Works */}
+      <section id="how-it-works" className="relative z-10 py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedContent distance={30} direction="vertical" threshold={0.2}>
+            <div className="max-w-2xl mx-auto text-center mb-14">
+              <span className="block text-sm font-medium text-on-surface-variant mb-3">How it Works</span>
+              <h2 className="font-headline text-3xl md:text-4xl font-bold text-on-surface leading-snug">
+                Easy Steps To Get Your Dream Job
+                <br className="hidden md:block" /> With Our Platform
+              </h2>
+            </div>
+          </AnimatedContent>
+
+          <AnimatedContent distance={30} direction="vertical" threshold={0.15} delay={0.1}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                {
+                  icon: UserPlus,
+                  title: 'Create Account',
+                  desc: 'Sign up as a candidate and rate your skills from 1 to 5 across the stacks you actually know.'
+                },
+                {
+                  icon: FileText,
+                  title: 'Upload Your Resume',
+                  desc: 'Import an existing resume or build a verified PDF one directly inside the platform.'
+                },
+                {
+                  icon: Search,
+                  title: 'Search Job',
+                  desc: 'Browse roles whose skill thresholds are checked live against your own ratings.'
+                },
+                {
+                  icon: Send,
+                  title: 'Apply Your Dream Job',
+                  desc: 'Apply instantly when you qualify — or pass a quick MCQ test to unlock the role.'
+                }
+              ].map(step => (
+                <div key={step.title} className="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-primary/10">
+                  <span className="h-11 w-11 rounded-xl bg-primary-container flex items-center justify-center mb-4">
+                    <step.icon className="w-5 h-5 text-primary" />
+                  </span>
+                  <h3 className="font-headline text-base font-bold text-on-surface mb-2">{step.title}</h3>
+                  <p className="text-xs text-on-surface-variant leading-relaxed">{step.desc}</p>
+                </div>
+              ))}
+            </div>
+          </AnimatedContent>
         </div>
       </section>
 

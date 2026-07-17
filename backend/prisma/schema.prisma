@@ -23,7 +23,7 @@ model Profile {
   userId       String        @unique @db.ObjectId
   user         User          @relation(fields: [userId], references: [id])
   name         String
-  username     String?       @unique
+  username     String?
   profilePic   String?
   resumeUrl    String?
   skills       Skill[]
@@ -196,4 +196,64 @@ model TestAttempt {
   score     Int
   passed    Boolean
   createdAt DateTime @default(now())
+}
+
+model Gig {
+  id                  String          @id @default(auto()) @map("_id") @db.ObjectId
+  title               String
+  description         String
+  skills              String[]
+  budget              Float
+  deliveryTime        String
+  attachments         String[]        @default([])
+  ownerId             String          @db.ObjectId
+  selectedCandidateId String?         @db.ObjectId
+  status              String          @default("OPEN") // "OPEN", "IN_PROGRESS", "COMPLETED"
+  typingUserId        String?
+  createdAt           DateTime        @default(now())
+  applicants          GigApplicant[]
+  messages            GigMessage[]
+  reviews             GigReview[]
+  submissions         GigSubmission[]
+}
+
+model GigApplicant {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  gigId       String   @db.ObjectId
+  gig         Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  candidateId String   @db.ObjectId
+  message     String?
+  createdAt   DateTime @default(now())
+}
+
+model GigMessage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  gigId     String   @db.ObjectId
+  gig       Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  senderId  String   @db.ObjectId
+  text      String?
+  fileUrl   String?
+  createdAt DateTime @default(now())
+}
+
+model GigSubmission {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  gigId        String   @db.ObjectId
+  gig          Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  candidateId  String   @db.ObjectId
+  text         String?
+  fileUrl      String?
+  status       String   @default("PENDING") // "PENDING", "ACCEPTED", "REJECTED"
+  createdAt    DateTime @default(now())
+}
+
+model GigReview {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  gigId       String   @db.ObjectId
+  gig         Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  reviewerId  String   @db.ObjectId
+  revieweeId  String   @db.ObjectId
+  rating      Int
+  review      String
+  createdAt   DateTime @default(now())
 }

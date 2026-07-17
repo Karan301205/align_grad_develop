@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, ChevronRight, Plus, ChevronDown } from 'lucide-react';
+import { CheckCircle, ChevronRight, Plus, ChevronDown, Star, Award, Briefcase, DollarSign } from 'lucide-react';
 import { ALL_SKILLS } from '../../../constants';
 import { apiFetch } from '../../../services/apiClient';
 import { putFileToS3 } from '../../../services/uploadService';
@@ -78,6 +78,19 @@ export default function StudentProfile({
   const [isSkillDropdownOpen, setIsSkillDropdownOpen] = React.useState(false);
   const [usernameStatus, setUsernameStatus] = React.useState(''); // 'loading', 'available', 'taken', 'invalid', ''
   const [usernameMsg, setUsernameMsg] = React.useState('');
+
+  const gigExperienceItems = (experienceList || []).filter(exp => exp.expType === 'Gig');
+  const completedGigsCount = gigExperienceItems.length;
+  let totalRating = 0;
+  let ratedGigsCount = 0;
+  gigExperienceItems.forEach(exp => {
+    const match = exp.description?.match(/Rating:\s*(\d+)\/5/);
+    if (match) {
+      totalRating += parseInt(match[1]);
+      ratedGigsCount++;
+    }
+  });
+  const averageRating = ratedGigsCount > 0 ? (totalRating / ratedGigsCount).toFixed(1) : 'N/A';
 
   const [editingEduIdx, setEditingEduIdx] = React.useState(null);
   const [editingExpIdx, setEditingExpIdx] = React.useState(null);
@@ -1185,46 +1198,84 @@ export default function StudentProfile({
                   <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">{experienceList.length} Items Added</span>
                 </div>
 
+                {/* Verified Gig Stats Card */}
+                {gigExperienceItems.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface-container-high/40 p-4 rounded-xl border border-outline-variant/50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20 shadow-inner">
+                        <Award className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-mono uppercase text-on-surface-variant">Completed Geeks</p>
+                        <p className="text-xs font-bold text-on-surface">{completedGigsCount} Verified Geeks</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-warning/10 text-warning flex items-center justify-center border border-warning/20 shadow-inner">
+                        <Star className="w-5 h-5 fill-warning/20" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-mono uppercase text-on-surface-variant">Average Rating</p>
+                        <p className="text-xs font-bold text-on-surface">{averageRating} / 5.0 Rating</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Existing items */}
                 {experienceList.length > 0 && (
                   <div className="space-y-3">
                     {experienceList.map((exp, idx) => (
-                      <div key={idx} className="p-4 bg-surface-container-low border border-outline-variant rounded-xl flex justify-between items-start">
+                      <div key={idx} className={`p-4 border rounded-xl flex justify-between items-start ${exp.expType === 'Gig' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-surface-container-low border-outline-variant'}`}>
                         <div>
-                          <p className="text-sm font-bold text-on-surface">{exp.designation} at {exp.companyName}</p>
-                          <p className="text-xs text-on-surface-variant">{exp.domain} ({exp.expType}) {exp.involvesTech && '• Tech Role'}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-bold text-on-surface">{exp.designation} at {exp.companyName}</p>
+                            {exp.expType === 'Gig' && (
+                              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[9px] font-mono font-bold border border-emerald-500/20">
+                                <Award className="w-3 h-3" /> Verified Gig
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-on-surface-variant">{exp.domain} ({exp.expType || 'Experience'}) {exp.involvesTech && '• Tech Role'}</p>
                           <p className="text-[10px] text-secondary font-mono mt-1">
                             {exp.startDate} to {exp.currentlyWorking ? 'Present' : exp.endDate} • {exp.location || 'Remote'}
                           </p>
+                          {exp.expType === 'Gig' && exp.description && (
+                            <p className="text-xs text-on-surface-variant mt-2 italic bg-surface-container-high/40 p-2.5 rounded-lg border border-outline-variant/30 leading-relaxed">
+                              {exp.description}
+                            </p>
+                          )}
                         </div>
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const item = experienceList[idx];
-                              setNewExp({ ...item });
-                              setDomainSearch('');
-                              setEditingExpIdx(idx);
-                            }}
-                            className="text-primary hover:text-primary/70 text-xs font-mono transition-colors"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setExperienceList(experienceList.filter((_, i) => i !== idx));
-                              if (editingExpIdx === idx) {
-                                setEditingExpIdx(null);
-                                setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
+                        {exp.expType !== 'Gig' && (
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const item = experienceList[idx];
+                                setNewExp({ ...item });
                                 setDomainSearch('');
-                              }
-                            }}
-                            className="text-error hover:text-error/70 text-xs font-mono transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
+                                setEditingExpIdx(idx);
+                              }}
+                              className="text-primary hover:text-primary/70 text-xs font-mono transition-colors"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setExperienceList(experienceList.filter((_, i) => i !== idx));
+                                if (editingExpIdx === idx) {
+                                  setEditingExpIdx(null);
+                                  setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
+                                  setDomainSearch('');
+                                }
+                              }}
+                              className="text-error hover:text-error/70 text-xs font-mono transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

@@ -50,7 +50,8 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   ├── auth.controller.js # Signups, logins, and token issuance
 │   │   │   ├── recruiter.controller.js # Verification, candidate search, job postings
 │   │   │   ├── student.controller.js # Profile updates, job listings, quiz scoring
-│   │   │   └── upload.controller.js # Presigned S3 url generator and binary magic-bytes checking
+│   │   │   ├── upload.controller.js # Presigned S3 url generator and binary magic-bytes checking
+│   │   │   └── gig.controller.js # Gigs marketplace controller workflow
 │   │   ├── middleware/           # HTTP Interceptors and guards
 │   │   │   ├── auth.js           # Decodes and validates JWT bearer token signatures
 │   │   │   ├── errorHandler.js   # Catches errors, formatting 500s with masked prod warnings
@@ -74,7 +75,8 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   ├── auth.validator.js
 │   │   │   ├── recruiter.validator.js
 │   │   │   ├── student.validator.js
-│   │   │   └── upload.validator.js
+│   │   │   ├── upload.validator.js
+│   │   │   └── gig.validator.js
 │   │   └── index.js              # Application entrypoint setting up middleware, DB, and ports
 │   ├── package.json
 │   ├── package-lock.json
@@ -146,6 +148,8 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │           ├── StudentResume.jsx # Resume builder compiling details and exporting PDF
 │   │   │           ├── StudentShowcase.jsx # Video introduction recorder and uploader
 │   │   │           └── StudentSkillTests.jsx # Interactive dashboard to verify and upgrade skills
+│   │   │   ├── Gigs/
+│   │   │   │   └── GigsMarketplace.jsx # Dashboard managing gigs browse, posts, chats, reviews
 │   │   ├── services/             # Client-side utility abstractions
 │   │   │   ├── apiClient.js      # Unified wrapper managing fetches, endpoints, and headers
 │   │   │   ├── resumePdf.js      # Generates a PDF resume from student profile DOM structures
@@ -358,6 +362,13 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Safe Modifications**: Structuring folder paths inside buckets.
 * **Risk**: High (handles uploads logic and executes signature checks).
 
+#### [backend/src/controllers/gig.controller.js](file:///Users/karanrawat/Desktop/a_g/backend/src/controllers/gig.controller.js)
+* **Purpose**: Manages gigs marketplace lifecycle including gig creation, applications submission, candidate selection (hiring), private chat messages, deliverables submission, completion acceptance/revisions, and client-freelancer reviews. Pushes completed gigs to candidate profiles as verified work experience.
+* **Used By**: [backend/src/routes/api.js](file:///Users/karanrawat/Desktop/a_g/backend/src/routes/api.js).
+* **Dependencies**: [backend/src/config/db.js](file:///Users/karanrawat/Desktop/a_g/backend/src/config/db.js).
+* **Safe Modifications**: Tweaking review/rating boundaries, customizing private chat text templates.
+* **Risk**: Medium.
+
 #### [backend/src/services/fileCleanup.service.js](file:///Users/karanrawat/Desktop/a_g/backend/src/services/fileCleanup.service.js)
 * **Purpose**: Provides deletion helpers to remove outdated profile files or company verification papers from S3.
 * **Used By**: [backend/src/controllers/student.controller.js](file:///Users/karanrawat/Desktop/a_g/backend/src/controllers/student.controller.js), [backend/src/controllers/recruiter.controller.js](file:///Users/karanrawat/Desktop/a_g/backend/src/controllers/recruiter.controller.js).
@@ -435,6 +446,13 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Safe Modifications**: Customizing fields, setting rules for projects or portfolio links.
 * **Risk**: Low.
 
+#### [backend/src/validators/gig.validator.js](file:///Users/karanrawat/Desktop/a_g/backend/src/validators/gig.validator.js)
+* **Purpose**: Zod validation schemas enforcing constraints on gig actions (gig creations, applications messages, chat messages, submissions descriptions, reviews ratings).
+* **Used By**: [backend/src/routes/api.js](file:///Users/karanrawat/Desktop/a_g/backend/src/routes/api.js).
+* **Dependencies**: `zod`.
+* **Safe Modifications**: Appending new fields to gig creation forms, modifying minimum text lengths.
+* **Risk**: Low.
+
 #### [backend/src/validators/upload.validator.js](file:///Users/karanrawat/Desktop/a_g/backend/src/validators/upload.validator.js)
 * **Purpose**: Zod schemas verifying file upload parameters (filename string, type categorization).
 * **Used By**: [backend/src/routes/api.js](file:///Users/karanrawat/Desktop/a_g/backend/src/routes/api.js).
@@ -473,7 +491,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Dependencies**: None.
 
 #### [frontend/src/features/Auth/AuthView.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/features/Auth/AuthView.jsx)
-* **Purpose**: Contains the split login/register dashboard UI forms.
+* **Purpose**: JobsPlanet-style marketing landing page in the scoped "Dream Job Blue" theme (`.theme-jobsplanet` token overrides in `index.css` — royal blue #2563eb, navy headings, blue-tinted white bg, light+dark variants). Split hero (`/man_with_offer_letter.png` on a radial blob, floating "250+ Jobs" card, "Leo got hired" pill with `/happy_candidate.png`), Browse Jobs CTA, "How it Works" 4-step cards, feature tabs, roadmap, plus the login/register popup picker and slide-over auth drawer. Keeps the interactive DotGrid + ClickSpark background.
 
 #### [frontend/src/features/SkillTest/TestView.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/features/SkillTest/TestView.jsx)
 * **Purpose**: Renders the lockout-remedial test verification screen and contains static question datasets.
@@ -505,7 +523,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Risk**: Medium.
 
 #### [frontend/src/index.css](file:///Users/karanrawat/Desktop/a_g/frontend/src/index.css)
-* **Purpose**: Loads Tailwind directives and registers the Industrial Skeuomorphism custom design system rules (light + dark mode, variables, shadow maps, LED badges, embossed text utilities).
+* **Purpose**: Loads Tailwind directives and registers the Industrial Skeuomorphism custom design system rules (light + dark mode, variables, shadow maps, LED badges, embossed text utilities). Also defines the scoped `.theme-jobsplanet` / `.dark .theme-jobsplanet` token override blocks (blue/white "Dream Job Blue" landing theme) used only by `AuthView.jsx`.
 * **Used By**: [frontend/src/main.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/main.jsx).
 * **Dependencies**: Tailwind directives.
 * **Safe Modifications**: Adjusting theme color variables, custom scrollbar styling, neumorphic border rules.
@@ -612,7 +630,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **`ThemeToggle.jsx`**: Slide button changing themes between light and dark modes.
 
 #### Feature Views (`frontend/src/features/`)
-* **`Auth/AuthView.jsx`**: Marketing landing page with popup picker and demo widgets.
+* **`Auth/AuthView.jsx`**: JobsPlanet-style blue marketing landing page (scoped `.theme-jobsplanet` tokens, hero with public-folder imagery on radial blob, How-it-Works steps) with popup auth picker and feature demo widgets.
 * **`Auth/CandidateAuth.jsx`**: Dedicated Candidate login and signup pages matching the skeuomorphic theme.
 * **`Auth/RecruiterAuth.jsx`**: Dedicated Recruiter login and signup pages matching the skeuomorphic theme.
 * **`SkillTest/TestView.jsx`**: Lockdown fullscreen exam panel checking focus state changes and scoring MCQ answers.
@@ -630,6 +648,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **`Student/components/StudentResume.jsx`**: Resume builder generating downloadable PDF resume layouts.
 * **`Student/components/StudentShowcase.jsx`**: Dashboard to record/upload introduction videos.
 * **`Student/components/StudentSkillTests.jsx`**: Certification lists and launcher panel for AI-generated MCQ tests.
+* **`Gigs/GigsMarketplace.jsx`**: Shared dashboard component handling the gigs marketplace browse list, posting form, select and hire freelancers controls, messaging chat panel, work submissions triggers, and review forms.
 
 ---
 
