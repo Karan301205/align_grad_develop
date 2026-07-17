@@ -442,10 +442,21 @@ export default function StudentProfile({
     if (JSON.stringify(orig.projects || []) !== JSON.stringify(projectsList || [])) return true;
     if (JSON.stringify(orig.cocurricular || []) !== JSON.stringify(cocurricular || [])) return true;
 
+    // Compare skills list
+    const origSkills = orig.skills || [];
+    const currSkills = skillsList || [];
+    if (origSkills.length !== currSkills.length) return true;
+    for (const skill of currSkills) {
+      const match = origSkills.find(s => s.name.toLowerCase() === skill.name.toLowerCase());
+      if (!match) return true;
+      if (match.rating !== skill.rating) return true;
+      if (match.verifiedRating !== skill.verifiedRating) return true;
+    }
+
     return false;
   }, [
     profile, username, profilePic, bio, nationality, gender, profileEmail, dob, phone, resumeUrl, cocurricular,
-    socialLinks, educationList, experienceList, certificatesList, projectsList
+    socialLinks, educationList, experienceList, certificatesList, projectsList, skillsList
   ]);
 
   const isSaveActive = React.useMemo(() => {
@@ -1934,7 +1945,7 @@ export default function StudentProfile({
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                   <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Your Stacks & Skills</label>
                   <span className="text-[10px] font-mono text-yellow-800 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-950/30 border border-yellow-300 dark:border-yellow-800/50 px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 shadow-sm">
-                    ⚠️ Default rating is 1 and can be increased by giving the test.
+                  Default rating is 1 and can be increased by giving the test.
                   </span>
                 </div>
 
