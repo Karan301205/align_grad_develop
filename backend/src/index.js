@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const apiRoutes = require('./routes/api');
 const { prisma } = require('./config/db');
 
-// Triggering nodemon reload to load the updated Prisma Client schema
+// Triggering nodemon reload to load the updated Prisma Client schema: reload 2
 dotenv.config();
 
 const app = express();
