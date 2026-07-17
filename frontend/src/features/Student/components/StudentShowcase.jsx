@@ -213,13 +213,13 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
         throw new Error(d.error || 'Failed to request secure signed upload URL.');
       }
 
-      const { uploadUrl, publicUrl } = await urlRes.json();
+      const { signedUrl, publicUrl } = await urlRes.json();
       setUploadProgress(15);
 
       // 2. Upload video file to Supabase using the signed URL and XMLHttpRequest (for progress reporting)
       await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open('PUT', uploadUrl);
+        xhr.open('PUT', signedUrl);
         xhr.setRequestHeader('Content-Type', recordedBlob.type || `video/${fileExt}`);
         if (token) {
           xhr.setRequestHeader('Authorization', `Bearer ${token}`);
