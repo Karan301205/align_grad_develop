@@ -1931,7 +1931,12 @@ export default function StudentProfile({
             {/* Panel 7: Skills */}
             {profileTab === 'skills' && (
               <div className="space-y-4">
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Your Stacks & Skills</label>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Your Stacks & Skills</label>
+                  <span className="text-[10px] font-mono text-yellow-800 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-950/30 border border-yellow-300 dark:border-yellow-800/50 px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 shadow-sm">
+                    ⚠️ Default rating is 1 and can be increased by giving the test.
+                  </span>
+                </div>
 
                 <div className="bg-surface-container-low border border-outline-variant rounded-xl p-6 space-y-5">
                   {/* Searchable input & dropdown to add a skill */}
