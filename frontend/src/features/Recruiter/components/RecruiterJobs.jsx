@@ -5,6 +5,7 @@ import EditJobModal from './EditJobModal';
 import PageHeader from '../../../components/ui/PageHeader';
 import StatCard from '../../../components/ui/StatCard';
 import Card from '../../../components/ui/Card';
+import Badge from '../../../components/ui/Badge';
 import EmptyState from '../../../components/ui/EmptyState';
 import { apiFetch } from '../../../services/apiClient';
 import CandidateProfileModal from './CandidateProfileModal';
@@ -89,6 +90,9 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                     >
                       {job.title}
                     </h4>
+                    <Badge variant={job.opportunityType === 'INTERNSHIP' ? 'tertiary' : 'primary'}>
+                      {job.opportunityType === 'INTERNSHIP' ? 'Internship' : 'Job'}
+                    </Badge>
                     {job.edited && (
                       <span className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[9px] font-mono font-bold rounded-full uppercase tracking-wider shrink-0">
                         Updated

@@ -42,10 +42,22 @@ const reviewGigSchema = {
   })
 };
 
+const updateGigSchema = {
+  body: z.object({
+    title: z.string().min(5, 'Title must be at least 5 characters long').max(100, 'Title must not exceed 100 characters').optional(),
+    description: z.string().min(10, 'Description must be at least 10 characters long').max(2000, 'Description must not exceed 2000 characters').optional(),
+    skills: z.array(z.string().min(1, 'Skill name must not be empty')).min(1, 'At least one skill is required').optional(),
+    budget: z.number().positive('Budget must be a positive number').optional(),
+    deliveryTime: z.string().min(1, 'Delivery time designation is required').max(100).optional(),
+    attachments: z.array(z.string().url('Invalid attachment URL')).optional()
+  })
+};
+
 module.exports = {
   createGigSchema,
   applyGigSchema,
   sendMessageSchema,
   submitWorkSchema,
-  reviewGigSchema
+  reviewGigSchema,
+  updateGigSchema
 };

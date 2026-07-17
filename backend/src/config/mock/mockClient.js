@@ -141,7 +141,7 @@ const mockClient = {
           'preferredEducation', 'desiredExperience', 'designation',
           'stipendPartTime', 'stipendFullTime', 'duration',
           'roleResponsibilities', 'location', 'locationUrl', 'joiningMonth',
-          'openings', 'edited', 'activeDays'
+          'openings', 'edited', 'activeDays', 'opportunityType'
         ];
         fields.forEach(field => {
           if (data[field] !== undefined) {
@@ -290,6 +290,19 @@ const mockClient = {
           }
         });
         return mockDb.gigs[idx];
+      }
+      throw new Error("Gig not found");
+    },
+    delete: async ({ where }) => {
+      const idx = mockDb.gigs.findIndex(g => g.id === where.id);
+      if (idx !== -1) {
+        const deleted = mockDb.gigs[idx];
+        mockDb.gigs.splice(idx, 1);
+        mockDb.gigApplicants = mockDb.gigApplicants.filter(a => a.gigId !== where.id);
+        mockDb.gigMessages = mockDb.gigMessages.filter(m => m.gigId !== where.id);
+        mockDb.gigSubmissions = mockDb.gigSubmissions.filter(s => s.gigId !== where.id);
+        mockDb.gigReviews = mockDb.gigReviews.filter(r => r.gigId !== where.id);
+        return deleted;
       }
       throw new Error("Gig not found");
     }

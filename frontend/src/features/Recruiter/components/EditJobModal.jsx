@@ -351,7 +351,9 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Stipend/Month (Part-Time)</label>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">
+                  {job.opportunityType === 'INTERNSHIP' ? 'Stipend/Month (Part-Time)' : 'Salary/Month (Part-Time)'}
+                </label>
                 <input
                   type="text"
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
@@ -361,7 +363,9 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Stipend/Month (Full-Time)</label>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">
+                  {job.opportunityType === 'INTERNSHIP' ? 'Stipend/Month (Full-Time)' : 'Salary/Month (Full-Time)'}
+                </label>
                 <input
                   type="text"
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
@@ -370,15 +374,17 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                 />
               </div>
 
-              <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Duration (Internship)</label>
-                <input
-                  type="text"
-                  className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
-                  value={duration}
-                  onChange={e => setDuration(e.target.value)}
-                />
-              </div>
+              {job.opportunityType === 'INTERNSHIP' && (
+                <div>
+                  <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Duration (Internship)</label>
+                  <input
+                    type="text"
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
+                    value={duration}
+                    onChange={e => setDuration(e.target.value)}
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Joining Date *</label>

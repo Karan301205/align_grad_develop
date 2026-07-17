@@ -54,6 +54,7 @@ exports.postJob = async (req, res) => {
   const { 
     title, 
     description, 
+    opportunityType,
     requirements,
     companyName,
     officialWebsite,
@@ -87,6 +88,7 @@ exports.postJob = async (req, res) => {
     const job = await prisma.job.create({
       data: {
         companyId: company.id,
+        opportunityType: opportunityType || "JOB",
         title,
         description,
         companyName,
@@ -180,6 +182,7 @@ exports.updateJob = async (req, res) => {
   const { 
     title, 
     description, 
+    opportunityType,
     requirements,
     companyName,
     officialWebsite,
@@ -223,6 +226,7 @@ exports.updateJob = async (req, res) => {
     const updatedJob = await prisma.job.update({
       where: { id: jobId },
       data: {
+        opportunityType: opportunityType !== undefined ? opportunityType : job.opportunityType,
         title,
         description,
         companyName,

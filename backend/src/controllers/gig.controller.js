@@ -42,6 +42,9 @@ exports.getGigs = async (req, res) => {
 // Create a new Gig
 exports.createGig = async (req, res) => {
   try {
+    if (req.user.role !== 'RECRUITER') {
+      return res.status(403).json({ error: 'Only recruiters can create gigs' });
+    }
     const { title, description, skills, budget, deliveryTime, attachments } = req.body;
     
     // Create new gig model
@@ -498,5 +501,120 @@ exports.reviewGig = async (req, res) => {
   } catch (err) {
     console.error('Error submitting review:', err);
     res.status(500).json({ error: 'Failed to submit review' });
+  }
+};
+
+// Update an existing Gig (Recruiter owner only)
+exports.updateGig = async (req, res) => {
+  try {
+    const { gigId } = req.params;
+    const { title, description, skills, budget, deliveryTime, attachments } = req.body;
+    const userId = req.user.id;
+
+    if (req.user.role !== 'RECRUITER') {
+      return res.status(403).json({ error: 'Only recruiters can update gigs' });
+    }
+
+    const gig = await prisma.gig.findUnique({ where: { id: gigId } });
+    if (!gig) {
+      return res.status(404).json({ error: 'Gig not found' });
+    }
+
+    if (gig.ownerId !== userId) {
+      return res.status(403).json({ error: 'Only the gig owner can edit this gig' });
+    }
+
+    if (gig.status !== 'OPEN' && gig.status !== 'PAUSED') {
+      return res.status(400).json({ error: 'You can only edit gigs that are open or paused' });
+    }
+
+    const updatedGig = await prisma.gig.update({
+      where: { id: gigId },
+      data: {
+        title: title !== undefined ? title : gig.title,
+        description: description !== undefined ? description : gig.description,
+        skills: skills !== undefined ? skills : gig.skills,
+        budget: budget !== undefined ? budget : gig.budget,
+        deliveryTime: deliveryTime !== undefined ? deliveryTime : gig.deliveryTime,
+        attachments: attachments !== undefined ? attachments : gig.attachments
+      }
+    });
+
+    res.status(200).json(updatedGig);
+  } catch (err) {
+    console.error('Error updating gig:', err);
+    res.status(500).json({ error: 'Failed to update gig' });
+  }
+};
+
+// Pause or Resume a Gig (Recruiter owner only)
+exports.updateGigStatus = async (req, res) => {
+  try {
+    const { gigId } = req.params;
+    const { status } = req.body; // "OPEN" or "PAUSED"
+    const userId = req.user.id;
+
+    if (req.user.role !== 'RECRUITER') {
+      return res.status(403).json({ error: 'Only recruiters can change gig status' });
+    }
+
+    const gig = await prisma.gig.findUnique({ where: { id: gigId } });
+    if (!gig) {
+      return res.status(404).json({ error: 'Gig not found' });
+    }
+
+    if (gig.ownerId !== userId) {
+      return res.status(403).json({ error: 'Only the gig owner can update its status' });
+    }
+
+    if (gig.status !== 'OPEN' && gig.status !== 'PAUSED') {
+      return res.status(400).json({ error: 'Status can only be toggled for open or paused gigs' });
+    }
+
+    if (status !== 'OPEN' && status !== 'PAUSED') {
+      return res.status(400).json({ error: 'Invalid status value' });
+    }
+
+    const updatedGig = await prisma.gig.update({
+      where: { id: gigId },
+      data: { status }
+    });
+
+    res.status(200).json(updatedGig);
+  } catch (err) {
+    console.error('Error toggling gig status:', err);
+    res.status(500).json({ error: 'Failed to toggle gig status' });
+  }
+};
+
+// Delete a Gig (Recruiter owner only)
+exports.deleteGig = async (req, res) => {
+  try {
+    const { gigId } = req.params;
+    const userId = req.user.id;
+
+    if (req.user.role !== 'RECRUITER') {
+      return res.status(403).json({ error: 'Only recruiters can delete gigs' });
+    }
+
+    const gig = await prisma.gig.findUnique({ where: { id: gigId } });
+    if (!gig) {
+      return res.status(404).json({ error: 'Gig not found' });
+    }
+
+    if (gig.ownerId !== userId) {
+      return res.status(403).json({ error: 'Only the gig owner can delete this gig' });
+    }
+
+    if (gig.status !== 'OPEN' && gig.status !== 'PAUSED') {
+      return res.status(400).json({ error: 'You cannot delete a gig that is in progress or completed' });
+    }
+
+    await prisma.gig.delete({ where: { id: gigId } });
+
+    res.status(200).json({ message: 'Gig deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting gig:', err);
+    res.status(500).json({ error: 'Failed to delete gig' });
   }
 };

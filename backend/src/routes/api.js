@@ -29,7 +29,8 @@ const {
   applyGigSchema,
   sendMessageSchema,
   submitWorkSchema,
-  reviewGigSchema
+  reviewGigSchema,
+  updateGigSchema
 } = require('../validators/gig.validator');
 
 const authController = require('../controllers/auth.controller');
@@ -78,6 +79,9 @@ router.put('/recruiter/applications/:applicationId/rounds', authMiddleware, rela
 // Gigs Marketplace routes (protected)
 router.get('/gigs', authMiddleware, relaxedLimit, gigController.getGigs);
 router.post('/gigs', authMiddleware, relaxedLimit, validate(createGigSchema), gigController.createGig);
+router.put('/gigs/:gigId', authMiddleware, relaxedLimit, validate(updateGigSchema), gigController.updateGig);
+router.patch('/gigs/:gigId/status', authMiddleware, relaxedLimit, gigController.updateGigStatus);
+router.delete('/gigs/:gigId', authMiddleware, relaxedLimit, gigController.deleteGig);
 router.get('/gigs/my-gigs', authMiddleware, relaxedLimit, gigController.getMyGigs);
 router.get('/gigs/:gigId', authMiddleware, relaxedLimit, gigController.getGigDetails);
 router.post('/gigs/:gigId/apply', authMiddleware, relaxedLimit, validate(applyGigSchema), gigController.applyToGig);

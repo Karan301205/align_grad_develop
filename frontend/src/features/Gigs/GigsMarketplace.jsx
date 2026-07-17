@@ -67,6 +67,16 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
   const [submittingReview, setSubmittingReview] = useState(false);
   const [alertConfig, setAlertConfig] = useState(null);
 
+  // Edit Gig states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editSkills, setEditSkills] = useState('');
+  const [editBudget, setEditBudget] = useState('');
+  const [editDeliveryTime, setEditDeliveryTime] = useState('');
+  const [editAttachmentFile, setEditAttachmentFile] = useState(null);
+  const [updatingGig, setUpdatingGig] = useState(false);
+
   // Keep a reference to profile to satisfy eslint
   React.useEffect(() => {
     if (profile) {
@@ -233,6 +243,115 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
       scrollToBottom();
     }
   }, [gigDetails]);
+
+  const handleTogglePause = async (gig) => {
+    try {
+      const nextStatus = gig.status === 'PAUSED' ? 'OPEN' : 'PAUSED';
+      const res = await apiFetch(`/gigs/${gig.id}/status`, {
+        token,
+        method: 'PATCH',
+        json: { status: nextStatus }
+      });
+      if (res.ok) {
+        setAlertConfig({ message: `Gig ${gig.status === 'PAUSED' ? 'resumed' : 'paused'} successfully!`, type: 'success' });
+        fetchGigDetails(gig.id);
+        fetchMyGigs();
+        fetchGigs();
+      } else {
+        const d = await res.json();
+        setAlertConfig({ message: d.error || 'Failed to toggle status', type: 'error' });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteGig = async (gigId) => {
+    if (!window.confirm("Are you sure you want to delete this gig? This action cannot be undone.")) return;
+    try {
+      const res = await apiFetch(`/gigs/${gigId}`, {
+        token,
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setAlertConfig({ message: 'Gig deleted successfully!', type: 'success' });
+        setSelectedGigId(null);
+        setGigDetails(null);
+        fetchMyGigs();
+        fetchGigs();
+      } else {
+        const d = await res.json();
+        setAlertConfig({ message: d.error || 'Failed to delete gig', type: 'error' });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleOpenEditModal = (gig) => {
+    setEditTitle(gig.title);
+    setEditDescription(gig.description);
+    setEditSkills(gig.skills.join(', '));
+    setEditBudget(String(gig.budget));
+    setEditDeliveryTime(gig.deliveryTime);
+    setEditAttachmentFile(null);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateGigSubmit = async (e) => {
+    e.preventDefault();
+    setUpdatingGig(true);
+    try {
+      let uploadedUrl = gigDetails.attachments?.[0] || null;
+      if (editAttachmentFile) {
+        const urlRes = await apiFetch('/upload/request-url', {
+          token,
+          method: 'POST',
+          json: {
+            fileType: 'doc',
+            fileName: editAttachmentFile.name,
+            contentType: editAttachmentFile.type
+          }
+        });
+        if (urlRes.ok) {
+          const { uploadUrl, publicUrl } = await urlRes.json();
+          await putFileToS3(uploadUrl, editAttachmentFile, editAttachmentFile.type, token);
+          uploadedUrl = publicUrl;
+        }
+      }
+
+      const gigData = {
+        title: editTitle,
+        description: editDescription,
+        skills: editSkills.split(',').map(s => s.trim()).filter(Boolean),
+        budget: parseFloat(editBudget),
+        deliveryTime: editDeliveryTime,
+        attachments: uploadedUrl ? [uploadedUrl] : []
+      };
+
+      const res = await apiFetch(`/gigs/${gigDetails.id}`, {
+        token,
+        method: 'PUT',
+        json: gigData
+      });
+
+      if (res.ok) {
+        setAlertConfig({ message: 'Gig updated successfully!', type: 'success' });
+        setShowEditModal(false);
+        fetchGigDetails(gigDetails.id);
+        fetchMyGigs();
+        fetchGigs();
+      } else {
+        const d = await res.json();
+        setAlertConfig({ message: d.error || 'Failed to update gig', type: 'error' });
+      }
+    } catch (err) {
+      console.error(err);
+      setAlertConfig({ message: 'Error updating gig', type: 'error' });
+    } finally {
+      setUpdatingGig(false);
+    }
+  };
 
   const handlePostGig = async (e) => {
     e.preventDefault();
@@ -531,20 +650,22 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         >
           Browse Gigs
         </button>
-        <button
-          onClick={() => {
-            setActiveSubTab('post');
-            setSelectedGigId(null);
-            setGigDetails(null);
-          }}
-          className={`px-4 py-2.5 rounded-xl text-xs font-mono tracking-wider font-bold transition-all uppercase ${
-            activeSubTab === 'post'
-              ? 'bg-primary/10 text-primary border-b-2 border-primary'
-              : 'text-on-surface-variant hover:text-on-surface'
-          }`}
-        >
-          Post a Gig
-        </button>
+        {user?.role === 'RECRUITER' && (
+          <button
+            onClick={() => {
+              setActiveSubTab('post');
+              setSelectedGigId(null);
+              setGigDetails(null);
+            }}
+            className={`px-4 py-2.5 rounded-xl text-xs font-mono tracking-wider font-bold transition-all uppercase ${
+              activeSubTab === 'post'
+                ? 'bg-primary/10 text-primary border-b-2 border-primary'
+                : 'text-on-surface-variant hover:text-on-surface'
+            }`}
+          >
+            Post a Gig
+          </button>
+        )}
         <button
           onClick={() => {
             setActiveSubTab('my-gigs');
@@ -865,77 +986,85 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-200px)] min-h-[600px] items-stretch">
             {/* Left Pane: Workspace Gigs Feed */}
             <div className="lg:col-span-4 flex flex-col gap-5 overflow-y-auto pr-2 custom-scrollbar max-h-[680px]">
-              {/* Projects Freelancer is Hired For */}
-              {myGigs.filter(g => g.selectedCandidateId === user.id).length > 0 && (
+              {/* Student Hired Projects */}
+              {user?.role === 'STUDENT' && (
                 <div className="space-y-3">
                   <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">Hired Projects</h4>
-                  <div className="space-y-3">
-                    {myGigs.filter(g => g.selectedCandidateId === user.id).map(gig => {
-                      const isSelected = gig.id === selectedGigId;
-                      return (
-                        <div
-                          key={gig.id}
-                          onClick={() => {
-                            setSelectedGigId(gig.id);
-                            fetchGigDetails(gig.id);
-                          }}
-                          className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col gap-2 ${
-                            isSelected
-                              ? 'bg-surface-container-high border-primary shadow border-l-4 border-l-primary'
-                              : 'bg-surface-container border-outline-variant hover:border-on-surface-variant/30 shadow-sm'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start gap-2">
-                            <h4 className="text-xs font-bold text-on-surface line-clamp-1">{gig.title}</h4>
-                            <span className={`text-[8px] font-mono uppercase px-1.5 py-0.5 rounded-md font-extrabold ${
-                              gig.status === 'COMPLETED' ? 'bg-success/15 text-success' : 'bg-primary/15 text-primary'
-                            }`}>{gig.status}</span>
+                  {myGigs.filter(g => g.selectedCandidateId === user.id).length === 0 ? (
+                    <div className="text-center py-10 bg-surface-container border border-outline-variant rounded-2xl shadow-sm">
+                      <p className="text-xs font-mono text-on-surface-variant">No hired gigs found.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {myGigs.filter(g => g.selectedCandidateId === user.id).map(gig => {
+                        const isSelected = gig.id === selectedGigId;
+                        return (
+                          <div
+                            key={gig.id}
+                            onClick={() => {
+                              setSelectedGigId(gig.id);
+                              fetchGigDetails(gig.id);
+                            }}
+                            className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col gap-2 ${
+                              isSelected
+                                ? 'bg-surface-container-high border-primary shadow border-l-4 border-l-primary'
+                                : 'bg-surface-container border-outline-variant hover:border-on-surface-variant/30 shadow-sm'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start gap-2">
+                              <h4 className="text-xs font-bold text-on-surface line-clamp-1">{gig.title}</h4>
+                              <span className={`text-[8px] font-mono uppercase px-1.5 py-0.5 rounded-md font-extrabold ${
+                                gig.status === 'COMPLETED' ? 'bg-success/15 text-success' : 'bg-primary/15 text-primary'
+                              }`}>{gig.status}</span>
+                            </div>
+                            <p className="text-[10px] font-mono text-on-surface-variant">Budget: <strong className="text-emerald-500">${gig.budget}</strong></p>
                           </div>
-                          <p className="text-[10px] font-mono text-on-surface-variant">Budget: <strong className="text-emerald-500">${gig.budget}</strong></p>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Projects Hired Out / Created Gigs */}
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">My Postings</h4>
-                {myGigs.filter(g => g.ownerId === user.id).length === 0 && myGigs.filter(g => g.selectedCandidateId === user.id).length === 0 ? (
-                  <div className="text-center py-10 bg-surface-container border border-outline-variant rounded-2xl shadow-sm">
-                    <p className="text-xs font-mono text-on-surface-variant">No workspace history found.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {myGigs.filter(g => g.ownerId === user.id).map(gig => {
-                      const isSelected = gig.id === selectedGigId;
-                      return (
-                        <div
-                          key={gig.id}
-                          onClick={() => {
-                            setSelectedGigId(gig.id);
-                            fetchGigDetails(gig.id);
-                          }}
-                          className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col gap-2 ${
-                            isSelected
-                              ? 'bg-surface-container-high border-primary shadow border-l-4 border-l-primary'
-                              : 'bg-surface-container border-outline-variant hover:border-on-surface-variant/30 shadow-sm'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start gap-2">
-                            <h4 className="text-xs font-bold text-on-surface line-clamp-1">{gig.title}</h4>
-                            <span className={`text-[8px] font-mono uppercase px-1.5 py-0.5 rounded-md font-extrabold ${
-                              gig.status === 'COMPLETED' ? 'bg-success/15 text-success' : gig.status === 'IN_PROGRESS' ? 'bg-primary/15 text-primary' : 'bg-warning/15 text-warning'
-                            }`}>{gig.status}</span>
+              {/* Recruiter Created Gigs */}
+              {user?.role === 'RECRUITER' && (
+                <div className="space-y-3">
+                  <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">My Postings</h4>
+                  {myGigs.filter(g => g.ownerId === user.id).length === 0 ? (
+                    <div className="text-center py-10 bg-surface-container border border-outline-variant rounded-2xl shadow-sm">
+                      <p className="text-xs font-mono text-on-surface-variant">No gigs posted yet.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {myGigs.filter(g => g.ownerId === user.id).map(gig => {
+                        const isSelected = gig.id === selectedGigId;
+                        return (
+                          <div
+                            key={gig.id}
+                            onClick={() => {
+                              setSelectedGigId(gig.id);
+                              fetchGigDetails(gig.id);
+                            }}
+                            className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col gap-2 ${
+                              isSelected
+                                ? 'bg-surface-container-high border-primary shadow border-l-4 border-l-primary'
+                                : 'bg-surface-container border-outline-variant hover:border-on-surface-variant/30 shadow-sm'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start gap-2">
+                              <h4 className="text-xs font-bold text-on-surface line-clamp-1">{gig.title}</h4>
+                              <span className={`text-[8px] font-mono uppercase px-1.5 py-0.5 rounded-md font-extrabold ${
+                                gig.status === 'COMPLETED' ? 'bg-success/15 text-success' : gig.status === 'IN_PROGRESS' ? 'bg-primary/15 text-primary' : 'bg-warning/15 text-warning'
+                              }`}>{gig.status}</span>
+                            </div>
+                            <p className="text-[10px] font-mono text-on-surface-variant">Budget: <strong className="text-emerald-500">${gig.budget}</strong></p>
                           </div>
-                          <p className="text-[10px] font-mono text-on-surface-variant">Budget: <strong className="text-emerald-500">${gig.budget}</strong></p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Right Pane: Work Room */}
@@ -954,6 +1083,28 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                         Budget: <span className="text-emerald-500 font-bold">${gigDetails.budget}</span> | Status: <span className="font-bold text-primary">{gigDetails.status}</span>
                       </p>
                     </div>
+                    {gigDetails.ownerId === user.id && (gigDetails.status === 'OPEN' || gigDetails.status === 'PAUSED') && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleOpenEditModal(gigDetails)}
+                          className="px-2.5 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-outline-variant bg-surface-container hover:text-primary transition-all cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleTogglePause(gigDetails)}
+                          className="px-2.5 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-outline-variant bg-surface-container hover:text-warning transition-all cursor-pointer"
+                        >
+                          {gigDetails.status === 'PAUSED' ? 'Resume' : 'Pause'}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteGig(gigDetails.id)}
+                          className="px-2.5 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-error/30 bg-surface-container text-error hover:bg-error hover:text-white transition-all cursor-pointer"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Inner Work Room Grid */}
@@ -1222,6 +1373,101 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Edit Gig Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <form onSubmit={handleUpdateGigSubmit} className="w-full max-w-md bg-surface-container border border-outline-variant rounded-2xl shadow-2xl p-6 space-y-4 animate-scale-up">
+            <h3 className="text-sm font-headline font-bold text-on-surface">Edit Gig Details</h3>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1">Title *</label>
+                <input
+                  type="text"
+                  required
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none"
+                  value={editTitle}
+                  onChange={e => setEditTitle(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1">Description *</label>
+                <TextArea
+                  required
+                  rows={4}
+                  value={editDescription}
+                  onChange={e => setEditDescription(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1">Required Skills (Comma separated) *</label>
+                <input
+                  type="text"
+                  required
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none"
+                  placeholder="e.g. Logo Design, Photoshop, Branding"
+                  value={editSkills}
+                  onChange={e => setEditSkills(e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1">Budget ($ USD) *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none"
+                    value={editBudget}
+                    onChange={e => setEditBudget(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1">Delivery Time *</label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none"
+                    value={editDeliveryTime}
+                    onChange={e => setEditDeliveryTime(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1">Update Spec Attachment (Optional)</label>
+                <input
+                  type="file"
+                  className="w-full text-xs text-on-surface bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2"
+                  onChange={e => setEditAttachmentFile(e.target.files[0])}
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 rounded-xl text-xs font-mono bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={updatingGig}
+                className="px-4 py-2 bg-primary text-white text-xs font-mono font-bold uppercase rounded-xl hover:opacity-90 transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                {updatingGig ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
         </div>
       )}
 

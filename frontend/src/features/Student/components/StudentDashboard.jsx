@@ -88,6 +88,9 @@ export default function StudentDashboard({ jobs, skillCount, appliedCount, handl
                   >
                     {job.title}
                   </h4>
+                  <Badge variant={job.opportunityType === 'INTERNSHIP' ? 'tertiary' : 'primary'}>
+                    {job.opportunityType === 'INTERNSHIP' ? 'Internship' : 'Job'}
+                  </Badge>
                   {job.edited && (
                     <span className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[9px] font-mono font-bold rounded-full uppercase tracking-wider shrink-0">
                       Updated

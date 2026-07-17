@@ -13,6 +13,7 @@ const postJobSchema = {
   body: z.object({
     title: z.string().min(3, 'Title must be at least 3 characters long'),
     description: z.string().min(10, 'Description must be at least 10 characters long'),
+    opportunityType: z.string().optional().nullable(),
     companyName: z.string().optional().nullable(),
     officialWebsite: z.string().url().or(z.literal('')).optional().nullable(),
     preferredEducation: z.string().optional().nullable(),

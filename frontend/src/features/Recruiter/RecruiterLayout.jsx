@@ -75,23 +75,61 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
   const handlePostJob = async (jobData) => {
     setSubmittingJob(true);
     try {
-      const res = await apiFetch('/recruiter/jobs', {
-        token,
-        method: 'POST',
-        json: jobData
-      });
+      let res;
+      if (jobData.opportunityType === 'GIG') {
+        let uploadedUrl = null;
+        if (jobData.attachmentFile) {
+          const urlRes = await apiFetch('/upload/request-url', {
+            token,
+            method: 'POST',
+            json: {
+              fileType: 'doc',
+              fileName: jobData.attachmentFile.name,
+              contentType: jobData.attachmentFile.type
+            }
+          });
+          if (urlRes.ok) {
+            const { uploadUrl, publicUrl } = await urlRes.json();
+            await putFileToS3(uploadUrl, jobData.attachmentFile, jobData.attachmentFile.type, token);
+            uploadedUrl = publicUrl;
+          }
+        }
+
+        const gigPayload = {
+          title: jobData.title,
+          description: jobData.description,
+          skills: jobData.skills,
+          budget: jobData.budget,
+          deliveryTime: jobData.deliveryTime,
+          attachments: uploadedUrl ? [uploadedUrl] : []
+        };
+
+        res = await apiFetch('/gigs', {
+          token,
+          method: 'POST',
+          json: gigPayload
+        });
+      } else {
+        res = await apiFetch('/recruiter/jobs', {
+          token,
+          method: 'POST',
+          json: jobData
+        });
+      }
+
       if (res.ok) {
-        setAlertConfig({ message: 'Job posted successfully!', type: 'success' });
+        setAlertConfig({ message: jobData.opportunityType === 'GIG' ? 'Gig posted successfully in Marketplace!' : 'Job posted successfully!', type: 'success' });
         fetchRecruiterData();
-        setActiveTab('dashboard');
+        setActiveTab(jobData.opportunityType === 'GIG' ? 'gigs' : 'dashboard');
         return true;
       } else {
         const d = await res.json();
-        setAlertConfig({ message: d.error || 'Failed to post job', type: 'error' });
+        setAlertConfig({ message: d.error || 'Failed to post opportunity', type: 'error' });
         return false;
       }
     } catch (err) {
-      setAlertConfig({ message: 'Error posting job', type: 'error' });
+      console.error('Error posting opportunity:', err);
+      setAlertConfig({ message: 'Error posting opportunity', type: 'error' });
       return false;
     } finally {
       setSubmittingJob(false);
@@ -199,7 +237,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     { id: 'dashboard', icon: Briefcase, label: 'Job Dashboard' },
     { id: 'candidates', icon: User, label: 'Search Candidates' },
     { id: 'post-job', icon: Plus, label: 'Post New Job' },
-    { id: 'gigs', icon: DollarSign, label: 'Geeks Marketplace' },
+    { id: 'gigs', icon: DollarSign, label: 'Gigs Marketplace' },
     { id: 'verification', icon: ShieldCheck, label: 'Verification Status' },
   ];
 

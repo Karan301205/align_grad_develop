@@ -916,6 +916,50 @@ src/index.js
   - **Purpose**: Lists all candidate profiles.
   - **Files**: `recruiter.controller.js`, `api.js`
 
+### Gigs Endpoints (Bearer JWT Required)
+* **`POST /api/gigs`**
+  - **Purpose**: Publishes a new gig task. Recruiter only.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`GET /api/gigs`**
+  - **Purpose**: Lists and filters active marketplace gigs.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`GET /api/gigs/my-workspace`**
+  - **Purpose**: Lists user's involved gigs (hired for students, owned for recruiters).
+  - **Files**: `gig.controller.js`, `api.js`
+* **`GET /api/gigs/:gigId`**
+  - **Purpose**: Retrieves full details, pitches, chat messages, and deliverables of a gig.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`PUT /api/gigs/:gigId`**
+  - **Purpose**: Modifies open/paused gig parameters. Recruiter only.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`PATCH /api/gigs/:gigId/status`**
+  - **Purpose**: Toggles status of owned gig between OPEN and PAUSED. Recruiter only.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`DELETE /api/gigs/:gigId`**
+  - **Purpose**: Removes open/paused gig and cascaded applications. Recruiter only.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`POST /api/gigs/:gigId/pitch`**
+  - **Purpose**: Submits candidate pitch application for a gig. Student only.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`POST /api/gigs/:gigId/select`**
+  - **Purpose**: Hires selected candidate for gig and updates status to IN_PROGRESS. Recruiter only.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`POST /api/gigs/:gigId/chat`**
+  - **Purpose**: Sends chat message in workspace room. Chat is only open after hiring.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`POST /api/gigs/:gigId/deliverable`**
+  - **Purpose**: Submits completed deliverable description/link. Student only.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`POST /api/gigs/:gigId/accept`**
+  - **Purpose**: Accepts student work, completes gig, rates/reviews candidate, and adds verified project to student profile. Recruiter only.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`POST /api/gigs/:gigId/revision`**
+  - **Purpose**: Requests revisions on submitted deliverable. Recruiter only.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`POST /api/gigs/:gigId/feedback`**
+  - **Purpose**: Rates/reviews recruiter client after gig completion. Student only.
+  - **Files**: `gig.controller.js`, `api.js`
+
 ### Upload Endpoints (Bearer JWT Required)
 * **`POST /api/upload/request-url`**
   - **Purpose**: Generates S3 pre-signed upload URL for files (resume, video, doc).
@@ -989,6 +1033,7 @@ src/index.js
   - `companyId`: ObjectId String
   - `title`: String
   - `description`: String
+  - `opportunityType`: String (Optional, e.g. "JOB", "INTERNSHIP", "GIG", default: "JOB")
   - `companyName`: String (Optional)
   - `officialWebsite`: String (Optional)
   - `preferredEducation`: String (Optional)
@@ -1024,6 +1069,43 @@ src/index.js
   - `skillName`: String
   - `score`: Integer
   - `passed`: Boolean
+  - `createdAt`: DateTime
+* **`Gig`**
+  - `id`: ObjectId String (Primary Key)
+  - `ownerId`: ObjectId String (Recruiter User)
+  - `title`: String
+  - `description`: String
+  - `skills`: Array of Strings
+  - `budget`: Float
+  - `deliveryTime`: String
+  - `attachments`: Array of Strings
+  - `status`: String ("OPEN", "PAUSED", "IN_PROGRESS", "COMPLETED", default: "OPEN")
+  - `selectedCandidateId`: ObjectId String (Student User, optional)
+  - `createdAt`: DateTime
+  - `updatedAt`: DateTime
+* **`GigPitch`**
+  - `id`: ObjectId String (Primary Key)
+  - `gigId`: ObjectId String
+  - `candidateId`: ObjectId String (Student User)
+  - `pitchText`: String
+  - `budget`: Float
+  - `deliveryTime`: String
+  - `createdAt`: DateTime
+* **`GigDeliverable`**
+  - `id`: ObjectId String (Primary Key)
+  - `gigId`: ObjectId String
+  - `description`: String
+  - `attachmentUrl`: String (Optional)
+  - `status`: String ("SUBMITTED", "ACCEPTED", "REJECTED")
+  - `feedback`: String (Optional, revision feedback from client)
+  - `createdAt`: DateTime
+* **`GigFeedback`**
+  - `id`: ObjectId String (Primary Key)
+  - `gigId`: ObjectId String
+  - `raterId`: ObjectId String
+  - `rateeId`: ObjectId String
+  - `rating`: Integer
+  - `review`: String
   - `createdAt`: DateTime
 
 ---

@@ -139,6 +139,7 @@ model Job {
   title                String
   description          String
   companyName          String?
+  opportunityType      String?  @default("JOB")
   officialWebsite      String?
   preferredEducation   String?
   desiredExperience    String?
