@@ -99,15 +99,35 @@ const mockClient = {
     update: async ({ where, data }) => {
       const idx = mockDb.companies.findIndex(c => c.userId === where.userId || c.id === where.id);
       if (idx !== -1) {
-        if (data.docUrl) mockDb.companies[idx].docUrl = data.docUrl;
-        if (data.verified !== undefined) mockDb.companies[idx].verified = data.verified;
-        if (data.name) mockDb.companies[idx].name = data.name;
+        mockDb.companies[idx] = {
+          ...mockDb.companies[idx],
+          ...data
+        };
         return mockDb.companies[idx];
       }
       throw new Error("Company not found");
     }
   },
   job: {
+    count: async (args = {}) => {
+      let filtered = mockDb.jobs;
+      if (args && args.where) {
+        const { companyId, OR } = args.where;
+        if (companyId) {
+          filtered = filtered.filter(j => j.companyId === companyId);
+        }
+        if (OR) {
+          filtered = filtered.filter(j => {
+            return OR.some(clause => {
+              if (clause.opportunityType === null) return j.opportunityType === null || j.opportunityType === undefined;
+              if (clause.opportunityType && clause.opportunityType.not === 'GIG') return j.opportunityType !== 'GIG';
+              return false;
+            });
+          });
+        }
+      }
+      return filtered.length;
+    },
     findMany: async (args = {}) => {
       return mockDb.jobs.map(j => {
         const company = mockDb.companies.find(c => c.id === j.companyId) || j.company || { name: "Mock Company", verified: true };
@@ -305,6 +325,19 @@ const mockClient = {
         return deleted;
       }
       throw new Error("Gig not found");
+    },
+    count: async (args = {}) => {
+      let filtered = mockDb.gigs;
+      if (args && args.where) {
+        const { ownerId, status } = args.where;
+        if (ownerId) {
+          filtered = filtered.filter(g => g.ownerId === ownerId);
+        }
+        if (status) {
+          filtered = filtered.filter(g => g.status === status);
+        }
+      }
+      return filtered.length;
     }
   },
   gigApplicant: {

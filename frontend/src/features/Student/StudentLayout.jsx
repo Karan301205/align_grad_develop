@@ -44,7 +44,7 @@ import OnboardingModal from './components/OnboardingModal';
 import GigsMarketplace from '../Gigs/GigsMarketplace';
 
 
-export default function StudentLayout({ user, token, activeTab, setActiveTab, testSkill, setTestSkill, handleLogout, theme, toggleTheme }) {
+export default function StudentLayout({ user, token, activeTab, setActiveTab, testSkill, setTestSkill, handleLogout, theme, toggleTheme, onOpenCompanyProfile, autoSelectOpportunity, setAutoSelectOpportunity }) {
   const [profile, setProfile] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const mainRef = useRef(null);
@@ -957,6 +957,9 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 handleApply={handleApply}
                 setTestSkill={setTestSkill}
                 onRefresh={fetchProfileAndJobs}
+                onOpenCompanyProfile={onOpenCompanyProfile}
+                autoSelectOpportunity={autoSelectOpportunity}
+                setAutoSelectOpportunity={setAutoSelectOpportunity}
               />
             )}
 
@@ -1071,6 +1074,9 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 theme={theme}
                 profile={profile}
                 onUpdateProfile={fetchProfileAndJobs}
+                onOpenCompanyProfile={onOpenCompanyProfile}
+                autoSelectOpportunity={autoSelectOpportunity}
+                setAutoSelectOpportunity={setAutoSelectOpportunity}
               />
             )}
 

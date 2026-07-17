@@ -74,6 +74,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   ├── validators/           # Zod schema definitions validating input payloads
 │   │   │   ├── auth.validator.js
 │   │   │   ├── recruiter.validator.js
+│   │   │   ├── recruiterCompany.validator.js # Zod schemas for company settings
 │   │   │   ├── student.validator.js
 │   │   │   ├── upload.validator.js
 │   │   │   └── gig.validator.js
@@ -100,6 +101,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   ├── components/           # Cross-cutting UI layouts and overlays
 │   │   │   ├── ConnectionLoader.jsx # Floating warning indicator showing offline API status
 │   │   │   ├── JobDetailsModal.jsx # Detail job specs drawer showing matching stats & Apply hooks
+│   │   │   ├── CompanyProfileModal.jsx # Unified candidate-facing company details card modal
 │   │   │   └── ui/               # Reusable Neumorphic atomic elements
 │   │   │       ├── AnimatedContent.jsx # Framer Motion container for slick transition animations
 │   │   │       ├── Badge.jsx     # Skeuomorphic tag displaying skills or status indicators

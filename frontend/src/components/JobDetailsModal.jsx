@@ -45,7 +45,7 @@ const formatJoiningDate = (dateStr) => {
   return dateStr;
 };
 
-export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isStudent }) {
+export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isStudent, onOpenCompanyProfile }) {
   if (!job) return null;
 
   const handleDownloadPDF = () => {
@@ -178,14 +178,51 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
         {/* Modal Header */}
         <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-high">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-lg shrink-0">
-              {job.companyName?.charAt(0) || job.company?.name?.charAt(0) || 'J'}
-            </div>
+            <button
+              onClick={() => {
+                if (job.company?.id && onOpenCompanyProfile) {
+                  onOpenCompanyProfile(job.company.id);
+                }
+              }}
+              title={job.company?.id ? "View Company Profile" : ""}
+              disabled={!job.company?.id}
+              className={`w-12 h-12 rounded-2xl bg-surface-container-low border border-outline-variant flex items-center justify-center text-primary font-bold text-lg shrink-0 overflow-hidden transition-all ${job.company?.id ? 'hover:border-primary/40 hover:scale-105 active:scale-95 cursor-pointer' : ''} shadow-sm`}
+            >
+              {job.company?.logoUrl ? (
+                <img src={job.company.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                <span>{job.companyName?.charAt(0) || job.company?.name?.charAt(0) || 'J'}</span>
+              )}
+            </button>
             <div className="min-w-0">
               <h3 className="text-xl font-bold text-on-surface truncate">{job.title || job.designation}</h3>
-              <p className="text-xs text-on-surface-variant font-mono flex items-center gap-1.5 mt-0.5 flex-wrap">
-                <Building className="w-3.5 h-3.5 shrink-0" />
-                {job.companyName || job.company?.name || 'Aether Corp'}
+              <div className="text-xs text-on-surface-variant font-mono flex items-center gap-1.5 mt-0.5 flex-wrap">
+                <Building className="w-3.5 h-3.5 shrink-0 text-secondary" />
+                {job.company?.id ? (
+                  <button
+                    onClick={() => {
+                      if (onOpenCompanyProfile) onOpenCompanyProfile(job.company.id);
+                    }}
+                    className="font-bold text-on-surface hover:text-primary hover:underline transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    {job.company?.name || job.companyName || 'Aether Corp'}
+                    {job.company?.verified && (
+                      <span className="text-[9px] bg-success-container border border-success/30 text-success px-1.5 py-0.5 rounded font-bold uppercase tracking-wide flex items-center select-none scale-90">
+                        ✓ Verified
+                      </span>
+                    )}
+                  </button>
+                ) : (
+                  <span className="font-bold text-on-surface">
+                    {job.companyName || job.company?.name || 'Aether Corp'}
+                  </span>
+                )}
+                {job.company?.companySize && (
+                  <span className="text-[10px] opacity-60">&bull; {job.company.companySize}</span>
+                )}
+                {job.company?.location && (
+                  <span className="text-[10px] opacity-60">&bull; {job.company.location}</span>
+                )}
                 {job.officialWebsite && (
                   <a
                     href={job.officialWebsite}
@@ -196,7 +233,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                     <Globe className="w-3 h-3" /> Visit Website
                   </a>
                 )}
-              </p>
+              </div>
             </div>
           </div>
           <button

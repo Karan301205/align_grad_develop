@@ -157,7 +157,7 @@ exports.getJobs = async (req, res) => {
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const jobs = await prisma.job.findMany();
+    const jobs = await prisma.job.findMany({ include: { company: true } });
     const applications = await prisma.application.findMany({
       where: { studentId: profile.id }
     });

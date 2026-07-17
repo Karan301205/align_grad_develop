@@ -17,6 +17,130 @@ exports.getCompany = async (req, res) => {
   }
 };
 
+exports.updateCompany = async (req, res) => {
+  try {
+    const existingCompany = await prisma.company.findUnique({
+      where: { userId: req.user.id }
+    });
+    if (!existingCompany) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    if (req.body.logoUrl && existingCompany.logoUrl && existingCompany.logoUrl !== req.body.logoUrl) {
+      try {
+        await deleteS3ObjectFromUrl(existingCompany.logoUrl, 'company logo');
+      } catch (deleteErr) {
+        console.error('Failed to delete old company logo from S3:', deleteErr);
+      }
+    }
+
+    const updated = await prisma.company.update({
+      where: { userId: req.user.id },
+      data: req.body
+    });
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error updating company profile' });
+  }
+};
+
+exports.getCompanyById = async (req, res) => {
+  const { companyId } = req.params;
+  try {
+    const company = await prisma.company.findUnique({
+      where: { id: companyId }
+    });
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    // Calculate statistics dynamically:
+    // 1. Total Jobs Posted (excluding Gigs)
+    const totalJobs = await prisma.job.count({
+      where: {
+        companyId,
+        OR: [
+          { opportunityType: null },
+          { opportunityType: { not: 'GIG' } }
+        ]
+      }
+    });
+
+    // 2. Total Gigs Posted
+    const totalGigs = await prisma.gig.count({
+      where: { ownerId: company.userId }
+    });
+
+    // 3. Active Openings
+    const activeJobs = await prisma.job.count({
+      where: {
+        companyId,
+        OR: [
+          { opportunityType: null },
+          { opportunityType: { not: 'GIG' } }
+        ]
+      }
+    });
+    const openGigs = await prisma.gig.count({
+      where: {
+        ownerId: company.userId,
+        status: 'OPEN'
+      }
+    });
+    const activeOpenings = activeJobs + openGigs;
+
+    // 4. Average Company Rating (from completed gig reviews)
+    const feedbacks = await prisma.gigReview.findMany({
+      where: { revieweeId: company.userId }
+    });
+    let averageRating = 0;
+    if (feedbacks.length > 0) {
+      const sum = feedbacks.reduce((acc, curr) => acc + curr.rating, 0);
+      averageRating = Number((sum / feedbacks.length).toFixed(1));
+    } else {
+      averageRating = 5.0; // Default baseline rating for unrated companies
+    }
+
+    // 5. Fetch recent opportunities currently posted by this company
+    const companyJobs = await prisma.job.findMany({
+      where: {
+        companyId,
+        OR: [
+          { opportunityType: null },
+          { opportunityType: { not: 'GIG' } }
+        ]
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const companyGigs = await prisma.gig.findMany({
+      where: {
+        ownerId: company.userId,
+        status: 'OPEN'
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.json({
+      ...company,
+      stats: {
+        totalJobs,
+        totalGigs,
+        activeOpenings,
+        averageRating
+      },
+      opportunities: {
+        jobs: companyJobs,
+        gigs: companyGigs
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error retrieving company profile' });
+  }
+};
+
 exports.verifyCompany = async (req, res) => {
   const { docUrl } = req.body;
   if (!docUrl) {

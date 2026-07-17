@@ -9,10 +9,20 @@ import Button from '../../../components/ui/Button';
 import EmptyState from '../../../components/ui/EmptyState';
 import { ALL_SKILLS } from '../../../constants';
 
-export default function StudentDashboard({ jobs, skillCount, appliedCount, handleApply, setTestSkill, onRefresh }) {
+export default function StudentDashboard({ jobs, skillCount, appliedCount, handleApply, setTestSkill, onRefresh, onOpenCompanyProfile, autoSelectOpportunity, setAutoSelectOpportunity }) {
   const [selectedJob, setSelectedJob] = useState(null);
   const matchingRate = jobs.length > 0 ? Math.round((jobs.filter(j => j.matched).length / jobs.length) * 100) : 0;
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  React.useEffect(() => {
+    if (autoSelectOpportunity && autoSelectOpportunity.type === 'job') {
+      const job = jobs.find(j => j.id === autoSelectOpportunity.id);
+      if (job) {
+        setSelectedJob(job);
+        setAutoSelectOpportunity(null);
+      }
+    }
+  }, [autoSelectOpportunity, jobs, setAutoSelectOpportunity]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -167,6 +177,7 @@ export default function StudentDashboard({ jobs, skillCount, appliedCount, handl
           onApply={handleApply}
           onUpgrade={setTestSkill}
           isStudent={true}
+          onOpenCompanyProfile={onOpenCompanyProfile}
         />
       )}
     </div>

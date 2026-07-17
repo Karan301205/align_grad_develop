@@ -24,6 +24,7 @@ const {
   updateApplicationRoundsSchema
 } = require('../validators/recruiter.validator');
 const { requestUploadUrlSchema } = require('../validators/upload.validator');
+const { updateCompanySchema } = require('../validators/recruiterCompany.validator');
 const {
   createGigSchema,
   applyGigSchema,
@@ -68,6 +69,8 @@ router.put('/upload/secure-put', authMiddleware, uploadController.securePut);
 
 // Recruiter routes (protected)
 router.get('/recruiter/company', authMiddleware, relaxedLimit, recruiterController.getCompany);
+router.put('/recruiter/company', authMiddleware, relaxedLimit, validate(updateCompanySchema), recruiterController.updateCompany);
+router.get('/recruiter/companies/:companyId', authMiddleware, relaxedLimit, recruiterController.getCompanyById);
 router.post('/recruiter/verify', authMiddleware, relaxedLimit, validate(verifyCompanySchema), recruiterController.verifyCompany);
 router.post('/recruiter/jobs', authMiddleware, relaxedLimit, validate(postJobSchema), recruiterController.postJob);
 router.put('/recruiter/jobs/:jobId', authMiddleware, relaxedLimit, validate(updateJobSchema), recruiterController.updateJob);

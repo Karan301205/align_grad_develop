@@ -229,6 +229,29 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     }
   };
 
+  const handleUpdateCompany = async (companyData) => {
+    try {
+      const res = await apiFetch('/recruiter/company', {
+        token,
+        method: 'PUT',
+        json: companyData
+      });
+      if (res.ok) {
+        setAlertConfig({ message: 'Company profile updated successfully!', type: 'success' });
+        fetchRecruiterData();
+        return true;
+      } else {
+        const d = await res.json();
+        setAlertConfig({ message: d.error || 'Failed to update company profile', type: 'error' });
+        return false;
+      }
+    } catch (err) {
+      console.error(err);
+      setAlertConfig({ message: 'Error updating company profile', type: 'error' });
+      return false;
+    }
+  };
+
   const updateReqRating = (skillName, val) => {
     setReqs(prev => prev.map(r => r.skillName === skillName ? { ...r, minRating: parseInt(val) } : r));
   };
@@ -238,7 +261,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     { id: 'candidates', icon: User, label: 'Search Candidates' },
     { id: 'post-job', icon: Plus, label: 'Post New Job' },
     { id: 'gigs', icon: DollarSign, label: 'Gigs Marketplace' },
-    { id: 'verification', icon: ShieldCheck, label: 'Verification Status' },
+    { id: 'verification', icon: ShieldCheck, label: 'Company Profile' },
   ];
 
   const goToTab = (tabId) => {
@@ -396,10 +419,12 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
             {activeTab === 'verification' && (
               <RecruiterCompany 
                 company={company}
+                token={token}
                 docLink={docLink}
                 setDocLink={setDocLink}
                 submittingDoc={submittingDoc}
                 handleVerification={handleVerification}
+                handleUpdateCompany={handleUpdateCompany}
               />
             )}
           </div>
