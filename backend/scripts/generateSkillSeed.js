@@ -46,14 +46,26 @@ const MERGES = {
 // 'Seaborn') do, and those get absorbed away below. Without adding the
 // canonical name here too, `names` would never contain it and the merge
 // group would silently vanish instead of producing a row.
-const EXTRA_SKILLS = ['Redis', 'GraphQL', 'Matplotlib & Seaborn'];
+// React is commented out in the frontend list (line 138) but IS present in
+// backend TECHNICAL_SKILLS, and it is a Tier 1 skill. Added explicitly so the
+// registry does not depend on the parser scraping commented-out entries.
+const EXTRA_SKILLS = ['Redis', 'GraphQL', 'Matplotlib & Seaborn', 'React'];
 
 function parseFrontendSkills(source) {
   const entries = [];
+  // Match per-line and skip commented-out entries (lines whose first
+  // non-whitespace characters are `//`). The frontend file deliberately
+  // disables several entries this way (CSS, GenAI, Next JS, React) — a
+  // whole-source regex scan can't distinguish code from comments, so it
+  // would resurrect deliberately-disabled entries into the registry.
   const re = /\{\s*skill:\s*"((?:[^"\\]|\\.)*)"\s*,\s*type:\s*"(technical|non-technical)"\s*\}/g;
-  let match;
-  while ((match = re.exec(source)) !== null) {
-    entries.push({ skill: match[1].replace(/\\"/g, '"'), type: match[2] });
+  for (const line of source.split('\n')) {
+    if (/^\s*\/\//.test(line)) continue;
+    re.lastIndex = 0;
+    let match;
+    while ((match = re.exec(line)) !== null) {
+      entries.push({ skill: match[1].replace(/\\"/g, '"'), type: match[2] });
+    }
   }
   return entries;
 }
@@ -80,29 +92,7 @@ function main() {
   }
 
   const technical = parsed.filter((e) => e.type === 'technical').map((e) => e.skill);
-  const rawNames = [...new Set([...technical, ...EXTRA_SKILLS])];
-
-  // The parser matches text, not live JS — it does not skip commented-out
-  // entries in the frontend source. That occasionally surfaces a pure
-  // punctuation-variant duplicate of an already-live entry (e.g. a commented
-  // "Next JS" alongside the live "Next.js"). normalizeToken() is exactly the
-  // mechanism this system uses to recognize such variants as the same skill,
-  // so collapse them here (first occurrence wins). This must happen BEFORE
-  // the MERGES/absorbed step below: if a canonical name and its own
-  // duplicate normalize identically, adding the duplicate as a MERGES alias
-  // would delete the canonical too (its normalized token is also "absorbed").
-  const seenTokens = new Set();
-  const duplicateSpellings = [];
-  const names = [];
-  for (const name of rawNames) {
-    const token = normalizeToken(name);
-    if (seenTokens.has(token)) {
-      duplicateSpellings.push(name);
-      continue;
-    }
-    seenTokens.add(token);
-    names.push(name);
-  }
+  const names = [...new Set([...technical, ...EXTRA_SKILLS])];
 
   // Names that are merged INTO another canonical must not become rows themselves.
   const absorbed = new Set(Object.values(MERGES).flat().map(normalizeToken));
@@ -139,9 +129,6 @@ function main() {
   console.log(`Wrote ${definitions.length} skill definitions to ${OUTPUT}`);
   console.log(`  Tier 1: ${byTier[1] || 0}  Tier 2: ${byTier[2] || 0}  Tier 3: ${byTier[3] || 0}`);
   console.log(`  Merged away: ${[...absorbed].join(', ')}`);
-  if (duplicateSpellings.length) {
-    console.log(`  Collapsed duplicate spellings (punctuation-only variants of a live entry): ${duplicateSpellings.join(', ')}`);
-  }
 }
 
 main();
