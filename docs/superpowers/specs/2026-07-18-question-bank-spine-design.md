@@ -109,7 +109,7 @@ decision to bundle them here was made deliberately, not by omission.
 |---|---|---|
 | 1 | Scope = spine (phases 1–4) as one unit | Coherent end-to-end story; dashboards are consumers |
 | 2 | Prisma models in `backend/`; generation as a worker; admin triggers via job documents | One schema owner; reuses existing Bedrock provider; queue gives real telemetry; no HTTP coupling between backends |
-| 3 | DB-backed `Skill` registry, aliases consolidated | Tier and publish status are mutable state, not constants; splitting identity from state creates a join on a fragile string |
+| 3 | DB-backed `SkillDefinition` registry, aliases consolidated | Tier and publish status are mutable state, not constants; splitting identity from state creates a join on a fragile string |
 | 4 | Bank-first with runtime LLM fallback behind a flag | Ships on Tier 1 with no student-facing regression; coverage becomes a dial, not a launch gate |
 | 5 | AI drafts blueprints, human approves via CLI, generation blocked until approved | A bad blueprint silently poisons ~300 questions; review costs minutes, regeneration costs money |
 | 6 | Hash pre-filter + Titan embeddings + in-process cosine, behind a swappable interface | Semantic paraphrase is the dominant LLM duplicate mode; ~300 vectors/skill fits in memory; Atlas Vector Search swaps in later without data migration |
@@ -177,7 +177,7 @@ backend/src/services/questionBank/
 Six new Prisma models. Shapes, not final syntax.
 
 ```
-Skill              canonicalName, slug @unique, aliases[], category,
+SkillDefinition    canonicalName, slug @unique, aliases[], category,
                    tier (1|2|3), status, targetQuestionCount,
                    counters { totalQuestions, validated, topicsReady, topicsTotal },
                    createdAt, updatedAt, deletedAt
@@ -214,6 +214,9 @@ QuestionReviewFlag questionId, reason (ANSWER_DISAGREEMENT|AMBIGUOUS_OPTIONS|DUP
 
 ### Rationale
 
+- **The registry model is `SkillDefinition`, not `Skill`.** `Skill` is already taken: `schema.prisma`
+  declares `type Skill { name, rating, verifiedRating }` as the embedded type on `Profile.skills`.
+  A `model Skill` would be a duplicate declaration and fail client generation.
 - **`TopicProgress` is separate from `SkillBlueprint`.** The blueprint is approved, immutable
   content; progress is high-churn worker state. Embedding progress would mean rewriting an approved
   document on every batch, and would make "which blueprint version produced this" unanswerable.
@@ -228,15 +231,30 @@ QuestionReviewFlag questionId, reason (ANSWER_DISAGREEMENT|AMBIGUOUS_OPTIONS|DUP
 
 - `Question`: `{skillId, topicKey, status}`, `{textHash}`, `{skillId, difficulty, status}`
 - `GenerationJob`: `{status, priority, createdAt}`
-- `Skill`: unique on `slug`
+- `SkillDefinition`: unique on `slug`
 - `TopicProgress`: unique on `{skillId, topicKey}`
 
 ### Migration obligation
 
-Alias consolidation requires a **normalization pass over existing data**: every stored `"next js"`
-in `Profile.skills[]` and `Job.requirements[]` must become `"next.js"`, or matching silently breaks
-for real users. Scripted, reversible, dry-run first, backup before execution. Specced as its own
-rollout step (§9), not a footnote.
+Alias consolidation requires a **normalization pass over existing data**. The exact leaf fields are
+`Profile.skills[].name` and `Job.requirements[].skillName` — every stored `"next js"` must become
+`"next.js"`, or matching silently breaks for real users. Scripted, reversible, dry-run first, backup
+before execution. Specced as its own rollout step (§9), not a footnote.
+
+### Seed source
+
+The registry is seeded from **`frontend/src/constants/skills.js` (`ALL_SKILLS`)**, not the backend
+`TECHNICAL_SKILLS` set. `ALL_SKILLS` carries display casing (`"Next.js"`, not `"next.js"`) and a
+`technical` / `non-technical` flag; only `technical` entries get registry rows, since non-technical
+skills (Accounting, Canva, Communication Skills) will never have question banks.
+
+Because the two workspaces are separate npm projects and the frontend file is ESM, seeding uses a
+**one-time import script** that parses `ALL_SKILLS` and emits a committed JSON seed file. After
+seeding, the database is the source of truth and both hand-maintained lists become legacy.
+
+Note that three tier-listed skills — **Redis, GraphQL, and Go's tier placement** — are not all
+present in the current lists (`redis` and `graphql` are absent entirely). Seeding must create them
+explicitly rather than silently skipping them.
 
 ---
 
@@ -271,7 +289,7 @@ Follows the blueprint rather than sampling the skill at random:
 
 ### Resolution order
 
-1. Normalize the requested skill name through the alias registry to a canonical `Skill`
+1. Normalize the requested skill name through the alias registry to a canonical `SkillDefinition`
 2. If `PUBLISHED` with enough `ACTIVE` questions → serve from bank
 3. Else if the fallback flag is enabled → call existing `services/mcq/`
 4. Else → explicit "assessment not yet available" state
@@ -311,7 +329,7 @@ objects except claim and write.
    existing vectors. Over threshold → discard, increment `duplicatesRemoved`.
 7. **Write** — bulk insert, update `TopicProgress` counters, loop until planned count is met.
 
-Then `TopicProgress → READY`, `Skill` counters recomputed. When every topic is ready the skill
+Then `TopicProgress → READY`, `SkillDefinition` counters recomputed. When every topic is ready the skill
 becomes `COMPLETED`.
 
 **`COMPLETED` is not `PUBLISHED`.** Publishing is a separate, explicit operator action. A skill that
@@ -340,7 +358,7 @@ This is an unattended process that spends money. Three protections:
 Steps are not commutative. Order matters.
 
 1. Add models and indexes — purely additive, safe to ship alone
-2. Seed the `Skill` registry with alias mappings — dry-run first, inspect merges
+2. Seed the `SkillDefinition` registry with alias mappings — dry-run first, inspect merges
 3. Normalize `Profile.skills[]` and `Job.requirements[]` to canonical names — reversible, dry-run,
    backup first. **This is the step that can hurt real users.**
 4. `TestSession` plus the two security fixes (§3) — no dependency on steps 1–3
@@ -419,12 +437,12 @@ Not built now, but nothing here forecloses them:
 
 | Future capability | How the design accommodates it |
 |---|---|
-| Admin dashboards (pieces 5–6) | `TopicProgress`, `GenerationJob`, and `Skill.counters` are the read model they render |
+| Admin dashboards (pieces 5–6) | `TopicProgress`, `GenerationJob`, and `SkillDefinition.counters` are the read model they render |
 | Search | `Question` indexes on skill/topic/difficulty/status; tags stored |
 | Question analytics | `Question.stats` subdocument exists and is unused |
 | Atlas Vector Search | `similarity/` single interface |
 | Question versioning | `blueprintVersion` on every question; blueprints already versioned |
 | Retirement / soft delete | `status: RETIRED` and `deletedAt` present |
 | Approval workflow | `QuestionReviewFlag` plus `PENDING_REVIEW` status |
-| Company-specific banks | `Skill` registry is DB-backed and extensible |
+| Company-specific banks | `SkillDefinition` registry is DB-backed and extensible |
 | Audit logs | `GenerationJob` records are already an audit trail of generation |
