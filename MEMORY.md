@@ -29,7 +29,14 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 ├── auth.txt                      # Developer scratchpad / testing session authorization notes
 ├── commit.md                     # Summary of recent git commit activities
 ├── my_resume.pdf                 # Asset: Sample PDF resume for student upload testing
-├── package.json                  # Root workspace runner coordinating dev and installations
+│   # NOTE: there is NO root-level package.json. frontend/ and backend/ are
+│   # independent npm projects and must be installed/run separately.
+│
+├── docs/superpowers/
+│   ├── specs/
+│   │   └── 2026-07-18-question-bank-spine-design.md  # Question bank spine design (phases 1-4)
+│   └── plans/
+│       └── 2026-07-18-skill-registry-foundation.md   # Plan 1: skill registry implementation
 │
 ├── backend/                      # --- Main Express.js API Workspace (Port 5001) ---
 │   ├── prisma/
@@ -44,8 +51,20 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   └── mock/             # Sandbox mock client & fixture sets
 │   │   │       ├── mockClient.js # In-memory emulation of Prisma API for offline execution
 │   │   │       └── seed.js       # Initial mock data and database state for the mock store
+│   │   ├── cli/                  # Operator CLI (npm run bank -- <command>)
+│   │   │   ├── bank.js           # Subcommand dispatcher; every write defaults to dry-run
+│   │   │   └── commands/
+│   │   │       ├── seedSkills.js # Seeds SkillDefinition rows from seedData.json
+│   │   │       └── normalizeSkillNames.js # PLANNED (Task 7): canonical-name data migration
 │   │   ├── constants/
-│   │   │   └── technicalSkills.js # Centralized list of recognized profile and job skills
+│   │   │   └── technicalSkills.js # LEGACY after registry seeding — see SkillDefinition
+│   │   ├── services/questionBank/ # Question bank subsystem (see docs/superpowers/specs/)
+│   │   │   ├── repositories/
+│   │   │   │   └── skillDefinitionRepository.js # SOLE Prisma access for SkillDefinition
+│   │   │   └── skills/
+│   │   │       ├── normalize.js  # Pure: normalizeToken, buildAliasIndex, resolveSkill
+│   │   │       ├── seedData.json # 143 generated canonical skill definitions
+│   │   │       └── registryCache.js # PLANNED (Task 6): boot-cached alias index
 │   │   ├── controllers/          # HTTP request controllers (Routing handlers only)
 │   │   │   ├── auth.controller.js # Signups, logins, and token issuance
 │   │   │   ├── recruiter.controller.js # Verification, candidate search, job postings
@@ -232,7 +251,10 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 ### Backend Files (`backend/`)
 
 #### [backend/prisma/schema.prisma](file:///Users/karanrawat/Desktop/a_g/backend/prisma/schema.prisma)
-* **Purpose**: Prisma ORM schema definitions for MongoDB structures. Sets up data collections (User, Profile, Company, Job, Application, TestAttempt) and their relationships.
+* **Purpose**: Prisma ORM schema definitions for MongoDB structures. Sets up data collections (User, Profile, Company, Job, Application, TestAttempt, **SkillDefinition**) and their relationships.
+* **`SkillDefinition` (added 2026-07-18)**: canonical registry for skill identity — `canonicalName`, `slug` (unique), `aliases[]`, `category`, `tier` (1|2|3), `status`, `targetQuestionCount`, `counters` (embedded `SkillCounters`), `createdAt/updatedAt/deletedAt`. Indexed on `[tier, status]`. Status values are plain strings (`WAITING | GENERATING | PAUSED | REVIEWING | COMPLETED | PUBLISHED`), matching the existing `User.role` convention rather than a Prisma enum.
+* **CRITICAL naming constraint**: the model is `SkillDefinition`, **never `Skill`**. `type Skill { name, rating, verifiedRating }` already exists as the embedded type on `Profile.skills`; declaring `model Skill` is a duplicate declaration and fails client generation.
+* **`Profile` has no `deletedAt` field.** Do not add `where: { deletedAt: null }` to Profile queries — Prisma rejects it with `Unknown argument`.
 * **Used By**: Prisma client generator command.
 * **Dependencies**: MongoDB server (connection specified in env).
 * **Safe Modifications**: Appending new fields or schemas to models. Ensure type declarations match MongoDB constraints.
@@ -1297,3 +1319,73 @@ A structural refactoring separated concerns per SOLID without altering any route
 * **Deliberately preserved quirks** (behavior-parity, not "fixed"): `saveIntroVideo` reads `introVideoUrl` while its validator names `videoUrl`; `submitTest` vs `submitSkillTest` rating-scale differences; `mockClient` lacking `application.update`; the duplicate `Tailwind` entry in `ALL_SKILLS`; dashboard's `'0.00 KB'`/`'84.5 MB'` byte fallbacks (kept distinct from storage's `formatBytes`).
 * **Deferred (not done — future follow-ups)**: JSX-tree decomposition of the large presentational components (`frontend` `StudentProfile.jsx` ~1904, `AuthView.jsx` ~1303, `StudentLayout.jsx` shell, and `admin_ws` `App.jsx` ~1661) into sub-components, and a shared `JobForm`/`PortalShell`. These were intentionally left intact because splitting 1300–1900-line render trees carries behavior-drift risk that outweighs the benefit under the strict no-behavior-change mandate; their non-JSX concerns (network, data, PDF, completeness rules) were already extracted. The `errorHandler`/`asyncHandler` unification was also skipped to preserve each handler's exact 500-response messages.
 
+
+---
+
+## 19. Question Bank Subsystem — Architecture Decisions (2026-07-18)
+
+Design spec: `docs/superpowers/specs/2026-07-18-question-bank-spine-design.md`
+Implementation plan (phase 1): `docs/superpowers/plans/2026-07-18-skill-registry-foundation.md`
+Session handoff: `CONTINUATION.md` · Roadmap: `task.md`
+
+### Goal
+
+Move MCQ generation **offline**. Students are served pre-generated, validated questions from
+MongoDB. Zero AI calls on the assessment path once coverage is complete. This replaces the current
+runtime path (`services/mcq/mcqService.js`, Bedrock → Groq fallback, called per assessment).
+
+### Scope decomposition
+
+The original request was decomposed into seven pieces. Pieces 1–4 are "the spine":
+
+1. Question bank data model + skill registry ← **in progress**
+2. Blueprint engine
+3. Offline generation pipeline
+4. Assessment engine cutover
+5. Admin question bank UI · 6. Generation dashboard · 7. Analytics
+
+### Binding decisions
+
+| # | Decision | Rationale |
+|---|---|---|
+| 1 | Prisma models live in `backend/`; generation runs as a **separate worker process**; `admin_ws` triggers work by writing `GenerationJob` documents | One schema owner. Reuses the existing Bedrock provider. The queue document is the contract between the two backends — no HTTP coupling. `admin_ws` stays read-only over these collections and never imports Prisma. |
+| 2 | **DB-backed `SkillDefinition` registry** is the source of truth for skill identity, with aliases consolidated | Tier and publish status are mutable state, not constants. Splitting identity from state would create a join on a fragile string. |
+| 3 | **Bank-first with runtime LLM fallback** behind a config flag | Ships on Tier 1 with no student-facing regression; coverage becomes a dial, not a launch gate. Flag is turned off once Tier 1+2 coverage is sufficient. |
+| 4 | AI drafts blueprints, **human approves via CLI**, generation blocked until approved | A bad blueprint silently poisons ~300 questions. Review costs minutes; regeneration costs money. |
+| 5 | Dedup = normalized-hash pre-filter + **Bedrock Titan embeddings** + in-process cosine, behind a swappable interface | Semantic paraphrase is the dominant LLM duplicate mode. ~300 vectors/skill fits in memory. Atlas Vector Search swaps in later without data migration. Dedup scope is **within a skill**, never global. |
+| 6 | **Batched reviewer pass**; disagreements flagged for humans, never auto-discarded | Wrong answer keys are the defect class that destroys trust. The reviewer is sometimes the one in error. |
+| 7 | `COMPLETED` ≠ `PUBLISHED` | Publishing is an explicit operator action. A finished bank is not automatically serving students. |
+
+### Architectural boundaries (enforce when editing)
+
+- **Repositories are the only place Prisma is touched.** No other file under `services/questionBank/` may import the Prisma client. Pipeline stages take and return plain objects so they are unit-testable without a database.
+- **`similarity/` exposes one interface** — `findSimilar(skillId, embedding, threshold)`.
+- **`services/mcq/` stays in place** and becomes the fallback path only.
+
+### Skill registry specifics
+
+- Seeded from **`frontend/src/constants/skills.js` (`ALL_SKILLS`)**, not the backend `TECHNICAL_SKILLS` set — `ALL_SKILLS` carries display casing and a `technical`/`non-technical` flag. Only `technical` entries get rows.
+- After seeding, **`backend/src/constants/technicalSkills.js` and `frontend/src/constants/skills.js` are LEGACY.** The database is the source of truth.
+- `backend/scripts/generateSkillSeed.js` is a **one-time importer**; its output `seedData.json` is committed and reviewed. It parses the frontend file as text (the frontend is ESM in a separate npm project and cannot be `require`d).
+- The parser **must skip `//`-commented lines.** Four skills are commented out in the frontend list (CSS, GenAI, Next JS, React); scraping them resurrects deliberately-disabled entries.
+- **`React` is added explicitly via `EXTRA_SKILLS`** — it is commented out in the frontend list but live in backend `TECHNICAL_SKILLS`, and is a Tier 1 skill. Same for `Redis` and `GraphQL`, absent from both lists.
+- **Normalization has two mechanisms and neither subsumes the other.** `normalizeToken()` folds *punctuation* variants (`Next.js` ≡ `next js`); explicit `aliases[]` fold *semantic* variants (`Data Structure` → `Data Structures & Algorithms`). `+` and `#` are deliberately preserved — `C`, `C++`, `C#` are three distinct skills.
+- Current seed result: **143 definitions** — Tier 1 = 9, Tier 2 = 7, Tier 3 = 127.
+
+### Known product bug surfaced by this work
+
+`React` is commented out in `frontend/src/constants/skills.js:138` while `React Native` and
+`React Testing Library` remain live, and backend `TECHNICAL_SKILLS` *does* contain `react`. If
+`ALL_SKILLS` drives the candidate skill picker, candidates cannot self-rate React while jobs can
+require it — a silent matching failure on the single most common frontend skill. **Not yet
+investigated or fixed.**
+
+### Security findings (documented, NOT yet fixed)
+
+See spec §3. Both are fixed by the `TestSession` model in Plan 2, which is **independently
+shippable** ahead of the rest of the spine.
+
+1. **Skill verification can be bypassed entirely.** `student.controller.js:354` `submitSkillTest` takes `score` from the request body and trusts it; `passed` is hardcoded `true`. A candidate can POST `{skillName, score: 10}` and receive a verified 10 without loading a question. It also raises `rating`, which propagates into `skillMatching.service.js` and unlocks ineligible job applications.
+2. **The answer key ships to the client.** `services/mcq/prompts.js:4` instructs the model to emit an `answer` field; `student.controller.js:346` returns the model output unmodified.
+
+**`CLAUDE.md` is wrong about this**: it documents a `score >= 7` pass threshold for `submitSkillTest`. No such threshold exists in the code. Correcting that doc is Task 8 of Plan 1.
