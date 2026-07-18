@@ -83,7 +83,7 @@ test('this failure proves the runner actually runs assertions', () => {
 In `backend/package.json`, add to `scripts`:
 
 ```json
-"test": "node --test tests/"
+"test": "node --test \"tests/**/*.test.js\""
 ```
 
 The full `scripts` block becomes:
@@ -92,7 +92,7 @@ The full `scripts` block becomes:
 "scripts": {
   "start": "node src/index.js",
   "dev": "nodemon src/index.js",
-  "test": "node --test tests/"
+  "test": "node --test \"tests/**/*.test.js\""
 }
 ```
 
