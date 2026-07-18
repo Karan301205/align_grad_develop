@@ -28,17 +28,21 @@ async function countAll() {
 // Idempotent: safe to re-run seeding without duplicating rows.
 // Does not overwrite `status` or `counters` — those are live state owned by
 // the generation pipeline, not by the seed file.
-async function upsertMany(definitions) {
+//
+// `client` defaults to the module's real Prisma binding; tests inject a
+// hand-written fake here to exercise this logic without touching the
+// database (see backend/tests/questionBank/skillDefinitionRepository.test.js).
+async function upsertMany(definitions, client = prisma) {
   let created = 0;
   let updated = 0;
 
   for (const def of definitions) {
-    const existing = await prisma.skillDefinition.findUnique({
+    const existing = await client.skillDefinition.findUnique({
       where: { slug: def.slug },
     });
 
     if (existing) {
-      await prisma.skillDefinition.update({
+      await client.skillDefinition.update({
         where: { slug: def.slug },
         data: {
           canonicalName: def.canonicalName,
@@ -50,7 +54,7 @@ async function upsertMany(definitions) {
       });
       updated += 1;
     } else {
-      await prisma.skillDefinition.create({
+      await client.skillDefinition.create({
         data: {
           canonicalName: def.canonicalName,
           slug: def.slug,
