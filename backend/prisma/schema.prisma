@@ -278,3 +278,27 @@ model GigReview {
   review      String
   createdAt   DateTime @default(now())
 }
+
+model SkillDefinition {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  canonicalName       String
+  slug                String   @unique
+  aliases             String[]
+  category            String   @default("technical")
+  tier                Int      @default(3)
+  status              String   @default("WAITING")
+  targetQuestionCount Int      @default(300)
+  counters            SkillCounters?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  deletedAt           DateTime?
+
+  @@index([tier, status])
+}
+
+type SkillCounters {
+  totalQuestions Int @default(0)
+  validated      Int @default(0)
+  topicsReady    Int @default(0)
+  topicsTotal    Int @default(0)
+}
