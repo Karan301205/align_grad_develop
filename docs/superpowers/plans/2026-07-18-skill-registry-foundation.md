@@ -535,7 +535,8 @@ Create `backend/src/services/questionBank/repositories/skillDefinitionRepository
 ```js
 // Sole Prisma access point for SkillDefinition. Nothing else under
 // services/questionBank/ may import the Prisma client directly.
-const prisma = require('../../../config/db');
+// NOTE: config/db.js exports { prisma, isMock } — it must be destructured.
+const { prisma } = require('../../../config/db');
 
 async function findAll() {
   return prisma.skillDefinition.findMany({
@@ -982,7 +983,7 @@ Create `backend/src/cli/commands/normalizeSkillNames.js`:
 ```js
 const fs = require('fs');
 const path = require('path');
-const prisma = require('../../config/db');
+const { prisma } = require('../../config/db');
 const repo = require('../../services/questionBank/repositories/skillDefinitionRepository');
 const { buildAliasIndex, resolveSkill } = require('../../services/questionBank/skills/normalize');
 
