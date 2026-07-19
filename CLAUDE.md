@@ -62,7 +62,9 @@ JWT-based; `authMiddleware` (`backend/src/middleware/auth.js`) verifies the Bear
 - `ALL_SKILLS` (`frontend/src/constants/index.js`) and `TECHNICAL_SKILLS` (`backend/src/controllers/student.controller.js`) are two independently maintained skill lists — keep them in sync manually when adding/removing skills.
 - A `Profile.skills` entry has both `rating` (self-declared) and `verifiedRating` (optional, set via a passed skill test).
 - Job matching (`getJobs`/`applyJob` in `student.controller.js`) compares a student's self-rated `skills[].rating` against `Job.requirements[].minRating`, case-insensitively by skill name. Falling short blocks the apply action but not the browse/view action.
-- Two independent test-scoring paths exist: `submitTest` (legacy, pass threshold `score >= 70`, raises `rating`) and `submitSkillTest` (MCQ flow, pass threshold `score >= 7` out of 10, sets `verifiedRating` instead of `rating`). Know which one a UI flow is calling before changing pass thresholds.
+- Two independent test-scoring paths exist: `submitTest` (legacy, pass threshold `score >= 70`, raises `rating`) and `submitSkillTest` (MCQ flow) currently applies **no pass threshold** — `passed` is hardcoded `true`
+  and `score` is taken from the request body. This is a known vulnerability being fixed in Plan 2 of
+  the question bank work (see `docs/superpowers/specs/2026-07-18-question-bank-spine-design.md` §3). Know which one a UI flow is calling before changing pass thresholds.
 
 ### Environment variables
 - Backend `.env`: `DATABASE_URL` (MongoDB, needs `replicaSet` for Prisma transactions), `JWT_SECRET`, `PORT` (default 5001), plus `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` (video storage) and `CLAUDE_API_KEY`/`GROQ_API_KEY` (MCQ generation) referenced by controllers but not present in `.env.example` — check `backend/.env` directly if a feature depending on them isn't working.

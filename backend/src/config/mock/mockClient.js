@@ -417,6 +417,46 @@ const mockClient = {
       if (where.gigId) filtered = filtered.filter(r => r.gigId === where.gigId);
       return filtered;
     }
+  },
+  skillDefinition: {
+    findMany: async (args = {}) => {
+      let rows = mockDb.skillDefinitions.filter(s => !s.deletedAt);
+      if (args.orderBy && args.orderBy.canonicalName) {
+        const dir = args.orderBy.canonicalName === 'desc' ? -1 : 1;
+        rows = [...rows].sort((a, b) => a.canonicalName.localeCompare(b.canonicalName) * dir);
+      }
+      return rows;
+    },
+    findUnique: async ({ where }) => {
+      const field = Object.keys(where)[0];
+      return mockDb.skillDefinitions.find(s => s[field] === where[field]) || null;
+    },
+    count: async () => mockDb.skillDefinitions.length,
+    create: async ({ data }) => {
+      const row = {
+        id: `sd_${Date.now()}_${mockDb.skillDefinitions.length}`,
+        status: 'WAITING',
+        aliases: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deletedAt: null,
+        ...data,
+      };
+      mockDb.skillDefinitions.push(row);
+      return row;
+    },
+    update: async ({ where, data }) => {
+      const idx = mockDb.skillDefinitions.findIndex(
+        s => s.slug === where.slug || s.id === where.id
+      );
+      if (idx === -1) return null;
+      mockDb.skillDefinitions[idx] = {
+        ...mockDb.skillDefinitions[idx],
+        ...data,
+        updatedAt: new Date(),
+      };
+      return mockDb.skillDefinitions[idx];
+    },
   }
 };
 

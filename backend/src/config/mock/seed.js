@@ -14,7 +14,8 @@ const mockDb = {
   gigApplicants: [],
   gigMessages: [],
   gigSubmissions: [],
-  gigReviews: []
+  gigReviews: [],
+  skillDefinitions: []
 };
 
 // Seed initial jobs in mock db to make it instantly usable

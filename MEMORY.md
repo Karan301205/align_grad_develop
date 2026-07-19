@@ -55,7 +55,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   ├── bank.js           # Subcommand dispatcher; every write defaults to dry-run
 │   │   │   └── commands/
 │   │   │       ├── seedSkills.js # Seeds SkillDefinition rows from seedData.json
-│   │   │       └── normalizeSkillNames.js # PLANNED (Task 7): canonical-name data migration
+│   │   │       └── normalizeSkillNames.js # Reversible canonical-name migration (dry-run default, human-only --commit)
 │   │   ├── constants/
 │   │   │   └── technicalSkills.js # LEGACY after registry seeding — see SkillDefinition
 │   │   ├── services/questionBank/ # Question bank subsystem (see docs/superpowers/specs/)
