@@ -19,7 +19,7 @@ before execution.
 
 | Plan | Contents | Status | Blocked by |
 |---|---|---|---|
-| **1** | Skill registry foundation | **In progress — 5/8 tasks done** | — |
+| **1** | Skill registry foundation | **COMPLETE — 8/8 tasks reviewed** (final whole-branch review pending) | — |
 | 2 | `TestSession`, server-side scoring, answer-key stripping (**fixes both security findings**) | Not started | Nothing — independently shippable |
 | 3 | `SkillBlueprint` + `TopicProgress`, AI blueprint drafting, CLI approval gate | Not started | Plan 1 |
 | 4 | `Question` + `GenerationJob` + `QuestionReviewFlag`, worker process, generation pipeline | Not started | Plans 1, 3 |
@@ -42,23 +42,15 @@ are consumers of the spine and are not scheduled yet.
 | 4 | `SkillDefinition` model + repository | `8beccab`, `04843cf` | M | Review found `upsertMany` untested; DI seam + 4 tests added. |
 | 5 | Seed CLI (`bank.js`, `seedSkills.js`) | `3f0a6f8`, `4949b53` | S | Reviewed 2026-07-19. Review found `loader()` outside `try` — raw stack on module-load failure (5th plan-code bug). Fixed in code + plan. Dry run still never executed against the DB (deliberate — see BLOCKER 1). |
 | 6 | Registry cache + `skillMatching` integration | `48ce2cc` | M | Reviewed 2026-07-19, zero blocking findings. Both comparison sides resolved; cache degrades to identity when unloaded or empty; boot verified against live Atlas (read-only): `loaded 0 skill spellings`. |
+| 7 | Normalization migration script (**BUILD ONLY**) | `5190e52`, `a111c96` | L | Reviewed 2026-07-19. Write path never executed — `--commit` is human-only (BLOCKER 1). Review fix: pure logic extracted + 14 fixture tests enforce rating/verifiedRating/minRating preservation. **Operator caveats for the eventual `--commit` run:** (1) TOCTOU — no concurrency guard between the plan read and the full-array write; run during low traffic, after the mandated backup. (2) A profile holding two spellings of one skill ends up with duplicate canonical names — watch for paired lines in the tally. |
+| 8 | Mock client support + doc corrections | `76244c3` | S | Reviewed 2026-07-19, zero blocking findings. Offline boot verified: mock mode + `loaded 0 skill spellings`. `CLAUDE.md` false-threshold claim corrected. |
 
-**Test suite: 21/21 passing.**
+**Test suite: 35/35 passing. ALL 8 TASKS OF PLAN 1 COMPLETE.**
 
 ### ⬜ Pending
 
-| # | Task | Complexity | Depends on | Notes |
-|---|---|---|---|---|
-| 7 | Normalization migration script | **L** | Done (4, 6) | **Highest-risk task in the plan.** Rewrites live user data. BUILD ONLY — no `--commit`, see BLOCKER 1. |
-| 8 | Mock client support + doc corrections | **S** | Done (4, 6) | `mockClient.skillDefinition`, `MEMORY.md` tree, `CLAUDE.md` threshold correction. |
-
-### Recommended order
-
-**7 (build only) → 8 → final whole-branch review.** (Tasks 1–5: five tasks, five real defects found
-by review. Task 6 was the first with zero blocking findings.)
-
-Task 7 comes after 6 because the migration's correctness depends on the same `buildAliasIndex`
-resolution the cache uses — that dependency is now satisfied and review-verified.
+Nothing — Plan 1's tasks are all complete. Next: final whole-branch review, then the merge
+decision and Plan 2 (`TestSession` security fixes).
 
 ---
 
