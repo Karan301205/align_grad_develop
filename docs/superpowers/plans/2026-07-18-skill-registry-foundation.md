@@ -1176,6 +1176,8 @@ git add backend/src/cli/commands/normalizeSkillNames.js backend/.gitignore
 git commit -m "feat: add reversible skill name normalization migration"
 ```
 
+**NOTE (2026-07-19):** the shipped file additionally extracts/exports pure helpers (`canonicalChange`, `summarise`, `applySkillRenames`, `applyRequirementRenames`) covered by `backend/tests/questionBank/normalizeSkillNames.test.js` — a review finding: the tally safety net cannot see dropped rating fields, so preservation is now test-enforced.
+
 ---
 
 ## Task 8: Mock database support and documentation

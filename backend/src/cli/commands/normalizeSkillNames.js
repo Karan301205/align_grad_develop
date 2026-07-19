@@ -14,6 +14,23 @@ function canonicalChange(index, storedName) {
   return canonical;
 }
 
+// Pure: returns a new array with names canonicalized; every other field untouched.
+// Entries that do not resolve to a different canonical keep their original object reference.
+function applySkillRenames(index, skills) {
+  return (skills || []).map((s) => {
+    const canonical = canonicalChange(index, s.name);
+    return canonical ? { ...s, name: canonical } : s;
+  });
+}
+
+// Pure: same contract as applySkillRenames, but for Job.requirements[].skillName.
+function applyRequirementRenames(index, reqs) {
+  return (reqs || []).map((r) => {
+    const canonical = canonicalChange(index, r.skillName);
+    return canonical ? { ...r, skillName: canonical } : r;
+  });
+}
+
 async function planProfiles(index) {
   // NOTE: Profile has no `deletedAt` field — do not add a soft-delete filter here,
   // Prisma will reject it with "Unknown argument deletedAt".
@@ -24,10 +41,7 @@ async function planProfiles(index) {
   const changes = [];
   for (const profile of profiles) {
     const skills = profile.skills || [];
-    const updated = skills.map((s) => {
-      const canonical = canonicalChange(index, s.name);
-      return canonical ? { ...s, name: canonical } : s;
-    });
+    const updated = applySkillRenames(index, skills);
 
     const touched = updated.some((s, i) => s.name !== skills[i].name);
     if (touched) {
@@ -45,10 +59,7 @@ async function planJobs(index) {
   const changes = [];
   for (const job of jobs) {
     const reqs = job.requirements || [];
-    const updated = reqs.map((r) => {
-      const canonical = canonicalChange(index, r.skillName);
-      return canonical ? { ...r, skillName: canonical } : r;
-    });
+    const updated = applyRequirementRenames(index, reqs);
 
     const touched = updated.some((r, i) => r.skillName !== reqs[i].skillName);
     if (touched) {
@@ -147,4 +158,4 @@ async function run({ commit }) {
   console.log(`Committed: ${profileChanges.length} profiles, ${jobChanges.length} jobs updated.`);
 }
 
-module.exports = { run };
+module.exports = { run, canonicalChange, summarise, applySkillRenames, applyRequirementRenames };
