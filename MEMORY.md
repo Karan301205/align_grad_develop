@@ -64,7 +64,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   └── skills/
 │   │   │       ├── normalize.js  # Pure: normalizeToken, buildAliasIndex, resolveSkill
 │   │   │       ├── seedData.json # 143 generated canonical skill definitions
-│   │   │       └── registryCache.js # PLANNED (Task 6): boot-cached alias index
+│   │   │       └── registryCache.js # Boot-cached alias index; degrades to identity when unloaded/empty
 │   │   ├── controllers/          # HTTP request controllers (Routing handlers only)
 │   │   │   ├── auth.controller.js # Signups, logins, and token issuance
 │   │   │   ├── recruiter.controller.js # Verification, candidate search, job postings
@@ -408,7 +408,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Risk**: Medium.
 
 #### [backend/src/services/skillMatching.service.js](file:///Users/karanrawat/Desktop/a_g/backend/src/services/skillMatching.service.js)
-* **Purpose**: Analyzes student skill scores against job requirements to flag eligibility and compute missing requirements.
+* **Purpose**: Analyzes student skill scores against job requirements to flag eligibility and compute missing requirements. Since 2026-07-19, both sides of every name comparison resolve through `questionBank/skills/registryCache` (alias-aware matching); `missingRequirements` still reports the recruiter's original `skillName`. With the registry unseeded, `resolve()` degrades to identity — behavior identical to before.
 * **Used By**: [backend/src/controllers/student.controller.js](file:///Users/karanrawat/Desktop/a_g/backend/src/controllers/student.controller.js).
 * **Dependencies**: [backend/src/constants/technicalSkills.js](file:///Users/karanrawat/Desktop/a_g/backend/src/constants/technicalSkills.js).
 * **Safe Modifications**: Modifying eligibility logic (e.g. adding relaxed match rules for certifications).

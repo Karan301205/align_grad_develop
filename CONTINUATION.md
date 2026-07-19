@@ -190,16 +190,30 @@ backend/package.json              # + "test", + "bank" scripts
 MEMORY.md                         # + §20, folder tree, SkillDefinition, removed phantom root package.json
 ```
 
+### Modified 2026-07-19 (Tasks 5-fix and 6)
+
+```
+backend/src/cli/bank.js                       # fix: loader() moved inside try (4949b53)
+backend/src/services/questionBank/skills/registryCache.js   # created (48ce2cc)
+backend/tests/questionBank/registryCache.test.js            # created (48ce2cc)
+backend/src/services/skillMatching.service.js # rewritten: both sides resolve through registry
+backend/src/index.js                          # non-fatal registryCache.load() at boot
+```
+
 ### NOT modified (deliberately)
 
-`skillMatching.service.js`, `student.controller.js`, `index.js`, `mockClient.js`, `CLAUDE.md`,
-anything under `frontend/`, anything under `admin_ws/`.
+`student.controller.js`, `mockClient.js`, `CLAUDE.md` (Task 8), anything under `frontend/`,
+anything under `admin_ws/`.
 
 ---
 
-## 7. Current verified state
+## 7. Current verified state (updated 2026-07-19)
 
-- **Test suite: 17/17 passing.** `cd backend && npm test`
+- **Tasks 1–6 complete and review-approved.** Five of six tasks had real defects caught by review
+  (Task 6 was the first clean one). Task 5's defect: `loader()` outside `try` in `bank.js`.
+- **Test suite: 21/21 passing.** `cd backend && npm test`
+- Boot verified against live Atlas (read-only): `[skill-registry] loaded 0 skill spellings` —
+  the registry collection is unseeded, and the cache correctly degrades to identity matching.
 - `npm run bank -- --help` works and lists both subcommands.
 - `npx prisma generate` succeeds — no duplicate-`Skill` collision.
 - Seed data: **143 definitions**, Tier 1 = 9, Tier 2 = 7, Tier 3 = 127.
@@ -224,9 +238,21 @@ Safe: `npx prisma generate`, dry runs, read-only queries, `npm test` (stubs `con
 
 ---
 
-## 9. EXACT next task
+## 9. EXACT next task (updated 2026-07-19)
 
-### Review Task 5, then implement Task 6.
+### Task 7: build the normalization migration script — BUILD ONLY, never run `--commit`.
+
+Tasks 5 and 6 are done and review-approved; the original Step 1/Step 2 guidance below is retained
+only as history. Task 7's full code is in the plan (Task 7 section) with the corrected
+`const { prisma } = require(...)` import and NO `deletedAt` filter on Profile (it has no such
+field). The script must dry-run by default, print a from→to tally, write a rollback JSON under
+`backend/.rollback/`, and refuse to run against an empty registry. Verification is: module loads,
+`npm run bank -- normalize-skills` fails cleanly with "Registry is empty" (a read-only check —
+registry is unseeded), and the suite stays green. The `--commit` path is executed by a human only,
+after `seed-skills --commit` and a backup (BLOCKER 1 in `task.md`). After Task 7 comes Task 8
+(mock + doc corrections), then the final whole-branch review.
+
+### (History) Review Task 5, then implement Task 6.
 
 **Step 1 — close the Task 5 review gap (do this first, it is small).**
 

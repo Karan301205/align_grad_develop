@@ -40,37 +40,25 @@ are consumers of the spine and are not scheduled yet.
 | 2 | Skill name normalization | `0ab7c9a` | M | 13 tests. Pure module, no I/O. |
 | 3 | Registry seed generation | `fe9e5f7`, `f6d7dd5` | M | Review found the parser scraped commented-out entries. Fixed. 143 defs. |
 | 4 | `SkillDefinition` model + repository | `8beccab`, `04843cf` | M | Review found `upsertMany` untested; DI seam + 4 tests added. |
+| 5 | Seed CLI (`bank.js`, `seedSkills.js`) | `3f0a6f8`, `4949b53` | S | Reviewed 2026-07-19. Review found `loader()` outside `try` — raw stack on module-load failure (5th plan-code bug). Fixed in code + plan. Dry run still never executed against the DB (deliberate — see BLOCKER 1). |
+| 6 | Registry cache + `skillMatching` integration | `48ce2cc` | M | Reviewed 2026-07-19, zero blocking findings. Both comparison sides resolved; cache degrades to identity when unloaded or empty; boot verified against live Atlas (read-only): `loaded 0 skill spellings`. |
 
-**Test suite: 17/17 passing.**
-
-### ⚠️ Implemented but NOT reviewed
-
-| # | Task | Commit | Complexity | Gap |
-|---|---|---|---|---|
-| 5 | Seed CLI (`bank.js`, `seedSkills.js`) | `3f0a6f8` | S | Code is committed and `npm run bank -- --help` works. **Never passed the review gate** and the dry run was **never executed against the database**. Tasks 1–4 each had real defects caught by review; assume this one does too until checked. |
+**Test suite: 21/21 passing.**
 
 ### ⬜ Pending
 
 | # | Task | Complexity | Depends on | Notes |
 |---|---|---|---|---|
-| 6 | Registry cache + `skillMatching` integration | **M** | Task 4 | Touches the hot job-matching path. Must resolve **both** the map keys and the lookup key. Unloaded cache must degrade to returning input unchanged, never `null`. |
-| 7 | Normalization migration script | **L** | Tasks 4, 6 | **Highest-risk task in the plan.** Rewrites live user data. Build-only this session — see Blockers. |
-| 8 | Mock client support + doc corrections | **S** | Tasks 4, 6 | `mockClient.skillDefinition`, `MEMORY.md` tree, `CLAUDE.md` threshold correction. |
+| 7 | Normalization migration script | **L** | Done (4, 6) | **Highest-risk task in the plan.** Rewrites live user data. BUILD ONLY — no `--commit`, see BLOCKER 1. |
+| 8 | Mock client support + doc corrections | **S** | Done (4, 6) | `mockClient.skillDefinition`, `MEMORY.md` tree, `CLAUDE.md` threshold correction. |
 
 ### Recommended order
 
-**5-review → 6 → 7 (build only) → 8.**
+**7 (build only) → 8 → final whole-branch review.** (Tasks 1–5: five tasks, five real defects found
+by review. Task 6 was the first with zero blocking findings.)
 
-Review Task 5 first — it is small, and leaving an unreviewed task behind while building on top of it
-is how defects compound. Every one of Tasks 1–4 had a real defect caught by review, so the base rate
-here is not reassuring.
-
-Then Task 6: it has no unmet dependencies and exercises the Task 4 repository in the real request
-path, which surfaces integration problems early.
-
-Task 7 must come after 6 because the migration's correctness depends on the same
-`buildAliasIndex` resolution the cache uses — if resolution is wrong, the migration corrupts data
-with it.
+Task 7 comes after 6 because the migration's correctness depends on the same `buildAliasIndex`
+resolution the cache uses — that dependency is now satisfied and review-verified.
 
 ---
 
