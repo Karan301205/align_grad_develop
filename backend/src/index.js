@@ -44,6 +44,13 @@ app.use((req, res, next) => {
 
 app.use(errorHandler);
 
+const skillRegistry = require('./services/questionBank/skills/registryCache');
+
+// Non-fatal: an unseeded registry degrades to raw name matching.
+skillRegistry.load().catch((err) => {
+  console.warn('[skill-registry] load failed, falling back to raw name matching:', err.message);
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
