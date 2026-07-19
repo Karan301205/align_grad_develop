@@ -47,10 +47,18 @@ are consumers of the spine and are not scheduled yet.
 
 **Test suite: 35/35 passing. ALL 8 TASKS OF PLAN 1 COMPLETE.**
 
-### ⬜ Pending
+### Final whole-branch review — DONE 2026-07-20
 
-Nothing — Plan 1's tasks are all complete. Next: final whole-branch review, then the merge
-decision and Plan 2 (`TestSession` security fixes).
+**Verdict: READY-WITH-CONDITIONS** (conditions are operational, not code). Zero Critical/Important
+cross-task findings. Confirmed non-issues: all 143 canonicals (except never-gating Redis/GraphQL)
+survive the `TECHNICAL_SKILLS` gate post-seed; test stubs key the exact resolved `config/db` path;
+CLI dispatch stays lazy; migration output is idempotent. All 17 deferred Minors triaged
+fine-to-defer. New Minors for the backlog: (a) one bad alias row in the DB degrades the WHOLE
+registry to identity (non-fatal, silent — `registryCache.js:16-20`); (b) merged-skill last-wins
+rating collapse (see runbook decision in BLOCKER 1); (c) migration doesn't dedupe merged pairs.
+
+**Next: merge decision (human), then Plan 2 (`TestSession` security fixes — still the highest-value
+unstarted work in the program).**
 
 ---
 
@@ -69,9 +77,33 @@ without a human at the keyboard:
 
 Safe: `npx prisma generate`, read-only queries, dry runs, the test suite (which stubs `config/db`).
 
-**To unblock:** either a human runs the `--commit` steps after taking a backup, or a throwaway
-`DATABASE_URL` (local `mongod` or scratch Atlas cluster) is supplied so the full flow can be proven
-end-to-end first. The second is lower risk and recommended.
+**Go-live runbook (human-only, final-review-verified 2026-07-20).** All commands from `backend/`
+with the **live `DATABASE_URL` set** — with it unset they hit the in-memory mock and persist
+nothing, which looks like success and does nothing:
+
+1. **Backup:** take a MongoDB Atlas manual snapshot. This is also the rollback plan — the migration
+   writes a rollback JSON under `backend/.rollback/` but **no inverse importer exists**; recovery is
+   snapshot-restore or manually re-applying that JSON.
+2. `npm run bank -- seed-skills` (dry run) → expect 143 definitions, Tier 1 = 9, Tier 2 = 7.
+3. `npm run bank -- seed-skills --commit`
+4. `npm run bank -- normalize-skills` (dry run) → **inspect every from→to tally line.** Watch for
+   one profile producing two identical `-> Matplotlib & Seaborn` (etc.) lines — that profile ends
+   up with duplicate canonical entries (see decision below).
+5. `npm run bank -- normalize-skills --commit` — **low-traffic window** (TOCTOU: no concurrency
+   guard between the plan read and the full-array write; a concurrent profile edit is silently lost).
+6. `npm run bank -- normalize-skills` again → must print `Nothing to normalize.`
+7. **Restart the API.** The registry cache loads once at boot; there is no reload endpoint. Until
+   restart, a running server keeps identity matching.
+
+**Open product decision before step 5:** after merging (e.g. Matplotlib + Seaborn → one canonical),
+a profile holding both keeps two entries with the same name, and the matching map is last-wins — a
+candidate with `[Matplotlib:9, Seaborn:3]` could fail a `≥5` requirement they genuinely meet.
+Options: have the migration dedupe merged pairs keeping `max(rating)` (changes migration semantics),
+or make the matching map take `Math.max` on key collision (changes matching semantics). Both are
+one-line-ish but are product calls — decide before running step 5.
+
+Alternative, lower-risk path: supply a throwaway `DATABASE_URL` (local `mongod` or scratch Atlas)
+and prove the full runbook end-to-end there first. Recommended.
 
 ### 🟡 BLOCKER 2 — Schema never pushed
 

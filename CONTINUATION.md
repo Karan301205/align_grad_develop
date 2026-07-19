@@ -238,9 +238,25 @@ Safe: `npx prisma generate`, dry runs, read-only queries, `npm test` (stubs `con
 
 ---
 
-## 9. EXACT next task (updated 2026-07-19)
+## 9. EXACT next task (updated 2026-07-20)
 
-### Task 7: build the normalization migration script — BUILD ONLY, never run `--commit`.
+### PLAN 1 IS COMPLETE — all 8 tasks implemented and review-approved, final whole-branch review
+### passed READY-WITH-CONDITIONS (2026-07-20). Suite: 35/35.
+
+Next session, in order:
+
+1. **Merge decision (human input needed).** Branch `feat/question-bank-spine` is ~20 commits ahead
+   of `main`, unpushed. Options: merge to main locally / push + open PR / keep the branch. Use
+   `superpowers:finishing-a-development-branch` (deferred this session for context-limit reasons).
+2. **Write Plan 2** via `superpowers:writing-plans`: `TestSession` model + server-side scoring +
+   answer-key stripping — closes both live security holes in spec §3. No dependencies on go-live.
+3. **Go-live is separate and human-only:** the full runbook (7 steps, with the mock trap, restart
+   requirement, no-inverse-importer warning, and the merged-skill rating decision) is in `task.md`
+   BLOCKER 1.
+
+Everything below this line is history.
+
+### (History) Task 7: build the normalization migration script — BUILD ONLY, never run `--commit`.
 
 Tasks 5 and 6 are done and review-approved; the original Step 1/Step 2 guidance below is retained
 only as history. Task 7's full code is in the plan (Task 7 section) with the corrected
