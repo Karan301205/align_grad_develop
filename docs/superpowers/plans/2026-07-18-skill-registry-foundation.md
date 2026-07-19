@@ -668,10 +668,10 @@ async function main() {
     process.exit(1);
   }
 
-  const command = loader();
   const commit = args.includes('--commit');
 
   try {
+    const command = loader();
     await command.run({ commit });
     process.exit(0);
   } catch (err) {
