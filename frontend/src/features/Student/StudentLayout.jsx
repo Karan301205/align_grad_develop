@@ -114,6 +114,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   // Skill testing states
   const [activeTestSkill, setActiveTestSkill] = useState(null);
   const [testQuestions, setTestQuestions] = useState([]);
+  const [testSessionId, setTestSessionId] = useState(null);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [generatingTest, setGeneratingTest] = useState(false);
@@ -292,6 +293,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       if (res.ok) {
         const data = await res.json();
         setTestQuestions(data.questions || []);
+        setTestSessionId(data.sessionId || null); // server-side scoring session
       } else {
         alert('Failed to generate test. Please try again.');
         setActiveTestSkill(null);
@@ -314,15 +316,9 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   }, [testSkill]);
 
   const handleSubmitSkillTest = async () => {
-    // Score computation
-    let correctCount = 0;
-    testQuestions.forEach((q, idx) => {
-      const userAnswerIdx = selectedAnswers[idx];
-      const userAnswerChar = userAnswerIdx !== undefined ? String.fromCharCode(65 + userAnswerIdx) : '';
-      if (userAnswerChar === q.answer) {
-        correctCount++;
-      }
-    });
+    // Server-side scoring: submit the selected option index per question (in served
+    // order). The client no longer computes a score or sees the answer key.
+    const answers = testQuestions.map((_, idx) => (selectedAnswers[idx] !== undefined ? selectedAnswers[idx] : 0));
 
     setSubmittingTest(true);
     try {
@@ -330,16 +326,17 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         token,
         method: 'POST',
         json: {
-          skillName: activeTestSkill,
-          score: correctCount
+          sessionId: testSessionId,
+          answers
         }
       });
       if (res.ok) {
         const data = await res.json();
         setTestResult({
-          score: correctCount,
-          passed: true,
-          attempt: data.attempt
+          rating: data.rating,   // 1-10 level (applied to profile only when passed)
+          percent: data.score,   // 0-100
+          passed: data.passed,
+          correctAnswers: data.correctAnswers
         });
         if (data.skills) {
           setSkillsList(data.skills);

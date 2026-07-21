@@ -20,13 +20,58 @@ before execution.
 | Plan | Contents | Status | Blocked by |
 |---|---|---|---|
 | **1** | Skill registry foundation | **COMPLETE — 8/8 tasks reviewed** (final whole-branch review pending) | — |
-| 2 | `TestSession`, server-side scoring, answer-key stripping (**fixes both security findings**) | Not started | Nothing — independently shippable |
+| 2 | `TestSession`, server-side scoring, answer-key stripping (**fixes both security findings**) | ✅ **IMPLEMENTED + verified 2026-07-20** (backend + quiz frontend). Both holes closed; suite 46/46; `verifyScoringFlow.js` + HTTP E2E pass. Uncommitted. | Done |
 | 3 | `SkillBlueprint` + `TopicProgress`, AI blueprint drafting, CLI approval gate | Not started | Plan 1 |
 | 4 | `Question` + `GenerationJob` + `QuestionReviewFlag`, worker process, generation pipeline | Not started | Plans 1, 3 |
 | 5 | Assessment read path, selection blueprint, fallback flag | Not started | Plans 1, 2, 4 |
 
 Pieces 5–7 of the original decomposition (admin question-bank UI, generation dashboard, analytics)
 are consumers of the spine and are not scheduled yet.
+
+---
+
+## Session 3 (2026-07-20) — Decision 1, Plan 2, +20 skills (all uncommitted)
+
+Detailed in `CONTINUATION.md` §9. Summary:
+- **Decision 1 enforced server-side:** ratings default to 1, are server-owned (`reconcileSkills` in
+  `updateProfile`), and rise ONLY via a passing server-scored assessment. Legacy client-score
+  endpoint `POST /student/tests` → **410**.
+- **Plan 2 implemented + verified:** `TestSession` (single-use, expiring), answer key never sent to
+  the client, `submitSkillTest` scores server-side (`scoring.js`, 70% pass). Suite 46/46 +
+  `verifyScoringFlow.js` (7 checks) + HTTP E2E (5 checks).
+- **Frontend (quiz component only, user-approved exception):** `StudentLayout.jsx` +
+  `StudentSkillTests.jsx` rewired to the session contract; build passes. All other frontend
+  (Antigravity design work) untouched. Legacy `SkillTest/TestView.jsx` is dead code (static Qs).
+- **+20 popular skills** generated via Groq (Bedrock still `403` payment-blocked). Top up gaps with
+  `GEN_CONCURRENCY=2 node scripts/generateQuestions.js --fill` → target 30 skills × 50.
+
+---
+
+## Interim: Temporary Question Bank (BUILT 2026-07-20, uncommitted)
+
+A ship-fast shim so candidates can take real pre-generated quizzes NOW, in parallel with the
+enterprise pipeline. **Full run-book: `HANDOFF_TEMP_QUESTION_BANK.md`.** Does not alter any Plan
+1–5 design — it seeds the permanent `Question` model early and serves from it.
+
+| Piece | State |
+|---|---|
+| `scripts/generateQuestions.js` — offline gen (Groq `llama-3.3-70b-versatile`), `--smoke`/`--fill` | ✅ done |
+| `scripts/output/questions.json` — **500 questions, 10 skills × 50** (gitignored) | ✅ done |
+| `Question` model (`schema.prisma`) + mock support + `npx prisma generate` | ✅ done |
+| `scripts/seedQuestions.js` — dry-run default, `--commit`, idempotent per-skill | ✅ done |
+| `generateSkillTest` serves bank-first (10 random, `correctIndex`→A–D, unchanged frontend contract) | ✅ done |
+| `loadQuestionBankMock.js` + `npm run dev:mock` — local test, zero DB setup, mock-only | ✅ done, HTTP-verified |
+| Suite | 35/35 |
+
+**Skills:** Python, JavaScript, Java, React, Node.js, TypeScript, SQL, Git and Github, Docker, AWS.
+
+**Local test:** `cd backend && npm run dev:mock` + `cd frontend && npm run dev` → sign up as Student → quiz.
+
+**Caveats / open items:**
+- Interim path keeps BOTH security holes (answer key sent to client; client score trusted). **Plan 2 fixes them.** Don't trust interim `verifiedRating`s.
+- 🔴 **Bedrock down:** `403 INVALID_PAYMENT_INSTRUMENT` — human must fix AWS billing to use the $100 credit. Groq covers generation.
+- ⚠️ **Prod incident:** a bad force-mock guard wrote **15 fake fixture rows** to production `Question` (`subtopic:"Fixtures"`). User chose to leave them; the real `seedQuestions.js --commit` overwrites Python/Java fixtures per-skill. Root cause fixed.
+- **Prod seed is human-only:** `node scripts/seedQuestions.js` (dry) → `--commit` → restart API. Uncommitted per user instruction.
 
 ---
 

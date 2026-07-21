@@ -4,6 +4,8 @@ const { buildStudentSkillMap, getMissingRequirements } = require('../services/sk
 const { purgeExpiredJobs } = require('../services/jobLifecycle.service');
 const { deleteS3ObjectFromUrl } = require('../services/fileCleanup.service');
 const mcqService = require('../services/mcq/mcqService');
+const testSessionRepo = require('../services/questionBank/repositories/testSessionRepository');
+const { scoreAnswers } = require('../services/questionBank/scoring');
 
 exports.getProfile = async (req, res) => {
   try {
@@ -19,6 +21,26 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ error: 'Server error fetching profile' });
   }
 };
+
+// Decision 1: candidates cannot set or raise their own skill ratings. The server
+// owns the numbers — a newly declared skill starts at rating 1, and any skill the
+// candidate already has keeps its server-side rating/verifiedRating (only a passed
+// assessment changes those, in submitSkillTest). The client controls only WHICH
+// skills are listed, never their ratings; any rating/verifiedRating in the request
+// body is ignored.
+function reconcileSkills(incoming, existing) {
+  const byName = new Map((existing || []).map((s) => [String(s.name).toLowerCase(), s]));
+  return (incoming || [])
+    .filter((s) => s && s.name)
+    .map((s) => {
+      const prior = byName.get(String(s.name).toLowerCase());
+      const skill = { name: prior ? prior.name : s.name, rating: prior ? (prior.rating || 1) : 1 };
+      const vr = prior ? prior.verifiedRating : undefined;
+      if (vr !== undefined && vr !== null) skill.verifiedRating = vr;
+      return skill;
+    });
+}
+exports._reconcileSkills = reconcileSkills;
 
 exports.updateProfile = async (req, res) => {
   const { 
@@ -92,7 +114,7 @@ exports.updateProfile = async (req, res) => {
           profilePic,
           resumeUrl,
           skills: skills ? {
-            set: skills // Array of { name: "React", rating: 4 }
+            set: reconcileSkills(skills, existingProfile.skills)
           } : undefined,
           bio,
           nationality,
@@ -119,7 +141,7 @@ exports.updateProfile = async (req, res) => {
           profilePic,
           resumeUrl,
           skills: skills ? {
-            set: skills
+            set: reconcileSkills(skills, [])
           } : undefined,
           bio,
           nationality,
@@ -247,62 +269,15 @@ exports.applyJob = async (req, res) => {
   }
 };
 
+// DISABLED (Decision 1). This legacy endpoint trusted a client-supplied score to
+// raise a rating — the exact hole Decision 1 forbids. Skill ratings can now only
+// change via the server-scored flow: POST /student/tests/generate then
+// POST /student/tests/submit (submitSkillTest). Kept as a hard 410 so any stale
+// client fails loudly instead of silently getting a self-assigned rating.
 exports.submitTest = async (req, res) => {
-  const { skillName, score, targetRating } = req.body;
-  if (!skillName || score === undefined || !targetRating) {
-    return res.status(400).json({ error: 'Missing required parameters' });
-  }
-
-  try {
-    const profile = await prisma.profile.findUnique({
-      where: { userId: req.user.id }
-    });
-    if (!profile) {
-      return res.status(404).json({ error: 'Profile not found' });
-    }
-
-    const passed = true;
-
-    await prisma.testAttempt.create({
-      data: {
-        profileId: profile.id,
-        skillName,
-        score,
-        passed
-      }
-    });
-
-    const calculatedRating = Math.max(1, Math.round(score / 10));
-
-    let updatedSkills = [...(profile.skills || [])];
-    const skillIdx = updatedSkills.findIndex(s => s.name.toLowerCase() === skillName.toLowerCase());
-
-    if (skillIdx !== -1) {
-      updatedSkills[skillIdx].rating = Math.max(updatedSkills[skillIdx].rating, calculatedRating);
-      updatedSkills[skillIdx].verifiedRating = Math.max(updatedSkills[skillIdx].verifiedRating || 0, calculatedRating);
-    } else {
-      updatedSkills.push({ name: skillName, rating: calculatedRating, verifiedRating: calculatedRating });
-    }
-
-    await prisma.profile.update({
-      where: { id: profile.id },
-      data: {
-        skills: {
-          set: updatedSkills
-        }
-      }
-    });
-
-    res.json({
-      passed,
-      score,
-      skillName,
-      targetRating
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error submitting test' });
-  }
+  return res.status(410).json({
+    error: 'This endpoint is disabled. Take the assessment via /student/tests/generate and submit answers to /student/tests/submit; scoring is server-side.',
+  });
 };
 
 exports.getTechnicalSkills = async (req, res) => {
@@ -336,6 +311,34 @@ exports.getTechnicalSkills = async (req, res) => {
   }
 };
 
+// Build a 10-question test from the pre-generated bank (>=10 available for the
+// skill) or, failing that, live LLM generation. Returns the client-safe questions
+// AND the answer key separately — the answer key is NEVER placed in `questions`;
+// it goes only into the server-side TestSession. answerKey[i] is the correct
+// option index (0-3) for questions[i].
+async function buildSkillTest(skillName) {
+  const rows = await prisma.question.findMany({
+    where: { skillName: { equals: skillName, mode: 'insensitive' } },
+  });
+
+  let picked;
+  if (rows && rows.length >= 10) {
+    picked = [...rows].sort(() => Math.random() - 0.5).slice(0, 10)
+      .map((q) => ({ question: q.question, options: q.options, idx: q.correctIndex }));
+  } else {
+    // Live fallback returns { questions:[{ question, options, answer:'A'-'D' }] }.
+    const live = await mcqService.generate(skillName);
+    picked = (live.questions || []).slice(0, 10)
+      .map((q) => ({ question: q.question, options: q.options, idx: 'ABCD'.indexOf(String(q.answer).toUpperCase()) }));
+  }
+
+  return {
+    questions: picked.map((q, i) => ({ id: i + 1, question: q.question, options: q.options })),
+    answerKey: picked.map((q) => q.idx),
+  };
+}
+exports._buildSkillTest = buildSkillTest;
+
 exports.generateSkillTest = async (req, res) => {
   const { skillName } = req.body;
   if (!skillName) {
@@ -343,8 +346,20 @@ exports.generateSkillTest = async (req, res) => {
   }
 
   try {
-    const testData = await mcqService.generate(skillName);
-    res.json(testData);
+    const { questions, answerKey } = await buildSkillTest(skillName);
+    if (questions.length < 10 || answerKey.some((i) => i < 0 || i > 3)) {
+      return res.status(502).json({ error: 'Could not build a complete test for this skill' });
+    }
+
+    // Store the answer key server-side; it is never sent to the client.
+    const session = await testSessionRepo.create({
+      userId: req.user.id,
+      skillName,
+      answerKey,
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+    });
+
+    res.json({ sessionId: session.id, skillName, questions });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error generating skill test' });
@@ -352,60 +367,63 @@ exports.generateSkillTest = async (req, res) => {
 };
 
 exports.submitSkillTest = async (req, res) => {
-  const { skillName, score } = req.body;
-  if (!skillName || score === undefined) {
-    return res.status(400).json({ error: 'skillName and score are required' });
+  const { sessionId, answers } = req.body;
+  if (!sessionId || !Array.isArray(answers)) {
+    return res.status(400).json({ error: 'sessionId and answers[] are required' });
   }
 
   try {
-    const profile = await prisma.profile.findUnique({
-      where: { userId: req.user.id }
-    });
+    // Single-use, expiring, owned-by-caller session. Rejects fabricated,
+    // replayed, or expired sessions — the client cannot self-assign a score.
+    const session = await testSessionRepo.findValidForUser(sessionId, req.user.id);
+    if (!session) {
+      return res.status(400).json({ error: 'Invalid, expired, or already-used test session' });
+    }
 
+    // Server-side scoring against the stored answer key.
+    const { score, passed, rating } = scoreAnswers(session.answerKey, answers);
+
+    // Burn the session before mutating anything so it can never be replayed.
+    await testSessionRepo.markUsed(session.id, { score, passed });
+
+    const profile = await prisma.profile.findUnique({ where: { userId: req.user.id } });
     if (!profile) {
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const testScore = parseInt(score, 10);
-    const passed = true;
-
-    // Save test attempt
-    const attempt = await prisma.testAttempt.create({
-      data: {
-        profileId: profile.id,
-        skillName,
-        score: testScore,
-        passed: passed
-      }
+    await prisma.testAttempt.create({
+      data: { profileId: profile.id, skillName: session.skillName, score, passed },
     });
 
-    // Update Skill in candidate profile
+    // Decision 1: ONLY a passing assessment raises a rating, and only ever
+    // upward. The rating is server-computed; the client never supplies it.
     let updatedSkills = [...(profile.skills || [])];
-    const skillIdx = updatedSkills.findIndex(s => s.name.toLowerCase() === skillName.toLowerCase());
-
-    if (skillIdx !== -1) {
-      updatedSkills[skillIdx].verifiedRating = testScore;
-      updatedSkills[skillIdx].rating = Math.max(updatedSkills[skillIdx].rating, testScore);
-    } else {
-      updatedSkills.push({
-        name: skillName,
-        rating: testScore,
-        verifiedRating: testScore
+    if (passed) {
+      const skillIdx = updatedSkills.findIndex(
+        (s) => s.name.toLowerCase() === session.skillName.toLowerCase()
+      );
+      if (skillIdx !== -1) {
+        updatedSkills[skillIdx].verifiedRating = Math.max(updatedSkills[skillIdx].verifiedRating || 0, rating);
+        updatedSkills[skillIdx].rating = Math.max(updatedSkills[skillIdx].rating || 1, rating);
+      } else {
+        updatedSkills.push({ name: session.skillName, rating, verifiedRating: rating });
+      }
+      await prisma.profile.update({
+        where: { id: profile.id },
+        data: { skills: { set: updatedSkills } },
       });
     }
 
-    const updatedProfile = await prisma.profile.update({
-      where: { id: profile.id },
-      data: {
-        skills: {
-          set: updatedSkills
-        }
-      }
-    });
-
+    // Correct answers are safe to return now: the session is already scored and
+    // burned, so revealing them enables no cheating and drives the review UI.
     res.json({
-      attempt,
-      skills: updatedProfile.skills
+      score,                 // percentage 0-100
+      rating,                // 1-10 level (only applied to the profile when passed)
+      total: session.answerKey.length,
+      passed,
+      skillName: session.skillName,
+      correctAnswers: session.answerKey,
+      skills: updatedSkills,
     });
   } catch (err) {
     console.error(err);

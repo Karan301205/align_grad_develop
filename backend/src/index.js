@@ -51,6 +51,13 @@ skillRegistry.load().catch((err) => {
   console.warn('[skill-registry] load failed, falling back to raw name matching:', err.message);
 });
 
+// Local dev only: load the pre-generated question bank into the in-memory mock so
+// the skill quiz works without a real database. No-op unless the mock is active.
+const { loadQuestionBankIntoMock } = require('./config/mock/loadQuestionBankMock');
+loadQuestionBankIntoMock().catch((err) => {
+  console.warn('[question-bank] mock load skipped:', err.message);
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

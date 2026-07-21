@@ -5,188 +5,174 @@
 
 :root {
   /* ─────────────────────────────────────────────────────────────
-     INDUSTRIAL SKEUOMORPHISM — light "workshop" chassis (Level 0)
-     Palette mimics matte ABS plastic under diffuse top-left light.
+     ARCHITECTURAL PROFESSIONALISM — Corporate Minimalist Design System
      ───────────────────────────────────────────────────────────── */
-  --c-brand-violet: #8750dc; /* legacy alias — now soft violet accent */
-  --c-brand-blue: #2d3436;   /* legacy alias — charcoal ink */
-  --c-grad-from: #c36edc;
-  --c-grad-to: #4678d2;
-  --brand-gradient: linear-gradient(135deg, rgba(195, 110, 220, 1) 0%, rgba(160, 95, 205, 1) 25%, rgba(135, 80, 220, 1) 48%, rgba(100, 90, 215, 1) 76%, rgba(70, 120, 210, 1) 100%);
+  --c-brand-violet: #0057c2; /* legacy alias — now vibrant primary blue */
+  --c-brand-blue: #0f172a;   /* legacy alias — deep charcoal */
+  --c-grad-from: #003527;
+  --c-grad-to: #064e3b;
+  --brand-gradient: linear-gradient(135deg, #003527 0%, #064e3b 100%);
 
-  /* Neumorphic light pair — the two halves of the lighting equation */
-  --neu-dark: #babecc;   /* shadow half (bottom-right) */
-  --neu-light: #ffffff;  /* highlight half (top-left)  */
+  /* High contrast line borders & neutral layering */
+  --neu-dark: #bfc9c3;   /* outline-variant */
+  --neu-light: #ffffff;
 
-  /* Dual-shadow system (the core visual signature) */
-  --shadow-card: 8px 8px 16px var(--neu-dark), -8px -8px 16px var(--neu-light);
-  --shadow-floating: 12px 12px 24px var(--neu-dark), -12px -12px 24px var(--neu-light), inset 1px 1px 0 rgba(255,255,255,0.5);
-  --shadow-pressed: inset 6px 6px 12px var(--neu-dark), inset -6px -6px 12px var(--neu-light);
-  --shadow-recessed: inset 4px 4px 8px var(--neu-dark), inset -4px -4px 8px var(--neu-light);
-  --shadow-sharp: 4px 4px 8px rgba(0,0,0,0.15), -1px -1px 1px rgba(255,255,255,0.8);
-  --shadow-glow: 0 0 10px 2px rgba(135, 80, 220, 0.55);
-  --shadow-primary-btn: 5px 5px 10px rgba(135, 80, 220, 0.35), -5px -5px 10px rgba(255, 255, 255, 0.6);
+  /* Offset solid borders for elevation (Blueprint style) */
+  --shadow-card: 4px 4px 0px 0px #0f172a;
+  --shadow-floating: 8px 8px 0px 0px #0f172a;
+  --shadow-pressed: none;
+  --shadow-recessed: none;
+  --shadow-sharp: 2px 2px 0px 0px #0f172a;
+  --shadow-glow: none;
+  --shadow-primary-btn: 4px 4px 0px 0px #0f172a;
 
-  /* Surfaces — panels share the chassis tone and lift via shadow */
-  --c-background: #e0e5ec;             /* chassis (Level 0) */
-  --c-surface-container: #e4e9f0;      /* panel (Level +1)  */
-  --c-surface-container-low: #d1d9e6;  /* recessed well (Level -1) — inputs/screens */
-  --c-surface-container-high: #e9edf3;
-  --c-surface-container-highest: #f0f2f5;
+  /* Surfaces — stark documents feel with architectural gray highlights */
+  --c-background: #faf8ff;             /* stark base */
+  --c-surface-container: #eaedff;      
+  --c-surface-container-low: #f2f3ff;  
+  --c-surface-container-high: #e2e7ff;
+  --c-surface-container-highest: #dae2fd;
+  --c-surface-container-lowest: #ffffff;
 
   /* Borders */
-  --c-outline: #babecc;
-  --c-outline-variant: #c9d0dd;
+  --c-outline: #707974;
+  --c-outline-variant: #bfc9c3;
 
-  /* Text — dark charcoal ink, softer than pure black */
-  --c-on-surface: #2d3436;
-  --c-on-surface-variant: #4a5568;
+  /* Text — deep charcoal/ink */
+  --c-on-surface: #0f172a;
+  --c-on-surface-variant: #404944;
 
-  /* Primary (VIOLET/BLUE — interactive triggers, active LEDs, alerts) */
-  --c-primary: #8750dc;
+  /* Primary (Emerald Green) */
+  --c-primary: #003527;
   --c-on-primary: #ffffff;
-  --c-primary-container: #f0e6ff;
-  --c-on-primary-container: #3d1480;
+  --c-primary-container: #064e3b;
+  --c-on-primary-container: #80bea6;
 
-  /* Secondary (charcoal panels / dark technical strips) */
-  --c-secondary: #2d3436;
+  /* Secondary (Slate Gray) */
+  --c-secondary: #545f73;
   --c-on-secondary: #ffffff;
-  --c-secondary-container: #d1d9e6;
-  --c-on-secondary-container: #2d3436;
+  --c-secondary-container: #d5e0f8;
+  --c-on-secondary-container: #586377;
 
-  /* Tertiary (amber — certification / upgrade CTAs) */
-  --c-tertiary: #b45309;
+  /* Tertiary (Charcoal/Slate) */
+  --c-tertiary: #2b2f30;
   --c-on-tertiary: #ffffff;
-  --c-tertiary-container: #fde6cb;
-  --c-on-tertiary-container: #7a4a00;
+  --c-tertiary-container: #424547;
+  --c-on-tertiary-container: #afb2b4;
 
   /* Error */
-  --c-error: #dc2626;
+  --c-error: #ba1a1a;
   --c-on-error: #ffffff;
-  --c-error-container: #fbe3e3;
-  --c-on-error-container: #991b1b;
+  --c-error-container: #ffdad6;
+  --c-on-error-container: #93000a;
 
-  /* Success (online / operational LEDs) */
-  --c-success: #15803d;
+  /* Success */
+  --c-success: #064e3b;
   --c-on-success: #ffffff;
-  --c-success-container: #dcefe1;
-  --c-on-success-container: #166534;
+  --c-success-container: #b0f0d6;
+  --c-on-success-container: #002117;
 }
 
 .dark {
-  /* Dark-industrial: powder-coated charcoal steel chassis */
-  --c-grad-from: #c36edc;
-  --c-grad-to: #4678d2;
+  /* Dark mode variant for Corporate Minimalist theme */
+  --c-grad-from: #0059c7;
+  --c-grad-to: #006ef2;
+  --brand-gradient: linear-gradient(135deg, #0059c7 0%, #006ef2 100%);
 
-  --neu-dark: #23282a;
-  --neu-light: #383f42;
+  --neu-dark: #3a4346;
+  --neu-light: #1e2426;
 
-  --shadow-card: 8px 8px 16px var(--neu-dark), -8px -8px 16px var(--neu-light);
-  --shadow-floating: 12px 12px 24px var(--neu-dark), -12px -12px 24px var(--neu-light), inset 1px 1px 0 rgba(255,255,255,0.06);
-  --shadow-pressed: inset 6px 6px 12px var(--neu-dark), inset -6px -6px 12px var(--neu-light);
-  --shadow-recessed: inset 4px 4px 8px var(--neu-dark), inset -4px -4px 8px var(--neu-light);
-  --shadow-sharp: 4px 4px 8px rgba(0,0,0,0.45), -1px -1px 1px rgba(255,255,255,0.05);
-  --shadow-glow: 0 0 10px 2px rgba(135, 80, 220, 0.5);
-  --shadow-primary-btn: 5px 5px 10px rgba(0, 0, 0, 0.3), -5px -5px 10px rgba(255, 255, 255, 0.08);
+  --shadow-card: 4px 4px 0px 0px #ffffff;
+  --shadow-floating: 8px 8px 0px 0px #ffffff;
+  --shadow-pressed: none;
+  --shadow-recessed: none;
+  --shadow-sharp: 2px 2px 0px 0px #ffffff;
+  --shadow-glow: none;
+  --shadow-primary-btn: 4px 4px 0px 0px #ffffff;
 
-  --c-background: #2d3436;
-  --c-surface-container: #313a3c;
-  --c-surface-container-low: #262d2f;
-  --c-surface-container-high: #384143;
-  --c-surface-container-highest: #414a4d;
-
-  --c-outline: #1e2426;
-  --c-outline-variant: #3a4346;
-
-  --c-on-surface: #e6ebf2;
-  --c-on-surface-variant: #a3adb2;
-
-  --c-primary: #a375f0;
-  --c-on-primary: #270645;
-  --c-primary-container: #381273;
-  --c-on-primary-container: #f0e6ff;
-
-  --c-secondary: #cdd4dc;
-  --c-on-secondary: #23282a;
-  --c-secondary-container: #384143;
-  --c-on-secondary-container: #e6ebf2;
-
-  --c-tertiary: #f5a623;
-  --c-on-tertiary: #2e2000;
-  --c-tertiary-container: #4a3410;
-  --c-on-tertiary-container: #ffd97a;
-
-  --c-error: #f87171;
-  --c-on-error: #2a0a0a;
-  --c-error-container: #4a1c1c;
-  --c-on-error-container: #fecaca;
-
-  --c-success: #4ade80;
-  --c-on-success: #052e16;
-  --c-success-container: #16362a;
-  --c-on-success-container: #bbf7d0;
-}
-
-/* ─── Scoped landing theme: "Dream Job Blue" (JobsPlanet-style) ───
-   Redefines the semantic tokens only inside .theme-jobsplanet so the
-   marketing landing page renders in the blue/white job-board palette
-   without touching the portal design system. */
-.theme-jobsplanet {
-  --brand-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%);
-  --c-background: #f6f9fe;
-  --c-surface-container: #ffffff;
-  --c-surface-container-low: #eef3fb;
-  --c-surface-container-high: #ffffff;
-  --c-surface-container-highest: #ffffff;
-
-  --c-outline: #d7e2f2;
-  --c-outline-variant: #e3eaf6;
-
-  --c-on-surface: #16244b;
-  --c-on-surface-variant: #5a6a88;
-
-  --c-primary: #2563eb;
-  --c-on-primary: #ffffff;
-  --c-primary-container: #dbeafe;
-  --c-on-primary-container: #1e3a8a;
-
-  --c-secondary: #16244b;
-  --c-on-secondary: #ffffff;
-  --c-secondary-container: #e3ecfa;
-  --c-on-secondary-container: #16244b;
-
-  --neu-dark: #dbe4f2;
-  --neu-light: #ffffff;
-  --shadow-glow: 0 0 10px 2px rgba(37, 99, 235, 0.35);
-  --shadow-primary-btn: 5px 5px 10px rgba(37, 99, 235, 0.25), -5px -5px 10px rgba(255, 255, 255, 0.7);
-}
-
-.dark .theme-jobsplanet {
-  --brand-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 55%, #2563eb 100%);
   --c-background: #0d1526;
   --c-surface-container: #131e33;
   --c-surface-container-low: #0f1930;
   --c-surface-container-high: #182742;
   --c-surface-container-highest: #1d2e4d;
+  --c-surface-container-lowest: #0a111f;
 
-  --c-outline: #1c2a47;
-  --c-outline-variant: #24345a;
+  --c-outline: #5d6676;
+  --c-outline-variant: #3d4452;
 
-  --c-on-surface: #e7eefb;
-  --c-on-surface-variant: #93a5c8;
+  --c-on-surface: #eaedf7;
+  --c-on-surface-variant: #a0aabf;
 
-  --c-primary: #60a5fa;
-  --c-on-primary: #0b1c3d;
-  --c-primary-container: #1e3a8a;
-  --c-on-primary-container: #dbeafe;
+  --c-primary: #95d3ba;
+  --c-on-primary: #002117;
+  --c-primary-container: #004d39;
+  --c-on-primary-container: #b0f0d6;
 
   --c-secondary: #cdd9ef;
   --c-on-secondary: #101c36;
   --c-secondary-container: #182742;
   --c-on-secondary-container: #e7eefb;
 
-  --neu-dark: #0a111f;
-  --neu-light: #1a2845;
+  --c-tertiary: #c4c7c9;
+  --c-on-tertiary: #191c1e;
+  --c-tertiary-container: #444749;
+  --c-on-tertiary-container: #e0e3e5;
+
+  --c-error: #ffb4ab;
+  --c-on-error: #690005;
+  --c-error-container: #93000a;
+  --c-on-error-container: #ffdad6;
+
+  --c-success: #b0f0d6;
+  --c-on-success: #003527;
+  --c-success-container: #064e3b;
+  --c-on-success-container: #b0f0d6;
+}
+
+/* ─── Scoped landing theme: "Dream Job Blue" (JobsPlanet-style) ─── */
+.theme-jobsplanet {
+  --brand-gradient: linear-gradient(135deg, #003527 0%, #064e3b 100%);
+  --c-background: #faf8ff;
+  --c-surface-container: #ffffff;
+  --c-surface-container-low: #f2f3ff;
+  --c-surface-container-high: #ffffff;
+  --c-surface-container-highest: #ffffff;
+
+  --c-outline: #707974;
+  --c-outline-variant: #bfc9c3;
+
+  --c-on-surface: #0f172a;
+  --c-on-surface-variant: #404944;
+
+  --c-primary: #003527;
+  --c-on-primary: #ffffff;
+  --c-primary-container: #064e3b;
+  --c-on-primary-container: #80bea6;
+
+  --c-secondary: #545f73;
+  --c-on-secondary: #ffffff;
+  --c-secondary-container: #d5e0f8;
+  --c-on-secondary-container: #586377;
+}
+
+.dark .theme-jobsplanet {
+  --brand-gradient: linear-gradient(135deg, #0059c7 0%, #006ef2 100%);
+  --c-background: #0d1526;
+  --c-surface-container: #131e33;
+  --c-surface-container-low: #0f1930;
+  --c-surface-container-high: #182742;
+  --c-surface-container-highest: #1d2e4d;
+
+  --c-outline: #5d6676;
+  --c-outline-variant: #3d4452;
+
+  --c-on-surface: #eaedf7;
+  --c-on-surface-variant: #a0aabf;
+
+  --c-primary: #95d3ba;
+  --c-on-primary: #002117;
+  --c-primary-container: #004d39;
+  --c-on-primary-container: #b0f0d6;
 }
 
 @theme inline {
@@ -231,8 +217,17 @@
   --color-brand-blue: var(--c-brand-blue);
 
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-headline: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-headline: "IBM Plex Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* ENFORCE RECTILINEAR (SHARP CORNERS) GLOBALLY */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
 }
 
 @layer base {
@@ -247,30 +242,12 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-  /* Matte-plastic micro-texture: fractal noise over the whole chassis */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.28;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
   #root {
     position: relative;
     z-index: 1;
   }
   h1, h2, h3, h4 {
     letter-spacing: -0.02em;
-  }
-  /* Embossed ink — subtle white highlight beneath dark text */
-  h1, h2, h3 {
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
-  }
-  .dark h1, .dark h2, .dark h3 {
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -286,49 +263,49 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   NEUMORPHIC UTILITIES — reusable tactile primitives
+   ARCHITECTURAL/LINE-ART UTILITIES (Flat offset shadows & solid borders)
    ───────────────────────────────────────────────────────────── */
-.neu-raised   { box-shadow: var(--shadow-card); }
-.neu-floating { box-shadow: var(--shadow-floating); }
-.neu-pressed  { box-shadow: var(--shadow-pressed); }
-.neu-recessed { box-shadow: var(--shadow-recessed); }
+.neu-raised   { 
+  border: 1px solid var(--c-on-surface);
+  box-shadow: var(--shadow-card); 
+}
+.neu-floating { 
+  border: 2px solid var(--c-on-surface);
+  box-shadow: var(--shadow-floating); 
+}
+.neu-pressed  { 
+  border: 1px solid var(--c-on-surface);
+  transform: translate(1px, 1px);
+}
+.neu-recessed { 
+  border: 1px solid var(--c-outline);
+  background-color: var(--c-surface-container-low);
+}
 
-/* LED status indicator — solid fill + colored bloom */
+/* Flat square status indicator */
 .led {
   display: inline-block;
   width: 0.6rem;
   height: 0.6rem;
-  border-radius: 9999px;
   background: var(--c-primary);
-  box-shadow: 0 0 8px 1px var(--c-primary), inset 0 0 2px rgba(255,255,255,0.6);
+  border: 1px solid var(--c-on-surface);
 }
-.led-success { background: var(--c-success); box-shadow: 0 0 8px 1px var(--c-success), inset 0 0 2px rgba(255,255,255,0.6); }
-.led-tertiary { background: var(--c-tertiary); box-shadow: 0 0 8px 1px var(--c-tertiary), inset 0 0 2px rgba(255,255,255,0.6); }
+.led-success { background: var(--c-success); border: 1px solid var(--c-on-surface); }
+.led-tertiary { background: var(--c-tertiary); border: 1px solid var(--c-on-surface); }
 
-/* Corner screws — radial-gradient indentations at 12px from each edge */
+/* No-op corners detailing for skeuomorphic elements removal */
 .neu-screws {
   position: relative;
 }
 .neu-screws::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle at 14px 14px, rgba(0,0,0,0.14) 1.5px, transparent 3px),
-    radial-gradient(circle at calc(100% - 14px) 14px, rgba(0,0,0,0.14) 1.5px, transparent 3px),
-    radial-gradient(circle at 14px calc(100% - 14px), rgba(0,0,0,0.14) 1.5px, transparent 3px),
-    radial-gradient(circle at calc(100% - 14px) calc(100% - 14px), rgba(0,0,0,0.14) 1.5px, transparent 3px);
+  display: none !important;
 }
 
-/* Ventilation slots — three recessed pills */
+/* Ventilation slot re-skinned to flat indicator rule */
 .neu-vent {
   height: 1.5rem;
   width: 0.2rem;
-  border-radius: 9999px;
-  background: var(--c-surface-container-low);
-  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.18);
+  background: var(--c-outline);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -343,7 +320,6 @@
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--c-outline);
   opacity: 0.5;
-  border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -372,7 +348,7 @@
 .loader-card {
   background-color: var(--c-background);
   padding: 1rem 2rem;
-  border-radius: 1.25rem;
+  border: 1px solid var(--c-on-surface);
   box-shadow: var(--shadow-floating);
 }
 
@@ -386,7 +362,6 @@
   padding: 10px 10px;
   display: flex;
   align-items: center;
-  border-radius: 8px;
 }
 
 .loader-words {
@@ -444,41 +419,41 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   "Glass" class names retained for API stability, but re-skinned
-   as neumorphic surfaces — bolted plastic panels & physical keys.
+   ARCHITECTURAL professional container shapes
    ───────────────────────────────────────────────────────────── */
 .glass-card {
-  background-color: var(--c-background);
-  border: none;
-  box-shadow: var(--shadow-card);
+  background-color: var(--c-surface-container-lowest);
+  border: 1px solid var(--c-outline);
 }
 
-/* Secondary / chassis key — sits flush on the panel, lifts on the surface */
 .glass-button {
-  background-color: var(--c-background);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: var(--shadow-card);
+  background-color: var(--c-surface-container-lowest);
+  border: 1px solid var(--c-on-surface);
+  box-shadow: 2px 2px 0px 0px var(--c-on-surface);
+  transition: all 100ms ease-out;
 }
 
-/* Primary key — injection-moulded custom gradient control */
 .glass-button-primary {
-  background: var(--brand-gradient);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: var(--shadow-primary-btn);
+  background-color: var(--c-primary-container);
+  border: 1px solid var(--c-on-surface);
+  color: var(--c-on-primary);
+  box-shadow: 2px 2px 0px 0px var(--c-on-surface);
+  transition: all 100ms ease-out;
 }
 
-/* Tertiary key — amber certification control */
 .glass-button-secondary {
-  background-color: var(--c-tertiary);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  box-shadow: 5px 5px 10px rgba(120, 74, 0, 0.3), -5px -5px 10px rgba(240, 170, 60, 0.3);
+  background-color: var(--c-secondary-container);
+  border: 1px solid var(--c-on-surface);
+  color: var(--c-on-secondary-container);
+  box-shadow: 2px 2px 0px 0px var(--c-on-surface);
+  transition: all 100ms ease-out;
 }
 
-/* Pressed physics — any glass key inverts its shadow when active */
 .glass-button:active,
 .glass-button-primary:active,
 .glass-button-secondary:active {
-  box-shadow: var(--shadow-pressed);
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -498,7 +473,6 @@
 .typing-dot {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
   background-color: var(--c-on-surface-variant);
   display: inline-block;
   animation: dot-bounce 1.2s infinite ease-in-out;

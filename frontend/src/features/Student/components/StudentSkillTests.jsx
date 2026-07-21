@@ -149,14 +149,16 @@ export default function StudentSkillTests({
       {testResult && (
         <div className="max-w-md mx-auto p-8 bg-surface-container border border-outline-variant rounded-2xl flex flex-col items-center text-center space-y-6 animate-fade-in shadow-2xl">
           <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-            'bg-success-container text-on-success-container border border-success/20'
+            testResult.passed
+              ? 'bg-success-container text-on-success-container border border-success/20'
+              : 'bg-error-container text-on-error-container border border-error/20'
           }`}>
             <Award className="w-8 h-8" />
           </div>
 
           <div className="space-y-2">
             <h3 className="text-2xl font-headline font-bold text-on-surface">
-              Verification Completed!
+              {testResult.passed ? 'Verification Completed!' : 'Not Verified Yet'}
             </h3>
             <p className="text-xs text-on-surface-variant font-mono">
               Tested Skill: {activeTestSkill}
@@ -164,15 +166,17 @@ export default function StudentSkillTests({
           </div>
 
           <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl w-full">
-            <p className="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">Your Test Rating</p>
-            <p className="text-3xl font-black text-on-surface mt-1">Level {testResult.score} / 10</p>
+            <p className="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">Your Score</p>
+            <p className="text-3xl font-black text-on-surface mt-1">{testResult.percent}%</p>
             <p className="text-[10px] text-secondary font-mono mt-1">
-              Verified Rating Saved
+              {testResult.passed ? `Verified Rating Saved: Level ${testResult.rating}/10` : 'Need 70% to verify'}
             </p>
           </div>
 
           <p className="text-xs text-on-surface-variant leading-relaxed">
-            Congratulations! A verified rating of Level {testResult.score}/10 has been added to your profile. Recruiters can view this verified rating on your profile.
+            {testResult.passed
+              ? `Congratulations! A verified rating of Level ${testResult.rating}/10 has been added to your profile. Recruiters can view this verified rating on your profile.`
+              : `You scored ${testResult.percent}%. You need at least 70% to verify this skill — your rating was not changed. You can try the assessment again.`}
           </p>
 
           <Button

@@ -302,3 +302,39 @@ type SkillCounters {
   topicsReady    Int @default(0)
   topicsTotal    Int @default(0)
 }
+
+// Pre-generated MCQ bank. Seeded offline by scripts/seedQuestions.js.
+// `correctIndex` (0-3) is the server-side answer key — Plan 2's TestSession will
+// score against it and strip it from the client payload. The interim serve path
+// (generateSkillTest) still converts it to an A-D letter for the current frontend.
+model Question {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  skillName    String
+  subtopic     String
+  question     String
+  options      String[]
+  correctIndex Int
+  source       String   @default("temp-bank-groq")
+  createdAt    DateTime @default(now())
+
+  @@index([skillName])
+}
+
+// Server-side assessment session. Holds the answer key so the client is never
+// sent it and never supplies its own score. Single-use and expiring:
+// `generateSkillTest` creates one (used=false); `submitSkillTest` scores the
+// submitted answers against `answerKey`, then marks it used. `answerKey[i]` is
+// the correct option index (0-3) for served question i.
+model TestSession {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  skillName String
+  answerKey Int[]
+  used      Boolean  @default(false)
+  score     Int?
+  passed    Boolean?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+}

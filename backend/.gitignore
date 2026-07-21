@@ -24,3 +24,6 @@ Thumbs.db
 
 # ─── Migration rollback snapshots ───────────────────────────
 .rollback/
+
+# Generated temp question-bank artifacts
+scripts/output/

@@ -457,6 +457,60 @@ const mockClient = {
       };
       return mockDb.skillDefinitions[idx];
     },
+  },
+  question: {
+    // Supports where.skillName as a plain string or { equals, mode:'insensitive' }.
+    findMany: async (args = {}) => {
+      const where = args.where || {};
+      let rows = mockDb.questions;
+      if (where.skillName !== undefined) {
+        const spec = where.skillName;
+        if (spec && typeof spec === 'object') {
+          const target = spec.equals;
+          rows = spec.mode === 'insensitive'
+            ? rows.filter(q => q.skillName.toLowerCase() === String(target).toLowerCase())
+            : rows.filter(q => q.skillName === target);
+        } else {
+          rows = rows.filter(q => q.skillName === spec);
+        }
+      }
+      return rows;
+    },
+    count: async (args = {}) => (await mockClient.question.findMany(args)).length,
+    create: async ({ data }) => {
+      const row = { id: `q_${Date.now()}_${mockDb.questions.length}`, source: 'temp-bank-groq', createdAt: new Date(), ...data };
+      mockDb.questions.push(row);
+      return row;
+    },
+    createMany: async ({ data }) => {
+      const rows = Array.isArray(data) ? data : [data];
+      for (const d of rows) await mockClient.question.create({ data: d });
+      return { count: rows.length };
+    },
+    deleteMany: async (args = {}) => {
+      const before = mockDb.questions.length;
+      const where = args.where || {};
+      if (where.skillName !== undefined) {
+        mockDb.questions = mockDb.questions.filter(q => q.skillName !== where.skillName);
+      } else {
+        mockDb.questions = [];
+      }
+      return { count: before - mockDb.questions.length };
+    },
+  },
+  testSession: {
+    create: async ({ data }) => {
+      const row = { id: `ts_${Date.now()}_${mockDb.testSessions.length}`, used: false, score: null, passed: null, createdAt: new Date(), ...data };
+      mockDb.testSessions.push(row);
+      return row;
+    },
+    findUnique: async ({ where }) => mockDb.testSessions.find(t => t.id === where.id) || null,
+    update: async ({ where, data }) => {
+      const idx = mockDb.testSessions.findIndex(t => t.id === where.id);
+      if (idx === -1) return null;
+      mockDb.testSessions[idx] = { ...mockDb.testSessions[idx], ...data };
+      return mockDb.testSessions[idx];
+    },
   }
 };
 

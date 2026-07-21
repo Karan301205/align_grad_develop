@@ -9,7 +9,7 @@ This document is the single source of truth for the AlignGrade repository. It de
 * **Purpose**: A premium, full-stack recruitment & skill verification platform.
 * **Business Objective**: Align candidate self-rated proficiencies with recruiter requirements using automated skill matching. Candidates falling below requirements are locked out from applying but can take interactive certification tests to verify their skills and unlock opportunities.
 * **High-Level Architecture**: 
-  - **Frontend**: Single Page React Application (Vite + Tailwind CSS v4). Design system: **Industrial Skeuomorphism** (neumorphic "workshop chassis") driven by semantic CSS-variable tokens in `src/index.css` (light + class-based dark mode). Light = matte-plastic chassis `#e0e5ec` with white/`#babecc` shadow pairs; dark = charcoal steel `#2d3436`. Accent (`--c-primary`) is **safety-orange `#ff4757`**, reserved for interactive triggers/LEDs; tertiary amber stays for certification CTAs. Depth comes from the neumorphic shadow vars `--shadow-card / -floating / -pressed / -recessed` (used via `shadow-[var(--shadow-*)]` or the `.neu-raised/-floating/-pressed/-recessed` utility classes). Signature helpers in `index.css`: `.neu-screws` (corner-screw pseudo-element), `.neu-vent`, `.led`/`.led-success`/`.led-tertiary`, body fractal-noise overlay, embossed heading text-shadow. The `.glass-card` / `.glass-button*` class names are retained (for API stability) but re-skinned as neumorphic surfaces — so `Card` and `Button` inherit the look automatically. Typography: Inter (body + headlines via `font-headline`), JetBrains Mono (labels/numeric readouts). Cards/inputs restyled centrally in `src/components/ui/` — feature views inherit the style through those primitives + tokens (no per-feature restyling).
+  - **Frontend**: Single Page React Application (Vite + Tailwind CSS v4). Design system: **Architectural Professionalism** (Corporate Minimalist with subtle architectural influences) driven by semantic CSS-variable tokens in `src/index.css` (light + class-based dark mode). Light = stark white surface `#ffffff` with slate-blue accents; dark = deep slate-blue chassis `#0d1526`. Accent (`--c-primary`) is **emerald green `#003527`** (overridden from design system primary blue for active branding), representing institutional success and authorization. Depth is achieved entirely through flat line work, solid offset borders, and tonal layering (shadows and gradients are rejected). Signature elements: 0px border-radius (rectilinear shapes globally), sharp 1px/2px solid borders (`#0f172a`), flat offset shadow configurations (e.g. `.neu-raised`/`.neu-floating` using solid box-shadow offsets). The `.glass-card` / `.glass-button*` class names are retained (for API stability) but re-skinned as flat solid containers with active translate micro-interactions. Typography: IBM Plex Sans (headlines via `font-headline`), Inter (body), JetBrains Mono (labels/numeric readouts). Cards/inputs restyled centrally in `src/components/ui/` — feature views inherit the style through those primitives + tokens (no per-feature restyling).
   - **Backend**: Express.js REST API using CommonJS (`require` syntax).
   - **Database & ORM**: MongoDB + Prisma ORM. Auto-configures an in-memory mock database store for seamless offline execution if no MongoDB connection is configured.
 
@@ -28,6 +28,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 ├── a_g_l Background Removed.png  # Asset: Primary AlignGrade branding logo (transparent background)
 ├── auth.txt                      # Developer scratchpad / testing session authorization notes
 ├── commit.md                     # Summary of recent git commit activities
+├── HANDOFF_TEMP_QUESTION_BANK.md # Run-book for temporary question bank shim
 ├── my_resume.pdf                 # Asset: Sample PDF resume for student upload testing
 │   # NOTE: there is NO root-level package.json. frontend/ and backend/ are
 │   # independent npm projects and must be installed/run separately.
@@ -36,11 +37,16 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   ├── specs/
 │   │   └── 2026-07-18-question-bank-spine-design.md  # Question bank spine design (phases 1-4)
 │   └── plans/
-│       └── 2026-07-18-skill-registry-foundation.md   # Plan 1: skill registry implementation
+│       ├── 2026-07-18-skill-registry-foundation.md   # Plan 1: skill registry implementation
+│       └── 2026-07-20-testsession-security.md        # Plan 2: TestSession security fixes implementation plan
 │
 ├── backend/                      # --- Main Express.js API Workspace (Port 5001) ---
 │   ├── prisma/
 │   │   └── schema.prisma         # Prisma schema and MongoDB collection structure definitions
+│   ├── scripts/                  # Offline generation, validation, and database seeding scripts
+│   │   ├── generateQuestions.js  # Offline MCQ generator pulling 50 Qs per skill from Groq
+│   │   ├── seedQuestions.js      # Seeding script to write JSON questions to Prisma Question model
+│   │   └── verifyBankFlow.js     # End-to-end flow validator checking seed -> serve under mock
 │   ├── src/
 │   │   ├── config/               # System configurations and DB connections
 │   │   │   ├── db.js             # DB wrapper initializing Prisma Client or hot-swapping Mock
@@ -51,6 +57,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   └── mock/             # Sandbox mock client & fixture sets
 │   │   │       ├── mockClient.js # In-memory emulation of Prisma API for offline execution
 │   │   │       └── seed.js       # Initial mock data and database state for the mock store
+│   │   │       └── loadQuestionBankMock.js # Boot-loads questions from JSON into the mock database
 │   │   ├── cli/                  # Operator CLI (npm run bank -- <command>)
 │   │   │   ├── bank.js           # Subcommand dispatcher; every write defaults to dry-run
 │   │   │   └── commands/
@@ -251,9 +258,11 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 ### Backend Files (`backend/`)
 
 #### [backend/prisma/schema.prisma](file:///Users/karanrawat/Desktop/a_g/backend/prisma/schema.prisma)
-* **Purpose**: Prisma ORM schema definitions for MongoDB structures. Sets up data collections (User, Profile, Company, Job, Application, TestAttempt, **SkillDefinition**) and their relationships.
+* **Purpose**: Prisma ORM schema definitions for MongoDB structures. Sets up data collections (User, Profile, Company, Job, Application, TestAttempt, **SkillDefinition**, **Question**, **TestSession**) and their relationships.
 * **`SkillDefinition` (added 2026-07-18)**: canonical registry for skill identity — `canonicalName`, `slug` (unique), `aliases[]`, `category`, `tier` (1|2|3), `status`, `targetQuestionCount`, `counters` (embedded `SkillCounters`), `createdAt/updatedAt/deletedAt`. Indexed on `[tier, status]`. Status values are plain strings (`WAITING | GENERATING | PAUSED | REVIEWING | COMPLETED | PUBLISHED`), matching the existing `User.role` convention rather than a Prisma enum.
 * **CRITICAL naming constraint**: the model is `SkillDefinition`, **never `Skill`**. `type Skill { name, rating, verifiedRating }` already exists as the embedded type on `Profile.skills`; declaring `model Skill` is a duplicate declaration and fails client generation.
+* **`Question` (added 2026-07-20, interim question bank)**: pre-generated MCQ store — `skillName`, `subtopic`, `question`, `options[]`, `correctIndex` (0-3 server-side answer key, aligned with Plan 2's `TestSession`), `source`, `createdAt`; indexed on `[skillName]`. Seeded offline by `scripts/seedQuestions.js` from `scripts/generateQuestions.js` (Groq `llama-3.3-70b-versatile`) output at `scripts/output/questions.json` (500 Qs, 10 skills × 50). **`generateSkillTest` now serves bank-first**: 10 random questions when a skill has ≥10 in the bank (converting `correctIndex`→A–D letter, keeping the exact legacy `{questions:[{id,question,options,answer}]}` contract), else falls back to live `mcqService.generate`. Local dev auto-loads the bank into the mock via `config/mock/loadQuestionBankMock.js` at boot (`npm run dev:mock`). Full run-book: `HANDOFF_TEMP_QUESTION_BANK.md`.
+* **`TestSession` (added 2026-07-20, Plan 2 — security fix)**: server-side assessment session — `userId`, `skillName`, `answerKey Int[]` (correct option index per served question), `used Bool`, `score Int?`, `passed Bool?`, `expiresAt`; indexed on `[userId]`. Sole Prisma access: `services/questionBank/repositories/testSessionRepository.js` (`create`/`findValidForUser`/`markUsed`). **This closes both skill-verification holes:** `generateSkillTest` now stores the answer key in a session and returns `{sessionId, questions:[{id,question,options}]}` with NO answers; `submitSkillTest` takes `{sessionId, answers[]}`, scores server-side via pure `services/questionBank/scoring.js` (`scoreAnswers`, 70% pass), burns the single-use session, and raises `verifiedRating` ONLY on pass. The client never sends a score. **Decision 1 (2026-07-20):** candidates cannot self-set ratings — `updateProfile` runs skills through `reconcileSkills` (new skill → rating 1; existing rating/verifiedRating server-owned; client values ignored); the ONLY rating-raise path is a passing assessment; legacy `POST /student/tests` (`submitTest`) is disabled (410).
 * **`Profile` has no `deletedAt` field.** Do not add `where: { deletedAt: null }` to Profile queries — Prisma rejects it with `Unknown argument`.
 * **Used By**: Prisma client generator command.
 * **Dependencies**: MongoDB server (connection specified in env).
@@ -349,6 +358,13 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Used By**: [backend/src/config/mock/mockClient.js](file:///Users/karanrawat/Desktop/a_g/backend/src/config/mock/mockClient.js).
 * **Dependencies**: None.
 * **Safe Modifications**: Appending additional mock profiles, modifying skill scores.
+* **Risk**: Low.
+
+#### [backend/src/config/mock/loadQuestionBankMock.js](file:///Users/karanrawat/Desktop/a_g/backend/src/config/mock/loadQuestionBankMock.js)
+* **Purpose**: Helper function that reads offline generated questions from JSON and seeds them into the mock client database at boot.
+* **Used By**: [backend/src/index.js](file:///Users/karanrawat/Desktop/a_g/backend/src/index.js).
+* **Dependencies**: [backend/src/config/db.js](file:///Users/karanrawat/Desktop/a_g/backend/src/config/db.js), `fs`, `path`.
+* **Safe Modifications**: Adjusting logs, changing JSON source path.
 * **Risk**: Low.
 
 #### [backend/src/constants/technicalSkills.js](file:///Users/karanrawat/Desktop/a_g/backend/src/constants/technicalSkills.js)
@@ -489,6 +505,27 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Used By**: `student.controller.js`.
 * **Dependencies**: `pdf-parse`, `mammoth`.
 * **Safe Modifications**: Enhancing keyword dictionaries, adding extra aliases, updating regex matches.
+* **Risk**: Low.
+
+#### [backend/scripts/generateQuestions.js](file:///Users/karanrawat/Desktop/a_g/backend/scripts/generateQuestions.js)
+* **Purpose**: Generates 50 questions per skill for the top 10 skills (500 total) from Groq LLM and writes them to a local JSON file.
+* **Used By**: Human operators (offline).
+* **Dependencies**: Groq API key in environment variables, `fs`, `path`.
+* **Safe Modifications**: Modifying skills/subtopics definitions, adjusting concurrency or system prompt template.
+* **Risk**: Low.
+
+#### [backend/scripts/seedQuestions.js](file:///Users/karanrawat/Desktop/a_g/backend/scripts/seedQuestions.js)
+* **Purpose**: Ingests offline generated questions JSON and bulk inserts them into MongoDB via Prisma client. It runs in dry-run mode by default, writing only when `--commit` is supplied.
+* **Used By**: Human operators.
+* **Dependencies**: [backend/src/config/db.js](file:///Users/karanrawat/Desktop/a_g/backend/src/config/db.js), `fs`, `path`.
+* **Safe Modifications**: Changing file pathways, validation logic.
+* **Risk**: Medium (can overwrite existing `Question` database rows when run with `--commit`).
+
+#### [backend/scripts/verifyBankFlow.js](file:///Users/karanrawat/Desktop/a_g/backend/scripts/verifyBankFlow.js)
+* **Purpose**: Mock-only end-to-end integration tests verifying seeding, mock client querying, case-insensitivity matching, legacy A-D formatting, and live generation fallback logic.
+* **Used By**: Human operators / QA testing.
+* **Dependencies**: [backend/src/config/db.js](file:///Users/karanrawat/Desktop/a_g/backend/src/config/db.js), `assert`, `fs`, `path`.
+* **Safe Modifications**: Modifying assertions, changing test fixtures.
 * **Risk**: Low.
 
 ---
@@ -1385,7 +1422,7 @@ investigated or fixed.**
 See spec §3. Both are fixed by the `TestSession` model in Plan 2, which is **independently
 shippable** ahead of the rest of the spine.
 
-1. **Skill verification can be bypassed entirely.** `student.controller.js:354` `submitSkillTest` takes `score` from the request body and trusts it; `passed` is hardcoded `true`. A candidate can POST `{skillName, score: 10}` and receive a verified 10 without loading a question. It also raises `rating`, which propagates into `skillMatching.service.js` and unlocks ineligible job applications.
-2. **The answer key ships to the client.** `services/mcq/prompts.js:4` instructs the model to emit an `answer` field; `student.controller.js:346` returns the model output unmodified.
+1. ✅ **RESOLVED 2026-07-20 (Plan 2).** Was: `submitSkillTest` trusted a client `score` with `passed` hardcoded true. Now scores server-side against a single-use `TestSession` answer key; the client submits `{sessionId, answers[]}`, never a score; a rating rises only on a ≥70% pass. The legacy `POST /student/tests` (`submitTest`) client-score path is disabled (410).
+2. ✅ **RESOLVED 2026-07-20 (Plan 2).** Was: the answer key shipped to the client. Now `generateSkillTest` stores the key in the `TestSession` and returns options-only questions; correct answers are returned only in the submit response (post-scoring), safe for the review UI.
 
-**`CLAUDE.md` is wrong about this**: it documents a `score >= 7` pass threshold for `submitSkillTest`. No such threshold exists in the code. Correcting that doc is Task 8 of Plan 1.
+Note: as of the 2026-07-20 fix there IS a real pass threshold — **70% (7/10)**, computed server-side in `scoring.js` — but it is enforced against the `TestSession` answer key, not taken from the client.

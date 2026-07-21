@@ -122,10 +122,13 @@ const generateTestSchema = {
   })
 };
 
+// Server-side scoring (Decision 1 / Plan 2): the client submits the session id and
+// its selected option indices — never a score. The backend scores against the
+// TestSession answer key.
 const submitSkillTestSchema = {
   body: z.object({
-    skillName: z.string().min(1, 'Skill name is required'),
-    score: z.number().int().min(0).max(100)
+    sessionId: z.string().min(1, 'sessionId is required'),
+    answers: z.array(z.number().int().min(0).max(3)).min(1, 'answers are required')
   })
 };
 

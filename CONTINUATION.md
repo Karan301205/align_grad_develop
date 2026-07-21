@@ -238,21 +238,55 @@ Safe: `npx prisma generate`, dry runs, read-only queries, `npm test` (stubs `con
 
 ---
 
-## 9. EXACT next task (updated 2026-07-20)
+## 9. EXACT next task (updated 2026-07-20, session 2)
 
-### PLAN 1 IS COMPLETE — all 8 tasks implemented and review-approved, final whole-branch review
-### passed READY-WITH-CONDITIONS (2026-07-20). Suite: 35/35.
+### SESSION 3 (2026-07-20) — DONE: Decision 1 + Plan 2 (server-side scoring) + 20 more skills.
 
-Next session, in order:
+**Everything uncommitted** (standing instruction). Suite 46/46. Two independent verifiers pass:
+`node scripts/verifyScoringFlow.js` (7 adversarial checks) and a live HTTP E2E (routes+validators).
 
-1. **Merge decision (human input needed).** Branch `feat/question-bank-spine` is ~20 commits ahead
-   of `main`, unpushed. Options: merge to main locally / push + open PR / keep the branch. Use
-   `superpowers:finishing-a-development-branch` (deferred this session for context-limit reasons).
-2. **Write Plan 2** via `superpowers:writing-plans`: `TestSession` model + server-side scoring +
-   answer-key stripping — closes both live security holes in spec §3. No dependencies on go-live.
-3. **Go-live is separate and human-only:** the full runbook (7 steps, with the mock trap, restart
-   requirement, no-inverse-importer warning, and the merged-skill rating decision) is in `task.md`
-   BLOCKER 1.
+**1. Decision 1 — skill ratings are now server-owned (enforced backend):**
+- `updateProfile` runs incoming skills through `reconcileSkills()` — a newly declared skill starts at
+  **rating 1**, existing skills keep their server-side rating/verifiedRating, and any client-supplied
+  rating/verifiedRating is IGNORED. (`student.controller.js`)
+- The ONLY way a rating rises is a **passing** server-scored assessment (`submitSkillTest`).
+- Legacy `POST /student/tests` (`submitTest`) — the old client-score hole — now returns **410 Gone**.
+
+**2. Plan 2 — TestSession + server-side scoring (both security holes CLOSED):**
+- `TestSession` model (schema + mock + `testSessionRepository` + 6 tests). Stores the answer key
+  server-side; single-use; 30-min expiry.
+- `generateSkillTest` → `buildSkillTest()` builds 10 Qs (bank-first, live fallback), stores the
+  answer key in a session, returns `{ sessionId, skillName, questions:[{id,question,options}] }` —
+  **no answer key to the client**.
+- `submitSkillTest` → takes `{ sessionId, answers[] }`, scores server-side via pure
+  `scoring.js scoreAnswers()` (5 tests, 70% pass), burns the session, and raises `verifiedRating`
+  **only on pass**. Returns `{ score(%), rating(1-10), passed, correctAnswers, skills }`
+  (correctAnswers is safe post-submission for the review UI).
+- `submitSkillTestSchema` now validates `{ sessionId, answers:int[0-3] }` (no score field).
+
+**3. Frontend (quiz component only — user approved this exception to "don't touch frontend"):**
+The ACTIVE quiz lives in `StudentLayout.jsx` + `components/StudentSkillTests.jsx` (NOT the legacy
+`SkillTest/TestView.jsx`, which is dead static-question code). Changed ONLY:
+- `StudentLayout.jsx`: added `testSessionId` state; `handleStartSkillTest` captures `sessionId`;
+  `handleSubmitSkillTest` submits `{sessionId, answers}` (no client scoring) and uses the server
+  result. `StudentSkillTests.jsx`: result block now honors pass/fail (was always "Congratulations").
+- Nothing else in the frontend touched (landing page / `index.html` / `index.css` / stitch design left
+  as the user's Antigravity work). Frontend `npm run build` passes.
+
+**4. Generation — 20 more popular skills** added to `generateQuestions.js` (C++, C#, C, Go, Rust,
+HTML, CSS, MongoDB, PostgreSQL, MySQL, Kubernetes, Express JS, Django, FastAPI, Machine Learning,
+TensorFlow, PyTorch, Pandas, NumPy, Linux — 5 subtopics each). Run via `--fill` (idempotent, merges).
+🔴 **Bedrock STILL blocked** (`403 INVALID_PAYMENT_INSTRUMENT` — AWS payment instrument, human fix);
+generation used **Groq** `llama-3.3-70b-versatile`. Rate-limited pairs are topped up by re-running
+`GEN_CONCURRENCY=2 node scripts/generateQuestions.js --fill`.
+
+### EXACT next steps
+1. **Finish the 20-skill generation top-up:** re-run `GEN_CONCURRENCY=2 node scripts/generateQuestions.js --fill`
+   until `questions.json` has 30 skills × 50 = 1500 (some pairs 429'd on the first pass).
+2. **Continue the enterprise pipeline:** Plan 3 (`SkillBlueprint` + `TopicProgress` + CLI approval)
+   then Plan 4 (generation worker) — write each via `superpowers:writing-plans` first. Backend only.
+3. **Merge decision** for `feat/question-bank-spine` (unpushed) via `finishing-a-development-branch`.
+4. Prod seed of the bank + `TestSession`/`Question` collections is HUMAN-only (BLOCKER 1).
 
 Everything below this line is history.
 
