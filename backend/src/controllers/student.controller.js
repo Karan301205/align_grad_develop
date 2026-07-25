@@ -1,6 +1,6 @@
 const { prisma } = require('../config/db');
 const { TECHNICAL_SKILLS } = require('../constants/technicalSkills');
-const { buildStudentSkillMap, getMissingRequirements } = require('../services/skillMatching.service');
+const { buildStudentSkillMap, getMissingRequirements, getRequirementStatuses } = require('../services/skillMatching.service');
 const { purgeExpiredJobs } = require('../services/jobLifecycle.service');
 const { deleteS3ObjectFromUrl } = require('../services/fileCleanup.service');
 const testSessionRepo = require('../services/questionBank/repositories/testSessionRepository');
