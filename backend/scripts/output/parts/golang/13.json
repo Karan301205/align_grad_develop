@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Testing Strategies",
+    "question": "package myapp\nfunc Add(a, b int) int { return a + b }\n\nIn myapp_test.go: func TestAdd(t *testing.T) { ... }. What's t parameter type?",
+    "options": ["*testing.T", "testing.T", "*testing.B", "interface{}"],
+    "correctIndex": 0,
+    "explanation": "Test functions receive *testing.T for reporting errors and logging.",
+    "difficulty": "Medium",
+    "tags": ["testing", "test-function"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Testing Strategies",
+    "question": "func TestAdd(t *testing.T) {\n  if Add(1, 2) != 3 {\n    t.Fail()\n  }\n}\n\nWhat's the difference between Fail() and FailNow()?",
+    "options": ["FailNow stops test immediately", "Fail is fatal", "same effect", "Fail errors out"],
+    "correctIndex": 0,
+    "explanation": "FailNow stops execution; Fail continues after marking test failed.",
+    "difficulty": "Medium",
+    "tags": ["testing", "test-failure"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Testing Strategies",
+    "question": "func TestAdd(t *testing.T) {\n  t.Helper()\n  result := Add(1, 2)\n  if result != 3 {\n    t.Error(\"expected 3\")\n  }\n}\n\nWhy call t.Helper()?",
+    "options": ["hides test helper from call stack", "enables parallel tests", "marks as helper", "required for testing"],
+    "correctIndex": 0,
+    "explanation": "Helper() tells test framework to skip this frame in error reporting.",
+    "difficulty": "Medium",
+    "tags": ["testing", "helper"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Testing Strategies",
+    "question": "func BenchmarkAdd(b *testing.B) {\n  for i := 0; i < b.N; i++ {\n    Add(1, 2)\n  }\n}\n\nWhat's b.N used for?",
+    "options": ["number of iterations", "benchmark name", "number of cores", "sample size"],
+    "correctIndex": 0,
+    "explanation": "b.N is determined by testing framework to reach stable benchmark time.",
+    "difficulty": "Medium",
+    "tags": ["testing", "benchmark"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Testing Strategies",
+    "question": "package myapp_test\nimport \"testing\"\nfunc TestExport(t *testing.T) { ... }\n\nWhat does _test suffix in package name indicate?",
+    "options": ["black-box test", "white-box test", "integration test", "private test"],
+    "correctIndex": 0,
+    "explanation": "myapp_test is external package; tests internal implementation as black-box.",
+    "difficulty": "Medium",
+    "tags": ["testing", "test-package"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Testing Strategies",
+    "question": "func TestExample(t *testing.T) {\n  if testing.Short() {\n    t.Skip(\"skipping in short mode\")\n  }\n}\n\nHow to run skipped tests?",
+    "options": ["go test -run TestExample", "go test -short=false", "go test -count=2", "skip"],
+    "correctIndex": 0,
+    "explanation": "Skipped tests run unless -short flag is set; -run TestExample forces execution.",
+    "difficulty": "Medium-Hard",
+    "tags": ["testing", "skip"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Testing Strategies",
+    "question": "func TestMain(m *testing.M) {\n  setup()\n  code := m.Run()\n  teardown()\n  os.Exit(code)\n}\n\nWhen does TestMain run?",
+    "options": ["before all tests", "instead of individual tests", "after tests", "never"],
+    "correctIndex": 0,
+    "explanation": "TestMain runs before all tests; controls setup/teardown and exit code.",
+    "difficulty": "Medium",
+    "tags": ["testing", "TestMain"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Testing Strategies",
+    "question": "package myapp\nfunc ExampleAdd() {\n  fmt.Println(Add(1, 2))\n  // Output: 3\n}\n\nWhat kind of test is this?",
+    "options": ["example test", "doc test", "unit test", "benchmark"],
+    "correctIndex": 0,
+    "explanation": "Example tests verify output and serve as documentation.",
+    "difficulty": "Medium",
+    "tags": ["testing", "example"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Testing Strategies",
+    "question": "func TestParallel(t *testing.T) {\n  t.Parallel()\n  // test body\n}\n\nWhat does t.Parallel() do?",
+    "options": ["allows concurrent execution", "runs in goroutines", "required for speed", "optional annotation"],
+    "correctIndex": 0,
+    "explanation": "t.Parallel() marks test safe for concurrent execution.",
+    "difficulty": "Medium",
+    "tags": ["testing", "parallel"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Testing Strategies",
+    "question": "func TestSub(t *testing.T) {\n  t.Run(\"case1\", func(t *testing.T) {\n    if 1 != 1 { t.Error(\"fail\") }\n  })\n}\n\nWhat's t.Run() for?",
+    "options": ["subtests", "parallel execution", "separate goroutine", "fixtures"],
+    "correctIndex": 0,
+    "explanation": "t.Run() creates subtests with individual reporting.",
+    "difficulty": "Medium",
+    "tags": ["testing", "subtests"]
+  }
+]

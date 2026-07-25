@@ -73,7 +73,7 @@ exports.signup = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Please provide email and password' });
   }
@@ -91,6 +91,14 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       recordFailedAttempt(email, ip);
       return res.status(400).json({ error: 'Invalid credentials' });
+    }
+
+    if (role && user.role !== role.toUpperCase()) {
+      recordFailedAttempt(email, ip);
+      const expectedPortal = user.role === 'STUDENT' ? 'Candidate' : 'Recruiter';
+      return res.status(403).json({ 
+        error: `Access denied. This account is registered as a ${user.role === 'STUDENT' ? 'candidate' : 'recruiter'}. Please sign in through the ${expectedPortal} portal.` 
+      });
     }
 
     let name = '';

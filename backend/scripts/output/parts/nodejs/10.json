@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "Security Best Practices",
+    "question": "Why is input validation critical?\n```javascript\napp.post('/users', (req, res) => {\n  // no validation\n  db('users').insert({email: req.body.email});\n});\n```",
+    "options": ["validation is optional", "prevents SQL injection and malformed data", "validation only needed on client", "server always receives clean data"],
+    "correctIndex": 1,
+    "explanation": "Unvalidated input can inject SQL, cause type errors, or bypass business logic; server must validate all user input.",
+    "difficulty": "Medium",
+    "tags": ["input-validation", "security"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Security Best Practices",
+    "question": "When is JWT appropriate for authentication?\n```javascript\nconst token = jwt.sign({id: user.id, role: user.role}, SECRET);\n// Send token to client; client includes in future requests\n```",
+    "options": ["JWT stores session on server", "JWT is stateless; user info is encoded in token", "JWT requires database lookup per request", "JWT should not be used"],
+    "correctIndex": 1,
+    "explanation": "JWTs are stateless tokens that encode user info; servers verify the signature without database queries, ideal for scalable APIs.",
+    "difficulty": "Medium",
+    "tags": ["jwt", "authentication", "stateless"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Security Best Practices",
+    "question": "How should passwords be stored?\n```javascript\nconst hash = bcrypt.hash(password, 10);\ndb('users').insert({email, passwordHash: hash});\n```",
+    "options": ["store plaintext password", "use bcrypt or scrypt with salt", "SHA256 is sufficient", "hashing is optional"],
+    "correctIndex": 1,
+    "explanation": "bcrypt and scrypt add salt and are slow-by-design; plaintext or fast hashes like SHA256 are vulnerable to brute-force attacks.",
+    "difficulty": "Medium",
+    "tags": ["password-hashing", "bcrypt", "security"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Security Best Practices",
+    "question": "What does CORS prevent?\n```javascript\napp.use(cors({origin: 'https://example.com'}));\n```",
+    "options": ["stops all HTTP requests", "prevents cross-origin requests unless explicitly allowed", "blocks POST requests", "CORS is not a security feature"],
+    "correctIndex": 1,
+    "explanation": "CORS restricts which origins can make requests to your API; browsers enforce this, preventing unauthorized cross-origin data theft.",
+    "difficulty": "Medium",
+    "tags": ["cors", "cross-origin", "browser-security"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Security Best Practices",
+    "question": "Why should sensitive data be in environment variables?\n```javascript\nconst dbURL = process.env.DATABASE_URL;\nconst secret = process.env.JWT_SECRET;\n```",
+    "options": ["hardcoding secrets is safe if code is private", "env vars keep secrets out of version control", "environment variables are less secure", "secrets can be in config files"],
+    "correctIndex": 1,
+    "explanation": "Environment variables prevent accidental commits of secrets to git; they should be set via .env or deployment platform, never checked in.",
+    "difficulty": "Medium",
+    "tags": ["environment-variables", "secrets", "security"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Security Best Practices",
+    "question": "What is SQL injection and how is it prevented?\n```javascript\nconst userId = req.params.id;\n// Vulnerable: db.query('SELECT * FROM users WHERE id = ' + userId);\n// Safe:\nconst user = await db('users').where({id: userId});\n```",
+    "options": ["SQL injection is not a real threat", "use parameterized queries or query builders", "input validation alone prevents injection", "concatenating strings is safe"],
+    "correctIndex": 1,
+    "explanation": "SQL injection occurs when user input is concatenated into SQL; parameterized queries and ORMs treat input as data, not code.",
+    "difficulty": "Medium-Hard",
+    "tags": ["sql-injection", "security", "query-builders"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Security Best Practices",
+    "question": "How should you validate email addresses?\n```javascript\nconst email = req.body.email;\n// Option A: complex regex\n// Option B: send confirmation email\n// Option C: basic format check + external verification service\n```",
+    "options": ["regex alone is sufficient", "send confirmation email to verify ownership", "no validation needed", "all options are equivalent"],
+    "correctIndex": 1,
+    "explanation": "Confirmation emails verify that the email is real and owned by the user; regex alone cannot detect typos or bounces.",
+    "difficulty": "Medium",
+    "tags": ["input-validation", "email-verification"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Security Best Practices",
+    "question": "What is rate limiting and why is it important?\n```javascript\nconst rateLimit = require('express-rate-limit');\nconst limiter = rateLimit({windowMs: 15 * 60 * 1000, max: 100});\napp.use(limiter);\n```",
+    "options": ["limits bandwidth only", "prevents brute-force attacks and DoS by limiting requests per IP", "slows down legitimate users", "unnecessary feature"],
+    "correctIndex": 1,
+    "explanation": "Rate limiting throttles requests per IP; this stops password brute-force attacks, API scraping, and distributed denial-of-service (DDoS).",
+    "difficulty": "Medium",
+    "tags": ["rate-limiting", "dos-prevention", "security"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Security Best Practices",
+    "question": "How should you handle sensitive error messages?\n```javascript\n// Bad: sends database error to client\napp.get('/data', (req, res) => {\n  try {\n    res.json(db.query(req.body.sql));\n  } catch (e) {\n    res.status(500).json({error: e.message});\n  }\n});\n```",
+    "options": ["expose all error details to help debugging", "log detailed errors server-side, send generic message to client", "never send errors to client", "errors always contain sensitive info"],
+    "correctIndex": 1,
+    "explanation": "Detailed errors leak database schema, file paths, and logic; log details for debugging, but send generic messages to clients.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "information-disclosure"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Security Best Practices",
+    "question": "What is a Content Security Policy (CSP) header?\n```javascript\napp.use((req, res, next) => {\n  res.setHeader('Content-Security-Policy', \"default-src 'self'\");\n  next();\n});\n```",
+    "options": ["CSP limits which external resources can be loaded", "prevents XSS attacks by restricting script sources", "all content is blocked without CSP", "both A and B"],
+    "correctIndex": 3,
+    "explanation": "CSP headers restrict script/image/style sources to trusted origins, mitigating XSS; 'self' allows only same-origin resources.",
+    "difficulty": "Medium-Hard",
+    "tags": ["csp", "xss-prevention", "security-headers"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "Microservices Architecture",
+    "question": "What HTTP status code indicates a successful POST request?\n```java\n@PostMapping(\"/users\")\npublic ResponseEntity<?> createUser(@RequestBody User user) {\n  userService.save(user);\n  return ResponseEntity.status(HttpStatus.CREATED).body(user);\n}\n```",
+    "options": ["200 OK", "201 Created", "Compilation error", "400 Bad Request"],
+    "correctIndex": 1,
+    "explanation": "POST creating a resource returns 201 Created; 200 OK is for successful GET/PUT, 201 signals new resource creation.",
+    "difficulty": "Medium",
+    "tags": ["http-status", "rest-api", "spring-mvc"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Microservices Architecture",
+    "question": "What is idempotency in REST APIs?\n```java\n@PutMapping(\"/users/{id}\")\npublic ResponseEntity<?> updateUser(@PathVariable int id, @RequestBody User user) {\n  userService.update(id, user);\n  return ResponseEntity.ok(user);\n}\n```",
+    "options": ["Request modifies server state", "Multiple identical requests produce same result", "Compilation error", "No state change"],
+    "correctIndex": 1,
+    "explanation": "PUT is idempotent; calling it 10 times with same data results in same server state as calling once.",
+    "difficulty": "Medium",
+    "tags": ["idempotency", "rest-principles", "http-methods"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Microservices Architecture",
+    "question": "What is eventual consistency in microservices?\n```java\n// Service A: Create order\n// Service B: Update inventory (async)\n// Client sees inconsistent data until B updates\n```",
+    "options": ["Immediate consistency", "Data consistency achieved after some delay", "Compilation error", "Never consistent"],
+    "correctIndex": 1,
+    "explanation": "Eventual consistency: in distributed systems, updates propagate asynchronously; data becomes consistent over time.",
+    "difficulty": "Medium",
+    "tags": ["eventual-consistency", "distributed-systems", "microservices"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Microservices Architecture",
+    "question": "What pattern solves cascading failures in microservices?\n```java\n@CircuitBreaker(name = \"userService\", fallbackMethod = \"fallback\")\npublic User getUser(int id) {\n  return userServiceClient.get(id);\n}\npublic User fallback(int id) {\n  return new User(); // Return default\n}\n```",
+    "options": ["No solution", "Circuit Breaker pattern (stops calls when service fails)", "Compilation error", "Timeout only"],
+    "correctIndex": 1,
+    "explanation": "Circuit Breaker prevents cascading failures: if a service fails, stop making calls to it and return fallback response.",
+    "difficulty": "Medium",
+    "tags": ["circuit-breaker", "resilience", "fault-tolerance"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Microservices Architecture",
+    "question": "What is service discovery in microservices?\n```java\n// Microservice A needs to call Service B\n// How does A find B's URL dynamically?\n```",
+    "options": ["Hard-coded URL", "Service registry (Eureka/Consul) maps service name to URL", "Compilation error", "Manual lookup"],
+    "correctIndex": 1,
+    "explanation": "Service discovery: services register themselves with a registry; clients query registry to find service endpoints dynamically.",
+    "difficulty": "Medium",
+    "tags": ["service-discovery", "service-registry", "microservices"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Microservices Architecture",
+    "question": "What does API Gateway do?\n```java\n// Client calls API Gateway instead of individual services\nGateway -> Service A, Service B, Service C\n```",
+    "options": ["Nothing", "Single entry point, routing, auth, rate limiting", "Compilation error", "Service registry"],
+    "correctIndex": 1,
+    "explanation": "API Gateway provides single entry point for clients; handles routing, authentication, rate limiting, and service discovery.",
+    "difficulty": "Medium",
+    "tags": ["api-gateway", "routing", "cross-cutting-concerns"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Microservices Architecture",
+    "question": "What is a saga pattern for distributed transactions?\n```java\n// Transaction across 3 services\n// Service A: create order\n// Service B: reserve inventory\n// Service C: process payment\n// If C fails, compensate A and B\n```",
+    "options": ["Single ACID transaction", "Orchestrate multiple local transactions with compensation", "Compilation error", "No solution"],
+    "correctIndex": 1,
+    "explanation": "Saga pattern coordinates distributed transactions; each step is a local transaction; failure triggers compensating transactions (rollback).",
+    "difficulty": "Medium-Hard",
+    "tags": ["saga-pattern", "distributed-transaction", "eventual-consistency"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Microservices Architecture",
+    "question": "What is the difference between synchronous and asynchronous communication?\n```java\n// Sync: REST API - waits for response\nUser user = userService.getUser(1);\n// Async: Message queue - returns immediately\nmessageQueue.send(new UserEvent(1));\n```",
+    "options": ["No difference", "Sync waits for response, Async returns immediately", "Compilation error", "Performance only"],
+    "correctIndex": 1,
+    "explanation": "Synchronous: caller blocks until callee responds; Asynchronous: caller sends message and continues; better for microservices coupling.",
+    "difficulty": "Medium",
+    "tags": ["sync-async", "message-queue", "loose-coupling"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Microservices Architecture",
+    "question": "What does containerization solve in microservices?\n```java\n// Docker container with microservice\n// Runs same everywhere: laptop, CI, production\n```",
+    "options": ["Nothing", "Consistent environment, dependency isolation", "Compilation error", "Only for Linux"],
+    "correctIndex": 1,
+    "explanation": "Containers (Docker) ensure microservices run identically across dev/test/production; solves dependency hell.",
+    "difficulty": "Medium",
+    "tags": ["containerization", "docker", "deployment"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Microservices Architecture",
+    "question": "What monitoring metric is critical for microservices?\n```java\n// Track: latency, error rate, request volume\n// Alert if any spike\n```",
+    "options": ["CPU only", "Latency, error rate, throughput (golden signals)", "Compilation error", "No monitoring"],
+    "correctIndex": 1,
+    "explanation": "Golden signals: latency, error rate, saturation, traffic; these metrics reveal service health and performance issues.",
+    "difficulty": "Medium",
+    "tags": ["monitoring", "observability", "metrics"]
+  }
+]

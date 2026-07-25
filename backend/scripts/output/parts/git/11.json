@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Performance",
+    "question": "A repository with 1 million commits takes 30 seconds to run git status. You enable core.fsmonitor to use file system watchers (like Watchman), but git status still takes 20 seconds. What is the next optimization?",
+    "options": [
+      "Run git gc to repack objects and rebuild indexes, or use git repack -Ad to create a multi-pack-index for faster lookups",
+      "Delete old commits",
+      "Switch to a different version control system",
+      "Disable all status checks"
+    ],
+    "correctIndex": 0,
+    "explanation": "git gc repacks objects into fewer files; multi-pack-index speeds up object lookups without modifying history.",
+    "difficulty": "Medium-Hard",
+    "tags": ["performance", "large-repo", "pack-index"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Performance",
+    "question": "You run git clone on a large repository (50GB of history) and it takes over an hour. The network connection is stable. How do you speed up the clone?",
+    "options": [
+      "Use git clone --shallow or git clone --depth=1 to fetch only recent history, then git fetch --unshallow to deepen later if needed",
+      "Upgrade internet connection speed",
+      "Clone during off-peak hours",
+      "Use git clone --mirror to clone with specific options"
+    ],
+    "correctIndex": 0,
+    "explanation": "Shallow clones download only the most recent commits, reducing transfer time significantly; unshallow expands history on-demand.",
+    "difficulty": "Medium",
+    "tags": ["clone-performance", "shallow-clone", "bandwidth"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Performance",
+    "question": "A repository has 10 million small text files tracked by Git. Operations like git add and git commit are extremely slow. What is the root cause, and how do you optimize?",
+    "options": [
+      "Git's index (tracking all files) becomes large and slow; optimize with sparse-checkout to only track relevant files, or migrate large file storage to LFS",
+      "The repository is corrupted",
+      "All repositories are inherently slow with many files",
+      "Git needs to be reinstalled"
+    ],
+    "correctIndex": 0,
+    "explanation": "Git's index is in-memory; millions of entries slow all operations; sparse-checkout reduces the index size by excluding unnecessary files.",
+    "difficulty": "Medium-Hard",
+    "tags": ["large-file-count", "sparse-checkout", "index-size"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Performance",
+    "question": "git log runs slowly on a repository with deep history (100k commits). Filtering by date (git log --since) helps, but is still slow. What optimization can reduce log query time?",
+    "options": [
+      "Enable commit-graph generation (git commit-graph write --reachable) to create an index of commit relationships, speeding up traversal",
+      "Delete old commits",
+      "Use git log --oneline to reduce output",
+      "Clone with --depth to create a shallow history"
+    ],
+    "correctIndex": 0,
+    "explanation": "commit-graph indexes the commit DAG (directed acyclic graph), eliminating slow traversals; git log becomes significantly faster.",
+    "difficulty": "Medium-Hard",
+    "tags": ["commit-graph", "log-performance", "traversal"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Performance",
+    "question": "You run git diff on a large file (100MB), and Git spends 5 minutes computing the diff. The file is mostly binary (e.g., compiled artifacts or database dump). How do you improve this?",
+    "options": [
+      "Add the file to .gitattributes with diff=nodiff or binary to skip diff computation, or track it with LFS instead",
+      "Wait for the diff to complete",
+      "Clone the repository again",
+      "Upgrade Git version"
+    ],
+    "correctIndex": 0,
+    "explanation": ".gitattributes can mark files as binary (skipping diff); LFS stores binary files separately, avoiding diff overhead.",
+    "difficulty": "Medium",
+    "tags": ["binary-files", "diff-optimization", "gitattributes"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Performance",
+    "question": "A developer complains that git push to a remote repository takes 5 minutes, but git status and git log are fast locally. Where is the bottleneck likely occurring?",
+    "options": [
+      "The push involves sending large objects or many commits to the remote; the bottleneck is either network bandwidth or server-side processing (e.g., hooks, CI triggers)",
+      "The local repository is corrupted",
+      "Git itself is slow",
+      "The remote repository is on the wrong server"
+    ],
+    "correctIndex": 0,
+    "explanation": "Push performance depends on object size, commit count, and server processing; server-side hooks or CI triggers can significantly delay push completion.",
+    "difficulty": "Medium",
+    "tags": ["push-performance", "network", "server-hooks"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Performance",
+    "question": "Your .git directory has grown to 5GB despite the working directory being only 500MB. This is unusual. What is likely consuming the space, and how do you reclaim it?",
+    "options": [
+      "Reflog entries, stashed commits, or unreachable objects accumulate over time; run git gc --aggressive and git reflog expire --expire=now --all to clean them",
+      "Clone the repository to a new location",
+      "Delete the .git directory and reinitialize",
+      "The space is normal and cannot be reclaimed"
+    ],
+    "correctIndex": 0,
+    "explanation": "Reflog keeps history of branch movements; git gc consolidates; git reflog expire removes old entries, freeing space.",
+    "difficulty": "Medium-Hard",
+    "tags": ["disk-space", "gc", "reflog-cleanup"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Performance",
+    "question": "git add . on a large working directory is taking 1 minute. Running it a second time takes 5 seconds. What optimization explains the difference?",
+    "options": [
+      "The first run scans all files from scratch; the second run uses cached file stat data (racy git detection is cached); enabling core.preloadindex and core.fsmonitor makes subsequent runs even faster",
+      "Git optimizes itself with repeated runs",
+      "The first run is more thorough",
+      "Disk caching explains the difference"
+    ],
+    "correctIndex": 0,
+    "explanation": "Git caches stat data for files that haven't changed; subsequent adds hit the cache; fsmonitor further optimizes by using OS-level file change notifications.",
+    "difficulty": "Medium-Hard",
+    "tags": ["add-performance", "stat-cache", "fsmonitor"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Performance",
+    "question": "You want to clone a repository but only get the files from the main branch, excluding all other branches and tags to reduce download size. What strategy should you use?",
+    "options": [
+      "Use git clone --single-branch --depth=1 origin to fetch only main with minimal history",
+      "Clone the full repository and delete branches later",
+      "Use git init and manually fetch the branch",
+      "Clone then run git branch -D to delete branches"
+    ],
+    "correctIndex": 0,
+    "explanation": "--single-branch fetches only the default branch; --depth=1 fetches only the most recent commit, minimizing data transfer.",
+    "difficulty": "Medium",
+    "tags": ["clone-optimization", "single-branch", "shallow-clone"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Performance",
+    "question": "A team is experiencing slow performance in a monorepo with 100,000 files. Simply enabling sparse-checkout on all files defeats the purpose. How should you structure the repository to leverage sparse-checkout effectively?",
+    "options": [
+      "Organize files into logical submodules or subdirectories by feature/team; developers configure sparse-checkout to include only their relevant directories",
+      "Split into separate repositories",
+      "Abandon Git for another system",
+      "Accept the slowness as unavoidable"
+    ],
+    "correctIndex": 0,
+    "explanation": "Sparse-checkout is effective only with good directory structure; monorepo organization by feature allows developers to exclude irrelevant directories.",
+    "difficulty": "Hard",
+    "tags": ["monorepo", "sparse-checkout", "scalability"]
+  }
+]

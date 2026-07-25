@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Resource Management",
+    "question": "You set a pod's memory request to 100Mi and limit to 500Mi. The pod starts and consumes 400Mi. Suddenly, it needs 600Mi. What happens?",
+    "options": [
+      "The pod's memory limit is automatically increased to accommodate the request",
+      "The pod is terminated with OOMKilled status because it exceeds the 500Mi limit",
+      "The pod continues running and manages memory internally",
+      "Kubernetes evicts other pods to free memory"
+    ],
+    "correctIndex": 1,
+    "explanation": "Memory limits are hard caps; exceeding them triggers immediate OOMKilled termination, unlike CPU limits which are throttled.",
+    "difficulty": "Medium",
+    "tags": ["resource-limits", "memory", "oomkilled"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Resource Management",
+    "question": "A pod's CPU request is set to 1000m (1 core) but the container can handle 4 cores of work. The node has 4 cores available. What limits the pod's CPU usage?",
+    "options": [
+      "The CPU request; the pod can use at most 1000m",
+      "The CPU limit (if set); otherwise, the pod can use available CPU up to node capacity",
+      "The node's total CPU; the pod can use up to 4 cores",
+      "The pod's CPU request is ignored for CPU usage; only limits matter"
+    ],
+    "correctIndex": 1,
+    "explanation": "Requests are scheduling hints; limits are hard caps for CPU (enforced as throttling). Without limits, pods can burst to available node CPU.",
+    "difficulty": "Medium-Hard",
+    "tags": ["resource-requests", "resource-limits", "cpu"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Resource Management",
+    "question": "You set a pod's memory limit lower than its request (request: 500Mi, limit: 250Mi). What does Kubernetes do?",
+    "options": [
+      "Kubernetes accepts this and the pod uses up to the limit",
+      "Kubernetes rejects the pod because the limit cannot be lower than the request",
+      "The pod is created but immediately evicted for violating resource constraints",
+      "Kubernetes adjusts the limit to match the request automatically"
+    ],
+    "correctIndex": 1,
+    "explanation": "Kubernetes validates that limits are not lower than requests; the pod spec is rejected before creation.",
+    "difficulty": "Medium",
+    "tags": ["resource-requests", "resource-limits", "validation"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Resource Management",
+    "question": "A namespace has a ResourceQuota with requests.memory: 2Gi. Three pods each request 800Mi. What happens to the fourth pod requesting 800Mi?",
+    "options": [
+      "The fourth pod is created; the quota is enforced at admission time",
+      "The fourth pod's PVC remains Pending because the namespace quota would be exceeded",
+      "The fourth pod is created and the quota is temporarily exceeded",
+      "The fourth pod is created and an older pod is evicted to stay within quota"
+    ],
+    "correctIndex": 1,
+    "explanation": "ResourceQuotas are enforced at admission; exceeding the quota prevents pod creation and leaves the pod Pending.",
+    "difficulty": "Medium",
+    "tags": ["resourcequota", "namespace", "resource-requests"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Resource Management",
+    "question": "A LimitRange in a namespace sets defaultLimit for memory at 256Mi. A pod is created without explicit memory limits. What is the pod's memory limit?",
+    "options": [
+      "Unlimited; no memory limit is enforced",
+      "256Mi, from the LimitRange default",
+      "Determined by the node's available memory",
+      "The pod is rejected because it lacks explicit limits"
+    ],
+    "correctIndex": 1,
+    "explanation": "LimitRange's default and defaultRequest fields are automatically applied to pods lacking explicit resource specs.",
+    "difficulty": "Medium",
+    "tags": ["limitrange", "namespace", "resource-defaults"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Resource Management",
+    "question": "A pod's memory request is higher than any single node's allocatable memory. Can the pod ever be scheduled?",
+    "options": [
+      "Yes, if enough unused memory is freed by evicting other pods",
+      "No, the scheduler cannot place it on any node with insufficient capacity",
+      "Yes, the pod will wait indefinitely for a node with sufficient capacity",
+      "Yes, if the node's memory limit is increased"
+    ],
+    "correctIndex": 1,
+    "explanation": "Scheduler will never place a pod on a node with insufficient allocatable capacity to meet its requests; the pod remains Pending.",
+    "difficulty": "Medium",
+    "tags": ["scheduling", "resource-requests", "node-capacity"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Resource Management",
+    "question": "Node allocatable is 8Gi of memory (out of 10Gi total). System daemons use 1.5Gi. Three pods request 1Gi each. The fourth pod requests 1Gi. What happens?",
+    "options": [
+      "All four pods are scheduled because allocatable is 8Gi",
+      "Only three pods are scheduled; the fourth remains Pending because allocatable space is exhausted",
+      "The node's allocatable is dynamically reduced, preventing new pods",
+      "System daemons are evicted to make room for the fourth pod"
+    ],
+    "correctIndex": 1,
+    "explanation": "Scheduler only places pods if their requests fit within allocatable capacity; when allocatable is consumed, new pods remain Pending.",
+    "difficulty": "Medium",
+    "tags": ["node-allocatable", "scheduling", "resource-requests"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Resource Management",
+    "question": "You set a pod's quality of service (QoS) class by not specifying requests and limits. What is the QoS class?",
+    "options": [
+      "Guaranteed; Kubernetes assumes best effort is not desired",
+      "Burstable; the pod can use any available resources",
+      "BestEffort; no requests or limits means no guarantees",
+      "None; the pod is not assigned a QoS class"
+    ],
+    "correctIndex": 2,
+    "explanation": "BestEffort QoS (no requests/limits) means the pod is evicted first during resource pressure; it has no guaranteed resources.",
+    "difficulty": "Medium",
+    "tags": ["qos", "resource-requests", "eviction"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Resource Management",
+    "question": "Two pods have the same requests and limits but different priority values. During node memory pressure, which pod is evicted first?",
+    "options": [
+      "The pod with higher priority",
+      "The pod with lower priority",
+      "The pod with fewer replicas",
+      "Both pods are evicted equally"
+    ],
+    "correctIndex": 1,
+    "explanation": "Lower-priority pods are evicted first during resource pressure; this is the primary eviction criterion after QoS class.",
+    "difficulty": "Medium",
+    "tags": ["pod-priority", "eviction", "resource-pressure"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Resource Management",
+    "question": "A pod is in Guaranteed QoS (requests = limits). Node memory pressure causes kubelet to evict it anyway. Why would this happen?",
+    "options": [
+      "Guaranteed pods are never evicted; this should not happen",
+      "The pod exceeded its limit, violating the guarantee; kubelet is enforcing the limit",
+      "Kubelet was restarted and lost track of the pod's QoS",
+      "A system pod required memory and took precedence"
+    ],
+    "correctIndex": 1,
+    "explanation": "Guaranteed pods are evicted only if they exceed their memory limit; this indicates actual usage surpassed the declared limit.",
+    "difficulty": "Hard",
+    "tags": ["qos", "guaranteed", "eviction"]
+  }
+]

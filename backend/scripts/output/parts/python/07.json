@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Regular Expressions",
+    "question": "What does re.search() return when a pattern is found?\n```python\nimport re\nmatch = re.search(r'\\d+', 'abc123def')\nprint(match.group())\n```",
+    "options": ["123", "None", "True", "abc123def"],
+    "correctIndex": 0,
+    "explanation": "re.search() returns a match object; .group() extracts the matched text '123'.",
+    "difficulty": "Medium",
+    "tags": ["regex-search", "match-object", "group"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Regular Expressions",
+    "question": "What does re.findall() return?\n```python\nimport re\nresult = re.findall(r'\\d+', 'a1b2c3')\nprint(result)\n```",
+    "options": ["['1', '2', '3']", "[('1',), ('2',), ('3',)]", "['a1b2c3']", "None"],
+    "correctIndex": 0,
+    "explanation": "re.findall() returns a list of all non-overlapping matches as strings.",
+    "difficulty": "Medium",
+    "tags": ["findall", "regex", "list-of-matches"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Regular Expressions",
+    "question": "What does this greedy vs non-greedy match show?\n```python\ntext = '<a>hello</a><b>world</b>'\ngreedy = re.findall(r'<.*>', text)\nnon_greedy = re.findall(r'<.*?>', text)\n```",
+    "options": ["Same result", "greedy matches more", "non-greedy matches more", "non-greedy is slower"],
+    "correctIndex": 1,
+    "explanation": "Greedy .* matches to the last >, non-greedy .*? stops at the first; greedy returns one match, non-greedy returns four.",
+    "difficulty": "Hard",
+    "tags": ["greedy", "non-greedy", "quantifiers"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Regular Expressions",
+    "question": "What do capturing groups return in re.findall()?\n```python\nimport re\nresult = re.findall(r'(\\w+):(\\d+)', 'user:123')\nprint(result)\n```",
+    "options": ["['user:123']", "[('user', '123')]", "['user', '123']", "None"],
+    "correctIndex": 1,
+    "explanation": "Multiple groups in findall return a list of tuples, each tuple containing the groups.",
+    "difficulty": "Medium-Hard",
+    "tags": ["capturing-groups", "findall", "tuples"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Regular Expressions",
+    "question": "What does re.sub() with a function do?\n```python\nimport re\ndef replace_func(match):\n    return match.group(0).upper()\nresult = re.sub(r'\\w+', replace_func, 'hello world')\nprint(result)\n```",
+    "options": ["hello world", "HELLO WORLD", "hello", "TypeError"],
+    "correctIndex": 1,
+    "explanation": "re.sub() can take a replacement function that receives each match and returns the replacement text.",
+    "difficulty": "Medium-Hard",
+    "tags": ["re.sub", "function-replacement", "match-object"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Regular Expressions",
+    "question": "What does the ^ anchor match?\n```python\nimport re\nresult1 = re.search(r'^hello', 'hello world')\nresult2 = re.search(r'^hello', 'say hello')\n```",
+    "options": ["First occurrence", "Start of string", "Any position", "End of string"],
+    "correctIndex": 1,
+    "explanation": "^ matches the start of the string; result1 succeeds, result2 fails.",
+    "difficulty": "Medium",
+    "tags": ["anchors", "start-of-string", "regex"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Regular Expressions",
+    "question": "What does re.compile() optimize?\n```python\nimport re\npattern = re.compile(r'\\d+')\nmatch1 = pattern.search('abc123')\nmatch2 = pattern.search('def456')\n```",
+    "options": ["Nothing different", "Reuses compiled pattern for multiple uses", "Faster than raw strings", "Required for patterns"],
+    "correctIndex": 1,
+    "explanation": "Compiling a pattern once and reusing it is more efficient than re.search() for repeated pattern matching.",
+    "difficulty": "Medium",
+    "tags": ["re.compile", "optimization", "pattern-reuse"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Regular Expressions",
+    "question": "What does a named group do?\n```python\nimport re\nmatch = re.search(r'(?P<name>\\w+):(?P<value>\\d+)', 'user:123')\nprint(match.group('name'))\n```",
+    "options": ["Syntax error", "user", "123", "name"]",
+    "correctIndex": 1,
+    "explanation": "Named groups (?P<name>...) allow accessing captured groups by name instead of index.",
+    "difficulty": "Medium-Hard",
+    "tags": ["named-groups", "capturing-groups", "named-access"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Regular Expressions",
+    "question": "What does character class negation do?\n```python\nimport re\nresult = re.findall(r'[^aeiou]', 'hello')\nprint(result)\n```",
+    "options": ["['h', 'l', 'l']", "['e', 'o']", "['h', 'e', 'l', 'l', 'o']", "SyntaxError"],
+    "correctIndex": 0,
+    "explanation": "[^...] matches any character NOT in the set; here matching consonants h, l, l.",
+    "difficulty": "Medium",
+    "tags": ["negated-character-class", "regex", "exclusion"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Regular Expressions",
+    "question": "What does re.split() do?\n```python\nimport re\nresult = re.split(r'\\s+', 'a  b  c')\nprint(result)\n```",
+    "options": ["['a', 'b', 'c']", "['a', '  ', 'b', '  ', 'c']", "SplitError", "['a b c']"],
+    "correctIndex": 0,
+    "explanation": "re.split() splits a string by regex pattern matches, skipping the separators.",
+    "difficulty": "Medium",
+    "tags": ["re.split", "string-splitting", "regex"]
+  }
+]

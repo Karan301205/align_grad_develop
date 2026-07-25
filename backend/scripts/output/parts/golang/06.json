@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Goroutines",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"time\"\n)\nfunc main() {\n  go fmt.Println(\"goroutine\")\n  fmt.Println(\"main\")\n}",
+    "options": ["main", "main\\ngoroutine", "goroutine", "main\\nmain"],
+    "correctIndex": 0,
+    "explanation": "Main exits immediately after printing; goroutine may not run before program terminates.",
+    "difficulty": "Medium",
+    "tags": ["goroutines", "concurrency", "timing"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Goroutines",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"time\"\n)\nfunc main() {\n  go fmt.Println(\"goroutine\")\n  time.Sleep(time.Second)\n  fmt.Println(\"main\")\n}",
+    "options": ["goroutine\\nmain", "main\\ngoroutine", "main", "goroutine"],
+    "correctIndex": 0,
+    "explanation": "Sleep allows goroutine to run; prints goroutine then main.",
+    "difficulty": "Medium",
+    "tags": ["goroutines", "time.Sleep"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Goroutines",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"sync\"\n)\nfunc main() {\n  var wg sync.WaitGroup\n  wg.Add(2)\n  go func() {\n    fmt.Print(\"1\")\n    wg.Done()\n  }()\n  go func() {\n    fmt.Print(\"2\")\n    wg.Done()\n  }()\n  wg.Wait()\n}",
+    "options": ["12", "21", "1", "2"],
+    "correctIndex": 1,
+    "explanation": "WaitGroup waits for both goroutines; order is nondeterministic but both print (1 or 2 first).",
+    "difficulty": "Medium",
+    "tags": ["goroutines", "WaitGroup"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Goroutines",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"sync\"\n)\nfunc main() {\n  var m sync.Mutex\n  x := 0\n  go func() {\n    m.Lock()\n    x = 1\n    m.Unlock()\n  }()\n  m.Lock()\n  fmt.Println(x)\n  m.Unlock()\n}",
+    "options": ["0", "1", "nondeterministic", "panic"],
+    "correctIndex": 2,
+    "explanation": "No synchronization between goroutine start and main mutex acquisition; x could be 0 or 1.",
+    "difficulty": "Medium-Hard",
+    "tags": ["goroutines", "mutex", "data-race"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Goroutines",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"time\"\n)\nfunc main() {\n  for i := 0; i < 3; i++ {\n    go func() {\n      fmt.Print(i)\n    }()\n  }\n  time.Sleep(time.Second)\n}",
+    "options": ["333", "012", "123", "nondeterministic"],
+    "correctIndex": 0,
+    "explanation": "Goroutines capture i by reference; all read final i=3 after loop completes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["goroutines", "closures", "capture"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Goroutines",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"time\"\n)\nfunc main() {\n  for i := 0; i < 3; i++ {\n    go func(i int) {\n      fmt.Print(i)\n    }(i)\n  }\n  time.Sleep(time.Second)\n}",
+    "options": ["012", "210", "333", "nondeterministic"],
+    "correctIndex": 3,
+    "explanation": "Passing i as argument captures its current value, but goroutine execution order is nondeterministic.",
+    "difficulty": "Medium-Hard",
+    "tags": ["goroutines", "closures", "arguments"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Goroutines",
+    "question": "package main\nimport (\n  \"fmt\"\n)\nfunc main() {\n  c := make(chan int)\n  go func() {\n    c <- 42\n  }()\n  fmt.Println(<-c)\n}",
+    "options": ["42", "0", "panic", "deadlock"],
+    "correctIndex": 0,
+    "explanation": "Goroutine sends 42 on c; main receives it and prints.",
+    "difficulty": "Medium",
+    "tags": ["goroutines", "channels", "send-receive"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Goroutines",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"sync\"\n)\nfunc main() {\n  var wg sync.WaitGroup\n  var m sync.Mutex\n  x := 0\n  for i := 0; i < 3; i++ {\n    wg.Add(1)\n    go func() {\n      m.Lock()\n      x++\n      m.Unlock()\n      wg.Done()\n    }()\n  }\n  wg.Wait()\n  fmt.Println(x)\n}",
+    "options": ["3", "1", "nondeterministic", "panic"],
+    "correctIndex": 0,
+    "explanation": "Mutex protects x; WaitGroup ensures all goroutines complete; x=3.",
+    "difficulty": "Medium",
+    "tags": ["goroutines", "mutex", "WaitGroup"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Goroutines",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"runtime\"\n)\nfunc main() {\n  n := runtime.NumGoroutine()\n  fmt.Println(n)\n}",
+    "options": ["1", "0", "2", "nondeterministic"],
+    "correctIndex": 0,
+    "explanation": "Only main goroutine is running; NumGoroutine returns 1.",
+    "difficulty": "Medium",
+    "tags": ["goroutines", "runtime"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Goroutines",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"runtime\"\n)\nfunc main() {\n  go func() {}\n  go func() {}\n  fmt.Println(runtime.NumGoroutine())\n}",
+    "options": ["3", "2", "1", "nondeterministic"],
+    "correctIndex": 3,
+    "explanation": "Goroutines may finish before NumGoroutine is called; count is nondeterministic.",
+    "difficulty": "Medium-Hard",
+    "tags": ["goroutines", "runtime", "timing"]
+  }
+]

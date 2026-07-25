@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "Scalable Architecture Design",
+    "question": "Your web application processes user requests sequentially: validate -> database query -> generate response. P99 latency is 5 seconds. You add caching (ElastiCache) for database results. P99 drops to 100ms. But users report stale data. What's the trade-off you're making?",
+    "options": [
+      "Cache-coherency cost; keeping cache fresh is complex, introducing eventual consistency",
+      "Serialization; responses are cached and cannot be parallelized",
+      "Memory overhead; caching requires additional infrastructure cost",
+      "Latency vs freshness; sub-100ms latency requires accepting stale data for some time window"
+    ],
+    "correctIndex": 3,
+    "explanation": "Caching fundamentally trades consistency for latency; to achieve sub-100ms P99, you accept eventual consistency (stale data briefly); this is a conscious architectural choice.",
+    "difficulty": "Hard",
+    "tags": ["caching", "consistency", "architectural-tradeoff"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Scalable Architecture Design",
+    "question": "You're designing a global content delivery system. Users in 6 continents request media files. Using single-region S3 (us-east-1) with CloudFront edge locations incurs expensive data transfer costs ($0.085/GB). Alternatively, multi-region S3 (each continent) with local CloudFront costs more but reduces transfer. Should you use multi-region S3?",
+    "options": [
+      "Yes; multi-region reduces data transfer; total cost is lower",
+      "No; single CloudFront distribution with edge locations is sufficient; data transfer is same",
+      "Yes, but only if you have 1000+ requests/second per region",
+      "No; CloudFront already handles multi-region via edge caching"
+    ],
+    "correctIndex": 0,
+    "explanation": "Single-region S3: transfer cost $0.085/GB from origin to edge. Multi-region S3: transfer cost $0 (local origin), only edge-to-user transfer; saves 50-70% on transfer costs.",
+    "difficulty": "Hard",
+    "tags": ["multi-region", "cloudfront", "cost-optimization"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Scalable Architecture Design",
+    "question": "Your application uses RDS MySQL with a single writer and 3 read replicas. Write throughput is 1,000 transactions/second. Read throughput is 10,000 queries/second. Replicas are catching up; replication lag is 2+ seconds. How should you scale writes?",
+    "options": [
+      "Add more read replicas; they help with read scalability, not writes",
+      "Migrate to Aurora; it supports faster replication lag and better write performance",
+      "Shard the database; split writes across multiple primary databases by data range",
+      "Scale up the primary instance to larger CPU; improve write throughput"
+    ],
+    "correctIndex": 2,
+    "explanation": "Replicas don't scale writes (writes still go to single primary); Aurora improves but doesn't address fundamental write bottleneck at 1k TPS; sharding enables linear write scaling by partitioning data.",
+    "difficulty": "Hard",
+    "tags": ["database-scaling", "sharding", "replication-lag"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Scalable Architecture Design",
+    "question": "You're designing a microservices architecture. Services communicate via REST APIs (synchronous). During peak load, API latency increases, causing timeouts and cascading failures. Should you introduce a message queue (async)?",
+    "options": [
+      "Yes; async decouples services, eliminating timeout cascades",
+      "No; REST is simpler; add a load balancer and scale horizontally",
+      "Partially; use async for non-critical operations (logging, analytics); keep critical path sync",
+      "No; async introduces debugging complexity; stick with sync and optimize network"
+    ],
+    "correctIndex": 2,
+    "explanation": "Async everywhere adds complexity; hybrid approach: sync for critical (auth, payment), async for non-blocking (emails, logs) provides resilience without over-engineering.",
+    "difficulty": "Hard",
+    "tags": ["microservices", "async-communication", "architecture"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Scalable Architecture Design",
+    "question": "Your SaaS application serves 10,000 concurrent customers. Database size is 100GB. Single RDS instance handles all queries. Scaling reads via replicas, but writes still bottleneck. Customer A is a whale account (40% of traffic). How should you scale for A?",
+    "options": [
+      "Shard database for all customers; each customer has own DB (multi-tenant isolated)",
+      "Single database is simpler; scale reads/writes equally",
+      "Create dedicated RDS instance for customer A; route their traffic separately",
+      "Use DynamoDB for customer A; relational DBs don't scale writes"
+    ],
+    "correctIndex": 2,
+    "explanation": "Dedicating infrastructure to whale customers isolates their impact (noisy neighbor problem); if one customer is 40% of load, separate instance scales them independently without affecting others.",
+    "difficulty": "Hard",
+    "tags": ["multi-tenancy", "scaling", "noisy-neighbor"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Scalable Architecture Design",
+    "question": "You're building a real-time dashboard showing system metrics. Metrics are generated by 10,000 EC2 instances, each sending 10 data points/second to CloudWatch. Display updates every 5 seconds. Should you use CloudWatch Dashboards or build a custom solution with Kinesis + DynamoDB?",
+    "options": [
+      "CloudWatch Dashboards; native integration, aggregation included, easy to set up",
+      "Kinesis + DynamoDB; higher throughput (1M events/sec), lower latency, more control",
+      "Kinesis for ingestion, ElastiCache for querying; real-time performance, cost-effective",
+      "Custom solution with Lambda; processes and stores metrics in S3"
+    ],
+    "correctIndex": 1,
+    "explanation": "100k data points/sec exceeds CloudWatch API limits; Kinesis handles ingestion at scale; DynamoDB provides sub-second queries; custom solution is necessary for true real-time at this scale.",
+    "difficulty": "Hard",
+    "tags": ["real-time-systems", "kinesis", "scalability"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Scalable Architecture Design",
+    "question": "Your application's static assets (images, CSS, JS) are served from S3 behind CloudFront. During a traffic spike, S3 request rate limits are hit (3,500 PUT/COPY/POST/DELETE per second per prefix). How should you avoid throttling?",
+    "options": [
+      "Use multiple prefixes (sharding); distribute requests across partitions",
+      "Enable S3 Transfer Acceleration; bypasses rate limits",
+      "CloudFront caches static assets; S3 request limits shouldn't be hit",
+      "Migrate to EBS-backed web server; S3 isn't suitable for high-throughput"
+    ],
+    "correctIndex": 0,
+    "explanation": "CloudFront caches GETs effectively, but if cache TTL is short or you have many cache misses, S3 is hit; sharding by prefix (e.g., /assets-1/, /assets-2/) distributes quota across partitions.",
+    "difficulty": "Medium-Hard",
+    "tags": ["s3", "rate-limiting", "performance"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Scalable Architecture Design",
+    "question": "Your video streaming platform stores 10TB of content. Users download videos; bandwidth is the primary cost. During peak hours, 1000 concurrent users each download 1Mbps. Should you cache videos in multiple regions?",
+    "options": [
+      "No; CloudFront edge locations already cache; multi-region S3 is redundant",
+      "Yes; pre-position copies in regional S3 buckets; CloudFront origins are local",
+      "Yes, but only if transfer costs exceed CloudFront CDN costs",
+      "No; CloudFront is designed for global caching; additional regions add complexity"
+    ],
+    "correctIndex": 1,
+    "explanation": "CloudFront caches, but if cache is evicted or TTL is short, origin fetch costs money; multi-region S3 ensures origin is local to each CloudFront POP, minimizing back-haul cost.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cdn", "multi-region", "cost-optimization"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Scalable Architecture Design",
+    "question": "You're designing a messaging platform handling 100 million messages/day. Each message has metadata (sender, recipient, timestamp). Queries: (1) fetch my last 100 messages (2) search by date range (3) count unread messages. Which database is best?",
+    "options": [
+      "RDS MySQL; indexes on (user_id, timestamp) support all queries efficiently",
+      "DynamoDB; partition by user_id, sort by timestamp; handles scans and queries at scale",
+      "Elasticsearch; full-text search; not optimized for simple timestamp queries",
+      "Aurora with read replicas; handles write load via sharding, reads via replicas"
+    ],
+    "correctIndex": 1,
+    "explanation": "100M messages/day requires massive scale; DynamoDB's partition key (user_id) enables parallel writes; sort key (timestamp) supports range queries (date range); better than RDS which has single-writer bottleneck.",
+    "difficulty": "Hard",
+    "tags": ["dynamodb", "data-modeling", "scalability"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Scalable Architecture Design",
+    "question": "Your serverless architecture (Lambda + API Gateway) experiences periodic traffic spikes from scheduled batch jobs. Peak concurrency is 1000, baseline is 10. Provisioned concurrency (1000) costs $13,000/month. On-demand costs $2,000/month average but spikes to $8,000 during peaks. Should you use provisioned concurrency?",
+    "options": [
+      "No; on-demand at $8,000/month peak is cheaper than provisioned $13,000/month",
+      "Yes; provisioned guarantees latency < 100ms; on-demand cold starts during spikes are unacceptable",
+      "Partially; use provisioned concurrency for 100 (baseline); handle 900 spike on-demand",
+      "No; implement retry logic; accept occasional timeouts during spikes"
+    ],
+    "correctIndex": 2,
+    "explanation": "Hybrid: baseline (10) rarely needs provisioned (costs $400/month); spikes (900) use on-demand; total ~$2,500/month with good P99 latency; pure provisioned ($13k) is wasteful, pure on-demand has cold start issues.",
+    "difficulty": "Hard",
+    "tags": ["lambda", "provisioned-concurrency", "cost-optimization"]
+  }
+]

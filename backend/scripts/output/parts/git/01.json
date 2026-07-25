@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Version Control Basics",
+    "question": "After committing changes to a local branch, you realize you committed to the wrong feature branch instead of main. The commit hasn't been pushed yet. Which approach preserves the work while keeping the branch history clean?",
+    "options": [
+      "Use git reset HEAD~1 on the current branch, then checkout main and cherry-pick the commit",
+      "Delete the current branch and recreate main from origin",
+      "Push to a new remote branch to preserve the commit",
+      "Revert the commit and manually re-apply changes on main"
+    ],
+    "correctIndex": 0,
+    "explanation": "Reset preserves staged changes (soft reset) or working directory state while removing the commit from history, then cherry-pick applies it cleanly to the correct branch.",
+    "difficulty": "Medium-Hard",
+    "tags": ["reset", "cherry-pick", "branch-management", "local-workflow"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Version Control Basics",
+    "question": "Your team's repository uses Git LFS for large binary files. A developer accidentally commits a 500MB video file without LFS tracking. What happens if they immediately push and then add the file to .gitattributes?",
+    "options": [
+      "Git LFS only applies to new commits; the binary stays in history and must be removed with git filter-branch",
+      "Git automatically reprocesses the entire history to apply LFS retroactively",
+      "The push is rejected because LFS cannot handle pre-existing binaries",
+      "The file is converted to an LFS pointer on next push"
+    ],
+    "correctIndex": 0,
+    "explanation": "LFS tracking is applied at commit time, not retroactively; removing the file from history requires filter operations and force-push after cleanup.",
+    "difficulty": "Hard",
+    "tags": ["lfs", "large-files", "history-rewriting"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Version Control Basics",
+    "question": "During a merge, you notice git identified a conflict in a file that visually looks correct on screen. Running git diff shows conflicting markers. What is the most likely cause?",
+    "options": [
+      "Whitespace differences or line-ending changes are recorded in Git's index but not always visible in editors",
+      "The file was opened in an editor that hides conflict markers",
+      "A corrupted .git object requires git fsck to rebuild",
+      "The merge algorithm incorrectly parsed the file encoding"
+    ],
+    "correctIndex": 0,
+    "explanation": "Git tracks whitespace and line endings literally; editors may normalize these invisibly, creating a mismatch between what you see and what Git's index contains.",
+    "difficulty": "Medium-Hard",
+    "tags": ["merge-conflicts", "whitespace", "line-endings"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Version Control Basics",
+    "question": "You run git status and see hundreds of files marked as modified, even though you only changed one file. The modified files are in different directories and unrelated to your change. What debugging step should you perform first?",
+    "options": [
+      "Run git diff --name-status to check if the differences are only whitespace or line-ending related",
+      "Immediately run git reset --hard to discard changes",
+      "Check if someone altered the .gitattributes file to change CRLF settings",
+      "Clone the repository again to verify it is not corrupted"
+    ],
+    "correctIndex": 0,
+    "explanation": "The --name-status flag reveals if changes are truly substantive or just whitespace/CRLF, guiding whether the issue is configuration-related.",
+    "difficulty": "Medium",
+    "tags": ["troubleshooting", "status", "whitespace", "crlf"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Version Control Basics",
+    "question": "A colleague says they committed code that breaks tests, but git blame on that file shows a different author from weeks ago. The actual culprit edited the file this morning. Why does blame show the wrong author?",
+    "options": [
+      "They rebased their branch onto main, which changed the commit author metadata even though the content changed today",
+      "git blame uses file modification time, not commit time, so it attributed the line to the original committer",
+      "Someone ran git commit --amend --author, changing historical authorship",
+      "The file was refactored with a move operation, and blame didn't follow the rename"
+    ],
+    "correctIndex": 0,
+    "explanation": "Rebase rewrites commit history and can preserve original author details; use git log -S or git log -p to trace content changes across rebases.",
+    "difficulty": "Hard",
+    "tags": ["blame", "rebase", "authorship", "history"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Version Control Basics",
+    "question": "You accidentally pushed a commit that contains a production database password in a configuration file. The team has already pulled the commit. What is the correct sequence to remediate?",
+    "options": [
+      "Use git filter-branch to remove the file from history, force-push, notify the team to pull, and rotate the password immediately",
+      "Delete the repository and recreate it without the file",
+      "Revert the commit and tell the team the password is still exposed in their local history",
+      "Create a new commit that removes the password and push normally"
+    ],
+    "correctIndex": 0,
+    "explanation": "filter-branch permanently removes secrets from history; force-push ensures old commits are unreachable; password rotation is mandatory because the file exists in git objects.",
+    "difficulty": "Hard",
+    "tags": ["security", "secrets", "filter-branch", "remediation"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Version Control Basics",
+    "question": "Your repository has a detached HEAD state after checking out a specific commit hash. You make a few changes and commit. Where will these commits exist if you switch back to main?",
+    "options": [
+      "They will still exist in the reflog and can be recovered with git reflog, but won't be reachable from any branch",
+      "They will be automatically merged into main",
+      "They will be permanently lost because the detached commits are orphaned",
+      "They will create a new branch automatically"
+    ],
+    "correctIndex": 0,
+    "explanation": "Detached HEAD commits are not deleted; they are orphaned from any branch but recoverable via reflog until garbage collection runs.",
+    "difficulty": "Medium",
+    "tags": ["detached-head", "reflog", "recovery", "orphaned-commits"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Version Control Basics",
+    "question": "You have two separate Git repositories that you want to combine into one while preserving the full commit history of both. Which operation achieves this?",
+    "options": [
+      "Use git subtree add or git merge --allow-unrelated-histories to combine the repositories under a subdirectory",
+      "Copy all files from one repo into the other and commit",
+      "Use git clone to create a reference between them",
+      "Manually recreate all commits from one repository into the other"
+    ],
+    "correctIndex": 0,
+    "explanation": "subtree add merges another repository's history while isolating its files in a subdirectory; --allow-unrelated-histories permits merging unrelated commit graphs.",
+    "difficulty": "Medium-Hard",
+    "tags": ["subtree", "merge", "history-preservation", "monorepo"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Version Control Basics",
+    "question": "After rebasing your feature branch onto main, your git log shows the same commit SHAs as before the rebase. What went wrong?",
+    "options": [
+      "The rebase completed but the branch pointer did not update; you need to run git branch -f or git reset to point your branch to the rebased commits",
+      "Git failed silently and the rebase did not actually execute",
+      "Rebasing does not change commit SHAs under any circumstance",
+      "You rebased onto an identical commit to your previous base"
+    ],
+    "correctIndex": 0,
+    "explanation": "Rebase creates new commits with new SHAs; if SHAs haven't changed, the branch reference is pointing at the old commits despite the rebase completing.",
+    "difficulty": "Medium",
+    "tags": ["rebase", "branch-pointer", "commit-sha"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Version Control Basics",
+    "question": "You run git add followed by git commit, but then discover you staged and committed the wrong file. You want to undo the commit but keep the work in progress. Which command is safest?",
+    "options": [
+      "git reset HEAD~1 to move HEAD back one commit, leaving the working directory intact",
+      "git revert HEAD to create a new commit that undoes the previous one",
+      "git reset --hard HEAD~1 to discard everything",
+      "git checkout HEAD~1 to go back to the previous state"
+    ],
+    "correctIndex": 0,
+    "explanation": "reset HEAD~1 (soft reset) moves the branch pointer backward and keeps staged changes in the index, preserving uncommitted work.",
+    "difficulty": "Medium",
+    "tags": ["reset", "undo-commit", "working-directory"]
+  }
+]

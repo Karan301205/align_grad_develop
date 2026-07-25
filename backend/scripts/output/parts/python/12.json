@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Testing Frameworks",
+    "question": "What does unittest.TestCase.assertEqual do?\n```python\nimport unittest\n\nclass TestExample(unittest.TestCase):\n    def test_add(self):\n        self.assertEqual(2 + 2, 4)\n```",
+    "options": ["Prints comparison", "Asserts two values are equal", "Assigns values", "Logs the result"],
+    "correctIndex": 1,
+    "explanation": "assertEqual checks if two values are equal; test fails if they're not.",
+    "difficulty": "Medium",
+    "tags": ["unittest", "assertEqual", "assertion"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Testing Frameworks",
+    "question": "What does unittest setUp method do?\n```python\nimport unittest\n\nclass TestExample(unittest.TestCase):\n    def setUp(self):\n        self.data = [1, 2, 3]\n    \n    def test_first(self):\n        self.assertEqual(len(self.data), 3)\n```",
+    "options": ["Runs once before all tests", "Runs before each test", "Runs after each test", "Initializes class"],
+    "correctIndex": 1,
+    "explanation": "setUp runs before each test method, allowing test-specific initialization.",
+    "difficulty": "Medium",
+    "tags": ["unittest", "setup", "fixture"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Testing Frameworks",
+    "question": "What does unittest tearDown do?\n```python\nimport unittest\n\nclass TestExample(unittest.TestCase):\n    def tearDown(self):\n        # cleanup code\n        pass\n```",
+    "options": ["Removes test file", "Cleanup after each test", "Disables test", "Stops execution"],
+    "correctIndex": 1,
+    "explanation": "tearDown runs after each test method, handling cleanup like closing files or connections.",
+    "difficulty": "Medium",
+    "tags": ["unittest", "teardown", "cleanup"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Testing Frameworks",
+    "question": "What does pytest.fixture provide?\n```python\nimport pytest\n\n@pytest.fixture\ndef sample_data():\n    return [1, 2, 3]\n\ndef test_example(sample_data):\n    assert len(sample_data) == 3\n```",
+    "options": ["Setup code", "Reusable test data via dependency injection", "Mocking framework", "Coverage tool"],
+    "correctIndex": 1,
+    "explanation": "Fixtures provide setup/teardown and reusable data; pytest injects them into test functions.",
+    "difficulty": "Medium",
+    "tags": ["pytest", "fixture", "dependency-injection"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Testing Frameworks",
+    "question": "What does unittest.mock.patch do?\n```python\nfrom unittest.mock import patch\n\nwith patch('module.function') as mock_func:\n    mock_func.return_value = 42\n    result = module.function()\n```",
+    "options": ["Modifies source code", "Replaces function with mock temporarily", "Creates backup", "Logs calls"],
+    "correctIndex": 1,
+    "explanation": "patch replaces a function/method with a Mock object for testing without side effects.",
+    "difficulty": "Medium",
+    "tags": ["mock", "patch", "mocking"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Testing Frameworks",
+    "question": "What does Mock.assert_called_with check?\n```python\nfrom unittest.mock import Mock\n\nmock_func = Mock()\nmock_func(1, 2, key='value')\nmock_func.assert_called_with(1, 2, key='value')\n```",
+    "options": ["Return value", "Mock was called with exact arguments", "Call count", "Exception raised"],
+    "correctIndex": 1,
+    "explanation": "assert_called_with verifies a mock was called with specific positional and keyword arguments.",
+    "difficulty": "Medium",
+    "tags": ["mock", "assert-called-with", "call-verification"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Testing Frameworks",
+    "question": "What does pytest.mark.parametrize accomplish?\n```python\nimport pytest\n\n@pytest.mark.parametrize('input,expected', [(1, 2), (2, 4), (3, 6)])\ndef test_double(input, expected):\n    assert input * 2 == expected\n```",
+    "options": ["Runs test once", "Runs test multiple times with different inputs", "Marks as skip", "Disables test"],
+    "correctIndex": 1,
+    "explanation": "parametrize runs a test multiple times with different argument combinations, avoiding code duplication.",
+    "difficulty": "Medium",
+    "tags": ["pytest", "parametrize", "data-driven-testing"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Testing Frameworks",
+    "question": "What does pytest.raises context manager do?\n```python\nimport pytest\n\ndef test_exception():\n    with pytest.raises(ValueError):\n        raise ValueError('error')\n```",
+    "options": ["Prevents exception", "Asserts exception is raised", "Logs exception", "Catches exception"],
+    "correctIndex": 1,
+    "explanation": "pytest.raises verifies that a specific exception is raised within the context.",
+    "difficulty": "Medium",
+    "tags": ["pytest", "exception-testing", "raises"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Testing Frameworks",
+    "question": "What does coverage measurement show?\n```python\n# Run: coverage run -m pytest\n# Report: coverage report\n```",
+    "options": ["Test execution time", "Percentage of code executed by tests", "Memory usage", "CPU usage"],
+    "correctIndex": 1,
+    "explanation": "Coverage measures what percentage of code is executed during tests, identifying untested branches.",
+    "difficulty": "Medium",
+    "tags": ["coverage", "code-coverage", "testing"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Testing Frameworks",
+    "question": "What does pytest.skip do?\n```python\nimport pytest\n\ndef test_skip_this():\n    pytest.skip('Not implemented yet')\n    assert 1 == 2\n```",
+    "options": ["Fails test", "Marks test as skipped", "Removes test", "Passes test"],
+    "correctIndex": 1,
+    "explanation": "pytest.skip skips the test and marks it as skipped, useful for unimplemented or environment-dependent tests.",
+    "difficulty": "Medium",
+    "tags": ["pytest", "skip", "test-marking"]
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Express JS",
+    "subtopic": "Performance Optimization",
+    "question": "A route handler performs a synchronous operation (reading a large file) before calling res.json(). Meanwhile, 100 other requests are queued. Why does this block the event loop?",
+    "options": [
+      "Express prioritizes requests in FIFO order",
+      "Synchronous operations block the single-threaded event loop, delaying all pending requests",
+      "The file system automatically queues reads",
+      "Express spawns new threads for sync operations"
+    ],
+    "correctIndex": 1,
+    "explanation": "Node.js is single-threaded; synchronous operations block the event loop, preventing other requests from being processed until the operation completes.",
+    "difficulty": "Medium",
+    "tags": ["performance", "event-loop", "synchronous-blocking"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Performance Optimization",
+    "question": "A route queries a database for the same data on every request: app.get('/data', async (req, res) => { const data = await db.query(...); res.json(data); }). Why is caching beneficial?",
+    "options": [
+      "Caching increases query load on the database",
+      "Without caching, every request hits the database; caching stores results in memory, reducing DB load and latency",
+      "Caching is only useful for static files, not dynamic data",
+      "Express caches automatically, so manual caching is redundant"
+    ],
+    "correctIndex": 1,
+    "explanation": "Caching frequently-accessed data in memory (Redis, in-process cache) reduces database hits and improves response times significantly.",
+    "difficulty": "Medium",
+    "tags": ["caching", "performance", "database", "optimization"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Performance Optimization",
+    "question": "app.use(express.json()) with default settings parses all JSON bodies. A route only needs URL parameters. Why might this waste resources?",
+    "options": [
+      "Parsing JSON is always required by Express",
+      "Parsing unused JSON bodies wastes CPU and memory; apply middleware selectively to routes that need it",
+      "Express automatically skips parsing for certain routes",
+      "JSON parsing is so fast it's negligible"
+    ],
+    "correctIndex": 1,
+    "explanation": "Applying body-parsing middleware to all routes adds overhead; use app.use(express.json()) only for routes that need it or apply to specific paths.",
+    "difficulty": "Medium",
+    "tags": ["middleware", "optimization", "resource-usage"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Performance Optimization",
+    "question": "A route returns res.json(largeArray) with 10,000 items. The response takes 5 seconds and uses high CPU. Why might this be slow?",
+    "options": [
+      "Express intentionally delays large responses",
+      "Serializing a large object to JSON is CPU-intensive; consider pagination or compression",
+      "The network is too slow",
+      "JSON serialization is always fast regardless of size"
+    ],
+    "correctIndex": 1,
+    "explanation": "Large JSON serialization is expensive; use pagination (limit/offset), streaming, or gzip compression to reduce payload size and processing time.",
+    "difficulty": "Medium",
+    "tags": ["performance", "json-serialization", "pagination", "compression"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Performance Optimization",
+    "question": "app.use(compression()) enables gzip compression for all responses. A client requests /data with Content-Encoding: gzip. What happens?",
+    "options": [
+      "The response is sent uncompressed because the client requested gzip encoding",
+      "The response is compressed, and Content-Encoding: gzip is set in the response header",
+      "Compression is only applied to responses over 1KB",
+      "The client must negotiate encoding before compression is applied"
+    ],
+    "correctIndex": 1,
+    "explanation": "Compression middleware detects Accept-Encoding headers and compresses responses if the client supports it, significantly reducing bandwidth.",
+    "difficulty": "Medium",
+    "tags": ["compression", "headers", "bandwidth", "optimization"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Performance Optimization",
+    "question": "A route loads config from disk on every request: const config = JSON.parse(fs.readFileSync('config.json')). Why is this inefficient?",
+    "options": [
+      "Disk I/O is slow; config should be loaded once at startup and cached",
+      "JSON.parse() is always slow regardless of caching",
+      "readFileSync is faster than async alternatives",
+      "File reads are optimized by the OS, so performance impact is minimal"
+    ],
+    "correctIndex": 0,
+    "explanation": "File I/O on every request is wasteful; load static config at startup and store in memory or use environment variables.",
+    "difficulty": "Medium",
+    "tags": ["file-io", "caching", "startup", "optimization"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Performance Optimization",
+    "question": "A route uses app.get('/file', (req, res) => { res.sendFile('large.zip'); }). The file is 500MB. Why might this exhaust server memory?",
+    "options": [
+      "res.sendFile() streams the file efficiently without buffering the entire file",
+      "sendFile() loads the entire file into memory before sending, consuming massive RAM",
+      "Large files are automatically chunked by Express",
+      "The server memory limit doesn't apply to file serving"
+    ],
+    "correctIndex": 1,
+    "explanation": "sendFile() should stream efficiently, but large uncompressed files can still strain resources; consider streaming, compression, or CDN distribution.",
+    "difficulty": "Medium-Hard",
+    "tags": ["file-serving", "memory", "streaming"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Performance Optimization",
+    "question": "A route performs multiple sequential async operations: const a = await op1(); const b = await op2(a); res.json({a, b});. Why is this slower than parallel execution?",
+    "options": [
+      "Sequential operations are faster; parallelization adds overhead",
+      "Sequential waits for op1 to complete before starting op2; parallel execution with Promise.all() runs both concurrently",
+      "Async operations are always parallel in Node.js",
+      "Sequential operations are required for data dependencies"
+    ],
+    "correctIndex": 1,
+    "explanation": "If operations are independent, use Promise.all([op1(), op2()]) to run them concurrently and reduce total time.",
+    "difficulty": "Medium",
+    "tags": ["async", "concurrency", "promises", "optimization"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Performance Optimization",
+    "question": "Middleware logs every request: app.use((req, res, next) => { console.log(req.url); next(); }). With 10,000 requests/sec, why could this degrade performance?",
+    "options": [
+      "console.log() is asynchronous and queues I/O, potentially blocking the event loop",
+      "Logging has no performance impact",
+      "console.log() is optimized for high-throughput scenarios",
+      "Logging only affects the current request, not others"
+    ],
+    "correctIndex": 0,
+    "explanation": "console.log() can block the event loop at high throughput; use a dedicated logging library (Winston, Pino) with async writes for production.",
+    "difficulty": "Medium-Hard",
+    "tags": ["logging", "event-loop", "performance", "optimization"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Performance Optimization",
+    "question": "A route processes a request in 10ms, but the client takes 500ms to receive the response. Why the delay?",
+    "options": [
+      "Express adds overhead between request processing and response sending",
+      "Network latency, client connection speed, or response size could cause delays outside server processing time",
+      "The server is intentionally delaying responses",
+      "Middleware is queued and processes responses sequentially"
+    ],
+    "correctIndex": 1,
+    "explanation": "Server processing time and network delivery are different metrics; measure both to identify bottlenecks (waterfall charts in browsers help diagnose).",
+    "difficulty": "Medium",
+    "tags": ["performance", "latency", "monitoring", "debugging"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Syntax Basics",
+    "question": "Given the CSS below, what color will the paragraph display?\n```css\np { color: blue; }\np { color: red; }\n```",
+    "options": ["blue", "red", "purple (blend)", "browser default"],
+    "correctIndex": 1,
+    "explanation": "The last declared rule wins in cascade order; red overwrites blue.",
+    "difficulty": "Medium",
+    "tags": ["cascade", "declaration-order"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Syntax Basics",
+    "question": "What will be the computed `font-size` of the child element?\n```css\n.parent { font-size: 16px; }\n.child { font-size: 1.5em; }\n```",
+    "options": ["1.5px", "16px", "24px", "1.5rem"],
+    "correctIndex": 2,
+    "explanation": "1em is relative to the parent's computed font-size (16px * 1.5 = 24px).",
+    "difficulty": "Medium",
+    "tags": ["em-units", "inheritance", "relativity"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Syntax Basics",
+    "question": "How will the browser interpret this CSS rule?\n```css\n.box {\n  width: 100px !important;\n  width: 200px;\n}\n```",
+    "options": ["width: 100px (important wins)", "width: 200px (last wins)", "width: 150px (average)", "width: unset (conflict)"],
+    "correctIndex": 0,
+    "explanation": "!important declarations override subsequent non-important declarations in cascade order.",
+    "difficulty": "Medium",
+    "tags": ["important-flag", "cascade", "precedence"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Syntax Basics",
+    "question": "Given this HTML and CSS, will the button inherit the color?\n```html\n<button>\n  <span>Click me</span>\n</button>\n```\n```css\nbutton { color: blue; }\n```",
+    "options": ["Yes, always", "No, button is form element", "Yes, color inherits", "No, span resets it"],
+    "correctIndex": 2,
+    "explanation": "The color property is inherited; the span receives blue from its parent button.",
+    "difficulty": "Medium",
+    "tags": ["inheritance", "inherited-properties"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Syntax Basics",
+    "question": "What will be the margin of this element after browser reflow?\n```css\n.box {\n  margin: 20px;\n  margin: unset;\n}\n```",
+    "options": ["0px (unset zeros margin)", "20px (unset reverts to last)", "auto (initial default)", "20px (second rule ignored)"],
+    "correctIndex": 0,
+    "explanation": "The unset keyword reverts a property to either inherited or initial value; for margin, it resets to 0.",
+    "difficulty": "Medium-Hard",
+    "tags": ["unset-keyword", "keyword-values"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Syntax Basics",
+    "question": "Which CSS custom property will be resolved?\n```css\n:root { --color: red; }\n.box { --color: blue; color: var(--color, green); }\n```",
+    "options": ["red (root scope)", "blue (local scope)", "green (fallback)", "error (undefined)"],
+    "correctIndex": 1,
+    "explanation": "CSS variables cascade; the .box scope overrides :root, so --color resolves to blue; green is unused fallback.",
+    "difficulty": "Medium",
+    "tags": ["css-variables", "custom-properties", "scope"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Syntax Basics",
+    "question": "What happens when you apply --webkit-transform in a browser that doesn't need the prefix?\n```css\n.box {\n  -webkit-transform: rotate(45deg);\n  transform: rotate(45deg);\n}\n```",
+    "options": ["Only webkit version applies", "Both apply, webkit wins", "Both apply, standard wins", "Error: conflicting values"],
+    "correctIndex": 2,
+    "explanation": "Modern browsers parse both; the unprefixed standard rule overwrites the prefixed one in cascade order.",
+    "difficulty": "Medium",
+    "tags": ["vendor-prefixes", "cascade", "fallbacks"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Syntax Basics",
+    "question": "After this CSS, what is the effective background-color?\n```css\n.box { background-color: initial; }\n```",
+    "options": ["transparent", "white", "inherits from parent", "browser default (transparent)"],
+    "correctIndex": 0,
+    "explanation": "The initial keyword resets a property to its CSS-defined default; background-color defaults to transparent.",
+    "difficulty": "Medium-Hard",
+    "tags": ["initial-keyword", "default-values"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Syntax Basics",
+    "question": "Why might using broad reset rules like `* { margin: 0; padding: 0; }` impact performance?\n```css\n* { margin: 0; padding: 0; }\n```",
+    "options": ["Slows selector matching", "Increases file size minimally", "Forces reflow on every element", "Removes browser optimizations"],
+    "correctIndex": 2,
+    "explanation": "The universal selector targets every element, triggering layout recalculation for each during rendering.",
+    "difficulty": "Medium-Hard",
+    "tags": ["universal-selector", "performance", "reflow"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Syntax Basics",
+    "question": "In this nested rule context, which color will apply?\n```css\n.parent { color: red; }\n.parent .child { color: inherit; }\n```",
+    "options": ["red (inherited through inherit)", "browser default", "unspecified", "invalid syntax"],
+    "correctIndex": 0,
+    "explanation": "The inherit keyword explicitly forces inheritance; .child receives red from .parent.",
+    "difficulty": "Medium",
+    "tags": ["inherit-keyword", "explicit-inheritance"]
+  }
+]

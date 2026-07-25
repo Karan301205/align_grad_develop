@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Performance Optimization",
+    "question": "Does using `any` type improve compilation speed compared to precise types?",
+    "options": ["No, any slows compilation", "Yes, any requires less type-checking", "Yes, but reduces safety", "No, typing has no compile-time cost"],
+    "correctIndex": 1,
+    "explanation": "Precise types require more inference and checking; `any` bypasses these, speeding up compilation but at the cost of safety.",
+    "difficulty": "Medium-Hard",
+    "tags": ["any-type", "compilation-speed", "type-checking"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Performance Optimization",
+    "question": "Can large discriminated unions impact compile-time performance?",
+    "options": ["No, discriminated unions are optimized", "Yes, very large unions slow type-checking", "Yes, but only with generics", "No, TypeScript handles them efficiently"],
+    "correctIndex": 1,
+    "explanation": "Large discriminated unions with many variants can slow type inference and checking due to the number of type combinations.",
+    "difficulty": "Medium-Hard",
+    "tags": ["discriminated-unions", "performance", "type-complexity"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Performance Optimization",
+    "question": "Does using `const` assertions on objects improve runtime performance?",
+    "options": ["No, const is compile-time only", "Yes, const optimizes memory", "Yes, with immutability benefits", "No, const has no runtime effect"],
+    "correctIndex": 0,
+    "explanation": "as const is purely a compile-time type annotation; it has no impact on runtime performance or memory usage.",
+    "difficulty": "Medium",
+    "tags": ["const-assertion", "compile-time", "runtime-behavior"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Performance Optimization",
+    "question": "Given deep type inference like `type A<T> = T extends ... ? ... : ...` recursively — can this slow compilation?",
+    "options": ["No, inference is instant", "Yes, deep recursion can cause slowdowns", "Yes, but only with generics", "No, TypeScript optimizes recursion"],
+    "correctIndex": 1,
+    "explanation": "Deeply recursive type definitions can cause exponential type-checking complexity, slowing compilation significantly.",
+    "difficulty": "Medium-Hard",
+    "tags": ["recursive-types", "conditional-types", "type-complexity"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Performance Optimization",
+    "question": "Does enabling `noEmitOnError` in tsconfig impact runtime performance?",
+    "options": ["Yes, errors are checked at runtime", "No, it only prevents emit if errors exist", "Yes, but only with loose types", "No, it is a compile-time setting"],
+    "correctIndex": 1,
+    "explanation": "noEmitOnError is a compilation setting; it prevents JavaScript output if type errors exist, with no runtime impact.",
+    "difficulty": "Medium",
+    "tags": ["tsconfig", "compilation-settings", "error-handling"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Performance Optimization",
+    "question": "Can unused type declarations impact the final JavaScript bundle size?",
+    "options": ["No, types are erased", "Yes, if they include code", "Yes, always included", "No, TypeScript strips all types"],
+    "correctIndex": 0,
+    "explanation": "TypeScript erases all type information during compilation; unused types do not appear in the JavaScript output.",
+    "difficulty": "Medium",
+    "tags": ["type-erasure", "bundle-size", "compilation"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Performance Optimization",
+    "question": "Does using `keyof T` on a large object slow down type-checking?",
+    "options": ["No, keyof is efficient", "Yes, keyof on huge objects can slow checks", "Yes, but only with unions", "No, it is optimized internally"],
+    "correctIndex": 1,
+    "explanation": "keyof on objects with many properties can generate large union types, slowing inference and type-checking.",
+    "difficulty": "Medium-Hard",
+    "tags": ["keyof-operator", "performance", "type-inference"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Performance Optimization",
+    "question": "Can circular type references cause infinite loops during compilation?",
+    "options": ["No, TypeScript handles cycles", "Yes, circular types can cause hangs", "Yes, but is caught quickly", "No, cycles are ignored"],
+    "correctIndex": 1,
+    "explanation": "Circular type references can cause TypeScript's type-checking to loop indefinitely or hang if not properly constrained.",
+    "difficulty": "Medium-Hard",
+    "tags": ["circular-types", "type-safety", "infinite-loops"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Performance Optimization",
+    "question": "Does using `Required<T>` or `Partial<T>` utility types add runtime overhead?",
+    "options": ["Yes, they add wrappers", "No, they are compile-time only", "Yes, with performance cost", "No, but may slow compilation"],
+    "correctIndex": 1,
+    "explanation": "Required and Partial are type-level utilities that do not produce runtime code; they only exist at compile time.",
+    "difficulty": "Medium",
+    "tags": ["utility-types", "compile-time", "type-transformations"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Performance Optimization",
+    "question": "Can using `never` type in unions help TypeScript eliminate impossible branches faster?",
+    "options": ["No, never is ignored", "Yes, never shortens union evaluation", "Yes, and optimizes runtime checks", "No, but clarifies intent"],
+    "correctIndex": 1,
+    "explanation": "never represents impossible states; TypeScript optimizes by removing it from unions, simplifying type-checking.",
+    "difficulty": "Medium",
+    "tags": ["never-type", "union-optimization", "type-narrowing"]
+  }
+]

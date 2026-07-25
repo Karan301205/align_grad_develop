@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Express JS",
+    "subtopic": "Middleware Functions",
+    "question": "Middleware A calls next(), then Middleware B calls next(), then a route handler sends a response. What happens if Middleware A calls next() again after the handler completes?",
+    "options": [
+      "next() triggers Middleware B again, creating an infinite loop",
+      "next() has no effect; calling it after the response is sent does nothing",
+      "Express throws an error 'Response already sent'",
+      "The response is sent twice, doubling the data"
+    ],
+    "correctIndex": 1,
+    "explanation": "Calling next() after the response is sent is a no-op; Express doesn't error, but no further middleware runs because the response is complete.",
+    "difficulty": "Medium",
+    "tags": ["middleware", "next", "request-flow", "response"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Middleware Functions",
+    "question": "A middleware logs req.method, then calls next(). Inside the next() callback, it tries to modify req.method = 'DELETE'. The route handler sees req.method as POST. Why?",
+    "options": [
+      "next() doesn't return control to the middleware after the handler runs",
+      "Modifying req after the handler processes it has no effect on that handler",
+      "req.method is read-only and cannot be modified",
+      "Express creates a copy of req before the handler, so changes are lost"
+    ],
+    "correctIndex": 0,
+    "explanation": "next() is not a callback function; it immediately passes control forward and doesn't return, so code after next() in the middleware won't run until the response is sent (if at all).",
+    "difficulty": "Medium-Hard",
+    "tags": ["middleware", "next", "request-flow", "control-flow"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Middleware Functions",
+    "question": "Error-handling middleware is defined as (err, req, res, next) => { ... }. It's registered after route handlers. A synchronous error is thrown in a route. Why doesn't the error handler catch it?",
+    "options": [
+      "Synchronous errors are never caught by error middleware",
+      "Error middleware must be registered before route handlers to work",
+      "The error middleware must explicitly listen to thrown errors with process.on()",
+      "Synchronous errors in routes are auto-caught by Express only if async/await is used"
+    ],
+    "correctIndex": 1,
+    "explanation": "Error-handling middleware must be registered after all other middleware and routes; if registered before routes, it won't catch route errors. Also, sync errors must be explicitly passed to next(err).",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "middleware", "registration-order", "synchronous"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Middleware Functions",
+    "question": "Middleware calls res.json({data: 'test'}), then res.send('more'). What happens?",
+    "options": [
+      "Both methods send their data; the client receives both responses",
+      "res.send() throws an error because the response is already sent",
+      "Only res.json() sends; res.send() is silently ignored",
+      "res.send() overwrites the previous response"
+    ],
+    "correctIndex": 2,
+    "explanation": "After res.json() sends the response, res.send() silently fails because the response is already sent; Express prevents double-sending with internal flags.",
+    "difficulty": "Medium",
+    "tags": ["response", "multiple-sends", "res.json", "res.send"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Middleware Functions",
+    "question": "A middleware modifies req.headers.authorization and calls next(). The route handler logs req.headers.authorization. Will it see the modified value?",
+    "options": [
+      "No; req.headers is read-only after the request enters Express",
+      "Yes; modifying req.headers affects the original object",
+      "Only if next() is awaited like await next()",
+      "Only if the modification is done before app.use() is called"
+    ],
+    "correctIndex": 1,
+    "explanation": "req.headers is a mutable object; modifications in middleware persist through the request chain because they're on the same req object.",
+    "difficulty": "Medium",
+    "tags": ["middleware", "request-object", "mutation", "headers"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Middleware Functions",
+    "question": "Middleware A takes 30s to complete before calling next(). Middleware B and the route handler then run. Meanwhile, another request arrives and goes through Middleware A again. Why don't they block each other?",
+    "options": [
+      "Express queues requests and processes them sequentially",
+      "Each request has its own context; Middleware A's 30s timer is per-request, not shared",
+      "Node.js runs multiple threads, one per request",
+      "Express automatically skips slow middleware for new requests"
+    ],
+    "correctIndex": 1,
+    "explanation": "Node.js is single-threaded but asynchronous; each request maintains its own stack, so waiting in Middleware A for the first request doesn't block the second's execution.",
+    "difficulty": "Medium-Hard",
+    "tags": ["middleware", "async", "concurrency", "event-loop"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Middleware Functions",
+    "question": "Custom middleware stores user data in req.user = {id: 123}. Later middleware tries req.user.name = 'John' but gets 'Cannot set property name of undefined'. Why?",
+    "options": [
+      "req.user is read-only and cannot have properties added",
+      "The first middleware didn't assign req.user before the second middleware ran",
+      "req.user is set to null instead of an object",
+      "Each middleware gets a separate copy of req, so changes don't propagate"
+    ],
+    "correctIndex": 1,
+    "explanation": "If the first middleware didn't execute or didn't set req.user, the second middleware sees req.user as undefined; ensure middleware runs in the correct order.",
+    "difficulty": "Medium",
+    "tags": ["middleware", "req.user", "order", "undefined"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Middleware Functions",
+    "question": "A middleware uses app.use(bodyParser.json({limit: '10kb'})). A POST request with a 5MB body is sent. Why does it fail?",
+    "options": [
+      "The body is larger than the 10kb limit, so the parser rejects it",
+      "bodyParser silently ignores large bodies and req.body is undefined",
+      "Express rejects the request before it reaches middleware",
+      "The body is truncated to 10kb automatically"
+    ],
+    "correctIndex": 0,
+    "explanation": "bodyParser enforces size limits; exceeding the limit raises a 413 Payload Too Large error and req.body is not set.",
+    "difficulty": "Medium",
+    "tags": ["middleware", "body-parser", "limits", "error-handling"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Middleware Functions",
+    "question": "Middleware is registered as app.use('/api', middlewareFunc). A request to /users is processed. Does middlewareFunc run?",
+    "options": [
+      "Yes; app.use() middleware runs for all routes regardless of path",
+      "No; the path prefix /api prevents the middleware from running for /users",
+      "Only if /users starts with /api",
+      "Yes, but only if a route is defined for /users"
+    ],
+    "correctIndex": 1,
+    "explanation": "Middleware registered with a path prefix only runs for routes matching that prefix; /users doesn't start with /api, so middlewareFunc is skipped.",
+    "difficulty": "Medium",
+    "tags": ["middleware", "path-prefix", "routing", "filtering"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Middleware Functions",
+    "question": "An async middleware is registered: app.use(async (req, res, next) => { await somePromise(); next(); }). An error is thrown inside somePromise(). Why doesn't the error handler catch it?",
+    "options": [
+      "Async errors in middleware are always ignored by Express",
+      "The error is thrown but next() was already called before the promise rejected",
+      "Errors in async middleware must be caught with try-catch and passed to next(err)",
+      "Express doesn't support async/await syntax in middleware"
+    ],
+    "correctIndex": 2,
+    "explanation": "Express doesn't automatically catch promise rejections; wrap async code in try-catch and call next(err) to trigger error-handling middleware.",
+    "difficulty": "Medium-Hard",
+    "tags": ["async-middleware", "error-handling", "promises", "try-catch"]
+  }
+]

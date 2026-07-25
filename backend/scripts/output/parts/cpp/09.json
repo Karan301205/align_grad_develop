@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Smart Pointers",
+    "question": "What does unique_ptr guarantee about ownership?",
+    "options": ["multiple pointers can own the same object", "only one unique_ptr owns the object at any time", "unique_ptr is shared across threads", "ownership is transferred on copy"],
+    "correctIndex": 1,
+    "explanation": "unique_ptr enforces exclusive ownership; moving transfers it, copying is forbidden to maintain uniqueness.",
+    "difficulty": "Medium",
+    "tags": ["unique-ptr", "ownership", "move-semantics"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Smart Pointers",
+    "question": "What is the difference between unique_ptr and raw pointers in terms of safety?",
+    "options": ["both require manual deletion", "unique_ptr automatically deletes; raw pointers require manual management", "both are equally safe", "raw pointers are safer if used correctly"],
+    "correctIndex": 1,
+    "explanation": "unique_ptr uses RAII to automatically delete on scope exit, eliminating manual cleanup and leaks.",
+    "difficulty": "Medium",
+    "tags": ["unique-ptr", "raii", "automatic-cleanup"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Smart Pointers",
+    "question": "Can a unique_ptr be copied, or only moved?",
+    "options": ["can be copied freely", "can only be moved", "copying creates a deep copy", "depends on the custom deleter"],
+    "correctIndex": 1,
+    "explanation": "unique_ptr cannot be copied (copy constructor and assignment are deleted) to maintain exclusive ownership.",
+    "difficulty": "Medium",
+    "tags": ["unique-ptr", "move-semantics", "non-copyable"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Smart Pointers",
+    "question": "What happens when two shared_ptrs reference the same object and both go out of scope?",
+    "options": ["object is deleted twice; undefined behavior", "object is deleted when the last shared_ptr is destroyed", "object is never deleted", "behavior depends on compiler"],
+    "correctIndex": 1,
+    "explanation": "shared_ptr uses reference counting; the object is deleted only when the reference count reaches zero.",
+    "difficulty": "Medium",
+    "tags": ["shared-ptr", "reference-counting", "cleanup"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Smart Pointers",
+    "question": "What is a circular reference, and how does it affect shared_ptr?",
+    "options": ["two shared_ptrs pointing to each other; causes memory leak", "a shared_ptr pointing to itself; memory is freed immediately", "circular references are impossible with smart pointers", "only affects unique_ptr"],
+    "correctIndex": 0,
+    "explanation": "Circular references prevent reference counts from reaching zero; both objects leak unless broken with weak_ptr.",
+    "difficulty": "Hard",
+    "tags": ["shared-ptr", "circular-reference", "memory-leak", "weak-ptr"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Smart Pointers",
+    "question": "What does weak_ptr do, and when should it be used?",
+    "options": ["weak_ptr is an alias for unique_ptr", "weak_ptr breaks circular references without keeping objects alive", "weak_ptr is unsafe and should be avoided", "weak_ptr only works in C++17"],
+    "correctIndex": 1,
+    "explanation": "weak_ptr observes shared_ptr without incrementing reference count; used to break cycles and avoid leaks.",
+    "difficulty": "Hard",
+    "tags": ["weak-ptr", "circular-reference", "reference-counting"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Smart Pointers",
+    "question": "Can you convert a unique_ptr to a shared_ptr?",
+    "options": ["no; conversions between smart pointers are forbidden", "yes; via move constructor or move assignment", "yes, but only if the original is deleted", "only in C++20"],
+    "correctIndex": 1,
+    "explanation": "shared_ptr can be constructed from unique_ptr via move; this transfers ownership cleanly.",
+    "difficulty": "Medium",
+    "tags": ["unique-ptr", "shared-ptr", "conversion"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Smart Pointers",
+    "question": "What is the purpose of a custom deleter in smart pointers?",
+    "options": ["deletes multiple objects at once", "calls a user-defined cleanup function instead of delete", "specifies which delete operator to use", "improves performance by deferring deletion"],
+    "correctIndex": 1,
+    "explanation": "Custom deleters handle non-standard cleanup, such as for C library objects or custom allocators.",
+    "difficulty": "Medium",
+    "tags": ["custom-deleter", "smart-pointers", "raii"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Smart Pointers",
+    "question": "What happens if you call .reset() on a unique_ptr?",
+    "options": ["resets the pointer to nullptr without deleting", "deletes the current object and sets pointer to nullptr", "resets ownership to the original allocator", "syntax error"],
+    "correctIndex": 1,
+    "explanation": "reset() deletes the managed object and optionally assigns a new one; called without arguments, it becomes nullptr.",
+    "difficulty": "Medium",
+    "tags": ["unique-ptr", "reset", "cleanup"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Smart Pointers",
+    "question": "Is it safe to store a smart pointer in a container that is passed to C library functions?",
+    "options": ["yes; containers are opaque to C", "no; C functions expect raw pointers and may outlive the container", "only if the container is std::vector", "depends on the C library"],
+    "correctIndex": 1,
+    "explanation": "If C functions store pointers, they may persist after the container is destroyed; use .get() and ensure proper lifetime.",
+    "difficulty": "Hard",
+    "tags": ["smart-pointers", "c-interop", "lifetime-management"]
+  }
+]

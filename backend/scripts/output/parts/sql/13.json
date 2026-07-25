@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Normalization",
+    "question": "A table violates First Normal Form (1NF):\nTable: students (id, name, courses).\nRow 1: (1, 'Alice', ['Math', 'Physics', 'Chemistry']).\n\nHow do you normalize to 1NF?",
+    "options": [
+      "Create a separate students_courses junction table with (student_id, course_id) entries",
+      "Store courses as a comma-separated list",
+      "Split courses into course_1, course_2, course_3 columns",
+      "No normalization is needed"
+    ],
+    "correctIndex": 0,
+    "explanation": "1NF requires atomic (non-repeating) columns; arrays/lists violate this; a junction table separates the relationships.",
+    "difficulty": "Medium",
+    "tags": ["1nf", "atomic-columns"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Normalization",
+    "question": "A table violates Second Normal Form (2NF):\nTable: orders (order_id, customer_id, customer_name, order_date).\n\nCustomer_name depends on customer_id, not order_id. How do you normalize to 2NF?",
+    "options": [
+      "Move customer_name to a customers table; orders table has foreign key to customers",
+      "Keep all columns in orders",
+      "Store customer_name in order_date column",
+      "No normalization is needed"
+    ],
+    "correctIndex": 0,
+    "explanation": "2NF requires all non-key columns depend on the entire primary key; customer_name depends only on customer_id, so it belongs in a customers table.",
+    "difficulty": "Medium",
+    "tags": ["2nf", "partial-dependency"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Normalization",
+    "question": "A table violates Third Normal Form (3NF):\nTable: employees (emp_id, name, department_id, department_name, manager_name).\n\nDepartment_name and manager_name depend on department_id, not emp_id. How do you normalize?",
+    "options": [
+      "Move department_name and manager_name to a departments table; employees has foreign key to departments",
+      "Keep all columns together",
+      "Delete the department columns",
+      "No normalization is needed"
+    ],
+    "correctIndex": 0,
+    "explanation": "3NF removes transitive dependencies; department_name and manager_name depend on department_id (not a key), so they belong in departments.",
+    "difficulty": "Medium",
+    "tags": ["3nf", "transitive-dependency"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Normalization",
+    "question": "A normalized schema requires multiple JOINs:\nSELECT o.*, c.name, p.status FROM orders o JOIN customers c ON ... JOIN products p ON ...",
+    "options": [
+      "This is normal; normalization often requires JOINs; the trade-off is write efficiency for read complexity",
+      "Normalization is broken if JOINs are needed",
+      "Denormalize by adding redundant columns",
+      "JOINs are always slow and should be avoided"
+    ],
+    "correctIndex": 0,
+    "explanation": "Normalization trades read performance for write efficiency and data consistency; JOINs are a natural consequence.",
+    "difficulty": "Medium",
+    "tags": ["normalization-tradeoff", "join-cost"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Normalization",
+    "question": "Update anomaly: A table stores (student_id, course_id, instructor_name).\nIf an instructor's name changes, which rows must be updated?",
+    "options": [
+      "All rows for that instructor; if one is missed, data is inconsistent (update anomaly)",
+      "Only one row needs updating",
+      "The instructor table handles updates; the anomaly is prevented",
+      "No updates are needed"
+    ],
+    "correctIndex": 0,
+    "explanation": "Update anomalies occur when denormalized data requires multiple updates; normalization (separate instructors table) prevents this.",
+    "difficulty": "Medium",
+    "tags": ["update-anomaly", "denormalization-risk"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Normalization",
+    "question": "Insertion anomaly: A table stores (department_id, department_name, budget).\nCan you insert a department without an employee?",
+    "options": [
+      "No, if department_id is a foreign key to employees; normalize by removing the foreign key dependency",
+      "Yes, you can insert any row",
+      "Insertion anomalies only affect deletion",
+      "Normalization increases insertion anomalies"
+    ],
+    "correctIndex": 0,
+    "explanation": "Insertion anomalies occur when you cannot insert a row without satisfying unrelated dependencies; proper foreign key design prevents this.",
+    "difficulty": "Medium",
+    "tags": ["insertion-anomaly", "foreign-key"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Normalization",
+    "question": "Deletion anomaly: A table stores (project_id, project_name, employee_id, employee_name).\nWhat happens when the last employee leaves the project?",
+    "options": [
+      "Deleting the row loses the project information (deletion anomaly); normalize by moving project data to a projects table",
+      "The row is preserved with NULL employee_id",
+      "Deletion anomalies do not occur in normalized schemas",
+      "The project is automatically transferred to a new employee"
+    ],
+    "correctIndex": 0,
+    "explanation": "Deletion anomalies lose unrelated data; normalization keeps projects in a separate table so deleting employees doesn't lose project info.",
+    "difficulty": "Medium",
+    "tags": ["deletion-anomaly", "normalization"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Normalization",
+    "question": "Boyce-Codd Normal Form (BCNF) is stricter than 3NF. When is BCNF violated?\nTable: (student_id, course, professor).\nKey: (student_id, course).\nBut professor -> course (each professor teaches one course).",
+    "options": [
+      "Professor is a determinant (determines course) but not a key; BCNF requires all determinants to be keys",
+      "BCNF is not stricter than 3NF",
+      "No BCNF violation occurs",
+      "The table is in BCNF"
+    ],
+    "correctIndex": 0,
+    "explanation": "BCNF requires all determinants (attributes that determine others) to be keys; professor -> course violates this.",
+    "difficulty": "Medium-Hard",
+    "tags": ["bcnf", "determinant"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Normalization",
+    "question": "When is denormalization appropriate?\nA: For frequently-read, rarely-written data\nB: To reduce JOINs in read-heavy queries\nC: When redundancy is acceptable for performance",
+    "options": [
+      "All three are valid reasons",
+      "Only A is valid",
+      "Only B and C are valid",
+      "Denormalization is never appropriate"
+    ],
+    "correctIndex": 0,
+    "explanation": "Denormalization trades consistency for performance; it is appropriate when reads dominate writes and cache invalidation is manageable.",
+    "difficulty": "Medium",
+    "tags": ["denormalization", "tradeoff"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Normalization",
+    "question": "A materialized view caches normalized query results:\nCREATE MATERIALIZED VIEW customer_order_stats AS SELECT customer_id, COUNT(*) FROM orders GROUP BY customer_id;",
+    "options": [
+      "Denormalization technique that stores pre-computed aggregates; must be refreshed when underlying data changes",
+      "Always up-to-date with live data",
+      "Replaces the need for normalization",
+      "Materialized views do not exist in SQL"
+    ],
+    "correctIndex": 0,
+    "explanation": "Materialized views denormalize by storing query results; they improve read performance but require refresh logic on updates.",
+    "difficulty": "Medium",
+    "tags": ["materialized-view", "denormalization"]
+  }
+]

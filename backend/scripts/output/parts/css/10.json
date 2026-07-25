@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "CSS",
+    "subtopic": "Performance Optimization",
+    "question": "What does will-change do, and when should it be applied?\n```css\n.animated {\n  will-change: transform;\n  animation: spin 2s infinite;\n}\n```",
+    "options": ["No performance effect", "Hints to browser to create rendering layer", "Apply to every animated element", "Only for GPU acceleration"],
+    "correctIndex": 1,
+    "explanation": "will-change tells browsers to prepare for changes; use sparingly (3-4 elements max) to optimize animation performance.",
+    "difficulty": "Medium",
+    "tags": ["will-change", "gpu-acceleration", "performance"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Performance Optimization",
+    "question": "Why is animating transform and opacity preferred over animating top/left?\n```css\n/* Fast: GPU accelerated */\n@keyframes slide { from { transform: translateX(0); } to { transform: translateX(100px); } }\n\n/* Slow: causes reflow */\n@keyframes slide { from { left: 0; } to { left: 100px; } }\n```",
+    "options": ["No difference in performance", "transform uses GPU, left causes reflow", "left is always faster", "Depends on element size"],
+    "correctIndex": 1,
+    "explanation": "transform and opacity bypass reflow/repaint (composite-only); left/top trigger layout recalculation on every frame.",
+    "difficulty": "Medium-Hard",
+    "tags": ["animation-performance", "gpu-acceleration", "reflow"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Performance Optimization",
+    "question": "What is layout thrashing, and how does it harm performance?\n```javascript\nfor (let i = 0; i < 100; i++) {\n  element.style.width = element.offsetWidth + 10 + 'px'; /* reads then writes */\n}\n```",
+    "options": ["No performance issue", "Read (offsetWidth) forces layout, write forces reflow; repeating thrashes", "Only affects old browsers", "Browser optimizes automatically"],
+    "correctIndex": 1,
+    "explanation": "Reading layout then writing forces sync reflow 100 times; batching all reads then all writes prevents thrashing.",
+    "difficulty": "Medium-Hard",
+    "tags": ["layout-thrashing", "reflow", "batching"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Performance Optimization",
+    "question": "How do CSS containment rules (contain property) improve rendering?\n```css\n.card {\n  contain: layout style paint;\n}\n```",
+    "options": ["No effect", "Isolates element; prevents reflow affecting outside", "Only layout containment matters", "Requires vendor prefixes"],
+    "correctIndex": 1,
+    "explanation": "contain: layout style paint tells browser element won't affect siblings; enables independent reflow and repaint optimization.",
+    "difficulty": "Medium-Hard",
+    "tags": ["css-containment", "performance", "rendering-optimization"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Performance Optimization",
+    "question": "Why might loading fonts asynchronously (font-display: swap) improve performance?\n```css\n@font-face {\n  font-family: 'Custom';\n  src: url('font.woff2');\n  font-display: swap;\n}\n```",
+    "options": ["No performance benefit", "Prevents invisible text delay; shows fallback immediately", "Always slower than sync", "Requires font preload"],
+    "correctIndex": 1,
+    "explanation": "font-display: swap shows fallback while font loads, avoiding invisible text (FOIT); improves perceived performance.",
+    "difficulty": "Medium-Hard",
+    "tags": ["font-loading", "foit-fout", "performance"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Performance Optimization",
+    "question": "How does splitting CSS into multiple files impact performance?\n```html\n<link rel=\"stylesheet\" href=\"main.css\">\n<link rel=\"stylesheet\" href=\"theme.css\">\n```",
+    "options": ["More files = faster", "More HTTP requests; use sparingly or bundle", "Browser parallelizes; always better", "No difference with HTTP/2"],
+    "correctIndex": 1,
+    "explanation": "More CSS files = more requests (overhead); modern builds bundle CSS; HTTP/2 helps but single file still optimal.",
+    "difficulty": "Medium",
+    "tags": ["css-splitting", "bundle-optimization", "http-requests"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Performance Optimization",
+    "question": "What is the purpose of critical CSS, and when is it extracted?\n```html\n<style>/* Critical above-fold CSS inlined */</style>\n<link rel=\"stylesheet\" href=\"rest.css\">\n```",
+    "options": ["No purpose", "Inline above-fold CSS to unblock rendering", "Extract unused CSS", "Only needed on slow connections"],
+    "correctIndex": 1,
+    "explanation": "Critical CSS (above-fold styles) is inlined in HTML head; non-critical deferred, reducing First Contentful Paint.",
+    "difficulty": "Medium-Hard",
+    "tags": ["critical-css", "rendering-optimization", "fcp"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Performance Optimization",
+    "question": "How do render-blocking stylesheets affect page load, and how is this mitigated?\n```html\n<link rel=\"stylesheet\" href=\"style.css\"> <!-- blocks rendering -->\n<link rel=\"stylesheet\" href=\"print.css\" media=\"print\"> <!-- doesn't block -->\n```",
+    "options": ["Stylesheets never block", "Parser pauses rendering until CSS loaded", "Can defer non-critical CSS via media queries", "Both 2 and 3"],
+    "correctIndex": 3,
+    "explanation": "CSS blocks rendering by default; media queries, async loading, or preload hints mitigate blocking.",
+    "difficulty": "Medium-Hard",
+    "tags": ["render-blocking", "css-loading", "optimization"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Performance Optimization",
+    "question": "Why should selector specificity be kept low for performance?\n```css\n.page .section .article .paragraph .text { } /* high specificity, deep match */\n.text { } /* low specificity, fast match */\n```",
+    "options": ["No performance difference", "Simple selectors match faster", "Specificity affects runtime, not match time", "Deep selectors always slower"],
+    "correctIndex": 2,
+    "explanation": "Selector complexity has minimal impact on modern browsers; cascade and reflows matter more than selector depth.",
+    "difficulty": "Medium-Hard",
+    "tags": ["selector-performance", "myth-busting"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Performance Optimization",
+    "question": "How does CSS minification and tree-shaking reduce bundle size?\n```css\n/* Before: 500 bytes */\n.unused { color: red; }\n.used { color: blue; }\n\n/* After: 20 bytes */\n.used{color:blue}\n```",
+    "options": ["Minification removes whitespace", "Tree-shaking removes unused selectors", "Manual deletion required", "Both 1 and 2"],
+    "correctIndex": 3,
+    "explanation": "Minification removes whitespace; tree-shaking (PurgeCSS, Tailwind) removes unused rules by analyzing HTML.",
+    "difficulty": "Medium",
+    "tags": ["minification", "tree-shaking", "bundle-optimization"]
+  }
+]

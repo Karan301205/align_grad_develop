@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "S3 Storage Solutions",
+    "question": "Your S3 bucket is accidentally configured with public read access (BlockPublicAccess disabled, bucket policy allows s3:GetObject from *). You've stored customer PII in the bucket. What's the fastest way to remediate public exposure?",
+    "options": [
+      "Delete all objects in the bucket; re-upload with private permissions",
+      "Enable BlockPublicAccess to block all public access; modify bucket policy to deny s3:GetObject from principals outside your AWS account",
+      "Enable S3 versioning to prevent future public access",
+      "Move objects to a new private bucket; delete the public one"
+    ],
+    "correctIndex": 1,
+    "explanation": "BlockPublicAccess immediately stops public access; bucket policy changes take effect instantly without object re-uploads; this is the fastest remediation for already-exposed data.",
+    "difficulty": "Medium-Hard",
+    "tags": ["s3", "security", "public-access", "remediation"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "S3 Storage Solutions",
+    "question": "You're storing log files in S3 (100GB/day). After 90 days, logs rarely need querying but must be retained for 7 years for compliance. Cost of S3 Standard for 7 years of logs is $500k. How should you optimize?",
+    "options": [
+      "Move logs to S3 Glacier after 90 days; immediate retrieval takes 1-5 minutes",
+      "Move logs to S3 Intelligent-Tiering; AWS automatically migrates to cheaper tiers based on access patterns",
+      "Delete logs after 1 year; compliance risk is worth the cost savings",
+      "Enable S3 compression to reduce storage size by 50%"
+    ],
+    "correctIndex": 0,
+    "explanation": "Glacier costs 68% less than Standard; 1-5 minute retrieval meets typical compliance audit timelines; Intelligent-Tiering requires frequent access patterns to save significantly.",
+    "difficulty": "Medium",
+    "tags": ["s3-storage-classes", "cost-optimization", "lifecycle"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "S3 Storage Solutions",
+    "question": "Your application reads objects from S3 using GetObject requests. Current request volume is 10k requests/second, costing $0.40/million requests. You're considering S3 Transfer Acceleration (1.25x cost) to reduce latency. Should you enable it?",
+    "options": [
+      "Yes; 1.25x cost premium is worth sub-millisecond latency improvements",
+      "No; 10k requests/second from a single region doesn't benefit from acceleration; enable for multi-region access patterns",
+      "Yes; Transfer Acceleration also increases request throughput capacity",
+      "No; CloudFront is always cheaper for accelerating S3 access"
+    ],
+    "correctIndex": 1,
+    "explanation": "Transfer Acceleration optimizes for single-source, multi-region uploads (edge location -> S3); single-region high-volume reads don't benefit; CloudFront or regional endpoints are better fits.",
+    "difficulty": "Medium-Hard",
+    "tags": ["s3", "transfer-acceleration", "cost-analysis"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "S3 Storage Solutions",
+    "question": "You enable S3 versioning on a bucket with 10 million objects. Versioning triples storage costs due to retention of all object versions. You need to keep versioning enabled for compliance but reduce cost. What's the best approach?",
+    "options": [
+      "Disable versioning entirely; use S3 Object Lock for compliance instead",
+      "Use S3 lifecycle policies to delete non-current object versions after 30 days",
+      "Migrate to S3 on Outposts; versioning costs less locally",
+      "Use S3 Batch Operations to delete half of the objects and reduce storage"
+    ],
+    "correctIndex": 1,
+    "explanation": "Lifecycle policies automatically delete non-current versions, balancing compliance needs (recent versions available) with cost savings; Object Lock is for immutability, not cost reduction.",
+    "difficulty": "Medium",
+    "tags": ["s3-versioning", "lifecycle", "cost-optimization"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "S3 Storage Solutions",
+    "question": "You're using S3 Select to query 1TB of JSON files. Each Select query scans the entire file even though you filter for rows matching a specific user ID. Queries take 30 seconds and cost $5 each. How can you optimize query performance?",
+    "options": [
+      "Partition S3 objects by user ID; S3 Select can filter to fewer files",
+      "Use Athena instead; it's always faster than S3 Select",
+      "Enable S3 Intelligent-Tiering; cheaper storage improves query speed",
+      "Compress JSON objects; smaller files query faster"
+    ],
+    "correctIndex": 0,
+    "explanation": "S3 Select scans files sequentially; partitioning by query predicate (user ID) reduces scanned data; Athena uses Presto for distributed queries but has different tradeoffs; compression helps but doesn't change scan cost.",
+    "difficulty": "Hard",
+    "tags": ["s3-select", "performance", "partitioning"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "S3 Storage Solutions",
+    "question": "Your application stores user-uploaded documents in S3. Each user can only read their own documents. Currently, you're using IAM policies with ${aws:username} variables for access. A contractor needs temporary access to customer data. How should you grant it?",
+    "options": [
+      "Add the contractor as an IAM user with permissions for all customer folders",
+      "Use IAM roles with temporary credentials; contractor assumes a role granting specific S3 prefix access (e.g., customer-123/)",
+      "Modify IAM policies to include the contractor's username",
+      "Use S3 object ACLs to grant public read access during the contract period"
+    ],
+    "correctIndex": 1,
+    "explanation": "Temporary role assumption (STS AssumeRole) is least-privilege for contractors; S3 prefixes can limit scope to specific customer data; IAM users are permanent and don't scale for temporary access.",
+    "difficulty": "Hard",
+    "tags": ["s3", "iam", "temporary-access", "least-privilege"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "S3 Storage Solutions",
+    "question": "You're using S3 Cross-Region Replication (CRR) to sync objects from us-east-1 to eu-west-1. Replication latency is sometimes 30+ minutes for large objects. Users in EU are waiting for data to appear. Should you use Multi-Region Access Points instead?",
+    "options": [
+      "Yes; Multi-Region Access Points provide active-active replication with sub-second latency",
+      "No; Multi-Region Access Points replicate async like CRR; use S3 Transfer Acceleration with CloudFront instead",
+      "Yes; Multi-Region Access Points automatically route requests to the nearest region",
+      "No; 30 minutes replication is normal for CRR; optimization isn't possible"
+    ],
+    "correctIndex": 2,
+    "explanation": "Multi-Region Access Points route GET requests to the nearest region with the object; CRR is async write replication, not request routing; MRAPs solve the latency problem for reads.",
+    "difficulty": "Hard",
+    "tags": ["s3", "multi-region", "replication", "latency"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "S3 Storage Solutions",
+    "question": "Your S3 bucket has 500 million objects accumulated over 5 years. You want to delete objects older than 2 years to save storage costs. Using lifecycle rules would take hours to process. What's the fastest way to delete old objects at scale?",
+    "options": [
+      "Use S3 Lifecycle policies; they process deletions in the background",
+      "Use S3 Batch Operations to delete objects matching a filter; deletions are parallelized across S3 infrastructure",
+      "Write a Lambda function to list and delete objects in batches",
+      "Use AWS CLI's rm command with the recursive flag"
+    ],
+    "correctIndex": 1,
+    "explanation": "S3 Batch Operations parallelizes deletes across millions of objects; Lambda is limited to concurrency (100-1000); CLI is even slower; Lifecycle is async but intended for automated rules, not one-time cleanup.",
+    "difficulty": "Medium-Hard",
+    "tags": ["s3-batch-operations", "scale", "cost-optimization"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "S3 Storage Solutions",
+    "question": "You're evaluating S3 storage classes for a video archive. 80% of videos are never accessed after upload, 15% are accessed 1-2 times in the first month, 5% are accessed frequently. Storage cost is $1M/year. What's the most cost-effective storage strategy?",
+    "options": [
+      "Store all videos in S3 Standard; highest performance for edge cases",
+      "Store all in S3 Glacier Deep Archive; cheapest, accept slow retrieval",
+      "Standard for hot (5%), Glacier for warm (15%), Glacier Deep Archive for cold (80%)",
+      "Intelligent-Tiering for all; AWS handles tier transitions automatically"
+    ],
+    "correctIndex": 2,
+    "explanation": "Tiered storage matches access patterns to cost; Deep Archive (cold 80%) costs 95% less than Standard; Glacier (warm 15%) balances cost and retrieval time; Intelligent-Tiering works but has tier-transition overhead.",
+    "difficulty": "Medium-Hard",
+    "tags": ["s3-storage-classes", "cost-optimization", "lifecycle"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "S3 Storage Solutions",
+    "question": "Your company's data governance policy requires all data to be encrypted at rest. You've enabled S3-managed encryption (SSE-S3) on your bucket. A security audit requires key rotation every 90 days. How should you meet this requirement?",
+    "options": [
+      "SSE-S3 handles key rotation automatically; no action needed",
+      "Migrate to SSE-KMS with a customer-managed key; enable automatic key rotation in AWS KMS",
+      "Re-encrypt all objects every 90 days using S3 Batch Operations",
+      "Disable SSE-S3 and use client-side encryption with manual key rotation"
+    ],
+    "correctIndex": 1,
+    "explanation": "SSE-S3 uses AWS-managed keys without rotation visibility; SSE-KMS with customer-managed keys allows enabling automatic annual rotation in KMS (not 90-day, but can be configured per policy).",
+    "difficulty": "Medium",
+    "tags": ["s3", "encryption", "kms", "compliance"]
+  }
+]

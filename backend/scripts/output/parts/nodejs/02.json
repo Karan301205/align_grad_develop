@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "Node.js Core Modules",
+    "question": "Given this file operation, what does the code output?\n```javascript\nconst fs = require('fs');\nconst data = fs.readFileSync('file.txt', 'utf8');\nconsole.log('done');\n```",
+    "options": ["blocks the event loop until file is read", "returns a Promise that must be awaited", "reads file asynchronously in background", "throws an error if file does not exist"],
+    "correctIndex": 0,
+    "explanation": "readFileSync blocks the thread until the file is fully read; execution cannot proceed to console.log until completion.",
+    "difficulty": "Medium",
+    "tags": ["fs-module", "sync-vs-async", "event-loop-blocking"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Node.js Core Modules",
+    "question": "What is the output of this path operation?\n```javascript\nconst path = require('path');\nconst p = path.join('/home/user', '../docs', 'file.txt');\nconsole.log(p);\n```",
+    "options": ["/home/user/../docs/file.txt", "/home/user/docs/file.txt", "/home/docs/file.txt", "/docs/file.txt"],
+    "correctIndex": 2,
+    "explanation": "path.join normalizes the path by resolving .. to go up one directory from /home/user to /home, then descending into docs.",
+    "difficulty": "Medium",
+    "tags": ["path-module", "path-normalization"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Node.js Core Modules",
+    "question": "A developer uses the crypto module to hash a password. Which approach is correct?\n```javascript\nconst crypto = require('crypto');\nconst hash1 = crypto.createHash('sha256').update('password').digest('hex');\nconst hash2 = crypto.createHash('sha256').update('password').digest('hex');\n```",
+    "options": ["hash1 and hash2 are identical, suitable for password storage", "hash1 and hash2 differ due to internal salt", "sha256 is too weak for passwords; use bcrypt", "digest must be called before update"],
+    "correctIndex": 2,
+    "explanation": "SHA256 lacks built-in salting; for password storage use bcrypt, scrypt, or pbkdf2 which introduce random salt per hash.",
+    "difficulty": "Medium-Hard",
+    "tags": ["crypto-module", "password-hashing", "security"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Node.js Core Modules",
+    "question": "What will the stream output?\n```javascript\nconst fs = require('fs');\nconst stream = fs.createReadStream('bigfile.txt', { highWaterMark: 16384 });\nstream.on('data', (chunk) => {\n  console.log(`received chunk: ${chunk.length} bytes`);\n});\nstream.on('end', () => console.log('done'));\n```",
+    "options": ["reads entire file into memory before emitting data", "emits data in 16384-byte chunks as available", "emits data only after all file is buffered", "chunks are guaranteed in size exactly 16384"],
+    "correctIndex": 1,
+    "explanation": "highWaterMark is the buffer threshold; the stream emits 'data' events in chunks up to that size as file I/O completes.",
+    "difficulty": "Medium",
+    "tags": ["stream-module", "stream-buffering", "highWaterMark"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Node.js Core Modules",
+    "question": "Using the util module, what does util.promisify do?\n```javascript\nconst util = require('util');\nconst readFile = util.promisify(fs.readFile);\nconst data = await readFile('file.txt', 'utf8');\n```",
+    "options": ["converts callback-based function to Promise", "reads file synchronously", "wraps file in a Promise without changing callback structure", "requires a callback even after promisify"],
+    "correctIndex": 0,
+    "explanation": "util.promisify transforms a callback-based function (last arg is callback) into one returning a Promise, enabling await syntax.",
+    "difficulty": "Medium",
+    "tags": ["util-module", "promisify", "callback-to-promise"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Node.js Core Modules",
+    "question": "What does the events module allow?\n```javascript\nconst EventEmitter = require('events');\nconst emitter = new EventEmitter();\nemitter.on('message', (msg) => console.log(msg));\nemitter.emit('message', 'hello');\n```",
+    "options": ["emitter stores the message for later retrieval", "emitter synchronously invokes all listeners for 'message'", "the listener never fires because 'on' requires preregistration", "emit sends message to a queue for async processing"],
+    "correctIndex": 1,
+    "explanation": "EventEmitter.emit calls all registered 'message' listeners synchronously; 'on' registers a listener before emit is called.",
+    "difficulty": "Medium",
+    "tags": ["events-module", "event-emitter", "observer-pattern"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Node.js Core Modules",
+    "question": "When reading a large file with streams, which statement is true?\n```javascript\nconst fs = require('fs');\nconst readable = fs.createReadStream('file.txt');\nconst writable = fs.createWriteStream('copy.txt');\nreadable.pipe(writable);\n```",
+    "options": ["pipe ignores backpressure and may cause memory bloat", "pipe automatically handles backpressure by pausing readable", "writable must manually emit pause events", "pipe is obsolete in modern Node.js"],
+    "correctIndex": 1,
+    "explanation": "pipe manages backpressure by pausing the readable stream when the writable stream's buffer is full, preventing memory issues.",
+    "difficulty": "Medium-Hard",
+    "tags": ["stream-module", "pipe", "backpressure"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Node.js Core Modules",
+    "question": "What is the output?\n```javascript\nconst url = require('url');\nconst parsed = url.parse('https://user:pass@example.com:8080/path?query=1');\nconsole.log(parsed.hostname, parsed.port);\n```",
+    "options": ["example.com 8080", "user:pass@example.com 8080", "example.com null", "example.com 80"],
+    "correctIndex": 0,
+    "explanation": "url.parse extracts hostname (without auth) and port as separate components; auth is in the auth property.",
+    "difficulty": "Medium",
+    "tags": ["url-module", "url-parsing"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Node.js Core Modules",
+    "question": "A developer checks file existence with fs.existsSync. Why is this problematic in high-concurrency scenarios?\n```javascript\nif (fs.existsSync('file.txt')) {\n  fs.writeFileSync('file.txt', 'data');\n}\n```",
+    "options": ["existsSync blocks, but writeFileSync does not", "file may be deleted between existsSync and writeFileSync", "existsSync is deprecated and must use fs.stat", "no problem; both are synchronous"],
+    "correctIndex": 1,
+    "explanation": "A race condition exists: another process can delete the file between the check and write, causing TOCTOU vulnerability.",
+    "difficulty": "Medium-Hard",
+    "tags": ["fs-module", "race-conditions", "toctou"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Node.js Core Modules",
+    "question": "What does require('module').createRequire allow?\n```javascript\nconst { createRequire } = require('module');\nconst require2 = createRequire('/path/to/file.js');\nconst pkg = require2('./pkg.json');\n```",
+    "options": ["requires modules from a different directory context", "converts ES modules to CommonJS", "allows loading JSON files as modules", "dynamically generates a new require function bound to a path"],
+    "correctIndex": 3,
+    "explanation": "createRequire returns a require function with a specific directory context, enabling module resolution relative to that path.",
+    "difficulty": "Medium-Hard",
+    "tags": ["module-system", "createRequire"]
+  }
+]

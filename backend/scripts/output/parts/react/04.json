@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "Component Lifecycle",
+    "question": "Given componentDidMount() and componentDidUpdate(prevProps), why might fetching data in both create race conditions? async componentDidMount() { const data = await fetch(...); this.setState({ data }); }",
+    "options": ["Multiple concurrent fetches may complete out-of-order, setting stale data", "componentDidMount only runs once, race condition is impossible", "componentDidUpdate is never called after mount", "Race conditions only occur with useEffect, not lifecycle methods"],
+    "correctIndex": 0,
+    "explanation": "If componentDidUpdate also fetches and requests complete out-of-order, the older response may overwrite the newer one; use AbortController or cleanup flags.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lifecycle", "race", "fetch"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Component Lifecycle",
+    "question": "Why is componentWillUnmount the place to clean up subscriptions? componentWillUnmount() { this.subscription.unsubscribe(); }",
+    "options": ["It's the last method called before the component is removed from DOM", "componentDidMount is too early to set up, so cleanup is in unmount", "Cleanup must happen synchronously before render", "It prevents memory leaks from persisting after unmount"],
+    "correctIndex": 0,
+    "explanation": "componentWillUnmount is called right before the component is removed; cleanup here frees resources (subscriptions, timers) that would otherwise persist.",
+    "difficulty": "Medium",
+    "tags": ["lifecycle", "cleanup", "unmount"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Component Lifecycle",
+    "question": "Given componentDidUpdate(prevProps, prevState), why doesn't this always fire when props change? const shouldUpdate = (nextProps) => false;",
+    "options": ["shouldComponentUpdate returning false skips the update and componentDidUpdate", "componentDidUpdate always fires regardless of shouldComponentUpdate", "Props changes automatically trigger componentDidUpdate", "shouldComponentUpdate is for performance only, not control flow"],
+    "correctIndex": 0,
+    "explanation": "If shouldComponentUpdate returns false, the component doesn't re-render, so componentDidUpdate never fires; this prevents bugs from stale updates.",
+    "difficulty": "Medium",
+    "tags": ["lifecycle", "update", "shouldupdate"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Component Lifecycle",
+    "question": "Why might getDerivedStateFromProps be dangerous for syncing state and props? static getDerivedStateFromProps(props, state) { return props; }",
+    "options": ["It runs every render, overwriting state and making it uncontrollable", "It never runs, props and state are always separate", "It's safe and the recommended way to sync props to state", "It only runs during mount, not updates"],
+    "correctIndex": 0,
+    "explanation": "getDerivedStateFromProps runs on every render; overwriting state from props makes the component uncontrolled and removes ability to edit state.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lifecycle", "state", "props"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Component Lifecycle",
+    "question": "Given multiple setState calls in componentDidMount, why might the final render use stale state? componentDidMount() { this.setState({ x: 1 }); this.setState({ y: 2 }); }",
+    "options": ["setState is batched, so both complete before re-render", "setState calls are asynchronous and may apply out-of-order", "Both setState calls merge, resulting in { x: 1, y: 2 }", "componentDidMount prevents any state updates"],
+    "correctIndex": 0,
+    "explanation": "In a lifecycle method, setState calls are batched; the component re-renders once with both updates applied, not out-of-order.",
+    "difficulty": "Medium",
+    "tags": ["lifecycle", "setstate", "batch"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Component Lifecycle",
+    "question": "Why is componentDidMount a better place for data fetching than componentWillMount? componentWillMount() { this.fetchData(); }",
+    "options": ["componentWillMount runs before mount, fetch completes after render", "componentWillMount is removed; componentDidMount is the safe alternative", "componentWillMount is synchronous, blocking initial render", "Fetching in willMount triggers unnecessary re-renders"],
+    "correctIndex": 1,
+    "explanation": "componentWillMount is deprecated (removed in React 18); componentDidMount runs after render, ensuring the component can safely set state.",
+    "difficulty": "Medium",
+    "tags": ["lifecycle", "mount", "deprecated"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Component Lifecycle",
+    "question": "Given componentDidUpdate(prevProps) { if (prevProps.id !== this.props.id) this.fetchData(); }, why might this cause infinite loops with siblings?",
+    "options": ["Fetching may update parent state, re-rendering siblings and re-triggering fetch", "componentDidUpdate only runs once per mount", "Fetching in componentDidUpdate is not allowed", "This pattern is safe and never causes loops"],
+    "correctIndex": 0,
+    "explanation": "If fetching updates parent state and re-renders other siblings, their prop changes may trigger their updates, creating a cascade loop.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lifecycle", "update", "loop"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Component Lifecycle",
+    "question": "Why does React call render() multiple times during the render phase? Why shouldn't render have side effects?",
+    "options": ["render is pure; side effects may run multiple times or be abandoned", "render is guaranteed to run once per lifecycle", "render never re-runs, each return is final", "Side effects in render are necessary for data fetching"],
+    "correctIndex": 0,
+    "explanation": "React may render a component multiple times (especially with Suspense or error boundaries) or abandon a render; side effects run N times, breaking consistency.",
+    "difficulty": "Medium",
+    "tags": ["render", "pure", "sideeffect"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Component Lifecycle",
+    "question": "Given a component that logs in multiple lifecycle methods, what is the typical order? componentWillMount -> componentDidMount -> componentDidUpdate -> componentWillUnmount",
+    "options": ["willMount, didMount, didUpdate, willUnmount (in lifecycle order)", "didMount, willMount, willUnmount, didUpdate (out of order)", "All run simultaneously", "Only didMount runs, others are skipped"],
+    "correctIndex": 0,
+    "explanation": "willMount (deprecated, skipped in React 18) -> render -> didMount (once) -> didUpdate (on prop/state change) -> willUnmount (before removal).",
+    "difficulty": "Medium",
+    "tags": ["lifecycle", "order", "sequence"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Component Lifecycle",
+    "question": "Why might a component with children not re-render when only a child's internal state changes? Why is key important for list items?",
+    "options": ["Parent only re-renders if parent's own state/props change, child state is isolated", "Parent always re-renders when any child state changes", "Children cannot have state, only parents can", "Key prevents any re-renders regardless of state"],
+    "correctIndex": 0,
+    "explanation": "Parent doesn't re-render based on child state; key matters for list identity so React matches the same component instance across re-renders.",
+    "difficulty": "Medium",
+    "tags": ["lifecycle", "rerender", "key"]
+  }
+]

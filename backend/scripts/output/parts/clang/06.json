@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "C",
+    "subtopic": "Arrays",
+    "question": "int arr[] = {1, 2, 3};\nprintf(\"%zu\", sizeof(arr));\nWhy is this different from sizeof(&arr)?",
+    "options": [
+      "sizeof(arr) gives total array size (12 bytes for 3 ints); sizeof(&arr) gives pointer size (typically 8 bytes)",
+      "sizeof(&arr) is a compiler error",
+      "Both are identical; & is redundant",
+      "sizeof(arr) is 3 (array length); sizeof(&arr) is 3 * 4 (element size)"
+    ],
+    "correctIndex": 0,
+    "explanation": "arr decays to a pointer in most contexts, but sizeof(arr) uses the array type directly; &arr is a pointer to the array.",
+    "difficulty": "Medium-Hard",
+    "tags": ["array decay", "sizeof", "pointers"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Arrays",
+    "question": "int arr[5] = {1, 2, 3};\nprintf(\"%d\", arr[3]);\nWhat is printed?",
+    "options": [
+      "0 (uninitialized array elements are zero-initialized in static/global context or with explicit {})",
+      "Garbage value (uninitialized)",
+      "Compiler error: array index out of bounds",
+      "3 (the last initialized element)"
+    ],
+    "correctIndex": 0,
+    "explanation": "Array initializers pad remaining elements with zero; arr[3] and arr[4] are 0.",
+    "difficulty": "Medium",
+    "tags": ["array initialization", "zero initialization", "bounds"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Arrays",
+    "question": "void func(int arr[10]) {\nprintf(\"%zu\", sizeof(arr));\n}\nint main() {\nint arr[10];\nfunc(arr);\n}\nWhat is printed?",
+    "options": [
+      "8 (or pointer size): arr decays to int* in the function; sizeof(int*) is typically 8 bytes",
+      "40 (10 * 4 bytes per int)",
+      "10 (array length)",
+      "Compiler error: invalid array parameter"
+    ],
+    "correctIndex": 0,
+    "explanation": "Arrays decay to pointers when passed to functions; the function receives a pointer, not an array; sizeof sees the pointer type.",
+    "difficulty": "Medium-Hard",
+    "tags": ["array decay", "function parameters", "sizeof pointers"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Arrays",
+    "question": "int arr[2][3] = {{1, 2, 3}, {4, 5, 6}};\nint *p = (int *)arr;\np[5] = 99;\nprintf(\"%d\", arr[1][2]);\nWhat is printed?",
+    "options": [
+      "99 (p[5] accesses the 6th element overall, which is arr[1][2] in row-major layout)",
+      "6 (arr[1][2] is unchanged)",
+      "Compiler error: invalid cast",
+      "Undefined behavior (pointer arithmetic out of bounds)"
+    ],
+    "correctIndex": 0,
+    "explanation": "A 2D array in memory is contiguous; casting to int* and using linear indexing allows accessing any element.",
+    "difficulty": "Medium-Hard",
+    "tags": ["multidimensional arrays", "row-major order", "pointer casting"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Arrays",
+    "question": "char str[] = \"hello\";\nstr[5] = '!';\nprintf(\"%s\", str);\nWhy might this fail?",
+    "options": [
+      "Array initialization with a string literal includes a null terminator (h-e-l-l-o-\\0); str[5] modifies the terminator to '!', corrupting the string",
+      "printf expects a null-terminated string",
+      "char arrays cannot be modified",
+      "The assignment str[5] = '!' is out of bounds"
+    ],
+    "correctIndex": 0,
+    "explanation": "String literals include \\0; an array of 6 chars {h,e,l,l,o,\\0} is created; modifying str[5] removes the terminator.",
+    "difficulty": "Medium",
+    "tags": ["string literals", "null termination", "initialization"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Arrays",
+    "question": "int arr[5][5];\nint (*p)[5] = arr;\np[0][0] = 10;\nWhat is the type of p?",
+    "options": [
+      "Pointer to an array of 5 ints (int (*)[5]): p points to rows, each of size 5 ints",
+      "Pointer to an int",
+      "2D array of ints",
+      "Compiler error: incompatible pointer types"
+    ],
+    "correctIndex": 0,
+    "explanation": "int (*p)[5] declares a pointer to an array of 5 ints; useful for dynamically allocated 2D arrays.",
+    "difficulty": "Medium-Hard",
+    "tags": ["pointers to arrays", "2D arrays", "array decay"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Arrays",
+    "question": "int arr[] = {1, 2, 3};\nfor (int i = 0; i <= 3; i++) {\nprintf(\"%d\", arr[i]);\n}\nWhat happens when i=3?",
+    "options": [
+      "Array out of bounds: arr[3] is the first element past the array; undefined behavior (likely prints garbage or crashes)",
+      "Prints 3 (the last element)",
+      "Compiler error: bounds checking prevents this",
+      "The loop terminates before i=3"
+    ],
+    "correctIndex": 0,
+    "explanation": "The loop condition is i <= 3, not i < 3; arr[3] accesses memory beyond the 3-element array.",
+    "difficulty": "Medium",
+    "tags": ["array bounds", "loop conditions", "buffer overflow"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Arrays",
+    "question": "int *arr[5];\nint arr2[5][5];\nWhat is the key difference between these declarations?",
+    "options": [
+      "arr is an array of 5 pointers to int; arr2 is a 2D array (array of arrays)",
+      "arr and arr2 are identical; the syntax is just different",
+      "arr is a pointer; arr2 is an array",
+      "arr2 can be passed to functions; arr cannot"
+    ],
+    "correctIndex": 0,
+    "explanation": "int *arr[5] is an array of pointers (each element is a pointer); int arr2[5][5] is an array of arrays (contiguous 2D block).",
+    "difficulty": "Medium-Hard",
+    "tags": ["pointer arrays", "multidimensional arrays", "memory layout"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Arrays",
+    "question": "int arr[10];\nvoid func(int *p, int size);\nfunc(arr, 10);\nWhy is passing size necessary?",
+    "options": [
+      "Arrays decay to pointers; the function loses size information and must receive it explicitly",
+      "sizeof(p) inside func would give the wrong size",
+      "The compiler cannot determine array length from a pointer",
+      "All of the above"
+    ],
+    "correctIndex": 3,
+    "explanation": "Array decay means the function cannot recover the original size from a pointer alone; passing size is essential for safe iteration.",
+    "difficulty": "Medium",
+    "tags": ["array decay", "function parameters", "bounds checking"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Arrays",
+    "question": "int arr[5] = {0};\nint (*pp)[5] = &arr;\npp[1][2] = 99;\nWhat is the target of this assignment?",
+    "options": [
+      "Undefined behavior / out of bounds: pp[1] is the next array after arr; pp[1][2] is beyond the array",
+      "arr[1][2] (within the array)",
+      "The assignment is invalid due to the pointer type",
+      "Compiler error: pointer to array cannot be indexed"
+    ],
+    "correctIndex": 0,
+    "explanation": "pp points to arr; pp[1] points one full array (5 ints) past arr; pp[1][2] accesses memory well beyond arr.",
+    "difficulty": "Medium-Hard",
+    "tags": ["pointer arithmetic", "multidimensional arrays", "out of bounds"]
+  }
+]

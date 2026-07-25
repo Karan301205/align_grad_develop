@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Interfaces",
+    "question": "You declare `interface A { x: string }; interface B extends A { x: number };` — does this compile?",
+    "options": ["Yes, B overrides A's x", "No, x cannot be narrowed to a different type in extends", "Yes, intersection takes precedence", "Only if A is not exported"],
+    "correctIndex": 1,
+    "explanation": "Interface extension requires property types to be compatible; narrowing x from string to number violates the Liskov substitution principle.",
+    "difficulty": "Medium-Hard",
+    "tags": ["interface-inheritance", "type-compatibility", "contravariance"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Interfaces",
+    "question": "Given `interface I { readonly a: { b: number } };` — can you mutate I.a.b on an object of type I?",
+    "options": ["No, readonly prevents all mutations", "Yes, readonly is shallow", "Yes, only with Object.freeze", "No, but b can be reassigned"],
+    "correctIndex": 1,
+    "explanation": "readonly only prevents reassignment of the property itself; nested properties remain mutable unless also marked readonly.",
+    "difficulty": "Medium",
+    "tags": ["readonly", "immutability", "nested-objects"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Interfaces",
+    "question": "Can a class implement two interfaces with the same method signature returning different types?",
+    "options": ["Yes, TypeScript merges them", "No, the signatures must be identical", "Yes, if cast appropriately", "Only if one is generic"],
+    "correctIndex": 1,
+    "explanation": "A class implementation must satisfy both interfaces; conflicting return types are incompatible and cannot be implemented by a single method.",
+    "difficulty": "Medium",
+    "tags": ["interface-implementation", "multiple-inheritance", "method-signatures"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Interfaces",
+    "question": "You declare `interface X { [key: string]: any };` on an object — can TypeScript catch typos in property access?",
+    "options": ["Yes, TypeScript always checks", "No, any index signature bypasses checks", "Only if you add explicit properties", "Yes, if key is narrowed"],
+    "correctIndex": 1,
+    "explanation": "Index signatures with any allow arbitrary keys; TypeScript cannot enforce property names or catch undefined property accesses.",
+    "difficulty": "Medium",
+    "tags": ["index-signatures", "any-type", "type-safety"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Interfaces",
+    "question": "Given `interface Func { (x: number): string; }; const f: Func = (x) => x.toString();` — what type does x have in f?",
+    "options": ["any", "number", "string | number", "unknown"],
+    "correctIndex": 1,
+    "explanation": "Contextual typing from the interface Func propagates the parameter type number to x, even though not explicitly annotated in the function.",
+    "difficulty": "Medium",
+    "tags": ["contextual-typing", "function-interfaces", "type-inference"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Interfaces",
+    "question": "Can TypeScript distinguish between structural and nominal typing for interfaces?",
+    "options": ["Yes, interfaces are nominal", "No, interfaces use structural typing only", "Yes, if you use brands", "Only in strict mode"],
+    "correctIndex": 1,
+    "explanation": "TypeScript interfaces use structural typing; two interfaces with identical shapes are assignable regardless of name or declaration order.",
+    "difficulty": "Medium-Hard",
+    "tags": ["structural-typing", "nominal-typing", "type-compatibility"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Interfaces",
+    "question": "Given `interface A { a?: string }; interface B extends A { a: string };` — does this compile?",
+    "options": ["No, b.a must also be optional", "Yes, a required in B is valid", "No, extending changes semantics", "Yes, but only in lenient mode"],
+    "correctIndex": 1,
+    "explanation": "B can narrow an optional property to required; B is more specific than A and satisfies the contract properly.",
+    "difficulty": "Medium",
+    "tags": ["interface-inheritance", "optional-properties", "type-narrowing"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Interfaces",
+    "question": "Does `const x: { new(): T } = SomeClass;` capture the constructor signature correctly?",
+    "options": ["No, classes cannot be typed as constructors", "Yes, if SomeClass matches T", "Yes, but requires typeof", "Only if T is a generic"],
+    "correctIndex": 1,
+    "explanation": "A constructor signature `{ new(): T }` matches a class whose no-arg constructor returns an instance of T.",
+    "difficulty": "Medium-Hard",
+    "tags": ["constructor-signatures", "class-types", "instantiation"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Interfaces",
+    "question": "You define `interface I { a: number }; type T = I;` — are they the same type?",
+    "options": ["No, interfaces and types are different", "Yes, they behave identically", "No, but T is assignable to I", "Only if I is exported"],
+    "correctIndex": 1,
+    "explanation": "Interfaces and type aliases are structurally equivalent for simple object types; both define and enforce the same shape.",
+    "difficulty": "Medium",
+    "tags": ["interface-vs-type", "type-equivalence", "declaration-forms"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Interfaces",
+    "question": "Given `interface A {}; interface B {}; const x: A = {} as B;` — does this compile?",
+    "options": ["No, A and B are incompatible", "Yes, both empty objects are compatible", "Yes, cast bypasses checks", "No, as-cast to unrelated types fails"],
+    "correctIndex": 1,
+    "explanation": "Empty interfaces are structurally equivalent; any object satisfies both, and the cast is safely compatible.",
+    "difficulty": "Medium",
+    "tags": ["structural-typing", "empty-types", "type-casting"]
+  }
+]

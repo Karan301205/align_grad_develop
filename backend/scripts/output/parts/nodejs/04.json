@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "Event Loop Management",
+    "question": "What is the execution order?\n```javascript\nconsole.log('start');\n\nsetImmediate(() => console.log('immediate'));\nPromise.resolve().then(() => console.log('promise'));\nprocess.nextTick(() => console.log('nextTick'));\n\nconsole.log('end');\n```",
+    "options": ["start end immediate promise nextTick", "start end nextTick promise immediate", "start end promise immediate nextTick", "start end nextTick immediate promise"],
+    "correctIndex": 1,
+    "explanation": "Synchronous code (start, end) runs first; then microtasks (nextTick, promises) in order; then timer callbacks (setImmediate) in the next phase.",
+    "difficulty": "Medium-Hard",
+    "tags": ["event-loop", "nextTick", "setImmediate", "promises", "phases"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Event Loop Management",
+    "question": "A developer blocks the event loop. What is the consequence?\n```javascript\n// Synchronous expensive operation\nfunction blockingLoop() {\n  let sum = 0;\n  for (let i = 0; i < 1e9; i++) {\n    sum += i;\n  }\n}\nblockingLoop();\nconsole.log('done');\n```",
+    "options": ["other I/O operations are delayed until blockingLoop completes", "I/O operations run in parallel unaffected", "blockingLoop runs in a worker thread", "console.log is queued but eventually prints"],
+    "correctIndex": 0,
+    "explanation": "Node.js is single-threaded; blocking code prevents the event loop from processing timers, I/O callbacks, or network requests.",
+    "difficulty": "Medium",
+    "tags": ["event-loop", "blocking", "performance"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Event Loop Management",
+    "question": "What is the output when process.nextTick is called recursively?\n```javascript\nlet count = 0;\nfunction recurse() {\n  process.nextTick(() => {\n    console.log(++count);\n    if (count < 3) recurse();\n  });\n}\nrecurse();\nconsole.log('sync done');\n```",
+    "options": ["sync done 1 2 3", "1 2 3 sync done", "sync done (infinite loop hangs)", "TypeError on recursive nextTick"],
+    "correctIndex": 0,
+    "explanation": "process.nextTick callbacks are queued in the microtask queue; all sync code runs first, then microtasks are drained.",
+    "difficulty": "Medium",
+    "tags": ["nextTick", "microtask-queue", "recursion"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Event Loop Management",
+    "question": "When does setImmediate fire relative to setTimeout with 0ms delay?\n```javascript\nsetTimeout(() => console.log('timeout'), 0);\nsetImmediate(() => console.log('immediate'));\n```",
+    "options": ["timeout then immediate always", "immediate then timeout always", "depends on the current event loop phase", "both fire simultaneously"],
+    "correctIndex": 2,
+    "explanation": "The order depends on whether setTimeout(0) is scheduled in the poll phase or earlier; usually immediate runs first, but not guaranteed.",
+    "difficulty": "Medium-Hard",
+    "tags": ["setImmediate", "setTimeout", "event-loop-phases"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Event Loop Management",
+    "question": "What happens if an unhandled Promise rejection occurs?\n```javascript\nPromise.reject(new Error('unhandled'));\nconsole.log('after reject');\n```",
+    "options": ["prints after reject, error is silently ignored", "prints after reject, then crashes with unhandled rejection", "crashes immediately before after reject", "error is automatically caught by global handler"],
+    "correctIndex": 1,
+    "explanation": "An unhandled rejection schedules an 'unhandledRejection' event; if not caught, Node.js exits with a non-zero code after sync code completes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["unhandled-rejection", "promise-error-handling"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Event Loop Management",
+    "question": "A stream's backpressure is ignored. What occurs?\n```javascript\nconst readable = fs.createReadStream('hugefile.txt', {highWaterMark: 16384});\nreadable.on('data', (chunk) => {\n  // expensive processing that takes 1 second per chunk\n  processExpensively(chunk);\n});\n```",
+    "options": ["stream pauses automatically until processing completes", "event loop blocks while processing occurs", "data events queue faster than processing, consuming memory", "stream throws an error on backpressure"],
+    "correctIndex": 2,
+    "explanation": "Without pipe or pause/resume management, the stream emits data faster than processing; buffered chunks accumulate in memory.",
+    "difficulty": "Medium-Hard",
+    "tags": ["stream-backpressure", "memory-leak", "event-loop"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Event Loop Management",
+    "question": "What is the difference between process.nextTick and queueMicrotask?\n```javascript\nprocess.nextTick(() => console.log('nextTick'));\nqueueMicrotask(() => console.log('microtask'));\n```",
+    "options": ["both fire at the same time in microtask phase", "nextTick fires before queueMicrotask", "queueMicrotask fires before nextTick", "they run in different event loop iterations"],
+    "correctIndex": 1,
+    "explanation": "Both are microtasks, but process.nextTick has higher priority and drains completely before queueMicrotask runs.",
+    "difficulty": "Medium-Hard",
+    "tags": ["nextTick", "queueMicrotask", "microtask-order"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Event Loop Management",
+    "question": "Connection pooling helps prevent event loop starvation by doing what?\n```javascript\n// High-traffic database queries\nconst pool = new Pool({max: 10});\nfor (let i = 0; i < 1000; i++) {\n  pool.query('SELECT 1');\n}\n```",
+    "options": ["queuing requests and reusing connections instead of creating new ones", "running queries in parallel worker threads", "delaying all queries until event loop is free", "buffering queries in memory"],
+    "correctIndex": 0,
+    "explanation": "Connection pooling limits concurrent connections to a fixed number (max: 10), queuing excess requests; this prevents resource exhaustion and event loop overload.",
+    "difficulty": "Medium",
+    "tags": ["connection-pooling", "database", "resource-management"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Event Loop Management",
+    "question": "When using fs.readFile callbacks, how many parallel I/O operations can occur?\n```javascript\nfs.readFile('file1.txt', cb);\nfs.readFile('file2.txt', cb);\nfs.readFile('file3.txt', cb);\n```",
+    "options": ["1 at a time, sequential", "up to 1024 (fs.constants.UV_FS_O_EXCL parallel ops)", "all 3 in parallel via libuv thread pool", "depends on the disk speed"],
+    "correctIndex": 2,
+    "explanation": "libuv's thread pool handles file I/O; by default 4 worker threads execute these operations in parallel without blocking the event loop.",
+    "difficulty": "Medium",
+    "tags": ["libuv", "thread-pool", "i-o-parallelism"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Event Loop Management",
+    "question": "What happens if you await in a loop without proper handling?\n```javascript\nfor (const file of files) {\n  const data = await readFile(file);\n  console.log(data);\n}\n```",
+    "options": ["files are read in parallel", "files are read sequentially, one per loop iteration", "event loop is blocked during reads", "TypeError: readFile is not awaitable"],
+    "correctIndex": 1,
+    "explanation": "The await pauses the loop iteration; each file must finish before the next loop iteration starts, making it sequential.",
+    "difficulty": "Medium",
+    "tags": ["async-await", "loop", "sequential-vs-parallel"]
+  }
+]

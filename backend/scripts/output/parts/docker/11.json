@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Containerization Best Practices",
+    "question": "A Dockerfile installs an SSH server and enables remote login for debugging: `RUN apt-get install -y openssh-server && echo 'root:password123' | chpasswd`. This image is deployed to production. What is the security risk?",
+    "options": ["The hardcoded password is baked into the image layers and visible in `docker history`; anyone with access to the image can extract the credentials", "SSH in a container violates isolation; the container should be debugged with `docker exec` instead", "Running SSH as root in a container is a privilege escalation risk", "All of the above"],
+    "correctIndex": 3,
+    "explanation": "SSH in containers bypasses orchestration controls, hardcoded credentials are exposed in layers, and root SSH access is a major vulnerability; use `docker exec`, `kubectl exec`, or volume mounts for debugging without embedding SSH.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dockerfile-security", "debugging-practices", "credential-management"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Containerization Best Practices",
+    "question": "A team builds images with `docker build -t app:latest .` and uses them immediately without tagging versions. After 3 months, they discover a production image was built from an older code commit. The `latest` tag now points to new code, but the old image is still running. What is the best practice to prevent this?",
+    "options": ["Tag all images with version numbers (e.g., `app:v1.2.3`) and reference specific versions in deployments, not `latest`", "Use immutable tags and disable the `latest` tag to force explicit versioning", "Implement a CI/CD pipeline that tags images at build time and prevents accidental re-tagging", "All of the above"],
+    "correctIndex": 3,
+    "explanation": "`latest` is mutable and can be retagged, breaking traceability; version tags (`v1.2.3`, git SHA) ensure reproducible deployments; CI/CD automation prevents accidental re-tagging and enforces versioning discipline.",
+    "difficulty": "Medium",
+    "tags": ["image-versioning", "ci-cd-practices", "deployment-reproducibility"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Containerization Best Practices",
+    "question": "A multi-stage Dockerfile has a builder stage that compiles a 500 MB artifact, then copies only a small binary to the final stage. The final image is 50 MB. After a security update to the base image of the builder stage, both stages are rebuilt, doubling build time. How can this be optimized?",
+    "options": ["Use separate Dockerfiles for builder and final stages so the builder can be updated independently", "Use a pre-built builder image (from a private registry) to avoid rebuilding the compiler each time", "Update only the final stage's base image; keep the builder stage unchanged", "Cache the builder stage output in a volume to avoid rebuilding on base image updates"],
+    "correctIndex": 1,
+    "explanation": "Pre-built builder images (pushed to a registry) decouple builder and final image updates; update the builder image independently when needed, then reference it by digest in the Dockerfile to avoid rebuilding on unrelated changes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["multi-stage-builds", "builder-images", "build-optimization"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Containerization Best Practices",
+    "question": "A Dockerfile copies the entire application source with `COPY . /app` before running `npm install`. After adding one line to a source file, the entire build is invalidated and `npm install` re-runs (taking 5 minutes). How can this be improved?",
+    "options": ["Separate the dependency installation from the source copy: install dependencies first (`COPY package.json && npm install`), then copy the source to maximize cache reuse", "Use `.dockerignore` to exclude source files during COPY, reducing build context size", "Use BuildKit's `--cache-mounts` to cache npm modules across builds", "Split the build into separate layers for each type of change (config, deps, source code)"],
+    "correctIndex": 0,
+    "explanation": "Copy package.json first and run npm install, then copy source code; changes to source code do not invalidate the npm install layer, which is the slowest step; this leverages layer caching for faster builds during development.",
+    "difficulty": "Medium",
+    "tags": ["dockerfile-optimization", "layer-caching", "build-efficiency"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Containerization Best Practices",
+    "question": "A Dockerfile runs a single-threaded application with `CMD python app.py`. To utilize a 4-core host, you decide to run 4 containers. This is deployed with Docker Compose using `replicas: 4`. Is this the correct way to scale a containerized application?",
+    "options": ["Yes, running multiple single-threaded containers leverages multiple cores and enables horizontal scaling", "No, modify the application to use multi-threading instead; containers are meant for stateless services, not parallel workloads", "Yes, but add a load balancer (nginx, haproxy) in front to distribute requests to the 4 containers", "No, single-threaded applications should run in a single container; use multi-threading for multi-core utilization"],
+    "correctIndex": 2,
+    "explanation": "Horizontal scaling with multiple containers is correct; add a load balancer (reverse proxy) in front to distribute requests to the replicas; each container serves one request at a time, and the load balancer balances across all 4 containers.",
+    "difficulty": "Medium",
+    "tags": ["horizontal-scaling", "load-balancing", "container-design"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Containerization Best Practices",
+    "question": "A container image includes a health check: `HEALTHCHECK --interval=10s --timeout=3s CMD curl localhost:8000/health`. After deploying to Kubernetes, the Pod is marked as Unhealthy and is restarted repeatedly. Using `docker run` the same image works fine. What is the issue?",
+    "options": ["Kubernetes ignores Dockerfile HEALTHCHECK and uses Kubernetes livenessProbe/readinessProbe instead; redefine the checks in the Pod spec", "The health check interval (10s) is too fast for Kubernetes; increase to 30s", "The Dockerfile HEALTHCHECK is only for Docker; it does not apply to Kubernetes deployments", "All of the above"],
+    "correctIndex": 2,
+    "explanation": "Kubernetes does not use Dockerfile HEALTHCHECK; it uses its own livenessProbe and readinessProbe in the Pod spec; HEALTHCHECK is only for Docker, so the Kubernetes probe (if defined) might be failing while HEALTHCHECK passes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["healthcheck", "kubernetes-probes", "container-orchestration"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Containerization Best Practices",
+    "question": "A Dockerfile has `ENTRYPOINT ['/app/start.sh']` and `CMD ['--prod']`. Running `docker run app` uses both (start.sh --prod). Running `docker run app --debug` replaces CMD but preserves ENTRYPOINT (start.sh --debug). Is this the intended behavior?",
+    "options": ["Yes, ENTRYPOINT is always executed; CMD provides default arguments that can be overridden at runtime", "No, both ENTRYPOINT and CMD should be overridden with a single docker run argument", "Yes, but this is confusing; use only ENTRYPOINT and avoid CMD for clarity", "No, CMD should take precedence over ENTRYPOINT; Docker should execute --prod or --debug, not start.sh --debug"],
+    "correctIndex": 0,
+    "explanation": "ENTRYPOINT is the command and CMD provides default args; this design allows the image to be used with or without arguments; `docker run app --debug` passes --debug to start.sh, making it flexible and reusable.",
+    "difficulty": "Medium",
+    "tags": ["entrypoint-cmd", "dockerfile-design", "container-invocation"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Containerization Best Practices",
+    "question": "A production Dockerfile runs the application as root (UID 0) because the application needs to bind to port 80. This violates the principle of least privilege. How should the Dockerfile be restructured?",
+    "options": ["Run the application as a non-root user and use a setuid wrapper to allow port 80 binding without root privileges", "Map port 80 at the container level with `docker run -p 80:8080` and run the app on port 8080 as a non-root user", "Use capabilities (`--cap-add NET_BIND_SERVICE`) to allow non-root to bind to ports below 1024", "Accept running as root for production; the container isolation provides security"],
+    "correctIndex": 2,
+    "explanation": "The cleanest approach is to use the `NET_BIND_SERVICE` capability to allow a non-root user to bind to port 80, or use port remapping (`docker run -p 80:8080`) and run the app on a high port as non-root; avoid setuid binaries in containers.",
+    "difficulty": "Medium-Hard",
+    "tags": ["least-privilege", "port-binding", "capability-dropping"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Containerization Best Practices",
+    "question": "A Dockerfile labels the image with `LABEL version='1.0' commit='abc123' build_date='2024-01-01'`. When a new build is created with the same code, the labels remain the same. This makes it difficult to trace which image corresponds to which build. What is the best practice?",
+    "options": ["Use the git commit SHA as the image tag/label, and regenerate labels dynamically at build time with `--label` flags or build args", "Manually increment the version label each time; this ensures traceability", "Include the build timestamp in the label or tag so each build is unique", "Use CI/CD to automatically generate labels based on git metadata and environment variables"],
+    "correctIndex": 3,
+    "explanation": "CI/CD systems (GitHub Actions, GitLab CI, Jenkins) can automatically inject git SHA, commit message, build timestamp, and other metadata into labels and tags at build time, ensuring each build is uniquely identifiable and traceable.",
+    "difficulty": "Medium",
+    "tags": ["image-metadata", "ci-cd-integration", "traceability"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Containerization Best Practices",
+    "question": "A team uses a private Docker registry to store images. After deploying an image `registry.io/app:v1.0`, they update the code but do not rebuild the image. The image digest (SHA256) is still the same because the code is unchanged. A new team member is onboarded and runs the image from the registry, expecting it to work. Why is this a problem?",
+    "options": ["The image digest is immutable; if code changes, the digest must change, so deploying the same digest is guaranteed to be the same code", "If the source code changed but the image was not rebuilt, the deployed container runs old code, causing unexpected behavior", "Docker always re-pulls images from the registry even if the local digest matches; this is not a problem", "The registry enforces image immutability; new deployments will fail"],
+    "correctIndex": 1,
+    "explanation": "An image digest is deterministic and immutable; if code changes and the image is not rebuilt, the digest is identical and the old image is deployed; this breaks the assumption that a versioned tag corresponds to specific code; always rebuild and re-tag after code changes.",
+    "difficulty": "Medium",
+    "tags": ["image-versioning", "reproducibility", "ci-cd-practices"]
+  }
+]

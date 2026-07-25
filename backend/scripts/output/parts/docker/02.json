@@ -1,0 +1,112 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Image Management",
+    "question": "Your Dockerfile has `FROM ubuntu:latest`, `RUN apt-get update`, `RUN apt-get install -y curl`, and `RUN apt-get clean`. After rebuilding on day 2 without code changes, the image size increased by 200 MB. What happened?",
+    "options": ["The ubuntu:latest digest changed, pulling a new base with additional pre-installed packages", "apt-get clean did not work because each RUN command creates a new layer with its own filesystem", "Docker rebuilt all layers because the timestamp of apt-get changed", "The build cache was invalidated by a Docker daemon restart"],
+    "correctIndex": 1,
+    "explanation": "Each RUN creates a separate layer; `apt-get clean` in one layer does not remove cached packages from earlier layers because the layer itself is immutable, so combining commands into one RUN (e.g., `apt-get update && apt-get install && apt-get clean`) eliminates intermediate cached packages.",
+    "difficulty": "Medium",
+    "tags": ["dockerfile-layers", "layer-caching", "image-size"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Image Management",
+    "question": "You run `docker build -t myapp:latest .` twice on the same code without changes. The first build takes 5 minutes, the second takes 10 seconds. On a third build, you add a single comment to the Dockerfile and rebuild; it takes 8 minutes. Why?",
+    "options": ["The comment is treated as a layer, which invalidated the subsequent cache", "Adding a comment to any RUN instruction invalidates the cache for that instruction and all following layers", "Modifying the Dockerfile metadata invalidates the entire build cache", "Changing the comment altered the build context hash, but only the affected layer was rebuilt in parallel"],
+    "correctIndex": 1,
+    "explanation": "Comments are part of the Dockerfile; adding one changes the Dockerfile's hash, invalidating the cache from that point onward, causing all subsequent RUN commands to rebuild from scratch.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker-build-cache", "layer-invalidation", "buildkit"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Image Management",
+    "question": "A multi-stage Dockerfile copies a 500 MB artifact from stage 1 to stage 2: `COPY --from=builder /app/dist /dist`. The final image is 600 MB. You then realize the artifact is unused in stage 2. After removing the COPY and rebuilding, the image is still 600 MB. Why?",
+    "options": ["The builder stage is still present in the image because multi-stage builds do not discard unused stages", "Docker caches the COPY layer even after removal; you must run `docker image prune --all`", "The base image of stage 2 must have been rebuilt with the artifact included", "The 500 MB artifact is referenced by a layer metadata even after the COPY removal"],
+    "correctIndex": 0,
+    "explanation": "Multi-stage builds include all stages (builder, intermediate, final); only the final stage is output, but earlier stages are stored in the image history; use `--target` flag or restructure to avoid including unused stages in the final image.",
+    "difficulty": "Medium-Hard",
+    "tags": ["multi-stage-builds", "image-size", "docker-build"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Image Management",
+    "question": "You build an image with `docker build -t app . --build-arg NODE_ENV=production` and then run `docker run app node -e 'console.log(process.env.NODE_ENV)'`. It prints 'undefined'. Why?",
+    "options": ["Build arguments are only available during the build, not at runtime", "The ARG NODE_ENV was not converted to an ENV instruction in the Dockerfile", "Docker strips all ARG values from the final image for security reasons", "The NODE_ENV variable was shadowed by the container's default environment"],
+    "correctIndex": 1,
+    "explanation": "Build args (ARG) are available only during build and are not persisted; to make them available at runtime, convert them to ENV: `ARG NODE_ENV` followed by `ENV NODE_ENV=${NODE_ENV}` in the Dockerfile.",
+    "difficulty": "Medium",
+    "tags": ["build-arguments", "environment-variables", "dockerfile"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Image Management",
+    "question": "After `docker pull alpine:3.18`, you inspect the image layers and see 6 layers totaling 10 MB. Running `docker run alpine df -h` shows only 5.8 MB used. The remaining 4.2 MB is unaccounted for. Where is it?",
+    "options": ["The difference is metadata stored in the Docker daemon's config.v2.json, not in the container filesystem", "Docker unpacks and stores the layer delta only when a container is running; the 4.2 MB is in-flight compression overhead", "The 4.2 MB is docker's internal filesystem overhead (inode tables, directory entries)", "One layer is a manifest or configuration blob that is not mounted into the container"],
+    "correctIndex": 3,
+    "explanation": "Docker image layers include not just the filesystem content but also layer metadata and configuration blobs; the container only mounts the actual filesystem layers, so manifest/config data is counted in image size but not in the container's filesystem.",
+    "difficulty": "Medium-Hard",
+    "tags": ["image-layers", "image-size", "docker-inspect"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Image Management",
+    "question": "You tag an image twice: `docker tag myapp:1.0 registry.io/myapp:latest` and `docker tag myapp:1.0 registry.io/myapp:v1.0`. After pushing both tags, the registry reports the image SHA256 digest is identical for both tags. If you delete the `latest` tag from the registry and pull `v1.0`, does it pull from cache or re-download from the registry?",
+    "options": ["It pulls from cache because the underlying image SHA is identical; deleting a tag does not affect the image layers", "It re-downloads because Docker tracks tags separately and does not correlate them via digest", "It checks the registry first to verify the digest before using cache", "Docker pulls from cache only if both tags are present simultaneously"],
+    "correctIndex": 0,
+    "explanation": "Docker identifies images by their SHA256 digest (computed from layers), not tags; if both tags reference the same digest, deleting one tag does not affect the layers, so pulling the remaining tag uses the cached image.",
+    "difficulty": "Medium-Hard",
+    "tags": ["image-tags", "image-digest", "docker-cache"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Image Management",
+    "question": "A Dockerfile uses `ADD https://example.com/file.tar.gz /tmp/` to download and extract a file. You change the URL but keep the same Dockerfile checksum. Rebuilding without `--no-cache` uses the cached ADD layer. How can you force a rebuild of this layer?",
+    "options": ["Use `docker build --no-cache` to skip all caching", "Replace ADD with RUN curl + manual extraction, then use `--build-arg BUST_CACHE=$(date)` to invalidate the layer", "Use `COPY` instead of ADD and manually download the file on the host before building", "Add a comment or timestamp to the ADD instruction to change the Dockerfile hash"],
+    "correctIndex": 1,
+    "explanation": "ADD/COPY layers are cached based on the instruction text and file contents, not the remote URL; use a build arg with a dynamic value (date, random, or explicit flag) to invalidate the cache, or use RUN curl with an explicit cache-buster.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker-build-cache", "add-instruction", "cache-invalidation"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Image Management",
+    "question": "You inspect a layer's digest and see it maps to `sha256:abc123...`. After modifying the Dockerfile to rebuild this layer, the new layer's digest is `sha256:abc123...` (identical). Docker skips this layer during rebuild and reuses the cached version. Is the new layer content definitely identical to the old one?",
+    "options": ["Yes, SHA256 is cryptographically secure; identical digests mean identical content", "No, the file permissions or timestamps may have changed without affecting the content hash", "No, the layer may include environment variables or build args that do not affect the SHA", "Yes, but only if the base image and all previous layers are identical"],
+    "correctIndex": 3,
+    "explanation": "Layer digest is computed from the layer's files, permissions, and previous layer's digest; identical digest only implies identical content if all preceding layers are identical; if you changed an earlier layer, the base for the cached layer differs, and you should rebuild.",
+    "difficulty": "Medium-Hard",
+    "tags": ["layer-digest", "cache-validation", "dockerfile"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Image Management",
+    "question": "After pushing an image to a private registry with `docker push registry.io/app:v1.0`, you delete the image locally with `docker rmi app:v1.0` and then immediately run `docker run registry.io/app:v1.0`. Does Docker pull from the registry or fail?",
+    "options": ["It pulls from the registry because the image is no longer in the local cache", "It fails because you deleted the image and did not use `docker pull` explicitly", "It checks the local Docker socket for the image first, then fails if not found", "It pulls from the registry, but only after checking the local cache and the Docker Hub fallback"],
+    "correctIndex": 0,
+    "explanation": "`docker run` with a registry-qualified image automatically calls `docker pull` if the image is not in the local daemon; deletion removes it from cache, so the pull proceeds from the registry.",
+    "difficulty": "Medium",
+    "tags": ["docker-pull", "image-registry", "docker-run"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Image Management",
+    "question": "You build two images from the same Dockerfile but with different build args: `docker build --build-arg FEATURE=A -t app:a .` and `docker build --build-arg FEATURE=B -t app:b .`. Both images have identical SHA256 digests. The Dockerfile uses `ARG FEATURE` but does not reference it anywhere. What is happening?",
+    "options": ["Unused ARG declarations are stripped by Docker, so both builds produce identical layers", "Docker optimizes unused ARG by ignoring the --build-arg flag, resulting in identical images", "The digest is identical because ARG does not change the actual layer filesystem content", "This is impossible; two builds with different arguments must produce different digests"],
+    "correctIndex": 2,
+    "explanation": "ARG only affects the build process if it is used in a RUN or other instruction; if unused, it does not change the image layers, so both images are identical despite different --build-arg values.",
+    "difficulty": "Medium",
+    "tags": ["build-arguments", "layer-digest", "dockerfile"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Image Management",
+    "question": "A Dockerfile chains multiple COPY instructions: `COPY file1 /app/`, `COPY file2 /app/`, `COPY file3 /app/`. You modify only file2 and rebuild. How many layers are invalidated and rebuilt?",
+    "options": ["One layer (file2 only) is rebuilt; file1 and file3 use the cache", "Two layers (file2 and file3) are rebuilt because the cache for file2 invalidates file3", "All three layers are rebuilt because each COPY is dependent on the others", "Only file2 is rebuilt, but the final image is considered stale and rebuilt entirely"],
+    "correctIndex": 1,
+    "explanation": "Docker layer caching is sequential; modifying file2 invalidates its COPY layer, and all subsequent layers (file3's COPY) are also invalidated because they depend on the previous layer's state.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dockerfile-layers", "layer-caching", "copy-instruction"]
+  }
+]

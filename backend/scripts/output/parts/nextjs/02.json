@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "Next.js Installation",
+    "question": "You run `npm install next react react-dom` but the build fails with 'Cannot find module react/jsx-runtime'. What's the root cause?",
+    "options": ["React version is too old for Next.js version", "JSX runtime is not included in react package", "next.config.js is misconfigured", "Node modules are corrupted; delete node_modules and reinstall"],
+    "correctIndex": 0,
+    "explanation": "React 17+ requires react/jsx-runtime; an old React version lacks this export, causing the build error.",
+    "difficulty": "Medium",
+    "tags": ["dependencies", "jsx", "version-compatibility"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Next.js Installation",
+    "question": "After `npx create-next-app@latest`, you notice package.json has `'next': '15.0.0'` but your local Node is v16.x. Which behavior will occur on `npm run dev`?",
+    "options": ["Dev server starts normally; Next.js handles Node v16 internally", "Build fails immediately due to Node version mismatch", "Next.js runs but App Router features silently degrade", "You can only use Pages Router, not App Router"],
+    "correctIndex": 1,
+    "explanation": "Next.js 15 requires Node 18+; older versions will fail during initialization.",
+    "difficulty": "Medium-Hard",
+    "tags": ["node-version", "installation", "compatibility"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Next.js Installation",
+    "question": "During `npm install`, a peer dependency warning appears: 'react@19 peer missing for next@14'. Should you force-install or find a compatible pair?",
+    "options": ["Force install; Next.js v14 works with any React version", "Find compatible versions; mismatched peer deps cause hook errors in rendering", "Use npm ci instead of npm install", "Ignore the warning; peer deps are advisory only in production"],
+    "correctIndex": 1,
+    "explanation": "Mismatched React-Next versions cause React hook internals to mismatch during hydration.",
+    "difficulty": "Medium-Hard",
+    "tags": ["peer-dependencies", "react-version", "build-errors"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Next.js Installation",
+    "question": "You manually set up Next.js (not via create-next-app) and forgot to add `./next/` to .gitignore. What's the worst outcome?",
+    "options": ["Git repo bloats with generated next/cache and next/static build artifacts", "CI pipeline fails because .next folder is versioned", "Secrets in .env get committed if accidentally in build output", "Team members get stale builds from git-tracked .next folder"],
+    "correctIndex": 3,
+    "explanation": "The .next build folder contains hashes and references sensitive to build time; versioning it causes cache inconsistency and stale builds across environments.",
+    "difficulty": "Medium-Hard",
+    "tags": ["gitignore", "build-artifacts", "repository-hygiene"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Next.js Installation",
+    "question": "In next.config.js, you set `{ swcMinify: true }` but TypeScript checks fail during build. Why?",
+    "options": ["SWC minifier strips type information and breaks runtime type guards", "next.config.js must use CommonJS export, not ES modules", "TypeScript compiler runs before SWC; config conflicts", "SWC replaces TypeScript compilation but type errors still need fixing"],
+    "correctIndex": 3,
+    "explanation": "SWC minification happens after TypeScript compilation; type errors must still be resolved before minification runs.",
+    "difficulty": "Medium-Hard",
+    "tags": ["swc", "typescript", "minification"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Next.js Installation",
+    "question": "You install Next.js in a monorepo alongside other packages. Builds work locally but CI fails with 'next: command not found'. What's the issue?",
+    "options": ["CI runs npm install from the monorepo root, not the Next.js app folder", "Next.js CLI is not globally installed in CI environment", "node_modules is too large; CI timeout occurs before install completes", "Monorepo package manager (yarn/pnpm) doesn't support Next.js"],
+    "correctIndex": 0,
+    "explanation": "In monorepos, CI must run install from the workspace root (with workspaces configured) or from the Next.js app subdirectory.",
+    "difficulty": "Medium-Hard",
+    "tags": ["monorepo", "ci-cd", "workspaces"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Next.js Installation",
+    "question": "After upgrading Next.js from v13 to v14, `npm run dev` logs 'Warning: Experimental App Router detected'. What should you do?",
+    "options": ["Delete pages/ folder immediately; pages router is deprecated", "Add experimental flag to next.config.js to enable App Router", "App Router is now stable in v14; the warning is outdated and safe to ignore", "Downgrade to v13 until App Router is no longer experimental"],
+    "correctIndex": 2,
+    "explanation": "In Next.js 14, App Router became stable; v13 warnings may persist but don't affect functionality.",
+    "difficulty": "Medium",
+    "tags": ["upgrade", "app-router", "pages-router"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Next.js Installation",
+    "question": "You clone a Next.js repo and run `npm install`. The app starts but all features hang. What's a likely culprit?",
+    "options": ["prisma generate was not run after install", "Dependency versions changed since clone; use exact lock file", "Environment variables are missing and blocking imports", ".next cache is stale from another machine"],
+    "correctIndex": 1,
+    "explanation": "Lock file mismatch (package-lock.json/yarn.lock) causes version drift; always ensure lock file is committed and CI uses ci command.",
+    "difficulty": "Medium",
+    "tags": ["lock-file", "dependency-resolution", "reproducibility"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Next.js Installation",
+    "question": "A dev adds `import type` statements from a Prisma schema import without running `npx prisma generate`. What happens on build?",
+    "options": ["TypeScript strips type imports so build succeeds", "Prisma types are generated on-the-fly during build", "Build fails with 'Cannot find module @prisma/client' or missing types", "Imports work locally but fail in CI"],
+    "correctIndex": 2,
+    "explanation": "Prisma types are generated artifacts; they don't exist without running generate, and CI won't auto-generate them.",
+    "difficulty": "Medium",
+    "tags": ["prisma", "code-generation", "build-tooling"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Next.js Installation",
+    "question": "You run `npm run build` and it completes successfully but `npm run dev` throws 'ENOENT: no such file or directory, open .next/BUILD_ID'. What likely happened?",
+    "options": [".next folder was deleted between builds; run npm run build again", "Build succeeded but .next/BUILD_ID is generated only on start, not during build", "You ran build in a different branch; .next is branch-specific", "Disk is full; .next was partially written"],
+    "correctIndex": 0,
+    "explanation": "BUILD_ID is written during build; if .next doesn't exist, the build output was lost or never written.",
+    "difficulty": "Medium-Hard",
+    "tags": ["build-cache", "file-system", "build-output"]
+  }
+]

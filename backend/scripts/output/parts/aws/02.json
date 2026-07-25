@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Account Management",
+    "question": "Your company has 5 AWS accounts (dev, staging, prod, analytics, compliance). Each team manages its own account independently. You're considering AWS Organizations to consolidate billing. What's the primary operational risk of consolidation?",
+    "options": [
+      "Consolidated billing increases total costs due to loss of volume discounts",
+      "Loss of individual account isolation; a security breach in one account could affect others",
+      "AWS Organizations requires migrating all workloads to a single account",
+      "Consolidated billing removes ability to track per-team cost allocation"
+    ],
+    "correctIndex": 1,
+    "explanation": "While Organizations enables billing consolidation, the primary risk is losing per-account isolation; you must implement SCPs and IAM policies carefully to prevent blast radius across accounts and maintain compliance boundaries.",
+    "difficulty": "Medium",
+    "tags": ["organizations", "account-structure", "security"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Account Management",
+    "question": "Your organization has 50 AWS accounts across 10 product teams. Each team manages its own account and AWS costs vary wildly. You need cost transparency and want to limit team overspending. Which approach provides the best control without sacrificing autonomy?",
+    "options": [
+      "Consolidate all accounts into one; enforce strict IAM permissions on per-team resources",
+      "Keep separate accounts; use AWS Budgets and SCPs to alert and cap spending per account",
+      "Migrate to a single shared account; use resource tags for cost allocation",
+      "Require manual approval for all AWS API calls above a spending threshold"
+    ],
+    "correctIndex": 1,
+    "explanation": "Separate accounts maintain blast radius isolation and autonomy; AWS Budgets alerts teams to overspending, while SCPs (service control policies) enforce guardrails without requiring centralized approval for every change.",
+    "difficulty": "Medium-Hard",
+    "tags": ["organizations", "cost-control", "governance"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Account Management",
+    "question": "You're setting up AWS Organizations with 20 OUs (organizational units) for different business units and environments. A compromised IAM user in the product-dev OU accidentally deletes a production RDS instance in product-prod OU. How should you have prevented this?",
+    "options": [
+      "Implement an SCP on product-prod OU denying RDS DeleteDBInstance action to all principals",
+      "Use IAM roles with least-privilege; product-dev users should never have cross-OU permissions",
+      "Enable CloudTrail logging to detect and audit the deletion",
+      "Require MFA for all high-risk API calls like DeleteDBInstance"
+    ],
+    "correctIndex": 0,
+    "explanation": "SCPs at the OU level deny actions regardless of IAM permissions, preventing cross-OU blast radius; least-privilege IAM (option B) is also critical but SCPs add mandatory guardrail layer.",
+    "difficulty": "Hard",
+    "tags": ["service-control-policies", "security", "blast-radius"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Account Management",
+    "question": "Your startup has a single AWS account. As you grow to 50+ engineers, deployment errors and permission mistakes are increasing. You're considering splitting into multiple accounts (dev/staging/prod). What's the primary operational advantage beyond security?",
+    "options": [
+      "Multiple accounts reduce total AWS costs due to volume discounts per account",
+      "Multiple accounts enable independent scaling and resource limits per environment; failed deployments affect only one environment",
+      "AWS always performs better with multiple accounts than a single account",
+      "Multiple accounts eliminate the need for IAM permissions; environment access is account-level only"
+    ],
+    "correctIndex": 1,
+    "explanation": "Multiple accounts provide blast radius isolation; a failed production deployment or resource limit doesn't cascade to dev/staging; each environment can scale independently and have its own cost controls.",
+    "difficulty": "Medium",
+    "tags": ["account-structure", "operational-resilience", "scaling"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Account Management",
+    "question": "You've set up AWS Organizations with a management account and 30 member accounts. Your CFO needs monthly cost reports per business unit. Which approach provides automated, scalable cost tracking without manual aggregation?",
+    "options": [
+      "Export AWS Cost Explorer CSVs monthly; aggregate in Excel spreadsheet",
+      "Enable consolidated billing; configure Cost Anomaly Detection to alert on overspending",
+      "Enable AWS Cost and Usage Report (CUR) to S3; query with Athena and build dashboard in QuickSight",
+      "Use AWS Budgets to email cost summaries directly to the CFO"
+    ],
+    "correctIndex": 2,
+    "explanation": "CUR exports raw billing data to S3; Athena queries it flexibly; QuickSight automates dashboard creation and refresh; this provides scalable, queryable cost data without manual aggregation (Excel is error-prone at scale).",
+    "difficulty": "Medium-Hard",
+    "tags": ["cost-management", "cost-reporting", "automation"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Account Management",
+    "question": "You're using AWS Organizations with SCPs to deny the DeleteTable action in production accounts. A developer with sufficient IAM permissions attempts to delete a DynamoDB table in prod. What happens?",
+    "options": [
+      "The delete succeeds because IAM permissions grant access",
+      "The delete is denied; SCPs act as a mandatory deny and override IAM permissions",
+      "The delete is delayed for 24 hours to allow for approval",
+      "The delete succeeds but is logged to CloudTrail for audit purposes only"
+    ],
+    "correctIndex": 1,
+    "explanation": "SCPs are mandatory deny policies at the organizational level; even if IAM grants an action, SCPs can explicitly deny it, and deny always wins in AWS permission evaluation.",
+    "difficulty": "Medium",
+    "tags": ["service-control-policies", "permission-evaluation", "security"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Account Management",
+    "question": "Your organization is migrating from individual AWS accounts (no Organizations) to AWS Organizations with 3-tier hierarchy (root -> environments -> business units). During transition, some teams still use old account roots directly. What's the primary security risk during this hybrid phase?",
+    "options": [
+      "Old root accounts might have different password policies than Organizations-managed accounts",
+      "Teams using old root credentials bypass SCPs and IAM policies enforced by Organizations",
+      "Organizations-managed accounts are slower than root-managed accounts",
+      "Old root accounts cannot communicate with Organizations-managed accounts"
+    ],
+    "correctIndex": 1,
+    "explanation": "Root credentials used directly bypass Organization controls; SCP restrictions don't apply to root, only to member accounts, creating a security gap during hybrid transition period.",
+    "difficulty": "Hard",
+    "tags": ["organizations", "migration", "security-gap"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Account Management",
+    "question": "You have 100 AWS accounts in Organizations. New compliance requirement: all accounts must enable MFA on root user and implement CloudTrail for all API calls. How do you enforce this at scale without visiting each account individually?",
+    "options": [
+      "Create a custom script to SSH into each account and enable settings",
+      "Use SCPs to require CloudTrail; use AWS Config Rules for MFA detection; publish non-compliant accounts to Slack",
+      "Manually enable features in each account using AWS Management Console",
+      "Require engineers to enable features as part of their project onboarding"
+    ],
+    "correctIndex": 1,
+    "explanation": "SCPs enforce CloudTrail retroactively; AWS Config Rules detect MFA status and trigger Lambda to notify; automated detection + alerting scales to 100+ accounts without manual intervention.",
+    "difficulty": "Hard",
+    "tags": ["compliance", "automation", "at-scale-management"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Account Management",
+    "question": "Your organization uses AWS Organizations with cross-account roles for inter-team access. The security team discovered a developer using root credentials in a member account to access another team's resources instead of assuming cross-account roles. What policy change should you make?",
+    "options": [
+      "Remove root user from all member accounts entirely",
+      "Implement SCP denying action * to root user in member accounts; allow root only in management account",
+      "Require the developer to use single sign-on instead of IAM users",
+      "Add root access logs to CloudTrail; audit usage monthly"
+    ],
+    "correctIndex": 1,
+    "explanation": "SCP denying actions to root user in member accounts forces use of IAM roles and cross-account assume role patterns; management account root can still do emergency recovery while member accounts are protected.",
+    "difficulty": "Hard",
+    "tags": ["service-control-policies", "access-control", "security-best-practices"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Account Management",
+    "question": "You're setting up AWS Organizations for a company with international operations. GDPR requires data residency (EU data stays in EU), CCPA requires audit logs (US), and each region team needs independent billing. How should you structure accounts and OUs?",
+    "options": [
+      "Single account with multiple VPCs per region; tag resources by region",
+      "Separate OUs by geography (EU, US, APAC); each OU has separate accounts per service for cost isolation",
+      "Separate accounts per geography per environment; use SCPs and resource policies to enforce regional data residency",
+      "Consolidate all regions into single account; use AWS Config to audit data location"
+    ],
+    "correctIndex": 2,
+    "explanation": "Accounts per geography provide billing and access isolation by region; SCPs can mandate region restrictions; resource policies enforce residency; auditing spans all accounts via Organizations trail.",
+    "difficulty": "Hard",
+    "tags": ["multi-region", "compliance", "data-residency"]
+  }
+]

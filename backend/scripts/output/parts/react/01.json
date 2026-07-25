@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "Why does this code produce unexpected output? const obj = { count: 0 }; const fn = () => { obj.count++; return obj.count; }; console.log(fn(), fn(), obj.count);",
+    "options": ["Prints 1, 2, 2 because mutation persists", "Prints 0, 0, 0 due to closure", "Throws error during increment", "Prints 3, 3, 3 from side effects"],
+    "correctIndex": 0,
+    "explanation": "obj.count++ mutates the shared object, so each call increments and returns the new value: 1, 2, then accessing obj.count returns 2.",
+    "difficulty": "Medium",
+    "tags": ["closure", "mutation", "scope"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "What does Array.isArray(new Array(3).fill(1)) return, and why might this differ from behavior you expect in component state?",
+    "options": ["true, but the array is sparse before fill", "false, because fill returns undefined", "true, fill creates a dense array you can map safely", "false, fill mutates but returns empty"],
+    "correctIndex": 2,
+    "explanation": "Array.isArray returns true; fill() mutates and returns the array, making it dense and safe to iterate, unlike sparse arrays created by new Array(3).",
+    "difficulty": "Medium-Hard",
+    "tags": ["array", "prototype", "state"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "Given const x = 0; const fn = () => x; const y = fn.bind({ x: 10 }); y();, what is returned and why?",
+    "options": ["10, because bind sets this context", "0, because arrow function ignores bind", "undefined, bind only works on methods", "10, because arrow function uses bind context"],
+    "correctIndex": 1,
+    "explanation": "Arrow functions do not have their own this; bind cannot override it, so x resolves to the outer scope variable 0.",
+    "difficulty": "Medium-Hard",
+    "tags": ["this", "arrow", "bind"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "Why might Object.assign({}, { a: 1 }, { a: 2 }) behave differently from spread { ...{ a: 1 }, ...{ a: 2 } } in React re-render scenarios?",
+    "options": ["Spread is faster so re-renders less", "Both are identical; spread is just syntax sugar", "Object.assign mutates the first argument, spread does not", "Spread shallow-merges nested objects, Object.assign doesn't"],
+    "correctIndex": 1,
+    "explanation": "Both produce { a: 2 }; spread syntax is just modern syntax sugar around Object.assign's shallow merge behavior.",
+    "difficulty": "Medium",
+    "tags": ["immutability", "spread", "merging"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "What is the value of [1, 2, 3].map(x => x * 2).reduce((a, b) => a + b, 0), and how would you memoize this in React?",
+    "options": ["12, use useMemo to avoid recalculation on every render", "6, memoization is not needed for pure functions", "12, but only if you use useCallback", "Undefined, reduce without initial value fails"],
+    "correctIndex": 0,
+    "explanation": "Result is 12 (2+4+6); useMemo caches the computation so it only runs when dependencies change, avoiding unnecessary recalculations.",
+    "difficulty": "Medium",
+    "tags": ["array", "reduction", "memoization"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "In const nums = [1, 2, 3]; nums[10] = 5; console.log(nums.length);, what is logged and why does this matter in React lists?",
+    "options": ["3, sparse arrays have gaps that confuse key resolution", "11, arrays auto-extend to include assigned index", "3, because sparse arrays don't count empty slots as length", "undefined, sparse arrays return undefined for missing indices"],
+    "correctIndex": 1,
+    "explanation": "Assigning nums[10] auto-extends length to 11; in React, sparse arrays or gaps cause keys to misalign with rendered items, breaking re-renders.",
+    "difficulty": "Medium-Hard",
+    "tags": ["array", "sparse", "keys"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "Given const x = Promise.resolve(1); x.then(v => console.log(v)); console.log('sync');, what is the execution order and how does this affect useEffect?",
+    "options": ["Prints sync then 1, useEffect runs after layout paint", "Prints 1 then sync, promises are synchronous", "Prints sync then 1, but useEffect blocking prevents render", "Prints 1 immediately, promises jump the microtask queue"],
+    "correctIndex": 0,
+    "explanation": "Promises use the microtask queue after synchronous code; useEffect runs after the component commits, so async operations there may miss data.",
+    "difficulty": "Medium-Hard",
+    "tags": ["async", "promise", "useeffect"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "Why does const obj = {}; obj[Symbol.for('x')] = 1; Object.keys(obj).length return 0?",
+    "options": ["Symbols are enumerable but Object.keys ignores them", "Symbols are not enumerable and Object.keys skips them", "Object.keys only works on arrays", "Symbols require explicit getOwnPropertySymbols"],
+    "correctIndex": 1,
+    "explanation": "Symbols (including well-known symbols) are non-enumerable; Object.keys only returns enumerable string keys, so length is 0.",
+    "difficulty": "Medium",
+    "tags": ["symbol", "enumerable", "keys"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "Given const fn = function(a, b) { return a + b; }; const bound = fn.bind(null, 5); bound(3);, what is returned and how does partial application relate to React?",
+    "options": ["8, partial application pre-fills args to avoid re-creating callbacks", "undefined, bind with null fails", "8, but useCallback should be used instead", "3, bind ignores the first argument"],
+    "correctIndex": 0,
+    "explanation": "bind(null, 5) pre-fills the first argument, so bound(3) calls fn(5, 3) = 8; partial application reduces re-renders by memoizing callback factories.",
+    "difficulty": "Medium-Hard",
+    "tags": ["bind", "partial", "callback"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "What does delete obj.prop do, and why is this relevant when managing component state cleanup?",
+    "options": ["Removes the property, but leaves the key in for...in loops", "Removes the property entirely from the object", "Throws error if the property is read-only", "Sets the property to undefined without removing it"],
+    "correctIndex": 1,
+    "explanation": "delete removes the property completely; in state cleanup, you should use immutable patterns like spread or filter instead of delete to avoid bugs.",
+    "difficulty": "Medium",
+    "tags": ["delete", "property", "cleanup"]
+  }
+]

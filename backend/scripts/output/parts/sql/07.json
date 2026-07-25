@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "JOIN Operations",
+    "question": "Users table: u_id=1,2,3; Orders table: o_id with u_id=1,1,2 (duplicate user 1). What does this return?\nSELECT u.id, COUNT(*) FROM users u LEFT JOIN orders o ON u.id = o.user_id GROUP BY u.id;",
+    "options": [
+      "User 1: 2 orders, User 2: 1 order, User 3: 0 orders",
+      "User 1: 1 order, User 2: 1 order, User 3: NULL",
+      "User 1: 2 orders, User 2: 1 order (User 3 not shown)",
+      "Only users with orders are returned"
+    ],
+    "correctIndex": 0,
+    "explanation": "LEFT JOIN preserves all users including those without orders (User 3 shows 0); duplicates in orders are counted per user.",
+    "difficulty": "Medium",
+    "tags": ["left-join", "group-by", "aggregate"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "JOIN Operations",
+    "question": "What is the difference in output between these?\nA: SELECT * FROM a INNER JOIN b ON a.id = b.a_id;\nB: SELECT * FROM a LEFT JOIN b ON a.id = b.a_id WHERE b.a_id IS NOT NULL;",
+    "options": [
+      "No functional difference; both return only matching rows",
+      "A includes unmatched rows from a, B does not",
+      "B is more efficient than A",
+      "A fails if b.a_id is NULL"
+    ],
+    "correctIndex": 0,
+    "explanation": "The WHERE clause in B filters out NULL rows (unmatched from a), making it functionally identical to INNER JOIN.",
+    "difficulty": "Medium",
+    "tags": ["inner-join", "left-join"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "JOIN Operations",
+    "question": "Table a: id=1,2; Table b: id=1,1; Table c: id=1,1,1. Query:\nSELECT COUNT(*) FROM a JOIN b ON a.id = b.id JOIN c ON a.id = c.id;",
+    "options": [
+      "2 (one row from a=1 joins two from b and three from c: 1*2*3=6, but grouped results in 1 final count)",
+      "6 (1*2*3 Cartesian product of matching rows)",
+      "1 (only one matching ID across all tables)",
+      "4 (total unique ID matches)"
+    ],
+    "correctIndex": 1,
+    "explanation": "Each a.id=1 row matches 2 b rows and 3 c rows, resulting in 1*2*3=6 rows in the final result.",
+    "difficulty": "Medium-Hard",
+    "tags": ["join-cardinality", "multiple-joins"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "JOIN Operations",
+    "question": "What does a FULL OUTER JOIN return?\nSELECT * FROM a FULL OUTER JOIN b ON a.id = b.id;",
+    "options": [
+      "All rows from a and b, with NULLs where no match exists",
+      "Only matching rows from both tables",
+      "All rows from a with NULLs for non-matching b columns",
+      "All rows from b with NULLs for non-matching a columns"
+    ],
+    "correctIndex": 0,
+    "explanation": "FULL OUTER JOIN returns all rows from both tables, with NULLs filling columns from the non-matching side.",
+    "difficulty": "Medium",
+    "tags": ["full-outer-join"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "JOIN Operations",
+    "question": "Tables: users (id=1,2,3), orders (user_id=1,1,2). Query:\nSELECT u.id, o.id FROM users u LEFT JOIN orders o ON u.id = o.user_id WHERE o.id IS NOT NULL;",
+    "options": [
+      "User 1 with orders 1 and 2; User 2 with order 3 (no User 3)",
+      "All three users with NULL orders for User 3",
+      "Only matching users",
+      "An error due to ambiguous column id"
+    ],
+    "correctIndex": 0,
+    "explanation": "LEFT JOIN includes all users, but WHERE o.id IS NOT NULL filters out User 3 (whose o.id is NULL).",
+    "difficulty": "Medium",
+    "tags": ["left-join", "where-filter"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "JOIN Operations",
+    "question": "Two tables with the same schema: apr_sales and may_sales. Each has product_id and revenue. You want all products from both months. Best approach?\nA: SELECT * FROM apr_sales UNION SELECT * FROM may_sales;\nB: SELECT * FROM apr_sales FULL OUTER JOIN may_sales ON apr_sales.product_id = may_sales.product_id;",
+    "options": [
+      "A gives all products from both months (union of rows); B gives side-by-side comparison",
+      "Both are identical",
+      "Only B works for comparing months",
+      "Only A works; B will error"
+    ],
+    "correctIndex": 0,
+    "explanation": "UNION combines rows from both tables; FULL OUTER JOIN side-by-sides them; they serve different purposes.",
+    "difficulty": "Medium",
+    "tags": ["union", "full-outer-join", "comparison"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "JOIN Operations",
+    "question": "A self-join query finds employees and their managers:\nSELECT e.name AS employee, m.name AS manager FROM employees e LEFT JOIN employees m ON e.manager_id = m.id;\n\nIf an employee has no manager, what is returned?",
+    "options": [
+      "Employee name with NULL for manager name",
+      "The employee row is excluded",
+      "An error due to ambiguous reference",
+      "The employee is listed as their own manager"
+    ],
+    "correctIndex": 0,
+    "explanation": "LEFT JOIN preserves all employees; those without a manager_id have NULL in the manager name column.",
+    "difficulty": "Medium",
+    "tags": ["self-join", "left-join"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "JOIN Operations",
+    "question": "Performance question: You have 1M users and 100M orders. Which JOIN order is more efficient?\nA: SELECT * FROM users JOIN orders ON users.id = orders.user_id WHERE orders.status = 'completed';\nB: SELECT * FROM orders WHERE status = 'completed' JOIN users ON users.id = orders.user_id;",
+    "options": [
+      "B is more efficient; filter orders first to reduce join input",
+      "A is more efficient; join users (smaller table) first",
+      "Both are identical; the optimizer reorders them",
+      "No measurable difference exists"
+    ],
+    "correctIndex": 0,
+    "explanation": "Filtering orders to 10k rows before joining users is more efficient than joining all 100M orders to 1M users.",
+    "difficulty": "Medium-Hard",
+    "tags": ["join-order", "filter-early"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "JOIN Operations",
+    "question": "What does a CROSS JOIN produce?\nSELECT * FROM a CROSS JOIN b;",
+    "options": [
+      "Cartesian product: every row from a paired with every row from b",
+      "Only matching rows where a and b have common columns",
+      "An error; CROSS JOIN is invalid",
+      "Rows from a where no match exists in b"
+    ],
+    "correctIndex": 0,
+    "explanation": "CROSS JOIN produces a Cartesian product; if a has 3 rows and b has 4, the result has 12 rows.",
+    "difficulty": "Medium",
+    "tags": ["cross-join", "cartesian-product"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "JOIN Operations",
+    "question": "A query with multiple LEFT JOINs:\nSELECT u.id FROM users u LEFT JOIN orders o ON u.id = o.user_id LEFT JOIN payments p ON o.id = p.order_id WHERE p.status = 'failed';\n\nWhat rows are included if an order has no payments?",
+    "options": [
+      "The user is excluded because WHERE p.status filters out NULL payment rows",
+      "The user is included with NULL payment status",
+      "An error due to chained LEFT JOINs",
+      "Only users with failed payments are shown"
+    ],
+    "correctIndex": 0,
+    "explanation": "WHERE p.status = 'failed' excludes rows where p is NULL (no payments), removing users whose orders have no payments.",
+    "difficulty": "Medium",
+    "tags": ["left-join-chain", "where-filter"]
+  }
+]

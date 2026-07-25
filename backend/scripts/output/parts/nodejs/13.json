@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "Microservices Architecture",
+    "question": "What problem do message queues solve in microservices?\n```javascript\n// Service A publishes event\nqueue.publish('user:created', {id: 1, email: 'test@example.com'});\n// Service B subscribes\nqueue.subscribe('user:created', (msg) => {\n  sendWelcomeEmail(msg.email);\n});\n```",
+    "options": ["queues are slower than direct calls", "decouples services; async communication prevents cascading failures", "all services must be synchronous", "queues are only for logging"],
+    "correctIndex": 1,
+    "explanation": "Message queues enable asynchronous, loosely-coupled communication; if Service B is down, Service A continues; messages are retried.",
+    "difficulty": "Medium-Hard",
+    "tags": ["message-queues", "microservices", "async-communication"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Microservices Architecture",
+    "question": "What is the difference between synchronous and asynchronous microservice calls?\n```javascript\n// Sync: wait for response\nconst user = await userService.getUser(1);\n\n// Async: fire and forget or callback\nuserService.emitUserFetch(1, callback);\n```",
+    "options": ["both are equally fast", "sync blocks until response; async continues immediately", "sync never times out", "async requires polling"],
+    "correctIndex": 1,
+    "explanation": "Sync calls block; if a service is slow, the caller waits; async calls continue immediately, improving throughput but adding complexity.",
+    "difficulty": "Medium",
+    "tags": ["microservices", "async-vs-sync", "communication"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Microservices Architecture",
+    "question": "What is service discovery?\n```javascript\n// Services register their location\nregistry.register('user-service', 'http://user-service-1:3001');\n// Client queries registry instead of hardcoding URLs\nconst url = registry.lookup('user-service');\n```",
+    "options": ["hardcoding service URLs is best", "discovery allows dynamic routing when services move", "discovery is only for large systems", "DNS solves all service discovery needs"],
+    "correctIndex": 1,
+    "explanation": "Service discovery keeps track of where services are; in Kubernetes or cloud environments, services scale/move; discovery ensures clients find them.",
+    "difficulty": "Medium-Hard",
+    "tags": ["service-discovery", "microservices"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Microservices Architecture",
+    "question": "What is the benefit of API Gateway pattern?\n```javascript\n// Client calls gateway, not individual services\nGET /api/users/1\n  ↓\nAPI Gateway\n  ├─ → User Service (get user data)\n  ├─ → Profile Service (get profile)\n  └─ → Recommendation Service (get recommendations)\n```",
+    "options": ["gateway slows down requests", "gateway provides single entry point, routing, auth, rate limiting", "clients should call services directly", "gateway is only for monoliths"],
+    "correctIndex": 1,
+    "explanation": "API Gateway centralizes routing, authentication, and rate limiting; clients see one API; services don't need to expose themselves.",
+    "difficulty": "Medium",
+    "tags": ["api-gateway", "microservices"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Microservices Architecture",
+    "question": "How should microservices handle distributed transactions?\n```javascript\n// Service A: deduct from account\nawait accountService.deduct(1, 100);\n// Service B: credit to account\nawait accountService.credit(2, 100);\n// What if B fails after A succeeds?\n```",
+    "options": ["use distributed 2PC (two-phase commit)", "use compensating transactions (saga pattern) to rollback on failure", "transactions are impossible", "ignore failure and accept inconsistency"],
+    "correctIndex": 1,
+    "explanation": "Distributed 2PC is slow and unreliable; the Saga pattern uses compensating transactions to undo failed steps (Service A refunds).",
+    "difficulty": "Medium-Hard",
+    "tags": ["microservices", "saga-pattern", "distributed-transactions"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Microservices Architecture",
+    "question": "What is circuit breaker pattern?\n```javascript\n// Calls to failing service\nif (circuitBreaker.isOpen()) {\n  // fail fast without calling service\n  throw new Error('Service unavailable');\n}\nconst result = await callService();\n```",
+    "options": ["retries failing calls forever", "stops calling failed services to prevent cascading failures", "circuit breaker is only for databases", "redundant if services are reliable"],
+    "correctIndex": 1,
+    "explanation": "Circuit breaker detects failures; after threshold, opens to fail fast instead of overwhelming a struggling service.",
+    "difficulty": "Medium",
+    "tags": ["circuit-breaker", "resilience", "microservices"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Microservices Architecture",
+    "question": "How should services communicate across networks?\n```javascript\n// Option A: REST HTTP\nfetch('http://service:3001/api/users/1');\n\n// Option B: gRPC (protobuf)\nawait client.getUser({id: 1});\n\n// Option C: Message Queue\nqueue.publish('get-user', {id: 1});\n```",
+    "options": ["REST is always best", "REST for simplicity, gRPC for speed, MQ for decoupling", "all approaches are identical", "only REST works cross-service"],
+    "correctIndex": 1,
+    "explanation": "REST is easy but slower; gRPC is fast (binary protocol) but less standard; MQ decouples but adds latency; choose by requirements.",
+    "difficulty": "Medium-Hard",
+    "tags": ["microservices", "communication", "protocol-choice"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Microservices Architecture",
+    "question": "What challenges arise when logging across microservices?\n```javascript\n// Service A logs: 'Processing request'\n// Service B logs: 'Sending email'\n// How do we correlate these as one request?\n```",
+    "options": ["logs are already correlated automatically", "use correlation ID passed through all services", "aggregate logs after the fact", "logging is only for single service"],
+    "correctIndex": 1,
+    "explanation": "Each service logs independently; pass a correlation ID (trace ID) with requests so logs from different services are linked.",
+    "difficulty": "Medium-Hard",
+    "tags": ["microservices", "logging", "observability"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Microservices Architecture",
+    "question": "What is the bulkhead pattern?\n```javascript\n// Dedicate separate thread pools for different services\nconst userPool = new ThreadPool(10);\nconst paymentPool = new ThreadPool(5);\n// Slow payment service doesn't starve user service\n```",
+    "options": ["all requests use one pool", "isolate resources per service to prevent one from starving others", "bulkhead is nautical only", "resource pools are not needed"],
+    "correctIndex": 1,
+    "explanation": "Bulkhead isolates resources (threads, connections); if payment is slow, user service continues with its own pool.",
+    "difficulty": "Medium-Hard",
+    "tags": ["bulkhead-pattern", "resilience", "resource-isolation"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Microservices Architecture",
+    "question": "How should you deploy microservices?\n```javascript\n// Option A: each service in its own VM\n// Option B: all services on shared server\n// Option C: containerized (Docker) and orchestrated (Kubernetes)\n```",
+    "options": ["shared server is cheapest", "each VM is most scalable", "containers with orchestration enable scalability and easy deployment", "deployment method doesn't matter"],
+    "correctIndex": 2,
+    "explanation": "Containers isolate services; orchestrators (Kubernetes) manage scaling, health checks, and updates automatically.",
+    "difficulty": "Medium",
+    "tags": ["microservices", "deployment", "containers", "kubernetes"]
+  }
+]

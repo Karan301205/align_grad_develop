@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Express JS",
+    "subtopic": "Routing Mechanisms",
+    "question": "A route is defined as app.get('/users/:id', handler). A request to /users/123/profile returns 404. Why doesn't the route match?",
+    "options": [
+      "The :id parameter only captures numeric IDs",
+      "The named parameter :id matches one segment only; /users/123/profile has extra segments",
+      "Express requires a trailing slash for multi-segment routes",
+      "The route should use a wildcard like /users/:id/*"
+    ],
+    "correctIndex": 1,
+    "explanation": "Named parameters like :id match a single URL segment; /users/123/profile doesn't match /users/:id because 'profile' is an extra segment.",
+    "difficulty": "Medium",
+    "tags": ["routing", "parameters", "segments", "matching"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Routing Mechanisms",
+    "question": "Two routes are defined: app.get('/files/:filename') and app.get('/files/download'). A request to /files/download triggers which handler?",
+    "options": [
+      "The /files/:filename route, because it matches first in the order registered",
+      "The /files/download route, because literals are prioritized over parameters",
+      "Whichever route is registered first",
+      "Both handlers run sequentially"
+    ],
+    "correctIndex": 2,
+    "explanation": "Express matches routes in registration order; if /files/:filename is registered first, it matches /files/download and the second route never runs.",
+    "difficulty": "Medium",
+    "tags": ["routing", "route-order", "parameter-matching", "literal-vs-param"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Routing Mechanisms",
+    "question": "app.get('/api/users/:id(\\\\d+)', handler) defines a regex constraint on the :id parameter. A request to /api/users/abc returns 404. Is this expected?",
+    "options": [
+      "No; Express ignores regex constraints and matches any value",
+      "Yes; the regex \\\\d+ only matches digits, so 'abc' doesn't match",
+      "No; regex constraints only work in router.param() callbacks",
+      "Yes; non-numeric IDs are automatically rejected by Express"
+    ],
+    "correctIndex": 1,
+    "explanation": "Route parameter regex constraints (e.g., :id(\\\\d+)) filter matches; 'abc' fails the digit-only constraint, so the route doesn't match and returns 404.",
+    "difficulty": "Medium",
+    "tags": ["routing", "regex", "parameters", "constraints"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Routing Mechanisms",
+    "question": "A route is app.get('/api/users/:id', handler). req.params.id returns '123abc'. Why isn't the value numeric?",
+    "options": [
+      ":id captures only alphanumeric characters by default",
+      "Named parameters are always strings, even if they look numeric; coerce to number if needed",
+      "The route definition is missing a type hint like :id(int)",
+      "The query string wasn't parsed correctly"
+    ],
+    "correctIndex": 1,
+    "explanation": "URL parameters are always strings; Express doesn't auto-convert to numbers, so '123abc' is a string regardless of content.",
+    "difficulty": "Medium",
+    "tags": ["routing", "parameters", "type-coercion", "strings"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Routing Mechanisms",
+    "question": "app.get('/api/*', handler) matches any route starting with /api/. Will it match /api or /api/?",
+    "options": [
+      "Yes to /api, no to /api/",
+      "No to /api, yes to /api/",
+      "No to both; use /api/? or /api* instead",
+      "Yes to both; the wildcard matches zero or more segments"
+    ],
+    "correctIndex": 1,
+    "explanation": "The * wildcard requires at least one character after /api/; /api/ has a trailing slash, so it matches, but /api alone does not.",
+    "difficulty": "Medium",
+    "tags": ["routing", "wildcard", "segments", "matching"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Routing Mechanisms",
+    "question": "app.get('/users/:id', handler) and app.get('/users/:username', handler) are registered in that order. A request to /users/john calls which route?",
+    "options": [
+      "The first route with parameter :id",
+      "The second route with parameter :username",
+      "Both routes simultaneously",
+      "Express throws an ambiguity error"
+    ],
+    "correctIndex": 0,
+    "explanation": "Express matches the first route that fits the pattern; /users/john matches /users/:id first, so :id='john' and the second route never runs.",
+    "difficulty": "Medium",
+    "tags": ["routing", "parameters", "ambiguity", "order"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Routing Mechanisms",
+    "question": "You define app.get('/api/v1/users', handler). Later, app.get('/api/*/users', handler) is registered. A request to /api/v1/users matches which route?",
+    "options": [
+      "Only /api/v1/users, because it's more specific",
+      "Only /api/*/users, because it was registered last",
+      "Only the first match in registration order, which is /api/v1/users",
+      "Both, executing in registration order"
+    ],
+    "correctIndex": 2,
+    "explanation": "Express matches routes in registration order; the first matching route (/api/v1/users) handles the request and others are skipped unless next() is called.",
+    "difficulty": "Medium",
+    "tags": ["routing", "specificity", "order", "matching"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Routing Mechanisms",
+    "question": "router.param('id', (req, res, next, id) => { ... }) defines a callback for :id parameters. In a route /users/:id, does this callback fire if :id is missing?",
+    "options": [
+      "Yes, the callback always fires when a route with :id is requested",
+      "No; router.param() callbacks only fire when the parameter is present in the URL",
+      "Yes, but id is undefined",
+      "No; router.param() only works for query strings, not URL parameters"
+    ],
+    "correctIndex": 1,
+    "explanation": "router.param() callbacks fire only when the named parameter is present in the URL; if /users is requested without :id, the callback doesn't trigger.",
+    "difficulty": "Medium",
+    "tags": ["routing", "router.param", "callbacks", "parameters"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Routing Mechanisms",
+    "question": "app.get('/data', handler) is registered. A request to /data?sort=asc returns 200. The query parameter is passed, but a later request to /data/ (with trailing slash) returns 404. Why?",
+    "options": [
+      "Express treats /data and /data/ as different routes by default",
+      "Query strings change the route matching behavior",
+      "Express automatically redirects /data/ to /data",
+      "The trailing slash breaks parameter parsing"
+    ],
+    "correctIndex": 0,
+    "explanation": "By default, Express distinguishes /data from /data/ (trailing slash) as separate routes; enable strict routing with app.set('strict routing', true) to enforce matching.",
+    "difficulty": "Medium",
+    "tags": ["routing", "trailing-slash", "strict-routing", "path-matching"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Routing Mechanisms",
+    "question": "A regex route is app.get(/^\\/api\\/v\\d+\\/users$/, handler). A request to /api/v2/users matches. What does req.params contain?",
+    "options": [
+      "req.params = {0: '/api/v2/users'}",
+      "req.params = {} (empty)",
+      "req.params = {v: '2'}",
+      "req.params throws an error with regex routes"
+    ],
+    "correctIndex": 1,
+    "explanation": "Regex routes don't define named parameters, so req.params is empty; captured groups would be in req.params as numeric keys if using groups like (/^\\/api\\/(v\\d+)\\//).",
+    "difficulty": "Medium-Hard",
+    "tags": ["routing", "regex", "parameters", "req.params"]
+  }
+]

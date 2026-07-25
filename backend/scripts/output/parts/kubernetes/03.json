@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Replica Sets",
+    "question": "A ReplicaSet is configured to maintain 5 replicas, but only 3 pods are running and ready. The nodes have sufficient capacity. What is most likely happening?",
+    "options": [
+      "The ReplicaSet controller is broken and needs a restart",
+      "Two pods are pending due to node selectors that match no nodes, or the selector itself is misconfigured",
+      "Kubernetes is intentionally running fewer pods to save resources",
+      "The persistent volume claim is blocking the remaining pods"
+    ],
+    "correctIndex": 1,
+    "explanation": "When a ReplicaSet cannot reach its desired count, it's usually due to pod scheduling failures—check pod events for node selector mismatches, resource constraints, or incorrect labels.",
+    "difficulty": "Medium",
+    "tags": ["replicaset", "pod-scheduling", "debugging"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Replica Sets",
+    "question": "You manually delete one pod from a ReplicaSet of 5. What happens next?",
+    "options": [
+      "The ReplicaSet stops managing the remaining pods",
+      "The ReplicaSet immediately creates a new pod to restore the desired count",
+      "You must manually recreate the pod",
+      "The ReplicaSet waits for you to acknowledge the deletion"
+    ],
+    "correctIndex": 1,
+    "explanation": "ReplicaSet continuously reconciles actual vs. desired state; deleting a pod triggers immediate creation of a replacement.",
+    "difficulty": "Medium",
+    "tags": ["replicaset", "reconciliation", "pod-management"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Replica Sets",
+    "question": "A ReplicaSet uses label selector 'app: web'. You manually create a pod with 'app: web' label outside the ReplicaSet. Does the ReplicaSet adopt it?",
+    "options": [
+      "Yes, the ReplicaSet immediately adopts the pod because labels match",
+      "No, the ReplicaSet ignores manually created pods",
+      "Yes, but only after a 5-minute delay",
+      "The ReplicaSet tries to adopt it but fails if the pod has a different owner"
+    ],
+    "correctIndex": 0,
+    "explanation": "ReplicaSets claim pods based on label selectors; a pod matching the selector is adopted even if created outside the ReplicaSet (unless already owned by another resource).",
+    "difficulty": "Medium-Hard",
+    "tags": ["replicaset", "label-selector", "pod-ownership"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Replica Sets",
+    "question": "You scale a ReplicaSet from 10 to 3 replicas. The oldest 7 pods are terminated. One of them has a terminationGracePeriod of 120 seconds but the pod doesn't respond to SIGTERM. What is the default behavior?",
+    "options": [
+      "Kubernetes waits indefinitely for the pod to respond",
+      "Kubernetes sends SIGTERM and after 120 seconds sends SIGKILL",
+      "Kubernetes scales the remaining pods up to handle the extra load",
+      "The scaling operation fails and is rolled back"
+    ],
+    "correctIndex": 1,
+    "explanation": "Kubernetes respects terminationGracePeriod as a hard deadline; after this period, it forcefully terminates unresponsive pods with SIGKILL.",
+    "difficulty": "Medium",
+    "tags": ["scaling", "pod-termination", "graceful-shutdown"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Replica Sets",
+    "question": "A ReplicaSet generates a pod name using a random suffix (e.g., web-abc123). Why does Kubernetes include this randomness instead of using sequential numbers?",
+    "options": [
+      "To prevent naming collisions if the ReplicaSet is deleted and recreated",
+      "To make pod names harder to guess for security reasons",
+      "To distribute pods evenly across nodes based on hash values",
+      "Because sequential names exceed the DNS label length limit"
+    ],
+    "correctIndex": 0,
+    "explanation": "Random suffixes ensure pod names remain unique across creation and deletion cycles, preventing orphaned pods from colliding with newly created ones.",
+    "difficulty": "Medium-Hard",
+    "tags": ["replicaset", "pod-naming", "pod-identity"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Replica Sets",
+    "question": "You create a ReplicaSet with a label selector that matches multiple existing pods with different image versions. Which pods does the ReplicaSet control?",
+    "options": [
+      "Only pods created after the ReplicaSet is deployed",
+      "All pods matching the label selector, regardless of when they were created",
+      "The oldest pods matching the selector",
+      "No pods until you manually attach them"
+    ],
+    "correctIndex": 1,
+    "explanation": "ReplicaSet control is based purely on label selectors; all matching pods are claimed, not just newly created ones.",
+    "difficulty": "Medium",
+    "tags": ["replicaset", "label-selector", "pod-control"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Replica Sets",
+    "question": "A pod is in an ImagePullBackOff state. The ReplicaSet continuously tries to replace it but new pods also fail to pull the image. What is the ReplicaSet doing?",
+    "options": [
+      "Retrying with exponential backoff until it succeeds",
+      "Waiting for you to fix the image repository before trying again",
+      "Giving up and marking the ReplicaSet as failed",
+      "Continuing to replace failed pods indefinitely, applying backoff"
+    ],
+    "correctIndex": 3,
+    "explanation": "ReplicaSet's reconciliation never stops; it continuously creates replacement pods using exponential backoff to handle image pull failures.",
+    "difficulty": "Medium",
+    "tags": ["replicaset", "image-pull", "backoff"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Replica Sets",
+    "question": "You set a ReplicaSet's minReadySeconds to 30, meaning new pods must be ready for 30 seconds before considered healthy. One pod becomes ready but then fails the readiness probe after 20 seconds. What happens?",
+    "options": [
+      "The pod is counted as ready and stays part of the ReplicaSet",
+      "The pod is immediately removed because it failed readiness",
+      "The pod is restarted and the minReadySeconds timer resets",
+      "The ReplicaSet scales down because it can't maintain readiness"
+    ],
+    "correctIndex": 2,
+    "explanation": "Failed readiness probes trigger pod restart; the minReadySeconds timer resets on each restart, requiring the pod to remain ready for the full period.",
+    "difficulty": "Medium-Hard",
+    "tags": ["minreadyseconds", "readiness-probe", "pod-health"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Replica Sets",
+    "question": "A ReplicaSet's ownerReference is lost due to a race condition in the cluster. The pods continue running. Can the ReplicaSet still manage them?",
+    "options": [
+      "No, because the pods are now orphaned and belong to no owner",
+      "Yes, the ReplicaSet reclaims orphaned pods matching its selector",
+      "No, manual intervention is required to re-attach the pods",
+      "Yes, but only after the cluster restarts"
+    ],
+    "correctIndex": 1,
+    "explanation": "ReplicaSet control is selector-based, not ownership-based; it reclaims orphaned pods matching the selector on the next reconciliation cycle.",
+    "difficulty": "Hard",
+    "tags": ["replicaset", "pod-ownership", "orphaned-pods"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Replica Sets",
+    "question": "You create two ReplicaSets with overlapping label selectors that both claim the same pod. What is the consequence?",
+    "options": [
+      "Kubernetes raises an error and prevents both ReplicaSets from being created",
+      "Both ReplicaSets manage the pod, and both count it toward their replica requirements",
+      "A conflict occurs where ReplicaSets fight to control the pod, leading to unpredictable behavior",
+      "Only the first ReplicaSet claims the pod; the second is ignored"
+    ],
+    "correctIndex": 2,
+    "explanation": "Overlapping selectors cause competing control; both ReplicaSets try to manage the same pod, resulting in race conditions and unpredictable terminations.",
+    "difficulty": "Hard",
+    "tags": ["replicaset", "label-selector", "conflict"]
+  }
+]

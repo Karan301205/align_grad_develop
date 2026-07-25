@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "Lambda Expressions",
+    "question": "What does this lambda return?\nFunc<int, int> square = x => x * x;\nConsole.WriteLine(square(5));",
+    "options": ["25", "5", "x", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Lambda expression x => x * x multiplies x by itself; 5 * 5 = 25.",
+    "difficulty": "Medium",
+    "tags": ["lambda", "func-delegate", "expressions"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Lambda Expressions",
+    "question": "What does this multi-line lambda do?\nFunc<int, int> compute = x => {\n  int result = x * 2;\n  return result;\n};\nConsole.WriteLine(compute(10));",
+    "options": ["20", "10", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Multi-line lambda with curly braces allows multiple statements; returns x * 2 = 20.",
+    "difficulty": "Medium",
+    "tags": ["lambda", "multi-line", "statements"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Lambda Expressions",
+    "question": "What does this lambda with multiple parameters do?\nFunc<int, int, int> add = (a, b) => a + b;\nConsole.WriteLine(add(3, 4));",
+    "options": ["7", "3", "4", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Lambda with multiple parameters separated by commas; 3 + 4 = 7.",
+    "difficulty": "Medium",
+    "tags": ["lambda", "multiple-parameters", "func-delegate"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Lambda Expressions",
+    "question": "What is captured by this lambda?\nint x = 10;\nFunc<int, int> add = y => x + y;\nConsole.WriteLine(add(5));",
+    "options": ["15", "5", "10", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Lambda captures outer variable x by reference; x + 5 = 15.",
+    "difficulty": "Medium",
+    "tags": ["lambda", "closure", "variable-capture"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Lambda Expressions",
+    "question": "What is the output when captured variable changes?\nint x = 5;\nFunc<int> get = () => x;\nx = 10;\nConsole.WriteLine(get());",
+    "options": ["10", "5", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Lambda captures variable by reference, not value; change to x is seen by lambda.",
+    "difficulty": "Medium",
+    "tags": ["lambda", "closure", "reference-capture"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Lambda Expressions",
+    "question": "What does this Action lambda do?\nAction<string> greet = name => Console.WriteLine($\"Hello {name}\");\ngreet(\"Alice\");",
+    "options": ["Prints Hello Alice", "Returns Hello Alice", "Compilation error", "Prints Alice"],
+    "correctIndex": 0,
+    "explanation": "Action<T> lambda takes parameter but returns void; prints interpolated string.",
+    "difficulty": "Medium",
+    "tags": ["lambda", "action-delegate", "void"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Lambda Expressions",
+    "question": "What does this lambda without parameters do?\nFunc<int> random = () => new Random().Next(10);\nvar x = random();\nConsole.WriteLine(x < 10);",
+    "options": ["True", "False", "Cannot determine", "Compilation error"],
+    "correctIndex": 2,
+    "explanation": "Lambda generates random number 0-9; always true but output unpredictable.",
+    "difficulty": "Medium",
+    "tags": ["lambda", "parameterless", "random"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Lambda Expressions",
+    "question": "What is the output of this loop with lambda?\nvar funcs = new List<Func<int>>();\nfor (int i = 0; i < 3; i++) {\n  funcs.Add(() => i);\n}\nConsole.WriteLine(funcs[0]());",
+    "options": ["3", "0", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Lambda captures loop variable i by reference; after loop i is 3, all lambdas return 3.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lambda", "closure", "loop-capture"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Lambda Expressions",
+    "question": "What does this delegate expression do?\nPredicate<int> isEven = x => x % 2 == 0;\nConsole.WriteLine(isEven(4));",
+    "options": ["True", "False", "Compilation error", "4"],
+    "correctIndex": 0,
+    "explanation": "Predicate<T> is Func<T, bool>; lambda returns true if 4 is even.",
+    "difficulty": "Medium",
+    "tags": ["lambda", "predicate", "boolean-logic"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Lambda Expressions",
+    "question": "What does this comparison lambda do?\nComparison<int> compare = (a, b) => a - b;\nConsole.WriteLine(compare(5, 3));",
+    "options": ["2", "5", "3", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Comparison<T> lambda returns difference; 5 - 3 = 2.",
+    "difficulty": "Medium",
+    "tags": ["lambda", "comparison", "sorting"]
+  }
+]

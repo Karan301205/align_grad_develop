@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "C",
+    "subtopic": "Data Structures",
+    "question": "typedef struct {\nint id;\nchar name[50];\nfloat salary;\n} Employee;\nEmployee emp;\nemp.id = 1;\nWhy is . used instead of ->?",
+    "options": [
+      "emp is a struct variable, not a pointer; use . for direct access",
+      "emp is a pointer; . cannot be used",
+      ". and -> are interchangeable",
+      "Compiler error: . is not valid for structs"
+    ],
+    "correctIndex": 0,
+    "explanation": "emp.field accesses a struct member directly; emp->field accesses via a pointer (equiv to (*emp).field).",
+    "difficulty": "Medium",
+    "tags": ["struct access", "dot operator", "arrow operator"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Structures",
+    "question": "typedef struct Node {\nint data;\nstruct Node *next;\n} Node;\nNode *head = malloc(sizeof(Node));\nhead->next = malloc(sizeof(Node));\nhead->next->data = 10;\nWhat is the memory layout?",
+    "options": [
+      "Two separate heap-allocated Node structs linked via pointers",
+      "A single contiguous block containing both nodes",
+      "Compiler error: recursive struct definitions are invalid",
+      "head and head->next point to the same memory"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each malloc allocates independent memory; next is a pointer linking them, not a contiguous array.",
+    "difficulty": "Medium",
+    "tags": ["linked lists", "pointers", "struct recursion"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Structures",
+    "question": "typedef struct {\nint x;\nint y;\n} Point;\nPoint p = {10, 20};\nPoint *pptr = &p;\nint value = pptr->x;\nWhy is pptr->x equivalent to (*pptr).x?",
+    "options": [
+      "-> dereferences the pointer and accesses the member; (*pptr).x explicitly dereferences then uses . (both are equivalent)",
+      "They are not equivalent",
+      "pptr->x is a shorthand that the compiler expands to (*pptr).x",
+      "Compiler error: mixing pointer and direct access"
+    ],
+    "correctIndex": 0,
+    "explanation": "pptr->x is syntactic sugar for (*pptr).x; the -> operator combines dereference and member access.",
+    "difficulty": "Medium",
+    "tags": ["pointer dereferencing", "struct members", "operators"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Structures",
+    "question": "typedef union {\nint i;\nfloat f;\n} Data;\nData d; d.i = 10;\nprintf(\"%f\", d.f);\nWhy is d.f garbage?",
+    "options": [
+      "Union members share the same memory; setting d.i then reading d.f interprets int bits as float (type punning)",
+      "Unions cannot store both int and float",
+      "d.f is automatically updated when d.i changes",
+      "Compiler error: cannot read different members"
+    ],
+    "correctIndex": 0,
+    "explanation": "Unions overlay members; reading a different member reinterprets the bit pattern.",
+    "difficulty": "Medium-Hard",
+    "tags": ["unions", "type punning", "memory overlap"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Structures",
+    "question": "typedef struct {\nstruct {\nint x, y;\n} point;\nstruct {\nint width, height;\n} size;\n} Rectangle;\nRectangle r;\nr.point.x = 10;\nHow is nested struct access expressed?",
+    "options": [
+      "r.point.x accesses the x field of the nested point struct",
+      "r.x (nested structs collapse into the parent scope)",
+      "Compiler error: nested structs are invalid",
+      "r.point->x (nested structs are pointers)"
+    ],
+    "correctIndex": 0,
+    "explanation": "Nested structs require chained member access; each . accesses a level of nesting.",
+    "difficulty": "Medium",
+    "tags": ["nested structs", "member access", "composition"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Structures",
+    "question": "typedef struct Node {\nint data;\nstruct Node *left, *right;\n} Node;\nHow is a binary tree node created and linked?",
+    "options": [
+      "Allocate nodes with malloc; set left/right pointers to link them, using NULL for absent children",
+      "Binary trees are built statically; malloc is not used",
+      "Nodes are linked via arrays, not pointers",
+      "Left and right must be allocated separately from the parent"
+    ],
+    "correctIndex": 0,
+    "explanation": "Tree nodes are typically dynamically allocated; pointers form the tree structure.",
+    "difficulty": "Medium",
+    "tags": ["binary trees", "tree structures", "pointer-based structures"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Structures",
+    "question": "typedef struct {\nint items[10];\nint top;\n} Stack;\nStack s; s.top = -1;\ns.items[++s.top] = 5;\nWhy is top initialized to -1?",
+    "options": [
+      "top = -1 indicates an empty stack; incrementing gives top = 0 for the first push (items[0])",
+      "top must always be negative",
+      "A stack is always empty",
+      "Compiler error: negative indices are forbidden"
+    ],
+    "correctIndex": 0,
+    "explanation": "Using top = -1 for empty simplifies push (++top then store) and pop logic.",
+    "difficulty": "Medium",
+    "tags": ["stack", "ADT", "push/pop"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Structures",
+    "question": "typedef struct {\nint items[10];\nint head, tail;\n} Queue;\nQ.head = 0; Q.tail = -1;\nQ.tail = (Q.tail + 1) % 10;\nQ.items[Q.tail] = 5;\nWhy use modulo arithmetic?",
+    "options": [
+      "To implement a circular queue; modulo wraps tail/head around when they exceed capacity, reusing space at the start",
+      "Modulo prevents overflow",
+      "Queues do not wrap; modulo is unnecessary",
+      "Compiler error: modulo on array indices"
+    ],
+    "correctIndex": 0,
+    "explanation": "Circular queues reuse array space by wrapping indices; modulo 10 cycles through the 10-element buffer.",
+    "difficulty": "Medium-Hard",
+    "tags": ["circular queue", "modulo arithmetic", "ADT"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Structures",
+    "question": "typedef struct {\nchar key[20];\nint value;\n} Entry;\nEntry hash_table[100];\nWhy might a simple array-based hash table collide?",
+    "options": [
+      "Multiple keys hash to the same index; entries overwrite each other (open addressing or chaining needed to resolve)",
+      "Hash tables never collide",
+      "Compiler error: collisions are not allowed",
+      "Arrays cannot be used for hash tables"
+    ],
+    "correctIndex": 0,
+    "explanation": "Hash collisions are inevitable; resolution strategies include chaining (linked lists) or probing (seek next free slot).",
+    "difficulty": "Medium-Hard",
+    "tags": ["hash tables", "collisions", "collision resolution"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Structures",
+    "question": "typedef struct Edge {\nint to;\nint weight;\nstruct Edge *next;\n} Edge;\nEdge *adjacency[100];\nHow does this represent a weighted graph?",
+    "options": [
+      "Each index is a node; the linked list at adjacency[i] stores edges from node i (each edge has destination and weight)",
+      "Edges are stored in a separate array",
+      "Graphs cannot be represented with pointers",
+      "Compiler error: nested structs and pointers are invalid"
+    ],
+    "correctIndex": 0,
+    "explanation": "Adjacency lists efficiently represent sparse graphs; each node's list tracks outgoing edges.",
+    "difficulty": "Medium-Hard",
+    "tags": ["graphs", "adjacency lists", "weighted edges"]
+  }
+]

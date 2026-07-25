@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "Semantic Elements",
+    "question": "A page has `<header><nav></nav></header>` followed by `<nav></nav>` in the footer. Why might a screen reader user be confused?",
+    "options": ["nav elements cannot repeat on the same page", "the outline algorithm sees both as top-level navigations with no hierarchy", "header should not contain nav, header is only for introductory content", "multiple nav elements require unique aria-label to distinguish them"],
+    "correctIndex": 3,
+    "explanation": "Multiple `<nav>` elements should each have a descriptive `aria-label` (e.g., 'Main navigation', 'Footer navigation') so assistive tech can differentiate them in landmarks.",
+    "difficulty": "Medium-Hard",
+    "tags": ["semantic-nav", "accessibility", "landmarks"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Semantic Elements",
+    "question": "A blog post is structured as `<article><section>...</section></article>` instead of nested `<article><article>...</article></article>`. Which is semantically correct for comments?",
+    "options": ["section is correct for comments because they are not independent content", "article is correct for each comment because each is self-contained content", "both are wrong, comments should use div with aria-labelledby", "the choice does not affect semantics, only css styling"],
+    "correctIndex": 1,
+    "explanation": "Each comment is independently distributable and reusable content, so `<article>` is semantically correct; `<section>` groups related content but implies a heading.",
+    "difficulty": "Medium",
+    "tags": ["article-element", "section-element", "comment-structure"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Semantic Elements",
+    "question": "Why should `<aside>` not be used to wrap a related-products sidebar in a shopping cart checkout?",
+    "options": ["aside is only for pull quotes, not advertisements", "checkout product suggestions are tangentially related, not off-topic", "aside implies content that is supplementary but the products are primary to purchase flow", "aside requires a heading to clarify its purpose"],
+    "correctIndex": 2,
+    "explanation": "In checkout context, suggested products are part of the main transaction flow, not tangential; `<aside>` is reserved for content that could be removed without breaking understanding of the main content.",
+    "difficulty": "Medium-Hard",
+    "tags": ["aside-element", "semantic-context"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Semantic Elements",
+    "question": "A document has `<main>` wrapping both article content and a newsletter signup form. A screen reader user jumps to main content. What happens?",
+    "options": ["the browser only exposes the article to the main landmark, form is hidden", "both article and form are included in the main landmark", "only one main element is allowed per document so the form is ignored", "screen reader assistive technology skips form elements inside main"],
+    "correctIndex": 1,
+    "explanation": "The `<main>` element contains both the article and form, so a screen reader jumping to main content will announce the entire region including both.",
+    "difficulty": "Medium",
+    "tags": ["main-element", "landmarks"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Semantic Elements",
+    "question": "A developer uses `<div class='header'>` instead of `<header>`. Why would an accessible name tree differ?",
+    "options": ["div has no implicit role, so it is transparent to accessibility tree; header has implicit role banner", "screen readers announce header with audio cue, div requires explicit announcement", "header creates a region landmark, div does not", "div and header are synonymous for assistive tech, only presentation differs"],
+    "correctIndex": 0,
+    "explanation": "A `<div>` with a class is semantically neutral to assistive tech; `<header>` has the implicit role `banner`, making it navigable as a landmark and improving document outline.",
+    "difficulty": "Medium-Hard",
+    "tags": ["implicit-roles", "accessibility", "landmarks"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Semantic Elements",
+    "question": "Which element correctly wraps `<h2>Featured Products</h2>` and a list of items without being a sectioning context?",
+    "options": ["div", "section", "article", "main"],
+    "correctIndex": 0,
+    "explanation": "A `<div>` is neutral and does not create a sectioning context; `<section>` / `<article>` / `<main>` all create sectioning contexts that affect heading hierarchy in the outline algorithm.",
+    "difficulty": "Medium",
+    "tags": ["sectioning-elements", "outline-algorithm"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Semantic Elements",
+    "question": "A page uses `<nav>` for a breadcrumb trail at the top and `<nav>` for the main menu. A keyboard user presses a skip link. What should happen?",
+    "options": ["skip link jumps to main content, bypassing both nav elements", "skip link must choose one nav, leaving the other to be tabbed through", "skip link jumps to the first nav and skips the second", "both nav elements are skipped; breadcrumbs are not navigational"],
+    "correctIndex": 0,
+    "explanation": "A skip link should bypass all `<nav>` landmarks and jump directly to `<main>` or the primary content area, improving keyboard navigation for all users.",
+    "difficulty": "Medium",
+    "tags": ["skip-links", "navigation", "keyboard-a11y"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Semantic Elements",
+    "question": "A definition list uses `<dl><dt>Term</dt><dd>Definition</dd></dl>`. When parsed by a search engine, what structure does it recognize?",
+    "options": ["key-value pairs suitable for schema.org extraction", "a simple list without semantic structure", "association between dt and dd elements by adjacency and order", "definition list is deprecated and search engines ignore it"],
+    "correctIndex": 2,
+    "explanation": "Search engines and assistive tech infer the term-to-definition relationship by the sequential presence of `<dt>` followed by `<dd>`, making it a semantically meaningful structure.",
+    "difficulty": "Medium",
+    "tags": ["definition-list", "semantic-structure"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Semantic Elements",
+    "question": "Why might `<figure><img src='chart.png' alt=''><figcaption>Chart data</figcaption></figure>` have an accessibility issue?",
+    "options": ["figcaption cannot substitute for alt text; the image needs meaningful alt", "empty alt attributes are invalid in html5", "figure with empty alt is treated as decorative by screen readers", "figcaption must come before the img element"],
+    "correctIndex": 0,
+    "explanation": "Empty `alt=''` marks the image as decorative; `figcaption` is a caption, not alternative text, so users cannot understand the chart's content without alt text.",
+    "difficulty": "Hard",
+    "tags": ["figure-element", "alt-text", "accessibility"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Semantic Elements",
+    "question": "A page has multiple `<section>` elements, each without a heading. How does the document outline behave?",
+    "options": ["sections are treated as untitled sections in the outline", "outline algorithm ignores sections without headings", "each section increments a new heading level", "sections create implicit headings based on class names"],
+    "correctIndex": 0,
+    "explanation": "Each `<section>` without a heading becomes an untitled section in the document outline, which is less accessible and confusing for users navigating via outline structure.",
+    "difficulty": "Medium-Hard",
+    "tags": ["section-element", "document-outline", "heading-hierarchy"]
+  }
+]

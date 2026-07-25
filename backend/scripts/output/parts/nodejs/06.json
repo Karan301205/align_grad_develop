@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "HTTP Protocol Handling",
+    "question": "Which status code should be sent when creating a new resource?\n```javascript\nconst http = require('http');\nconst server = http.createServer((req, res) => {\n  if (req.method === 'POST') {\n    // resource created\n    res.statusCode = ?;\n  }\n});\n```",
+    "options": ["200", "201", "202", "204"],
+    "correctIndex": 1,
+    "explanation": "201 Created is the standard response for successful resource creation; 200 OK implies an existing resource was updated.",
+    "difficulty": "Medium",
+    "tags": ["http-status-codes", "rest-conventions"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "HTTP Protocol Handling",
+    "question": "What is the correct way to stream a file to the client?\n```javascript\nconst fs = require('fs');\nconst http = require('http');\nhttp.createServer((req, res) => {\n  const stream = fs.createReadStream('large.bin');\n  stream.pipe(res);\n}).listen(3000);\n```",
+    "options": ["reading file into memory then sending", "streaming with pipe, writing size header first", "streaming directly via pipe", "streams are not suitable for HTTP"],
+    "correctIndex": 2,
+    "explanation": "Piping the stream directly to res works; Content-Length is optional for streaming (chunked encoding is used instead).",
+    "difficulty": "Medium",
+    "tags": ["http-streaming", "file-streaming", "pipe"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "HTTP Protocol Handling",
+    "question": "When should you use 304 Not Modified?\n```javascript\n// Client sends If-Modified-Since header\nif (req.headers['if-modified-since'] === fileModTime) {\n  res.statusCode = ?;\n  res.end();\n}\n```",
+    "options": ["200", "304", "412", "304 with a body containing cached content"],
+    "correctIndex": 1,
+    "explanation": "304 Not Modified tells the client to use its cached copy; no body is sent, saving bandwidth.",
+    "difficulty": "Medium",
+    "tags": ["http-caching", "conditional-request", "304-status"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "HTTP Protocol Handling",
+    "question": "What is the purpose of the Content-Length header?\n```javascript\nres.setHeader('Content-Length', fileSize);\nres.end(data);\n```",
+    "options": ["tells client the total bytes of the response body", "limits upload size", "enforces chunked encoding", "optional header with no effect"],
+    "correctIndex": 0,
+    "explanation": "Content-Length informs the client how many bytes to expect, enabling proper buffering and progress tracking.",
+    "difficulty": "Medium",
+    "tags": ["http-headers", "content-length"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "HTTP Protocol Handling",
+    "question": "When using chunked transfer encoding, how does the client know when the response ends?\n```javascript\nres.write('chunk1');\nres.write('chunk2');\nres.end(); // last chunk: 0\\r\\n\n```",
+    "options": ["reads until Content-Length bytes received", "reads until connection closes", "reads until a zero-length chunk is sent", "client must send a request to end"],
+    "correctIndex": 2,
+    "explanation": "Chunked encoding terminates with a zero-length chunk (0\\r\\n); the client reads until this marker.",
+    "difficulty": "Medium-Hard",
+    "tags": ["chunked-encoding", "transfer-encoding", "http-protocol"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "HTTP Protocol Handling",
+    "question": "What does res.headersSent tell you?\n```javascript\nres.write('hello');\nif (!res.headersSent) {\n  res.setHeader('X-Custom', 'value');\n}\n```",
+    "options": ["true if headers were already sent to client", "true if setHeader was called", "true if response is complete", "always false in Node.js"],
+    "correctIndex": 0,
+    "explanation": "Once res.write or res.end is called, headers are sent to the client; headersSent becomes true and further setHeader calls are ignored.",
+    "difficulty": "Medium",
+    "tags": ["http-response", "headersSent"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "HTTP Protocol Handling",
+    "question": "Which method should you use for idempotent operations?\n```javascript\n// Client submits a form multiple times by accident\nPOST /api/transfer { amount: 100 }\nPOST /api/transfer { amount: 100 }\n```",
+    "options": ["POST is idempotent if status is 200", "PUT is idempotent and better for this scenario", "both POST and PUT are equally idempotent", "HTTP method does not affect idempotency"],
+    "correctIndex": 1,
+    "explanation": "PUT is idempotent; multiple identical PUT requests have the same effect as one; POST creates new resources each time (not idempotent).",
+    "difficulty": "Medium-Hard",
+    "tags": ["http-methods", "idempotency", "rest-design"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "HTTP Protocol Handling",
+    "question": "What should happen if the client sends a malformed request body?\n```javascript\napp.post('/api', (req, res) => {\n  try {\n    const json = JSON.parse(req.body);\n  } catch (e) {\n    res.status(?) .json({error: 'invalid json'});\n  }\n});\n```",
+    "options": ["200", "400", "422", "500"],
+    "correctIndex": 1,
+    "explanation": "400 Bad Request indicates the client sent a malformed or invalid request; 422 Unprocessable Entity is for semantic errors.",
+    "difficulty": "Medium",
+    "tags": ["http-status-codes", "error-handling", "rest-design"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "HTTP Protocol Handling",
+    "question": "When streaming large data, what issue can occur with pipe?\n```javascript\nconst readable = fs.createReadStream('huge.bin', {highWaterMark: 16384});\nreadable.pipe(res); // res is slow (e.g., 56k modem)\n```",
+    "options": ["memory is freed after each chunk", "readable blocks until res buffer clears", "memory accumulates as chunks buffer", "pipe throws an error immediately"],
+    "correctIndex": 2,
+    "explanation": "If the destination (res) is slower than the source (readable), chunks accumulate in memory; pipe handles backpressure to prevent this.",
+    "difficulty": "Medium-Hard",
+    "tags": ["stream-backpressure", "pipe", "memory-management"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "HTTP Protocol Handling",
+    "question": "What does req.method tell you about the request intent?\n```javascript\nif (req.method === 'HEAD') {\n  // Client wants headers but no body\n}\n```",
+    "options": ["HEAD is not a valid HTTP method", "HEAD is like GET but without response body", "HEAD requires a 204 response", "HEAD bypasses middleware"],
+    "correctIndex": 1,
+    "explanation": "HEAD is identical to GET but the response body is omitted; clients use it to check resource metadata without downloading content.",
+    "difficulty": "Medium",
+    "tags": ["http-methods", "head-request"]
+  }
+]

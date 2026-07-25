@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "Document Structure",
+    "question": "A page omits `<meta charset>` but includes `<title>Café</title>`. How do browsers determine encoding before parsing the title?",
+    "options": ["content-type header signals encoding to the parser before the meta tag is read", "charset meta is not needed if the server sends the correct content-type", "browsers guess encoding from the first non-ascii character", "the title is parsed as bytes until charset is discovered"],
+    "correctIndex": 0,
+    "explanation": "The HTTP Content-Type header (e.g., `text/html; charset=utf-8`) is read before the HTML parser starts, so the parser uses server-declared encoding from the beginning.",
+    "difficulty": "Medium-Hard",
+    "tags": ["charset", "meta-tag", "encoding", "http-headers"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Document Structure",
+    "question": "A document has `<html lang='en-US'>` but client JavaScript sets `document.documentElement.lang = 'es'`. Which language do screen readers announce?",
+    "options": ["en-US because the html attribute is the source of truth", "es because javascript dynamically updates the attribute", "the browser caches en-US and ignores the change", "es only if the change occurs before the page fully loads"],
+    "correctIndex": 1,
+    "explanation": "Assistive tech monitors live DOM attributes; updating `lang` dynamically with JavaScript changes the announced language immediately.",
+    "difficulty": "Medium",
+    "tags": ["lang-attribute", "dynamic-content", "a11y"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Document Structure",
+    "question": "An HTML file is missing `<!DOCTYPE html>`. The page renders in quirks mode. Which rendering behavior is likely?",
+    "options": ["box model uses content-box instead of border-box", "older browsers apply non-standard css interpretation", "modern browsers reset doctype assumption and revert to standards mode", "the page renders identically to a proper doctype"],
+    "correctIndex": 1,
+    "explanation": "Quirks mode activates legacy rendering behaviors to support old websites; modern browsers interpret older CSS rules and may differ from standards mode in box sizing, margins, and padding.",
+    "difficulty": "Medium-Hard",
+    "tags": ["doctype", "quirks-mode", "rendering"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Document Structure",
+    "question": "A document declares `<html lang='en-US'>` but has no `<head>`. Where do CSS and JavaScript loads go?",
+    "options": ["the browser auto-inserts a head element for them", "css and js fail to load because head is required", "they are parsed as part of body and loaded in order", "the browser rejects the document as malformed"],
+    "correctIndex": 0,
+    "explanation": "HTML5 parsers auto-insert missing structural elements (`<head>`, `<body>`) to maintain valid tree structure, so CSS/JS in `<body>` are moved to the inserted `<head>`.",
+    "difficulty": "Medium",
+    "tags": ["document-structure", "html5-parsing", "auto-correction"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Document Structure",
+    "question": "Why might `<meta name='viewport' content='width=device-width'>` fail on a page served with `<meta http-equiv='X-UA-Compatible' content='IE=5'>`?",
+    "options": ["the x-ua-compatible meta forces internet explorer 5 rendering, ignoring viewport", "both metas conflict and only the first one is applied", "viewport only works if x-ua-compatible is absent", "the x-ua-compatible meta is deprecated and causes parsing errors"],
+    "correctIndex": 0,
+    "explanation": "The `X-UA-Compatible` header/meta forces a specific IE rendering mode, which takes precedence; if it targets IE5, modern viewport scaling is disabled.",
+    "difficulty": "Hard",
+    "tags": ["viewport-meta", "x-ua-compatible", "browser-modes"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Document Structure",
+    "question": "A document has `<meta http-equiv='refresh' content='5; url=http://example.com'>`. Which statement is true?",
+    "options": ["the page redirects after 5 seconds without server involvement", "redirect only works if the server sends a matching refresh header", "meta refresh is ignored by modern browsers for security", "meta refresh only works if placed before meta charset"],
+    "correctIndex": 0,
+    "explanation": "The meta refresh directive causes the browser to navigate after the specified delay; it is a client-side redirect that works independently of server headers.",
+    "difficulty": "Medium",
+    "tags": ["meta-refresh", "client-redirect"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Document Structure",
+    "question": "A page loads `<link rel='stylesheet' href='style.css'>` in head and `<link rel='stylesheet' href='style.css'>` again in body. How many HTTP requests are made?",
+    "options": ["two requests, one for each link tag", "one request with caching preventing the second", "one request because the browser deduplicates identical links", "varies by browser implementation"],
+    "correctIndex": 1,
+    "explanation": "Modern browsers cache fetched resources by URL; if the browser fetches the CSS on the first link, the second link request is served from the browser cache without a network round-trip.",
+    "difficulty": "Medium-Hard",
+    "tags": ["resource-loading", "caching"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Document Structure",
+    "question": "A document has `<noscript>JavaScript is disabled</noscript>` in the head. When does this appear?",
+    "options": ["only if javascript is disabled at the browser setting level", "only if a script tag fails to load or errors", "if javascript is not supported or explicitly disabled", "noscript only works in body, not in head"],
+    "correctIndex": 2,
+    "explanation": "The `<noscript>` element displays its content when the browser does not support JavaScript or when JavaScript is disabled; placement in head is valid and displays before body renders.",
+    "difficulty": "Medium",
+    "tags": ["noscript-element", "fallback"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Document Structure",
+    "question": "Why might a page with `<base href='https://example.com/docs/'>` and `<a href='intro.html'>` navigate to an unexpected URL?",
+    "options": ["relative hrefs are resolved against the base, resulting in https://example.com/docs/intro.html", "the base element applies only to forms, not anchor links", "anchor href ignores base and always uses the current page path", "the browser invalidates the href due to base conflicting with the domain"],
+    "correctIndex": 0,
+    "explanation": "The `<base>` element sets the base URL for resolving all relative URLs in the document, so `intro.html` becomes `https://example.com/docs/intro.html`.",
+    "difficulty": "Medium",
+    "tags": ["base-element", "relative-urls"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Document Structure",
+    "question": "A document has `<head><script src='app.js'></script></head><body>...</body>`. The page is blank until the script finishes loading. Why?",
+    "options": ["script tags in head block html parsing until the script runs", "the script must run before the dom is available", "browser waits for head to complete before rendering body", "an error in the script is preventing body from rendering"],
+    "correctIndex": 0,
+    "explanation": "By default, `<script>` tags are render-blocking; the HTML parser pauses while the script loads and executes, delaying initial render until the script completes.",
+    "difficulty": "Medium",
+    "tags": ["script-loading", "render-blocking", "performance"]
+  }
+]

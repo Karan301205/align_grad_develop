@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Express JS",
+    "subtopic": "Node JS Basics",
+    "question": "You're building an Express app and need to read a JSON file synchronously at startup. Which approach won't block the event loop?",
+    "options": [
+      "fs.readFileSync() in your main index.js before starting the server",
+      "fs.readFile() wrapped in a Promise.all() with other async ops before listening",
+      "fs.promises.readFile() in an async IIFE before creating the Express app",
+      "eval() to load config inline"
+    ],
+    "correctIndex": 2,
+    "explanation": "fs.promises.readFile() in an async IIFE defers file I/O until after the module loads, preventing event loop blocking during startup.",
+    "difficulty": "Medium",
+    "tags": ["event-loop", "fs", "async", "startup"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Node JS Basics",
+    "question": "A module exports a function that modifies a shared counter object. After requiring it 3 times in different routes, why does each route see the same updated counter?",
+    "options": [
+      "Node.js re-executes the module for each require() call",
+      "Node.js caches the module after first require(), returning the same instance every time",
+      "Express automatically synchronizes module state across routes",
+      "The counter is stored in the V8 heap and shared globally"
+    ],
+    "correctIndex": 1,
+    "explanation": "Node.js module caching means require() returns the same singleton instance on subsequent calls, causing state mutations to persist across all consumers.",
+    "difficulty": "Medium",
+    "tags": ["module-caching", "require", "state-sharing"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Node JS Basics",
+    "question": "A callback-based database operation times out and never calls its callback. Why does the process hang instead of exiting?",
+    "options": [
+      "The event loop has no more tasks in its queue but the process is still listening for the callback",
+      "Express automatically prevents process exit when callbacks are pending",
+      "Node.js treats timeouts as fatal and waits for manual termination",
+      "The process is blocked by a synchronous operation somewhere"
+    ],
+    "correctIndex": 0,
+    "explanation": "The event loop remains active and the process stays alive as long as there are outstanding references (pending callbacks, open handles), even if they never fire.",
+    "difficulty": "Medium-Hard",
+    "tags": ["event-loop", "callbacks", "hanging", "handles"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Node JS Basics",
+    "question": "You set `process.env.NODE_ENV = 'production'` in your app, but Express still shows detailed error stack traces. What's the likely cause?",
+    "options": [
+      "process.env is only checked at startup, not updated dynamically",
+      "Express reads NODE_ENV once during require, so mid-runtime changes are ignored",
+      "Production mode requires a restart or app.set() to take effect",
+      "You didn't call app.use(express.errorHandler()) explicitly"
+    ],
+    "correctIndex": 1,
+    "explanation": "Express caches NODE_ENV during initialization; changing it mid-runtime doesn't update error handling because the conditional logic runs only once on module load.",
+    "difficulty": "Medium",
+    "tags": ["environment", "process.env", "startup", "caching"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Node JS Basics",
+    "question": "A helper module exports an async function that imports a database connection string from process.env. In tests, you set a different env var before importing the helper, but the old value persists. Why?",
+    "options": [
+      "process.env is immutable and cannot be changed after Node starts",
+      "The helper cached the env var at import time, before your test changed it",
+      "Test frameworks automatically restore original process.env after each test",
+      "Modifying process.env requires calling process.restart()"
+    ],
+    "correctIndex": 1,
+    "explanation": "If the helper reads process.env during module initialization (not inside a function), the value is cached; changing process.env later doesn't re-execute the module-level code.",
+    "difficulty": "Medium",
+    "tags": ["testing", "process.env", "caching", "module-loading"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Node JS Basics",
+    "question": "Your Express app spawns a child process with child_process.spawn() but doesn't listen to its 'exit' event. What happens after the child dies?",
+    "options": [
+      "The parent process immediately exits",
+      "The parent process hangs indefinitely because the child handle is still active",
+      "The child becomes a zombie until the parent process exits",
+      "The parent automatically cleans up the child process"
+    ],
+    "correctIndex": 2,
+    "explanation": "Without listening to 'exit' or calling waitpid(), the child becomes a zombie process that persists until the parent exits or explicitly reaps it.",
+    "difficulty": "Medium-Hard",
+    "tags": ["child-process", "zombie", "event-handling", "cleanup"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Node JS Basics",
+    "question": "You use require('./config') in a route handler that's called multiple times per second. The config file is 500KB and contains complex object lookups. Why is this not ideal?",
+    "options": [
+      "require() re-reads the file from disk on every call",
+      "require() is cached globally, so the file is read once but passed to every handler",
+      "require() blocking the event loop is negligible for small files",
+      "Express limits require() calls per route"
+    ],
+    "correctIndex": 1,
+    "explanation": "require() caches the module after the first load, but calling it repeatedly in hot code paths is still poor practice; cache the reference at startup instead.",
+    "difficulty": "Medium",
+    "tags": ["caching", "require", "performance", "startup"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Node JS Basics",
+    "question": "A stream.pipe() operation between two large files fails silently after 30 minutes. Which is the most likely cause?",
+    "options": [
+      "Pipes automatically time out after 30 minutes",
+      "The destination stream closed without error or finished event, but the source kept writing and hit backpressure limits",
+      "The source stream emitted 'end' but 'drain' was never called",
+      "Node.js has a built-in timeout for stream operations"
+    ],
+    "correctIndex": 1,
+    "explanation": "If the destination closes unexpectedly but the source doesn't see it, backpressure accumulates; proper stream handling requires listening to 'error', 'close', and 'drain' events.",
+    "difficulty": "Medium-Hard",
+    "tags": ["streams", "backpressure", "error-handling", "drainage"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Node JS Basics",
+    "question": "You're debugging memory leaks and notice the process keeps growing. A global array pushes new objects every request, but nothing removes them. What prevents garbage collection?",
+    "options": [
+      "Arrays are always kept in memory and never garbage collected",
+      "The global reference keeps the array alive, and the array holds references to objects, preventing GC",
+      "Garbage collection only runs at startup in Node.js",
+      "Objects in Express routes are automatically freed after the request"
+    ],
+    "correctIndex": 1,
+    "explanation": "Global references prevent garbage collection; objects stored in a global array remain in memory indefinitely, causing a memory leak as the array grows unbounded.",
+    "difficulty": "Medium",
+    "tags": ["memory-leak", "garbage-collection", "globals", "debugging"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Node JS Basics",
+    "question": "Your Node process runs with --max-old-space-size=512 but a data processing route OOMs unexpectedly. The heap was only at 450MB before the request. Why did it fail?",
+    "options": [
+      "Node.js allocates memory in discrete chunks, not gradually, so a large request exceeded the next chunk boundary",
+      "V8's garbage collector didn't run before the large allocation, leaving fragmented free space too small for contiguous blocks",
+      "Express middleware consumed hidden memory outside the counted heap",
+      "Buffers over 256MB are always rejected regardless of heap size"
+    ],
+    "correctIndex": 1,
+    "explanation": "V8 garbage collection is not instantaneous; fragmentation and allocation patterns can cause OOM even with theoretical free space if no contiguous block large enough exists.",
+    "difficulty": "Hard",
+    "tags": ["memory", "heap", "garbage-collection", "oom"]
+  }
+]

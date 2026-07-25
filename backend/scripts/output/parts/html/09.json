@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "Accessibility Guidelines",
+    "question": "A form input uses `<input type='text' placeholder='Email'>` without a label. Why does this fail accessibility?",
+    "options": ["placeholder text is not an accessible label for screen readers", "screen readers cannot see placeholder text", "the input must have a label element with for and id", "all three reasons above are correct"],
+    "correctIndex": 3,
+    "explanation": "Placeholder text disappears when the user types, is not semantically linked, and is not reliably read by all screen readers; a `<label>` element is required for proper accessibility.",
+    "difficulty": "Medium",
+    "tags": ["placeholder", "form-labels", "accessibility"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Accessibility Guidelines",
+    "question": "A page uses `<div role='button'>Click me</div>` instead of `<button>`. Which assistive tech feature is broken?",
+    "options": ["the element is not keyboard accessible without js, and screen readers may not announce it as a button", "role='button' requires aria-pressed attribute", "div elements cannot be made keyboard accessible", "role='button' is deprecated and button element must be used"],
+    "correctIndex": 0,
+    "explanation": "While `role='button'` makes screen readers announce it as a button, it does not provide keyboard interaction (Space/Enter) without JavaScript, breaking native accessibility.",
+    "difficulty": "Medium-Hard",
+    "tags": ["role-attribute", "keyboard-accessibility"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Accessibility Guidelines",
+    "question": "A page uses `<img src='icon.svg' alt='Icon'>` for a decorative icon next to text. Why is this redundant?",
+    "options": ["svg images do not need alt text", "decorative images should have empty alt='' to skip them", "the icon is already described by adjacent text", "all icons require meaningful alt text"],
+    "correctIndex": 1,
+    "explanation": "Decorative images (like icons accompanying explanatory text) should have `alt=''` to signal that they are decorative and should be skipped by screen readers.",
+    "difficulty": "Medium",
+    "tags": ["alt-text", "decorative-images"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Accessibility Guidelines",
+    "question": "A page has a modal dialog but users can still tab to elements behind it. Why is this an accessibility issue?",
+    "options": ["the modal is missing aria-modal='true' which is required", "keyboard focus should be trapped within the modal", "the modal is missing role='dialog' which prevents background interaction", "hidden elements behind the modal should have display:none"],
+    "correctIndex": 1,
+    "explanation": "A modal dialog should trap keyboard focus within itself; allowing tab navigation to background elements breaks the dialog's purpose and confuses keyboard users.",
+    "difficulty": "Medium-Hard",
+    "tags": ["modal-dialog", "focus-management", "keyboard-a11y"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Accessibility Guidelines",
+    "question": "A form uses `<input type='text' aria-label='Search'>` without a visible label. Which users are affected?",
+    "options": ["sighted users cannot see the label, making it unclear what the field is for", "screen reader users have an accessible label via aria-label", "both sighted and keyboard-only users may be confused", "aria-label replaces the need for a visible label"],
+    "correctIndex": 2,
+    "explanation": "`aria-label` is invisible to sighted users; a visible label (via `<label>` or text) is necessary for inclusive design, especially for keyboard-only users.",
+    "difficulty": "Medium-Hard",
+    "tags": ["aria-label", "visible-labels", "inclusive-design"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Accessibility Guidelines",
+    "question": "A page uses `<a href='#' onclick='doSomething()'>Action</a>`. Why is this not accessible?",
+    "options": ["the href='#' causes page scroll, interfering with the action", "the link is keyboard accessible but screen readers may not announce it correctly", "anchor tags should not use onclick; buttons should be used instead", "onclick on links breaks screen reader announcement"],
+    "correctIndex": 2,
+    "explanation": "Anchor tags with onclick (instead of navigation) are semantically misused; a `<button>` element is the correct choice for actions, providing built-in keyboard support.",
+    "difficulty": "Medium",
+    "tags": ["semantic-html", "button-element", "keyboard-a11y"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Accessibility Guidelines",
+    "question": "A page uses `<span role='heading' aria-level='1'>Title</span>`. Why might this confuse screen readers?",
+    "options": ["role='heading' without aria-level is invalid", "the span element role overrides native heading semantics", "screen readers may not properly link the heading to the outline algorithm", "the span is not parsed as a heading in document structure"],
+    "correctIndex": 2,
+    "explanation": "While `role='heading'` makes screen readers announce it as a heading, it does not create a structural heading entry in the document outline, breaking navigation.",
+    "difficulty": "Hard",
+    "tags": ["role-attribute", "aria-level", "document-outline"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Accessibility Guidelines",
+    "question": "A page uses `<input type='checkbox' aria-label='Agree to terms'>`. A sighted user sees only an unchecked box. Why is this incomplete?",
+    "options": ["aria-label should be visible to all users, not just screen readers", "the checkbox needs a visible label element in addition to aria-label", "aria-label is sufficient and no visible label is needed", "checkboxes do not support aria-label"],
+    "correctIndex": 1,
+    "explanation": "Sighted users cannot see `aria-label`, so a visible `<label>` element is necessary for all users to understand the checkbox's purpose.",
+    "difficulty": "Medium",
+    "tags": ["aria-label", "visible-labels", "form-labels"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Accessibility Guidelines",
+    "question": "A page uses `<div style='display:none'>This is hidden</div>` with `aria-hidden='false'`. What does a screen reader announce?",
+    "options": ["the text is announced because aria-hidden=false overrides display:none", "the text is not announced because display:none removes it from rendering", "aria-hidden=false contradicts display:none causing unpredictable behavior", "the combination is invalid and creates an error"],
+    "correctIndex": 1,
+    "explanation": "CSS `display:none` removes elements from both visual rendering and the accessibility tree, regardless of `aria-hidden`; the element is not announced.",
+    "difficulty": "Medium-Hard",
+    "tags": ["display:none", "aria-hidden", "accessibility-tree"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Accessibility Guidelines",
+    "question": "A page uses `<button aria-label='Close' onclick='close()'>✕</button>`. Why might the aria-label be necessary?",
+    "options": ["the symbol ✕ is not universally understood by screen readers", "aria-label provides context for screen readers when the symbol alone is unclear", "the button text must match the label for accessibility", "aria-label is redundant; the symbol provides sufficient context"],
+    "correctIndex": 1,
+    "explanation": "Unicode symbols like ✕ may not be clearly announced by screen readers (e.g., 'multiplication sign'); `aria-label='Close'` clarifies the button's purpose.",
+    "difficulty": "Medium",
+    "tags": ["aria-label", "symbols", "button-labels"]
+  }
+]

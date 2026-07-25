@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "Performance Optimization",
+    "question": "What causes a memory leak in Node.js?\n```javascript\nconst cache = {};\napp.get('/data/:id', (req, res) => {\n  if (!cache[req.params.id]) {\n    cache[req.params.id] = fetchData(req.params.id);\n  }\n  res.json(cache[req.params.id]);\n});\n```",
+    "options": ["cache is freed automatically", "cache grows infinitely, never freed", "cache only stores recent entries", "no memory leak exists"],
+    "correctIndex": 1,
+    "explanation": "The cache object holds references indefinitely; cache grows unbounded as new IDs are requested, causing memory to grow until process crashes.",
+    "difficulty": "Medium",
+    "tags": ["memory-leak", "cache", "garbage-collection"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Performance Optimization",
+    "question": "How does Node.js clustering improve performance?\n```javascript\nconst cluster = require('cluster');\nconst os = require('os');\nfor (let i = 0; i < os.cpus().length; i++) {\n  cluster.fork();\n}\n```",
+    "options": ["spawns one worker per CPU core, distributing requests", "only one process runs regardless", "clustering is deprecated", "clustering slows down single requests"],
+    "correctIndex": 0,
+    "explanation": "Multiple worker processes utilize all CPU cores; a master process distributes incoming requests, improving throughput on multi-core systems.",
+    "difficulty": "Medium-Hard",
+    "tags": ["clustering", "multicore", "performance"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Performance Optimization",
+    "question": "What does caching HTTP responses achieve?\n```javascript\nres.setHeader('Cache-Control', 'max-age=3600, public');\nres.json(data);\n```",
+    "options": ["tells browsers to cache response for 1 hour", "browsers cache on disk and reuse without new requests", "improves server performance by reducing requests", "all of the above"],
+    "correctIndex": 3,
+    "explanation": "Cache-Control instructs browsers to store responses locally; subsequent requests within 1 hour skip the server, improving speed and reducing load.",
+    "difficulty": "Medium",
+    "tags": ["http-caching", "cache-control"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Performance Optimization",
+    "question": "How can you find performance bottlenecks?\n```javascript\nconst perf = require('perf_hooks');\nconst mark1 = perf.performance.mark('start');\n// code to measure\nconst mark2 = perf.performance.mark('end');\nperf.performance.measure('duration', 'start', 'end');\n```",
+    "options": ["profiling with perf_hooks identifies slow functions", "guess which functions are slow", "profiling is unnecessary", "only production code is worth profiling"],
+    "correctIndex": 0,
+    "explanation": "perf_hooks allows marking and measuring code execution time; profiling identifies which functions consume most time.",
+    "difficulty": "Medium",
+    "tags": ["profiling", "performance", "perf_hooks"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Performance Optimization",
+    "question": "What is the effect of res.setHeader('Content-Encoding', 'gzip')?\n```javascript\nres.setHeader('Content-Encoding', 'gzip');\nconst stream = fs.createReadStream('file.txt').pipe(zlib.createGzip()).pipe(res);\n```",
+    "options": ["sends uncompressed file", "compresses response body, reducing bandwidth", "encryption replaces compression", "gzip is deprecated"],
+    "correctIndex": 1,
+    "explanation": "gzip compresses the response; browsers automatically decompress; bandwidth reduces by 60-80% for text, improving download speed.",
+    "difficulty": "Medium",
+    "tags": ["compression", "gzip", "bandwidth"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Performance Optimization",
+    "question": "How does connection pooling improve database performance?\n```javascript\nconst pool = new Pool({min: 5, max: 20});\n// maintains 5-20 idle connections\n```",
+    "options": ["creates new connection per query (slow)", "reuses idle connections, avoiding connection creation overhead", "pooling is optional", "one connection per client"],
+    "correctIndex": 1,
+    "explanation": "Creating connections is expensive; pooling maintains idle connections ready to reuse, eliminating handshake delays.",
+    "difficulty": "Medium",
+    "tags": ["connection-pooling", "database-performance"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Performance Optimization",
+    "question": "When should you implement asynchronous code?\n```javascript\n// Synchronous: blocks event loop\nconst data = fs.readFileSync('file.txt');\n\n// Asynchronous: doesn't block\nfs.readFile('file.txt', (err, data) => {});\n```",
+    "options": ["synchronous is simpler, avoid async", "use async for I/O operations to not block event loop", "sync and async have same performance", "blocking is always preferred"],
+    "correctIndex": 1,
+    "explanation": "I/O operations (file, network, database) should be async; blocking ties up the event loop, starving other requests.",
+    "difficulty": "Medium",
+    "tags": ["async-programming", "event-loop", "performance"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Performance Optimization",
+    "question": "How does Node.js garbage collection (GC) affect performance?\n```javascript\nnode --max-old-space-size=2048 app.js\n```",
+    "options": ["GC pauses are unavoidable in all languages", "GC pauses can cause latency spikes; tune heap size", "larger heap = faster GC", "GC is not relevant in Node.js"],
+    "correctIndex": 1,
+    "explanation": "GC pauses stop execution; smaller heap = more frequent pauses; larger heap = longer pauses; tune to balance frequency vs. duration.",
+    "difficulty": "Medium-Hard",
+    "tags": ["garbage-collection", "memory-management", "latency"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Performance Optimization",
+    "question": "What is the benefit of CDN for static assets?\n```javascript\n// Serve from CDN instead of origin server\n<img src=\"https://cdn.example.com/image.png\" />\n```",
+    "options": ["CDN is only for CSS and JavaScript", "CDN caches assets near users, reducing latency", "all users download from same location", "CDN slows down requests"],
+    "correctIndex": 1,
+    "explanation": "CDNs distribute copies of assets to global edge servers; users fetch from nearby locations, dramatically reducing latency.",
+    "difficulty": "Medium",
+    "tags": ["cdn", "caching", "performance"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Performance Optimization",
+    "question": "How can you measure database query performance?\n```javascript\nconst start = Date.now();\nconst result = await db('users').select();\nconst duration = Date.now() - start;\nconsole.log(`Query took ${duration}ms`);\n```",
+    "options": ["manual timing is unreliable", "timing is one tool; use EXPLAIN to analyze query plans", "slow queries can't be optimized", "query performance is unpredictable"],
+    "correctIndex": 1,
+    "explanation": "Timing shows a query is slow; EXPLAIN reveals the query plan (indexes used, scans); combine both to optimize queries.",
+    "difficulty": "Medium-Hard",
+    "tags": ["database-performance", "query-optimization", "explain"]
+  }
+]

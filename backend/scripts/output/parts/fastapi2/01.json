@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Async Programming",
+    "question": "from fastapi import FastAPI\nimport asyncio\n\napp = FastAPI()\n\n@app.get(\"/test\")\ndef sync_endpoint():\n    asyncio.run(asyncio.sleep(1))\n    return {\"status\": \"ok\"}\n\nWhat happens when this endpoint is called?",
+    "options": [
+      "Creates new event loop, sleeps 1s, returns immediately",
+      "Blocks thread for 1s, raises RuntimeError about existing loop",
+      "Returns immediately without waiting",
+      "Deadlocks the server"
+    ],
+    "correctIndex": 1,
+    "explanation": "Calling asyncio.run() in a non-async function inside FastAPI's async context creates a RuntimeError because an event loop already exists; use `async def` instead.",
+    "difficulty": "Medium",
+    "tags": ["asyncio", "event-loop", "blocking"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Async Programming",
+    "question": "from fastapi import FastAPI\nimport httpx\n\napp = FastAPI()\n\n@app.get(\"/users/{user_id}\")\nasync def get_user(user_id: int):\n    async with httpx.AsyncClient() as client:\n        response = await client.get(f\"https://api.example.com/users/{user_id}\")\n    return response.json()\n\nWhat is the performance characteristic?",
+    "options": [
+      "Each request blocks the event loop for network I/O",
+      "Concurrent requests can be processed while one waits for network I/O",
+      "Maximum 1 request per second due to httpx limits",
+      "Memory leaks from unclosed async contexts"
+    ],
+    "correctIndex": 1,
+    "explanation": "AsyncClient properly suspends the coroutine during I/O, allowing the event loop to process other requests concurrently.",
+    "difficulty": "Medium",
+    "tags": ["async-http", "concurrency", "i-o-bound"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Async Programming",
+    "question": "from fastapi import FastAPI\nimport time\n\napp = FastAPI()\n\n@app.get(\"/task\")\nasync def process_task():\n    time.sleep(2)  # CPU-bound work\n    return {\"result\": \"done\"}\n\nWhy is this inefficient even though it's marked async?",
+    "options": [
+      "time.sleep() is synchronous and blocks the event loop",
+      "Async functions always add overhead",
+      "AsyncClient not used",
+      "Response encoding takes time"
+    ],
+    "correctIndex": 0,
+    "explanation": "time.sleep() blocks the entire event loop thread; use `await asyncio.sleep()` or run CPU-bound work in a thread pool via `asyncio.to_thread()`.",
+    "difficulty": "Medium",
+    "tags": ["blocking", "cpu-bound", "event-loop"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Async Programming",
+    "question": "from fastapi import FastAPI\nimport asyncio\n\napp = FastAPI()\n\nasync def background_task():\n    await asyncio.sleep(5)\n    print(\"Task complete\")\n\n@app.get(\"/start-task\")\nasync def start_task():\n    asyncio.create_task(background_task())\n    return {\"status\": \"started\"}\n\nWhat happens if the server shuts down 2 seconds after calling this endpoint?",
+    "options": [
+      "Task runs to completion in background after shutdown",
+      "Task is cancelled and never completes",
+      "Task warning issued but execution continues",
+      "Server waits for all tasks before shutdown"
+    ],
+    "correctIndex": 1,
+    "explanation": "create_task() fires-and-forgets; the task is cancelled when the server shuts down without waiting, so it never completes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["background-tasks", "lifecycle", "task-cancellation"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Async Programming",
+    "question": "from fastapi import FastAPI, BackgroundTasks\n\napp = FastAPI()\n\n@app.get(\"/email\")\nasync def send_email(bg_tasks: BackgroundTasks):\n    bg_tasks.add_task(send_mail, email=\"user@example.com\")\n    return {\"status\": \"email queued\"}\n\nasync def send_mail(email: str):\n    # 10 seconds of work\n    pass\n\nHow does BackgroundTasks handle async functions?",
+    "options": [
+      "Awaits them within the lifespan context, blocking response",
+      "Runs them synchronously without awaiting",
+      "Wraps them in asyncio.create_task() safely",
+      "Raises TypeError because send_mail is async"
+    ],
+    "correctIndex": 2,
+    "explanation": "BackgroundTasks internally wraps async functions using create_task() to schedule them safely after the response is sent.",
+    "difficulty": "Medium-Hard",
+    "tags": ["background-tasks", "async-context", "response-cycle"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Async Programming",
+    "question": "from fastapi import FastAPI\nimport asyncio\n\napp = FastAPI()\n\nasync def fetch_from_multiple_apis():\n    tasks = [\n        fetch(\"https://api1.example.com\"),\n        fetch(\"https://api2.example.com\"),\n        fetch(\"https://api3.example.com\")\n    ]\n    results = await asyncio.gather(*tasks)\n    return results\n\nasync def fetch(url: str):\n    await asyncio.sleep(2)\n    return {\"url\": url}\n\n@app.get(\"/combined\")\nasync def combined_data():\n    data = await fetch_from_multiple_apis()\n    return data\n\nWhat is the total wall-clock time for three sequential 2-second requests?",
+    "options": [
+      "2 seconds (concurrent)",
+      "6 seconds (sequential)",
+      "3 seconds (batched)",
+      "Depends on gather() implementation"
+    ],
+    "correctIndex": 0,
+    "explanation": "asyncio.gather() awaits all tasks concurrently, so three 2-second operations complete in ~2 seconds total.",
+    "difficulty": "Medium",
+    "tags": ["asyncio.gather", "concurrency", "timing"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Async Programming",
+    "question": "from fastapi import FastAPI\n\napp = FastAPI()\n\n@app.get(\"/items/{item_id}\")\nasync def get_item(item_id: int):\n    return {\"item_id\": item_id}\n\nwhen this is run under Uvicorn with workers=4, how many event loops exist?",
+    "options": [
+      "1 shared event loop across all workers",
+      "4 independent event loops, one per worker",
+      "1 event loop plus 4 thread pools",
+      "Depends on OS"
+    ],
+    "correctIndex": 1,
+    "explanation": "Each Uvicorn worker process has its own event loop; they don't share a loop across processes.",
+    "difficulty": "Medium",
+    "tags": ["uvicorn", "workers", "multiprocessing"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Async Programming",
+    "question": "from fastapi import FastAPI\nfrom contextlib import asynccontextmanager\n\napp = FastAPI()\n\n@asynccontextmanager\nasync def get_db():\n    db = connect()\n    try:\n        yield db\n    finally:\n        db.close()\n\n@app.get(\"/users\")\nasync def list_users(db = Depends(get_db)):\n    return db.query(\"SELECT * FROM users\")\n\nWhat happens if db.close() is a blocking I/O call?",
+    "options": [
+      "Blocks the event loop during cleanup",
+      "Silently fails to close the connection",
+      "Raises TypeError automatically",
+      "get_db() context manager refuses the dependency"
+    ],
+    "correctIndex": 0,
+    "explanation": "Blocking I/O in async cleanup blocks the event loop; use `await db.aclose()` or run it in a thread via `asyncio.to_thread()`.",
+    "difficulty": "Medium-Hard",
+    "tags": ["context-managers", "cleanup", "blocking-io"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Async Programming",
+    "question": "from fastapi import FastAPI\nimport asyncio\n\napp = FastAPI()\n\nshared_cache = {}\n\n@app.get(\"/data/{key}\")\nasync def get_cached(key: str):\n    if key not in shared_cache:\n        shared_cache[key] = await fetch_data(key)\n    return shared_cache[key]\n\nasync def fetch_data(key: str):\n    await asyncio.sleep(1)\n    return {\"data\": key}\n\nTwo concurrent requests for the same key arrive simultaneously. What happens?",
+    "options": [
+      "fetch_data() runs twice because both see empty cache",
+      "Second request waits for first to populate cache",
+      "Requests are serialized; second gets cached result",
+      "Dictionary raises KeyError during concurrent access"
+    ],
+    "correctIndex": 0,
+    "explanation": "Both coroutines check the cache before either finishes fetch_data(), so both initiate concurrent fetches; use asyncio.Lock or Cache libraries to prevent this.",
+    "difficulty": "Medium-Hard",
+    "tags": ["race-conditions", "caching", "concurrency"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Async Programming",
+    "question": "from fastapi import FastAPI\nimport asyncio\n\napp = FastAPI()\n\n@app.get(\"/timeout\")\nasync def slow_endpoint():\n    try:\n        result = await asyncio.wait_for(\n            fetch_external_api(),\n            timeout=2.0\n        )\n        return result\n    except asyncio.TimeoutError:\n        return {\"error\": \"timeout\"}\n\nasync def fetch_external_api():\n    await asyncio.sleep(5)\n\nWhat happens to the fetch_external_api() task after timeout?",
+    "options": [
+      "Continues running in background; still sleeps 5 seconds",
+      "Gets cancelled immediately; sleep stops",
+      "Completes after 2 seconds regardless",
+      "Raises unhandled exception in background"
+    ],
+    "correctIndex": 1,
+    "explanation": "asyncio.wait_for() cancels the task on timeout by raising CancelledError inside it, stopping execution immediately.",
+    "difficulty": "Medium-Hard",
+    "tags": ["timeouts", "task-cancellation", "error-handling"]
+  }
+]

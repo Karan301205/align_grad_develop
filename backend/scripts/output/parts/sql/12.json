@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "Transaction Management",
+    "question": "Two transactions run concurrently:\nTransaction 1: BEGIN; UPDATE account SET balance = balance - 100; COMMIT;\nTransaction 2: BEGIN; SELECT balance FROM account; COMMIT;\n\nWhat is guaranteed by ACID properties?",
+    "options": [
+      "Transaction 2 sees either the old balance or the new balance (no intermediate states)",
+      "Transaction 2 sees the balance mid-update",
+      "Both transactions see the same balance value",
+      "ACID guarantees are not relevant to reads"
+    ],
+    "correctIndex": 0,
+    "explanation": "ACID (Atomicity) guarantees that transactions execute completely or not at all; intermediate states are not visible.",
+    "difficulty": "Medium",
+    "tags": ["acid", "atomicity"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Transaction Management",
+    "question": "A transaction attempts to read data modified by an uncommitted transaction:\nTransaction A: UPDATE users SET status = 'inactive';\nTransaction B: SELECT * FROM users WHERE status = 'active';\n\nUnder READ COMMITTED isolation, what does B see?",
+    "options": [
+      "B sees the old status 'active' because A has not committed yet (dirty read prevention)",
+      "B sees the new status 'inactive'",
+      "An error is raised",
+      "B is blocked until A commits"
+    ],
+    "correctIndex": 0,
+    "explanation": "READ COMMITTED prevents dirty reads; uncommitted changes are not visible to other transactions.",
+    "difficulty": "Medium",
+    "tags": ["isolation-level", "dirty-read"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Transaction Management",
+    "question": "A phantom read occurs when:\nTransaction A reads rows WHERE age > 30 (finds 100 rows).\nTransaction B inserts a new row with age = 35 (COMMIT).\nTransaction A re-reads WHERE age > 30 (finds 101 rows).",
+    "options": [
+      "A new row appeared between the two reads (phantom); SERIALIZABLE isolation prevents this",
+      "Phantom reads cannot occur in SQL",
+      "This is a dirty read, not a phantom read",
+      "Transaction A is not affected by B's insert"
+    ],
+    "correctIndex": 0,
+    "explanation": "Phantom reads happen when new rows inserted by other transactions satisfy a WHERE clause; SERIALIZABLE prevents them.",
+    "difficulty": "Medium-Hard",
+    "tags": ["phantom-read", "isolation-level"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Transaction Management",
+    "question": "Deadlock occurs when:\nTransaction A locks row 1, waits for row 2.\nTransaction B locks row 2, waits for row 1.\n\nHow is this resolved?",
+    "options": [
+      "The database detects the cycle and rolls back one transaction; the other retries",
+      "Both transactions wait indefinitely",
+      "Deadlocks cannot occur in SQL",
+      "Manual intervention is required"
+    ],
+    "correctIndex": 0,
+    "explanation": "Deadlock detection rolls back one transaction; the application should retry or implement locking order to prevent deadlocks.",
+    "difficulty": "Medium",
+    "tags": ["deadlock", "lock-cycle"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Transaction Management",
+    "question": "A transaction transfers money:\nBEGIN TRANSACTION;\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\nCOMMIT;\n\nWhat does atomicity guarantee?",
+    "options": [
+      "Both UPDATEs succeed or both fail; money is never lost",
+      "Updates execute in order",
+      "Updates are always fast",
+      "Atomicity only applies to single rows"
+    ],
+    "correctIndex": 0,
+    "explanation": "Atomicity guarantees all-or-nothing execution; a crash mid-transaction rolls back both updates, preventing inconsistency.",
+    "difficulty": "Medium",
+    "tags": ["atomicity", "money-transfer"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Transaction Management",
+    "question": "A SAVEPOINT is used in a transaction:\nBEGIN; ... DO SOMETHING ...; SAVEPOINT sp1; ... DO MORE ...; ROLLBACK TO sp1;\n\nWhat is the result?",
+    "options": [
+      "Only changes after sp1 are rolled back; earlier changes are preserved",
+      "The entire transaction is rolled back",
+      "The transaction commits at sp1",
+      "Savepoints are not supported in standard SQL"
+    ],
+    "correctIndex": 0,
+    "explanation": "SAVEPOINT allows partial rollback; you can undo recent changes without losing earlier ones in the same transaction.",
+    "difficulty": "Medium",
+    "tags": ["savepoint", "partial-rollback"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Transaction Management",
+    "question": "Two isolation levels:\nREPEATABLE READ: Prevents non-repeatable reads (same row read twice shows same value).\nSERIALIZABLE: Prevents phantom reads (same WHERE clause read twice shows same rows).\n\nWhich is stricter?",
+    "options": [
+      "SERIALIZABLE is stricter; it prevents both non-repeatable and phantom reads",
+      "REPEATABLE READ is stricter",
+      "Both are equally strict",
+      "Strictness cannot be compared"
+    ],
+    "correctIndex": 0,
+    "explanation": "SERIALIZABLE is the highest level; it includes protections from all lower levels plus phantom read prevention.",
+    "difficulty": "Medium",
+    "tags": ["isolation-level", "repeatable-read"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Transaction Management",
+    "question": "A long-running transaction holds locks for 10 minutes. Other transactions are blocked. What is the performance impact?",
+    "options": [
+      "Blocked transactions queue and wait (or timeout), reducing throughput and increasing latency",
+      "No impact; blocked transactions run in parallel",
+      "The database automatically terminates long transactions",
+      "Locks are released after a timeout"
+    ],
+    "correctIndex": 0,
+    "explanation": "Long-held locks block other transactions; applications should minimize transaction duration to reduce contention.",
+    "difficulty": "Medium",
+    "tags": ["lock-contention", "transaction-duration"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Transaction Management",
+    "question": "A transaction uses explicit locks:\nBEGIN; SELECT * FROM users WHERE id = 5 FOR UPDATE; ... COMMIT;",
+    "options": [
+      "FOR UPDATE acquires an exclusive lock; other transactions cannot read or modify row 5 until COMMIT",
+      "FOR UPDATE is advisory; other transactions are not blocked",
+      "Row 5 is marked for deletion",
+      "FOR UPDATE is not valid SQL"
+    ],
+    "correctIndex": 0,
+    "explanation": "FOR UPDATE acquires an exclusive lock immediately; useful to prevent concurrent modifications to the same row.",
+    "difficulty": "Medium",
+    "tags": ["for-update", "explicit-lock"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Transaction Management",
+    "question": "A program issues:\nBEGIN; SELECT * FROM accounts; ... 30 second delay ... COMMIT;\n\nDuring the delay, another program updates an account. Under REPEATABLE READ, what does the first program see?",
+    "options": [
+      "The old account values (REPEATABLE READ prevents non-repeatable reads)",
+      "The new account values",
+      "An error about conflicting changes",
+      "A mix of old and new values"
+    ],
+    "correctIndex": 0,
+    "explanation": "REPEATABLE READ isolation maintains a consistent snapshot; the first program sees data as of transaction start.",
+    "difficulty": "Medium",
+    "tags": ["repeatable-read", "isolation"]
+  }
+]

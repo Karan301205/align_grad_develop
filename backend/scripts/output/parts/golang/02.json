@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Data Types",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  var s string\n  var i int\n  var b bool\n  fmt.Println(s, i, b)\n}",
+    "options": ["\" \" 0 false", "empty empty empty", "nil nil nil", "0 0 false"],
+    "correctIndex": 0,
+    "explanation": "Go's zero values are empty string for string, 0 for int, and false for bool; printing them with spaces between shows \" \" 0 false.",
+    "difficulty": "Medium",
+    "tags": ["zero-values", "initialization", "basic-types"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Data Types",
+    "question": "package main\nfunc main() {\n  var x interface{} = 5\n  v, ok := x.(string)\n  if ok {\n    println(v)\n  } else {\n    println(\"not a string\")\n  }\n}",
+    "options": ["prints 5", "prints not a string", "panics", "prints empty string"],
+    "correctIndex": 1,
+    "explanation": "Type assertion on interface{} holding an int to string fails safely (ok is false), executing the else branch.",
+    "difficulty": "Medium",
+    "tags": ["type-assertion", "interface-empty", "type-safety"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Data Types",
+    "question": "package main\nfunc main() {\n  var m map[string]int\n  m[\"key\"] = 10\n  v := m[\"key\"]\n  println(v)\n}",
+    "options": ["prints 10", "panics", "prints 0", "prints nil"],
+    "correctIndex": 1,
+    "explanation": "Assigning to an uninitialized nil map panics; maps must be created with make() before use.",
+    "difficulty": "Medium",
+    "tags": ["maps", "nil-pointer", "initialization"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Data Types",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  i := uint8(255)\n  j := i + 1\n  fmt.Println(j)\n}",
+    "options": ["256", "0", "1", "compilation error"],
+    "correctIndex": 3,
+    "explanation": "Cannot implicitly convert uint8 + int overflow; Go is strict about types in arithmetic—this fails to compile.",
+    "difficulty": "Medium-Hard",
+    "tags": ["type-conversion", "numeric-types", "overflow"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Data Types",
+    "question": "package main\nfunc main() {\n  s := \"hello\"\n  r := []rune(s)\n  r[0] = 'H'\n  println(string(r))\n}",
+    "options": ["Hello", "hello", "panics", "runtime error"],
+    "correctIndex": 0,
+    "explanation": "Strings are immutable, but converting to []rune creates a mutable slice where you can modify characters and convert back.",
+    "difficulty": "Medium",
+    "tags": ["rune", "string-conversion", "mutability"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Data Types",
+    "question": "package main\nfunc main() {\n  i := 42\n  f := float64(i)\n  s := string(i)\n  println(s)\n}",
+    "options": ["42", "panics", "*", "empty"],
+    "correctIndex": 2,
+    "explanation": "string(int) converts the numeric value to its Unicode code point character (42 → '*'), not a decimal string.",
+    "difficulty": "Medium-Hard",
+    "tags": ["type-conversion", "rune-semantics", "gotcha"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Data Types",
+    "question": "package main\ntype MyInt int\nfunc main() {\n  a := MyInt(5)\n  b := 5\n  if a == b {\n    println(\"equal\")\n  }\n}",
+    "options": ["prints equal", "panics", "compilation error", "prints nothing"],
+    "correctIndex": 2,
+    "explanation": "Named types are distinct from their underlying type; MyInt and int cannot be compared without explicit conversion.",
+    "difficulty": "Medium",
+    "tags": ["named-types", "type-identity", "comparison"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Data Types",
+    "question": "package main\nfunc main() {\n  v := []int{1, 2, 3}\n  v2 := v\n  v2[0] = 99\n  println(v[0])\n}",
+    "options": ["99", "1", "panics", "runtime error"],
+    "correctIndex": 0,
+    "explanation": "Slices are passed by reference semantics (header points to same backing array), so modifying v2 changes v's data.",
+    "difficulty": "Medium",
+    "tags": ["slices", "reference-semantics", "array-backing"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Data Types",
+    "question": "package main\nfunc main() {\n  var x *int\n  if x != nil {\n    println(*x)\n  }\n  println(\"done\")\n}",
+    "options": ["prints done", "panics", "compilation error", "prints nil"],
+    "correctIndex": 0,
+    "explanation": "Nil pointer check prevents dereference; the nil check succeeds and prints done without panic.",
+    "difficulty": "Medium",
+    "tags": ["pointers", "nil-check", "safety"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Data Types",
+    "question": "package main\nfunc main() {\n  a := [3]int{1, 2, 3}\n  b := a\n  b[0] = 99\n  println(a[0])\n}",
+    "options": ["99", "1", "panics", "undefined behavior"],
+    "correctIndex": 1,
+    "explanation": "Arrays are value types; assigning array b := a makes a copy, so modifying b does not affect a.",
+    "difficulty": "Medium",
+    "tags": ["arrays", "value-semantics", "copy"]
+  }
+]

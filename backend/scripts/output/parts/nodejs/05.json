@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "What error is caught by this try-catch?\n```javascript\ntry {\n  setTimeout(() => {\n    throw new Error('async error');\n  }, 0);\n} catch (e) {\n  console.log('caught:', e.message);\n}\n```",
+    "options": ["caught: async error", "no error is caught, error is thrown uncaught", "caught: Error", "TypeError on throw in setTimeout"],
+    "correctIndex": 1,
+    "explanation": "try-catch only catches synchronous errors; the error inside setTimeout fires asynchronously in a different context, bypassing the catch.",
+    "difficulty": "Medium",
+    "tags": ["try-catch", "async-errors", "common-mistake"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "How can you handle async errors from setTimeout?\n```javascript\ntry {\n  const result = await new Promise((resolve, reject) => {\n    setTimeout(() => reject(new Error('async error')), 0);\n  });\n} catch (e) {\n  console.log('caught:', e.message);\n}\n```",
+    "options": ["caught: async error", "error is not caught, Promise rejection occurs", "try-catch never catches async errors", "await is invalid with setTimeout"],
+    "correctIndex": 0,
+    "explanation": "Wrapping setTimeout in a Promise allows await to pause execution; the rejected Promise is caught by try-catch.",
+    "difficulty": "Medium",
+    "tags": ["try-catch-async", "promise-wrapper", "error-handling"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "What does this error handler do?\n```javascript\nprocess.on('uncaughtException', (err) => {\n  console.log('caught:', err.message);\n});\nthrow new Error('fatal error');\nconsole.log('after throw');\n```",
+    "options": ["prints caught: fatal error, then after throw", "prints caught: fatal error, exits process", "prints after throw (error is swallowed)", "throws uncaught exception"],
+    "correctIndex": 1,
+    "explanation": "uncaughtException catches the error and prints the message, but the process exits after the handler completes (or crashes if handler errors).",
+    "difficulty": "Medium-Hard",
+    "tags": ["uncaughtException", "global-error-handler", "process-exit"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "A stream encounters an error. What happens if 'error' is not handled?\n```javascript\nconst readable = fs.createReadStream('missing.txt');\nreadable.on('data', (chunk) => {\n  console.log(chunk);\n});\n// no error handler\n```",
+    "options": ["stream silently ignores the error", "process crashes with unhandled error event", "error is logged to stderr but continues", "stream retries automatically"],
+    "correctIndex": 1,
+    "explanation": "If an 'error' event is not handled on an EventEmitter, Node.js crashes with an unhandled error.",
+    "difficulty": "Medium",
+    "tags": ["stream-error", "event-emitter", "error-event"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "How should you handle errors in Express middleware?\n```javascript\napp.use((req, res, next) => {\n  const data = JSON.parse(req.body);\n  next();\n});\n```",
+    "options": ["wrap in try-catch and pass to error handler", "errors automatically propagate", "use a domain module", "JSON.parse errors are silent"],
+    "correctIndex": 0,
+    "explanation": "Synchronous errors in middleware must be caught with try-catch and passed to Express error handling via next(err).",
+    "difficulty": "Medium",
+    "tags": ["express", "middleware", "error-handling"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "What is the correct pattern for an Express error handler?\n```javascript\napp.use((err, req, res, next) => {\n  res.status(500).json({error: err.message});\n});\n```",
+    "options": ["correct; must come after all other middleware", "incorrect; error handlers are deprecated", "correct; must come before route definitions", "incorrect; Express does not support error handlers"],
+    "correctIndex": 0,
+    "explanation": "Express error middleware must have 4 parameters (err, req, res, next) and be registered after all other middleware to catch errors.",
+    "difficulty": "Medium",
+    "tags": ["express-error-handler", "middleware-order"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "When a Promise is rejected without a handler, what event is emitted?\n```javascript\nPromise.reject(new Error('unhandled'));\nprocess.on('unhandledRejection', (reason, promise) => {\n  console.log('caught:', reason.message);\n});\n```",
+    "options": ["uncaughtException event fires", "unhandledRejection event fires", "error is silently ignored", "TypeError is thrown"],
+    "correctIndex": 1,
+    "explanation": "Unhandled Promise rejections emit the unhandledRejection event; if not handled, Node.js logs a warning and may exit.",
+    "difficulty": "Medium",
+    "tags": ["unhandledRejection", "promise", "global-error-handler"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "What does error.code tell you in an fs error?\n```javascript\nfs.readFile('file.txt', (err, data) => {\n  if (err && err.code === 'ENOENT') {\n    console.log('file not found');\n  }\n});\n```",
+    "options": ["the type of filesystem error (ENOENT, EACCES, etc)", "a numeric error identifier", "the line number where error occurred", "error code is not available in fs"],
+    "correctIndex": 0,
+    "explanation": "err.code is a string constant (ENOENT = No Such File, EACCES = Permission Denied) that identifies the specific OS-level error.",
+    "difficulty": "Medium",
+    "tags": ["fs-errors", "error-codes", "error-handling"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "How do you ensure cleanup after an error?\n```javascript\nconst db = await connectDB();\ntry {\n  const result = await db.query('SELECT * FROM users');\n} catch (e) {\n  console.error(e);\n} finally {\n  await db.close();\n}\n```",
+    "options": ["finally block ensures cleanup always runs", "close must be called in catch block", "error prevents close from executing", "finally is optional and not recommended"],
+    "correctIndex": 0,
+    "explanation": "finally always executes regardless of whether try succeeds or catch catches, making it ideal for cleanup like closing connections.",
+    "difficulty": "Medium",
+    "tags": ["finally", "cleanup", "resource-management"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "What happens if an error handler itself throws an error?\n```javascript\napp.use((err, req, res, next) => {\n  throw new Error('handler error');\n});\n```",
+    "options": ["the new error replaces the original error", "the error is caught by another handler", "unhandled error crashes the process", "Express ignores errors in error handlers"],
+    "correctIndex": 2,
+    "explanation": "If an error handler throws, Express cannot catch it (no more handlers downstream); the error becomes unhandled and crashes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["express-error-handler", "error-propagation"]
+  }
+]

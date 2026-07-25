@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Performance Optimization",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  s := make([]int, 0, 100)\n  for i := 0; i < 100; i++ {\n    s = append(s, i)\n  }\n  fmt.Println(len(s))\n}",
+    "options": ["100", "0", "50", "panic"],
+    "correctIndex": 0,
+    "explanation": "Pre-allocating capacity prevents reallocation during appends; len=100.",
+    "difficulty": "Medium",
+    "tags": ["slices", "allocation", "performance"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Performance Optimization",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  s := make([]int, 100)\n  s = append(s, 1)\n  fmt.Println(len(s), cap(s))\n}",
+    "options": ["101 200", "101 101", "100 100", "panic"],
+    "correctIndex": 0,
+    "explanation": "Appending beyond capacity doubles capacity; len=101, cap=200.",
+    "difficulty": "Medium",
+    "tags": ["slices", "capacity", "growth"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Performance Optimization",
+    "question": "When concatenating strings in a loop, which approach avoids repeated allocations?",
+    "options": ["strings.Builder", "string +=", "fmt.Sprintf", "\"\" + var"],
+    "correctIndex": 0,
+    "explanation": "strings.Builder buffers writes efficiently; string += reallocates on each iteration.",
+    "difficulty": "Medium",
+    "tags": ["strings", "builder", "allocation"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Performance Optimization",
+    "question": "package main\nimport \"fmt\"\nfunc f(x *[10000]int) int {\n  return x[0]\n}\nfunc main() {\n  a := [10000]int{1}\n  fmt.Println(f(&a))\n}",
+    "options": ["1", "0", "panic", "slow"],
+    "correctIndex": 0,
+    "explanation": "Passing array pointer avoids copying; efficient for large arrays.",
+    "difficulty": "Medium",
+    "tags": ["pointers", "arrays", "efficiency"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Performance Optimization",
+    "question": "package main\nimport \"fmt\"\nfunc f(x [10000]int) int {\n  return x[0]\n}\nfunc main() {\n  a := [10000]int{1}\n  fmt.Println(f(a))\n}",
+    "options": ["1", "0", "slow but prints 1", "panic"],
+    "correctIndex": 2,
+    "explanation": "Passing array by value copies entire array; works but inefficient.",
+    "difficulty": "Medium",
+    "tags": ["arrays", "copy", "performance"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Performance Optimization",
+    "question": "What's the overhead of interface{} assertions compared to concrete types?",
+    "options": ["type assertion cost", "negligible", "same as concrete", "none"],
+    "correctIndex": 0,
+    "explanation": "Type assertions on interface{} require runtime type checking; faster than reflection but slower than concrete.",
+    "difficulty": "Medium-Hard",
+    "tags": ["interfaces", "type-assertion", "performance"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Performance Optimization",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  m := make(map[string]int)\n  for i := 0; i < 1000; i++ {\n    m[fmt.Sprintf(\"key%d\", i)] = i\n  }\n  fmt.Println(len(m))\n}",
+    "options": ["1000", "0", "panic", "slow"],
+    "correctIndex": 0,
+    "explanation": "Map grows dynamically; efficient for 1000 entries without pre-allocation.",
+    "difficulty": "Medium",
+    "tags": ["maps", "performance"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Performance Optimization",
+    "question": "Comparing string equality in Go: which is faster for large strings?",
+    "options": ["== operator", "strings.Compare", "bytes.Equal", "reflection"],
+    "correctIndex": 0,
+    "explanation": "== operator is optimized for string comparison; fastest for large strings.",
+    "difficulty": "Medium-Hard",
+    "tags": ["strings", "comparison", "performance"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Performance Optimization",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  s1 := \"hello\"\n  s2 := \"hello\"\n  fmt.Println(s1 == s2)\n}",
+    "options": ["true", "false", "address comparison", "panic"],
+    "correctIndex": 0,
+    "explanation": "String equality compares values, not pointers; both \"hello\" equal.",
+    "difficulty": "Medium",
+    "tags": ["strings", "equality"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Performance Optimization",
+    "question": "Which causes allocation: range over map vs range over slice?",
+    "options": ["both allocate", "slice only", "map only", "neither"],
+    "correctIndex": 0,
+    "explanation": "Range over map requires iterator state allocation; range over slice may not allocate.",
+    "difficulty": "Medium-Hard",
+    "tags": ["maps", "slices", "range", "allocation"]
+  }
+]

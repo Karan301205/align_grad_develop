@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "TreeTraversal",
+    "question": "In-order traversal of a binary search tree visits nodes in sorted order. If recursive in-order traversal is called on a tree with n nodes, what is the time complexity?",
+    "options": ["logarithmic time", "linear time", "linearithmic time", "quadratic time"],
+    "correctIndex": 1,
+    "explanation": "Each of the n nodes is visited exactly once; at each node, a constant-time recursive call is made, yielding O(n) linear time.",
+    "difficulty": "Medium",
+    "tags": ["in-order", "BST-sorted-order"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "TreeTraversal",
+    "question": "Pre-order traversal can be used to copy a tree. Post-order traversal is better for deletion. Why is post-order used for deletion?",
+    "options": ["post-order is faster", "post-order visits children before the parent", "post-order is easier to understand", "both are equally suitable"],
+    "correctIndex": 1,
+    "explanation": "When deleting, you must free children before freeing the parent node; post-order ensures children are processed and freed first.",
+    "difficulty": "Medium-Hard",
+    "tags": ["traversal-order", "deletion-pattern"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "TreeTraversal",
+    "question": "Level-order traversal of a binary tree using a queue requires enqueuing a node's children after dequeuing the node. If tree height is h and width is w, what is space complexity?",
+    "options": ["logarithmic space", "linear space in h", "linear space in w", "linear space in n"],
+    "correctIndex": 2,
+    "explanation": "The queue stores at most one complete level at a time; maximum space is w (the tree's maximum width), which can be O(n) in worst case.",
+    "difficulty": "Medium",
+    "tags": ["level-order", "queue-space"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "TreeTraversal",
+    "question": "A tree has n nodes and height h. Iterative in-order traversal using an explicit stack (simulating recursion) requires how much space?",
+    "options": ["constant space", "linear space in n", "linear space in h", "quadratic space"],
+    "correctIndex": 2,
+    "explanation": "The stack depth is bounded by tree height h; in worst case (linear tree), h = n, but for balanced trees, h = O(log n).",
+    "difficulty": "Medium",
+    "tags": ["iterative-traversal", "stack-space"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "TreeTraversal",
+    "question": "Morris in-order traversal of a binary tree uses no extra space by temporarily modifying tree pointers (threading). After modification and restoration, nodes are visited in order. What must be true about the tree structure after completion?",
+    "options": ["the tree is destroyed", "the tree is unchanged", "one thread remains", "child pointers are swapped"],
+    "correctIndex": 1,
+    "explanation": "Morris traversal temporarily uses null right pointers to thread back to ancestors; these threads are removed during traversal, restoring the original tree.",
+    "difficulty": "Medium-Hard",
+    "tags": ["Morris-traversal", "space-optimization"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "TreeTraversal",
+    "question": "A skewed binary tree (every node has only a right child) has height n for n nodes. Recursive in-order traversal will hit stack overflow after how many nodes?",
+    "options": ["stack never overflows", "depends on call stack size", "guaranteed after n nodes", "depends on CPU speed"],
+    "correctIndex": 1,
+    "explanation": "Stack depth is proportional to tree height; for skewed trees, height = n, so stack overflow depends on system stack size limit.",
+    "difficulty": "Medium-Hard",
+    "tags": ["stack-overflow", "skewed-tree"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "TreeTraversal",
+    "question": "Reverse level-order traversal visits the last level first, then the second-to-last level, etc. Using a regular queue and then reversing the result adds what complexity?",
+    "options": ["no additional complexity", "logarithmic complexity", "linear complexity for reversal", "quadratic complexity"],
+    "correctIndex": 2,
+    "explanation": "Reversing a list of n nodes requires O(n) time; total complexity is O(n) for traversal plus O(n) for reversal = O(n) linear.",
+    "difficulty": "Medium",
+    "tags": ["reverse-order", "post-processing"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "TreeTraversal",
+    "question": "An n-node tree is traversed recursively with pre-order. If each node's visit operation queries a HashMap, what is the total time complexity?",
+    "options": ["linear time in n", "logarithmic time", "linearithmic time", "quadratic time"],
+    "correctIndex": 0,
+    "explanation": "Traversal visits n nodes once (O(n)); HashMap queries are O(1) per node; total is O(n) * O(1) = O(n) linear.",
+    "difficulty": "Medium",
+    "tags": ["traversal-with-auxiliary-structure", "HashMap-lookup"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "TreeTraversal",
+    "question": "Depth-first traversal can be implemented recursively or iteratively using a stack. Compared to recursive implementation, what is the primary trade-off of iterative?",
+    "options": ["iterative is slower", "iterative uses more space", "iterative uses explicit stack instead of call stack", "iterative is always better"],
+    "correctIndex": 2,
+    "explanation": "Iterative traversal replaces the implicit call stack with an explicit stack data structure; both use O(h) space, but explicit stack avoids recursion.",
+    "difficulty": "Medium-Hard",
+    "tags": ["recursion-vs-iteration", "stack-management"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "TreeTraversal",
+    "question": "A binary tree's post-order traversal result is [3, 4, 2, 6, 5, 1]. Pre-order of the same tree is [1, 2, 3, 4, 5, 6]. From these two sequences alone, can the tree structure be uniquely reconstructed?",
+    "options": ["yes, always", "no, insufficient information", "yes, but only if values are distinct", "only if height is given"],
+    "correctIndex": 0,
+    "explanation": "Pre-order gives root-first; post-order gives root-last; combined they reveal parent-child relationships for every node, allowing unique reconstruction.",
+    "difficulty": "Medium-Hard",
+    "tags": ["tree-reconstruction", "traversal-properties"]
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "Cloud Computing Fundamentals",
+    "question": "Your company runs a 24/7 on-premises data warehouse requiring reserved capacity for peak loads, but actual usage averages 30% of peak. You're evaluating migration to AWS. What is the primary business advantage?",
+    "options": [
+      "Pay only for consumed capacity; dynamically scale to peaks without reserved waste",
+      "AWS guarantees 99.99% uptime without additional configuration needed",
+      "Automatic data compression reduces storage costs to zero",
+      "Eliminates the need for database administrators"
+    ],
+    "correctIndex": 0,
+    "explanation": "Cloud elasticity converts fixed CapEx (reserved capacity) to variable OpEx (pay-per-use), eliminating waste from unutilized reserved resources and enabling dynamic scaling.",
+    "difficulty": "Medium",
+    "tags": ["cloud-economics", "elasticity", "cost-optimization"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cloud Computing Fundamentals",
+    "question": "You need disaster recovery with 1-hour RPO and 4-hour RTO. Warm standby (secondary region kept in sync) costs 2x; pilot light (hourly syncs, activation on failure) costs 30% more than production. Which approach is most cost-effective?",
+    "options": [
+      "Warm standby for all components to guarantee RTO",
+      "Pilot light with monthly activation tests to confirm 4-hour RTO feasibility",
+      "Hot-hot active-active across regions to guarantee both RPO and RTO",
+      "Pilot light with daily syncs; accept occasional RPO misses for savings"
+    ],
+    "correctIndex": 1,
+    "explanation": "Pilot light meets 1-hour RPO (hourly syncs) and satisfies 4-hour RTO if tested regularly; warm standby's higher cost doesn't improve either metric for this scenario.",
+    "difficulty": "Medium-Hard",
+    "tags": ["disaster-recovery", "rpo-rto", "cost-tradeoff"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cloud Computing Fundamentals",
+    "question": "Your monolithic app handles 10x seasonal traffic spikes for 2 months yearly. Comparing cost strategies: reserved instances (RI) for baseline plus on-demand spikes versus on-demand only. Which is most cost-effective?",
+    "options": [
+      "RIs for baseline capacity; on-demand for seasonal spikes",
+      "On-demand only; flexibility to scale to zero outweighs RI savings",
+      "Split RIs across regions; on-demand overflow for redundancy",
+      "3-year all-upfront RI for peak capacity; turn off during low seasons"
+    ],
+    "correctIndex": 0,
+    "explanation": "RIs lock savings on steady-state load; on-demand handles unpredictable seasonal peaks; all-upfront for peak is wasteful when scaling to zero.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cost-optimization", "capacity-planning", "reserved-instances"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cloud Computing Fundamentals",
+    "question": "Building SaaS with variable demand: mission-critical customers need <100ms latency, others handle batch jobs. You need deployment isolation and independent scaling per customer. Which approach best meets these requirements?",
+    "options": [
+      "Single multi-tenant VPC with shared RDS; customer-level IAM policies isolate access",
+      "Dedicated VPC per customer with independent RDS; Terraform enforces consistency",
+      "Single VPC with Kubernetes namespaces per customer; shared compute pool",
+      "Serverless (Lambda + DynamoDB); configure concurrency per API key"
+    ],
+    "correctIndex": 1,
+    "explanation": "Dedicated VPC per customer provides network-level blast radius isolation, independent scaling, and ensures mission-critical latency isn't affected by noisy neighbors.",
+    "difficulty": "Hard",
+    "tags": ["multi-tenancy", "architecture", "isolation"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cloud Computing Fundamentals",
+    "question": "Analytics team queries 500GB of logs in S3 using Athena (30s avg, $50/day). You added DynamoDB GSI caching popular queries (<100ms, $80/day). Should you replace Athena entirely with DynamoDB?",
+    "options": [
+      "Yes; 100ms response is always worth the premium for user experience",
+      "No; keep Athena for full scans and one-off queries; DynamoDB for frequent cached queries",
+      "Replace Athena entirely; DynamoDB on-demand pricing drops at scale",
+      "Migrate logs to Elasticsearch for better performance and cost"
+    ],
+    "correctIndex": 1,
+    "explanation": "Hybrid approach: DynamoDB excels at cached frequent patterns (low latency), Athena is cost-effective for exploratory or large scans; caching all queries in DynamoDB eliminates its advantage.",
+    "difficulty": "Hard",
+    "tags": ["data-querying", "cost-tradeoff", "architecture"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cloud Computing Fundamentals",
+    "question": "Choosing between IaaS (EC2) and PaaS (Fargate) for 200+ containerized microservices. EC2 offers OS control but requires patch management; Fargate abstracts infrastructure. What's the primary operational advantage of Fargate at scale?",
+    "options": [
+      "Better CPU and memory efficiency compared to EC2",
+      "Eliminates OS-level patch management overhead; operational simplicity outweighs higher cost",
+      "Native support for all programming languages without container requirements",
+      "Guaranteed lower costs than EC2 auto-scaling groups"
+    ],
+    "correctIndex": 1,
+    "explanation": "At 200+ services, OS patch management burden and security update complexity exceed Fargate's cost premium; trading minor cost for significant operational reduction is justified.",
+    "difficulty": "Medium-Hard",
+    "tags": ["iaas-vs-paas", "operational-burden", "cost-benefit"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cloud Computing Fundamentals",
+    "question": "Designing geo-distributed application serving North America, Europe, and Asia with data residency compliance (data must remain in-region). Which approach supports this requirement?",
+    "options": [
+      "Global tables with EventBridge to sync across regions",
+      "CloudFront distribution with origin in each region",
+      "Independent RDS instances per region; application-level routing by user location",
+      "Aurora Global Database with read replicas in each region"
+    ],
+    "correctIndex": 2,
+    "explanation": "Data residency requires data to stay in-region; CloudFront caches only; Global Tables and Aurora Global replicate data, violating residency; independent RDS plus app-level routing is compliant.",
+    "difficulty": "Hard",
+    "tags": ["multi-region", "compliance", "data-residency"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cloud Computing Fundamentals",
+    "question": "Competitor achieves sub-second response times via real-time in-memory processing. Your RDS + EC2 averages 500ms; ElastiCache reduced it to 200ms but cache invalidation is complex. What's the core architectural trade-off?",
+    "options": [
+      "In-memory cache latency versus consistency; eventual consistency and stale data trade-off is acceptable",
+      "Cache storage costs versus database I/O costs; cache is always cheaper",
+      "Read scalability versus write scalability; caches improve reads only",
+      "Application complexity versus response time; simpler architectures scale better"
+    ],
+    "correctIndex": 0,
+    "explanation": "Caching trades consistency for speed; sub-second latency requires accepting eventual consistency (stale reads for a time window), a fundamental architectural choice.",
+    "difficulty": "Hard",
+    "tags": ["caching", "consistency", "architectural-tradeoff"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cloud Computing Fundamentals",
+    "question": "Startup deciding between AWS (pay-per-use, global) and private data center (high CapEx). Growth forecast shows 50% annual increase in compute needs. When does private infrastructure become more cost-effective?",
+    "options": [
+      "When sustained compute usage exceeds 80% of reserved instance capacity for 2+ years",
+      "After 3 years when cumulative AWS spend exceeds private DC CapEx investment",
+      "When baseline load requires reserved instances; variable load stays on-demand",
+      "Private infrastructure never beats cloud for unpredictable growth; cloud maintains flexibility"
+    ],
+    "correctIndex": 1,
+    "explanation": "Cumulative AWS OpEx eventually exceeds one-time CapEx; breakeven is typically 2-4 years; after breakeven, only workload stability and zero growth justify private infrastructure.",
+    "difficulty": "Medium-Hard",
+    "tags": ["capex-vs-opex", "financial-analysis", "infrastructure-strategy"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cloud Computing Fundamentals",
+    "question": "ML team trains models requiring 100 GPU hours monthly, unpredictably. Training must complete within 24 hours of submission. Should you use reserved GPU instances or on-demand?",
+    "options": [
+      "Reserved instances; 100-hour monthly baseline justifies the commitment",
+      "On-demand; 100 hours spread across a month is low utilization, unpredictable timing makes reservations risky",
+      "Spot instances exclusively; accept interruptions for lowest cost",
+      "Reserved instances for 50 hours; on-demand for overage"
+    ],
+    "correctIndex": 1,
+    "explanation": "Reserved instances require sustained, predictable usage; 100 hours spread monthly is low utilization, and unpredictable timing means GPUs sit idle; on-demand's flexibility fits the 24-hour deadline.",
+    "difficulty": "Medium-Hard",
+    "tags": ["reserved-instances", "spot-instances", "workload-characterization"]
+  }
+]

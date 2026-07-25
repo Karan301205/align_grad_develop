@@ -1,0 +1,112 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "Server Side Rendering",
+    "question": "In getServerSideProps, you log req.headers.cookie. On production, is this value available?",
+    "options": ["Yes; cookies from the client request are always forwarded", "Only if cookies are HttpOnly; secure cookies are filtered", "No; Next.js strips headers before passing req to the function", "Only for first request; subsequent renders use cached headers"],
+    "correctIndex": 0,
+    "explanation": "getServerSideProps receives the full request object including cookies; they are always accessible on every server-side render.",
+    "difficulty": "Medium",
+    "tags": ["getserversideprops", "cookies", "request-headers"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Server Side Rendering",
+    "question": "You call an external API inside getServerSideProps that times out after 10 seconds. What does the user see?",
+    "options": ["Page renders with fallback content", "Page shows a 504 Gateway Timeout error", "getServerSideProps throws; error page renders", "Request waits indefinitely; user eventually sees browser timeout"],
+    "correctIndex": 2,
+    "explanation": "Unhandled errors in getServerSideProps cause a 500 error; the default error page displays unless caught.",
+    "difficulty": "Medium",
+    "tags": ["getserversideprops", "error-handling", "api-calls"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Server Side Rendering",
+    "question": "You have a page with getServerSideProps that fetches user data. After deploying, users report the page loads slower than before. What's a likely cause?",
+    "options": ["CDN cache is not configured", "getServerSideProps runs on every request; there's no caching", "Database queries in getServerSideProps are blocking renders", "All of the above are potential factors"],
+    "correctIndex": 3,
+    "explanation": "SSR has multiple bottlenecks: no response caching (each request re-renders), database I/O, and network latency; all can degrade performance.",
+    "difficulty": "Medium-Hard",
+    "tags": ["getserversideprops", "performance", "caching"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Server Side Rendering",
+    "question": "In getServerSideProps, you set a secure cookie using res.setHeader. Does this cookie persist on the client?",
+    "options": ["Yes; all cookies set via setHeader are sent to the browser", "Only if HttpOnly flag is not set", "No; getServerSideProps responses don't set client cookies", "Only on the first request; cookies reset on navigation"],
+    "correctIndex": 0,
+    "explanation": "res.setHeader in getServerSideProps sets HTTP headers that the browser processes normally, including Set-Cookie.",
+    "difficulty": "Medium",
+    "tags": ["getserversideprops", "cookies", "headers"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Server Side Rendering",
+    "question": "You need to conditionally redirect in getServerSideProps based on user role. Which approach works?",
+    "options": ["Return redirect: { destination: '/admin', permanent: false }", "Call res.redirect(); return empty props", "Use next/router.push() inside getServerSideProps", "Return notFound: true if role is not admin"],
+    "correctIndex": 0,
+    "explanation": "getServerSideProps uses the redirect property to perform server-side redirects before rendering.",
+    "difficulty": "Medium",
+    "tags": ["getserversideprops", "redirects", "conditional-logic"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Server Side Rendering",
+    "question": "getServerSideProps queries a database with a 2-second latency. You add caching (redis-like) with 60-second TTL. Do users see improved page load times?",
+    "options": ["Yes; all requests within 60s hit cache", "No; getServerSideProps still runs on every request", "Yes, but only for repeat visitors within 60s", "Partially; cache reduces DB latency but doesn't prevent re-renders"],
+    "correctIndex": 0,
+    "explanation": "Caching the data source eliminates DB latency on cache hits; the next 59 requests skip the 2-second query.",
+    "difficulty": "Medium",
+    "tags": ["getserversideprops", "caching", "performance-optimization"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Server Side Rendering",
+    "question": "Your getServerSideProps accesses a server-only secret (API key) without checking if it exists. On a fresh deployment where the env var is missing, what happens?",
+    "options": ["getServerSideProps silently skips the API call", "Page renders without the data; console shows undefined", "getServerSideProps throws an error; page shows 500", "Deployment fails during build; missing secrets are caught"],
+    "correctIndex": 2,
+    "explanation": "Runtime errors in getServerSideProps result in a 500 error; missing env vars are not caught until the code tries to use them.",
+    "difficulty": "Medium-Hard",
+    "tags": ["getserversideprops", "error-handling", "environment-variables"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Server Side Rendering",
+    "question": "You use getServerSideProps to fetch a list of 10,000 items. On production, the response size exceeds limits. What's the best fix?",
+    "options": ["Paginate or filter data in getServerSideProps before sending to client", "Move data to a client-side fetch to bypass Next.js limits", "Compress the response using gzip (handled automatically)", "Use ISR instead of SSR to cache larger responses"],
+    "correctIndex": 0,
+    "explanation": "Fetching large datasets in getServerSideProps causes bloated responses; pagination or filtering keeps payloads manageable.",
+    "difficulty": "Medium-Hard",
+    "tags": ["getserversideprops", "data-fetching", "response-size"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Server Side Rendering",
+    "question": "A user's authentication token stored in a cookie is included in req.headers in getServerSideProps. Is it safe to log this token?",
+    "options": ["Yes; server logs are protected", "No; tokens in logs are a security risk if logs are exposed", "Only if the token is encrypted in the log file", "Tokens are automatically masked by Next.js"],
+    "correctIndex": 1,
+    "explanation": "Logging auth tokens is a security vulnerability; if logs are breached, tokens grant unauthorized access.",
+    "difficulty": "Medium-Hard",
+    "tags": ["getserversideprops", "security", "logging"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Server Side Rendering",
+    "question": "In getServerSideProps, you conditionally import a library based on a server-only flag. Does this work?",
+    "options": ["Yes; imports in getServerSideProps are server-only", "No; all imports are bundled into client code", "Conditionally; only if the import is wrapped in require, not ES import", "It works but leaves dead code in the bundle"],
+    "correctIndex": 0,
+    "explanation": "Code inside getServerSideProps is never sent to the client; only the returned props are serialized.",
+    "difficulty": "Medium-Hard",
+    "tags": ["getserversideprops", "code-splitting", "server-only-code"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Server Side Rendering",
+    "question": "You have a page that requires fresh data every request, so you use getServerSideProps. After analyzing logs, you find 30% of requests return cached data. Why?",
+    "options": ["CDN is caching responses; disable in next.config.js", "getServerSideProps doesn't prevent caching by default", "Browser cache is persisting pages; set Cache-Control headers", "Next.js middleware is caching responses automatically"],
+    "correctIndex": 2,
+    "explanation": "getServerSideProps doesn't set cache headers; the browser or CDN may cache if you don't explicitly set Cache-Control: no-cache.",
+    "difficulty": "Medium-Hard",
+    "tags": ["getserversideprops", "caching", "cache-control"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Modules",
+    "question": "Given `export type T = string;` in module A — can another module do `import * as M from A; const x: M.T`?",
+    "options": ["Yes, types export normally", "No, type imports require named import syntax", "Yes, namespace imports work for types", "No, types cannot be exported with *"],
+    "correctIndex": 0,
+    "explanation": "TypeScript allows both `import type T` and namespace imports to access exported types; type is re-exported as a namespace member.",
+    "difficulty": "Medium",
+    "tags": ["es-modules", "type-exports", "namespace-imports"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Modules",
+    "question": "Does `import { T } from './module.js' assert { type: 'json' };` load a JSON module correctly?",
+    "options": ["Yes, import assertions import JSON", "No, import assertions are for ESM only", "Yes, but only with top-level await", "No, use import * from instead"],
+    "correctIndex": 0,
+    "explanation": "Import assertions (or import attributes) enable safe loading of non-JavaScript modules like JSON with semantic guarantees.",
+    "difficulty": "Medium-Hard",
+    "tags": ["import-assertions", "json-modules", "esm"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Modules",
+    "question": "Can you use `export default` and `export` in the same file for the same entity?",
+    "options": ["No, an entity can be exported only once", "Yes, default and named exports coexist", "Yes, but default shadows named", "No, use re-export instead"],
+    "correctIndex": 1,
+    "explanation": "A module can export an entity both as default and as a named export; they are two separate export slots.",
+    "difficulty": "Medium",
+    "tags": ["default-export", "named-export", "module-exports"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Modules",
+    "question": "Given `import type T from './module'; import { value } from './module';` — are these safe for circular dependencies?",
+    "options": ["No, both import at runtime", "Yes, type imports are erased", "Yes, if module.ts has both exports", "No, circular dependencies always fail"],
+    "correctIndex": 1,
+    "explanation": "Type-only imports are erased at compile time; they do not create a runtime dependency and break circular dependency chains.",
+    "difficulty": "Medium-Hard",
+    "tags": ["type-imports", "circular-dependencies", "erase-on-compile"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Modules",
+    "question": "Does `export * from './module';` re-export type exports from the imported module?",
+    "options": ["No, * does not include types", "Yes, types are included in *", "Yes, but only named types", "No, use export type * instead"],
+    "correctIndex": 1,
+    "explanation": "Export star re-exports all exports, including types, from the source module.",
+    "difficulty": "Medium",
+    "tags": ["re-export", "export-star", "type-exports"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Modules",
+    "question": "Can you use dynamic imports with type checking: `const M = await import('./module'); const x: M.T`?",
+    "options": ["No, dynamic imports are untyped", "Yes, if module is imported with declare", "Yes, TypeScript infers the module type", "No, require dynamic type annotations"],
+    "correctIndex": 2,
+    "explanation": "TypeScript infers dynamic import return types; M is typed as the module's exports, enabling type-safe access to members.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dynamic-imports", "async-imports", "type-inference"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Modules",
+    "question": "Given `declare module './module' { export interface T { x: number } }` — what happens to the original T?",
+    "options": ["The interface merges with the original", "It overwrites the original", "It shadows the original in this scope", "It causes a compile error"],
+    "correctIndex": 0,
+    "explanation": "Module augmentation merges declarations with the same name; interfaces combine their members across all declarations.",
+    "difficulty": "Medium-Hard",
+    "tags": ["module-augmentation", "interface-merging", "declaration-merging"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Modules",
+    "question": "Does `export =` (CommonJS export) work in TypeScript modules?",
+    "options": ["No, TypeScript uses ESM only", "Yes, for CommonJS compatibility", "Yes, but requires special import syntax", "No, export = is deprecated"],
+    "correctIndex": 1,
+    "explanation": "TypeScript supports `export =` for CommonJS default exports; imports use `import X = require()` syntax.",
+    "difficulty": "Medium",
+    "tags": ["commonjs-export", "module-compatibility", "export-syntax"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Modules",
+    "question": "Can you conditionally import modules based on compilation flags?",
+    "options": ["No, imports are static", "Yes, with dynamic imports and if statements", "Yes, with triple-slash directives", "No, TypeScript requires declarative imports"],
+    "correctIndex": 1,
+    "explanation": "Dynamic imports evaluated at runtime allow conditional loading; compile-time conditions use preprocessor directives or separate configs.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dynamic-imports", "conditional-imports", "runtime-evaluation"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Modules",
+    "question": "Given ambient declaration `declare module 'external-lib' {}` — does this suppress type errors for missing modules?",
+    "options": ["No, it only silences imports", "Yes, it declares the module as any", "Yes, and any property access is type-safe", "No, you must use @types packages"],
+    "correctIndex": 1,
+    "explanation": "A bare module declaration without exports implicitly types the module as any, allowing imports without type errors.",
+    "difficulty": "Medium",
+    "tags": ["ambient-declarations", "module-declarations", "typing-external-libs"]
+  }
+]

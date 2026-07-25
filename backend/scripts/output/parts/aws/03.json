@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "EC2 Instance Management",
+    "question": "Your production EC2 instance in a private subnet suddenly loses internet connectivity. The instance can reach other subnets in the VPC but cannot connect to external APIs. The route table has 0.0.0.0/0 pointing to a NAT Gateway, and the NAT Gateway status shows available. What's the most likely cause?",
+    "options": [
+      "The NAT Gateway ran out of Elastic IPs and needs more allocated",
+      "The network ACL on the private subnet is denying outbound traffic",
+      "The instance's security group is missing an outbound rule",
+      "The instance's ENI needs to be reattached to the NAT Gateway"
+    ],
+    "correctIndex": 1,
+    "explanation": "Route table and NAT Gateway are healthy, so the issue is at the network ACL level; NACLs control layer-4 traffic in/out of a subnet; check NACL outbound rules for port 443/80 and ephemeral port ranges (1024-65535).",
+    "difficulty": "Hard",
+    "tags": ["vpc", "networking", "troubleshooting"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "EC2 Instance Management",
+    "question": "Your EC2 instance in a public subnet has a public IP and security group allowing SSH (22) inbound. When you try to SSH, the connection times out. Route table has 0.0.0.0/0 to an internet gateway. What should you check first?",
+    "options": [
+      "Check if the instance is in a running state and has an Elastic IP assigned",
+      "Verify the subnet's network ACL allows inbound traffic on port 22 and outbound ephemeral response traffic",
+      "Confirm your local firewall isn't blocking SSH connections",
+      "Check if the OS-level SSH daemon is running on the instance"
+    ],
+    "correctIndex": 1,
+    "explanation": "Layer-3 routing and security group (layer 4) are configured correctly; NACLs are stateless and require explicit inbound AND outbound rules; verify ephemeral port range (1024-65535) in outbound to allow SSH responses.",
+    "difficulty": "Hard",
+    "tags": ["vpc", "nacl", "troubleshooting"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "EC2 Instance Management",
+    "question": "You're running a distributed application across 3 EC2 instances in the same AZ. Network latency between instances occasionally spikes to 5ms. Your use case requires sub-1ms latency. Would a placement group improve this?",
+    "options": [
+      "Yes; a cluster placement group guarantees sub-1ms latency between instances",
+      "No; all instances in the same AZ already have optimal latency; placement groups won't improve it",
+      "Yes; a spread placement group reduces network contention and improves latency",
+      "No; EC2 latency is primarily determined by instance type, not placement"
+    ],
+    "correctIndex": 0,
+    "explanation": "Cluster placement groups place instances close together on the same physical hardware in a single AZ, achieving sub-1ms latency; same AZ without cluster group doesn't guarantee physical proximity.",
+    "difficulty": "Medium-Hard",
+    "tags": ["placement-groups", "latency", "performance"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "EC2 Instance Management",
+    "question": "Your application scales from 2 to 20 instances during peak hours. You're using an Auto Scaling Group with target tracking (CPU 70%). Every morning, the scaling takes 15+ minutes to reach peak capacity. What can you do to reduce scale-up time?",
+    "options": [
+      "Decrease the target tracking threshold from 70% to 50%; this triggers scaling faster",
+      "Reduce AMI size to reduce instance launch time from 3-5 minutes to 30-60 seconds",
+      "Use warm pools in the Auto Scaling Group; pre-warmed instances reach running state in seconds",
+      "Switch from target tracking to step scaling; step scaling is always faster"
+    ],
+    "correctIndex": 2,
+    "explanation": "Warm pools maintain pre-launched instances in stopped state; transitioning to running is 10-50x faster than launching new instances; decreasing threshold (A) accelerates detection but not launch time.",
+    "difficulty": "Medium-Hard",
+    "tags": ["auto-scaling", "performance", "launch-time"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "EC2 Instance Management",
+    "question": "You have 50 instances running t3.medium (burstable). During peak hours, CPU exceeds baseline credits, and burstable behavior throttles performance. Budget allows for $200/month additional spend. Should you right-size to m5.large?",
+    "options": [
+      "Yes; m5.large provides guaranteed performance; burstable is unsuitable for production",
+      "No; t3.large offers 2x baseline, unlimited credits option, and costs significantly less than m5.large",
+      "Yes; only general-purpose instances are recommended for production workloads",
+      "No; increase instance count instead; 100 t3.micro instances are cheaper than 50 m5.large"
+    ],
+    "correctIndex": 1,
+    "explanation": "t3.large is cheaper and more cost-effective than m5.large for bursty workloads; enabling unlimited credits trades cost for predictable performance; don't right-size horizontally if the issue is burstable behavior.",
+    "difficulty": "Medium-Hard",
+    "tags": ["instance-types", "right-sizing", "cost-optimization"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "EC2 Instance Management",
+    "question": "Your CI/CD pipeline launches EC2 instances to run tests, then terminates them after 30 minutes. You're spending $500/month on EC2 for these short-lived instances. How should you reduce this cost?",
+    "options": [
+      "Use Spot instances for test runners; accept 2-minute interruption warnings and handle termination gracefully",
+      "Switch to smaller instance types; downsize test instances from c5.large to t3.micro",
+      "Migrate to Lambda for test execution; Lambda pricing is always cheaper than EC2",
+      "Run tests serially instead of parallel; fewer instances needed"
+    ],
+    "correctIndex": 0,
+    "explanation": "Spot instances cost 60-90% less than on-demand; short-lived workloads benefit from price discount more than availability risk; handling interruptions is feasible for CI/CD (rerun tests).",
+    "difficulty": "Medium",
+    "tags": ["spot-instances", "cost-optimization", "ci-cd"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "EC2 Instance Management",
+    "question": "You're deploying 100 EC2 instances in an Auto Scaling Group across 3 AZs. During an AZ-level outage, one AZ loses connectivity. What happens to instances in the failed AZ?",
+    "options": [
+      "Instances remain running but unreachable; ASG does not terminate them automatically",
+      "ASG automatically detects unhealthy instances and launches replacements in other AZs",
+      "All instances in the failed AZ are immediately terminated and replaced",
+      "Instances remain running; you must manually terminate and replace them"
+    ],
+    "correctIndex": 1,
+    "explanation": "ASG with health checks (ELB, EC2 status checks) detects unhealthy instances and replaces them; if ASG launched 33-34 instances per AZ, it replaces failed ones in other AZs to maintain capacity.",
+    "difficulty": "Medium",
+    "tags": ["auto-scaling", "high-availability", "multi-az"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "EC2 Instance Management",
+    "question": "Your web application has a spike in demand. You want to quickly add 10 more instances, but launching new instances takes 3-5 minutes each. You already have 20 on-demand instances running. What's the fastest way to add capacity?",
+    "options": [
+      "Launch 10 new on-demand instances from the same AMI",
+      "Launch 10 Spot instances; they launch faster than on-demand",
+      "Use EC2 Instance Store volumes; they're faster than EBS",
+      "Request 10 instances from the ASG warm pool if configured"
+    ],
+    "correctIndex": 3,
+    "explanation": "Warm pools (pre-launched stopped instances) transition to running in seconds; on-demand and Spot both require full launch (3-5 min); Instance Store doesn't affect launch time.",
+    "difficulty": "Medium",
+    "tags": ["auto-scaling", "warm-pools", "launch-time"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "EC2 Instance Management",
+    "question": "You have a t3.medium instance with burstable CPU baseline 20% (0.2 CPU). When CPU reaches 100% and baseline is exhausted, AWS throttles it to 20% again. Your application needs predictable performance during spikes. What's the most cost-effective solution?",
+    "options": [
+      "Enable unlimited credits; pay for excess CPU usage beyond included credits",
+      "Switch to m5.large for guaranteed baseline performance",
+      "Switch to t3.large which has 40% baseline; enables unlimited mode within budget",
+      "Use Elastic Compute Optimizer to auto-right-size instances"
+    ],
+    "correctIndex": 2,
+    "explanation": "t3.large doubles baseline (40%) for $8/month more; enabling unlimited on t3.medium costs $15-20/month for peak overages; t3.large is the better cost-effective middle ground vs. m5.large.",
+    "difficulty": "Medium-Hard",
+    "tags": ["instance-types", "burstable", "cost-optimization"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "EC2 Instance Management",
+    "question": "You're using a mixed ASG with 60% on-demand and 40% Spot instances targeting 100 instances total. Spot prices increase 3x due to capacity constraints. How should you adjust the policy to minimize cost impact?",
+    "options": [
+      "Shift to 100% on-demand; Spot volatility is too risky for production",
+      "Increase on-demand percentage to 80%; reduce Spot to 20% to stabilize costs",
+      "Accept higher cost; Spot savings during normal periods justify occasional spikes",
+      "Launch additional Spot in other instance types or regions where prices are lower"
+    ],
+    "correctIndex": 3,
+    "explanation": "Diversifying Spot across instance types, families, and regions reduces price volatility; if one type becomes expensive, others provide fallback; keeps Spot cost advantage while reducing spike impact.",
+    "difficulty": "Hard",
+    "tags": ["spot-instances", "cost-optimization", "flexibility"]
+  }
+]

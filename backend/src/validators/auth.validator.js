@@ -12,7 +12,8 @@ const signupSchema = {
 const loginSchema = {
   body: z.object({
     email: z.string().email('Invalid email address format'),
-    password: z.string().min(1, 'Password is required')
+    password: z.string().min(1, 'Password is required'),
+    role: z.enum(['STUDENT', 'RECRUITER']).optional()
   })
 };
 

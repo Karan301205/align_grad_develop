@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "Testing Strategies",
+    "question": "Why might testing component rendering without user interactions miss important bugs? function Button() { return <button>Click</button>; }",
+    "options": ["Shallow rendering tests structure, not behavior; missing click handlers and state changes", "Testing structure is sufficient", "User interactions are not testable", "Rendering and interaction tests are equivalent"],
+    "correctIndex": 0,
+    "explanation": "Rendering tests check JSX output; behavior tests simulate clicks/input and verify state changes, useEffect runs, and callbacks fire.",
+    "difficulty": "Medium",
+    "tags": ["test", "rendering", "behavior"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Testing Strategies",
+    "question": "Why is mocking child components useful in unit tests? render(<Parent><MockChild /></Parent>);",
+    "options": ["Mocking isolates Parent logic from Child dependencies, testing Parent independently", "Mocking introduces bugs", "Real children should always be used", "Mocking is unnecessary"],
+    "correctIndex": 0,
+    "explanation": "Mocking children isolates the component under test; changes in Child don't break Parent tests, and you can verify Child is called correctly.",
+    "difficulty": "Medium",
+    "tags": ["test", "mock", "unit"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Testing Strategies",
+    "question": "Why might testing useState behavior require rendering and user interaction instead of testing the hook directly?",
+    "options": ["Hooks run inside components; testing them requires rendering and simulating state updates", "Hooks can be tested in isolation", "useState doesn't need testing", "State testing is unnecessary"],
+    "correctIndex": 0,
+    "explanation": "useState has no behavior outside a component; tests must render the component, fire events, and check that state updated and UI changed.",
+    "difficulty": "Medium",
+    "tags": ["test", "hook", "state"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Testing Strategies",
+    "question": "Why is testing async behavior (like fetch) in useEffect difficult? Why do you need waitFor? useEffect(() => { fetch(...).then(...); }, []);",
+    "options": ["Fetch is async; test must wait for promise resolution, useEffect to run, and re-render before asserting", "Async testing is not needed", "fetch completes synchronously", "waitFor is not necessary"],
+    "correctIndex": 0,
+    "explanation": "fetch completes asynchronously; test must use waitFor(() => expect(...)) to wait for the promise and re-render before checking results.",
+    "difficulty": "Medium-Hard",
+    "tags": ["test", "async", "waitfor"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Testing Strategies",
+    "question": "Given a test for a custom hook, why must it use renderHook instead of render? const { result } = renderHook(() => useCustom());",
+    "options": ["renderHook provides a wrapper to call hooks outside component context", "render and renderHook are equivalent", "Hooks only work with render", "renderHook is not a real testing library"],
+    "correctIndex": 0,
+    "explanation": "renderHook simulates calling a hook in a component; render expects JSX, so renderHook is a convenience for testing hooks in isolation.",
+    "difficulty": "Medium",
+    "tags": ["test", "hook", "render"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Testing Strategies",
+    "question": "Why might testing implementation details (like internal state) make tests brittle? const [internal, setInternal] = useState(0);",
+    "options": ["Tests should verify behavior, not internal structure; refactoring breaks tests without changing behavior", "Testing implementation is best practice", "Behavior and implementation tests are equivalent", "Internal state should be tested"],
+    "correctIndex": 0,
+    "explanation": "Testing internals couples tests to implementation; replacing useState with useReducer breaks tests even though component behavior stays the same.",
+    "difficulty": "Medium",
+    "tags": ["test", "implementation", "brittle"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Testing Strategies",
+    "question": "Why is screen.getByRole better than container.querySelector for queries? screen.getByRole('button');",
+    "options": ["getByRole finds elements by accessible role, reflecting real user interaction", "querySelector is better", "Both are equivalent", "getByRole is slower"],
+    "correctIndex": 0,
+    "explanation": "getByRole mimics how users interact with the page (finding buttons, links by label); querySelector tests implementation, not user experience.",
+    "difficulty": "Medium",
+    "tags": ["test", "query", "accessibility"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Testing Strategies",
+    "question": "Why might a test that passes locally fail in CI? Why do async operations need special handling?",
+    "options": ["CI timing is different; async operations may not complete in time, flaky tests result", "CI and local have identical timing", "Async tests never fail", "Flakiness is unavoidable"],
+    "correctIndex": 0,
+    "explanation": "CI runs on slower machines; if tests don't properly wait for async (using waitFor, userEvent), they're flaky, passing locally but failing in CI.",
+    "difficulty": "Medium-Hard",
+    "tags": ["test", "async", "flaky"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Testing Strategies",
+    "question": "Why is testing effects with cleanup important? useEffect(() => { const listener = () => {}; addEventListener('click', listener); return () => removeEventListener('click', listener); }, []);",
+    "options": ["Cleanup prevents stale listeners, missing cleanup causes memory leaks in tests", "Cleanup is optional", "Listeners always clean up", "Cleanup is tested automatically"],
+    "correctIndex": 0,
+    "explanation": "If cleanup doesn't run (or isn't tested), listeners persist across renders/unmounts in tests, causing unexpected behavior and memory leaks.",
+    "difficulty": "Medium",
+    "tags": ["test", "cleanup", "effect"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Testing Strategies",
+    "question": "Why might snapshot tests be fragile for React components? render(<Component />); expect(container).toMatchSnapshot();",
+    "options": ["Any change, including formatting, breaks snapshot, encouraging frequent updates instead of thinking", "Snapshots are stable", "Snapshots catch all bugs", "Snapshot tests are best practice"],
+    "correctIndex": 0,
+    "explanation": "Snapshots are brittle; a whitespace change breaks them, encouraging mindless updates instead of intentional review of what changed.",
+    "difficulty": "Medium",
+    "tags": ["test", "snapshot", "brittle"]
+  }
+]

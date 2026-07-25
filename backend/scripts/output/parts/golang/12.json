@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Memory Management",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"runtime\"\n)\nfunc main() {\n  var m1, m2 runtime.MemStats\n  runtime.ReadMemStats(&m1)\n  s := make([]int, 1000000)\n  runtime.ReadMemStats(&m2)\n  fmt.Println(m2.Alloc > m1.Alloc)\n}",
+    "options": ["true", "false", "panic", "depends on GC"],
+    "correctIndex": 0,
+    "explanation": "Large slice allocation increases Alloc; m2.Alloc > m1.Alloc.",
+    "difficulty": "Medium",
+    "tags": ["memory", "runtime", "MemStats"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Memory Management",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"runtime\"\n  \"time\"\n)\nfunc main() {\n  s := make([]int, 1000000)\n  runtime.GC()\n  fmt.Println(len(s))\n}",
+    "options": ["1000000", "0", "varies", "panic"],
+    "correctIndex": 0,
+    "explanation": "runtime.GC runs garbage collection; slice remains reachable, len unchanged.",
+    "difficulty": "Medium",
+    "tags": ["gc", "memory"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Memory Management",
+    "question": "package main\nimport \"fmt\"\nfunc f() *int {\n  x := 42\n  return &x\n}\nfunc main() {\n  p := f()\n  fmt.Println(*p)\n}",
+    "options": ["42", "0", "undefined", "panic"],
+    "correctIndex": 0,
+    "explanation": "Go escapes x to heap; pointer remains valid after function return.",
+    "difficulty": "Medium",
+    "tags": ["escape-analysis", "pointers"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Memory Management",
+    "question": "package main\nimport \"fmt\"\nfunc f() int {\n  p := new(int)\n  *p = 42\n  return *p\n}\nfunc main() {\n  fmt.Println(f())\n}",
+    "options": ["42", "0", "panic", "undefined"],
+    "correctIndex": 0,
+    "explanation": "new(int) allocates; escape analysis likely keeps allocation on stack.",
+    "difficulty": "Medium",
+    "tags": ["new", "escape-analysis"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Memory Management",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  s := make([]int, 10)\n  s = nil\n  fmt.Println(len(s), cap(s))\n}",
+    "options": ["0 0", "10 10", "undefined", "panic"],
+    "correctIndex": 0,
+    "explanation": "Setting slice to nil resets len and cap to 0.",
+    "difficulty": "Medium",
+    "tags": ["slices", "nil"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Memory Management",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  s := make([]int, 0, 100)\n  s = s[:50]\n  fmt.Println(len(s), cap(s))\n}",
+    "options": ["50 100", "50 50", "0 100", "panic"],
+    "correctIndex": 0,
+    "explanation": "Reslicing changes len but not cap; len=50, cap=100.",
+    "difficulty": "Medium",
+    "tags": ["slices", "reslicing"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Memory Management",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  s := make([]int, 100)\n  s = s[:0]\n  fmt.Println(len(s), cap(s))\n  s = append(s, 1)\n  fmt.Println(len(s))\n}",
+    "options": ["1", "0", "panic", "undefined"],
+    "correctIndex": 0,
+    "explanation": "Reslicing to [:0] empties but keeps capacity; append uses existing array.",
+    "difficulty": "Medium",
+    "tags": ["slices", "reslicing", "append"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Memory Management",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  s1 := []int{1, 2, 3}\n  s2 := s1[:2]\n  s2[0] = 99\n  fmt.Println(s1[0])\n}",
+    "options": ["99", "1", "panic", "undefined"],
+    "correctIndex": 0,
+    "explanation": "s2 shares underlying array with s1; modification visible in both.",
+    "difficulty": "Medium",
+    "tags": ["slices", "aliasing", "memory"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Memory Management",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"unsafe\"\n)\nfunc main() {\n  x := int64(1)\n  p := (*int32)(unsafe.Pointer(&x))\n  fmt.Println(*p)\n}",
+    "options": ["undefined", "1", "0", "panic"],
+    "correctIndex": 0,
+    "explanation": "Unsafe pointer cast can cause undefined behavior; platform-dependent result.",
+    "difficulty": "Medium-Hard",
+    "tags": ["unsafe", "pointers"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Memory Management",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  m := make(map[int]*int)\n  x := 42\n  m[1] = &x\n  y := *m[1]\n  fmt.Println(y)\n}",
+    "options": ["42", "0", "panic", "undefined"],
+    "correctIndex": 0,
+    "explanation": "x is in scope; pointer remains valid; prints 42.",
+    "difficulty": "Medium",
+    "tags": ["maps", "pointers", "memory"]
+  }
+]

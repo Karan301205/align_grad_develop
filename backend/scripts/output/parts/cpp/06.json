@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Templates",
+    "question": "What is template specialization, and how does it differ from instantiation?",
+    "options": ["specialization is providing a custom implementation for a template type or value", "instantiation creates a specific version from the template; specialization is instantiation", "specialization is for functions; instantiation for classes", "they are identical terms"],
+    "correctIndex": 0,
+    "explanation": "Specialization provides a hand-written alternative implementation for specific template arguments; instantiation auto-generates from the template.",
+    "difficulty": "Medium-Hard",
+    "tags": ["template-specialization", "partial-specialization", "template-instantiation"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Templates",
+    "question": "In `template<typename T> void f(T) {}` and `void f(int) {}`, which overload is chosen for `f(3)`?",
+    "options": ["the template version always", "the explicit int version", "whichever is declared first", "undefined behavior due to ambiguity"],
+    "correctIndex": 1,
+    "explanation": "Overload resolution prefers exact specializations over template instantiations; f(int) is chosen.",
+    "difficulty": "Medium",
+    "tags": ["template-overloading", "overload-resolution"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Templates",
+    "question": "What does SFINAE mean, and what problem does it solve?",
+    "options": ["Substitution Failure Is Not An Error; allows disabling templates based on type traits", "Sequential Function Assertion; ensures function signatures match", "Safe Function Argument In Namespace E; a scoping rule", "a deprecated C++98 feature no longer used"],
+    "correctIndex": 0,
+    "explanation": "SFINAE enables conditional template availability: if template parameter substitution fails, that template is discarded, not an error.",
+    "difficulty": "Hard",
+    "tags": ["sfinae", "enable-if", "type-traits"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Templates",
+    "question": "Can template functions be declared with default template arguments?",
+    "options": ["no; default arguments only work for regular functions", "yes; template<typename T = int> syntax", "yes; but only for class templates", "only in C++20"],
+    "correctIndex": 1,
+    "explanation": "Template functions support default arguments: `template<typename T = int> void f() {}` allows calling f() without specifying T.",
+    "difficulty": "Medium",
+    "tags": ["default-template-arguments", "function-templates"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Templates",
+    "question": "In `template<typename T> class A { T t; };`, is T guaranteed to be a type?",
+    "options": ["yes; template parameters are always types", "no; T can be a non-type parameter like int", "no; the syntax is ambiguous without typename", "only in C++17 onwards"],
+    "correctIndex": 1,
+    "explanation": "T is deduced as a type in this case, but templates can also accept non-type parameters like values or pointers.",
+    "difficulty": "Medium",
+    "tags": ["template-parameters", "typename", "non-type-parameters"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Templates",
+    "question": "What is template argument deduction, and when does it fail?",
+    "options": ["deduction infers template arguments from function call; fails if type mismatch occurs", "deduction always succeeds; explicit arguments override", "deduction is C++17 only", "only works for class templates"],
+    "correctIndex": 0,
+    "explanation": "Deduction examines argument types to infer T; it fails if no consistent T can satisfy the template signature.",
+    "difficulty": "Medium",
+    "tags": ["template-deduction", "argument-deduction"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Templates",
+    "question": "Can you write a template that works for pointers but not values?",
+    "options": ["no; templates apply to all type categories", "yes; use partial specialization or SFINAE with is_pointer", "yes; but only in C++20", "only for function templates"],
+    "correctIndex": 1,
+    "explanation": "Partial specialization `template<typename T> class A<T*>` or SFINAE with type traits enable type-category-specific templates.",
+    "difficulty": "Medium-Hard",
+    "tags": ["partial-specialization", "type-traits", "sfinae"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Templates",
+    "question": "What does the `typename` keyword mean when used before a dependent type in a template?",
+    "options": ["specifies that the name is a type, not a static member", "declares a new template type parameter", "clarifies scope resolution for nested types", "required only in C++98"],
+    "correctIndex": 0,
+    "explanation": "typename disambiguates dependent names: `typename T::type` tells the compiler T::type is a type, not a static variable.",
+    "difficulty": "Hard",
+    "tags": ["dependent-types", "typename-keyword", "template-parsing"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Templates",
+    "question": "Does a template function need a declaration if the definition is in a header?",
+    "options": ["no; template definitions in headers are sufficient", "yes; templates require separate declaration and definition", "only if the template is instantiated in multiple files", "depends on the linker"],
+    "correctIndex": 0,
+    "explanation": "Template definitions are typically in headers; the compiler instantiates them when needed, no separate declaration required.",
+    "difficulty": "Medium",
+    "tags": ["template-definition", "header-inclusion", "linkage"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Templates",
+    "question": "What is the Two-Phase Name Lookup rule, and why does it matter?",
+    "options": ["names are looked up at instantiation time only", "dependent names resolve at instantiation; non-dependent at definition time", "C++ looks up names twice for security", "this rule does not exist in modern C++"],
+    "correctIndex": 1,
+    "explanation": "Non-dependent names are checked at template definition; dependent names at instantiation, catching unrelated issues early.",
+    "difficulty": "Hard",
+    "tags": ["name-lookup", "template-instantiation", "dependent-names"]
+  }
+]

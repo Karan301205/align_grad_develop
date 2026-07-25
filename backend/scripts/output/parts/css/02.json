@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "CSS",
+    "subtopic": "Selector Types",
+    "question": "What is the specificity value of this selector?\n```css\n#main .box > p::first-line\n```",
+    "options": ["0,1,1,1", "0,1,2,1", "0,0,1,2", "0,1,2,2"],
+    "correctIndex": 1,
+    "explanation": "Specificity is: 1 ID (#main) = 100, 1 class (.box) = 10, 1 pseudo-element (::first-line) = 1, 1 element (p) = 1; total = 0,1,2,1.",
+    "difficulty": "Medium",
+    "tags": ["specificity", "calculation", "pseudo-elements"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Selector Types",
+    "question": "Given this HTML, which selector will select only the direct child p?\n```html\n<div class=\"parent\">\n  <p>Direct child</p>\n  <div>\n    <p>Nested child</p>\n  </div>\n</div>\n```",
+    "options": [".parent p", ".parent > p", ".parent .p", "div p:first-child"],
+    "correctIndex": 1,
+    "explanation": "The child combinator (>) matches only direct children; descendant combinator (space) matches all nested elements.",
+    "difficulty": "Medium",
+    "tags": ["combinators", "child-selector", "descendant-selector"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Selector Types",
+    "question": "What will this attribute selector match?\n```css\ninput[type=\"text\"]\n```",
+    "options": ["All input elements", "Inputs with type attribute", "Inputs with type exactly matching 'text'", "Inputs starting with 'text'"],
+    "correctIndex": 2,
+    "explanation": "The attribute exact-match selector [attr=\"value\"] requires the attribute value to match exactly; 'text' vs 'email' are different.",
+    "difficulty": "Medium",
+    "tags": ["attribute-selector", "exact-match"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Selector Types",
+    "question": "When would :first-child fail to select an element while :first-of-type succeeds?\n```html\n<div class=\"container\">\n  <h2>Title</h2>\n  <p>First paragraph</p>\n</div>\n```\n```css\np:first-child { color: blue; }\np:first-of-type { color: red; }\n```",
+    "options": ["Both would fail", "first-child matches, first-of-type fails", "first-child fails, first-of-type matches", "Both match, red wins"],
+    "correctIndex": 2,
+    "explanation": "p:first-child fails because the first child is h2, not p; p:first-of-type succeeds because p is the first p element among siblings.",
+    "difficulty": "Medium-Hard",
+    "tags": ["pseudo-class", "first-child", "first-of-type"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Selector Types",
+    "question": "What is the difference between :not(.active) and :not(.active, .disabled)?\n```css\nbutton:not(.active) { opacity: 0.5; }\nbutton:not(.active, .disabled) { opacity: 1; }\n```",
+    "options": ["First excludes .active, second excludes both", "Same behavior in all browsers", "Second uses legacy :not() syntax", "Chaining selectors in :not() not supported"],
+    "correctIndex": 3,
+    "explanation": "The :not() selector only accepts a single simple selector in older specs; modern browsers support :not(.active, .disabled) but older ones require chaining :not(.active):not(.disabled).",
+    "difficulty": "Medium-Hard",
+    "tags": ["not-selector", "pseudo-class", "browser-support"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Selector Types",
+    "question": "In terms of CSS performance, which selector is typically most expensive to process?\n```css\n* { } /* universal */\ndiv p span { } /* descendant chain */\n.container .item { } /* class descendant */\n#header nav { } /* id descendant */\n```",
+    "options": ["Universal selector", "Long descendant chains", "Class selectors", "ID selectors"],
+    "correctIndex": 0,
+    "explanation": "The universal selector (*) targets every element in the DOM, forcing style recalculation on all nodes; browser optimizations matter more than selector type.",
+    "difficulty": "Medium-Hard",
+    "tags": ["performance", "selector-efficiency", "universal-selector"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Selector Types",
+    "question": "What will be the computed text color of the span?\n```html\n<p class=\"text\" id=\"main\">\n  <span class=\"highlight\">Colored text</span>\n</p>\n```\n```css\np.text { color: blue; }\n#main .highlight { color: green; }\nspan.highlight { color: red; }\n```",
+    "options": ["blue (element + class)", "green (ID specificity higher)", "red (last rule wins)", "conflict: specificity tie"],
+    "correctIndex": 1,
+    "explanation": "Specificity: p.text = 0,0,1,1 (11); #main .highlight = 0,1,1,0 (110); span.highlight = 0,0,1,1 (11); ID rule wins with highest specificity.",
+    "difficulty": "Medium-Hard",
+    "tags": ["specificity", "calculation", "id-selector"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Selector Types",
+    "question": "Which pseudo-element cannot be styled with color or text properties?\n```css\n::before { color: red; }\n::after { content: 'text'; }\n::selection { background: blue; }\n::placeholder { color: gray; }\n```",
+    "options": ["::before", "::after", "::selection", "None, all can be styled"],
+    "correctIndex": 2,
+    "explanation": "::selection can only accept background-color, background, and color; text-specific properties like font or text-decoration are not applicable.",
+    "difficulty": "Medium-Hard",
+    "tags": ["pseudo-element", "styling-constraints"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Selector Types",
+    "question": "When testing this, which element will match :nth-child(2)?\n```html\n<ul>\n  <li>Item 1</li>\n  <li class=\"skip\">Item 2</li>\n  <li>Item 3</li>\n</ul>\n```\n```css\nli:nth-child(2) { color: red; }\n```",
+    "options": ["Item 1 (first li)", "Item 2 (second li, has class)", "Item 3 (skips li.skip)", "No match (class blocks selector)"],
+    "correctIndex": 1,
+    "explanation": "nth-child counts all children by position regardless of class; the second child is the li with class='skip', so it matches and turns red.",
+    "difficulty": "Medium",
+    "tags": ["nth-child", "positional-pseudo-class"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Selector Types",
+    "question": "How does the adjacent sibling combinator (+) differ from the general sibling combinator (~)?\n```css\nli + li { margin-top: 10px; }\nli ~ li { margin-top: 10px; }\n```",
+    "options": ["Both do the same thing", "+ matches first sibling, ~ matches all", "+ matches next sibling, ~ matches all following", "~ is invalid syntax"],
+    "correctIndex": 2,
+    "explanation": "The adjacent sibling combinator (+) matches only the immediate next sibling; the general sibling combinator (~) matches all following siblings.",
+    "difficulty": "Medium",
+    "tags": ["combinators", "sibling-selector"]
+  }
+]

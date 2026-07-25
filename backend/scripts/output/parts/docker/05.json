@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Compose",
+    "question": "A docker-compose.yml defines two services with `depends_on: [db]`. Docker Compose starts the db container first, then starts the app container. The app immediately tries to connect to the database but fails because the database server is still initializing. What is the issue?",
+    "options": ["The depends_on flag only controls startup order, not readiness; the app must implement retry logic or wait-for-it scripts", "Docker Compose automatically waits for the db service to be healthy; you must define a HEALTHCHECK in the db image", "The db container is not actually running; depends_on syntax is incorrect and should use `depends_on: {db: {condition: service_started}}`", "Docker Compose does not support database startup ordering; use --wait flag instead"],
+    "correctIndex": 0,
+    "explanation": "`depends_on` controls only container startup order, not readiness; the database port may be listening but initialization (schema setup, migrations) may still be in progress; the app must retry connections or use a wait-for-it script.",
+    "difficulty": "Medium",
+    "tags": ["depends-on", "service-readiness", "docker-compose"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Compose",
+    "question": "In docker-compose.yml, two services are defined with `networks: [backend]`, but one service's Dockerfile contains `EXPOSE 3000`. From the second service, `curl localhost:3000` fails. Why?",
+    "options": ["The EXPOSE instruction does not actually publish ports; use `ports: ['3000:3000']` in docker-compose.yml to make it accessible", "Services on the same network can reach each other by service name, not localhost; use `curl <service-name>:3000` instead", "Docker Compose requires explicit port publishing in the yml; EXPOSE is ignored in Compose", "The second service must explicitly declare the dependency with `depends_on` to access the first service's ports"],
+    "correctIndex": 1,
+    "explanation": "Inside Docker Compose, services communicate by service name over the network; `localhost` refers to the current container, not other services; use the service name (hostname) to reach other containers on the same network.",
+    "difficulty": "Medium",
+    "tags": ["docker-compose-networking", "service-discovery", "expose-instruction"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Compose",
+    "question": "After running `docker-compose up -d` with two services and then editing the docker-compose.yml (changing environment variables), you run `docker-compose up -d` again. The environment variables in the running containers do not change. What must you do?",
+    "options": ["Run `docker-compose restart` to apply the new environment variables without rebuilding", "Run `docker-compose down` then `docker-compose up -d` to force a full restart with new config", "Run `docker-compose up --force-recreate -d` to recreate containers with the new configuration", "Edit the containers directly with `docker exec` or restart them individually with `docker restart`"],
+    "correctIndex": 2,
+    "explanation": "`docker-compose up -d` does not recreate containers if they already exist; use `--force-recreate` to destroy and rebuild them, or `docker-compose down && docker-compose up -d` to ensure new configuration is applied.",
+    "difficulty": "Medium",
+    "tags": ["docker-compose-update", "container-recreation", "configuration-changes"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Compose",
+    "question": "A service in docker-compose.yml uses `image: myapp:latest`. After rebuilding the image locally, you run `docker-compose up -d` but the old image is still running. How do you ensure the new image is pulled and used?",
+    "options": ["Run `docker-compose pull` to fetch the latest image from the registry, then `docker-compose up -d`", "Run `docker-compose up -d --pull always` to force a pull before starting", "Run `docker image rm myapp:latest` to remove the old image, then `docker-compose up -d` to rebuild", "Use `build: .` instead of `image:` in docker-compose.yml to rebuild from the Dockerfile on every up"],
+    "correctIndex": 1,
+    "explanation": "By default, Compose uses the locally cached image; `--pull always` forces a pull from the registry before starting, ensuring the latest version; `build: .` rebuilds from a Dockerfile instead of pulling.",
+    "difficulty": "Medium",
+    "tags": ["docker-compose-image-management", "image-caching", "docker-compose"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Compose",
+    "question": "Two docker-compose.yml files exist: `docker-compose.yml` and `docker-compose.prod.yml`. Running `docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d` applies both files, but values in prod.yml override those in base.yml. Later, you remove a service definition from prod.yml and re-up. The service still exists with the old prod.yml config. Why?",
+    "options": ["Multiple -f flags merge configurations, and removing a service from a later file does not delete it; you must use `docker-compose down` first", "Docker Compose caches the merged configuration; run with `--no-cache` to reload", "The service is running independently; use `docker-compose -f ... ps` to verify which services are actually running", "Once merged, the configuration is finalized; you must edit the base file instead"],
+    "correctIndex": 0,
+    "explanation": "Multiple -f flags merge configurations (override, not replace); removing a service definition from a later file does not undo the merge from a previous up; use `docker-compose down` to stop and remove all services, then re-up.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker-compose-merge", "multiple-compose-files", "service-lifecycle"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Compose",
+    "question": "A docker-compose.yml defines a service with `build: { context: ., dockerfile: Dockerfile.prod }` and `image: myapp:prod`. After running `docker-compose build`, the image myapp:prod is created. Running `docker-compose up -d` rebuilds the image again even though nothing changed. Why?",
+    "options": ["Compose always rebuilds images tagged with a non-default name to ensure freshness", "By default, `docker-compose up` rebuilds if the Dockerfile or build context changed; add `--no-build` to skip rebuilding", "The image.tag 'prod' is considered a development tag and is always rebuilt", "Docker detects that the image was built at a different time and treats it as stale"],
+    "correctIndex": 1,
+    "explanation": "`docker-compose up` checks if the image is out of date based on build context changes; use `--no-build` to skip rebuilding if you only want to start containers, or `build --no-cache` to force rebuild.",
+    "difficulty": "Medium",
+    "tags": ["docker-compose-build", "image-caching", "docker-compose"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Compose",
+    "question": "A docker-compose.yml uses `version: '3.8'` and defines a service with `environment: DB_HOST=localhost`. Inside the container, `echo $DB_HOST` prints 'localhost'. A second container on the same network needs to connect to the database on the first container, but using `localhost` as the hostname fails. How should the first container's environment be configured?",
+    "options": ["The environment variable should be set to the service name with `DB_HOST=${COMPOSE_PROJECT_NAME}_db_1` to enable service discovery", "Change `DB_HOST=localhost` to `DB_HOST=<service-name>` (e.g., `DB_HOST=db`) so other services can reach it by name", "Use `environment: {DB_HOST: localhost}` syntax instead; the string format does not support service name interpolation", "Environment variables cannot reference Docker Compose service names; use a separate entrypoint script to set the hostname"],
+    "correctIndex": 1,
+    "explanation": "Inside Docker Compose, containers reach each other by service name, not localhost; set `DB_HOST=db` (the service name) so other services can resolve and connect; `localhost` only refers to the container's own loopback.",
+    "difficulty": "Medium",
+    "tags": ["docker-compose-networking", "service-discovery", "environment-variables"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Compose",
+    "question": "After running `docker-compose up -d`, you check the network with `docker network ls` and see a network named `myproject_default`. You then run `docker run --network myproject_default -it alpine` to attach a standalone container to the Compose network. The standalone container can reach the services, but services cannot reach the standalone container by name. Why?",
+    "options": ["Standalone containers joined after Compose startup do not get DNS entries; the Compose network does not register external containers", "The embedded DNS in the Compose network only resolves Compose services, not arbitrary containers", "You must use `docker run --name` to register the hostname, which Compose does not do automatically for external containers", "This is expected; external containers are isolated from Compose's service discovery by design"],
+    "correctIndex": 1,
+    "explanation": "Docker Compose's embedded DNS resolves service names defined in the Compose file; standalone containers are not in the Compose configuration, so they have no DNS entries, making them unreachable by name from services (though services can reach the standalone container if they know its IP).",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker-compose-networking", "external-containers", "dns-resolution"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Compose",
+    "question": "A docker-compose.yml uses `volumes: [./data:/data]` (relative path), and the yaml file is located at `/home/user/app/docker-compose.yml`. The service writes to `/data` inside the container. On the host, where would the data be stored?",
+    "options": ["The relative path is resolved to `/home/user/app/data`", "The relative path is resolved to the Docker daemon's working directory, which is typically `/`", "Docker Compose uses an absolute path internally; the data is stored in the Docker volumes directory", "Relative paths in volumes are not allowed in Compose; the command fails"],
+    "correctIndex": 0,
+    "explanation": "Relative paths in Compose volumes are resolved relative to the directory containing the docker-compose.yml file; `./data` becomes `/home/user/app/data` on the host.",
+    "difficulty": "Medium",
+    "tags": ["docker-compose-volumes", "relative-paths", "volume-mounting"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Compose",
+    "question": "A service declares `ports: ['8080:80']` in docker-compose.yml. After running `docker-compose up -d`, you check `docker ps` and see the port is published as `0.0.0.0:8080->80/tcp`. Later, you change the port to `ports: ['127.0.0.1:8080:80']` and run `docker-compose up -d` again. The container is still running but the port binding hasn't changed. What must you do?",
+    "options": ["Run `docker-compose up --force-recreate -d` to rebuild the container with the new port binding", "Run `docker port <container-id>` to verify the actual binding; it may have changed without showing in ps", "Docker Compose does not update port bindings on running containers; you must `docker-compose down` first", "Run `docker-compose port <service-name> 80` to check if the binding was applied"],
+    "correctIndex": 2,
+    "explanation": "`docker-compose up` does not recreate containers if they already exist; changing port bindings requires either `--force-recreate` or `docker-compose down` followed by `up` to apply the new configuration.",
+    "difficulty": "Medium",
+    "tags": ["docker-compose-ports", "container-recreation", "configuration-update"]
+  }
+]

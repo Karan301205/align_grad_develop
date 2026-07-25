@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "Java Syntax",
+    "question": "What is printed by this code?\n```java\nString s1 = \"Hello\";\nString s2 = new String(\"Hello\");\nSystem.out.println(s1 == s2);\nSystem.out.println(s1.equals(s2));\n```",
+    "options": ["true, true", "false, true", "true, false", "false, false"],
+    "correctIndex": 1,
+    "explanation": "s1 == s2 compares references (false: different objects), while equals() compares content (true: both contain 'Hello').",
+    "difficulty": "Medium",
+    "tags": ["strings", "reference-vs-value", "operators"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Syntax",
+    "question": "What is the output?\n```java\nint x = 5;\nint y = ++x + x-- + x;\nSystem.out.println(y);\n```",
+    "options": ["16", "17", "18", "19"],
+    "correctIndex": 1,
+    "explanation": "++x makes x=6, then 6+6=12, then x-- returns 6 (x becomes 5), so 12+5=17.",
+    "difficulty": "Medium-Hard",
+    "tags": ["increment-operators", "operator-precedence"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Syntax",
+    "question": "Which statement compiles without error?\n```java\nint a = 10;\nInteger b = 10;\n```\nWhen comparing these values, which expression is safe for all cases?",
+    "options": ["a == b", "a > b", "a >= b", "None of the above (NullPointerException risk)"],
+    "correctIndex": 2,
+    "explanation": "a >= b auto-unboxes b safely; a == b may fail if b is null (NullPointerException on unboxing); > and < have same unboxing risk.",
+    "difficulty": "Medium-Hard",
+    "tags": ["autoboxing", "null-safety", "comparison"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Syntax",
+    "question": "What does this print?\n```java\nString[] arr = {\"a\", \"b\", \"c\"};\nfor (String s : arr) {\n  s = \"x\";\n}\nSystem.out.println(Arrays.toString(arr));\n```",
+    "options": ["[x, x, x]", "[a, b, c]", "NullPointerException", "[null, null, null]"],
+    "correctIndex": 1,
+    "explanation": "Enhanced for-loop iterates over copies of references; reassigning s does not modify the array.",
+    "difficulty": "Medium",
+    "tags": ["enhanced-for", "reference-semantics", "arrays"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Syntax",
+    "question": "What is the output?\n```java\nint[] x = new int[3];\nSystem.out.println(x[0]);\nInteger[] y = new Integer[3];\nSystem.out.println(y[0]);\n```",
+    "options": ["0, 0", "0, null", "null, 0", "null, null"],
+    "correctIndex": 1,
+    "explanation": "Primitive array elements default to 0; reference array elements (Integer objects) default to null.",
+    "difficulty": "Medium",
+    "tags": ["initialization", "default-values", "primitive-vs-reference"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Syntax",
+    "question": "Which throws an exception?\n```java\nint[] arr = new int[5];\nint x = arr[10];\n```",
+    "options": ["ArrayIndexOutOfBoundsException", "IndexOutOfBoundsException", "NullPointerException", "OutOfMemoryException"],
+    "correctIndex": 0,
+    "explanation": "Accessing array index 10 when size is 5 throws ArrayIndexOutOfBoundsException (a subclass of IndexOutOfBoundsException).",
+    "difficulty": "Medium",
+    "tags": ["exceptions", "array-bounds"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Syntax",
+    "question": "What is printed?\n```java\nboolean x = true;\nif (x = false) {\n  System.out.println(\"A\");\n} else {\n  System.out.println(\"B\");\n}\n```",
+    "options": ["A", "B", "Compilation error", "A and B"],
+    "correctIndex": 1,
+    "explanation": "x = false is an assignment expression that evaluates to false, so the else block executes and prints 'B'.",
+    "difficulty": "Medium",
+    "tags": ["assignment-expression", "control-flow"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Syntax",
+    "question": "What is the output?\n```java\nInteger a = 127;\nInteger b = 127;\nInteger c = 128;\nInteger d = 128;\nSystem.out.println((a == b) + \", \" + (c == d));\n```",
+    "options": ["true, true", "true, false", "false, true", "false, false"],
+    "correctIndex": 1,
+    "explanation": "Integer values -128 to 127 are cached and reuse objects (a == b is true), but 128+ are new objects (c == d is false).",
+    "difficulty": "Medium-Hard",
+    "tags": ["integer-cache", "autoboxing", "reference-equality"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Syntax",
+    "question": "What does this code print?\n```java\nString s = \"test\";\nswitch (s) {\n  case \"test\":\n    System.out.println(\"A\");\n  case \"other\":\n    System.out.println(\"B\");\n  default:\n    System.out.println(\"C\");\n}\n```",
+    "options": ["A", "A, B, C", "B, C", "A, B"],
+    "correctIndex": 3,
+    "explanation": "switch matches 'test', prints 'A', then falls through (no break) to print 'B', but not 'C' (default is not reached after case match without break).",
+    "difficulty": "Medium",
+    "tags": ["switch", "fall-through", "control-flow"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Syntax",
+    "question": "What is the result of this expression?\n```java\nint x = 10;\nint y = 20;\nint z = (x > y) ? x : y;\nSystem.out.println(z);\n```",
+    "options": ["10", "20", "30", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "The ternary operator (condition ? true-value : false-value) evaluates to y (20) because x > y is false.",
+    "difficulty": "Medium",
+    "tags": ["ternary-operator", "conditional-expression"]
+  }
+]

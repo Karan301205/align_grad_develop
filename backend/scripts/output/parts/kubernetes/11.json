@@ -1,0 +1,167 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Logging Monitoring",
+    "question": "A pod writes logs to stdout but kubectl logs shows no output even though the pod is running. What is a likely cause?",
+    "options": [
+      "The container is writing to a file instead of stdout",
+      "Kubelet on the node has crashed and cannot forward logs",
+      "The pod is still initializing and hasn't started logging",
+      "The container runtime hasn't flushed the logs to disk yet"
+    ],
+    "correctIndex": 0,
+    "explanation": "kubectl logs reads from container stdout/stderr; if the application logs to files, kubectl logs will be empty.",
+    "difficulty": "Medium",
+    "tags": ["logging", "kubectl-logs", "debugging"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Logging Monitoring",
+    "question": "A pod crashes and is recreated by its ReplicaSet. You run kubectl logs <pod>. What logs do you see?",
+    "options": [
+      "Logs from the current running instance only",
+      "Logs from both the crashed and current instances",
+      "The previous crashed instance's logs (if available) with the --previous flag",
+      "An error because the pod is new"
+    ],
+    "correctIndex": 2,
+    "explanation": "kubectl logs shows current logs by default; use --previous to view logs from a previous container instance in the same pod.",
+    "difficulty": "Medium",
+    "tags": ["logging", "kubectl-logs", "pod-restart"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Logging Monitoring",
+    "question": "The metrics-server in kube-system is not running. You try to use kubectl top to view pod CPU and memory usage. What happens?",
+    "options": [
+      "kubectl top retrieves metrics from an alternative source",
+      "kubectl top fails because metrics-server is required to provide metrics",
+      "kubectl top shows cached metrics from the last known state",
+      "Kubernetes automatically starts a replacement metrics-server"
+    ],
+    "correctIndex": 1,
+    "explanation": "kubectl top depends on metrics-server; without it, no metrics are available and the command fails.",
+    "difficulty": "Medium",
+    "tags": ["metrics-server", "monitoring", "kubectl-top"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Logging Monitoring",
+    "question": "A pod is in CrashLoopBackOff. You run kubectl logs but the output shows no errors, only normal startup messages. What else can you check?",
+    "options": [
+      "The pod's exit code using kubectl describe; check events for termination reasons (OOMKilled, etc.)",
+      "The pod's network connectivity using ping",
+      "The cluster's authentication logs",
+      "The container's source code to find the bug"
+    ],
+    "correctIndex": 0,
+    "explanation": "kubectl describe shows pod events including exit codes, termination reasons, and resource limits; this reveals why the container crashed.",
+    "difficulty": "Medium",
+    "tags": ["debugging", "crashloopbackoff", "kubectl-describe"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Logging Monitoring",
+    "question": "You configure a liveness probe that periodically checks if the application is responsive. The probe fails repeatedly. How does this appear in logs?",
+    "options": [
+      "The pod's logs show liveness probe failures",
+      "Kubelet logs (not pod logs) show probe failures; the pod continues running until failure threshold is reached",
+      "The pod is immediately terminated on the first probe failure",
+      "No logs are generated; only the pod status reflects the failure"
+    ],
+    "correctIndex": 1,
+    "explanation": "Probe attempts are logged by kubelet, not the container; kubelet logs show probe failures and actions taken.",
+    "difficulty": "Medium-Hard",
+    "tags": ["logging", "liveness-probe", "kubelet-logs"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Logging Monitoring",
+    "question": "A pod generates 100MB of logs per second. Container logs are stored on the node's filesystem. What is the consequence?",
+    "options": [
+      "Kubernetes automatically compresses logs to save space",
+      "The node's filesystem can fill quickly, causing pod evictions when disk pressure is high",
+      "Logs are automatically purged after 1 hour",
+      "The pod is terminated to prevent disk exhaustion"
+    ],
+    "correctIndex": 1,
+    "explanation": "Container logs consume disk space; high log volume can fill the node's filesystem, triggering evictions when disk pressure exceeds thresholds.",
+    "difficulty": "Medium-Hard",
+    "tags": ["logging", "disk-pressure", "eviction"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Logging Monitoring",
+    "question": "You use kubectl logs --tail=50 <pod> to view the last 50 lines. The pod has been running for 2 hours and generates 1000 lines per minute. What is shown?",
+    "options": [
+      "The last 50 lines logged by the application",
+      "The last 50 lines that haven't been rotated off disk yet",
+      "An error because the pod has too many logs",
+      "Logs from the last 3 seconds only"
+    ],
+    "correctIndex": 0,
+    "explanation": "kubectl logs --tail fetches the last N lines from the container's current log stream, regardless of when they were logged.",
+    "difficulty": "Medium",
+    "tags": ["logging", "kubectl-logs", "tail"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Logging Monitoring",
+    "question": "A multi-container pod has two containers. You run kubectl logs <pod> without specifying a container. What happens?",
+    "options": [
+      "Logs from all containers are shown together",
+      "An error occurs because you must specify which container to log from",
+      "Logs from the first container in the pod spec are shown",
+      "Kubernetes shows a summary of all container logs"
+    ],
+    "correctIndex": 1,
+    "explanation": "kubectl logs requires --container or -c to specify which container to view in a multi-container pod; the command fails without it.",
+    "difficulty": "Medium",
+    "tags": ["logging", "multi-container-pod", "kubectl-logs"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Logging Monitoring",
+    "question": "You query the metrics API to get pod CPU usage every 30 seconds. The metrics-server stores data for 15 minutes. What happens after 15 minutes?",
+    "options": [
+      "Metrics are archived to permanent storage",
+      "Metrics are deleted; metrics-server retains only recent data",
+      "Metrics are cached indefinitely",
+      "The API returns cached metrics with a staleness warning"
+    ],
+    "correctIndex": 1,
+    "explanation": "Metrics-server is short-lived; it retains metrics in memory for the specified duration, then discards them; external storage is needed for long-term retention.",
+    "difficulty": "Medium-Hard",
+    "tags": ["metrics-server", "monitoring", "data-retention"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Logging Monitoring",
+    "question": "A pod's readiness probe fails repeatedly. You check kubectl logs and see normal startup messages. The pod's readiness is failing for an external dependency. How do you diagnose this?",
+    "options": [
+      "Use kubectl logs to see if the probe itself logged failures",
+      "Manually exec into the pod and test the readiness probe endpoint yourself",
+      "Check kubectl describe for the readiness probe configuration and events",
+      "Query the kubelet logs on the node to see probe execution details"
+    ],
+    "correctIndex": 2,
+    "explanation": "kubectl describe shows probe configuration, retry counts, and events revealing why probes fail; this guides manual testing.",
+    "difficulty": "Medium-Hard",
+    "tags": ["debugging", "readiness-probe", "kubectl-describe"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Logging Monitoring",
+    "question": "You install a monitoring solution that scrapes metrics from kubelet's metrics endpoint (port 10250). The scraper keeps getting unauthorized errors. Why?",
+    "options": [
+      "Port 10250 requires client certificates for HTTPS; the scraper must authenticate",
+      "The kubelet is configured to deny external scraping",
+      "The metrics endpoint is disabled by default",
+      "Network policies are blocking access to the kubelet"
+    ],
+    "correctIndex": 0,
+    "explanation": "Kubelet's secure metrics endpoint (port 10250) requires client-certificate authentication; scrapers must use valid certificates signed by the cluster CA.",
+    "difficulty": "Hard",
+    "tags": ["monitoring", "kubelet", "certificates"]
+  }
+]

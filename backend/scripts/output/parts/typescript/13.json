@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Architecture Patterns",
+    "question": "Given a discriminated union `type Action = { type: 'add'; payload: number } | { type: 'remove'; payload: string };` — can you dispatch an action safely?",
+    "options": ["No, payload types conflict", "Yes, type discriminates the payload", "Yes, but requires a cast", "No, unions are ambiguous"],
+    "correctIndex": 1,
+    "explanation": "Discriminated unions use a tag (type) to narrow the payload; switching on type reveals the correct payload shape.",
+    "difficulty": "Medium",
+    "tags": ["discriminated-unions", "pattern-matching", "type-narrowing"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Architecture Patterns",
+    "question": "Does the Repository pattern benefit from TypeScript's generic constraints?",
+    "options": ["No, repositories are untyped", "Yes, generics enforce a consistent interface", "Yes, with extends Entity", "No, generics complicate patterns"],
+    "correctIndex": 1,
+    "explanation": "Generic repositories like `Repository<T extends Entity>` ensure type-safe CRUD operations across all entities.",
+    "difficulty": "Medium",
+    "tags": ["repository-pattern", "generics", "data-access"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Architecture Patterns",
+    "question": "Can the Builder pattern leverage TypeScript's type system for compile-time validation?",
+    "options": ["No, builders are runtime", "Yes, with chained method return types", "Yes, tracking state via generics", "No, TypeScript cannot validate builders"],
+    "correctIndex": 2,
+    "explanation": "Fluent builders can use generic type parameters to track required vs. optional fields, ensuring all required fields are set.",
+    "difficulty": "Medium-Hard",
+    "tags": ["builder-pattern", "fluent-api", "type-safety"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Architecture Patterns",
+    "question": "Does the Observer pattern benefit from TypeScript's strong typing?",
+    "options": ["No, observers are callbacks", "Yes, typed event handlers enforce contracts", "Yes, reducing bugs", "No, events are untyped"],
+    "correctIndex": 1,
+    "explanation": "Typed observers (e.g., `EventEmitter<EventMap>`) ensure handlers receive correct event data, catching mismatches at compile time.",
+    "difficulty": "Medium",
+    "tags": ["observer-pattern", "event-emitters", "type-safety"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Architecture Patterns",
+    "question": "Can the Strategy pattern use function types for compile-time algorithm selection?",
+    "options": ["No, strategies are objects only", "Yes, function type as Strategy<T>", "Yes, with interface requirements", "No, strategies are runtime-only"],
+    "correctIndex": 1,
+    "explanation": "A Strategy can be typed as a function signature (e.g., `(data: T) => Result`), enabling type-safe algorithm swapping.",
+    "difficulty": "Medium",
+    "tags": ["strategy-pattern", "function-types", "algorithm-selection"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Architecture Patterns",
+    "question": "Does the Adapter pattern require TypeScript to expose the adapted interface?",
+    "options": ["No, adapters transform silently", "Yes, adapters must implement the target interface", "Yes, with type assertions only", "No, interface is optional"],
+    "correctIndex": 1,
+    "explanation": "Adapters convert one interface to another; TypeScript should declare the adapter implements the target interface for type safety.",
+    "difficulty": "Medium",
+    "tags": ["adapter-pattern", "interface-implementation", "compatibility"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Architecture Patterns",
+    "question": "Can the Middleware pattern use higher-order types to compose handlers?",
+    "options": ["No, middleware is linear", "Yes, with function composition generics", "Yes, but verbosely", "No, TypeScript does not support this"],
+    "correctIndex": 1,
+    "explanation": "Typed middleware can use generics to compose functions while preserving request/response types across the chain.",
+    "difficulty": "Medium-Hard",
+    "tags": ["middleware-pattern", "function-composition", "generics"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Architecture Patterns",
+    "question": "Does the Singleton pattern benefit from TypeScript's static typing?",
+    "options": ["No, singletons are untyped", "Yes, private constructors enforce singleton", "Yes, but is still a runtime concern", "No, TypeScript cannot enforce singletons"],
+    "correctIndex": 1,
+    "explanation": "Private constructors and static getters/instances can enforce singleton at compile time, preventing accidental instantiation.",
+    "difficulty": "Medium",
+    "tags": ["singleton-pattern", "private-constructors", "static-members"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Architecture Patterns",
+    "question": "Can the Decorator pattern (GoF) leverage TypeScript decorators for aspect-oriented programming?",
+    "options": ["No, GoF decorators differ from TS", "Yes, TS decorators can wrap methods", "Yes, for cross-cutting concerns", "No, they are incompatible"],
+    "correctIndex": 1,
+    "explanation": "TypeScript decorators (metadata-based) and GoF decorators (object wrapping) overlap; both can implement cross-cutting concerns like logging.",
+    "difficulty": "Medium-Hard",
+    "tags": ["decorator-pattern", "AOP", "cross-cutting-concerns"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Architecture Patterns",
+    "question": "Does the Chain of Responsibility pattern require type-safe handler linking in TypeScript?",
+    "options": ["No, handlers can be any type", "Yes, each handler narrows or passes request", "Yes, with generic request types", "No, chains are untyped"],
+    "correctIndex": 2,
+    "explanation": "Chain handlers can be generically typed as `Handler<T>` where T is the request; handlers transform or pass T safely.",
+    "difficulty": "Medium-Hard",
+    "tags": ["chain-of-responsibility", "generics", "type-safety"]
+  }
+]

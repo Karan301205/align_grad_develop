@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Concurrency",
+    "question": "package main\nimport \"sync\"\nfunc main() {\n  var wg sync.WaitGroup\n  wg.Add(1)\n  go func() {\n    println(\"goroutine\")\n  }()\n  wg.Wait()\n}",
+    "options": ["panics or exits before goroutine prints", "prints goroutine", "deadlock", "prints nothing"],
+    "correctIndex": 0,
+    "explanation": "WaitGroup counter is never decremented (no wg.Done()), so Wait() blocks forever and exits with panic on goroutine mismatch.",
+    "difficulty": "Medium",
+    "tags": ["waitgroup", "synchronization", "missing-done"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Concurrency",
+    "question": "package main\nimport \"sync\"\nfunc main() {\n  var wg sync.WaitGroup\n  wg.Add(1)\n  wg.Done()\n  wg.Add(1)\n  wg.Wait()\n}",
+    "options": ["prints nothing and exits", "panics", "deadlock", "races"],
+    "correctIndex": 1,
+    "explanation": "Add after Wait is called during/after its execution panics (counter negative or re-use); Wait blocks a goroutine permanently until counter reaches zero.",
+    "difficulty": "Medium-Hard",
+    "tags": ["waitgroup", "add-after-wait", "panic"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Concurrency",
+    "question": "package main\nimport \"sync\"\nfunc main() {\n  var mu sync.Mutex\n  mu.Lock()\n  mu.Lock()\n}",
+    "options": ["deadlock", "panics", "exits normally", "race condition"],
+    "correctIndex": 0,
+    "explanation": "Mutex is not re-entrant; locking twice from the same goroutine causes deadlock as the goroutine waits for itself.",
+    "difficulty": "Medium",
+    "tags": ["mutex", "reentrancy", "deadlock"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Concurrency",
+    "question": "package main\nfunc main() {\n  done := make(chan bool)\n  go func() {\n    println(\"goroutine\")\n    done <- true\n  }()\n  <-done\n}",
+    "options": ["prints goroutine", "deadlock", "panics", "prints nothing"],
+    "correctIndex": 0,
+    "explanation": "Unbuffered channel synchronizes goroutine start and done signal; main waits on receive, goroutine prints then sends.",
+    "difficulty": "Medium",
+    "tags": ["goroutine-sync", "unbuffered-channel", "coordination"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Concurrency",
+    "question": "package main\nvar x int\nfunc main() {\n  go func() {\n    x = 1\n  }()\n  println(x)\n}",
+    "options": ["prints 0", "prints 1", "prints 0 or 1", "race condition"],
+    "correctIndex": 3,
+    "explanation": "Unsynchronized read and write to shared variable x is a race; outcome depends on scheduling, which is undefined.",
+    "difficulty": "Medium",
+    "tags": ["data-race", "synchronization", "undefined-behavior"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Concurrency",
+    "question": "package main\nfunc main() {\n  ch := make(chan int)\n  go func() {\n    for i := 0; i < 3; i++ {\n      ch <- i\n    }\n  }()\n  for v := range ch {\n    println(v)\n  }\n}",
+    "options": ["prints 0 1 2 then exits", "deadlock after printing 0 1 2", "panics", "prints 0 1 2 then hangs"],
+    "correctIndex": 1,
+    "explanation": "Range waits for close signal; goroutine sends 0-2 but never closes, so range blocks forever after draining.",
+    "difficulty": "Medium-Hard",
+    "tags": ["range-channel", "close-signal", "deadlock"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Concurrency",
+    "question": "package main\nimport \"sync\"\nfunc main() {\n  var once sync.Once\n  count := 0\n  for i := 0; i < 10; i++ {\n    go once.Do(func() {\n      count++\n    })\n  }\n}",
+    "options": ["count is 1 eventually", "count is 10", "race condition", "panics"],
+    "correctIndex": 2,
+    "explanation": "Once.Do ensures function runs once, but unsynchronized read of count after goroutines exit races; need to sync or wait.",
+    "difficulty": "Medium-Hard",
+    "tags": ["once", "synchronization", "data-race"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Concurrency",
+    "question": "package main\nfunc main() {\n  ch := make(chan int, 2)\n  select {\n  case v := <-ch:\n    println(v)\n  default:\n    println(\"empty\")\n  }\n}",
+    "options": ["prints empty", "prints 0", "deadlock", "panics"],
+    "correctIndex": 0,
+    "explanation": "Select with default is non-blocking; channel is empty and receive not ready, so default executes.",
+    "difficulty": "Medium",
+    "tags": ["select-default", "non-blocking", "channel-empty"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Concurrency",
+    "question": "package main\nfunc main() {\n  ch1 := make(chan int)\n  ch2 := make(chan int)\n  select {\n  case <-ch1:\n  case <-ch2:\n  }\n}",
+    "options": ["deadlock", "panics", "exits", "random selection"],
+    "correctIndex": 0,
+    "explanation": "Both channels block (no senders), select has no ready case and no default, so it deadlocks.",
+    "difficulty": "Medium",
+    "tags": ["select", "blocked-cases", "deadlock"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Concurrency",
+    "question": "package main\nimport (\n  \"sync\"\n  \"sync/atomic\"\n)\nfunc main() {\n  var counter atomic.Int64\n  var wg sync.WaitGroup\n  wg.Add(100)\n  for i := 0; i < 100; i++ {\n    go func() {\n      counter.Add(1)\n      wg.Done()\n    }()\n  }\n  wg.Wait()\n  println(counter.Load())\n}",
+    "options": ["prints 100", "prints 0", "race condition", "panics"],
+    "correctIndex": 0,
+    "explanation": "atomic.Int64 is race-free; Add(1) from 100 goroutines coordinated by WaitGroup reliably increments to 100.",
+    "difficulty": "Medium-Hard",
+    "tags": ["atomic", "race-free", "coordination"]
+  }
+]

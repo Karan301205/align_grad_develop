@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Remote",
+    "question": "You clone a repository, and git status shows your branch is behind origin by 10 commits. However, git log shows no new commits from teammates. What is the most likely explanation?",
+    "options": [
+      "You have not run git fetch recently; the remote has new commits that your local repository has not downloaded yet",
+      "The 10 commits are rewritten history; git has not yet detected the change",
+      "Your local branch is corrupted",
+      "The remote is misconfigured"
+    ],
+    "correctIndex": 0,
+    "explanation": "git status compares your branch against cached remote references; git fetch updates these references from the remote, and only then does git log reflect new commits.",
+    "difficulty": "Medium",
+    "tags": ["fetch", "remote-tracking", "status"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Remote",
+    "question": "You configure a local branch to track origin/main with git branch -u origin/main. Later, the remote branch is deleted. Your local branch still shows as tracking origin/main, which no longer exists. How do you remove this stale upstream reference?",
+    "options": [
+      "Use git branch --unset-upstream to remove the tracking reference, or run git fetch --prune to delete the stale remote-tracking branch",
+      "Delete the local branch and recreate it",
+      "Set the upstream to a different branch",
+      "Run git remote prune to remove all stale remotes"
+    ],
+    "correctIndex": 0,
+    "explanation": "git branch --unset-upstream removes the tracking relationship; git fetch --prune deletes the remote-tracking branch (origin/main) from your local repository.",
+    "difficulty": "Medium",
+    "tags": ["upstream-tracking", "prune", "stale-branches"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Remote",
+    "question": "You push a feature branch to origin, but the push fails with 'failed to push some refs'. When you run git pull, it says 'already up to date'. What is the likely cause?",
+    "options": [
+      "Your local branch is ahead of origin in commits, but origin has a newer commit that is not on your local branch (conflicting histories); use git pull --rebase or force-push carefully",
+      "The network is down",
+      "Your branch name is invalid",
+      "The remote repository is corrupted"
+    ],
+    "correctIndex": 0,
+    "explanation": "Push fails when remote has commits your local lacks; pull reports up-to-date because it compares against your tracking branch (not the actual remote); rebase or force-push resolves this.",
+    "difficulty": "Medium-Hard",
+    "tags": ["push-failure", "conflicting-history", "rebase"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Remote",
+    "question": "You have multiple remotes (origin and upstream). You want to fetch from both, but only push to origin. How do you configure this asymmetric setup?",
+    "options": [
+      "Use git remote set-url --push origin to set the push URL differently from fetch, or configure remote.upstream.pushurl to disable pushes to upstream",
+      "Create separate branches for each remote",
+      "Use git push origin --all to push only to origin",
+      "Delete the upstream remote and fetch from origin only"
+    ],
+    "correctIndex": 0,
+    "explanation": "git remote set-url --push sets a separate push URL; remote.<name>.pushurl can point to a different URL or be disabled (empty) to prevent pushes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["multiple-remotes", "asymmetric-push", "fetch-upstream"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Remote",
+    "question": "You accidentally push a sensitive commit to origin. You want to remove it from the remote history without affecting anyone else's clone. What is the correct approach?",
+    "options": [
+      "Use git push -f origin :branch-name to delete the remote branch, then use filter-branch/filter-repo to clean history, then push a corrected version",
+      "Run git reset --hard to undo locally and hope no one cloned it",
+      "Ask everyone to re-clone",
+      "Leave it as-is since everyone has already pulled"
+    ],
+    "correctIndex": 0,
+    "explanation": "Force-push to delete the remote branch, clean the history locally with filter operations, then push the corrected version; notify users to reset their local tracking branches.",
+    "difficulty": "Hard",
+    "tags": ["sensitive-commit", "force-push", "history-cleaning"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Remote",
+    "question": "You clone a repository with --single-branch, which only fetches the main branch. Now you want to add another remote branch to your local repository. How do you fetch it?",
+    "options": [
+      "Use git fetch origin <branch> to fetch a specific branch, or git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' to fetch all branches",
+      "Clone the repository again without --single-branch",
+      "Create a new remote with git remote add",
+      "Use git checkout -b to create a local branch from scratch"
+    ],
+    "correctIndex": 0,
+    "explanation": "git fetch origin <branch> fetches a specific remote branch without cloning; modifying the fetch refspec adds all branches to future fetches.",
+    "difficulty": "Medium",
+    "tags": ["single-branch", "fetch-branch", "refspec"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Remote",
+    "question": "Your team uses a workflow where the remote repository enforces that only fast-forward pushes are allowed. A developer attempts to push a merge commit and is rejected. How should they reorganize their commits?",
+    "options": [
+      "Use git rebase origin/<branch> to replay commits on top of the remote without creating a merge commit, ensuring a linear history",
+      "Use git merge --ff-only to merge with fast-forward only",
+      "Force-push the merge commit to override the restriction",
+      "Create a new branch and cherry-pick commits"
+    ],
+    "correctIndex": 0,
+    "explanation": "A fast-forward-only policy requires linear history; rebase replays commits on top of the remote, avoiding merge commits and satisfying the policy.",
+    "difficulty": "Medium",
+    "tags": ["fast-forward", "rebase", "linear-history"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Remote",
+    "question": "You configure git pull to always use rebase instead of merge. Now, when you run git pull, it rebases your local commits onto the remote. However, you have uncommitted changes. What happens?",
+    "options": [
+      "git pull fails with 'error: Your local changes would be overwritten'; you must stash changes with git stash before pulling",
+      "git automatically commits the changes",
+      "git rebases anyway and overwrites your changes",
+      "git creates a merge commit to preserve your changes"
+    ],
+    "correctIndex": 0,
+    "explanation": "Rebase requires a clean working directory; git stash temporarily saves uncommitted changes, then git stash pop reapplies them after the rebase.",
+    "difficulty": "Medium",
+    "tags": ["pull-rebase", "stash", "working-directory"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Remote",
+    "question": "You have a branch tracking origin/feature, and you want to switch upstream to point at upstream/feature instead. The remote.upstream.url is already configured. What command updates the tracking reference?",
+    "options": [
+      "Use git branch -u upstream/feature to set the upstream branch",
+      "Use git branch --set-upstream-to origin/feature",
+      "Manually edit .git/config to change the upstream",
+      "Delete and recreate the branch"
+    ],
+    "correctIndex": 0,
+    "explanation": "git branch -u <remote>/<branch> updates the upstream for the current branch; -u is the shorthand for --set-upstream-to.",
+    "difficulty": "Medium",
+    "tags": ["upstream-tracking", "branch-configuration"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Remote",
+    "question": "You want to fetch all remote branches and tags but avoid downloading large binary files tracked with LFS. What git configuration or fetch strategy should you use?",
+    "options": [
+      "Use git fetch origin --no-recurse-submodules and configure Git LFS to skip downloads (git lfs install --skip-smudge), or fetch without checking out files",
+      "Run git fetch --bare to fetch only refs without checking out",
+      "Configure core.sparseCheckout to limit file downloads",
+      "Clone with --depth to limit history"
+    ],
+    "correctIndex": 0,
+    "explanation": "git lfs install --skip-smudge prevents LFS from downloading binary files; combined with git fetch, this downloads refs and metadata without large binaries.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lfs", "fetch-optimization", "bandwidth"]
+  }
+]

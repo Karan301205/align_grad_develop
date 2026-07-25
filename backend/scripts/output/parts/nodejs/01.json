@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "What will be printed to the console?\n```javascript\nconst obj = {\n  name: 'Alice',\n  greet: function() {\n    console.log(this.name);\n  }\n};\nconst fn = obj.greet;\nfn();\nobj.greet();\n```",
+    "options": ["Alice, Alice", "undefined, Alice", "Alice, undefined", "Error: this is not defined"],
+    "correctIndex": 1,
+    "explanation": "The first call uses the detached function context (this = global/undefined in strict mode), the second retains obj context via method invocation.",
+    "difficulty": "Medium",
+    "tags": ["this-binding", "context", "method-invocation"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "Given the code, which expression returns a new array without mutating the original?\n```javascript\nconst arr = [1, 2, 3];\nconst a = arr.push(4);\nconst b = [...arr, 5];\nconst c = arr.concat([6]);\n```",
+    "options": ["a creates a new array", "b mutates original", "c mutates original", "both b and c avoid mutation"],
+    "correctIndex": 3,
+    "explanation": "Spread operator and concat both return new arrays without altering the original; push mutates and returns a length.",
+    "difficulty": "Medium",
+    "tags": ["immutability", "spread-operator", "array-methods"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "What is the value of `result` after execution?\n```javascript\nconst result = [1, 2, 3]\n  .map(x => x * 2)\n  .filter(x => x > 3)\n  .reduce((a, b) => a + b, 0);\n```",
+    "options": ["0", "5", "10", "9"],
+    "correctIndex": 3,
+    "explanation": "Map produces [2,4,6], filter keeps [4,6], reduce sums to 10; the only confusion is reduce starts at 0, then 0+4+6=10.",
+    "difficulty": "Medium",
+    "tags": ["map-filter-reduce", "chainable-methods"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "A developer creates a closure. Which statement is true?\n```javascript\nfunction createCounter() {\n  let count = 0;\n  return function() {\n    return ++count;\n  };\n}\nconst counter = createCounter();\ncounter();\ncounter();\n```",
+    "options": ["count is garbage collected after createCounter returns", "count persists across counter() calls", "each counter() call creates a new count variable", "count is stored in global scope"],
+    "correctIndex": 1,
+    "explanation": "The returned function maintains a reference to count via closure, preserving it across invocations.",
+    "difficulty": "Medium",
+    "tags": ["closures", "scope", "memory-retention"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "What will `obj.method()` output?\n```javascript\nconst obj = {\n  value: 42,\n  method: function() {\n    const inner = () => {\n      console.log(this.value);\n    };\n    inner();\n  }\n};\nobj.method();\n```",
+    "options": ["undefined", "42", "null", "ReferenceError"],
+    "correctIndex": 1,
+    "explanation": "Arrow functions inherit this from their enclosing scope (method context), which is obj.",
+    "difficulty": "Medium",
+    "tags": ["arrow-functions", "this-binding", "lexical-scope"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "After execution, what is `typeof obj.prop`?\n```javascript\nconst obj = {};\nObject.defineProperty(obj, 'prop', {\n  value: 'test',\n  writable: false,\n  enumerable: true\n});\nobj.prop = 'modified';\nconsole.log(obj.prop);\n```",
+    "options": ["undefined", "string (test)", "string (modified)", "SyntaxError is thrown"],
+    "correctIndex": 1,
+    "explanation": "The non-writable property silently ignores reassignment in non-strict mode; writable: false prevents mutation.",
+    "difficulty": "Medium-Hard",
+    "tags": ["property-descriptors", "object-definition"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "What will be logged?\n```javascript\nfor (var i = 0; i < 3; i++) {\n  setTimeout(() => console.log(i), 0);\n}\n```",
+    "options": ["0, 1, 2", "3, 3, 3", "undefined, undefined, undefined", "0, 0, 0"],
+    "correctIndex": 1,
+    "explanation": "var is function-scoped, so all callbacks share the same i variable, which is 3 by callback execution time.",
+    "difficulty": "Medium",
+    "tags": ["var-hoisting", "event-loop", "closure-trap"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "Which object comparison is true?\n```javascript\nconst a = {x: 1};\nconst b = {x: 1};\nconst c = a;\n```",
+    "options": ["a === b", "b === c", "a === c", "a == b is false"],
+    "correctIndex": 2,
+    "explanation": "Objects are compared by reference, not value; only c and a point to the same object in memory.",
+    "difficulty": "Medium",
+    "tags": ["reference-comparison", "object-equality"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "What does the spread operator produce?\n```javascript\nconst obj = {a: 1, b: 2};\nconst copy = {...obj, b: 3};\n```",
+    "options": ["shallow copy with b overwritten to 3", "deep copy preserving original b as 2", "reference to same object", "syntax error"],
+    "correctIndex": 0,
+    "explanation": "Object spread creates a shallow copy, and the b: 3 property overwrites the spread-copied b: 2.",
+    "difficulty": "Medium",
+    "tags": ["spread-operator", "shallow-copy"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "What is the output?\n```javascript\nconst arr = [1, 2, 3];\nconst result = arr.findIndex(x => x === 2);\nconsole.log(result);\n```",
+    "options": ["-1", "0", "1", "2"],
+    "correctIndex": 2,
+    "explanation": "findIndex returns the index of the first matching element; 2 is at index 1.",
+    "difficulty": "Medium",
+    "tags": ["array-methods", "findIndex"]
+  }
+]

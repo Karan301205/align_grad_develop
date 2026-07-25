@@ -1,0 +1,3 @@
+[
+  {"skillName":"C++","subtopic":"Control Structures","question":"What does this print? `int i=0; switch(i){case 0: std::cout<<\"a\"; case 1: std::cout<<\"b\"; break; default: std::cout<<\"c\";}`","options":["ab, because case 0 falls through to case 1","only a","abc","only c"],"correctIndex":0,"explanation":"Without a break after case 0, execution falls through into case 1 before the break, printing 'ab'.","difficulty":"Medium","tags":["switch","fallthrough","control-flow"]}
+]

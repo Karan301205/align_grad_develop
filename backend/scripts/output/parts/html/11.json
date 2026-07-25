@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML5 Features",
+    "question": "A page uses `<canvas id='draw'></canvas>`. The canvas appears blank. What is likely missing?",
+    "options": ["canvas requires a specific doctype to render", "javascript is needed to draw on the canvas", "canvas must have a src attribute pointing to an image", "canvas needs a width and height in the html"],
+    "correctIndex": 1,
+    "explanation": "Canvas is rendered as an empty element by default; JavaScript is required to get the context and draw content using methods like `fillRect()` or `strokePath()`.",
+    "difficulty": "Medium",
+    "tags": ["canvas-element", "javascript-api"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML5 Features",
+    "question": "A page stores `<script type='application/json' id='data'>{\"users\": []}</script>`. Why is this a valid data storage technique?",
+    "options": ["script tags with type='application/json' are parsed as data, not code", "the browser ignores the script tag but stores the content for js access", "json inside script tags is not executed and is accessible via textContent", "this technique is deprecated and should not be used"],
+    "correctIndex": 2,
+    "explanation": "A `<script>` tag with a non-JavaScript type (like `application/json`) is not executed; JavaScript can parse its `textContent` to access embedded data.",
+    "difficulty": "Medium-Hard",
+    "tags": ["script-element", "data-storage"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML5 Features",
+    "question": "A video uses `<video><source src='video.mp4'><track kind='subtitles' src='subs.vtt'></video>`. What is the track element used for?",
+    "options": ["track adds subtitles or captions that display over the video", "track specifies alternative video formats", "track adds chapter markers to the video", "track defines video metadata"],
+    "correctIndex": 0,
+    "explanation": "The `<track>` element adds text-based content like subtitles, captions, descriptions, or chapters to a `<video>` element, sourced from a WebVTT or similar file.",
+    "difficulty": "Medium",
+    "tags": ["video-element", "track-element", "subtitles"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML5 Features",
+    "question": "A page uses `<input type='number' min='1' max='10' step='0.5'>`. A user enters '5'. What is the outcome?",
+    "options": ["the value 5 is accepted because it is between 1 and 10", "the value is rejected because 5 is not a valid step", "the browser adjusts the value to the nearest step", "the input requires a decimal value like 5.0"],
+    "correctIndex": 0,
+    "explanation": "The `step` attribute defines valid increments (e.g., 0.5, 1, 2), but browsers typically accept any valid number between min and max, then constrain on submission if needed.",
+    "difficulty": "Medium-Hard",
+    "tags": ["input-number", "step-attribute", "validation"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML5 Features",
+    "question": "A page uses `<meter value='6' min='0' max='10'></meter>`. What does the meter element display?",
+    "options": ["a horizontal bar indicating progress at 60%", "a gauge or measurement indicator at 6 out of 10", "the percentage value as text", "the meter element is decorative and requires css to display"],
+    "correctIndex": 1,
+    "explanation": "The `<meter>` element displays a gauge-like visual representation of a measurement within a range (not progress); it shows the proportion of value within min/max.",
+    "difficulty": "Medium",
+    "tags": ["meter-element"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML5 Features",
+    "question": "A page uses `<progress value='50' max='100'></progress>`. Why might the progress bar not show on some browsers?",
+    "options": ["progress requires a width style to be visible", "some browsers render progress as text instead of a visual bar", "progress is a newer html5 element with limited support", "progress bar styling varies by browser, but it should render visually"],
+    "correctIndex": 3,
+    "explanation": "Modern browsers render `<progress>` as a visual bar; styling and appearance vary (some may show as a simple rectangle), but the element should display on all current browsers.",
+    "difficulty": "Medium",
+    "tags": ["progress-element", "browser-rendering"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML5 Features",
+    "question": "A page uses `<output>5</output>` and updates it via JavaScript to `10`. What is the output element's purpose?",
+    "options": ["output displays calculated or user-input results without form submission", "output is a generic container like div", "output requires form wrapping to be valid", "output is semantically identical to a span"],
+    "correctIndex": 0,
+    "explanation": "The `<output>` element represents the result of a calculation or user interaction; it is semantically meaningful for assistive tech to recognize as a result area.",
+    "difficulty": "Medium",
+    "tags": ["output-element"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML5 Features",
+    "question": "A page uses `<input type='color' value='#FF0000'>`. What picker is displayed?",
+    "options": ["a text input for entering hex color codes", "a native color picker dialog or widget", "a dropdown list of web colors", "the color type is not supported and displays as text input"],
+    "correctIndex": 1,
+    "explanation": "The `type='color'` input displays a native color picker (appearance varies by browser); users can select or input color values, which are returned as hex strings.",
+    "difficulty": "Medium",
+    "tags": ["input-color", "color-picker"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML5 Features",
+    "question": "A page uses `<time datetime='2024-07-22T15:30:00Z'>3:30 PM</time>`. Why is the datetime attribute useful?",
+    "options": ["it allows screen readers to announce the date/time accurately", "it helps search engines and assistive tech parse the date semantically", "it changes how the date is displayed visually", "it enables browser-based event scheduling"],
+    "correctIndex": 1,
+    "explanation": "The `datetime` attribute in ISO 8601 format allows machines (search engines, assistive tech, calendar apps) to parse the date unambiguously, while the text content is human-readable.",
+    "difficulty": "Medium",
+    "tags": ["time-element", "datetime-attribute"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML5 Features",
+    "question": "A page uses `<embed src='plugin.swf'>` for Flash. On modern browsers without Flash, what displays?",
+    "options": ["a broken plugin icon", "nothing is displayed", "fallback html inside embed is shown", "embed requires a type attribute or it is invalid"],
+    "correctIndex": 0,
+    "explanation": "The `<embed>` element is a self-closing void element with no fallback content support; if the plugin is not available, a broken/missing icon typically displays.",
+    "difficulty": "Medium",
+    "tags": ["embed-element", "plugin-support"]
+  }
+]

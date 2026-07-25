@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "Design Patterns",
+    "question": "What does Singleton pattern ensure?\npublic class Logger {\n  private static Logger instance = new Logger();\n  private Logger() { }\n  public static Logger Instance => instance;\n}",
+    "options": ["Only one instance exists", "Multiple instances allowed", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Singleton restricts instantiation to one object via private constructor and static accessor.",
+    "difficulty": "Medium",
+    "tags": ["singleton", "creational-pattern", "instance-control"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Design Patterns",
+    "question": "What does Factory pattern provide?\npublic class ShapeFactory {\n  public static Shape CreateShape(string type) {\n    return type switch {\n      \"circle\" => new Circle(),\n      \"square\" => new Square(),\n      _ => throw new ArgumentException()\n    };\n  }\n}",
+    "options": ["Encapsulates object creation", "Direct instantiation", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Factory pattern centralizes object creation, decoupling client from concrete classes.",
+    "difficulty": "Medium",
+    "tags": ["factory", "creational-pattern", "object-creation"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Design Patterns",
+    "question": "What does Builder pattern enable?\nvar person = new PersonBuilder()\n  .SetName(\"Alice\")\n  .SetAge(30)\n  .SetEmail(\"alice@test.com\")\n  .Build();",
+    "options": ["Flexible construction with readable syntax", "Direct constructor", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Builder pattern constructs complex objects step-by-step with fluent API.",
+    "difficulty": "Medium",
+    "tags": ["builder", "creational-pattern", "fluent-api"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Design Patterns",
+    "question": "What does Observer pattern do?\npublic class Subject {\n  public event Action<string> Changed;\n  public void Notify(string message) => Changed?.Invoke(message);\n}\nvar subject = new Subject();\nsubject.Changed += (msg) => Console.WriteLine(msg);",
+    "options": ["Decouples event source from listeners", "Tight coupling", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Observer pattern decouples subjects from observers via events/delegates.",
+    "difficulty": "Medium",
+    "tags": ["observer", "behavioral-pattern", "event-driven"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Design Patterns",
+    "question": "What does Strategy pattern define?\npublic interface PaymentStrategy {\n  void Pay(decimal amount);\n}\npublic class CreditCardPayment : PaymentStrategy {\n  public void Pay(decimal amount) { }\n}\npublic class PayPalPayment : PaymentStrategy {\n  public void Pay(decimal amount) { }\n}",
+    "options": ["Interchangeable algorithms", "Fixed algorithm", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Strategy pattern defines family of algorithms as interchangeable strategies.",
+    "difficulty": "Medium",
+    "tags": ["strategy", "behavioral-pattern", "algorithms"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Design Patterns",
+    "question": "What does Decorator pattern add?\npublic abstract class Component { public abstract void Operation(); }\npublic class Decorator : Component {\n  protected Component component;\n  public override void Operation() => component.Operation();\n}",
+    "options": ["Adds behavior dynamically without subclassing", "Inheritance only", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Decorator wraps objects to add behavior, avoiding explosion of subclasses.",
+    "difficulty": "Medium",
+    "tags": ["decorator", "structural-pattern", "composition"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Design Patterns",
+    "question": "What does Adapter pattern do?\npublic interface NewInterface {\n  void NewMethod();\n}\npublic class OldClass {\n  public void OldMethod() { }\n}\npublic class Adapter : NewInterface {\n  private OldClass old = new OldClass();\n  public void NewMethod() => old.OldMethod();\n}",
+    "options": ["Makes incompatible interfaces work together", "Direct compatibility", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Adapter converts one interface to another, enabling cooperation between incompatible types.",
+    "difficulty": "Medium",
+    "tags": ["adapter", "structural-pattern", "compatibility"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Design Patterns",
+    "question": "What does Template Method pattern define?\npublic abstract class Algorithm {\n  public void Execute() {\n    Setup();\n    Process();\n    Cleanup();\n  }\n  protected abstract void Process();\n  protected virtual void Setup() { }\n  protected virtual void Cleanup() { }\n}",
+    "options": ["Skeleton in base class, details in subclasses", "No structure", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Template Method defines algorithm structure in base class, leaving steps to subclasses.",
+    "difficulty": "Medium",
+    "tags": ["template-method", "behavioral-pattern", "inheritance"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Design Patterns",
+    "question": "What does Facade pattern provide?\npublic class DatabaseFacade {\n  public void InitializeDatabase() {\n    ConnectToDB();\n    LoadSchema();\n    ValidateConnections();\n  }\n}",
+    "options": ["Simplified interface to complex subsystem", "Direct complexity exposure", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Facade provides unified, simplified interface to complex subsystems.",
+    "difficulty": "Medium",
+    "tags": ["facade", "structural-pattern", "simplification"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Design Patterns",
+    "question": "What does Chain of Responsibility pattern do?\npublic abstract class Handler {\n  protected Handler next;\n  public virtual void Handle(Request req) {\n    if (CanHandle(req)) ProcessRequest(req);\n    else next?.Handle(req);\n  }\n  protected abstract bool CanHandle(Request req);\n}",
+    "options": ["Passes request along chain of handlers", "Single handler", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Chain of Responsibility passes requests along chain until handled.",
+    "difficulty": "Medium",
+    "tags": ["chain-of-responsibility", "behavioral-pattern", "request-handling"]
+  }
+]

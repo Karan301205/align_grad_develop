@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Stack Implementation",
+    "question": "A stack is implemented using a dynamic array that doubles in capacity when full. Pushing n elements requires a total of how many array assignments in the amortized sense?",
+    "options": ["n assignments", "2 times n assignments", "log n assignments", "n squared assignments"],
+    "correctIndex": 0,
+    "explanation": "Amortized analysis: resizing happens at sizes 1, 2, 4, ..., doubling; total assignments = 1 + 2 + 4 + ... + n ≈ 2n, which amortizes to O(n) or O(1) per push.",
+    "difficulty": "Medium-Hard",
+    "tags": ["amortized-analysis", "dynamic-array"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Stack Implementation",
+    "question": "Implementing a stack using a linked list where push/pop operations interact with the head node. What is the space complexity of this stack for n elements?",
+    "options": ["constant space", "linear space", "logarithmic space", "quadratic space"],
+    "correctIndex": 1,
+    "explanation": "Each of the n elements requires a node with data and a next pointer; storing n elements always requires O(n) linear space.",
+    "difficulty": "Medium",
+    "tags": ["linked-list-stack", "space-overhead"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Stack Implementation",
+    "question": "Evaluating a postfix expression like '3 4 + 5 *' using a stack: when you encounter an operator, what must be true about stack size?",
+    "options": ["stack must have exactly one element", "stack must have at least two elements", "stack must be empty", "stack size does not matter"],
+    "correctIndex": 1,
+    "explanation": "Operators pop two operands from the stack; for valid postfix, when an operator is encountered, at least two elements must have been pushed.",
+    "difficulty": "Medium-Hard",
+    "tags": ["postfix-evaluation", "stack-validation"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Stack Implementation",
+    "question": "A stack-based depth-first search (DFS) traversal of a tree with n nodes visits each node once. What is the time complexity?",
+    "options": ["logarithmic time", "linear time", "linearithmic time", "quadratic time"],
+    "correctIndex": 1,
+    "explanation": "DFS visits each of the n nodes exactly once and processes each edge once, giving O(n + edges) which is O(n) for trees.",
+    "difficulty": "Medium",
+    "tags": ["DFS", "tree-traversal"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Stack Implementation",
+    "question": "Matching brackets in an expression like '(([]{}))' using a stack requires pushing opening brackets and popping for closing brackets. If the expression is invalid, what indicates the error?",
+    "options": ["stack is non-empty at the end", "stack underflows or closing bracket type mismatch", "stack overflows", "no error can be detected"],
+    "correctIndex": 1,
+    "explanation": "Stack underflow occurs when popping from an empty stack; bracket type mismatch occurs when opening and closing types differ; both signal invalid expressions.",
+    "difficulty": "Medium",
+    "tags": ["bracket-matching", "validation"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Stack Implementation",
+    "question": "Finding the nearest smaller element to the left of each element in an array using a monotonic stack solves the problem in O(n) time. Why not use a nested loop?",
+    "options": ["nested loop is faster", "nested loop uses less space", "monotonic stack solves in one pass", "nested loop is quadratic while stack is linear"],
+    "correctIndex": 3,
+    "explanation": "Nested loop would check every element to the left (worst case O(n^2)); monotonic stack maintains candidates and pops in O(n) total time across all elements.",
+    "difficulty": "Medium-Hard",
+    "tags": ["monotonic-stack", "optimization"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Stack Implementation",
+    "question": "A stack with a min-pointer that tracks the current minimum element requires push, pop, and getMin operations. To support getMin in O(1), what trade-off exists?",
+    "options": ["push becomes slower", "pop becomes slower", "push and pop use extra space for a shadow stack", "no trade-off exists"],
+    "correctIndex": 2,
+    "explanation": "Maintaining a min-value at each stack level requires an auxiliary stack storing the minimum at each depth, doubling space complexity to O(n).",
+    "difficulty": "Medium",
+    "tags": ["min-stack", "space-time-tradeoff"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Stack Implementation",
+    "question": "Converting infix notation '3 + 4 * 5' to postfix using the Shunting Yard algorithm involves a stack to handle operator precedence. What is the time complexity?",
+    "options": ["constant time", "logarithmic time", "linear time", "quadratic time"],
+    "correctIndex": 2,
+    "explanation": "Scanning the infix expression once and processing each token with constant-time stack operations yields O(n) linear time for an n-token expression.",
+    "difficulty": "Medium",
+    "tags": ["shunting-yard", "infix-to-postfix"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Stack Implementation",
+    "question": "Implementing a stack with a fixed capacity c means push will fail when the stack is full. What is the space complexity of this stack?",
+    "options": ["constant space", "linear space in terms of c", "logarithmic space", "space grows dynamically"],
+    "correctIndex": 1,
+    "explanation": "A fixed-capacity stack reserves O(c) space regardless of how many elements are actually stored; this is still linear in the capacity c.",
+    "difficulty": "Medium",
+    "tags": ["fixed-capacity", "space-reservation"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Stack Implementation",
+    "question": "Implementing undo/redo functionality typically uses two stacks: one for undo history, one for redo history. After an undo operation, the redo stack is not cleared. Why?",
+    "options": ["it is a design choice", "the previous redo history remains valid", "clearing redo is inefficient", "clearing and not clearing have equal cost"],
+    "correctIndex": 1,
+    "explanation": "If you undo and then undo again, the original redo should still be available; only new actions (not undos) should clear redo history.",
+    "difficulty": "Medium-Hard",
+    "tags": ["undo-redo", "design-pattern"]
+  }
+]

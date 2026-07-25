@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Microservices Architecture",
+    "question": "Two microservices (auth and api) communicate via HTTP. The auth service is deployed with `docker run --name auth auth-image` and the api service with `docker run --name api api-image`. The api service tries to reach auth via `http://auth:3000` but DNS resolution fails. Both are on the same host. What is the issue?",
+    "options": ["They are on the default bridge network which lacks built-in DNS; use `docker network create` and attach both containers to a custom network", "The auth service was not started before the api service; Docker caches DNS failures", "The --name flag creates a hostname, but port 3000 is not exposed by default; use `docker run -p 3000:3000 --name auth auth-image`", "The containers need to be on the same network; `docker network connect <network> auth` after creation"],
+    "correctIndex": 0,
+    "explanation": "The default bridge network does not support container-name DNS resolution; create a custom network with `docker network create mynet`, then run both containers with `--network mynet` to enable DNS by service name.",
+    "difficulty": "Medium",
+    "tags": ["microservices-communication", "service-discovery", "docker-networking"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Microservices Architecture",
+    "question": "A microservices application uses 10 containers coordinated by docker-compose. One service (database) takes 5 seconds to initialize. The application service tries to connect immediately after the db container starts, resulting in connection failures. What is the correct pattern?",
+    "options": ["Use `depends_on: {db: {condition: service_healthy}}` in docker-compose.yml and define a HEALTHCHECK in the db service", "Add a wait loop in the application's entrypoint that retries database connections with exponential backoff", "Set a long startup timeout with `docker-compose up --timeout 30` to give the database time to initialize", "Use `docker-compose up --scale db=3` to run multiple database instances for high availability"],
+    "correctIndex": 0,
+    "explanation": "depends_on with condition: service_healthy waits for the HEALTHCHECK to pass, ensuring the database is truly ready; the application service only starts after the health check succeeds, not just when the container starts.",
+    "difficulty": "Medium",
+    "tags": ["docker-compose-healthcheck", "service-readiness", "microservices-orchestration"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Microservices Architecture",
+    "question": "Five microservices share a single MongoDB instance. Each service uses `mongodb://mongo:27017/dbname`. Over time, each service has its own database schema (customers, orders, payments, etc.). This is an anti-pattern. Why?",
+    "options": ["Sharing a single database violates microservices principles; each service should have its own database to ensure loose coupling", "MongoDB does not support multiple databases with different access controls; all services can modify any database", "The shared connection pool limits concurrent connections, causing bottlenecks", "This is a best practice for microservices to share a single database and connection"],
+    "correctIndex": 0,
+    "explanation": "Sharing a database couples microservices and prevents independent scaling/deployment; each service should own its data storage, communicating via APIs; use separate MongoDB instances or databases with separate credentials per service.",
+    "difficulty": "Medium",
+    "tags": ["microservices-design", "database-per-service", "loose-coupling"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Microservices Architecture",
+    "question": "A service-to-service call (A -> B) fails with a timeout after 30 seconds even though B responds in 2 seconds when called directly. A's timeout is set to 60 seconds. What is the most likely cause?",
+    "options": ["The 30-second timeout is imposed by a reverse proxy or load balancer between A and B", "Service B is responding, but a network intermediate (firewall, router) is dropping long-lived connections", "The docker network bridge has a built-in 30-second timeout for service-to-service calls", "Service A's DNS cache has stale IP addresses; flush with `docker exec -it A nscd -i hosts`"],
+    "correctIndex": 0,
+    "explanation": "If B responds in 2 seconds but the call times out at 30 seconds, an intermediate (reverse proxy, load balancer, kubernetes ingress) likely has a 30-second timeout; increase that timeout or check the infrastructure between A and B.",
+    "difficulty": "Medium-Hard",
+    "tags": ["microservices-debugging", "timeout-issues", "service-mesh"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Microservices Architecture",
+    "question": "Service A calls Service B, which calls Service C. Service C fails and responds with an error. Service B catches the error and retries immediately. Service A sees no error and succeeds. Is this a good retry pattern for microservices?",
+    "options": ["Yes, immediate retries at each layer provide resilience against transient failures", "No, immediate retries can amplify failures; use exponential backoff and jitter to avoid thundering herd", "Yes, this pattern is known as cascading resilience and is a microservices best practice", "No, only the outermost service (A) should retry; intermediate retries waste resources"],
+    "correctIndex": 1,
+    "explanation": "Immediate retries at each layer (B retries C, A retries B) can create a thundering herd and amplify failures; use exponential backoff and jitter (each layer waits longer before retrying) to reduce load and increase success probability.",
+    "difficulty": "Medium-Hard",
+    "tags": ["retry-patterns", "resilience", "microservices-design"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Microservices Architecture",
+    "question": "A microservices architecture has 20 services, each in its own container. During a deployment, all services are restarted simultaneously. A downstream service (payments) cannot handle the sudden load spike and crashes. What is a better deployment strategy?",
+    "options": ["Use rolling updates to restart services one at a time, allowing dependent services to handle changes gracefully", "Increase the resource limits (--memory, --cpus) for all services to handle temporary load spikes", "Deploy changes to independent services only; avoid restarting services that other services depend on", "Use a service mesh (Istio) to automatically handle load balancing during deployments"],
+    "correctIndex": 0,
+    "explanation": "Rolling updates restart services sequentially (or in small batches) rather than all at once, allowing the system to stabilize between each restart; this prevents cascading failures and load spikes that crash dependent services.",
+    "difficulty": "Medium",
+    "tags": ["rolling-updates", "deployment-strategy", "microservices"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Microservices Architecture",
+    "question": "Service A and Service B are deployed in separate containers and communicate via a shared Docker volume for IPC (inter-process communication). After a network partition occurs, both services continue writing to the volume but cannot read each other's updates. What is the design issue?",
+    "options": ["Shared volumes do not guarantee consistency across containers during network partitions; use message queues (RabbitMQ, Kafka) for async communication instead", "The volume mount is read-only on one service; change to read-write mode", "Docker does not support IPC over shared volumes; use Unix sockets or network APIs", "The file locking mechanism in the shared volume is broken; remount with `nolock` option"],
+    "correctIndex": 0,
+    "explanation": "Shared volumes are synchronous and rely on the host filesystem; during partitions, each service sees a stale view; message queues decouple services, allowing async communication that survives partitions and handles retries.",
+    "difficulty": "Medium-Hard",
+    "tags": ["microservices-communication", "message-queues", "network-partitions"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Microservices Architecture",
+    "question": "A microservices application has one central logging container that all services send logs to via a shared volume. After the logging container crashes, other services cannot write logs and hang. Why is this a poor design?",
+    "options": ["The shared volume coupling creates a single point of failure; use centralized logging (ELK, Splunk) over the network instead", "The logging container should use `--restart=always` to prevent crashes", "Services should buffer logs locally until the logging container recovers", "This is a best practice; all logs in one place simplifies troubleshooting"],
+    "correctIndex": 0,
+    "explanation": "Shared volume logging creates tight coupling and a single point of failure; services hang if the volume is unavailable; use network-based centralized logging (ELK stack, Splunk, CloudWatch) with async sending to decouple services from the logging system.",
+    "difficulty": "Medium",
+    "tags": ["centralized-logging", "single-point-of-failure", "loose-coupling"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Microservices Architecture",
+    "question": "A microservice runs multiple containers (worker replicas). All replicas share a single database connection via an environment variable `DB_HOST=postgres:5432`. One database connection fails and one container disconnects. The other replicas continue using the same connection string. Is this resilient?",
+    "options": ["Yes, each container maintains its own connection pool independently; a single failure does not affect others", "No, if the DNS name 'postgres' becomes unresolvable, all containers will fail simultaneously", "Yes, the connection string is just a reference; each container resolves it independently at connection time", "No, the shared connection string means all containers are tightly coupled to the database"],
+    "correctIndex": 2,
+    "explanation": "Each container maintains its own connection pool and resolves the DNS name independently at connection time; if one connection fails, the container reconnects (retry logic); DNS failures would affect all containers, but network-level redundancy (DNS, load balancer) mitigates this.",
+    "difficulty": "Medium-Hard",
+    "tags": ["connection-pooling", "resilience", "service-discovery"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Microservices Architecture",
+    "question": "A microservices system uses Docker Compose with all services on the same docker-compose.yml. Adding a new service requires editing the same file and restarting the entire application with `docker-compose down && docker-compose up`. This impacts running services. How can this be improved?",
+    "options": ["Split services into separate docker-compose files and use `docker-compose -f file1.yml -f file2.yml up` to manage them independently", "Deploy new services to a separate Compose project with `docker-compose -p project2 up` to isolate them", "Use Kubernetes instead of Docker Compose for better service management and independent scaling", "Use `docker-compose up -d <service-name>` to add individual services without restarting all services"],
+    "correctIndex": 2,
+    "explanation": "Docker Compose is designed for local development and small deployments; for production microservices with independent lifecycles, use Kubernetes or a service mesh (Docker Swarm, ECS) that supports dynamic service addition without affecting running services.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker-compose-limitations", "kubernetes", "production-deployment"]
+  }
+]

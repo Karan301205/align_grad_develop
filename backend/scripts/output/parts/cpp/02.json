@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Operators",
+    "question": "What is the output of `int x = 5; cout << (x++ + ++x);`?",
+    "options": ["10", "11", "12", "undefined behavior"],
+    "correctIndex": 3,
+    "explanation": "The order of evaluation of x++ and ++x is unspecified; modifying x multiple times without an intervening sequence point triggers undefined behavior.",
+    "difficulty": "Hard",
+    "tags": ["sequence-point", "undefined-behavior", "increment-operators"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Operators",
+    "question": "Why does `operator==` often return `const bool` rather than just `bool` in a user-defined class?",
+    "options": ["to prevent assignment to the result", "to allow chaining comparisons", "historical legacy from older C++ versions", "no valid reason; it is a mistake"],
+    "correctIndex": 0,
+    "explanation": "Returning const prevents accidental assignment like `if ((a == b) = true)`, though modern code often omits it.",
+    "difficulty": "Medium",
+    "tags": ["operator-overloading", "const-correctness"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Operators",
+    "question": "What is the difference between `a && b` and `a & b` when both are bools?",
+    "options": ["no difference; both are bitwise operations", "&& short-circuits and returns bool; & always evaluates both and performs bitwise AND", "& is faster due to no short-circuit overhead", "they are identical and & was deprecated"],
+    "correctIndex": 1,
+    "explanation": "Logical && short-circuits and returns bool; bitwise & evaluates both operands and returns the bit-wise AND result.",
+    "difficulty": "Medium",
+    "tags": ["short-circuit", "logical-vs-bitwise"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Operators",
+    "question": "Given `struct S { int* p; }; S a, b; a = b;` what happens to memory?",
+    "options": ["deep copy of pointed-to data", "shallow copy; both now point to same int", "memory leak in a.p", "compilation error without copy assignment"],
+    "correctIndex": 1,
+    "explanation": "Default copy assignment performs shallow copy of struct members; both a.p and b.p now alias the same int.",
+    "difficulty": "Medium",
+    "tags": ["copy-semantics", "shallow-copy", "memory-aliasing"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Operators",
+    "question": "What does `sizeof(a + b)` do when a and b are ints, and why is this useful?",
+    "options": ["computes sizeof the sum result", "computes size of int without evaluating a + b", "syntax error", "returns the size of the temporary result at runtime"],
+    "correctIndex": 1,
+    "explanation": "sizeof is a compile-time operator that does not evaluate its argument; it queries the type of a + b without running code.",
+    "difficulty": "Medium",
+    "tags": ["sizeof-operator", "compile-time", "type-queries"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Operators",
+    "question": "In `a[i] = b[i++]`, which index is written: the old value of i or the new value?",
+    "options": ["old value; read-modify-write order is guaranteed left-to-right", "new value; increment happens before assignment", "undefined behavior due to sequence point violation", "both sides use the old value, then i increments"],
+    "correctIndex": 2,
+    "explanation": "Modifying i on the right-hand side while also using it on the left violates the rule that an object must not be modified between sequence points.",
+    "difficulty": "Hard",
+    "tags": ["sequence-point", "undefined-behavior"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Operators",
+    "question": "What is the result of `5 / 2` vs `5.0 / 2` in C++?",
+    "options": ["both are 2.5", "2 vs 2.5 due to integer division", "2.5 vs 2 due to integer promotion", "undefined until runtime"],
+    "correctIndex": 1,
+    "explanation": "Integer division truncates: 5 / 2 = 2; floating-point division: 5.0 / 2 = 2.5.",
+    "difficulty": "Medium",
+    "tags": ["integer-division", "type-promotion"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Operators",
+    "question": "Can you overload `operator&&` to short-circuit like the built-in version?",
+    "options": ["yes; overloading preserves short-circuit behavior", "no; both operands are always evaluated in overloaded version", "yes, but requires special compiler flag", "no; operator&& cannot be overloaded at all"],
+    "correctIndex": 1,
+    "explanation": "Overloaded operators lose short-circuit evaluation; both operands are passed as function arguments before the call.",
+    "difficulty": "Medium-Hard",
+    "tags": ["operator-overloading", "short-circuit", "limitation"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Operators",
+    "question": "What is the difference between prefix `++a` and postfix `a++` for efficiency?",
+    "options": ["no difference; compiler optimizes both equally", "prefix creates no temporary; postfix creates a temporary copy", "postfix is always faster", "difference only exists for classes, not built-in types"],
+    "correctIndex": 1,
+    "explanation": "Postfix returns the old value (requires a temporary), while prefix returns a reference to the modified object.",
+    "difficulty": "Medium",
+    "tags": ["prefix-postfix", "performance", "temporary-objects"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Operators",
+    "question": "Given `const int a = 5; int& r = const_cast<int&>(a);`, is this safe to execute?",
+    "options": ["safe; casting away const is always allowed", "unsafe; modifying r invokes undefined behavior", "unsafe but safe if a is in writable memory", "compilation error"],
+    "correctIndex": 1,
+    "explanation": "const_cast removes const, but if the original object is truly const, modifying it is undefined behavior.",
+    "difficulty": "Hard",
+    "tags": ["const-cast", "undefined-behavior", "const-correctness"]
+  }
+]

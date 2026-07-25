@@ -1,0 +1,3 @@
+[
+  {"skillName":"Node.js","subtopic":"JavaScript Fundamentals","question":"In Node, what does `console.log(typeof module.exports)` print in a fresh empty module?","options":["object","undefined","function","module"],"correctIndex":0,"explanation":"module.exports is initialized to an empty object by the CommonJS module wrapper.","difficulty":"Medium","tags":["commonjs","module-exports","types"]}
+]

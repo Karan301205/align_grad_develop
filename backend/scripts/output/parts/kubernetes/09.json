@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Scaling Strategies",
+    "question": "You configure HPA with targetCPUUtilizationPercentage: 80. Pods average 60% CPU. Suddenly, all pods spike to 95% CPU. What happens?",
+    "options": [
+      "HPA immediately scales to max replicas to handle the load",
+      "HPA quickly scales up replicas because CPU exceeds the target, then scales down as CPU normalizes",
+      "HPA waits 3 minutes (default stabilization window) before deciding to scale",
+      "HPA only scales if CPU remains above 80% for 5 consecutive minutes"
+    ],
+    "correctIndex": 2,
+    "explanation": "HPA applies a stabilization window (3 minutes by default) to avoid rapid oscillations; it waits to confirm sustained high utilization before scaling.",
+    "difficulty": "Medium-Hard",
+    "tags": ["hpa", "autoscaling", "stabilization"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Scaling Strategies",
+    "question": "An HPA is configured with minReplicas: 2 and maxReplicas: 10. The Deployment is manually scaled to 5 replicas. When HPA targets are met, how many replicas should there be?",
+    "options": [
+      "5, because manual scaling takes precedence",
+      "Between 2 and 10, determined by the HPA's calculation based on target metrics",
+      "2, because HPA enforces minimum replicas",
+      "10, because HPA enforces maximum replicas"
+    ],
+    "correctIndex": 1,
+    "explanation": "HPA's desired replica count overrides manual scaling; the current replica count is adjusted to match HPA's calculation within min/max bounds.",
+    "difficulty": "Medium",
+    "tags": ["hpa", "autoscaling", "manual-scaling"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Scaling Strategies",
+    "question": "An HPA targets CPU and memory metrics, but the metrics-server in kube-system is not responding. What happens to the HPA?",
+    "options": [
+      "HPA continues scaling based on cached metrics",
+      "HPA enters an error state and stops scaling; metrics are unavailable",
+      "HPA defaults to scaling based on pod count",
+      "Kubernetes automatically restarts the metrics-server"
+    ],
+    "correctIndex": 1,
+    "explanation": "HPA depends on the metrics-server for CPU/memory data; without metrics, it cannot make scaling decisions and enters a failed state.",
+    "difficulty": "Medium",
+    "tags": ["hpa", "metrics-server", "autoscaling"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Scaling Strategies",
+    "question": "You set up an HPA with targetAverageValuePercentage: 50 based on a custom metric. A pod's custom metric value is not being reported. How does HPA handle missing metrics?",
+    "options": [
+      "HPA assumes the metric is 0 and scales up aggressively",
+      "HPA ignores pods with missing metrics when calculating the average",
+      "HPA treats missing metrics as an error and stops scaling",
+      "HPA scales down because it cannot confirm the target is met"
+    ],
+    "correctIndex": 2,
+    "explanation": "Missing metrics from custom metric providers cause HPA to enter a failed state; all pods must report metrics for HPA to function reliably.",
+    "difficulty": "Medium-Hard",
+    "tags": ["hpa", "custom-metrics", "scaling"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Scaling Strategies",
+    "question": "An HPA scales a Deployment from 2 to 10 replicas due to high load. All new pods are in ImagePullBackOff. The load continues, but HPA stops scaling further. Why?",
+    "options": [
+      "HPA detected the pod failures and stopped to prevent wasting resources",
+      "maxReplicas: 10 is reached; HPA stops scaling even if pods are failing",
+      "HPA waits for pods to become ready before scaling further",
+      "Kubernetes prevents HPA from scaling beyond the number of available nodes"
+    ],
+    "correctIndex": 1,
+    "explanation": "HPA respects maxReplicas as a hard limit; it continues scaling until this limit is reached, regardless of pod readiness.",
+    "difficulty": "Medium",
+    "tags": ["hpa", "maxreplicas", "pod-failures"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Scaling Strategies",
+    "question": "A Deployment's rolling update is in progress when HPA scales up new replicas. How does this interaction work?",
+    "options": [
+      "HPA waits for the rollout to complete before scaling",
+      "The rolling update creates new ReplicaSet pods; HPA scales both old and new ReplicaSets independently",
+      "HPA pauses scaling until the rollout finishes",
+      "A conflict occurs and both operations are blocked"
+    ],
+    "correctIndex": 1,
+    "explanation": "HPA scales the total replica count without awareness of ReplicaSets; both old and new ReplicaSets may be scaled as part of the Deployment's rolling update.",
+    "difficulty": "Hard",
+    "tags": ["hpa", "deployment", "rolling-update"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Scaling Strategies",
+    "question": "You set scaleDownBehavior with stabilizationWindowSeconds: 300. After a load spike, utilization drops and remains low for 5 minutes. When does HPA scale down?",
+    "options": [
+      "Immediately, because load is low",
+      "After 5 minutes (stabilization window); HPA then starts scale-down calculations",
+      "After 10 minutes; HPA requires both a 5-minute stabilization window and additional time for decisions",
+      "HPA never scales down unless explicitly configured"
+    ],
+    "correctIndex": 1,
+    "explanation": "scaleDownBehavior's stabilizationWindowSeconds defines how long low utilization must persist; after this period, HPA can scale down.",
+    "difficulty": "Medium-Hard",
+    "tags": ["hpa", "scaledown", "stabilization"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Scaling Strategies",
+    "question": "An HPA based on request count (requests per second) scales a Deployment. Some pods process requests much faster than others due to uneven load distribution. How does this affect HPA's decisions?",
+    "options": [
+      "HPA adjusts for pod efficiency and scales based on average performance",
+      "HPA calculates average requests per pod across all replicas; uneven distribution does not affect scaling",
+      "HPA scales up to handle the slowest pods equally",
+      "HPA detects imbalance and automatically rebalances load"
+    ],
+    "correctIndex": 1,
+    "explanation": "HPA works on aggregate metrics (e.g., average requests per pod); uneven distribution within pods does not change HPA's calculations.",
+    "difficulty": "Medium-Hard",
+    "tags": ["hpa", "load-distribution", "metrics"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Scaling Strategies",
+    "question": "An HPA is configured with a max replica count of 100, but the cluster has only 10 nodes with limited capacity. As the HPA scales up, pods go Pending. What should you do?",
+    "options": [
+      "Increase maxReplicas so the HPA keeps trying",
+      "Enable cluster autoscaling to add nodes as the HPA requests them",
+      "Manually add more nodes to the cluster",
+      "Reduce HPA's target utilization to scale less aggressively"
+    ],
+    "correctIndex": 1,
+    "explanation": "Cluster autoscaling coordinates with HPA; when pods cannot be scheduled, the cluster autoscaler provisions new nodes to meet demand.",
+    "difficulty": "Medium-Hard",
+    "tags": ["hpa", "cluster-autoscaling", "node-capacity"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Scaling Strategies",
+    "question": "You delete an HPA but leave the Deployment's desired replica count at the current scaled value (e.g., 20 replicas). After deletion, how many replicas will the Deployment maintain?",
+    "options": [
+      "The Deployment scales down to 1 replica",
+      "The Deployment maintains 20 replicas until you manually change the replica count",
+      "The Deployment scales to the original spec's replica count",
+      "The Deployment enters an error state"
+    ],
+    "correctIndex": 1,
+    "explanation": "Deleting an HPA does not change the Deployment's spec; the current replica count is maintained until manually updated or a new HPA is created.",
+    "difficulty": "Medium",
+    "tags": ["hpa", "deletion", "replica-management"]
+  }
+]

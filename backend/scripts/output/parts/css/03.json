@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "CSS",
+    "subtopic": "Box Model",
+    "question": "Given two adjacent divs, what will be the space between them?\n```css\n.box1 { margin-bottom: 20px; }\n.box2 { margin-top: 30px; }\n```",
+    "options": ["20px", "30px", "50px (added)", "0px (collapse)"],
+    "correctIndex": 1,
+    "explanation": "Vertical margin collapse merges adjacent block margins; the larger value (30px) is used, not summed.",
+    "difficulty": "Medium",
+    "tags": ["margin-collapse", "vertical-margin"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Box Model",
+    "question": "After applying box-sizing: border-box, what will be the actual width of the element?\n```css\n.box {\n  width: 200px;\n  padding: 20px;\n  border: 10px solid black;\n  box-sizing: border-box;\n}\n```",
+    "options": ["240px", "200px", "260px", "Depends on content"],
+    "correctIndex": 1,
+    "explanation": "With border-box, width includes padding and border; the 200px total encompasses padding (20px each side) and border (10px each side).",
+    "difficulty": "Medium",
+    "tags": ["box-sizing", "border-box", "width-calculation"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Box Model",
+    "question": "Why might using negative margin create unexpected layout shifts?\n```css\n.item {\n  margin: -10px;\n  width: 100%;\n}\n```",
+    "options": ["Negative margins expand the box", "Width calculation includes negative margin", "Content overlaps adjacent elements", "Browser interprets as invalid"],
+    "correctIndex": 2,
+    "explanation": "Negative margins pull elements outside their normal flow, causing them to overlap adjacent siblings or containers.",
+    "difficulty": "Medium-Hard",
+    "tags": ["negative-margin", "layout-shift", "overlap"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Box Model",
+    "question": "Which approach is better for spacing between elements and why?\n```css\n.parent > .child { margin: 20px; } /* option A */\n.parent { padding: 20px; } /* option B */\n.parent { gap: 20px; } /* option C (if flex/grid) */\n```",
+    "options": ["A: consistent spacing", "B: padding creates internal breathing room", "C: gap only applies to flex/grid children", "All identical in layout"],
+    "correctIndex": 2,
+    "explanation": "gap (flex/grid) avoids margin-collapse issues and double-spacing on edges; it's the modern approach for spacing children uniformly.",
+    "difficulty": "Medium-Hard",
+    "tags": ["margin-vs-padding", "gap-property", "spacing-strategy"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Box Model",
+    "question": "When box-sizing: content-box (default), what is the total width of the rendered box?\n```css\n.box {\n  width: 100px;\n  padding: 15px;\n  border: 5px solid black;\n  margin: 20px;\n}\n```",
+    "options": ["100px", "130px", "155px", "180px"],
+    "correctIndex": 2,
+    "explanation": "With content-box: width (100px) + padding (15px both sides = 30px) + border (5px both sides = 10px) = 140px rendered; margin is outside, so 140px + 20px margin = ignored in width.",
+    "difficulty": "Medium-Hard",
+    "tags": ["content-box", "box-model-calculation"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Box Model",
+    "question": "Why does this element not center with margin: auto?\n```css\n.box {\n  margin: 0 auto;\n  width: 100%;\n}\n```",
+    "options": ["margin: auto requires text-align: center", "Width 100% fills container, no room to center", "margin: auto only works with position: absolute", "Color property needed"],
+    "correctIndex": 1,
+    "explanation": "margin: auto centers by using leftover space; width: 100% consumes all available space, leaving zero space to center.",
+    "difficulty": "Medium",
+    "tags": ["margin-auto", "centering", "width-constraints"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Box Model",
+    "question": "When will this padding percentage be calculated relative to what?\n```css\n.box {\n  width: 300px;\n  padding-top: 50%;\n}\n```",
+    "options": ["50% of viewport height", "50% of parent height", "50% of element's own height", "50% of element's width"],
+    "correctIndex": 3,
+    "explanation": "Padding percentages always calculate relative to the element's width, not height, even for padding-top/bottom.",
+    "difficulty": "Medium-Hard",
+    "tags": ["padding-percentage", "relative-units"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Box Model",
+    "question": "Given floated elements, what happens to margins between them?\n```css\n.float-left { float: left; margin-right: 10px; }\n.float-right { float: left; margin-left: 20px; }\n```",
+    "options": ["Margins collapse like block elements", "Margins combine (30px gap)", "Margins don't collapse; 30px gap forms", "Only left margin applies"],
+    "correctIndex": 2,
+    "explanation": "Floated elements don't participate in margin collapse; adjacent float margins add together (10px + 20px = 30px gap).",
+    "difficulty": "Medium-Hard",
+    "tags": ["floats", "margin-collapse", "float-behavior"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Box Model",
+    "question": "What is the rendered height of this div after overflow is applied?\n```css\n.box {\n  height: 100px;\n  padding: 20px;\n  overflow: hidden;\n}\n```\nHTML: `<div class=\"box\"><p>Content</p></div>`",
+    "options": ["80px (height minus padding)", "100px (padding included in height)", "140px (height plus padding)", "Depends on content"],
+    "correctIndex": 1,
+    "explanation": "With box-sizing: content-box (default), height applies to content only; padding extends beyond, making total rendered height 140px, but overflow: hidden clips at 100px from the padding edge inward.",
+    "difficulty": "Medium-Hard",
+    "tags": ["overflow", "padding", "box-model"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Box Model",
+    "question": "Why does the child's margin-top push the parent down in this scenario?\n```html\n<div class=\"parent\">\n  <div class=\"child\" style=\"margin-top: 30px;\">Content</div>\n</div>\n```\n```css\n.parent { background: blue; }\n.child { background: red; }\n```",
+    "options": ["Margin is inside child", "Parent has no overflow property", "Margin collapse moves parent down", "Child margin extends outside parent"],
+    "correctIndex": 2,
+    "explanation": "When a block child's margin-top has no separating border/padding on parent, it collapses through and pushes the parent (and child together) downward.",
+    "difficulty": "Medium-Hard",
+    "tags": ["margin-collapse", "parent-child", "margin-through"]
+  }
+]

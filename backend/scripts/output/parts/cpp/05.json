@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Object Oriented Programming",
+    "question": "What does slicing mean, and when does it occur?",
+    "options": ["assigning a derived class object to a base class variable by value", "undefined behavior when pointers cross class boundaries", "a memory optimization technique in virtual inheritance", "creating a shallow copy of an object"],
+    "correctIndex": 0,
+    "explanation": "Object slicing occurs when a derived object is assigned to a base class variable by value, losing derived-specific data.",
+    "difficulty": "Medium",
+    "tags": ["inheritance", "slicing", "polymorphism"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Object Oriented Programming",
+    "question": "If a base class has a virtual function, must derived classes override it?",
+    "options": ["yes; all derived classes must implement it", "no; derived class can inherit the base implementation", "no; compiler forbids inherited virtual functions", "only if explicitly marked with override"],
+    "correctIndex": 1,
+    "explanation": "Virtual functions are inherited; a derived class is not required to override, and will use the base implementation if not.",
+    "difficulty": "Medium",
+    "tags": ["virtual-functions", "inheritance", "polymorphism"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the difference between private and protected inheritance?",
+    "options": ["both hide derived members from outsiders", "protected derives inherit base public as protected; private inherits all as private", "private inheritance is illegal in C++", "they are identical but protected is preferred"],
+    "correctIndex": 1,
+    "explanation": "private inheritance hides all base members from further derived classes; protected inheritance preserves protected access.",
+    "difficulty": "Medium-Hard",
+    "tags": ["inheritance", "access-control", "visibility"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Object Oriented Programming",
+    "question": "Can a destructor be virtual, and why?",
+    "options": ["no; destructors cannot be virtual", "yes; virtual destructors allow derived destructors to run via base pointers", "yes; but only in C++11 onwards", "only in abstract base classes"],
+    "correctIndex": 1,
+    "explanation": "Virtual destructors ensure the derived destructor runs when deleting a derived object via a base pointer.",
+    "difficulty": "Medium",
+    "tags": ["virtual-destructors", "polymorphism", "cleanup"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Object Oriented Programming",
+    "question": "If a class defines a move constructor, does the compiler still generate a copy constructor?",
+    "options": ["yes; both are always present", "no; move constructor suppresses default copy constructor", "only if copy constructor is explicitly deleted", "depends on whether the class has a destructor"],
+    "correctIndex": 1,
+    "explanation": "Defining a move constructor suppresses the compiler-generated copy constructor; you must explicitly default it if needed.",
+    "difficulty": "Medium-Hard",
+    "tags": ["move-semantics", "rule-of-five", "compiler-generated"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the purpose of pure virtual functions?",
+    "options": ["to force derived classes to implement them", "to define an interface without implementation", "to optimize performance by eliminating vtable overhead", "to prevent instantiation of the class"],
+    "correctIndex": 0,
+    "explanation": "Pure virtual functions (`= 0`) ensure derived classes override them; a class with any pure virtual cannot be instantiated.",
+    "difficulty": "Medium",
+    "tags": ["pure-virtual", "abstract-base-class", "interface"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Object Oriented Programming",
+    "question": "Can you call a virtual function from a constructor, and will it dispatch to the derived version?",
+    "options": ["yes; virtual dispatch always occurs", "no; compilation error in constructor", "no; the base version runs because derived object is not fully constructed", "yes, but only in C++17 onwards"],
+    "correctIndex": 2,
+    "explanation": "During construction, the object is considered its current class type, not the final derived type; virtual calls dispatch to the base version.",
+    "difficulty": "Hard",
+    "tags": ["virtual-functions", "construction", "dispatch"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the purpose of the override keyword, and is it required?",
+    "options": ["marks a function as overriding a base virtual; not required but recommended", "overrides base implementation; required in C++11", "allows overriding of non-virtual functions", "error if base function is not actually virtual"],
+    "correctIndex": 0,
+    "explanation": "override is optional but forces a compiler error if the base virtual is missing; aids clarity and catches mistakes.",
+    "difficulty": "Medium",
+    "tags": ["override-keyword", "virtual-functions", "best-practice"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Object Oriented Programming",
+    "question": "In multiple inheritance, what problem can the diamond pattern create?",
+    "options": ["memory waste from duplicate base data", "ambiguous virtual function calls", "both; unless virtual inheritance is used", "no problem; C++ handles it transparently"],
+    "correctIndex": 2,
+    "explanation": "Diamond inheritance can duplicate base data and cause ambiguity; virtual inheritance ensures a single shared base.",
+    "difficulty": "Medium-Hard",
+    "tags": ["multiple-inheritance", "diamond-problem", "virtual-inheritance"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Object Oriented Programming",
+    "question": "What does `final` on a class declaration do?",
+    "options": ["prevents the class from being inherited", "prevents virtual functions from being overridden", "marks the class as unchangeable", "syntax error in standard C++"],
+    "correctIndex": 0,
+    "explanation": "final on a class forbids deriving from it; attempting to create a derived class causes a compiler error.",
+    "difficulty": "Medium",
+    "tags": ["final-keyword", "inheritance", "c++11"]
+  }
+]

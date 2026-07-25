@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "String Matching",
+    "question": "Naive string matching checks a pattern P of length m against a text T of length n by trying all n-m+1 positions. Worst-case time complexity?",
+    "options": ["linear time", "quadratic time in n and m", "linearithmic time", "cubic time"],
+    "correctIndex": 1,
+    "explanation": "Each position requires O(m) character comparisons; n-m+1 positions means O(n*m) quadratic time in worst case.",
+    "difficulty": "Medium",
+    "tags": ["naive-matching", "brute-force"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "String Matching",
+    "question": "Knuth-Morris-Pratt (KMP) algorithm preprocesses a pattern to build a failure function (LPS array) allowing O(n+m) matching time. What does LPS represent?",
+    "options": ["longest previous substring", "longest proper prefix which is also suffix", "leftmost pattern shift", "last possible start"],
+    "correctIndex": 1,
+    "explanation": "LPS[i] stores the length of the longest proper prefix of P[0..i] that is also a suffix, enabling intelligent skipping of failed matches.",
+    "difficulty": "Medium-Hard",
+    "tags": ["KMP", "failure-function"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "String Matching",
+    "question": "Boyer-Moore algorithm for string matching skips characters using a bad-character rule (furthest right occurrence of a character in pattern). Why does this speed up matching?",
+    "options": ["it always checks backward", "mismatches can skip multiple characters instead of one", "Boyer-Moore is always linear time", "it reduces pattern size"],
+    "correctIndex": 1,
+    "explanation": "When a mismatch occurs, the bad-character rule skips based on the mismatched text character, potentially jumping multiple positions.",
+    "difficulty": "Medium-Hard",
+    "tags": ["Boyer-Moore", "bad-character-rule"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "String Matching",
+    "question": "Rabin-Karp algorithm uses polynomial rolling hash to match patterns. A hash collision occurs when two different substrings hash to the same value. What is the risk?",
+    "options": ["no risk, hashing is perfect", "false positives require confirming actual match", "false negatives miss real matches", "cannot be handled"],
+    "correctIndex": 1,
+    "explanation": "Hash collisions are false positives; must verify the actual characters; real matches are never missed (no false negatives).",
+    "difficulty": "Medium",
+    "tags": ["rolling-hash", "collision-handling"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "String Matching",
+    "question": "Rabin-Karp hashing of a substring takes O(m) to compute initially but O(1) to update when sliding one character. How is O(1) update achieved?",
+    "options": ["by ignoring old characters", "by computing rolling hash: remove leftmost contribution and add new character", "by using a fixed-size window", "updates are actually O(m)"],
+    "correctIndex": 1,
+    "explanation": "Rolling hash: subtract old character's contribution, shift, add new character; each operation is constant-time arithmetic.",
+    "difficulty": "Medium-Hard",
+    "tags": ["rolling-hash", "sliding-window"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "String Matching",
+    "question": "Using regular expressions for pattern matching is powerful but potentially slow. Why do engines using backtracking have worst-case exponential time for certain patterns?",
+    "options": ["backtracking never causes exponential behavior", "alternation and quantifiers can cause exponential state exploration", "only linear time is possible", "depends on CPU"],
+    "correctIndex": 1,
+    "explanation": "Patterns like (a+)+ matching a string of a's cause backtracking to explore all possible splits, creating exponential time in input length.",
+    "difficulty": "Medium-Hard",
+    "tags": ["regex-catastrophic-backtracking", "exponential-matching"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "String Matching",
+    "question": "Aho-Corasick algorithm finds multiple pattern matches in text simultaneously. Compared to running KMP separately for each pattern, what is the advantage?",
+    "options": ["Aho-Corasick is not better", "Aho-Corasick builds a trie once and scans text once: O(n+m+z) vs O(n*k) for k patterns", "Aho-Corasick is slower", "both are identical"],
+    "correctIndex": 1,
+    "explanation": "Aho-Corasick uses a finite automaton built from all patterns; scanning text is O(n) once; total is O(n+m+z) where z is match count.",
+    "difficulty": "Medium-Hard",
+    "tags": ["Aho-Corasick", "multi-pattern-matching"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "String Matching",
+    "question": "Z-algorithm computes an array Z where Z[i] is the length of the longest substring starting at i matching a prefix of the string. Time complexity?",
+    "options": ["quadratic time", "linear time in string length", "linearithmic time", "cubic time"],
+    "correctIndex": 1,
+    "explanation": "Z-algorithm scans the string once, maintaining a window of matched prefix; each character is processed once, giving O(n) linear time.",
+    "difficulty": "Medium-Hard",
+    "tags": ["Z-algorithm", "linear-time"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "String Matching",
+    "question": "Suffix array and suffix tree are used for efficient pattern matching on a static text. Suffix array requires O(n log n) space and O(log n) per pattern query. Why is suffix array preferred over naive search for many queries?",
+    "options": ["suffix array is always better", "suffix array amortizes preprocessing; with many queries, O((n log n + q log n) < O(n*m*q)", "naive is never useful", "suffix array uses less space always"],
+    "correctIndex": 1,
+    "explanation": "Suffix array preprocessing is O(n log n) once; q queries are O(log n) each; total O((n + q) log n) beats O(n*m*q) naive for large q.",
+    "difficulty": "Medium-Hard",
+    "tags": ["suffix-array", "amortized-analysis"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "String Matching",
+    "question": "Wildcard pattern matching where '?' matches any single character and '*' matches any sequence: naive backtracking can be exponential. What DP approach solves it in O(n*m) time?",
+    "options": ["no DP exists for wildcards", "dp[i][j] represents if T[0..i-1] matches P[0..j-1]", "use greedy only", "exponential is unavoidable"],
+    "correctIndex": 1,
+    "explanation": "dp[i][j] tracks matches; transitions handle literals, '?', and '*'; filling the (n+1) x (m+1) table is O(n*m) time.",
+    "difficulty": "Medium-Hard",
+    "tags": ["wildcard-matching", "DP-on-strings"]
+  }
+]

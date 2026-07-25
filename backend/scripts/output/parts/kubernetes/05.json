@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Services Networking",
+    "question": "A Service with selector app: web has no endpoints listed (Endpoints shows <none>). The pods with app: web label exist and are running. What is a likely cause?",
+    "options": [
+      "The pods' containers are not listening on the Service's target port",
+      "The selector is misspelled or doesn't match any pod labels",
+      "The Service and pods are in different namespaces",
+      "Kube-proxy has crashed and is not maintaining endpoints"
+    ],
+    "correctIndex": 1,
+    "explanation": "Service endpoints are built from pods matching the selector; a mismatch (typo, different namespace, or wrong label) prevents endpoint discovery.",
+    "difficulty": "Medium",
+    "tags": ["service", "endpoints", "selector", "debugging"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Services Networking",
+    "question": "You create a ClusterIP Service that targets port 8080, but the pods listen on port 9000. How do you configure traffic routing?",
+    "options": [
+      "The Service automatically discovers the correct port",
+      "Set targetPort: 9000 in the Service spec to route traffic from port 8080 to 9000",
+      "Modify the pod containers to listen on port 8080",
+      "Use a sidecar to proxy traffic between the ports"
+    ],
+    "correctIndex": 1,
+    "explanation": "targetPort specifies which port on the pod receives traffic; port specifies the Service's listening port, enabling port translation.",
+    "difficulty": "Medium",
+    "tags": ["service", "port-mapping", "targetport"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Services Networking",
+    "question": "A NodePort Service is created with port: 80 and nodePort: 30001. External users access the service via cluster-node-ip:30001. This works. Why is it not recommended for production?",
+    "options": [
+      "NodePort services do not support HTTPS",
+      "NodePort services create security risks (wide port exposure) and do not provide load balancing across nodes",
+      "NodePort services do not persist data",
+      "NodePort services cannot handle concurrent connections"
+    ],
+    "correctIndex": 1,
+    "explanation": "NodePort exposes the service on every node's public port, creating security risks; LoadBalancer or Ingress are preferred for production traffic management.",
+    "difficulty": "Medium",
+    "tags": ["service", "nodeport", "security", "networking"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Services Networking",
+    "question": "You delete a Service but the pods it targets are still running and receiving traffic from somewhere. What is likely happening?",
+    "options": [
+      "The pods are receiving direct traffic from kube-proxy before the Service is fully deleted",
+      "Stale endpoints remain cached; wait a few seconds for DNS/iptables to update",
+      "The pods are still exposing themselves via NodePort",
+      "An Ingress is still routing traffic to the pods"
+    ],
+    "correctIndex": 1,
+    "explanation": "Kube-proxy and DNS cache Service endpoints briefly after deletion; traffic may continue until caches refresh (usually within seconds).",
+    "difficulty": "Medium",
+    "tags": ["service", "deletion", "cache", "kube-proxy"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Services Networking",
+    "question": "An ExternalName Service is configured with externalName: 'db.example.com'. What does this Service do?",
+    "options": [
+      "It exposes a pod running db.example.com inside the cluster",
+      "It creates a DNS CNAME record pointing to the external domain, allowing pods to connect using the Service name",
+      "It creates a reverse proxy to the external domain",
+      "It requires the external domain to run a Kubernetes cluster"
+    ],
+    "correctIndex": 1,
+    "explanation": "ExternalName Services create a DNS CNAME alias; pods can call the Service name and are transparently routed to the external hostname.",
+    "difficulty": "Medium",
+    "tags": ["service", "externalname", "dns", "networking"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Services Networking",
+    "question": "Two Services share the same selector and both use port 8080. One Service is deleted, but traffic is still being load-balanced across all matched pods. What happened?",
+    "options": [
+      "Both Services exist in the Endpoints object; deleting one doesn't remove pods from the other Service's endpoints",
+      "Kubernetes keeps both Services active until all references are removed",
+      "Kube-proxy cached the endpoints and hasn't refreshed yet",
+      "The remaining Service now claims all matched pods"
+    ],
+    "correctIndex": 0,
+    "explanation": "Services build endpoints independently; pods are included in all matching Services' endpoints simultaneously, so deleting one Service doesn't affect the other.",
+    "difficulty": "Medium-Hard",
+    "tags": ["service", "endpoints", "multiple-services"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Services Networking",
+    "question": "A LoadBalancer Service waits in Pending state with externalIP showing <pending>. Why might the cloud load balancer not be provisioned?",
+    "options": [
+      "The cluster has insufficient resources to create a load balancer",
+      "The cloud provider's load balancer controller is not installed or has errors",
+      "The Service port is already in use on the load balancer",
+      "LoadBalancer services require a static IP to be pre-allocated"
+    ],
+    "correctIndex": 1,
+    "explanation": "LoadBalancer Services depend on a cloud controller provisioning external load balancers; if the controller is absent or misconfigured, the IP remains pending.",
+    "difficulty": "Medium-Hard",
+    "tags": ["service", "loadbalancer", "cloud-provider", "debugging"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Services Networking",
+    "question": "You use sessionAffinity: ClientIP on a Service. A client connects and is routed to pod-A. If pod-A crashes and is recreated, where is the client rerouted?",
+    "options": [
+      "To the same pod-A if it's recreated quickly",
+      "To a different pod because the recreated pod-A is a different instance",
+      "To a random pod; session affinity is lost on pod recreation",
+      "The client's session terminates and must reconnect"
+    ],
+    "correctIndex": 2,
+    "explanation": "ClientIP affinity is tied to the pod instance, not the pod name; when a pod restarts, it's a new instance and the client is rerouted to another pod.",
+    "difficulty": "Hard",
+    "tags": ["service", "sessionaffinity", "pod-restart"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Services Networking",
+    "question": "A Service uses type: ClusterIP and is accessible via its DNS name inside the cluster but not from outside. How do you make it accessible from outside the cluster without changing the Service type?",
+    "options": [
+      "Create an Ingress resource that routes external traffic to the Service",
+      "Use port forwarding with kubectl port-forward",
+      "Configure the firewall to allow inbound traffic to the ClusterIP",
+      "Create a second LoadBalancer Service pointing to the same pods"
+    ],
+    "correctIndex": 0,
+    "explanation": "Ingress provides external access to ClusterIP Services; it routes external traffic to internal Services based on hostnames and paths.",
+    "difficulty": "Medium",
+    "tags": ["service", "ingress", "external-access"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Services Networking",
+    "question": "You set a Service's sessionAffinityTimeout to 300 seconds. After 301 seconds of inactivity, a client reconnects. What happens?",
+    "options": [
+      "The client is routed to the same pod because the affinity is still active",
+      "The client is routed to any available pod because the affinity has expired",
+      "The Service raises an error because the client is attempting to reuse a stale session",
+      "Kubernetes automatically reconnects the client to the previous pod"
+    ],
+    "correctIndex": 1,
+    "explanation": "sessionAffinityTimeout is a hard timeout; after expiration, the affinity is cleared and the client is treated as a new connection.",
+    "difficulty": "Medium-Hard",
+    "tags": ["service", "sessionaffinity", "timeout"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Security",
+    "question": "A Dockerfile uses `RUN apt-get install sudo` and then runs a script as a non-root user with `USER appuser` followed by `RUN sudo apt-get install curl`. The build fails because appuser is not in the sudoers file. What is the best practice fix?",
+    "options": ["Add appuser to sudoers during the root phase: `RUN usermod -aG sudo appuser` before the USER directive", "Perform all privileged installations before the USER directive, then switch to the non-root user for the application", "Use `RUN sudo -u appuser apt-get install curl` to explicitly run as appuser", "This is impossible; non-root users cannot install packages; use a multi-stage build with a root stage"],
+    "correctIndex": 1,
+    "explanation": "Run all package installations and privileged operations before `USER appuser`; once switched to a non-root user, you cannot regain root privileges without sudo setup, which is unnecessary in a container; perform all setup as root, then drop privileges.",
+    "difficulty": "Medium",
+    "tags": ["dockerfile-security", "non-root-user", "privilege-escalation"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Security",
+    "question": "A container is run with `docker run --cap-add SYS_ADMIN app`. Inside, you can use `mount` syscalls and modify the kernel module list. What security boundary has been crossed?",
+    "options": ["The container can now access the entire host filesystem by remounting", "The container gained the ability to load kernel modules from inside, bypassing host kernel validation", "SYS_ADMIN is equivalent to running as root and allows nearly any privileged operation inside the container", "The container can now intercept system calls and modify host kernel behavior"],
+    "correctIndex": 2,
+    "explanation": "SYS_ADMIN is a broad capability covering mount, namespace, module, and other privileged operations; it approximates root privileges inside the container and should be avoided unless absolutely necessary; prefer dropping ALL capabilities and adding only the minimum required.",
+    "difficulty": "Medium",
+    "tags": ["docker-capabilities", "privilege-escalation", "container-security"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Security",
+    "question": "You build an image and include an API key in a layer: `RUN export API_KEY=secret && curl -H 'Authorization: Bearer $API_KEY' https://...`. Later, you remove the key from the Dockerfile and rebuild. The key is no longer visible in the source code, but `docker history <image>` still shows the key in an old layer. How do you remove it?",
+    "options": ["Use `docker image prune --all` to remove all cached layers containing the secret", "Rebuild from scratch with a new base image; old layers are immutable and cannot be deleted", "Re-tag the image; the historical layers are not included in the new tag", "This is impossible; secrets in layer history can only be mitigated by rotating the key"],
+    "correctIndex": 3,
+    "explanation": "Secrets in Dockerfile layers are baked into the image history and cannot be deleted by layer pruning; rebuild from scratch or use BuildKit's `--secret` flag to avoid adding secrets to layers at all; if exposed, rotate the secret immediately.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dockerfile-secrets", "layer-history", "secret-management"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Security",
+    "question": "A container runs with `docker run --security-opt apparmor=docker-default app`. Inside, the application attempts to read `/etc/shadow` and fails with 'Permission denied'. Is this the AppArmor profile or file permissions?",
+    "options": ["AppArmor is blocking the read; the profile prevents access to sensitive system files", "File permissions (root-only access to /etc/shadow) are preventing the read; AppArmor is not involved", "Both AppArmor and file permissions are in effect; the most restrictive policy wins", "AppArmor would block the read, but the container is running as root, bypassing both checks"],
+    "correctIndex": 2,
+    "explanation": "Both AppArmor (MAC) and file permissions (DAC) are enforced; the most restrictive wins; if the container runs as root with AppArmor disabled, file permissions still block access; if AppArmor is enabled, it may also block access independently.",
+    "difficulty": "Medium-Hard",
+    "tags": ["apparmor", "mac-vs-dac", "file-permissions"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Security",
+    "question": "You run `docker run --read-only app` to make the container filesystem read-only. The application tries to write to `/tmp` and fails. Why does a read-only filesystem prevent /tmp writes?",
+    "options": ["/tmp is part of the container's root filesystem, which is read-only; provide a tmpfs mount for /tmp", "Docker does not create a /tmp directory in read-only containers; the directory does not exist", "The application lacks write permissions; use `docker run --read-only --user appuser` to grant permissions", "Read-only filesystems are enforced at the kernel level, blocking all writes regardless of mount points"],
+    "correctIndex": 0,
+    "explanation": "`--read-only` makes the root filesystem read-only, including /tmp; the fix is to mount a tmpfs (in-memory) volume: `docker run --read-only -v /tmp:tmpfs app` or use `--tmpfs /tmp` to allow temporary writes.",
+    "difficulty": "Medium",
+    "tags": ["read-only-filesystem", "tmpfs", "container-security"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Security",
+    "question": "A Dockerfile declares `USER appuser` at the end. Running `docker run app id` shows the container is running as the root user (UID 0), not appuser. Why did the USER directive not apply?",
+    "options": ["The docker run command explicitly overrides USER with root privileges", "The image does not exist yet; rebuild with `docker build` to apply the USER directive", "A HEALTHCHECK or ENTRYPOINT after USER might override it if not properly configured", "The Dockerfile's USER directive is compiled into the image but not executed; the container runtime chooses the user"],
+    "correctIndex": 3,
+    "explanation": "USER sets the default user for the image, not the runtime user; `docker run --user root` explicitly overrides it; verify with `docker run app id` without --user to confirm the Dockerfile's USER is being used, or rebuild and check with `docker inspect --format '{{.Config.User}}'`.",
+    "difficulty": "Medium",
+    "tags": ["dockerfile-user", "default-user", "user-override"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Security",
+    "question": "A container image includes a world-writable directory: `RUN mkdir -p /app/uploads && chmod 777 /app/uploads`. An attacker inside the container writes a malicious executable to /app/uploads. Can they execute it?",
+    "options": ["Yes, but only if the filesystem is mounted with 'exec' permissions; noexec mounts prevent execution", "No, because the container filesystem is read-only in production (when `--read-only` is used)", "Yes, if the directory is world-writable and executable, the file can be executed", "No, Docker prevents execution of files written at runtime for security reasons"],
+    "correctIndex": 2,
+    "explanation": "World-writable directories (chmod 777) allow any user to write and execute files; this is a significant security risk; use restrictive permissions (`chmod 755` for the directory, owned by the app user) and never make /app/uploads world-writable.",
+    "difficulty": "Medium",
+    "tags": ["file-permissions", "world-writable", "privilege-escalation"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Security",
+    "question": "You run `docker run --userns-remap=testuser app`, mapping container root to a host non-root user. Inside, `id` shows UID 0 (root). A file written by the container appears on the host as owned by testuser (not root). Explain the mapping.",
+    "options": ["The container runs with elevated privileges inside the namespace but is mapped to testuser outside; this prevents privilege escalation on the host", "Container UID 0 is mapped to host UID of testuser via the user namespace, so files appear owned by testuser but the container sees root", "This is a bug; the --userns-remap flag should hide the root user entirely from the container", "The container is actually running as testuser despite showing UID 0; the `id` command is misleading"],
+    "correctIndex": 1,
+    "explanation": "User namespace remapping (--userns-remap) maps container UIDs to host UIDs; container UID 0 (root) maps to the testuser's UID on the host, so even if a container process runs as root inside, the host sees it as testuser, preventing privilege escalation.",
+    "difficulty": "Medium-Hard",
+    "tags": ["user-namespaces", "uid-remapping", "privilege-isolation"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Security",
+    "question": "A Dockerfile includes `RUN apt-get install -y package1 package2 && apt-get clean`. The image size is 500 MB. To reduce size and minimize attack surface, you rebuild with a multi-stage Dockerfile where the final stage copies only the compiled binary. The final image is 150 MB. Can you further improve security by removing unused libraries from the final stage?",
+    "options": ["Use `apt-get autoremove` to remove orphaned dependencies, but this only works during the build phase of the copied stage", "Remove unused libraries with `docker image prune --all` to reduce the final image size from 150 MB", "Multi-stage builds already minimize the surface by excluding build tools; further pruning requires custom tooling or distroless images", "Use strip to remove debugging symbols from the binary and re-base the final stage on a smaller image like alpine"],
+    "correctIndex": 2,
+    "explanation": "Multi-stage builds already copy only the necessary artifacts (binary) to the final stage, excluding build tools and dependencies; further reduction requires using distroless images, custom tooling, or accepting the base OS overhead; `docker image prune` does not reduce a single image's size.",
+    "difficulty": "Medium-Hard",
+    "tags": ["multi-stage-builds", "image-minimization", "attack-surface"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Security",
+    "question": "A container is started with `docker run --privileged app`. Inside, `cat /proc/sys/kernel/modules` returns 1 (modules are enabled) and you can use `insmod` to load kernel modules. What are the security implications?",
+    "options": ["The container can load arbitrary kernel modules, potentially compromising the host kernel; this is extremely dangerous and bypasses all container isolation", "Kernel modules are sandboxed and cannot affect the host kernel; --privileged is safe for development use", "Module loading fails silently; the 1 value is misleading and modules cannot be loaded from inside a container", "The modules affect only the container namespace and have no impact on the host"],
+    "correctIndex": 0,
+    "explanation": "`--privileged` grants all capabilities, including CAP_SYS_MODULE, allowing kernel module loading; modules execute in kernel space and can directly access host memory and devices, completely breaking container isolation; this should only be used for specialized cases (Docker-in-Docker) with great caution.",
+    "difficulty": "Hard",
+    "tags": ["privileged-containers", "kernel-modules", "container-isolation"]
+  }
+]

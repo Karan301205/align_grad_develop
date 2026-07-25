@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "C",
+    "subtopic": "System Programming",
+    "question": "int fd = open(\"file.txt\", O_RDONLY);\nif (fd == -1) { perror(\"open\"); }\nchar buffer[100];\nssize_t n = read(fd, buffer, 100);\nclose(fd);\nWhat does open return on success?",
+    "options": [
+      "A non-negative file descriptor integer; -1 on error",
+      "0 for success, -1 for error",
+      "A pointer to the file",
+      "Compiler error: open is not a standard function"
+    ],
+    "correctIndex": 0,
+    "explanation": "open() returns a file descriptor (fd) >= 0 on success; -1 on error (errno set).",
+    "difficulty": "Medium",
+    "tags": ["file descriptors", "open", "system calls"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "System Programming",
+    "question": "pid_t pid = fork();\nif (pid == 0) { printf(\"child\"); }\nelse if (pid > 0) { printf(\"parent\"); }\nWhat is the output of this program?",
+    "options": [
+      "Both child and parent print (fork creates two processes with identical code; pid differs in each)",
+      "Only parent prints",
+      "Only child prints",
+      "Compiler error: fork is not standard C"
+    ],
+    "correctIndex": 0,
+    "explanation": "fork() returns 0 in the child, the child's PID in the parent; the program continues in both processes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["fork", "processes", "system calls"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "System Programming",
+    "question": "int fd = open(\"file.txt\", O_WRONLY | O_CREAT, 0644);\nWhy is 0644 a permission mask?",
+    "options": [
+      "0644 is an octal literal representing file permissions (rw-r--r--); the leading 0 denotes octal",
+      "0644 is a decimal number",
+      "0644 is a hexadecimal color code",
+      "Compiler error: octal literals are not allowed"
+    ],
+    "correctIndex": 0,
+    "explanation": "Octal 0644 = rw-r--r-- (owner read/write, group read, others read); 0 prefix signals octal parsing.",
+    "difficulty": "Medium",
+    "tags": ["file permissions", "octal", "system calls"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "System Programming",
+    "question": "int status;\npid_t pid = fork();\nif (pid == 0) { exit(42); }\nelse { wait(&status); printf(\"%d\", WEXITSTATUS(status)); }\nWhat is printed?",
+    "options": [
+      "42 (exit status extracted by WEXITSTATUS macro)",
+      "0 (wait always returns 0)",
+      "Compiler error: WEXITSTATUS is not standard",
+      "Garbage value"
+    ],
+    "correctIndex": 0,
+    "explanation": "wait() obtains the child's exit status; WEXITSTATUS extracts the exit code passed to exit().",
+    "difficulty": "Medium-Hard",
+    "tags": ["fork", "wait", "exit status"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "System Programming",
+    "question": "char *argv[] = {\"./prog\", \"arg1\", NULL};\nexecv(\"./prog\", argv);\nprintf(\"after execv\");\nWhy is printf never reached?",
+    "options": [
+      "execv replaces the current process image; the old code (printf) is no longer in memory",
+      "execv returns control but suppresses output",
+      "printf is executed by the new process",
+      "Compiler error: execv is not standard C"
+    ],
+    "correctIndex": 0,
+    "explanation": "execv() replaces the entire process; subsequent code only runs if execv fails.",
+    "difficulty": "Medium-Hard",
+    "tags": ["execv", "process replacement", "system calls"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "System Programming",
+    "question": "int pipefd[2];\npipe(pipefd);\nif (fork() == 0) {\nclose(pipefd[0]);\nwrite(pipefd[1], \"hello\", 5);\n} else {\nclose(pipefd[1]);\nchar buf[10];\nread(pipefd[0], buf, 5);\n}\nWhat does close(pipefd[0]) accomplish in the child?",
+    "options": [
+      "Closes the read end to reduce file descriptor usage; the child only writes, not reads",
+      "Prevents the child from reading the pipe",
+      "Closes the entire pipe",
+      "Compiler error: cannot close pipe file descriptors"
+    ],
+    "correctIndex": 0,
+    "explanation": "Pipes are bidirectional; each process closes unused ends to signal EOF when writing ends.",
+    "difficulty": "Medium-Hard",
+    "tags": ["pipes", "inter-process communication", "fork"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "System Programming",
+    "question": "void sig_handler(int sig) { printf(\"received signal %d\", sig); }\nsignal(SIGUSR1, sig_handler);\nraise(SIGUSR1);\nWhy might this hang or produce unexpected output?",
+    "options": [
+      "Signal handlers are asynchronous and may interrupt printf; unbuffered writes to stderr are safer; the handler cannot safely call many functions",
+      "Signals always run safely",
+      "raise() always delivers the signal immediately",
+      "Compiler error: signal handlers cannot call printf"
+    ],
+    "correctIndex": 0,
+    "explanation": "Signal handlers have limited async-signal-safety; calling printf is risky (not in the whitelist).",
+    "difficulty": "Hard",
+    "tags": ["signals", "signal handlers", "async safety"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "System Programming",
+    "question": "struct stat file_stat;\nstat(\"file.txt\", &file_stat);\nprintf(\"%ld\", file_stat.st_size);\nWhat does st_size represent?",
+    "options": [
+      "The file size in bytes",
+      "The file creation time",
+      "The file permissions",
+      "Compiler error: st_size is not a valid field"
+    ],
+    "correctIndex": 0,
+    "explanation": "stat() fills a struct with file metadata; st_size is the byte count of the file.",
+    "difficulty": "Medium",
+    "tags": ["stat", "file metadata", "system calls"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "System Programming",
+    "question": "int uid = getuid();\nint gid = getgid();\nprintf(\"%d %d\", uid, gid);\nWhat do these functions return?",
+    "options": [
+      "The real user ID and group ID of the calling process",
+      "Compiler error: getuid/getgid are not standard C",
+      "The process ID and parent process ID",
+      "The owner and group IDs of the current file"
+    ],
+    "correctIndex": 0,
+    "explanation": "getuid() and getgid() retrieve the real UID/GID of the process for permission checks.",
+    "difficulty": "Medium",
+    "tags": ["process identity", "permissions", "system calls"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "System Programming",
+    "question": "char cwd[256];\nif (getcwd(cwd, sizeof(cwd)) == NULL) { perror(\"getcwd\"); }\nprintf(\"%s\", cwd);\nWhy is sizeof(cwd) passed to getcwd?",
+    "options": [
+      "To prevent buffer overflow; getcwd writes at most sizeof(cwd)-1 characters, plus a null terminator",
+      "To specify the number of directories to read",
+      "getcwd ignores the size parameter",
+      "Compiler error: getcwd does not take a size parameter"
+    ],
+    "correctIndex": 0,
+    "explanation": "Buffer size is essential; getcwd ensures it does not overflow the buffer.",
+    "difficulty": "Medium",
+    "tags": ["getcwd", "buffer overflow prevention", "system calls"]
+  }
+]

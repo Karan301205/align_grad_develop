@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Installation",
+    "question": "Your team works across Windows, macOS, and Linux machines. You must configure Git to handle line ending differences automatically across platforms. Which configuration decision prevents CRLF vs LF conflicts?",
+    "options": [
+      "Set core.autocrlf to true on Windows and input on macOS/Linux to normalize line endings at commit time",
+      "Configure core.fileMode to false on all platforms",
+      "Set core.ignorecase to true to ignore case differences",
+      "Enable core.preloadindex for faster index reads"
+    ],
+    "correctIndex": 0,
+    "explanation": "core.autocrlf=true converts CRLF to LF on commit (Windows) and LF to CRLF on checkout; on Unix systems, core.autocrlf=input converts CRLF to LF without reverse conversion.",
+    "difficulty": "Medium",
+    "tags": ["line-endings", "crlf", "autocrlf", "cross-platform"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Installation",
+    "question": "You need to configure Git so that the team consistently uses rebase instead of merge for integrating changes. Which configuration should be set in the global .gitconfig to make this the default behavior?",
+    "options": [
+      "Set branch.autosetuprebase to always or pull.rebase to true",
+      "Set merge.strategy to recursive-ours",
+      "Set core.mergeoptions to --rebase",
+      "Create a .git/hooks/pre-merge-commit hook to block merges"
+    ],
+    "correctIndex": 0,
+    "explanation": "pull.rebase=true makes git pull default to rebase; branch.autosetuprebase=always applies rebase to all tracking branches created in the future.",
+    "difficulty": "Medium",
+    "tags": ["configuration", "rebase", "merge-strategy", "pull-behavior"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Installation",
+    "question": "Your development environment requires Git to sign every commit with a GPG key for audit compliance. However, the CI/CD pipeline runs as a service account without a GPG key. How should you configure Git to enforce signing locally but not fail in CI?",
+    "options": [
+      "Set commit.gpgsign to true locally, and use an environment variable or CI condition to disable it in the pipeline",
+      "Set core.safecrlf to warn to prevent signature failures",
+      "Configure diff.renameLimit to allow more commit variations",
+      "Set user.useConfigOnly to true in the service account"
+    ],
+    "correctIndex": 0,
+    "explanation": "commit.gpgsign=true enforces signing; CI pipelines should unset this with -c commit.gpgsign=false or via conditional scripts to bypass signing.",
+    "difficulty": "Medium-Hard",
+    "tags": ["gpg", "signing", "ci-cd", "compliance"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Installation",
+    "question": "You install Git and immediately notice that git status runs very slowly on a large repository with millions of files. Which performance configuration should you apply first to diagnose and potentially fix the issue?",
+    "options": [
+      "Enable core.preloadindex and core.fsmonitor to cache index state and use file system watchers",
+      "Disable core.fscache globally",
+      "Set core.checkStat to minimal to skip all stat checks",
+      "Run git gc --aggressive to repack all objects"
+    ],
+    "correctIndex": 0,
+    "explanation": "preloadindex uses multiple threads to load the index; fsmonitor (like Watchman) tracks file changes at the OS level to avoid re-scanning the entire tree.",
+    "difficulty": "Medium-Hard",
+    "tags": ["performance", "large-repo", "index", "watchman"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Installation",
+    "question": "A developer's Git configuration uses an SSH key with a passphrase, and they are prompted for the passphrase on every git push. Which setup should they implement to cache the passphrase securely?",
+    "options": [
+      "Use ssh-agent (or gpg-agent) to cache the decrypted key, configurable via core.sshCommand or ssh config",
+      "Store the SSH passphrase in .gitconfig in plaintext",
+      "Remove the passphrase from the SSH key entirely",
+      "Use https instead of SSH to bypass passphrase entry"
+    ],
+    "correctIndex": 0,
+    "explanation": "ssh-agent securely holds decrypted keys in memory for the session; git can be configured to use it via ssh_config or core.sshCommand without exposing the passphrase.",
+    "difficulty": "Medium",
+    "tags": ["ssh", "passphrase", "ssh-agent", "security"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Installation",
+    "question": "You want to configure Git to use a custom merge tool (like vimdiff) for resolving conflicts interactively. Which configuration steps are required?",
+    "options": [
+      "Set merge.tool and mergetool.vimdiff.cmd in .gitconfig, then run git mergetool",
+      "Copy vimdiff into the .git/hooks directory",
+      "Create a pre-merge-commit hook that invokes vimdiff",
+      "Use git config core.editor to set vimdiff as the editor"
+    ],
+    "correctIndex": 0,
+    "explanation": "merge.tool specifies the tool; mergetool.<tool>.cmd defines how to invoke it; git mergetool then launches it for each conflict.",
+    "difficulty": "Medium",
+    "tags": ["merge-tool", "conflict-resolution", "vimdiff"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Installation",
+    "question": "Your organization requires all commits to reference a Jira ticket ID in the format JIRA-#### in the commit message. Which Git hook and configuration combination enforces this?",
+    "options": [
+      "Create a commit-msg hook that validates the message with a regex pattern and exits with code 1 if validation fails",
+      "Set core.commitTemplate to a message template with the Jira ID",
+      "Add a prepare-commit-msg hook that auto-inserts the Jira ID",
+      "Configure branch.*.merge to include Jira in the branch name"
+    ],
+    "correctIndex": 0,
+    "explanation": "The commit-msg hook receives the message as an argument and can validate it; exit code 1 aborts the commit if the pattern does not match.",
+    "difficulty": "Medium-Hard",
+    "tags": ["commit-msg-hook", "validation", "jira", "workflow"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Installation",
+    "question": "After installing Git, you notice that git diff shows incorrect diffs for certain file types. The issue is that Git is treating them as binary. How should you configure Git to recognize these files as text and show proper diffs?",
+    "options": [
+      "Add entries to .gitattributes to declare the file type as text and specify a diff driver (e.g., diff=html for HTML files)",
+      "Run git add --renormalize to force text mode on all files",
+      "Set core.safecrlf to false to disable safety checks",
+      "Configure core.pager to use a different diff viewer"
+    ],
+    "correctIndex": 0,
+    "explanation": ".gitattributes with diff=<driver> entries tells Git to treat files as text and apply language-specific diff algorithms; standard drivers include html, ruby, python, etc.",
+    "difficulty": "Medium",
+    "tags": ["gitattributes", "diff-driver", "binary-detection"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Installation",
+    "question": "You configure credential.helper to store HTTP Git credentials on disk, but you want to add an extra layer of security by expiring cached credentials after one week. Which approach achieves this?",
+    "options": [
+      "Use credential.helper with a custom timeout script or use a manager like pass or 1password that supports automatic expiration",
+      "Run git credential reject <url> on a weekly cron job manually",
+      "Set core.credentialTimeout to 604800 seconds in .gitconfig",
+      "Configure credential.helper to prompt for a password on every operation"
+    ],
+    "correctIndex": 0,
+    "explanation": "Git's built-in cache helper does not support expiration; use a credential manager (pass, 1password, osxkeychain) or a custom helper script with timeout logic.",
+    "difficulty": "Medium-Hard",
+    "tags": ["credentials", "security", "credential-helper", "expiration"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Installation",
+    "question": "Your CI/CD pipeline fails because Git is interpreting file ownership and permissions strictly. How should you configure Git to ignore permission changes across machines?",
+    "options": [
+      "Set core.fileMode to false to ignore permission changes in commits",
+      "Set core.ignorestat to force skip stat comparisons",
+      "Configure core.safecrlf to disable all safety checks",
+      "Use git config --system to override file mode globally"
+    ],
+    "correctIndex": 0,
+    "explanation": "core.fileMode=false tells Git to ignore changes in file permissions (mode bits); useful in CI or Windows environments where permissions are irrelevant.",
+    "difficulty": "Medium",
+    "tags": ["file-mode", "permissions", "ci-cd", "cross-platform"]
+  }
+]

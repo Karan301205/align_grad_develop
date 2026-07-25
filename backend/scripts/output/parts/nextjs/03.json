@@ -1,0 +1,112 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "Page Routing System",
+    "question": "In your app directory, both pages/blog/[slug].js and pages/blog/[slug]/comments.js exist. When a user visits /blog/my-post/comments, which file handles the request?",
+    "options": ["pages/blog/[slug].js with slug='my-post/comments'", "pages/blog/[slug]/comments.js matches first because it's more specific", "Neither; Next.js throws a routing conflict error", "pages/blog/[slug].js with slug='my-post'; comments is ignored"],
+    "correctIndex": 1,
+    "explanation": "Next.js prioritizes more specific file-based routes; [slug]/comments.js is more specific than [slug].js, so it matches first.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dynamic-routes", "route-priority", "nested-routing"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Page Routing System",
+    "question": "You have pages/[...slug].js (catch-all) and pages/settings.js. When you navigate to /settings, which route matches?",
+    "options": ["pages/[...slug].js with slug=['settings']", "pages/settings.js matches because it's exact", "Both match but settings.js takes precedence", "Neither matches; you need pages/settings/index.js"],
+    "correctIndex": 1,
+    "explanation": "Exact matches (settings.js) take priority over catch-all routes ([...slug].js) in Next.js routing precedence.",
+    "difficulty": "Medium",
+    "tags": ["catch-all-routes", "exact-match", "route-precedence"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Page Routing System",
+    "question": "You define pages/api/users/[id].js as an API route. A POST to /api/users/123 returns 404. What's the issue?",
+    "options": ["API routes are read-only; you must use GET", "req.method check is missing; the file accepts all HTTP verbs by default", "API route file must export a default handler that returns res.status", "next.config.js must configure API routes explicitly"],
+    "correctIndex": 2,
+    "explanation": "API route files must export a default handler function; without it, Next.js cannot invoke the route.",
+    "difficulty": "Medium",
+    "tags": ["api-routes", "http-methods", "handler-export"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Page Routing System",
+    "question": "In the app directory, you have app/posts/[id]/page.js and app/posts/[id]/layout.js. What happens when /posts/123 is requested?",
+    "options": ["Only page.js renders; layout.js is ignored", "layout.js wraps page.js content; both render", "They conflict; Next.js throws an error", "layout.js is for folder navigation only, not file requests"],
+    "correctIndex": 1,
+    "explanation": "Layouts wrap page components; both layout.js and page.js render, with layout as the outer wrapper.",
+    "difficulty": "Medium",
+    "tags": ["app-directory", "layouts", "page-composition"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Page Routing System",
+    "question": "You have pages/[[...slug]].js (optional catch-all). A request to / should render this page, but Next.js serves pages/index.js instead. How do you handle root?",
+    "options": ["Delete pages/index.js; optional catch-all replaces it", "pages/index.js takes precedence; optional catch-all is for /something/else only", "Rename [[...slug]].js to root.js at pages/root/[[...slug]].js", "Add explicit route logic in next.config.js"],
+    "correctIndex": 1,
+    "explanation": "Optional catch-all routes don't override index.js; they capture child paths like /foo, /foo/bar but not root.",
+    "difficulty": "Medium-Hard",
+    "tags": ["optional-catch-all", "index-routes", "route-hierarchy"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Page Routing System",
+    "question": "In pages/products/[category]/[id].js, you access query params via router.query. On first render, what is router.query?",
+    "options": ["{category: 'electronics', id: '42'}", "Empty object {}; params load on useEffect", "undefined; you must use getServerSideProps", "Null; dynamic routes don't populate query until component mounts"],
+    "correctIndex": 1,
+    "explanation": "router.query is populated asynchronously after hydration; it's empty on initial server render.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dynamic-routes", "router-query", "hydration"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Page Routing System",
+    "question": "You have pages/api/auth/[...slug].js that delegates to different handlers based on slug[0]. On POST /api/auth/login?debug=1, what is req.query?",
+    "options": ["{slug: ['login'], debug: '1'}", "{slug: ['login'], debug: true}", "{debug: '1'}; slug is in req.params", "Query params are not available in API routes"],
+    "correctIndex": 0,
+    "explanation": "Query string params appear in req.query alongside dynamic route params; all values are strings.",
+    "difficulty": "Medium",
+    "tags": ["api-routes", "query-params", "catch-all-api"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Page Routing System",
+    "question": "Between pages/users/[id].js and pages/users/[id]/settings.js, you want only settings.js to render when visiting /users/42/settings. The other should 404. What will happen?",
+    "options": ["Next.js 404s because both match the segment; routes conflict", "[id].js wins because it's more general; settings path is ignored", "[id]/settings.js matches; it's more specific than [id].js", "You must add a check in [id].js to redirect if next segment exists"],
+    "correctIndex": 2,
+    "explanation": "Nested dynamic routes follow specificity: [id]/settings.js is more specific than [id].js and will handle the longer path.",
+    "difficulty": "Medium",
+    "tags": ["nested-routes", "route-specificity", "file-hierarchy"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Page Routing System",
+    "question": "You have pages/[locale]/index.js. On build, Next.js should generate static HTML for en and fr locales. Without getStaticPaths, what happens?",
+    "options": ["Next.js generates static pages for en and fr automatically", "Build succeeds but only SSR is used; no static pre-rendering", "Build fails; getStaticPaths is required for dynamic routes", "Next.js generates a single HTML and routes dynamically at runtime"],
+    "correctIndex": 1,
+    "explanation": "Without getStaticPaths, dynamic routes fall back to SSR; static generation doesn't happen.",
+    "difficulty": "Medium",
+    "tags": ["static-generation", "getstaticpaths", "dynamic-routes"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Page Routing System",
+    "question": "In app router, both app/(admin)/layout.js and app/layout.js exist. A request to /admin/users is routed through which sequence?",
+    "options": ["app/layout.js → app/(admin)/layout.js → segment component", "Only app/(admin)/layout.js wraps the component", "Route groups bypass parent layouts; only (admin) layout applies", "Both layouts wrap independently; component receives dual context"],
+    "correctIndex": 0,
+    "explanation": "Layouts nest hierarchically; a route traverses all parent layouts in order, including the root layout.",
+    "difficulty": "Medium",
+    "tags": ["app-directory", "route-groups", "layout-nesting"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Page Routing System",
+    "question": "You use next/link to navigate between routes. Clicking a Link with href='/users/42' triggers a full page reload. What might cause this?",
+    "options": ["next/link only works with 'a' tags; you forgot the 'a' element", "The route is dynamic [id].js and Link doesn't support param routes", "Client-side navigation is disabled in next.config.js", "The page has getServerSideProps or uses middleware that prevents SPA mode"],
+    "correctIndex": 3,
+    "explanation": "Link provides soft navigation only if client-side rendering is available; SSR-only pages or certain middleware configurations force full reloads.",
+    "difficulty": "Medium-Hard",
+    "tags": ["link-navigation", "client-routing", "getserversideprops"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "Best Practices",
+    "question": "Why should component files be organized by feature, not by type? Why avoid src/components/Button.jsx, src/hooks/useClick.jsx structure?",
+    "options": ["Feature-based (src/Dashboard/Button.jsx) groups related code, avoiding circular imports and making refactoring easier", "Type-based structure is optimal", "Organization doesn't matter", "Feature structure causes more imports"],
+    "correctIndex": 0,
+    "explanation": "Type-based structure spreads related code across folders; feature-based groups components, hooks, styles for one feature, reducing dependencies and coupling.",
+    "difficulty": "Medium",
+    "tags": ["structure", "organization", "feature"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Best Practices",
+    "question": "Why is extracting logic into custom hooks better than duplicating logic across components?",
+    "options": ["Custom hooks reuse logic, avoid duplication, simplify testing, allow easy updates in one place", "Code duplication is simpler", "Hooks add unnecessary complexity", "Logic cannot be shared"],
+    "correctIndex": 0,
+    "explanation": "Custom hooks (like useInput, useFetch) capture recurring patterns; reusing them avoids bugs, reduces bundle size, and centralizes logic.",
+    "difficulty": "Medium",
+    "tags": ["custom", "hook", "reuse"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Best Practices",
+    "question": "Why is naming components PascalCase (MyComponent) while naming instances camelCase (myComponent) important for clarity?",
+    "options": ["PascalCase signals constructor/component function, camelCase signals value/instance", "Naming conventions don't matter", "Both should be lowercase", "Both should be PascalCase"],
+    "correctIndex": 0,
+    "explanation": "PascalCase (MyComponent) tells React to render as component; lowercase (<mycomponent>) is treated as an HTML tag, a common bug.",
+    "difficulty": "Medium",
+    "tags": ["naming", "convention", "component"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Best Practices",
+    "question": "Why should controlled components avoid mutating state directly? Why use setState or hooks instead?",
+    "options": ["setState/hooks notify React of changes, triggering re-render; mutations are silent bugs", "Mutations are acceptable", "setState is slower than mutation", "Mutations and setState are equivalent"],
+    "correctIndex": 0,
+    "explanation": "Mutations don't trigger re-render; React doesn't detect changes, so UI doesn't update even though state changed (invisible bug).",
+    "difficulty": "Medium",
+    "tags": ["mutation", "state", "controlled"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Best Practices",
+    "question": "Why is avoiding prop drilling by using Context better than passing props through many levels?",
+    "options": ["Context avoids threading props through unrelated intermediate components, reducing coupling", "Prop drilling is simpler", "Context causes performance issues", "Prop drilling is best practice"],
+    "correctIndex": 0,
+    "explanation": "Prop drilling couples intermediate components to parent/child concerns; Context allows deep components to access values without passing through every ancestor.",
+    "difficulty": "Medium",
+    "tags": ["context", "prop", "drilling"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Best Practices",
+    "question": "Why is using Fragment instead of wrapping in a div important for CSS and accessibility?",
+    "options": ["Fragment doesn't add DOM node, avoiding accidental layout breaking and selector specificity issues", "div and fragment are identical", "div is always better", "Fragment has no benefit"],
+    "correctIndex": 0,
+    "explanation": "Wrapping in <div> can break CSS (grid, flex) if the parent expects direct children; <> doesn't add a node, preserving layout intent.",
+    "difficulty": "Medium",
+    "tags": ["fragment", "dom", "layout"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Best Practices",
+    "question": "Why should sensitive data (API keys, tokens) never be stored in state or component files?",
+    "options": ["State appears in React DevTools, bundle includes client code; tokens should be server-only or sessionStorage with httpOnly", "State is secure", "Tokens in component files are safe", "Security is not a concern"],
+    "correctIndex": 0,
+    "explanation": "Client-side state is visible in DevTools; tokens should be httpOnly cookies (server-only) or in memory only, never bundled.",
+    "difficulty": "Medium-Hard",
+    "tags": ["security", "token", "data"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Best Practices",
+    "question": "Why is early return pattern better than deeply nested JSX? Why prefer guards?",
+    "options": ["Guards reduce nesting depth, improving readability and error handling", "Deep nesting is simpler", "Readability is not important", "Early return causes performance loss"],
+    "correctIndex": 0,
+    "explanation": "Early returns (guard clauses) flatten JSX tree, making logic clearer and reducing mental load from parsing nested conditions.",
+    "difficulty": "Medium",
+    "tags": ["pattern", "guard", "readability"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Best Practices",
+    "question": "Why should components be pure and avoid side effects in render? Why is useEffect better for side effects?",
+    "options": ["Pure render allows React to re-run render safely; side effects in render run multiple times or are abandoned", "Side effects in render are fine", "useEffect is slower", "Purity is not important"],
+    "correctIndex": 0,
+    "explanation": "React may render multiple times or discard a render (Suspense, error boundaries); side effects in render cause duplicate operations or data leaks.",
+    "difficulty": "Medium",
+    "tags": ["pure", "render", "sideeffect"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Best Practices",
+    "question": "Why is using TypeScript or PropTypes recommended even though they're optional?",
+    "options": ["Both catch type mismatches early in dev, preventing runtime errors and improving code clarity", "Type checking is unnecessary", "Runtime errors are always caught", "Types only add complexity"],
+    "correctIndex": 0,
+    "explanation": "PropTypes warn in dev; TypeScript catches errors at compile-time; both reduce bugs and document expected prop shapes.",
+    "difficulty": "Medium",
+    "tags": ["type", "proptypes", "typescript"]
+  }
+]

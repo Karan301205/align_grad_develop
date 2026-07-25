@@ -1,0 +1,167 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "Stored Procedures",
+    "question": "A stored procedure has:\nCREATE PROCEDURE AddUser(@name VARCHAR(100), @email VARCHAR(100)) AS BEGIN ... END;\n\nHow do you call it from an application?",
+    "options": [
+      "EXEC AddUser 'John', 'john@example.com'; or CALL AddUser(...) depending on database",
+      "SELECT AddUser('John', 'john@example.com');",
+      "CREATE AddUser('John', 'john@example.com');",
+      "No way to call stored procedures from applications"
+    ],
+    "correctIndex": 0,
+    "explanation": "SQL Server uses EXEC; MySQL uses CALL; both are valid depending on the database system.",
+    "difficulty": "Medium",
+    "tags": ["stored-procedure", "execution"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Stored Procedures",
+    "question": "A stored procedure updates a users table and returns the count of updated rows. How is the count returned?\nCREATE PROCEDURE UpdateStatus(@status VARCHAR(20)) AS BEGIN UPDATE users SET status = @status WHERE ...; ... END;",
+    "options": [
+      "Use an OUTPUT parameter or RETURN value to communicate the count to the caller",
+      "The procedure always returns zero",
+      "Use a SELECT statement inside the procedure",
+      "Return values are not supported in stored procedures"
+    ],
+    "correctIndex": 0,
+    "explanation": "Stored procedures use OUTPUT parameters or RETURN statements to pass values back to the caller.",
+    "difficulty": "Medium",
+    "tags": ["stored-procedure", "output-parameter"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Stored Procedures",
+    "question": "When should you use a stored procedure instead of sending raw SQL from the application?\nA: Complex multi-step logic that benefits from server-side execution\nB: Security (parameterization is built in)\nC: Reusability across multiple applications",
+    "options": [
+      "All three are valid reasons",
+      "Only A is a reason",
+      "Only B and C are reasons",
+      "Stored procedures should never be used"
+    ],
+    "correctIndex": 0,
+    "explanation": "Stored procedures provide complexity encapsulation, security through parameterization, and reusability.",
+    "difficulty": "Medium",
+    "tags": ["stored-procedure", "best-practice"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Stored Procedures",
+    "question": "A stored procedure has a bug and crashes. What happens to the transaction?\nCREATE PROCEDURE Transfer(@from_id INT, @to_id INT, @amount DECIMAL) AS BEGIN UPDATE accounts SET balance = balance - @amount WHERE id = @from_id; ... CRASH ... END;",
+    "options": [
+      "The transaction is rolled back (first UPDATE is undone) if the procedure is wrapped in a transaction",
+      "The first UPDATE is committed automatically",
+      "Both updates are committed even if one fails",
+      "The procedure prevents crashes from affecting transactions"
+    ],
+    "correctIndex": 0,
+    "explanation": "Stored procedures run within transaction scopes; if an error occurs, the entire transaction can be rolled back to maintain consistency.",
+    "difficulty": "Medium",
+    "tags": ["stored-procedure", "transaction-safety"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Stored Procedures",
+    "question": "A user-defined function is:\nCREATE FUNCTION GetUserAge(@birth_date DATE) RETURNS INT AS BEGIN RETURN DATEDIFF(YEAR, @birth_date, GETDATE()); END;",
+    "options": [
+      "Used in SELECT queries like: SELECT id, GetUserAge(birth_date) FROM users;",
+      "Must be called as EXEC GetUserAge(...);",
+      "Cannot return a single value",
+      "User-defined functions don't exist in SQL"
+    ],
+    "correctIndex": 0,
+    "explanation": "User-defined functions are called inline in queries; they return values that can be selected or filtered.",
+    "difficulty": "Medium",
+    "tags": ["user-defined-function", "scalar-function"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Stored Procedures",
+    "question": "A trigger updates a summary table after each INSERT on a transactions table:\nCREATE TRIGGER UpdateSummary AFTER INSERT ON transactions FOR EACH ROW BEGIN UPDATE summary SET total = total + NEW.amount WHERE ...; END;",
+    "options": [
+      "The trigger automatically fires after each INSERT, updating the summary",
+      "The trigger must be called manually",
+      "Triggers cannot update other tables",
+      "An error occurs due to circular updates"
+    ],
+    "correctIndex": 0,
+    "explanation": "Triggers fire automatically on specified events (INSERT/UPDATE/DELETE); they maintain related data consistency.",
+    "difficulty": "Medium",
+    "tags": ["trigger", "automatic-execution"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Stored Procedures",
+    "question": "What is the risk of overusing stored procedures for simple queries?",
+    "options": [
+      "Complex application logic in the database is hard to version control, test, and maintain",
+      "Stored procedures are always faster, so there is no risk",
+      "The database becomes more efficient",
+      "No risk; stored procedures should be used for everything"
+    ],
+    "correctIndex": 0,
+    "explanation": "Business logic in stored procedures complicates deployment, version control, and testing; use them selectively for complex logic only.",
+    "difficulty": "Medium",
+    "tags": ["stored-procedure", "architecture"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Stored Procedures",
+    "question": "A table-valued function returns multiple rows:\nCREATE FUNCTION GetUserOrders(@user_id INT) RETURNS TABLE AS SELECT order_id, order_date FROM orders WHERE user_id = @user_id;",
+    "options": [
+      "Called in FROM clause: SELECT * FROM GetUserOrders(5);",
+      "Called as EXEC GetUserOrders(5);",
+      "Cannot be used in queries",
+      "Returns a single aggregated value only"
+    ],
+    "correctIndex": 0,
+    "explanation": "Table-valued functions return rowsets and are used in FROM clauses like regular tables.",
+    "difficulty": "Medium",
+    "tags": ["table-valued-function", "multi-row-result"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Stored Procedures",
+    "question": "What does a BEFORE trigger do compared to an AFTER trigger?\nBEFORE INSERT: Validates/modifies data before insertion\nAFTER INSERT: Logs/updates related tables after insertion",
+    "options": [
+      "BEFORE allows modification of inserted values; AFTER cannot modify the inserted row",
+      "AFTER is always preferred",
+      "They are identical",
+      "BEFORE triggers don't exist in SQL"
+    ],
+    "correctIndex": 0,
+    "explanation": "BEFORE triggers can validate or modify incoming values; AFTER triggers work with already-inserted data for cascading updates.",
+    "difficulty": "Medium",
+    "tags": ["trigger-timing", "before-after"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Stored Procedures",
+    "question": "A stored procedure recursively calls itself to process a tree structure. What risk occurs?\nCREATE PROCEDURE ProcessNode(@node_id INT) AS BEGIN ... EXEC ProcessNode(@child_id); ... END;",
+    "options": [
+      "Recursion depth limits can be exceeded, causing a stack overflow error",
+      "Recursion is not allowed in stored procedures",
+      "No risk; SQL handles infinite recursion automatically",
+      "The procedure runs sequentially, not recursively"
+    ],
+    "correctIndex": 0,
+    "explanation": "Stored procedures support recursion but have depth limits (default often 32 levels); deep trees can cause errors.",
+    "difficulty": "Medium-Hard",
+    "tags": ["recursion", "stored-procedure", "limits"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Stored Procedures",
+    "question": "Should parameterized queries be used instead of string concatenation in stored procedures?\nVulnerable: EXEC ('SELECT * FROM users WHERE id = ' + @id);\nSafe: SELECT * FROM users WHERE id = @id;",
+    "options": [
+      "Yes, use parameters directly; concatenation allows SQL injection",
+      "Concatenation is fine if the variable is validated",
+      "Stored procedures prevent SQL injection regardless",
+      "There is no difference in security"
+    ],
+    "correctIndex": 0,
+    "explanation": "Dynamic SQL via string concatenation can be exploited even in stored procedures; use parameters to prevent injection.",
+    "difficulty": "Medium",
+    "tags": ["sql-injection", "security", "parameterization"]
+  }
+]

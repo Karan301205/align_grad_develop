@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "Database Integration",
+    "question": "What does connection pooling achieve?\n```javascript\nconst pool = new Pool({max: 10});\nfor (let i = 0; i < 1000; i++) {\n  pool.query('SELECT * FROM users');\n}\n```",
+    "options": ["creates 1000 database connections", "reuses up to 10 connections for 1000 queries", "creates one connection per query", "connections are created on-demand infinitely"],
+    "correctIndex": 1,
+    "explanation": "Pooling maintains a fixed number of connections (max: 10); queries queue until a connection is available, preventing resource exhaustion.",
+    "difficulty": "Medium",
+    "tags": ["connection-pooling", "database-performance"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Database Integration",
+    "question": "What is the purpose of a database transaction?\n```javascript\nawait db.transaction(async (trx) => {\n  await trx('users').insert({name: 'Alice'});\n  await trx('logs').insert({event: 'user_created'});\n});\n```",
+    "options": ["allows multiple queries to succeed or all fail together", "improves query speed", "is optional for data consistency", "transactions only work with MongoDB"],
+    "correctIndex": 0,
+    "explanation": "Transactions ensure atomicity; if any query fails, all changes are rolled back, preventing partial updates.",
+    "difficulty": "Medium",
+    "tags": ["database-transactions", "acid"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Database Integration",
+    "question": "When should you use an index on a database column?\n```javascript\n// Query runs slow\ndb.query('SELECT * FROM users WHERE email = ?');\n```",
+    "options": ["indexes slow down writes, avoid them", "add index on email for fast lookups", "indexes only work for numeric columns", "indexes are automatic"],
+    "correctIndex": 1,
+    "explanation": "Indexes create sorted lookup structures; indexing email enables fast equality searches, trading write speed for read speed.",
+    "difficulty": "Medium",
+    "tags": ["database-indexes", "query-optimization"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Database Integration",
+    "question": "What is the N+1 query problem?\n```javascript\nconst users = await db('users').select();\nfor (const user of users) {\n  user.posts = await db('posts').where({userId: user.id});\n}\n```",
+    "options": ["1 query for users + 1 query per user = N+1 total", "this is efficient; no problem exists", "only occurs with NoSQL databases", "N+1 refers to array indices"],
+    "correctIndex": 0,
+    "explanation": "One query fetches users, then one query per user fetches posts; this scales badly; use JOIN or eager loading instead.",
+    "difficulty": "Medium",
+    "tags": ["n-plus-one", "query-optimization"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Database Integration",
+    "question": "How should you handle concurrent database writes safely?\n```javascript\nawait db('accounts').where({id: 1}).update({\n  balance: db.raw('balance - 100')\n});\n```",
+    "options": ["read balance, subtract 100, then write (race condition)", "use db.raw to update atomically in database", "locks table during write", "concurrency is not a concern"],
+    "correctIndex": 1,
+    "explanation": "db.raw executes the decrement atomically in the database, preventing race conditions where two concurrent requests both read stale balance.",
+    "difficulty": "Medium-Hard",
+    "tags": ["concurrency", "atomic-operations", "database-safety"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Database Integration",
+    "question": "When using Prisma, what does await do?\n```javascript\nconst user = await prisma.user.findUnique({where: {id: 1}});\nconsole.log(user.name);\n```",
+    "options": ["findUnique returns a Promise that must be awaited", "findUnique is synchronous", "await is optional in Prisma", "user is undefined until await completes"],
+    "correctIndex": 0,
+    "explanation": "Prisma queries return Promises; await pauses execution until the query completes and returns the result.",
+    "difficulty": "Medium",
+    "tags": ["prisma", "async-database"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Database Integration",
+    "question": "What happens if you exceed the connection pool limit?\n```javascript\nconst pool = new Pool({max: 5});\nfor (let i = 0; i < 100; i++) {\n  pool.query('SELECT SLEEP(10)');\n}\n```",
+    "options": ["queries run in parallel without waiting", "excess queries queue until connections free", "error is thrown immediately", "new connections are created automatically"],
+    "correctIndex": 1,
+    "explanation": "The pool queues excess queries; as connections complete, queued queries are processed, preventing resource exhaustion.",
+    "difficulty": "Medium",
+    "tags": ["connection-pooling", "resource-management"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Database Integration",
+    "question": "What is query result caching?\n```javascript\nconst redis = require('redis');\nconst result = redis.get('users:all');\nif (!result) {\n  const data = await db('users').select();\n  redis.set('users:all', data, 'EX', 3600);\n}\n```",
+    "options": ["caches query results in Redis for 1 hour", "improves read performance by avoiding database queries", "requires invalidation when data changes", "all of the above"],
+    "correctIndex": 3,
+    "explanation": "Caching stores query results; if a cache hit occurs, the database is skipped, improving speed; cache must be invalidated on updates.",
+    "difficulty": "Medium-Hard",
+    "tags": ["query-caching", "redis", "performance"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Database Integration",
+    "question": "How should you structure a foreign key relationship?\n```javascript\n// User has many Posts\ncreate table posts {\n  id int primary key,\n  userId int ?,\n  title varchar\n};\n```",
+    "options": ["userId should be optional", "userId must have a foreign key constraint to users(id)", "posts should have no userId column", "foreign keys slow down queries"],
+    "correctIndex": 1,
+    "explanation": "Foreign key constraint ensures referential integrity; deleted users cannot leave orphaned posts; the constraint should be required.",
+    "difficulty": "Medium",
+    "tags": ["database-schema", "foreign-keys", "relational-design"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Database Integration",
+    "question": "What is the difference between eager and lazy loading?\n```javascript\n// Eager: fetch related data immediately\nconst user = await User.findById(1).populate('posts');\n\n// Lazy: fetch on access\nconst user = await User.findById(1);\nconst posts = await user.getPosts();\n```",
+    "options": ["eager causes N+1 problem, lazy is efficient", "eager loads all data upfront, lazy loads on demand", "both are equally efficient", "lazy loading is not supported"],
+    "correctIndex": 1,
+    "explanation": "Eager loading fetches related data with one query; lazy loading defers until needed; choose based on whether data is always/often used.",
+    "difficulty": "Medium-Hard",
+    "tags": ["query-optimization", "eager-vs-lazy"]
+  }
+]

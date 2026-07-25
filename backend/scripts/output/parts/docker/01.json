@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Basics",
+    "question": "A container starts successfully with `docker run -d nginx`, but `docker logs` shows nothing while curl to localhost:80 hangs. The container exits after 5 seconds. What most likely caused this?",
+    "options": ["PID 1 process forked and exited without waiting for children", "iptables blocked port 80 on the host", "The nginx binary is not executable in the image", "The container inherited the host network namespace incorrectly"],
+    "correctIndex": 0,
+    "explanation": "If the main PID (nginx daemon in this case) forks and the parent exits, the container stops because PID 1 has terminated; using `nginx -g 'daemon off;'` keeps the main process alive as PID 1.",
+    "difficulty": "Medium-Hard",
+    "tags": ["container-lifecycle", "pid1", "process-management"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Basics",
+    "question": "After `docker run -it ubuntu`, you install curl with apt-get, then exit. Running the same container again with `docker start -i <id>` shows curl is gone. Why?",
+    "options": ["The layer cache expired after logout", "You did not commit the changes as a new image", "Apt-get packages are stored in a temporary overlay, not the image", "The container's union filesystem reverted to the base image"],
+    "correctIndex": 1,
+    "explanation": "Container changes are lost on exit unless committed; `docker commit` creates a new image layer, otherwise the writable layer is discarded when the container stops.",
+    "difficulty": "Medium",
+    "tags": ["container-persistence", "image-layers", "commit"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Basics",
+    "question": "You run `docker run --rm -e DB_HOST=localhost app` expecting the app to reach a database on the host machine, but it cannot connect. What is the issue?",
+    "options": ["Environment variables do not propagate through the Docker daemon", "localhost inside the container refers to the container's loopback interface, not the host", "The DB_HOST environment variable syntax is invalid in Docker", "The --rm flag blocks network connections until container cleanup"],
+    "correctIndex": 1,
+    "explanation": "Inside a container, `localhost` (127.0.0.1) refers to the container's own network namespace; use the Docker bridge gateway IP (typically 172.17.0.1) or `host.docker.internal` on Mac/Windows to reach the host.",
+    "difficulty": "Medium",
+    "tags": ["container-networking", "localhost-isolation", "environment-variables"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Basics",
+    "question": "A container receives SIGTERM on `docker stop`, ignores it for 30 seconds, then Docker sends SIGKILL. What is the correct way to handle graceful shutdown in the container's entrypoint?",
+    "options": ["Trap SIGTERM in bash and call the app's shutdown endpoint before exiting", "Run the app in the background and sleep in the foreground to catch SIGTERM", "Disable SIGKILL with `--stop-signal` to force containers to handle SIGTERM", "Use `docker run --init` to proxy signals to a child process manager"],
+    "correctIndex": 0,
+    "explanation": "Trap SIGTERM in the entrypoint script and clean up gracefully (flush databases, close connections) before exiting; `docker run --init` adds an init process but the app logic must still handle the signal.",
+    "difficulty": "Medium-Hard",
+    "tags": ["signal-handling", "graceful-shutdown", "entrypoint"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Basics",
+    "question": "You mount a host directory with `docker run -v /host/path:/container/path app`, then delete a file inside the container. The file is still visible on the host. Why does Docker not delete it?",
+    "options": ["Bind mounts are read-only by default in user namespaces", "The container does not have permission to write to the host filesystem", "Deleting files in bind mounts updates a delete journal that the host must process separately", "This is normal: both the host and container see the same filesystem; the host must delete the file itself"],
+    "correctIndex": 3,
+    "explanation": "A bind mount is bidirectional and refers to the same inode on the host; deleting a file in the container deletes the inode, but if the host process has the file open or it is cached, the host may still see it.",
+    "difficulty": "Medium",
+    "tags": ["bind-mounts", "volumes", "filesystem-isolation"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Basics",
+    "question": "After running `docker run -d app`, you check `docker ps` and the container is listed but does not respond to requests. The logs are empty. What is the fastest way to diagnose the issue?",
+    "options": ["Run `docker inspect <id>` to check the last exit code and state.Running flag", "Restart the container with `docker restart <id>` and observe the logs", "Attach to the container with `docker attach <id>` and press Ctrl+C to see buffered output", "Copy the container's filesystem with `docker cp` and inspect files directly"],
+    "correctIndex": 0,
+    "explanation": "`docker inspect` shows the exit code (State.ExitCode), whether the container is running (State.Running), and timestamps, which quickly reveals if the process crashed or is stuck.",
+    "difficulty": "Medium",
+    "tags": ["container-inspection", "debugging", "docker-inspect"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Basics",
+    "question": "You set `WORKDIR /app` in a Dockerfile, then run `docker run -v $PWD:/src app`, and inside the container `pwd` returns `/app`, not `/src`. Why?",
+    "options": ["The -v mount is relative to the container's WORKDIR", "WORKDIR is evaluated at build time and overrides runtime mounts", "The current working directory is set after volumes are mounted, so WORKDIR takes precedence", "The mount path /src is shadowed by the /app layer in the union filesystem"],
+    "correctIndex": 2,
+    "explanation": "WORKDIR is set during the build and becomes the container's default working directory at runtime; the mount happens after, so `pwd` reflects WORKDIR, but files in /src are still accessible via absolute path.",
+    "difficulty": "Medium",
+    "tags": ["workdir", "volumes", "mount-precedence"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Basics",
+    "question": "A container runs a background process and a foreground script. The background process crashes silently. The container keeps running because the foreground script is still alive. How should the Dockerfile be structured to detect and exit on background process failure?",
+    "options": ["Use ENTRYPOINT with a bash script that monitors all child processes with `wait` after starting them", "Set HEALTHCHECK to detect the background process exit and trigger a container restart", "Replace the foreground script with a process manager (supervisord, runit) that monitors all processes", "Use `docker run --stop-on-error` to make the container exit if any process fails"],
+    "correctIndex": 0,
+    "explanation": "Start both processes in the background, then `wait` in bash to block until any child exits with non-zero, making the entrypoint exit and stop the container.",
+    "difficulty": "Medium-Hard",
+    "tags": ["process-management", "entrypoint", "exit-codes"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Basics",
+    "question": "You create a container with `docker run -d app`, then immediately run `docker commit <id> app:v1`. The running container continues to function, but later you restart it from the committed image and it crashes. Why?",
+    "options": ["The commit captured the container's state mid-startup, before initialization completed", "Committing a running container does not include the writable layer, only the base image", "The container's memory state and open file handles were lost during the commit process", "The environment variables set in the running container are not persisted to the committed image"],
+    "correctIndex": 0,
+    "explanation": "Committing a running container captures its current filesystem state, which may include temporary files or incomplete initialization; the stopped container's clean state (if any) is not preserved.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker-commit", "container-state", "image-creation"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Basics",
+    "question": "A container's PID namespace includes process IDs 1, 42, 99, and 200. Inside the container, `ps aux` shows all four processes, but on the host, `docker top <id>` shows only three. What is the most likely reason?",
+    "options": ["One of the processes has exited since the ps snapshot was taken", "A process is in a stopped state (Traced/Stopped) and docker top filters it out", "One process is a kernel thread and docker top does not report kernel threads by default", "The container's PID namespace is not fully synchronized with the host kernel"],
+    "correctIndex": 1,
+    "explanation": "`docker top` uses the host's `ps` command which may filter stopped/traced processes; a process in state T (Stopped) from Ctrl+Z would appear in `ps aux` but not in `docker top` by default.",
+    "difficulty": "Medium-Hard",
+    "tags": ["process-namespaces", "docker-top", "process-state"]
+  }
+]

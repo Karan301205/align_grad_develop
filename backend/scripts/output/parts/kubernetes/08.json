@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Architecture",
+    "question": "The kube-apiserver component crashes. What immediate impact does this have on running pods?",
+    "options": [
+      "All pods are immediately terminated",
+      "Running pods continue to function, but new pods cannot be created and existing pods cannot be managed",
+      "Pods continue running, but services stop routing traffic",
+      "The entire cluster shuts down automatically"
+    ],
+    "correctIndex": 1,
+    "explanation": "Kube-apiserver is the control plane endpoint; its loss prevents new resource creation/updates but does not affect pod execution (kubelet continues autonomously).",
+    "difficulty": "Medium",
+    "tags": ["cluster-architecture", "control-plane", "apiserver"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Architecture",
+    "question": "A node loses network connectivity to the control plane. The node is marked NotReady after 5 minutes. What happens to the pods on that node?",
+    "options": [
+      "All pods are immediately terminated",
+      "Pods continue running on the node; kubelet retries connecting to the control plane every 5 seconds",
+      "Pods are evicted and rescheduled to other nodes",
+      "The node automatically enters maintenance mode"
+    ],
+    "correctIndex": 1,
+    "explanation": "Kubelet is autonomous; it continues managing pods locally while attempting to reconnect to the control plane, only evicting pods if the node reaches resource limits.",
+    "difficulty": "Medium",
+    "tags": ["cluster-architecture", "node-failure", "kubelet"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Architecture",
+    "question": "The kube-controller-manager is unavailable. A pod is deleted but its parent Deployment does not create a replacement. Why?",
+    "options": [
+      "The scheduler cannot reach the pod that was deleted",
+      "The Deployment controller, managed by kube-controller-manager, is not running to reconcile the desired vs. actual state",
+      "The ReplicaSet is preventing automatic replacement",
+      "Kubernetes intentionally pauses Deployment management during control plane issues"
+    ],
+    "correctIndex": 1,
+    "explanation": "Kube-controller-manager runs controllers (Deployment, ReplicaSet, etc.) that reconcile state; without it, control loops are broken.",
+    "difficulty": "Medium",
+    "tags": ["cluster-architecture", "control-plane", "controller-manager"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Architecture",
+    "question": "A cluster has 3 control plane nodes and 10 worker nodes. One control plane node fails. Is the cluster still operable?",
+    "options": [
+      "No, the cluster is fully down until all control plane nodes are restored",
+      "Partially; the API remains available through the remaining control plane nodes, but some functionality might be degraded",
+      "Yes, completely; worker nodes continue running pods",
+      "The cluster automatically elects a new control plane node from the worker nodes"
+    ],
+    "correctIndex": 1,
+    "explanation": "Multi-master HA requires quorum; losing 1 of 3 control planes still maintains API quorum, but latency and availability may degrade.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cluster-architecture", "high-availability", "control-plane"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Architecture",
+    "question": "The etcd database becomes unavailable. Can kubectl commands that read existing state (like kubectl get pods) still work?",
+    "options": [
+      "Yes, because kubelet caches pod state",
+      "No, because etcd is the only source of truth; API requests fail without it",
+      "Partially, only for nodes; pod state is lost",
+      "Yes, if the cluster has a backup of etcd snapshots"
+    ],
+    "correctIndex": 1,
+    "explanation": "Etcd is the single source of truth for all cluster state; without it, the API server cannot serve any requests.",
+    "difficulty": "Medium",
+    "tags": ["cluster-architecture", "etcd", "api-server"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Architecture",
+    "question": "The kube-scheduler crashes. A new pod is created, but it remains in Pending state indefinitely. What is happening?",
+    "options": [
+      "The pod is waiting for kubelet to pull the image before scheduling",
+      "Kube-scheduler is responsible for assigning pods to nodes; without it, pods cannot be scheduled",
+      "The pod is intentionally paused by the control plane",
+      "The pod is waiting for a Secret or ConfigMap that doesn't exist"
+    ],
+    "correctIndex": 1,
+    "explanation": "Kube-scheduler runs the scheduling algorithm; without it, pods are never assigned to nodes and remain Pending.",
+    "difficulty": "Medium",
+    "tags": ["cluster-architecture", "scheduler", "scheduling"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Architecture",
+    "question": "A cluster's cloud controller manager crashes. Nodes are added to the cloud provider, but they are not recognized by Kubernetes. Why?",
+    "options": [
+      "Kubelet automatically discovers new nodes in the cloud",
+      "The cloud controller manager is responsible for discovering cloud provider resources and registering nodes",
+      "The kube-apiserver automatically registers new nodes",
+      "Manual node registration is required"
+    ],
+    "correctIndex": 1,
+    "explanation": "Cloud controller manager bridges Kubernetes and cloud providers; without it, cloud resources like nodes are not synced with the cluster.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cluster-architecture", "cloud-controller-manager"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Architecture",
+    "question": "Kube-proxy is stopped on a node. Traffic to Services on that node is no longer routed correctly. What is the cause?",
+    "options": [
+      "The kubelet on that node stops functioning",
+      "Kube-proxy maintains iptables/ipvs rules for Service networking; without it, routing rules are missing",
+      "Pods lose network connectivity entirely",
+      "The Service is removed from the cluster"
+    ],
+    "correctIndex": 1,
+    "explanation": "Kube-proxy is responsible for maintaining network rules that implement Services; without it, traffic cannot reach pods via Service IPs.",
+    "difficulty": "Medium",
+    "tags": ["cluster-architecture", "kube-proxy", "networking"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Architecture",
+    "question": "The kubelet on a node crashes. Pods running on that node are terminated immediately by the control plane. Is this expected?",
+    "options": [
+      "Yes, Kubernetes automatically terminates pods when kubelet fails",
+      "No, pods continue running on the node until the node is marked NotReady and pods are evicted after the eviction timeout",
+      "Yes, because the pod's health checks fail without kubelet",
+      "No, manual cleanup is required"
+    ],
+    "correctIndex": 1,
+    "explanation": "Pod termination is not automatic on kubelet failure; pods continue running locally until the control plane detects the node is NotReady and initiates eviction.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cluster-architecture", "kubelet", "pod-eviction"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Architecture",
+    "question": "A cluster's CNI (Container Network Interface) plugin is uninstalled, but the control plane continues running. What happens to pod networking?",
+    "options": [
+      "Pods use the default bridge network if CNI is missing",
+      "Pod-to-pod networking fails because CNI is responsible for allocating pod IPs and network connectivity",
+      "Only pod-to-node networking is affected; pod-to-pod networking continues",
+      "Kubernetes automatically reinstalls the CNI plugin"
+    ],
+    "correctIndex": 1,
+    "explanation": "CNI is responsible for assigning pod IPs and configuring network interfaces; without it, pods cannot communicate beyond localhost.",
+    "difficulty": "Hard",
+    "tags": ["cluster-architecture", "cni", "networking"]
+  }
+]

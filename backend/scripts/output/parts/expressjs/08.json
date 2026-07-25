@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Express JS",
+    "subtopic": "Database Connectivity",
+    "question": "A database query is executed in a route handler: const user = db.users.find({id: 1}). The handler sends res.json(user) immediately. Why might user be undefined?",
+    "options": [
+      "The query completed successfully but found no matching record",
+      "The query is asynchronous, but the handler didn't await it",
+      "db.users.find() doesn't return a promise",
+      "The database connection is async and haven't been awaited"
+    ],
+    "correctIndex": 1,
+    "explanation": "Async database queries return promises; if not awaited, the variable holds the promise object, not the result, often appearing as undefined when sent.",
+    "difficulty": "Medium",
+    "tags": ["async", "database", "promises", "await"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Database Connectivity",
+    "question": "const pool = new db.Pool() is called once at app startup. This connection pool is reused by all route handlers. Why is this pattern preferred over creating a new connection per request?",
+    "options": [
+      "New connections are faster than reusing from a pool",
+      "Reusing connections avoids the overhead of repeated connection setup/teardown",
+      "Connection pools require less memory than individual connections",
+      "Each request requires its own isolated connection for security"
+    ],
+    "correctIndex": 1,
+    "explanation": "Connection pooling maintains pre-opened connections, eliminating expensive handshake overhead per request and improving throughput.",
+    "difficulty": "Medium",
+    "tags": ["database", "connection-pool", "performance"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Database Connectivity",
+    "question": "A database operation takes 5 seconds to complete. The route handler awaits the query but doesn't call res.send() inside. After the await, res.json(result) is called. What's the risk?",
+    "options": [
+      "The response timeout is exceeded and the connection is closed",
+      "Express automatically closes the connection after 30 seconds if no response is sent",
+      "If the query completes but the handler crashes before res.json(), the client waits indefinitely",
+      "The response payload is corrupted due to long delays"
+    ],
+    "correctIndex": 2,
+    "explanation": "If the handler awaits a long-running query and then crashes before sending a response, the client hangs; wrap in try-catch and always send a response.",
+    "difficulty": "Medium",
+    "tags": ["async", "error-handling", "response-handling", "timeouts"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Database Connectivity",
+    "question": "A pool.query('SELECT * FROM users WHERE id = ' + userId) is executed. Why is this dangerous even if userId appears to be a number?",
+    "options": [
+      "String concatenation is slower than parameterized queries",
+      "SQL injection is possible if userId is user input, even from numbers",
+      "Express doesn't support string concatenation in queries",
+      "The query is cached and changes to userId are ignored"
+    ],
+    "correctIndex": 1,
+    "explanation": "String concatenation in SQL is vulnerable to injection attacks; use parameterized queries like pool.query('SELECT * FROM users WHERE id = ?', [userId]) to prevent SQL injection.",
+    "difficulty": "Medium-Hard",
+    "tags": ["sql-injection", "security", "parameterized-queries"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Database Connectivity",
+    "question": "A transaction is started with db.beginTransaction(). After inserting data, res.json() is called before commit(). Why could this cause issues?",
+    "options": [
+      "Sending a response commits the transaction automatically",
+      "res.json() can't be called inside a transaction",
+      "The transaction is still open and uncommitted if an error occurs after res.json(), potentially leaving the database in an inconsistent state",
+      "Transactions prevent res.json() from working"
+    ],
+    "correctIndex": 2,
+    "explanation": "If you respond before committing, errors after the response won't trigger rollback; the transaction may remain open or commit incompletely.",
+    "difficulty": "Medium-Hard",
+    "tags": ["transactions", "database", "commit", "error-handling"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Database Connectivity",
+    "question": "const result = await pool.query(SQL); is used in one route, and in another route, the same query is executed without await. The second route sends res.json(result). What happens?",
+    "options": [
+      "result is undefined because the query hasn't completed",
+      "result is a Promise object, not the query result",
+      "Express waits for the query to complete before sending the response",
+      "The response includes the Promise stringified as a string"
+    ],
+    "correctIndex": 1,
+    "explanation": "Without await, result holds the Promise object, not the data; sending this as JSON results in an empty object {} or error depending on the JSON serializer.",
+    "difficulty": "Medium",
+    "tags": ["async", "promises", "await", "debugging"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Database Connectivity",
+    "question": "A connection pool has a maximum of 10 connections. 15 concurrent requests all try to query the database. What happens to the 11th-15th requests?",
+    "options": [
+      "They are queued and wait for a connection to become available",
+      "They immediately fail with a connection error",
+      "Express creates additional connections beyond the pool limit",
+      "The requests are dropped without error"
+    ],
+    "correctIndex": 0,
+    "explanation": "Connection pools queue waiting requests; once a connection is freed, the next queued request uses it, preventing connection exhaustion.",
+    "difficulty": "Medium",
+    "tags": ["connection-pool", "concurrency", "queueing"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Database Connectivity",
+    "question": "pool.on('error', (err) => { ... }) listens for connection errors. A connection drops silently in the middle of a query. Will the error handler catch it?",
+    "options": [
+      "Yes; the pool emits 'error' events for all connection issues",
+      "Only if the error occurs during query execution, not mid-transaction",
+      "The query's error callback will fire instead; the pool error handler won't",
+      "It depends on whether the connection is reused or discarded"
+    ],
+    "correctIndex": 2,
+    "explanation": "Pool-level error handlers catch general connection issues; query-specific errors fire in the query callback or rejected promise, not the pool error handler.",
+    "difficulty": "Medium-Hard",
+    "tags": ["error-handling", "connection-pool", "events"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Database Connectivity",
+    "question": "const db = require('db-module'); is called once in app.js. The same db object is used by multiple routes. If a middleware modifies db.config, will other routes see the change?",
+    "options": [
+      "No; each route gets its own copy of the db object",
+      "Yes; the db object is shared, and modifications affect all routes using it",
+      "Only if the modification is made before app.listen()",
+      "Modifications to db.config require restarting the server"
+    ],
+    "correctIndex": 1,
+    "explanation": "A single db object is cached and reused; mutations to its properties are visible to all routes because they share the same reference.",
+    "difficulty": "Medium",
+    "tags": ["module-caching", "shared-state", "mutation"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Database Connectivity",
+    "question": "A route handler calls await db.query('DELETE FROM users WHERE age > ?', [age]). No error is thrown, but rows aren't deleted. What's likely?",
+    "options": [
+      "The query syntax is incorrect",
+      "The transaction wasn't committed (if in a transaction) or the query didn't match any rows",
+      "DELETE operations require special permissions not set up",
+      "Express prevents DELETE queries by default"
+    ],
+    "correctIndex": 1,
+    "explanation": "A successful query doesn't guarantee rows were deleted; check result.affectedRows or verify the WHERE clause matches intended rows.",
+    "difficulty": "Medium",
+    "tags": ["database", "query-results", "delete", "debugging"]
+  }
+]

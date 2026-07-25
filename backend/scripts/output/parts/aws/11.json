@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Security Best Practices",
+    "question": "Your AWS account root user has MFA enabled and a strong password. You're using IAM roles for all day-to-day operations. Is it necessary to enable MFA on IAM users too?",
+    "options": [
+      "No; MFA on root is sufficient for account security",
+      "Yes; MFA on IAM users prevents compromise of individual accounts within the AWS account",
+      "Only for privileged users (admins); developers don't need MFA",
+      "MFA is redundant if using AWS SSO; SSO authentication is sufficient"
+    ],
+    "correctIndex": 1,
+    "explanation": "Root MFA protects account creation/deletion; IAM user MFA protects individual credentials; both should be enabled; a compromised IAM user (with MFA) can't assume privileged roles without MFA.",
+    "difficulty": "Medium",
+    "tags": ["security", "mfa", "best-practices"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Security Best Practices",
+    "question": "Your security team requires data at rest encryption. You enable S3 server-side encryption (SSE-S3) on all buckets. Audit reveals that encryption keys are AWS-managed. The compliance officer asks: can AWS delete your data using these keys? Should you switch to SSE-KMS?",
+    "options": [
+      "No; AWS-managed keys are safe; switching to SSE-KMS adds unnecessary cost",
+      "Yes; AWS can decrypt data with SSE-S3; switch to SSE-KMS with customer-managed keys for full control",
+      "No; encryption keys are tied to your account; AWS cannot decrypt without your permission",
+      "Switch to client-side encryption; server-side encryption is inherently less secure"
+    ],
+    "correctIndex": 1,
+    "explanation": "SSE-S3 keys are AWS-managed; AWS can decrypt if compelled (legal orders); SSE-KMS with customer-managed keys gives you direct control; you can revoke key access, preventing AWS decryption.",
+    "difficulty": "Hard",
+    "tags": ["encryption", "kms", "compliance"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Security Best Practices",
+    "question": "You're launching an EC2 instance in a public subnet with a security group allowing SSH (22) from 0.0.0.0/0 (anywhere). Is this a security risk?",
+    "options": [
+      "No; the instance is ephemeral; brute-force attacks take hours to crack strong passwords",
+      "Yes; any attacker can attempt SSH connections; restrict to specific IPs (corporate VPN, bastion) instead",
+      "Only if the instance has public IP; security groups prevent external access",
+      "Risk depends on the OS; Windows instances are safer than Linux"
+    ],
+    "correctIndex": 1,
+    "explanation": "Open SSH (0.0.0.0/0) enables automated scanning and brute-force attacks; restrict to known IPs (corporate, VPN, bastion host); even strong passwords can be compromised via persistent attacks.",
+    "difficulty": "Medium",
+    "tags": ["security-groups", "network-security", "least-privilege"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Security Best Practices",
+    "question": "Your application stores API keys in S3 for use by Lambda functions. Keys are encrypted with SSE-S3. A developer with S3 read permissions can extract the keys. How should you secure this?",
+    "options": [
+      "Encrypt keys with a customer-managed KMS key; use bucket policy to require decryption via KMS",
+      "Store keys in AWS Secrets Manager; grant Lambda IAM permission to read specific secrets",
+      "Grant S3 read access to admin only; developers don't need to read keys",
+      "Rotate keys weekly; expiring keys reduce compromise window"
+    ],
+    "correctIndex": 1,
+    "explanation": "Secrets Manager is purpose-built for credentials; IAM policies control access; audit trail tracks who accessed secrets; S3 + KMS is cumbersome; rotation is handled by Secrets Manager.",
+    "difficulty": "Hard",
+    "tags": ["secrets-management", "iam", "security"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Security Best Practices",
+    "question": "You enable AWS CloudTrail to log all API calls in your account. Three months later, you discover a script deleted 100 important objects from an S3 bucket. CloudTrail logs the deletion. Can you recover the objects?",
+    "options": [
+      "Yes; CloudTrail logs contain object contents; restore from the log",
+      "No; CloudTrail logs API calls, not data; object recovery requires S3 versioning or backups",
+      "Yes; use AWS DataSync to restore from CloudTrail logs",
+      "No; deleted objects are permanently gone if versioning wasn't enabled"
+    ],
+    "correctIndex": 1,
+    "explanation": "CloudTrail is audit log (who did what when), not backup; to recover deleted objects, enable S3 versioning or regular backups; CloudTrail helps identify what happened, not restore data.",
+    "difficulty": "Medium",
+    "tags": ["cloudtrail", "auditing", "data-recovery"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Security Best Practices",
+    "question": "You're using AWS KMS to encrypt database passwords. Your IAM policy grants kms:Decrypt permission broadly. A compromised application can decrypt any password in KMS. How should you scope KMS permissions?",
+    "options": [
+      "Grant kms:Decrypt only on the specific KMS key ARN used for this application",
+      "Use IAM conditions to restrict decryption to specific encryption contexts",
+      "Create separate KMS keys per application; grant application access to its own key",
+      "All three approaches; implement defense in depth"
+    ],
+    "correctIndex": 3,
+    "explanation": "All three together provide least-privilege: (1) scoped to key ARN, (2) conditions on encryption context, (3) separate keys per app limit blast radius; layered security prevents single point of failure.",
+    "difficulty": "Hard",
+    "tags": ["kms", "least-privilege", "defense-in-depth"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Security Best Practices",
+    "question": "You're setting up VPC Flow Logs to monitor network traffic. You enable logging for all ENIs. Monthly data volume is 500 GB. Cost is $2,500/month. You need visibility but costs are high. What's a cost-effective approach?",
+    "options": [
+      "Disable VPC Flow Logs; they're too expensive for routine monitoring",
+      "Enable Flow Logs only on sensitive subnets (databases, payments); log to S3 instead of CloudWatch Logs",
+      "Use Amazon GuardDuty; it analyzes VPC metadata without full Flow Logs",
+      "Enable sampling: capture 10% of traffic; 90% reduction in cost"
+    ],
+    "correctIndex": 1,
+    "explanation": "Selective logging (sensitive subnets) + S3 export reduces cost from $2,500 to ~$100/month (storage only); GuardDuty is for threat detection, not network audit; sampling loses visibility on attacks.",
+    "difficulty": "Hard",
+    "tags": ["vpc-flow-logs", "cost-optimization", "security"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Security Best Practices",
+    "question": "Your organization requires SSL/TLS encryption for all data in transit. Your API Gateway forwards requests to backend Lambda functions over HTTPS. The Lambda-to-RDS connection is within a VPC. Must the Lambda-to-RDS connection also be encrypted?",
+    "options": [
+      "Yes; all connections must be encrypted, including internal VPC traffic",
+      "No; VPC traffic is isolated from the internet; internal encryption is optional",
+      "Yes, but only for databases containing PII; other databases can use plaintext",
+      "Depends on compliance requirements; HIPAA requires it, PCI doesn't"
+    ],
+    "correctIndex": 0,
+    "explanation": "Best practice: encrypt all sensitive data in transit, even internal VPC traffic; insider threats (compromised instance) could sniff unencrypted VPC traffic; compliance (HIPAA, NIST) mandates encryption.",
+    "difficulty": "Medium-Hard",
+    "tags": ["encryption-in-transit", "vpc", "compliance"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Security Best Practices",
+    "question": "You're using AWS Secrets Manager to store database passwords. Secrets are automatically rotated every 30 days. After rotation, old Lambda functions still use the old password and fail. How should you handle this?",
+    "options": [
+      "Disable rotation; change passwords manually only when needed",
+      "Update all Lambda functions to fetch the secret before each connection; rotation is transparent",
+      "Create a Lambda rotation function that updates Lambda environment variables after secret rotation",
+      "Store secrets in environment variables; Secrets Manager rotation can't affect them"
+    ],
+    "correctIndex": 1,
+    "explanation": "Lambda should fetch secret at runtime, not cache in environment variables; Secrets Manager caching (TTL) ensures performance; rotation is transparent if secrets are fetched on-demand.",
+    "difficulty": "Medium-Hard",
+    "tags": ["secrets-manager", "rotation", "credential-management"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "AWS Security Best Practices",
+    "question": "You enable AWS Config to monitor S3 bucket compliance. A Config rule checks if buckets have versioning enabled. You manually disable versioning on a bucket (violation). AWS Config detects the violation and sends an SNS alert. What should you do next?",
+    "options": [
+      "Manually re-enable versioning and acknowledge in Config",
+      "Configure remediation: auto-enable versioning; Config automatically fixes violations",
+      "Ignore Config violations; Config is advisory only",
+      "Delete the non-compliant bucket; create a new one with versioning"
+    ],
+    "correctIndex": 1,
+    "explanation": "Config remediation (auto-remediation) fixes violations automatically; you approve the action; this scales compliance enforcement without manual intervention.",
+    "difficulty": "Medium",
+    "tags": ["aws-config", "compliance", "automation"]
+  }
+]

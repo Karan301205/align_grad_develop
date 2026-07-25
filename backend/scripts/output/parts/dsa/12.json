@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Bit Manipulation",
+    "question": "Checking if an integer n is a power of 2 using bit manipulation: n & (n-1) == 0. Why does this work?",
+    "options": ["all powers of 2 have single bit set", "subtracting 1 flips all trailing bits", "the operation tests a specific bit pattern", "it works only for even numbers"],
+    "correctIndex": 1,
+    "explanation": "Powers of 2 (e.g., 8 = 1000b) have exactly one 1 bit; subtracting 1 gives all trailing 1s (7 = 0111b); AND produces 0 only for powers of 2.",
+    "difficulty": "Medium",
+    "tags": ["bit-trick", "power-of-two"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Bit Manipulation",
+    "question": "Counting the number of set bits (1s) in an integer n using Brian Kernighan's algorithm: repeatedly n &= (n-1) until n becomes 0. What is the complexity?",
+    "options": ["constant time", "logarithmic time in n's value", "linear time in bit length", "number of set bits"],
+    "correctIndex": 3,
+    "explanation": "Each iteration clears one set bit; iterations equal the count of set bits, giving O(popcount) time where popcount is the number of 1s.",
+    "difficulty": "Medium",
+    "tags": ["bit-counting", "Brian-Kernighan"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Bit Manipulation",
+    "question": "Finding the single number that appears once while all others appear twice: using XOR operation. Why does XOR solve this?",
+    "options": ["XOR is faster than sorting", "XOR of two identical numbers is 0; XOR of result with single is itself", "XOR swaps bits", "XOR reverses order"],
+    "correctIndex": 1,
+    "explanation": "a XOR a = 0 and a XOR 0 = a; XORing all numbers cancels pairs, leaving only the unique number.",
+    "difficulty": "Medium",
+    "tags": ["XOR-property", "single-number"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Bit Manipulation",
+    "question": "Extracting the i-th bit of a number n: (n >> i) & 1. What is the time complexity of this operation?",
+    "options": ["constant time", "logarithmic time", "linear time in i", "depends on CPU"],
+    "correctIndex": 0,
+    "explanation": "Bit shift and AND are constant-time CPU operations regardless of bit position; time is O(1).",
+    "difficulty": "Medium",
+    "tags": ["bit-extraction", "constant-time"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Bit Manipulation",
+    "question": "Given numbers with all bits set except one, finding the missing bit using bitwise operations is efficient. If the range is 0 to 2^n - 1, why use XOR instead of sum?",
+    "options": ["XOR is always faster", "sum can overflow for large n; XOR never overflows", "sum cannot work", "both are equivalent"],
+    "correctIndex": 1,
+    "explanation": "Summing large ranges can cause integer overflow; XOR operates bit-by-bit with no overflow risk.",
+    "difficulty": "Medium-Hard",
+    "tags": ["XOR-robustness", "overflow-avoidance"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Bit Manipulation",
+    "question": "Setting the i-th bit of n to 1: n |= (1 << i). Setting it to 0: n &= ~(1 << i). What is the time complexity of these operations?",
+    "options": ["constant time", "linear in i", "logarithmic in n", "depends on bit value"],
+    "correctIndex": 0,
+    "explanation": "Bit shift, OR, AND, and NOT are all constant-time operations on most CPUs.",
+    "difficulty": "Medium",
+    "tags": ["bit-manipulation-operations", "constant-time"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Bit Manipulation",
+    "question": "Reversing the bits of a 32-bit integer requires processing each bit. Naive approach: extract, reverse, reconstruct. Time complexity?",
+    "options": ["constant time", "logarithmic time", "linear time in bit count", "quadratic time"],
+    "correctIndex": 2,
+    "explanation": "Processing all 32 bits individually (extract and place) is O(32) = O(1) for 32-bit integers, but generally O(log n) in bit length.",
+    "difficulty": "Medium",
+    "tags": ["bit-reversal", "constant-bit-operations"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Bit Manipulation",
+    "question": "Finding two numbers in an array where one appears once and one appears twice, all others appear twice: why does a single XOR of all elements fail?",
+    "options": ["it does not fail", "XOR produces 0 for even-appearing numbers, leaving two single-appearing XORed together", "XOR cannot separate two unknowns", "more information is needed"],
+    "correctIndex": 1,
+    "explanation": "Single XOR of all gives a XOR b where both a and b appear once; to separate them, partition by a set bit difference and XOR each group.",
+    "difficulty": "Medium-Hard",
+    "tags": ["XOR-separation", "partition-trick"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Bit Manipulation",
+    "question": "Checking if a number is divisible by a power of 2 (e.g., 8) using bitwise: n & ((1 << k) - 1) == 0 checks divisibility by 2^k. Why mask (2^k - 1)?",
+    "options": ["masks select the lowest k bits", "masks check if lowest k bits are 0", "masks reverse bit order", "no masking needed"],
+    "correctIndex": 1,
+    "explanation": "If the lowest k bits are 0, the number is divisible by 2^k; mask (2^k - 1) isolates these bits.",
+    "difficulty": "Medium-Hard",
+    "tags": ["divisibility-check", "bit-masking"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Bit Manipulation",
+    "question": "Gray code (binary-reflected Gray code) differs from binary by one bit at each step. Converting binary to Gray: gray = n XOR (n >> 1). Why does this one-liner work?",
+    "options": ["it shifts and compares", "XOR each bit with its left neighbor to encode differences", "Gray code is faster", "random chance"],
+    "correctIndex": 1,
+    "explanation": "Gray code encodes the Hamming distance from 0; XORing with right-shift applies each bit to its left neighbor, producing the Gray-coded sequence.",
+    "difficulty": "Medium-Hard",
+    "tags": ["Gray-code", "bit-encoding"]
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Pull Request Process",
+    "question": "A pull request receives a comment requesting a change. You make the change and commit it to the PR's branch. However, the reviewer is asking you to amend the original commit instead of creating a new commit. What is the trade-off between the two approaches?",
+    "options": [
+      "Amending creates a clean linear history with a single commit per fix; force-pushing hides the iteration process but is cleaner for main; new commits preserve the feedback loop but clutter history",
+      "Amending is always better",
+      "New commits are always better",
+      "Both approaches produce identical results"
+    ],
+    "correctIndex": 0,
+    "explanation": "Amending requires force-push and hides feedback-driven changes; new commits show iteration but require squashing before merge; team policy determines which is preferred.",
+    "difficulty": "Medium",
+    "tags": ["commit-amendment", "force-push", "review-workflow"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Pull Request Process",
+    "question": "You open a pull request from a feature branch. A teammate also opens a PR from the same feature branch with slightly different changes. Both PRs target main and have no conflicts yet. What is the likely outcome when one is merged?",
+    "options": [
+      "When the first PR is merged, the second PR will immediately show a merge conflict because both branches diverged from the same base",
+      "Both PRs can be merged independently without conflicts",
+      "GitHub will merge both PRs automatically",
+      "The second PR will be automatically closed"
+    ],
+    "correctIndex": 0,
+    "explanation": "Two PRs from the same branch converge when merged; the second PR will have conflicts because main moved forward from their shared base.",
+    "difficulty": "Medium",
+    "tags": ["multiple-prs", "convergence", "merge-conflict"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Pull Request Process",
+    "question": "You want to review a pull request before approving it, but you want to test the changes locally first. What is the easiest way to check out the PR's branch locally?",
+    "options": [
+      "Use git fetch origin pull/<pr-number>/head:<branch-name> or use GitHub's CLI (gh pr checkout <pr-number>)",
+      "Manually clone the contributor's fork and check out their branch",
+      "Ask the contributor to push the branch to your repository",
+      "Review only in GitHub's UI without local testing"
+    ],
+    "correctIndex": 0,
+    "explanation": "GitHub provides a special refspec (pull/<N>/head) for fetching PR branches without adding them to remotes; gh pr checkout automates this.",
+    "difficulty": "Medium",
+    "tags": ["pr-checkout", "local-testing", "github-cli"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Pull Request Process",
+    "question": "A pull request is open and has received approvals, but the branch is 5 commits behind main due to other PRs being merged. Before merging this PR, should the branch be updated, and what risks does updating introduce?",
+    "options": [
+      "Yes, update via rebase or merge to ensure compatibility with current main; updating may introduce conflicts or surface issues hidden by the older base, so re-test after updating",
+      "No, merge as-is to avoid additional work",
+      "Update only if there are visible conflicts",
+      "Ask the reviewer to approve again after updating"
+    ],
+    "correctIndex": 0,
+    "explanation": "Updating ensures the PR's code works with current main; hidden incompatibilities may surface after update, requiring re-testing and potentially re-approval.",
+    "difficulty": "Medium-Hard",
+    "tags": ["pr-update", "stale-branch", "compatibility"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Pull Request Process",
+    "question": "You have a large pull request with 50 commits making changes across multiple features. A reviewer requests to split it into smaller PRs. What is the best way to reorganize the commits?",
+    "options": [
+      "Use git rebase -i to reorder commits by feature, create new branches for each feature with git checkout -b, then force-push the smaller branches or create new PRs",
+      "Close the current PR and manually create 50 separate PRs",
+      "Merge the large PR as-is",
+      "Revert all commits and recreate them one by one"
+    ],
+    "correctIndex": 0,
+    "explanation": "Interactive rebase allows reorganizing commits; branching from specific points in the history isolates each feature for separate PRs.",
+    "difficulty": "Medium-Hard",
+    "tags": ["large-pr", "split-pr", "interactive-rebase"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Pull Request Process",
+    "question": "A contributor's PR has been sitting open for weeks without updates. You want to check if it is still being worked on or if it can be closed. What should you do before closing?",
+    "options": [
+      "Leave a comment asking for status, wait a reasonable time (e.g., 1-2 weeks), then close if no response with a note that it can be reopened",
+      "Immediately close it to reduce clutter",
+      "Merge it regardless of status",
+      "Email the contributor privately without leaving a public comment"
+    ],
+    "correctIndex": 0,
+    "explanation": "Leaving a comment provides the contributor a chance to respond; documenting the reason for closure allows reopening if circumstances change.",
+    "difficulty": "Medium",
+    "tags": ["stale-pr", "communication", "pr-management"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Pull Request Process",
+    "question": "You approve a pull request with the comment 'Looks good, but please add a test for this edge case before merge.' The contributor adds the test and pushes. Should you re-review the test, and does your previous approval automatically update?",
+    "options": [
+      "Yes, you should review the test; your previous approval does not automatically update, so you should re-approve or update your review explicitly",
+      "No, your approval stands and the PR can be merged immediately",
+      "GitHub automatically re-reviews new commits",
+      "Approvals are never required to be refreshed"
+    ],
+    "correctIndex": 0,
+    "explanation": "Approvals in most platforms do not auto-update on new commits; reviewers should explicitly re-approve if they requested changes and they have been addressed.",
+    "difficulty": "Medium",
+    "tags": ["approval", "review-refresh", "requested-changes"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Pull Request Process",
+    "question": "A pull request from a fork is open, but you notice the contributor is asking for permission to merge. However, branch protection rules require status checks to pass before merge. Can the contributor merge, or must a maintainer do it?",
+    "options": [
+      "Contributor PRs from forks run with reduced permissions; status checks may fail due to missing secrets (e.g., API keys); a maintainer must approve or merge using branch protection override",
+      "Contributors can always merge their own PRs",
+      "GitHub merges automatically when ready",
+      "Fork PRs bypass branch protection"
+    ],
+    "correctIndex": 0,
+    "explanation": "Fork PRs run workflows without access to repository secrets for security; maintainers must review and explicitly merge such PRs.",
+    "difficulty": "Medium-Hard",
+    "tags": ["fork-pr", "permissions", "branch-protection"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Pull Request Process",
+    "question": "You want to enforce that every pull request must have at least one approval before merge. However, you also want to allow self-approval (a developer approving their own PR). Is self-approval enforceable via GitHub, or does it require an organizational policy?",
+    "options": [
+      "GitHub's branch protection allows requiring approvals but cannot enforce that approvals come from others; self-approval protection requires organizational policy or tooling",
+      "GitHub can prevent self-approval automatically",
+      "All approvals are equal regardless of source",
+      "Self-approval is never an issue"
+    ],
+    "correctIndex": 0,
+    "explanation": "GitHub branch protection requires N approvals but does not distinguish self-approval; preventing it requires a policy, automation (e.g., CODEOWNERS), or team conventions.",
+    "difficulty": "Medium",
+    "tags": ["branch-protection", "approval", "policy"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Pull Request Process",
+    "question": "A pull request is waiting for approval, but one reviewer has been unavailable for two weeks. You need to merge urgent fixes. What is the appropriate process to proceed without losing the review requirement?",
+    "options": [
+      "Request approval from a different reviewer or a team lead, document the reason, then merge; this maintains the spirit of review without being blocked indefinitely",
+      "Merge without approval to meet deadlines",
+      "Wait indefinitely for the unavailable reviewer",
+      "Close the PR and create an emergency branch"
+    ],
+    "correctIndex": 0,
+    "explanation": "Code review policies should include escalation paths for unavailable reviewers; switching reviewers and documenting maintains oversight.",
+    "difficulty": "Medium",
+    "tags": ["review-escalation", "unavailable-reviewer", "policy"]
+  }
+]

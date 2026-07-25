@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Sorting Techniques",
+    "question": "Quicksort has O(n log n) average-case complexity but O(n^2) worst-case. What pivot selection strategy best avoids the worst case?",
+    "options": ["always choose first element", "randomly select a pivot", "choose median-of-three", "choose the median of medians"],
+    "correctIndex": 3,
+    "explanation": "Median-of-medians guarantees balanced partitions, ensuring O(n log n) worst-case; median-of-three heuristic is practical but not guaranteed.",
+    "difficulty": "Medium-Hard",
+    "tags": ["quicksort-variants", "pivot-selection"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Sorting Techniques",
+    "question": "Merge sort achieves O(n log n) time in all cases but requires O(n) extra space for merging. Why not always use merge sort instead of quicksort?",
+    "options": ["merge sort is always better", "quicksort uses less space with O(log n) recursion stack", "merge sort is slower in practice", "both have identical cost"],
+    "correctIndex": 1,
+    "explanation": "Merge sort requires O(n) auxiliary space; quicksort uses only O(log n) stack space; for memory-constrained environments, quicksort wins.",
+    "difficulty": "Medium",
+    "tags": ["space-time-tradeoff", "sorting-comparison"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Sorting Techniques",
+    "question": "Counting sort sorts n integers in range [0, k] in O(n + k) time. When is counting sort preferred over quicksort O(n log n)?",
+    "options": ["when n is small", "when k is small relative to n", "always prefer counting sort", "never prefer counting sort"],
+    "correctIndex": 1,
+    "explanation": "If k is small (e.g., k < n log n), counting sort is O(n + k) faster than O(n log n); but if k is large, O(n + k) becomes worse.",
+    "difficulty": "Medium-Hard",
+    "tags": ["non-comparison-sort", "conditional-superiority"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Sorting Techniques",
+    "question": "Radix sort sorts n integers with d digits in O(d * (n + k)) time. Compared to comparison-based sorting, when is radix sort advantageous?",
+    "options": ["never", "when d is small and k is small", "when n is very large", "when all elements are distinct"],
+    "correctIndex": 1,
+    "explanation": "Radix sort is faster when d and k are both small; if d = log n and k = n, radix is O(n log n), same as comparison sorting.",
+    "difficulty": "Medium-Hard",
+    "tags": ["radix-sort", "digit-sorting"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Sorting Techniques",
+    "question": "Stable sort preserves the relative order of equal elements. Merge sort is stable; quicksort is not. Why might stability matter?",
+    "options": ["stability has no practical impact", "stability is needed when sorting by secondary keys or when preserving original order matters", "stable sorts are always faster", "unstable sorts use less space"],
+    "correctIndex": 1,
+    "explanation": "Stable sorts preserve order of ties; important for multi-key sorting or when original sequence order carries meaning.",
+    "difficulty": "Medium",
+    "tags": ["sort-stability", "secondary-sort"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Sorting Techniques",
+    "question": "Heap sort achieves O(n log n) worst-case time and uses O(1) extra space. Why is quicksort more commonly used in practice?",
+    "options": ["heap sort is actually preferred", "quicksort is usually faster in practice due to cache locality", "heap sort is unstable", "quicksort uses less space"],
+    "correctIndex": 1,
+    "explanation": "Quicksort performs better on modern CPUs due to cache locality; heap sort accesses memory in a less cache-friendly pattern.",
+    "difficulty": "Medium-Hard",
+    "tags": ["practical-performance", "cache-effects"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Sorting Techniques",
+    "question": "Insertion sort is O(n^2) in average case but O(n) in best case (already sorted). What data characteristic makes insertion sort faster than merge sort on real data?",
+    "options": ["insertion sort is never faster", "data with few inversions and small n", "data with many duplicates", "random data"],
+    "correctIndex": 1,
+    "explanation": "Insertion sort is effective for nearly-sorted data (few inversions) and small arrays due to low overhead; merge sort overhead dominates on small n.",
+    "difficulty": "Medium-Hard",
+    "tags": ["insertion-sort-advantage", "partially-sorted-data"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Sorting Techniques",
+    "question": "External sorting sorts a file larger than available memory by sorting chunks and merging. If the file has n records and memory holds m records, how many merge passes are needed?",
+    "options": ["one pass", "log of n over m passes", "n divided by m passes", "log of m passes"],
+    "correctIndex": 1,
+    "explanation": "Sort n/m chunks; then merge requires log(n/m) passes to consolidate chunks into one sorted sequence.",
+    "difficulty": "Medium-Hard",
+    "tags": ["external-sorting", "multi-way-merge"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Sorting Techniques",
+    "question": "Bubble sort repeatedly compares adjacent elements and swaps if out of order. In the best case (sorted array), what is the complexity and how can it be optimized?",
+    "options": ["O(n^2) always", "O(n) if a flag tracks whether a swap occurred", "O(log n) with early termination", "O(1) with no iterations"],
+    "correctIndex": 1,
+    "explanation": "If no swaps occur in a pass, the array is sorted; adding a flag allows early exit, giving O(n) best-case instead of O(n^2).",
+    "difficulty": "Medium",
+    "tags": ["bubble-sort-optimization", "best-case"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Sorting Techniques",
+    "question": "Merge sort divides the array recursively then merges sorted halves. When dividing, what is the depth of the recursion tree for n elements?",
+    "options": ["constant depth", "logarithmic depth", "linear depth", "quadratic depth"],
+    "correctIndex": 1,
+    "explanation": "Each level divides by 2: n, n/2, n/4, ..., 1; this gives log n levels of recursion depth.",
+    "difficulty": "Medium",
+    "tags": ["recursion-depth", "divide-and-conquer"]
+  }
+]

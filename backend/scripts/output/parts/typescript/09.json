@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Async Programming",
+    "question": "Given `async function f(): Promise<number> { return 5; }` — does f() return Promise<number>?",
+    "options": ["No, it returns number", "Yes, async functions always return Promises", "Yes, but wrapped in Promise<Promise<number>>", "No, return type is inferred"],
+    "correctIndex": 1,
+    "explanation": "Async functions always return a Promise; even a direct return value 5 is wrapped in Promise<5>, narrowed to Promise<number>.",
+    "difficulty": "Medium",
+    "tags": ["async-functions", "promise-types", "return-types"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Async Programming",
+    "question": "Does `await promise` suspend the function until resolution?",
+    "options": ["No, await is only for type-checking", "Yes, await pauses execution", "Yes, but requires async context", "No, await is optional syntax"],
+    "correctIndex": 1,
+    "explanation": "await pauses the current async function until the Promise resolves or rejects; it only works in async contexts.",
+    "difficulty": "Medium",
+    "tags": ["async-await", "promise-resolution", "execution-model"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Async Programming",
+    "question": "Given `const x: Promise<number> = Promise.resolve(5);` — what is the type of x?",
+    "options": ["number", "Promise<number>", "Promise<5>", "5"],
+    "correctIndex": 1,
+    "explanation": "Promise.resolve(5) returns Promise<number> (widened from the literal 5).",
+    "difficulty": "Medium",
+    "tags": ["promise-types", "type-inference", "promise-resolution"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Async Programming",
+    "question": "Does `Promise.all([p1, p2])` infer the result type correctly if p1 and p2 have different types?",
+    "options": ["No, all elements must have the same type", "Yes, as a tuple [T1, T2]", "Yes, as (T1 | T2)[]", "Yes, but with a warning"],
+    "correctIndex": 1,
+    "explanation": "Promise.all on an array of promises with different types returns Promise<[T1, T2, ...]>, preserving the tuple structure.",
+    "difficulty": "Medium",
+    "tags": ["promise-all", "tuple-types", "type-inference"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Async Programming",
+    "question": "Given `async function f() { const x = await Promise.reject(new Error()); return x; }` — what is the return type?",
+    "options": ["Promise<never>", "Promise<Error>", "Promise<void>", "Promise<unknown>"],
+    "correctIndex": 0,
+    "explanation": "await on a rejected Promise throws; the function never completes normally, so x is unreachable and return type is Promise<never>.",
+    "difficulty": "Medium-Hard",
+    "tags": ["async-await", "promise-rejection", "control-flow"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Async Programming",
+    "question": "Can you use await outside an async function?",
+    "options": ["Yes, in any function", "No, only in async functions", "Yes, with top-level await", "No, it is a syntax error"],
+    "correctIndex": 2,
+    "explanation": "await in non-async contexts is an error, unless top-level await is enabled in tsconfig (module: esnext).",
+    "difficulty": "Medium",
+    "tags": ["await-syntax", "async-context", "top-level-await"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Async Programming",
+    "question": "Does `Promise.race([p1: Promise<number>, p2: Promise<string>])` have type Promise<number | string>?",
+    "options": ["No, race returns the first type only", "Yes, race returns the union of all types", "Yes, as a tuple", "No, types must match"],
+    "correctIndex": 1,
+    "explanation": "Promise.race returns whichever Promise settles first; the result type is the union of all input Promise types.",
+    "difficulty": "Medium",
+    "tags": ["promise-race", "union-types", "promise-combinators"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Async Programming",
+    "question": "Given `const p: Promise<number> = new Promise(resolve => resolve('x'));` — does this compile?",
+    "options": ["No, 'x' is not a number", "Yes, resolve is typed as any", "Yes, constructor resolves to any", "No, but error is at assignment"],
+    "correctIndex": 0,
+    "explanation": "The Promise constructor callback receive resolve and reject; resolve('x') does not satisfy Promise<number>, causing a type error.",
+    "difficulty": "Medium-Hard",
+    "tags": ["promise-constructor", "type-safety", "callback-types"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Async Programming",
+    "question": "Can you cancel a Promise with AbortController?",
+    "options": ["No, Promises cannot be cancelled", "Yes, AbortController can abort", "Yes, but it rejects instead of cancels", "No, you need a different API"],
+    "correctIndex": 2,
+    "explanation": "AbortController signals abort via AbortSignal; handlers respond by rejecting with an AbortError (not true cancellation).",
+    "difficulty": "Medium-Hard",
+    "tags": ["abort-controller", "promise-cancellation", "async-patterns"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Async Programming",
+    "question": "Given `async function f(p: Promise<void>) { await p; return 5; }` — does the 5 get wrapped in Promise?",
+    "options": ["No, return values are raw", "Yes, async wraps all returns", "Yes, but only if awaited", "No, only if explicit Promise"],
+    "correctIndex": 1,
+    "explanation": "Async functions always wrap their return values in a Promise; return 5 becomes Promise<5> (widened to Promise<number>).",
+    "difficulty": "Medium",
+    "tags": ["async-functions", "promise-wrapping", "return-types"]
+  }
+]

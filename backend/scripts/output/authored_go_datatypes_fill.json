@@ -1,0 +1,3 @@
+[
+  {"skillName":"Go","subtopic":"Data Types","question":"What is the zero value of a declared but uninitialized `var m map[string]int` in Go, and what happens on `m[\"x\"]`?","options":["m is nil; reading returns 0 but writing panics","m is an empty usable map","m is nil and reading panics immediately","m defaults to a one-element map"],"correctIndex":0,"explanation":"A nil map reads as the value type's zero (0 here) but panics on assignment until initialized with make.","difficulty":"Medium-Hard","tags":["maps","nil","zero-value"]}
+]

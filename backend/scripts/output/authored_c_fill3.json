@@ -1,0 +1,3 @@
+[
+  {"skillName":"C","subtopic":"Data Types","question":"On a typical 64-bit system, what does `printf(\"%zu\", sizeof(char))` print?","options":["1","4","8","depends on the compiler optimization level"],"correctIndex":0,"explanation":"The C standard defines sizeof(char) as exactly 1 byte on every conforming implementation.","difficulty":"Medium","tags":["sizeof","char","data-types"]}
+]

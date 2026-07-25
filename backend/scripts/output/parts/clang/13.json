@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "C",
+    "subtopic": "Performance Optimization",
+    "question": "inline int add(int a, int b) { return a + b; }\nint result = add(5, 3);\nWhat does inline accomplish?",
+    "options": [
+      "Suggests to the compiler to substitute the function body at the call site, eliminating call overhead (not guaranteed)",
+      "inline forces the function to run in a single CPU cycle",
+      "inline prevents the function from being called",
+      "Compiler error: inline keyword is not valid"
+    ],
+    "correctIndex": 0,
+    "explanation": "inline is a hint; modern compilers inline automatically based on heuristics; explicit inline is rarely needed.",
+    "difficulty": "Medium",
+    "tags": ["inline functions", "compiler optimization", "function calls"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Performance Optimization",
+    "question": "register int counter = 0;\nfor (int i = 0; i < 1000000; i++) { counter++; }\nWhy might register improve performance?",
+    "options": [
+      "register requests the compiler to store the variable in a CPU register rather than stack memory, reducing memory access latency",
+      "register doubles the variable's value",
+      "register prevents integer overflow",
+      "Compiler error: register is deprecated"
+    ],
+    "correctIndex": 0,
+    "explanation": "register is a hint; modern compilers optimize register allocation automatically, making explicit register mostly obsolete.",
+    "difficulty": "Medium",
+    "tags": ["register", "CPU registers", "memory hierarchy"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Performance Optimization",
+    "question": "void func1() { int local = 5; }\nvoid func2() { static int local = 5; }\nWhich version is faster?",
+    "options": [
+      "func1 is typically faster (stack allocation is cheaper than static storage initialization); static trades startup overhead for reuse",
+      "func2 is always faster",
+      "Both have identical performance",
+      "Compiler error: static locals are not allowed"
+    ],
+    "correctIndex": 0,
+    "explanation": "Static locals are initialized once; normal locals are re-initialized each call; for single initialization, static is overhead.",
+    "difficulty": "Medium",
+    "tags": ["static variables", "initialization", "performance"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Performance Optimization",
+    "question": "for (int i = 0; i < arr_len; i++) { arr[i] = arr[i] * 2; }\nfor (int i = 0; i < arr_len; i++) { arr[i] = arr[i] + arr[i]; }\nAre these loops equivalent in performance?",
+    "options": [
+      "Likely not; multiplication and addition have different instruction latencies; addition may be faster on some CPUs",
+      "They are identical",
+      "Multiplication is always faster",
+      "Compiler error: cannot use both operations"
+    ],
+    "correctIndex": 0,
+    "explanation": "Modern CPUs have pipelined ALUs; add may be 1 cycle, mul may be 3+ cycles; the compiler may optimize one differently.",
+    "difficulty": "Medium-Hard",
+    "tags": ["instruction latency", "CPU performance", "compiler optimization"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Performance Optimization",
+    "question": "int arr[1000000];\nfor (int i = 0; i < 1000000; i++) { arr[i]++; }\nWhy might this loop be slow?",
+    "options": [
+      "Cache misses: the large array may not fit in L1/L2 caches; main memory access is orders of magnitude slower than cache hits",
+      "Array operations are inherently slow",
+      "Compiler error: large arrays are not allowed",
+      "Integer increment is slow"
+    ],
+    "correctIndex": 0,
+    "explanation": "Cache locality is critical; sequential access is best, but large arrays cause eviction; prefetching and cache-aware algorithms help.",
+    "difficulty": "Hard",
+    "tags": ["cache locality", "memory hierarchy", "performance"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Performance Optimization",
+    "question": "const char *str = \"hello\";\nfor (int i = 0; i < strlen(str); i++) { printf(\"%c\", str[i]); }\nWhy is this suboptimal?",
+    "options": [
+      "strlen(str) is called each iteration; it scans the string to find \\0, wasting O(n^2) time; cache the length before the loop",
+      "printf is slow",
+      "const strings cannot be iterated",
+      "Compiler error: strlen in a loop condition"
+    ],
+    "correctIndex": 0,
+    "explanation": "Loop-invariant code motion: compute strlen once before the loop, then reuse the value.",
+    "difficulty": "Medium",
+    "tags": ["algorithm optimization", "loop optimization", "redundant computation"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Performance Optimization",
+    "question": "int sum = 0;\nfor (int i = 0; i < 1000000; i++) { sum += expensive_function(); }\nHow can branch prediction impact this?",
+    "options": [
+      "If expensive_function's return value causes different branch paths (if statements), misprediction stalls the pipeline; unpredictable branches are costly",
+      "Branch prediction does not affect loops",
+      "Compiler error: function calls in loops are forbidden",
+      "All branches are equally fast"
+    ],
+    "correctIndex": 0,
+    "explanation": "Modern CPUs speculatively execute branches; misprediction is expensive (pipeline flush); predictable branches (always taken or always skipped) are faster.",
+    "difficulty": "Hard",
+    "tags": ["branch prediction", "CPU pipeline", "performance"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Performance Optimization",
+    "question": "void func(int *arr) { arr[0]++; arr[1]++; arr[2]++; }\nWhy might the compiler not optimize consecutive array accesses?",
+    "options": [
+      "Pointer aliasing: the compiler cannot prove that arr[0], arr[1], arr[2] are independent; they might overlap or be modified elsewhere, forcing conservative ordering",
+      "Array operations are not subject to optimization",
+      "Compiler error: consecutive array accesses are forbidden",
+      "The compiler always optimizes array access"
+    ],
+    "correctIndex": 0,
+    "explanation": "Without restrict, the compiler assumes worst-case aliasing; restrict keyword tells the compiler pointers are independent.",
+    "difficulty": "Hard",
+    "tags": ["pointer aliasing", "restrict qualifier", "compiler optimization"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Performance Optimization",
+    "question": "int a = 1;\nfor (int i = 0; i < 1000000; i++) { if (a) { a++; } }\nWhy might this loop have severe branch prediction penalties?",
+    "options": [
+      "a is modified in the branch (a++), then the condition is re-evaluated; after the first iteration, the branch is taken every time, but the initial prediction is speculative and may be mispredicted once",
+      "The loop never executes",
+      "Compiler error: modifying variables in branches",
+      "Branch prediction is perfect"
+    ],
+    "correctIndex": 0,
+    "explanation": "Weak branch patterns (first false, then all true) can misprediction in first iterations; the cost depends on pipeline depth.",
+    "difficulty": "Hard",
+    "tags": ["branch prediction", "pipeline", "performance penalties"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Performance Optimization",
+    "question": "void copy(int *dest, const int *src, int n) {\nfor (int i = 0; i < n; i++) { dest[i] = src[i]; }\n}\nWhy is memcpy(dest, src, n * sizeof(int)) potentially faster?",
+    "options": [
+      "memcpy is optimized (sometimes uses SIMD, prefetching, cache-aware strategies); loop unrolling, vectorization, or assembly optimizations may not be applied by the compiler to the C loop",
+      "memcpy is always faster",
+      "Loops are always slower than library functions",
+      "Compiler error: memcpy cannot copy ints"
+    ],
+    "correctIndex": 0,
+    "explanation": "Library functions like memcpy are hand-tuned; the compiler may not apply advanced optimizations to straightforward C code.",
+    "difficulty": "Medium-Hard",
+    "tags": ["memcpy", "optimization", "library functions"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Functions",
+    "question": "package main\nimport \"fmt\"\nfunc f(x *int) {\n  *x = 99\n}\nfunc main() {\n  a := 1\n  f(&a)\n  fmt.Println(a)\n}",
+    "options": ["99", "1", "panic", "compile error"],
+    "correctIndex": 0,
+    "explanation": "f receives a pointer to a; dereferencing and assigning modifies a.",
+    "difficulty": "Medium",
+    "tags": ["pointers", "function-args"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Functions",
+    "question": "package main\nimport \"fmt\"\nfunc f() (int, error) {\n  return 42, nil\n}\nfunc main() {\n  x, _ := f()\n  fmt.Println(x)\n}",
+    "options": ["42", "nil", "0", "compile error"],
+    "correctIndex": 0,
+    "explanation": "Blank identifier _ discards the error return value; x receives 42.",
+    "difficulty": "Medium",
+    "tags": ["returns", "multiple-returns", "blank-identifier"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Functions",
+    "question": "package main\nimport \"fmt\"\nfunc f() (x int, y int) {\n  x = 1\n  y = 2\n  return\n}\nfunc main() {\n  a, b := f()\n  fmt.Println(a, b)\n}",
+    "options": ["1 2", "0 0", "panic", "compile error"],
+    "correctIndex": 0,
+    "explanation": "Named returns x and y are initialized to 0; assigned and returned via bare return.",
+    "difficulty": "Medium",
+    "tags": ["named-returns", "bare-return"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Functions",
+    "question": "package main\nimport \"fmt\"\nfunc f(args ...int) int {\n  sum := 0\n  for _, v := range args {\n    sum += v\n  }\n  return sum\n}\nfunc main() {\n  fmt.Println(f(1, 2, 3))\n}",
+    "options": ["6", "3", "0", "compile error"],
+    "correctIndex": 0,
+    "explanation": "Variadic function f sums all arguments; 1+2+3=6.",
+    "difficulty": "Medium",
+    "tags": ["variadic", "ellipsis"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Functions",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  f := func(x int) int {\n    return x * 2\n  }\n  fmt.Println(f(5))\n}",
+    "options": ["10", "5", "25", "compile error"],
+    "correctIndex": 0,
+    "explanation": "Anonymous function assigned to f; calling f(5) returns 5*2=10.",
+    "difficulty": "Medium",
+    "tags": ["closures", "anonymous-functions"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Functions",
+    "question": "package main\nimport \"fmt\"\nfunc f() func() int {\n  x := 0\n  return func() int {\n    x++\n    return x\n  }\n}\nfunc main() {\n  g := f()\n  fmt.Println(g(), g())\n}",
+    "options": ["1 2", "0 0", "1 1", "panic"],
+    "correctIndex": 0,
+    "explanation": "Closure captures x; each call increments and returns x (1, then 2).",
+    "difficulty": "Medium-Hard",
+    "tags": ["closures", "capture"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Functions",
+    "question": "package main\nimport \"fmt\"\nfunc f(x []int) {\n  x[0] = 99\n}\nfunc main() {\n  s := []int{1, 2}\n  f(s)\n  fmt.Println(s[0])\n}",
+    "options": ["99", "1", "0", "panic"],
+    "correctIndex": 0,
+    "explanation": "Slice s is passed by value but references the same array; modification in f affects s.",
+    "difficulty": "Medium",
+    "tags": ["slices", "function-args", "aliasing"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Functions",
+    "question": "package main\nimport \"fmt\"\nfunc f(x ...int) int {\n  return len(x)\n}\nfunc main() {\n  s := []int{1, 2, 3}\n  fmt.Println(f(s...))\n}",
+    "options": ["3", "1", "0", "compile error"],
+    "correctIndex": 0,
+    "explanation": "Slice unpacking s... expands to 1, 2, 3; variadic f receives 3 elements.",
+    "difficulty": "Medium",
+    "tags": ["variadic", "ellipsis", "slice-unpacking"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Functions",
+    "question": "package main\nimport \"fmt\"\nfunc f() {\n  defer fmt.Print(\"1\")\n  defer fmt.Print(\"2\")\n  fmt.Print(\"3\")\n}\nfunc main() {\n  f()\n}",
+    "options": ["321", "123", "312", "213"],
+    "correctIndex": 0,
+    "explanation": "Deferred calls execute in LIFO order; prints 3, then 2, then 1.",
+    "difficulty": "Medium",
+    "tags": ["defer", "lifo"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Functions",
+    "question": "package main\nimport \"fmt\"\nfunc f() int {\n  defer func() {\n    recover()\n  }()\n  panic(\"error\")\n  return 1\n}\nfunc main() {\n  fmt.Println(f())\n}",
+    "options": ["0", "1", "panic", "error"],
+    "correctIndex": 0,
+    "explanation": "Deferred recover() catches panic; function returns zero value (0) after panic.",
+    "difficulty": "Medium-Hard",
+    "tags": ["defer", "recover", "panic"]
+  }
+]

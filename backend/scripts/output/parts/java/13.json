@@ -1,0 +1,112 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "Debugging Techniques",
+    "question": "What is the cause of this error?\n```java\nNullPointerException at line 42\nObject obj = null;\nobj.toString();\n```",
+    "options": ["toString() issue", "obj is null, calling method on it", "Compilation error", "Memory leak"],
+    "correctIndex": 1,
+    "explanation": "Calling a method on a null reference throws NullPointerException; check for null before calling methods.",
+    "difficulty": "Medium",
+    "tags": ["null-pointer", "debugging", "defensive-coding"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Debugging Techniques",
+    "question": "What does a stack trace tell you?\n```\njava.lang.ArrayIndexOutOfBoundsException: 10\n  at Main.test(Main.java:25)\n  at Main.main(Main.java:5)\n```",
+    "options": ["Line numbers only", "Execution call chain from main to error", "Compilation error", "Variable values"],
+    "correctIndex": 1,
+    "explanation": "Stack trace shows the call stack: main() called test() at line 5, test() failed at line 25 with ArrayIndexOutOfBoundsException.",
+    "difficulty": "Medium",
+    "tags": ["stack-trace", "debugging", "exception-source"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Debugging Techniques",
+    "question": "How to debug an infinite loop?\n```java\nwhile (true) {\n  data.process();\n}\n```",
+    "options": ["Remove the loop", "Set breakpoint, inspect variables", "Compilation error", "Print statements only"],
+    "correctIndex": 1,
+    "explanation": "Debugger breakpoint pauses execution, allowing variable inspection and step-through; identify why loop condition never becomes false.",
+    "difficulty": "Medium",
+    "tags": ["debugger", "breakpoint", "infinite-loop"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Debugging Techniques",
+    "question": "What is a common cause of ClassCastException?\n```java\nObject obj = \"string\";\nInteger x = (Integer) obj; // Throws ClassCastException\n```",
+    "options": ["No issue", "obj is String, cannot cast to Integer", "Compilation error", "Null reference"],
+    "correctIndex": 1,
+    "explanation": "A String object cannot be cast to Integer at runtime; casting only works if the object's actual type matches.",
+    "difficulty": "Medium",
+    "tags": ["classcast-exception", "type-casting", "runtime-error"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Debugging Techniques",
+    "question": "How to identify a memory leak?\n```java\nList<Object> cache = new ArrayList<>();\nwhile (true) {\n  cache.add(new Object());\n}\n```",
+    "options": ["Visual inspection", "Profiler shows heap growing indefinitely", "Compilation error", "No way to detect"],
+    "correctIndex": 1,
+    "explanation": "Memory profiler tracks heap usage; steady growth with no GC collection indicates a memory leak.",
+    "difficulty": "Medium",
+    "tags": ["memory-profiler", "leak-detection", "heap-analysis"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Debugging Techniques",
+    "question": "What does Thread.currentThread() help debug?\n```java\nSystem.out.println(Thread.currentThread().getName());\nSystem.out.println(Thread.currentThread().getState());\n```",
+    "options": ["Nothing", "Thread name and state (identifies threading issues)", "Compilation error", "Slows execution"],
+    "correctIndex": 1,
+    "explanation": "Thread name and state identify which thread is executing and if it's blocked, runnable, etc.; useful for concurrency debugging.",
+    "difficulty": "Medium",
+    "tags": ["threading-debug", "thread-state", "concurrency"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Debugging Techniques",
+    "question": "How to debug a race condition?\n```java\nint x = 0;\nfor (int i = 0; i < 10; i++) {\n  new Thread(() -> x++).start();\n}\n```",
+    "options": ["Print statements", "Run multiple times, use profiler/debugger to catch timing", "Compilation error", "Impossible"],
+    "correctIndex": 1,
+    "explanation": "Race conditions are timing-dependent; run multiple times and use debugger/profiler to catch inconsistent results.",
+    "difficulty": "Medium-Hard",
+    "tags": ["race-condition-debug", "threading", "intermittent-bug"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Debugging Techniques",
+    "question": "What does this log statement reveal?\n```java\nlog.error(\"Operation failed\", e);\n```",
+    "options": ["Message only", "Message + exception stack trace (root cause)", "Compilation error", "No info"],
+    "correctIndex": 1,
+    "explanation": "Logging exception with stack trace shows the error message and full call chain, pinpointing where the failure occurred.",
+    "difficulty": "Medium",
+    "tags": ["logging", "exception-logging", "debugging"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Debugging Techniques",
+    "question": "How to find a resource leak?\n```java\nFileInputStream fis = new FileInputStream(\"file.txt\");\nbyte[] data = new byte[1024];\nfis.read(data);\n// fis.close() missing\n```",
+    "options": ["Not an issue", "File descriptor leak; profiler shows open files increasing", "Compilation error", "No way to detect"],
+    "correctIndex": 1,
+    "explanation": "Without close(), file descriptor remains open; OS file descriptor profiler shows count growing, indicating a leak.",
+    "difficulty": "Medium",
+    "tags": ["resource-leak", "file-handles", "profiling"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Debugging Techniques",
+    "question": "What does a heap dump show?\n```java\n// JVM option: -XX:+HeapDumpOnOutOfMemoryError\n```",
+    "options": ["Memory usage over time", "Snapshot of all objects and references at OOM", "Compilation error", "Nothing"],
+    "correctIndex": 1,
+    "explanation": "Heap dump captures the state of memory when OutOfMemoryError occurs; analyze to find objects holding references.",
+    "difficulty": "Medium",
+    "tags": ["heap-dump", "memory-analysis", "oom-debugging"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Debugging Techniques",
+    "question": "What debugging technique helps with intermittent failures?\n```java\n// Test fails randomly\nfor (int i = 0; i < 1000; i++) {\n  testScenario();\n}\n```",
+    "options": ["Single test run", "Repeat test many times, use assertions/logging", "Compilation error", "Impossible"],
+    "correctIndex": 1,
+    "explanation": "Intermittent failures (timing-dependent) appear when running many iterations; add logging/assertions to catch the failure case.",
+    "difficulty": "Medium",
+    "tags": ["intermittent-bug", "flaky-test", "debugging-strategy"]
+  }
+]

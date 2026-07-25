@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Big O Notation",
+    "question": "A function performs n iterations of an inner loop that runs log n times. What is the time complexity?",
+    "options": ["linear", "logarithmic", "linearithmic", "quadratic"],
+    "correctIndex": 2,
+    "explanation": "The outer loop runs n times and each inner loop runs log n times, giving n * log n = O(n log n) linearithmic complexity.",
+    "difficulty": "Medium",
+    "tags": ["complexity-analysis", "asymptotic-behavior"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Big O Notation",
+    "question": "Which statement correctly orders these complexities from fastest to slowest: A) O(log n), B) O(n), C) O(1), D) O(n^2)?",
+    "options": ["C, A, B, D", "A, B, C, D", "C, B, A, D", "D, B, A, C"],
+    "correctIndex": 0,
+    "explanation": "Ordering by growth rate: O(1) constant is fastest, then O(log n) logarithmic, then O(n) linear, then O(n^2) quadratic is slowest.",
+    "difficulty": "Medium",
+    "tags": ["complexity-comparison", "growth-rates"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Big O Notation",
+    "question": "A recursive function calls itself twice with n-1 as argument. Approximately how many function calls occur for input size n?",
+    "options": ["linear growth", "logarithmic growth", "exponential growth", "quadratic growth"],
+    "correctIndex": 2,
+    "explanation": "Binary recursion with no memoization creates a call tree with 2^n nodes, resulting in exponential time complexity.",
+    "difficulty": "Medium-Hard",
+    "tags": ["recursion", "exponential-complexity"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Big O Notation",
+    "question": "Consider: outer loop i from 1 to n, inner loop j from i to n. How many total iterations?",
+    "options": ["n iterations", "n squared iterations", "n times log n iterations", "sum of 1 to n equals n squared over 2"],
+    "correctIndex": 3,
+    "explanation": "First iteration: n steps, second: n-1 steps, ..., last: 1 step; sum equals n(n+1)/2, which is O(n^2).",
+    "difficulty": "Medium",
+    "tags": ["nested-loops", "summation"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Big O Notation",
+    "question": "An algorithm uses an array of size n. What is its space complexity if only k (constant) variables are used besides the array?",
+    "options": ["constant space", "linear space", "logarithmic space", "quadratic space"],
+    "correctIndex": 1,
+    "explanation": "The array itself consumes O(n) space; the k constant variables add only O(1), so total is O(n) linear space.",
+    "difficulty": "Medium",
+    "tags": ["space-complexity", "auxiliary-space"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Big O Notation",
+    "question": "Algorithm A runs in O(n log n) time with O(n) space. Algorithm B runs in O(n^2) time with O(1) space. When is B preferred?",
+    "options": ["always use A", "when n is very large and memory is severely limited", "when n is very small or memory is cheap", "B is never preferable"],
+    "correctIndex": 1,
+    "explanation": "When memory is a critical bottleneck and n is large enough that O(1) vs O(n) space matters more than O(n^2) vs O(n log n) time.",
+    "difficulty": "Medium-Hard",
+    "tags": ["space-time-tradeoff", "practical-considerations"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Big O Notation",
+    "question": "A loop runs 1, then 2, then 4, then 8 iterations successively until reaching n. What is the total number of iterations?",
+    "options": ["linear growth", "logarithmic growth", "quadratic growth", "approximately two times n"],
+    "correctIndex": 3,
+    "explanation": "Sum is 1 + 2 + 4 + 8 + ... + n (doubling each time), which equals approximately 2n when n is a power of 2.",
+    "difficulty": "Medium",
+    "tags": ["geometric-series", "summation"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Big O Notation",
+    "question": "Two nested loops, each running n times, with a break statement inside the inner loop that sometimes exits both loops. What is worst-case complexity?",
+    "options": ["linear", "logarithmic", "quadratic", "constant"],
+    "correctIndex": 2,
+    "explanation": "Worst-case assumes the break is never triggered, so the inner loop completes all n iterations for each of n outer iterations, giving O(n^2).",
+    "difficulty": "Medium-Hard",
+    "tags": ["worst-case-analysis", "control-flow"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Big O Notation",
+    "question": "An algorithm scans an array once to find an element, then calls itself recursively on half the remaining array. Complexity?",
+    "options": ["linear time", "logarithmic time", "quadratic time", "linearithmic time"],
+    "correctIndex": 0,
+    "explanation": "Each level processes n, n/2, n/4, ... elements but only scans sequentially; even with recursion, total work is n + n/2 + n/4 + ... = O(n) linear.",
+    "difficulty": "Medium-Hard",
+    "tags": ["linear-recursion", "geometric-series"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Big O Notation",
+    "question": "Comparing O(n log n) and O(n sqrt(n)): for very large n, which grows faster?",
+    "options": ["they grow at the same rate", "O(n log n) grows faster", "O(n sqrt(n)) grows faster", "it depends on the constant factors"],
+    "correctIndex": 2,
+    "explanation": "O(n sqrt(n)) = O(n^1.5) grows faster than O(n log n) because the exponent 1.5 is greater than the log factor.",
+    "difficulty": "Medium",
+    "tags": ["complexity-comparison", "exponential-growth"]
+  }
+]

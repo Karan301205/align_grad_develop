@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Inference",
+    "question": "Given `const arr = [1, 'a', true];` — what is the inferred type of arr?",
+    "options": ["(number | string | boolean)[]", "[1, 'a', boolean]", "[number, string, boolean]", "readonly [1, 'a', true]"],
+    "correctIndex": 0,
+    "explanation": "Widening infers the array type as a union of primitive types, not as a tuple; each element is generalized.",
+    "difficulty": "Medium",
+    "tags": ["type-widening", "array-inference", "union-types"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Inference",
+    "question": "Does `const x = 5 as const;` make x have type 5 or number?",
+    "options": ["number", "5", "readonly 5", "const (invalid)"],
+    "correctIndex": 1,
+    "explanation": "as const prevents widening; x retains the literal type 5, not the general number type.",
+    "difficulty": "Medium",
+    "tags": ["const-assertion", "literal-types", "type-widening"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Inference",
+    "question": "Given `function f(x: number = 5) { return x; }` — what is the return type?",
+    "options": ["number | undefined", "number", "5", "number | 5"],
+    "correctIndex": 1,
+    "explanation": "TypeScript infers return type from all code paths; x is always number (either passed or defaulted), so return is number.",
+    "difficulty": "Medium",
+    "tags": ["default-parameters", "return-type-inference", "control-flow-analysis"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Inference",
+    "question": "Does TypeScript infer the return type of a function with no explicit return statement?",
+    "options": ["No, return type must be declared", "Yes, as void", "Yes, as the union of all returns", "Yes, as undefined"],
+    "correctIndex": 2,
+    "explanation": "TypeScript infers return type from all return statements in the function body; if none, it defaults to void or undefined.",
+    "difficulty": "Medium",
+    "tags": ["return-type-inference", "implicit-types", "control-flow-analysis"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Inference",
+    "question": "Given `const obj = { a: 1, b: 2 } as const;` — what type is obj.a?",
+    "options": ["number", "1", "1 (readonly)", "const"],
+    "correctIndex": 1,
+    "explanation": "as const makes properties readonly with literal types; obj.a has type 1 (readonly), narrower than number.",
+    "difficulty": "Medium",
+    "tags": ["const-assertion", "literal-types", "readonly-properties"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Inference",
+    "question": "Does TypeScript infer generic type parameters from object literal patterns?",
+    "options": ["No, generics must be explicit", "Yes, from method calls within literals", "Yes, if type is declared", "No, literal object patterns do not infer T"],
+    "correctIndex": 1,
+    "explanation": "TypeScript infers generics from usage context; object literals with methods can trigger generic inference from method calls.",
+    "difficulty": "Medium-Hard",
+    "tags": ["generic-inference", "contextual-typing", "object-patterns"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Inference",
+    "question": "Given `function f<T>(x: T): T { return x; } const g = f;` — what is the type of g?",
+    "options": ["(x: unknown) => unknown", "<T>(x: T) => T", "function", "(x: any) => any"],
+    "correctIndex": 1,
+    "explanation": "Function type inference preserves generics; g retains the full generic signature of f.",
+    "difficulty": "Medium-Hard",
+    "tags": ["generic-inference", "function-types", "type-preservation"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Inference",
+    "question": "Does TypeScript infer union types when assigning conditionally?",
+    "options": ["No, conditionals must be typed", "Yes, through control flow analysis", "Yes, if both branches return values", "No, union is explicitly required"],
+    "correctIndex": 1,
+    "explanation": "Control flow analysis infers unions from all possible code paths; if condition returns T and else returns U, the result is T|U.",
+    "difficulty": "Medium",
+    "tags": ["control-flow-analysis", "union-inference", "conditional-types"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Inference",
+    "question": "Given `const x: number | string = 5; const y = x ? 'a' : 'b';` — what is the type of y?",
+    "options": ["'a' | 'b'", "'b'", "string", "'a'"],
+    "correctIndex": 0,
+    "explanation": "Both branches return literal types; the union of 'a' and 'b' is inferred regardless of x's type.",
+    "difficulty": "Medium",
+    "tags": ["conditional-expressions", "literal-types", "inference"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Inference",
+    "question": "Does `const arr: (number | string)[] = [1, 'a'];` infer arr as a heterogeneous array?",
+    "options": ["No, inference assumes homogeneous", "Yes, the declared type enforces union", "Yes, but only with as const", "No, mixed types require tuple"],
+    "correctIndex": 1,
+    "explanation": "The declared type (number|string)[] allows heterogeneous elements; the array type matches the annotation, not the literal values.",
+    "difficulty": "Medium",
+    "tags": ["array-types", "union-types", "type-annotation"]
+  }
+]

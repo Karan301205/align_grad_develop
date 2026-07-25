@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Async Programming",
+    "question": "What is logged?\n```javascript\nconsole.log('1');\nPromise.resolve().then(() => console.log('2'));\nconsole.log('3');\n```",
+    "options": [
+      "1 2 3 because promises resolve immediately",
+      "1 3 2 because promise callback is queued asynchronously",
+      "2 1 3 due to promise priority",
+      "3 2 1 because queue processes backward"
+    ],
+    "correctIndex": 1,
+    "explanation": "Promise.then callbacks are microtasks; synchronous code runs first, then microtasks.",
+    "difficulty": "Medium",
+    "tags": ["event-loop", "microtask", "promise"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Async Programming",
+    "question": "What is logged?\n```javascript\nasync function test() {\n  const result = await Promise.resolve(5);\n  return result + 10;\n}\ntest().then(r => console.log(r));\n```",
+    "options": [
+      "5 because await returns the promise",
+      "15 because await unwraps the value and function returns wrapped",
+      "undefined due to async return type",
+      "null because await fails in async"
+    ],
+    "correctIndex": 1,
+    "explanation": "await unwraps the promise to 5; function returns 15 wrapped in a promise; .then logs 15.",
+    "difficulty": "Medium",
+    "tags": ["async-await", "promises", "await"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Async Programming",
+    "question": "What is the output?\n```javascript\nconsole.log('start');\nsetTimeout(() => console.log('timeout'), 0);\nPromise.resolve().then(() => console.log('promise'));\nconsole.log('end');\n```",
+    "options": [
+      "start timeout promise end due to macro task priority",
+      "start end promise timeout because microtasks run before macrotasks",
+      "start promise timeout end due to promise priority",
+      "start end timeout promise because setTimeout runs last"
+    ],
+    "correctIndex": 1,
+    "explanation": "Event loop: synchronous first, then microtasks (promises), then macrotasks (setTimeout).",
+    "difficulty": "Medium-Hard",
+    "tags": ["event-loop", "microtask-vs-macrotask", "async-order"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Async Programming",
+    "question": "What is logged?\n```javascript\nconst p1 = Promise.resolve(1);\nconst p2 = Promise.reject(2);\nPromise.all([p1, p2])\n  .then(r => console.log('success', r))\n  .catch(e => console.log('error', e));\n```",
+    "options": [
+      "success [1] because p1 succeeds",
+      "error 2 because Promise.all rejects if any fails",
+      "success 1 due to resolve taking precedence",
+      "error undefined because p2 has no value"
+    ],
+    "correctIndex": 1,
+    "explanation": "Promise.all rejects if any promise rejects; it returns the first rejection reason.",
+    "difficulty": "Medium",
+    "tags": ["Promise.all", "rejection-handling", "error-propagation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Async Programming",
+    "question": "What is the output?\n```javascript\nasync function test() {\n  try {\n    const result = await Promise.reject('error');\n    console.log(result);\n  } catch (e) {\n    console.log('caught', e);\n  }\n}\ntest();\n```",
+    "options": [
+      "result undefined because catch does not print",
+      "caught error because await rejection is caught",
+      "error result due to execution order",
+      "ReferenceError because try/catch fails with async"
+    ],
+    "correctIndex": 1,
+    "explanation": "await unwraps rejected promises as exceptions; try/catch works with async/await.",
+    "difficulty": "Medium",
+    "tags": ["async-await", "error-handling", "try-catch"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Async Programming",
+    "question": "What is logged?\n```javascript\nPromise.resolve()\n  .then(() => {\n    console.log('1');\n    return Promise.resolve();\n  })\n  .then(() => console.log('2'))\n  .then(() => console.log('3'));\n```",
+    "options": [
+      "1 2 3 because all thens resolve in sequence",
+      "1 then 2 3 separately due to return promise delay",
+      "1 1 2 3 because return creates extra microtask",
+      "3 2 1 due to reverse execution"
+    ],
+    "correctIndex": 0,
+    "explanation": "Chained .then() callbacks execute in order; returning a promise doesn't add extra steps.",
+    "difficulty": "Medium",
+    "tags": ["promise-chain", "then", "microtask-order"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Async Programming",
+    "question": "What is the output?\n```javascript\nasync function test() {\n  throw new Error('oops');\n}\ntest()\n  .then(() => console.log('success'))\n  .catch(e => console.log('error'));\n```",
+    "options": [
+      "success because throw returns value",
+      "error because async function throws promise rejection",
+      "oops only because catch does not fire",
+      "ReferenceError due to throw in async"
+    ],
+    "correctIndex": 1,
+    "explanation": "throw in async function returns a rejected promise; .catch handles the error.",
+    "difficulty": "Medium",
+    "tags": ["async-await", "throw", "error-handling"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Async Programming",
+    "question": "What is logged?\n```javascript\nPromise.race([Promise.resolve(1), Promise.resolve(2)])\n  .then(r => console.log(r));\n```",
+    "options": [
+      "2 because second promise is faster",
+      "1 because first promise resolves first",
+      "undefined due to race returning undefined",
+      "null because race does not return value"
+    ],
+    "correctIndex": 1,
+    "explanation": "Promise.race returns the result of whichever promise settles first.",
+    "difficulty": "Medium",
+    "tags": ["Promise.race", "first-to-settle", "promises"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Async Programming",
+    "question": "What is the output?\n```javascript\nasync function outer() {\n  const a = await Promise.resolve(1);\n  const b = await Promise.resolve(2);\n  console.log(a, b);\n}\nouter();\nconsole.log('done');\n```",
+    "options": [
+      "done 1 2 because async runs immediately",
+      "1 2 done because function runs synchronously",
+      "1 2 only because console.log done is in async",
+      "ReferenceError due to async scope"
+    ],
+    "correctIndex": 0,
+    "explanation": "async function returns immediately (pending); 'done' logs before await completes.",
+    "difficulty": "Medium",
+    "tags": ["async-await", "non-blocking", "execution-order"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Async Programming",
+    "question": "What is logged?\n```javascript\nsetTimeout(() => console.log('1'), 0);\nqueueMicrotask(() => console.log('2'));\nPromise.resolve().then(() => console.log('3'));\nconsole.log('4');\n```",
+    "options": [
+      "4 1 2 3 due to setTimeout priority",
+      "4 2 3 1 because microtasks run before macrotasks",
+      "1 2 3 4 because timeout is queued first",
+      "4 3 2 1 due to promise precedence"
+    ],
+    "correctIndex": 1,
+    "explanation": "Execution order: sync (4), microtasks (2,3), macrotasks (1).",
+    "difficulty": "Medium-Hard",
+    "tags": ["event-loop", "microtask-queue", "macrotask-queue"]
+  }
+]

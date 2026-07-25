@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Control Structures",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  for i := 0; i < 3; i++ {\n    if i == 1 {\n      continue\n    }\n    fmt.Print(i)\n  }\n}",
+    "options": ["02", "012", "01", "0123"],
+    "correctIndex": 0,
+    "explanation": "continue skips i=1; loop prints i=0 then i=2.",
+    "difficulty": "Medium",
+    "tags": ["loops", "continue"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Control Structures",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  switch x := 1; x {\n  case 1:\n    fmt.Print(\"a\")\n  case 1:\n    fmt.Print(\"b\")\n  }\n}",
+    "options": ["a", "ab", "b", "compile error"],
+    "correctIndex": 0,
+    "explanation": "First case 1 matches; no fallthrough by default; second case 1 is unreachable.",
+    "difficulty": "Medium",
+    "tags": ["switch", "no-fallthrough"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Control Structures",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  x := 5\n  switch {\n  case x > 3:\n    fmt.Print(\"a\")\n  case x > 4:\n    fmt.Print(\"b\")\n  }\n}",
+    "options": ["a", "ab", "b", "nothing"],
+    "correctIndex": 0,
+    "explanation": "Tagless switch evaluates cases in order; x > 3 is true, so prints a and exits.",
+    "difficulty": "Medium",
+    "tags": ["switch", "tagless"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Control Structures",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  for i := 0; i < 3; i++ {\n    for j := 0; j < 2; j++ {\n      if j == 0 { break }\n      fmt.Print(i)\n    }\n  }\n}",
+    "options": ["nothing", "012", "012012", "012012012"],
+    "correctIndex": 0,
+    "explanation": "Inner break exits j loop when j==0; outer loop continues but prints nothing.",
+    "difficulty": "Medium",
+    "tags": ["loops", "break", "nested"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Control Structures",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  x := 0\n  if x := 1; x > 0 {\n    fmt.Print(x)\n  }\n  fmt.Print(x)\n}",
+    "options": ["10", "11", "01", "1"],
+    "correctIndex": 0,
+    "explanation": "if initializes x=1 in block scope; prints 1 inside if, then outer x=0 outside.",
+    "difficulty": "Medium",
+    "tags": ["scope", "shadowing", "if"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Control Structures",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  x := 0\n  switch x {\n  case 0, 1, 2:\n    fmt.Print(\"small\")\n  default:\n    fmt.Print(\"large\")\n  }\n}",
+    "options": ["small", "large", "smallsmallsmall", "compile error"],
+    "correctIndex": 0,
+    "explanation": "switch matches x=0 in case 0,1,2 clause; prints small once.",
+    "difficulty": "Medium",
+    "tags": ["switch", "multiple-cases"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Control Structures",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  for i := 0; i < 5; i++ {\n    if i == 2 { goto end }\n  }\n  fmt.Print(\"loop\")\n  end:\n  fmt.Print(\"done\")\n}",
+    "options": ["done", "loopdone", "looplooplooplooplooptry again"],
+    "correctIndex": 0,
+    "explanation": "goto jumps to end label when i==2; skips loop print and prints only done.",
+    "difficulty": "Medium-Hard",
+    "tags": ["goto", "labels"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Control Structures",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  s := []int{1, 2, 3}\n  for i, v := range s {\n    s = append(s, v)\n    if i >= 10 { break }\n  }\n  fmt.Println(len(s))\n}",
+    "options": ["infinite loop problem", "6", "9", "panic"],
+    "correctIndex": 0,
+    "explanation": "Modifying a slice during range iteration causes undefined behavior; in this code it loops forever or panics.",
+    "difficulty": "Medium-Hard",
+    "tags": ["range", "mutation", "unsafe"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Control Structures",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  m := map[int]int{1: 10, 2: 20}\n  for k := range m {\n    delete(m, k)\n  }\n  fmt.Println(len(m))\n}",
+    "options": ["unpredictable", "0", "2", "1"],
+    "correctIndex": 0,
+    "explanation": "Deleting map entries during iteration is undefined; the loop may skip entries or delete fewer than expected.",
+    "difficulty": "Medium-Hard",
+    "tags": ["maps", "range", "mutation"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Control Structures",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  x := 0\n  if x == 0 {\n    y := 1\n  }\n  fmt.Println(y)\n}",
+    "options": ["compile error", "0", "1", "panic"],
+    "correctIndex": 0,
+    "explanation": "y is declared in if block scope; not accessible outside the block.",
+    "difficulty": "Medium",
+    "tags": ["scope", "if"]
+  }
+]

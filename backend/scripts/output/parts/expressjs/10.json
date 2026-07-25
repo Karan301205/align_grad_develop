@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Express JS",
+    "subtopic": "API Security Best Practices",
+    "question": "A route accepts user input and builds a query: const SQL = 'SELECT * FROM users WHERE name = ' + req.query.name. A hacker sends ?name=' OR '1'='1. What happens?",
+    "options": [
+      "The input is sanitized automatically by Express",
+      "SQL injection: the query becomes 'SELECT * FROM users WHERE name = ' OR '1'='1', returning all users",
+      "The query fails because the syntax is invalid",
+      "Express rejects the request as suspicious"
+    ],
+    "correctIndex": 1,
+    "explanation": "String concatenation with user input enables SQL injection; the malicious input breaks the WHERE clause and returns unexpected data.",
+    "difficulty": "Medium",
+    "tags": ["sql-injection", "security", "input-validation"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "API Security Best Practices",
+    "question": "Passwords are stored in the database as plain text: password: req.body.password. Why is this a critical vulnerability?",
+    "options": [
+      "It violates user privacy but is technically secure within the app",
+      "If the database is breached, all passwords are immediately compromised",
+      "Express hashes passwords automatically by default",
+      "Plaintext passwords are only an issue if the API is public"
+    ],
+    "correctIndex": 1,
+    "explanation": "Plaintext passwords in a database breach expose user accounts across other platforms; always hash with bcrypt or similar before storage.",
+    "difficulty": "Medium",
+    "tags": ["password-security", "hashing", "database-security"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "API Security Best Practices",
+    "question": "A JWT token is sent in the Authorization header: req.get('Authorization'). The token includes user ID and role. Why shouldn't the token include sensitive data?",
+    "options": [
+      "Tokens are encrypted, so sensitive data is protected",
+      "JWTs are signed, not encrypted; malicious clients can decode the payload and access sensitive data",
+      "Sensitive data in tokens violates HTTP standards",
+      "Express automatically redacts sensitive data from tokens"
+    ],
+    "correctIndex": 1,
+    "explanation": "JWTs are signed but not encrypted; the payload is base64-encoded and can be decoded by anyone; never include passwords, PII, or secrets.",
+    "difficulty": "Medium",
+    "tags": ["jwt", "token-security", "cryptography"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "API Security Best Practices",
+    "question": "app.disable('x-powered-by') is called to hide the Express version. A hacker still discovers the version by examining response headers. What's the real mitigation?",
+    "options": [
+      "Hiding the version is sufficient security",
+      "Security through obscurity is weak; focus on patching vulnerabilities instead",
+      "Use a firewall to block header inspection",
+      "Change the version number in package.json"
+    ],
+    "correctIndex": 1,
+    "explanation": "Hiding version headers is a minor defense; real security comes from keeping Express and dependencies updated and fixing known vulnerabilities.",
+    "difficulty": "Medium",
+    "tags": ["security", "headers", "vulnerability-management"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "API Security Best Practices",
+    "question": "A route returns res.json(user) where user includes user.password (hashed). Should the password be included in the API response?",
+    "options": [
+      "Yes; the password is hashed, so it's safe to expose",
+      "No; even hashed passwords shouldn't be in API responses, only verification is needed server-side",
+      "Yes, if sent over HTTPS",
+      "Only for admin users"
+    ],
+    "correctIndex": 1,
+    "explanation": "Never return hashed passwords in API responses; they're not needed for authentication and increase attack surface if a client is compromised.",
+    "difficulty": "Medium",
+    "tags": ["api-design", "data-exposure", "best-practices"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "API Security Best Practices",
+    "question": "CORS is enabled: app.use(cors()). Any origin can now make requests. A malicious site initiates a request to your API. What's at risk?",
+    "options": [
+      "CORS is only a convenience feature; there's no security risk",
+      "The malicious site can make authenticated requests if the user is logged in, leading to CSRF attacks",
+      "The malicious site can access your API key from headers",
+      "CORS vulnerabilities always result in data breaches"
+    ],
+    "correctIndex": 1,
+    "explanation": "Unrestricted CORS allows any site to make requests with user credentials, enabling CSRF; restrict origins to trusted domains.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cors", "csrf", "security", "same-origin-policy"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "API Security Best Practices",
+    "question": "Rate limiting isn't implemented, and a hacker sends 1000 requests per second to /login, trying passwords. Why is this a problem?",
+    "options": [
+      "The server is fast enough to handle it without slowdown",
+      "Brute-force attacks can crack weak passwords; rate limiting slows down attempts",
+      "Express logs all requests, so the attack is traceable",
+      "It only affects the API endpoint, not the database"
+    ],
+    "correctIndex": 1,
+    "explanation": "Without rate limiting, brute-force attacks can guess passwords; implement rate-limit middleware to cap requests per IP/user per time interval.",
+    "difficulty": "Medium",
+    "tags": ["brute-force", "rate-limiting", "authentication", "security"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "API Security Best Practices",
+    "question": "An API accepts file uploads: app.use(express.json({limit: '50mb'})). A hacker uploads a 100MB file. Why could this be problematic?",
+    "options": [
+      "The file is automatically rejected because it exceeds 50MB",
+      "Without a size check, large uploads can exhaust server memory or disk space (DoS)",
+      "Express prevents file uploads larger than the JSON limit",
+      "The file is silently truncated to 50MB"
+    ],
+    "correctIndex": 1,
+    "explanation": "Large files without proper limits can cause denial-of-service; set appropriate upload limits and validate file types server-side.",
+    "difficulty": "Medium",
+    "tags": ["file-upload", "dos-attack", "resource-limits"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "API Security Best Practices",
+    "question": "res.set('X-Frame-Options', 'DENY') prevents clickjacking. A user visits a malicious site that embeds your API response in a hidden iframe. What's prevented?",
+    "options": [
+      "The API data is encrypted before the iframe loads",
+      "The browser respects the header and prevents framing, blocking the attack",
+      "The clickjacking payload is blocked by the firewall",
+      "The malicious site can't access the X-Frame-Options header"
+    ],
+    "correctIndex": 1,
+    "explanation": "X-Frame-Options header tells browsers to prevent framing by other origins, stopping attackers from using iframes to trick users into actions.",
+    "difficulty": "Medium",
+    "tags": ["clickjacking", "headers", "security"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "API Security Best Practices",
+    "question": "User input is logged: console.log('User:', req.query.user). A hacker sends ?user=<img src=x onerror=alert(1)>. The log contains the XSS payload. Why is logging user input risky?",
+    "options": [
+      "The log file becomes too large",
+      "If logs are viewed in a web dashboard without escaping, the XSS executes in the admin's browser",
+      "Console.log is deprecated and shouldn't be used",
+      "User input is always sanitized before logging"
+    ],
+    "correctIndex": 1,
+    "explanation": "Unescaped user input in logs can execute XSS if logs are viewed in a web UI; sanitize or JSON-encode before logging.",
+    "difficulty": "Medium-Hard",
+    "tags": ["xss", "logging", "security", "input-validation"]
+  }
+]

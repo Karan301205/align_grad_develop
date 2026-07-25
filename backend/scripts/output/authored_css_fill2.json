@@ -1,0 +1,3 @@
+[
+  {"skillName":"CSS","subtopic":"Selector Types","question":"Given `#nav .item` (id + class) versus `.menu .item.active` (two classes), which selector has higher specificity?","options":["#nav .item, because an id outweighs multiple classes","the one with more classes always wins","they are equal in specificity","whichever appears later in the file"],"correctIndex":0,"explanation":"Specificity compares id count first, and one id beats any number of classes.","difficulty":"Medium-Hard","tags":["specificity","selectors","cascade"]}
+]

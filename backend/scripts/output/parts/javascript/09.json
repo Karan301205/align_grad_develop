@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Error Handling",
+    "question": "What is logged?\n```javascript\ntry {\n  throw new Error('test');\n} catch (e) {\n  console.log(e.message, e.name);\n}\n```",
+    "options": [
+      "Error test because error object properties print",
+      "test Error because message and name are correct",
+      "undefined undefined due to error properties missing",
+      "ReferenceError because Error has no message property"
+    ],
+    "correctIndex": 1,
+    "explanation": "Error objects have message and name properties; catch binds the error for access.",
+    "difficulty": "Medium",
+    "tags": ["try-catch", "Error", "error-properties"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Error Handling",
+    "question": "What is the output?\n```javascript\ntry {\n  nonExistentFunction();\n} catch (e) {\n  console.log(e instanceof ReferenceError);\n}\n```",
+    "options": [
+      "false because nonExistent is not an error",
+      "true because calling undefined function throws ReferenceError",
+      "undefined due to catch not working",
+      "null because error type is unknown"
+    ],
+    "correctIndex": 1,
+    "explanation": "Calling an undefined function throws ReferenceError; instanceof checks error type.",
+    "difficulty": "Medium",
+    "tags": ["ReferenceError", "error-types", "instanceof"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Error Handling",
+    "question": "What is logged?\n```javascript\ntry {\n  try {\n    throw new Error('inner');\n  } finally {\n    console.log('finally');\n  }\n} catch (e) {\n  console.log('caught');\n}\n```",
+    "options": [
+      "finally caught because finally runs before catch",
+      "caught finally due to execution order",
+      "finally only because catch is skipped",
+      "ReferenceError due to nested try"
+    ],
+    "correctIndex": 0,
+    "explanation": "finally always runs before catch; error still propagates to outer catch after finally.",
+    "difficulty": "Medium",
+    "tags": ["try-catch-finally", "finally-execution", "error-propagation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Error Handling",
+    "question": "What is the output?\n```javascript\ntry {\n  const result = JSON.parse('{invalid json}');\n} catch (e) {\n  console.log(e.name);\n}\n```",
+    "options": [
+      "Error because parse returns generic error",
+      "SyntaxError because invalid JSON throws SyntaxError",
+      "JSONError because JSON errors have custom type",
+      "undefined due to parse failure"
+    ],
+    "correctIndex": 1,
+    "explanation": "JSON.parse throws SyntaxError for invalid JSON input.",
+    "difficulty": "Medium",
+    "tags": ["JSON.parse", "SyntaxError", "error-types"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Error Handling",
+    "question": "What is logged?\n```javascript\ntry {\n  throw new TypeError('type error');\n} catch (e) {\n  console.log(e.message);\n  throw e;\n}\n```",
+    "options": [
+      "type error because catch prints before rethrowing",
+      "type error undefined because rethrow prevents final logging",
+      "undefined due to catch failure",
+      "nothing because rethrow breaks execution"
+    ],
+    "correctIndex": 0,
+    "explanation": "catch logs the message, then rethrow propagates; console.log executes before throw.",
+    "difficulty": "Medium",
+    "tags": ["try-catch", "rethrow", "error-propagation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Error Handling",
+    "question": "What is the output?\n```javascript\nfunction test() {\n  try {\n    return 'try';\n  } finally {\n    return 'finally';\n  }\n}\nconsole.log(test());\n```",
+    "options": [
+      "try because return happens first",
+      "finally because finally can override return",
+      "undefined due to conflicting returns",
+      "null because return in finally fails"
+    ],
+    "correctIndex": 1,
+    "explanation": "finally block executes after try; return in finally overrides the try return.",
+    "difficulty": "Medium-Hard",
+    "tags": ["try-catch-finally", "return-override", "finally-behavior"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Error Handling",
+    "question": "What is logged?\n```javascript\nPromise.reject(new Error('async error'))\n  .catch(e => console.log(e.message));\n```",
+    "options": [
+      "nothing because rejection is not caught",
+      "async error because catch handles rejection",
+      "undefined due to promise rejection handling",
+      "null because Error message is inaccessible"
+    ],
+    "correctIndex": 1,
+    "explanation": ".catch() handles promise rejections like try/catch handles throws.",
+    "difficulty": "Medium",
+    "tags": ["Promise", "catch", "rejection-handling"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Error Handling",
+    "question": "What is the output?\n```javascript\ntry {\n  (() => {\n    throw new Error('arrow');\n  })();\n} catch (e) {\n  console.log(e.message);\n}\n```",
+    "options": [
+      "undefined because arrow functions do not support throw",
+      "arrow because arrow function throws are caught",
+      "null due to arrow function error handling",
+      "ReferenceError because throw fails in arrow"
+    ],
+    "correctIndex": 1,
+    "explanation": "Arrow functions work with try/catch; throw inside them is caught normally.",
+    "difficulty": "Medium",
+    "tags": ["arrow-functions", "try-catch", "error-propagation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Error Handling",
+    "question": "What is logged?\n```javascript\nclass CustomError extends Error {\n  constructor(msg) {\n    super(msg);\n    this.name = 'CustomError';\n  }\n}\ntry {\n  throw new CustomError('custom');\n} catch (e) {\n  console.log(e instanceof CustomError);\n}\n```",
+    "options": [
+      "false because instanceof does not work with custom errors",
+      "true because CustomError extends Error and can be caught",
+      "undefined due to class inheritance failure",
+      "null because custom errors are invalid"
+    ],
+    "correctIndex": 1,
+    "explanation": "Custom error classes extend Error; instanceof correctly identifies them.",
+    "difficulty": "Medium",
+    "tags": ["custom-errors", "error-inheritance", "instanceof"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Error Handling",
+    "question": "What is the output?\n```javascript\ntry {\n  console.log('1');\n  throw new Error('error');\n  console.log('2');\n} finally {\n  console.log('3');\n}\n```",
+    "options": [
+      "1 2 3 because finally runs after all code",
+      "1 3 because error stops execution but finally runs",
+      "1 2 because error prevents finally execution",
+      "3 1 due to finally executing first"
+    ],
+    "correctIndex": 1,
+    "explanation": "throw stops execution at line 2; finally still runs for cleanup before error propagates.",
+    "difficulty": "Medium",
+    "tags": ["try-catch-finally", "execution-flow", "error-interruption"]
+  }
+]

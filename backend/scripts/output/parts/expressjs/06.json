@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Express JS",
+    "subtopic": "Request Response Objects",
+    "question": "req.query contains query string parameters, but req.params is empty. A GET request is sent to /api/users?id=123. Where is the id value?",
+    "options": [
+      "req.params.id = '123'",
+      "req.query.id = '123'",
+      "req.body.id = '123'",
+      "The id is lost if not defined as a route parameter"
+    ],
+    "correctIndex": 1,
+    "explanation": "req.query contains parsed query string parameters; req.params only contains URL path parameters like :id in /api/users/:id.",
+    "difficulty": "Medium",
+    "tags": ["query-string", "req.query", "req.params", "parsing"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Request Response Objects",
+    "question": "req.body is undefined in a POST handler even though Content-Type is 'application/json' and middleware includes app.use(express.json()). What's likely?",
+    "options": [
+      "The client didn't send a body payload",
+      "express.json() wasn't registered or was registered after the route handler",
+      "req.body only works with 'application/x-www-form-urlencoded'",
+      "The JSON payload exceeds the size limit"
+    ],
+    "correctIndex": 1,
+    "explanation": "Middleware must be registered before route handlers; if express.json() comes after the route, req.body won't be parsed for that route.",
+    "difficulty": "Medium",
+    "tags": ["req.body", "middleware", "body-parsing", "order"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Request Response Objects",
+    "question": "res.status(404).send('Not Found') and res.status(200).json({}) both set a status code. Which method executes the response transmission?",
+    "options": [
+      "res.status() transmits the response; send() and json() are no-ops",
+      "send() and json() transmit; res.status() only sets the code without transmitting",
+      "Both transmit; the second call overwrites the first",
+      "Neither transmits; you must call res.end() explicitly"
+    ],
+    "correctIndex": 1,
+    "explanation": "res.status() only sets the status code; send() and json() actually transmit the response body and status to the client.",
+    "difficulty": "Medium",
+    "tags": ["response", "res.status", "res.send", "transmission"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Request Response Objects",
+    "question": "req.get('X-Custom-Header') returns undefined, but the client definitely sent the header. What's a likely cause?",
+    "options": [
+      "Custom headers are blocked by Express for security reasons",
+      "req.get() only retrieves standard HTTP headers, not custom ones",
+      "The header name case doesn't match exactly (e.g., 'x-custom-header' vs 'X-Custom-Header')",
+      "Custom headers must be retrieved via req.headers directly, not req.get()"
+    ],
+    "correctIndex": 2,
+    "explanation": "req.get() is case-insensitive for header lookup, but the header must match the expected name; verify the exact header name the client sent.",
+    "difficulty": "Medium",
+    "tags": ["headers", "req.get", "case-sensitivity", "custom-headers"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Request Response Objects",
+    "question": "res.json() automatically sets Content-Type to 'application/json', but res.send() uses the default. If res.send() is called with an object, what Content-Type is set?",
+    "options": [
+      "'application/json' (Express detects objects and sets JSON type)",
+      "'text/plain' (default for send())",
+      "'application/octet-stream'",
+      "No Content-Type is set; the client infers it"
+    ],
+    "correctIndex": 0,
+    "explanation": "res.send() inspects the data type; for objects, it sets 'application/json' and stringifies the data, similar to res.json().",
+    "difficulty": "Medium",
+    "tags": ["response", "content-type", "res.json", "res.send"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Request Response Objects",
+    "question": "res.redirect('/login') sends a 302 status by default. After the redirect, the client performs a new GET request to /login. Why always GET?",
+    "options": [
+      "The HTTP 302 status requires clients to convert POST to GET on redirect",
+      "302 explicitly tells the client to use GET for the redirected URL",
+      "Express code forces GET; use res.redirect(303) for other methods",
+      "Browsers always convert any redirect to GET for security"
+    ],
+    "correctIndex": 1,
+    "explanation": "HTTP 302 Found status typically causes POST requests to become GET on redirect (though technically client-dependent); use 303 See Other for guaranteed GET or 307 Temporary Redirect to preserve method.",
+    "difficulty": "Medium-Hard",
+    "tags": ["redirect", "status-codes", "http", "res.redirect"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Request Response Objects",
+    "question": "req.originalUrl contains the full original request URL including query strings. In middleware, you modify req.url = '/new-path'. Does req.originalUrl change?",
+    "options": [
+      "Yes; req.originalUrl is updated whenever req.url changes",
+      "No; req.originalUrl is immutable and stays as the original request",
+      "No; req.url changes but req.originalUrl only reflects the first URL",
+      "req.originalUrl doesn't exist; use req.url instead"
+    ],
+    "correctIndex": 1,
+    "explanation": "req.originalUrl is immutable and always reflects the client's original request; modifying req.url changes the current routing path but doesn't affect originalUrl.",
+    "difficulty": "Medium",
+    "tags": ["req.url", "req.originalUrl", "routing", "mutation"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Request Response Objects",
+    "question": "res.set('Cache-Control', 'no-cache') sets a header. Later, res.append('Cache-Control', 'no-store') is called. What header value is sent?",
+    "options": [
+      "'no-cache' (append() overwrites)",
+      "'no-store' (latest call wins)",
+      "'no-cache, no-store' (both values joined)",
+      "'no-cache' and 'no-store' as separate header lines"
+    ],
+    "correctIndex": 2,
+    "explanation": "res.append() adds to the header value, joining multiple values with ', '; res.set() overwrites, while append() concatenates.",
+    "difficulty": "Medium",
+    "tags": ["headers", "res.set", "res.append", "http"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Request Response Objects",
+    "question": "res.send() is called, then code tries to log res.headersSent. What is its value?",
+    "options": [
+      "false (headers aren't sent until the connection closes)",
+      "true (send() transmits headers and body immediately)",
+      "undefined (headersSent is not a valid property)",
+      "null (headers are sent but not yet received)"
+    ],
+    "correctIndex": 1,
+    "explanation": "res.headersSent is true after send() or any method that transmits the response; it's a flag indicating the response headers have been written to the socket.",
+    "difficulty": "Medium",
+    "tags": ["response", "res.headersSent", "transmission"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Request Response Objects",
+    "question": "req.method is 'POST', but a route is defined as app.get('/endpoint'). Why doesn't the GET route match the POST request?",
+    "options": [
+      "Express automatically converts POST to GET if no POST route exists",
+      "HTTP method matching is strict; app.get() only matches GET requests",
+      "POST requests can't access GET routes by design",
+      "The Content-Type header determines which method is used"
+    ],
+    "correctIndex": 1,
+    "explanation": "Express routes are method-specific; app.get() matches only GET requests, app.post() matches POST, etc.; POST to a GET route returns 404 or 405.",
+    "difficulty": "Medium",
+    "tags": ["routing", "http-methods", "req.method", "matching"]
+  }
+]

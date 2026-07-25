@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "Redux Architecture",
+    "question": "Given a reducer: const reducer = (state = 0, action) => { state++; return state; }, why is mutating state a bug?",
+    "options": ["Mutations break time-travel debugging and immutable devtools", "Mutating state is safe, no issues", "Redux always clones state automatically", "Mutations are required for performance"],
+    "correctIndex": 0,
+    "explanation": "Redux relies on immutability for time-travel debugging (DevTools) and to detect changes; mutations break debugging and state comparison.",
+    "difficulty": "Medium",
+    "tags": ["redux", "reducer", "immutable"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Redux Architecture",
+    "question": "Why might dispatch(action1, action2) not work even though both are valid actions?",
+    "options": ["dispatch only accepts one action at a time; queue actions separately", "dispatch can handle multiple actions", "Actions must be dispatched synchronously", "Redux auto-batches multiple dispatches"],
+    "correctIndex": 0,
+    "explanation": "dispatch(action) takes a single action; dispatching multiple requires separate calls or middleware (thunk, saga) to coordinate async actions.",
+    "difficulty": "Medium",
+    "tags": ["redux", "dispatch", "action"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Redux Architecture",
+    "question": "Given const mapStateToProps = (state) => ({ x: state.data.x }), why might the component re-render on unrelated state changes?",
+    "options": ["mapStateToProps runs on every action, even if mapped values didn't change", "mapStateToProps only runs when relevant state changes", "Redux auto-optimizes and skips unnecessary renders", "This pattern always causes unnecessary re-renders"],
+    "correctIndex": 0,
+    "explanation": "mapStateToProps runs on every dispatch; if it returns a new object reference (even with same values), connect() re-renders; use selectors/reselect to memoize.",
+    "difficulty": "Medium-Hard",
+    "tags": ["redux", "mapstate", "rerender"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Redux Architecture",
+    "question": "Why might fetching data in a reducer cause issues? const reducer = (state, action) => { if (action.type === 'FETCH') { fetch(...); } return state; }",
+    "options": ["Side effects in reducers break pure function guarantee and time-travel", "Reducers can call async operations", "fetch is synchronous in Redux", "This is the correct way to handle async in Redux"],
+    "correctIndex": 0,
+    "explanation": "Reducers must be pure; side effects (fetch, logs) break time-travel debugging and make state changes non-deterministic; use middleware (thunk, saga).",
+    "difficulty": "Medium",
+    "tags": ["redux", "reducer", "sideeffect"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Redux Architecture",
+    "question": "Given const state = { x: 1 }; state.x = 2; store.dispatch(action);, why doesn't mutating state directly update Redux?",
+    "options": ["Redux doesn't detect mutations; dispatch and reduce are required to update store", "Direct mutations automatically update Redux", "Mutations are preferred for performance", "Redux auto-syncs state mutations"],
+    "correctIndex": 0,
+    "explanation": "Redux store is immutable; mutating a state object doesn't notify subscribed components; you must dispatch an action and return new state from the reducer.",
+    "difficulty": "Medium",
+    "tags": ["redux", "store", "mutation"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Redux Architecture",
+    "question": "Why might useSelector(state => state.data) on every render cause performance issues?",
+    "options": ["useSelector runs the selector on every dispatch, returns new reference if data is a new object", "useSelector caches and never re-runs", "Selector functions are always memoized", "This pattern has no performance impact"],
+    "correctIndex": 0,
+    "explanation": "useSelector runs the selector on every action; if it returns a new object reference (even with same values), the component re-renders; use reselect or inline memoization.",
+    "difficulty": "Medium-Hard",
+    "tags": ["redux", "selector", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Redux Architecture",
+    "question": "Given const action = { type: 'SET', payload: { x: 1 } };, why is the action type a string and not a constant?",
+    "options": ["Constants prevent typos and make refactoring easier", "Strings are more flexible than constants", "Action types are always strings, no alternative", "Strings and constants are equivalent"],
+    "correctIndex": 0,
+    "explanation": "Using constants (export const SET = 'SET') prevents typos (action.type = 'SETT' goes unnoticed) and enables IDE refactoring for action types.",
+    "difficulty": "Medium",
+    "tags": ["redux", "action", "constant"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Redux Architecture",
+    "question": "Why might middleware like thunk be necessary for async actions? Without thunk: store.dispatch(async () => {...});",
+    "options": ["dispatch only accepts plain objects, not functions; thunk enables function dispatch", "dispatch can handle functions directly", "Async actions don't require middleware", "Thunk is deprecated in modern Redux"],
+    "correctIndex": 0,
+    "explanation": "dispatch(action) expects a plain object; thunk middleware intercepts functions and allows async operations before dispatching the resulting action.",
+    "difficulty": "Medium",
+    "tags": ["redux", "thunk", "async"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Redux Architecture",
+    "question": "Given combineReducers({ user: userReducer, posts: postsReducer }), what is the final state shape?",
+    "options": ["{ user: {...}, posts: {...} }, each reducer manages its slice", "state.user and state.posts are inaccessible", "All state is merged into one flat object", "Reducers cannot be combined"],
+    "correctIndex": 0,
+    "explanation": "combineReducers creates a state shape where each reducer controls its slice; this encourages modularity and predictable state structure.",
+    "difficulty": "Medium",
+    "tags": ["redux", "combine", "state"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Redux Architecture",
+    "question": "Why might Redux DevTools Time-Travel debugging fail if a reducer mutates state? const reducer = (state, action) => { state.x = 2; return state; }",
+    "options": ["Mutations make it impossible to restore old state; each 'version' is the same reference", "Time-travel works even with mutations", "DevTools only work with immutable state libraries", "Mutations are required for time-travel"],
+    "correctIndex": 0,
+    "explanation": "Time-travel captures state snapshots; if all snapshots reference the same mutated object, rewinding shows the current state, not the historical version.",
+    "difficulty": "Medium-Hard",
+    "tags": ["redux", "devtools", "mutation"]
+  }
+]

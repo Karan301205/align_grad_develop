@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const apiRoutes = require('./routes/api');
 const { prisma } = require('./config/db');
 
-// Triggering nodemon reload to load the updated Prisma Client schema: reload 2
+// Triggering nodemon reload to load the updated Prisma Client schema: reload 3
 dotenv.config();
 
 const app = express();
@@ -58,6 +58,12 @@ loadQuestionBankIntoMock().catch((err) => {
   console.warn('[question-bank] mock load skipped:', err.message);
 });
 
+const { ensureGlobalCommunity } = require('./services/community/community.service');
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  // Initialize Global Community at application startup
+  ensureGlobalCommunity().catch(err => {
+    console.warn('[community] Global community startup initialization skipped:', err.message);
+  });
 });

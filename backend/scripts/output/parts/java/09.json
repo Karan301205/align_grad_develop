@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "Design Patterns",
+    "question": "What pattern does this implement?\n```java\nclass Singleton {\n  private static Singleton instance;\n  private Singleton() { }\n  public static Singleton getInstance() {\n    if (instance == null) {\n      instance = new Singleton();\n    }\n    return instance;\n  }\n}\n```",
+    "options": ["Singleton pattern", "Factory pattern", "Builder pattern", "Lazy-loaded not thread-safe Singleton"],
+    "correctIndex": 3,
+    "explanation": "This is a Singleton, but the lazy-loading is not thread-safe; multiple threads may create multiple instances due to race condition.",
+    "difficulty": "Medium-Hard",
+    "tags": ["singleton", "thread-safety", "lazy-loading"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Design Patterns",
+    "question": "Which is a thread-safe Singleton implementation?\n```java\nclass Singleton {\n  private static volatile Singleton instance;\n  private Singleton() { }\n  public static Singleton getInstance() {\n    if (instance == null) {\n      synchronized (Singleton.class) {\n        if (instance == null) {\n          instance = new Singleton();\n        }\n      }\n    }\n    return instance;\n  }\n}\n```",
+    "options": ["Double-checked locking pattern", "Factory pattern", "Observer pattern", "Prototype pattern"],
+    "correctIndex": 0,
+    "explanation": "This is double-checked locking: first check (no lock) for performance, second check (with lock) for thread-safety.",
+    "difficulty": "Medium-Hard",
+    "tags": ["singleton", "double-checked-locking", "thread-safety"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Design Patterns",
+    "question": "What pattern is this?\n```java\ninterface PaymentStrategy {\n  void pay(int amount);\n}\nclass CreditCard implements PaymentStrategy { ... }\nclass PayPal implements PaymentStrategy { ... }\nclass ShoppingCart {\n  private PaymentStrategy strategy;\n  void setStrategy(PaymentStrategy s) { strategy = s; }\n  void checkout() { strategy.pay(total); }\n}\n```",
+    "options": ["Strategy pattern", "Factory pattern", "Adapter pattern", "Decorator pattern"],
+    "correctIndex": 0,
+    "explanation": "Strategy pattern encapsulates algorithms (payment methods) and makes them interchangeable at runtime.",
+    "difficulty": "Medium",
+    "tags": ["strategy-pattern", "encapsulation", "algorithm-selection"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Design Patterns",
+    "question": "Which pattern solves this problem?\n```java\nclass MealBuilder {\n  private Meal meal = new Meal();\n  MealBuilder addBurger() { meal.setBurger(true); return this; }\n  MealBuilder addFries() { meal.setFries(true); return this; }\n  Meal build() { return meal; }\n}\nMeal m = new MealBuilder().addBurger().addFries().build();\n```",
+    "options": ["Builder pattern", "Factory pattern", "Decorator pattern", "Adapter pattern"],
+    "correctIndex": 0,
+    "explanation": "Builder pattern constructs complex objects step by step with a fluent interface.",
+    "difficulty": "Medium",
+    "tags": ["builder-pattern", "fluent-interface", "object-construction"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Design Patterns",
+    "question": "What pattern is demonstrated here?\n```java\nclass Subject {\n  private List<Observer> observers = new ArrayList<>();\n  void attach(Observer o) { observers.add(o); }\n  void notifyObservers() {\n    observers.forEach(o -> o.update());\n  }\n}\ninterface Observer { void update(); }\n```",
+    "options": ["Observer pattern", "Pub-Sub pattern", "State pattern", "Command pattern"],
+    "correctIndex": 0,
+    "explanation": "Observer pattern defines a one-to-many dependency where a subject notifies multiple observers of state changes.",
+    "difficulty": "Medium",
+    "tags": ["observer-pattern", "event-driven", "loose-coupling"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Design Patterns",
+    "question": "Which pattern is this?\n```java\nclass Database {\n  private static Database instance = new Database();\n  private Database() { }\n  public static Database getInstance() { return instance; }\n}\n```",
+    "options": ["Eager-loaded Singleton", "Lazy-loaded Singleton", "Factory pattern", "Prototype pattern"],
+    "correctIndex": 0,
+    "explanation": "This is an eager-loaded Singleton: the instance is created at class loading time, guaranteed thread-safe by JVM.",
+    "difficulty": "Medium",
+    "tags": ["singleton", "eager-loading", "thread-safety"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Design Patterns",
+    "question": "What pattern does this represent?\n```java\ninterface Shape { void draw(); }\nclass Circle implements Shape { ... }\nclass ShapeFactory {\n  static Shape createShape(String type) {\n    switch (type) {\n      case \"circle\": return new Circle();\n      case \"square\": return new Square();\n    }\n  }\n}\n```",
+    "options": ["Factory pattern", "Abstract Factory pattern", "Builder pattern", "Singleton pattern"],
+    "correctIndex": 0,
+    "explanation": "Factory pattern encapsulates object creation logic, decoupling client code from concrete classes.",
+    "difficulty": "Medium",
+    "tags": ["factory-pattern", "object-creation", "loose-coupling"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Design Patterns",
+    "question": "What pattern is this?\n```java\nclass Component {\n  void operation() { System.out.println(\"Component\"); }\n}\nclass Decorator extends Component {\n  private Component component;\n  Decorator(Component c) { this.component = c; }\n  @Override\n  void operation() {\n    System.out.println(\"Decorator\");\n    component.operation();\n  }\n}\n```",
+    "options": ["Decorator pattern", "Adapter pattern", "Bridge pattern", "Facade pattern"],
+    "correctIndex": 0,
+    "explanation": "Decorator pattern adds behavior to objects dynamically without modifying their structure.",
+    "difficulty": "Medium",
+    "tags": ["decorator-pattern", "composition", "behavior-addition"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Design Patterns",
+    "question": "Which pattern models this scenario?\n```java\nclass Document {\n  private Memento memento;\n  void save() { memento = new Memento(state); }\n  void restore() { state = memento.getState(); }\n}\nclass Memento {\n  private Object state;\n  Memento(Object s) { this.state = s; }\n  Object getState() { return state; }\n}\n```",
+    "options": ["Memento pattern", "State pattern", "Command pattern", "Iterator pattern"],
+    "correctIndex": 0,
+    "explanation": "Memento pattern captures and externalizes an object's state without violating encapsulation, enabling undo/redo.",
+    "difficulty": "Medium",
+    "tags": ["memento-pattern", "state-capture", "undo-redo"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Design Patterns",
+    "question": "What pattern avoids tight coupling between client and receiver?\n```java\ninterface Command { void execute(); }\nclass LightOnCommand implements Command {\n  private Light light;\n  public void execute() { light.on(); }\n}\nclass RemoteControl {\n  private Command command;\n  void pressButton() { command.execute(); }\n}\n```",
+    "options": ["Command pattern", "State pattern", "Strategy pattern", "Chain of Responsibility"],
+    "correctIndex": 0,
+    "explanation": "Command pattern encapsulates requests as objects, allowing parameterization and queuing of commands.",
+    "difficulty": "Medium",
+    "tags": ["command-pattern", "encapsulation", "loose-coupling"]
+  }
+]

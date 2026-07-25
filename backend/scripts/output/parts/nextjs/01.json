@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "React Fundamentals",
+    "question": "Your component renders a counter that updates on click, but changes don't persist across navigation back to the page. What's the root issue?",
+    "options": ["State isn't lifted to a parent component or context", "You're using useState without useEffect", "The component is server-rendered and needs use client", "Next.js caches component instances incorrectly"],
+    "correctIndex": 0,
+    "explanation": "Local useState resets when the component unmounts; navigating away and back remounts it, losing state—move to context/provider or use a router-aware store.",
+    "difficulty": "Medium",
+    "tags": ["state-management", "react-lifecycle"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "React Fundamentals",
+    "question": "You render a list with map(), omit keys, and later reorder items in state. What observable bug will users see?",
+    "options": ["List items swap content instead of position", "React throws a console error but renders correctly", "The app crashes with a runtime exception", "List items disappear and reappear"],
+    "correctIndex": 0,
+    "explanation": "Without keys, React relies on index and reuses DOM nodes; reordering causes node content to swap instead of moving, breaking controlled inputs and component state.",
+    "difficulty": "Medium",
+    "tags": ["key-prop", "list-rendering"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "React Fundamentals",
+    "question": "You fetch data inside useState and set it. The fetch fires twice in dev, causing duplicate API calls. How do you stop it?",
+    "options": ["Wrap fetch in useEffect with empty dependency array", "Move fetch outside the component into a utility file", "Set a flag to track if fetch is in progress", "Use useMemo instead of useState"],
+    "correctIndex": 0,
+    "explanation": "React 18 strict mode runs effects twice in dev to detect side effects; useEffect with [] dep array ensures fetch runs once per mount.",
+    "difficulty": "Medium",
+    "tags": ["useeffect", "side-effects"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "React Fundamentals",
+    "question": "You pass a callback to a child component, and it executes on every parent render even though the child never changes. What's the fix?",
+    "options": ["Wrap callback in useCallback with stable deps", "Move callback outside the parent component", "Use memo to wrap the child component", "Rewrite callback as a class method"],
+    "correctIndex": 0,
+    "explanation": "A new function is created on every render, breaking referential equality; useCallback memoizes it so the child receives the same reference across renders.",
+    "difficulty": "Medium",
+    "tags": ["usecallback", "optimization"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "React Fundamentals",
+    "question": "You compute expensive values in your component, and it recalculates them needlessly during re-renders. Which hook prevents this?",
+    "options": ["useMemo to cache the computed value", "useRef to store the value", "useCallback to wrap the calculation", "useContext to lift the value"],
+    "correctIndex": 0,
+    "explanation": "useMemo caches the result and only recalculates if dependencies change, avoiding expensive operations on every render.",
+    "difficulty": "Medium",
+    "tags": ["usememo", "performance"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "React Fundamentals",
+    "question": "You have a form with 10 inputs and call setState on each keystroke. The form lags on older devices. What's a better pattern?",
+    "options": ["Use uncontrolled inputs and validate on submit", "Debounce the state setter calls", "Store all inputs in a single state object", "Move form to a server component"],
+    "correctIndex": 0,
+    "explanation": "Uncontrolled inputs with refs avoid re-renders per keystroke; validate and extract values only on submit, dramatically improving responsiveness.",
+    "difficulty": "Medium-Hard",
+    "tags": ["forms", "performance"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "React Fundamentals",
+    "question": "Your context value updates, but a consumer component doesn't re-render even though it reads from the context. What's the likely cause?",
+    "options": ["The component isn't wrapped in a provider", "The context value is a new object reference every render", "useContext wasn't called in the component", "The provider is lower in the tree than the consumer"],
+    "correctIndex": 1,
+    "explanation": "Context compares by reference; if the provider creates a new object on each render, all consumers re-render even if values didn't change—memoize the value.",
+    "difficulty": "Medium-Hard",
+    "tags": ["context", "optimization"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "React Fundamentals",
+    "question": "You fetch user data on mount and store it in state, but the fetch never runs despite the component mounting. What's wrong?",
+    "options": ["useEffect dependency array is missing or wrong", "The fetch promise isn't awaited", "The API returns a 404 silently", "The component is a server component"],
+    "correctIndex": 0,
+    "explanation": "Missing dependency array makes useEffect not run; wrong deps (e.g., including state that hasn't initialized) can prevent execution.",
+    "difficulty": "Medium",
+    "tags": ["useeffect", "initialization"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "React Fundamentals",
+    "question": "Your component calls setState in a loop, then expects the state to be updated immediately. It isn't. Why?",
+    "options": ["State updates are batched and async in React", "setState requires a callback to confirm the update", "Multiple setState calls cancel each other out", "You must call forceUpdate instead"],
+    "correctIndex": 0,
+    "explanation": "React batches state updates asynchronously for performance; the state doesn't change until the next render cycle completes.",
+    "difficulty": "Medium",
+    "tags": ["state-updates", "async"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "React Fundamentals",
+    "question": "A library exports a component using lazy loading, but your test throws 'Suspended' errors. How do you fix it?",
+    "options": ["Wrap the test in Suspense and provide a fallback", "Mock the component as a regular component", "Use act() from testing-library around renders", "Increase the test timeout"],
+    "correctIndex": 0,
+    "explanation": "Lazy components suspend until loaded; wrap tests in Suspense or mock the component to avoid suspense errors in test environments.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lazy-loading", "testing"]
+  }
+]

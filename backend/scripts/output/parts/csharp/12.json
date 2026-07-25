@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "Async Programming",
+    "question": "What does async/await do?\nasync Task Main() {\n  await Task.Delay(100);\n  Console.WriteLine(\"Done\");\n}",
+    "options": ["Prints Done after 100ms", "Prints Done immediately", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "async marks method as asynchronous; await suspends execution until Task.Delay completes.",
+    "difficulty": "Medium",
+    "tags": ["async", "await", "tasks"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Async Programming",
+    "question": "What is an async deadlock?\nasync Task Main() {\n  var result = GetDataAsync().Result;\n  Console.WriteLine(result);\n}\nasync Task<string> GetDataAsync() {\n  await Task.Delay(100);\n  return \"Data\";\n}",
+    "options": ["Deadlock occurs", "Prints Data", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Using .Result blocks synchronously on async method, blocking the thread waiting for itself.",
+    "difficulty": "Medium-Hard",
+    "tags": ["async", "deadlock", "blocking-async"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Async Programming",
+    "question": "What does Task.Run do?\nasync Task Main() {\n  var result = await Task.Run(() => 5 + 3);\n  Console.WriteLine(result);\n}",
+    "options": ["Prints 8", "Prints 0", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Task.Run executes delegate on thread pool; 5 + 3 = 8.",
+    "difficulty": "Medium",
+    "tags": ["task-run", "thread-pool", "async"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Async Programming",
+    "question": "What does ConfigureAwait(false) do?\nasync Task Method() {\n  await Task.Delay(100).ConfigureAwait(false);\n  Console.WriteLine(\"Done\");\n}",
+    "options": ["Avoids capturing context", "Captures context", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "ConfigureAwait(false) prevents resuming on original context, improving performance.",
+    "difficulty": "Medium-Hard",
+    "tags": ["configureawait", "context", "async-best-practices"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Async Programming",
+    "question": "What does Task.WhenAll do?\nasync Task Main() {\n  var t1 = Task.Delay(50);\n  var t2 = Task.Delay(100);\n  await Task.WhenAll(t1, t2);\n  Console.WriteLine(\"All done\");\n}",
+    "options": ["Waits for all tasks, ~100ms", "Waits 150ms", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "WhenAll waits for all tasks to complete; time is max delay (100ms), not sum.",
+    "difficulty": "Medium",
+    "tags": ["task-whenall", "parallel-execution", "coordination"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Async Programming",
+    "question": "What does Task.WhenAny do?\nasync Task Main() {\n  var t1 = Task.Delay(50);\n  var t2 = Task.Delay(100);\n  var completed = await Task.WhenAny(t1, t2);\n  Console.WriteLine(\"First done\");\n}",
+    "options": ["Prints when first task completes (~50ms)", "Waits 150ms", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "WhenAny completes when first task finishes; t1 (50ms) completes first.",
+    "difficulty": "Medium",
+    "tags": ["task-whenany", "race-condition", "coordination"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Async Programming",
+    "question": "What does CancellationToken do?\nasync Task Main() {\n  var cts = new CancellationTokenSource();\n  var token = cts.Token;\n  var task = LongRunningAsync(token);\n  cts.Cancel();\n  await task;\n}\nasync Task LongRunningAsync(CancellationToken token) {\n  while (!token.IsCancellationRequested) {\n    await Task.Delay(100);\n  }\n}",
+    "options": ["Cancels task gracefully", "Task runs indefinitely", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "CancellationToken allows cancellation; IsCancellationRequested becomes true after Cancel().",
+    "difficulty": "Medium",
+    "tags": ["cancellationtoken", "cancellation", "cooperative-cancellation"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Async Programming",
+    "question": "What does ValueTask do?\nValueTask<int> GetNumber() => new ValueTask<int>(42);\nvar result = await GetNumber();\nConsole.WriteLine(result);",
+    "options": ["Prints 42", "Prints 0", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "ValueTask is a lightweight alternative to Task; avoids allocation for synchronous completion.",
+    "difficulty": "Medium",
+    "tags": ["valuetask", "performance", "async"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Async Programming",
+    "question": "What is async state machine?\nasync Task Method() {\n  await Task.Delay(100);\n  Console.WriteLine(\"A\");\n  await Task.Delay(100);\n  Console.WriteLine(\"B\");\n}",
+    "options": ["Compiler generates state machine", "Interpreted at runtime", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Compiler transforms async method into state machine handling continuation at each await.",
+    "difficulty": "Medium-Hard",
+    "tags": ["async", "state-machine", "compiler-transformation"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Async Programming",
+    "question": "What does async void do?\nasync void ButtonClick() {\n  await Task.Delay(100);\n  Console.WriteLine(\"Click\");\n}",
+    "options": ["Fire-and-forget, not awaitable", "Returns Task", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "async void is fire-and-forget; caller can't await it or handle exceptions, should avoid.",
+    "difficulty": "Medium",
+    "tags": ["async-void", "anti-pattern", "best-practices"]
+  }
+]

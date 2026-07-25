@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Algorithm Complexity",
+    "question": "What is the time complexity of std::sort on a std::vector?",
+    "options": ["O(n)", "O(n log n) average, O(n^2) worst-case", "O(n log n) guaranteed", "depends on initial order"],
+    "correctIndex": 1,
+    "explanation": "std::sort uses introsort (hybrid quicksort/heapsort); O(n log n) average but O(n^2) worst-case for pathological inputs.",
+    "difficulty": "Medium",
+    "tags": ["std-sort", "time-complexity", "sorting"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Algorithm Complexity",
+    "question": "What is the time complexity of std::binary_search on a sorted range?",
+    "options": ["O(n)", "O(log n)", "O(n log n)", "depends on the value searched"],
+    "correctIndex": 1,
+    "explanation": "binary_search divides the range in half each step, achieving O(log n) time.",
+    "difficulty": "Medium",
+    "tags": ["binary-search", "time-complexity", "searching"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Algorithm Complexity",
+    "question": "How does std::find perform compared to binary_search on an unsorted vector?",
+    "options": ["find is faster due to caching", "find is O(n); binary_search requires sorted data", "both are O(log n)", "find is always slower"],
+    "correctIndex": 1,
+    "explanation": "find performs linear search O(n) on unsorted data; binary_search requires pre-sorted data for O(log n).",
+    "difficulty": "Medium",
+    "tags": ["std-find", "linear-search", "time-complexity"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Algorithm Complexity",
+    "question": "What is the time complexity of constructing a std::set from an unsorted std::vector?",
+    "options": ["O(n)", "O(n log n)", "O(n^2)", "depends on the vector size"],
+    "correctIndex": 1,
+    "explanation": "Each insertion into the tree-based set is O(log n); n insertions result in O(n log n) total.",
+    "difficulty": "Medium",
+    "tags": ["std-set", "insertion", "time-complexity"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Algorithm Complexity",
+    "question": "What does Big O notation describe?",
+    "options": ["the exact number of operations", "the upper bound on growth rate of operations", "the average-case performance only", "memory usage only"],
+    "correctIndex": 1,
+    "explanation": "Big O describes worst-case asymptotic complexity; O(n) means the algorithm grows proportionally with input size.",
+    "difficulty": "Medium",
+    "tags": ["big-o-notation", "complexity-analysis"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Algorithm Complexity",
+    "question": "What is the space complexity of std::sort?",
+    "options": ["O(1)", "O(n)", "O(log n) or O(n) depending on implementation", "O(n log n)"],
+    "correctIndex": 2,
+    "explanation": "std::sort uses introsort with O(log n) extra space for recursion stack; some implementations may use O(n).",
+    "difficulty": "Medium-Hard",
+    "tags": ["std-sort", "space-complexity", "in-place-sorting"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Algorithm Complexity",
+    "question": "What is the time complexity of inserting into the middle of a std::list?",
+    "options": ["O(1) after finding the position", "O(n) to find the position", "O(n) total always", "O(log n)"],
+    "correctIndex": 1,
+    "explanation": "Insertion itself is O(1), but finding the position in an unsorted list requires O(n) linear search.",
+    "difficulty": "Medium",
+    "tags": ["std-list", "insertion", "time-complexity"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Algorithm Complexity",
+    "question": "Is std::stable_sort faster or slower than std::sort?",
+    "options": ["stable_sort is always faster", "stable_sort is slower due to stability guarantee", "same speed with different results", "speed depends on data distribution"],
+    "correctIndex": 1,
+    "explanation": "stable_sort maintains relative order of equal elements; this overhead makes it slower than unsorted sort.",
+    "difficulty": "Medium",
+    "tags": ["std-stable-sort", "std-sort", "time-complexity"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Algorithm Complexity",
+    "question": "What is the time complexity of std::remove from a vector?",
+    "options": ["O(n) to rearrange; does not actually erase", "O(1) removal only", "O(n^2) due to erase overhead", "depends on the value"],
+    "correctIndex": 0,
+    "explanation": "std::remove rearranges elements in-place O(n) but does not erase; erase-remove idiom calls erase after remove.",
+    "difficulty": "Medium",
+    "tags": ["std-remove", "erase-remove-idiom", "time-complexity"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Algorithm Complexity",
+    "question": "What is the amortized time complexity of push_back on a vector?",
+    "options": ["O(n) always", "O(1) amortized due to exponential growth", "O(log n)", "O(n log n)"],
+    "correctIndex": 1,
+    "explanation": "push_back is O(1) amortized; occasional O(n) reallocations are spread over many O(1) insertions.",
+    "difficulty": "Medium-Hard",
+    "tags": ["vector", "amortized-complexity", "push-back"]
+  }
+]

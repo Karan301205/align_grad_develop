@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "Exception Handling",
+    "question": "What is printed?\n```java\ntry {\n  throw new Exception();\n} catch (RuntimeException e) {\n  System.out.println(\"Caught\");\n} catch (Exception e) {\n  System.out.println(\"Caught Exception\");\n}\n```",
+    "options": ["Caught", "Caught Exception", "Compilation error", "Unhandled exception"],
+    "correctIndex": 1,
+    "explanation": "Exception is a checked exception, not a RuntimeException subclass; the second catch block handles it and prints 'Caught Exception'.",
+    "difficulty": "Medium",
+    "tags": ["checked-exceptions", "catch-order", "exception-hierarchy"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\n```java\ntry {\n  return 10;\n} finally {\n  System.out.println(\"Finally\");\n}\nSystem.out.println(\"After\");\n```",
+    "options": ["Finally, 10 returned", "After, Finally", "10 returned", "Finally, After, 10 returned"],
+    "correctIndex": 0,
+    "explanation": "finally block always executes; it runs before the return statement takes effect, then the value 10 is returned (After never executes).",
+    "difficulty": "Medium",
+    "tags": ["finally-block", "control-flow", "return-statement"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Exception Handling",
+    "question": "What does this print?\n```java\ntry {\n  int x = 10 / 0;\n} catch (Exception e) {\n  System.out.println(\"Caught\");\n} finally {\n  System.out.println(\"Finally\");\n}\n```",
+    "options": ["Caught", "Caught, Finally", "Finally", "Exception thrown"],
+    "correctIndex": 1,
+    "explanation": "ArithmeticException is caught, prints 'Caught', then finally block executes and prints 'Finally'.",
+    "difficulty": "Medium",
+    "tags": ["exception-handling", "finally-block", "arithmetic-exception"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Exception Handling",
+    "question": "What is printed?\n```java\ntry {\n  int x = Integer.parseInt(\"abc\");\n} catch (NumberFormatException e) {\n  System.out.println(\"Number Error\");\n} catch (Exception e) {\n  System.out.println(\"General Error\");\n}\n```",
+    "options": ["Number Error", "General Error", "Compilation error", "Both messages"],
+    "correctIndex": 0,
+    "explanation": "parseInt('abc') throws NumberFormatException, caught by the first catch block (more specific), so 'Number Error' is printed.",
+    "difficulty": "Medium",
+    "tags": ["exception-hierarchy", "catch-order", "specific-exceptions"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\n```java\ntry {\n  Integer x = null;\n  System.out.println(x + 1);\n} catch (NullPointerException e) {\n  System.out.println(\"NPE\");\n} catch (Exception e) {\n  System.out.println(\"Exception\");\n}\n```",
+    "options": ["NPE", "Exception", "null1", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "null + 1 attempts autoboxing and arithmetic on null, triggering a NullPointerException, caught and prints 'NPE'.",
+    "difficulty": "Medium",
+    "tags": ["null-pointer-exception", "autoboxing", "exception-handling"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Exception Handling",
+    "question": "Can this method be declared?\n```java\nvoid method() throws IOException {\n  System.out.println(\"No exception thrown\");\n}\n```",
+    "options": ["Yes, always valid", "Yes, but warning", "No, throws but doesn't throw", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "A method can declare throws IOException even if it doesn't actually throw it; the declaration is a contract, not a guarantee.",
+    "difficulty": "Medium",
+    "tags": ["throws-clause", "checked-exceptions", "method-contract"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Exception Handling",
+    "question": "What is printed?\n```java\ntry {\n  throw new IllegalArgumentException();\n} finally {\n  throw new RuntimeException();\n}\n```",
+    "options": ["IllegalArgumentException thrown", "RuntimeException thrown", "Both exceptions", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "finally block throws RuntimeException, which suppresses the original IllegalArgumentException; RuntimeException is what propagates.",
+    "difficulty": "Medium-Hard",
+    "tags": ["exception-suppression", "finally-block", "exception-chaining"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\n```java\nint x = 10;\ntry {\n  x = 20;\n  throw new Exception();\n} catch (Exception e) {\n  x = 30;\n} finally {\n  x = 40;\n}\nSystem.out.println(x);\n```",
+    "options": ["20", "30", "40", "Exception thrown"],
+    "correctIndex": 2,
+    "explanation": "x is set to 20, then 30 in catch, then 40 in finally (which always executes last), so final value is 40.",
+    "difficulty": "Medium",
+    "tags": ["finally-block", "variable-assignment", "execution-order"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Exception Handling",
+    "question": "What does this compile to?\n```java\ntry (Scanner sc = new Scanner(System.in)) {\n  String line = sc.nextLine();\n}\n```",
+    "options": ["Try-with-resources, auto-closes Scanner", "Compilation error", "Requires finally block", "Resource leak"],
+    "correctIndex": 0,
+    "explanation": "Try-with-resources (Java 7+) automatically closes the Scanner resource after the try block, no finally needed.",
+    "difficulty": "Medium",
+    "tags": ["try-with-resources", "resource-management", "auto-closeable"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Exception Handling",
+    "question": "What is printed?\n```java\ntry {\n  System.out.println(\"Try\");\n  if (true) throw new Exception();\n} catch (RuntimeException e) {\n  System.out.println(\"Runtime\");\n} finally {\n  System.out.println(\"Finally\");\n}\nSystem.out.println(\"After\");\n```",
+    "options": ["Try, Runtime, Finally, After", "Try, Finally", "Try, Runtime, Finally", "Try, Finally, After, Exception"],
+    "correctIndex": 1,
+    "explanation": "Exception (not RuntimeException) is thrown, not caught by catch, but finally still executes; After is skipped as exception propagates.",
+    "difficulty": "Medium",
+    "tags": ["exception-propagation", "finally-block", "uncaught-exceptions"]
+  }
+]

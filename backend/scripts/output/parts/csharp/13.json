@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "Performance Optimization",
+    "question": "What does the 'in' modifier do for performance?\nvoid ProcessData(in int[] data) {\n  // Uses data without copying\n}",
+    "options": ["Passes by reference, avoids copy", "Passes by value", "Compilation error", "Slows down performance"],
+    "correctIndex": 0,
+    "explanation": "The 'in' modifier passes struct/array by reference, avoiding expensive copies.",
+    "difficulty": "Medium",
+    "tags": ["performance", "ref-parameters", "memory-efficiency"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Performance Optimization",
+    "question": "What does struct vs class affect for allocation?\nstruct Point { public int X; public int Y; }\nvar p = new Point { X = 1, Y = 2 };",
+    "options": ["Stack allocation, faster", "Heap allocation", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Structs allocate on stack, avoiding GC overhead and improving cache locality.",
+    "difficulty": "Medium",
+    "tags": ["allocation", "value-types", "performance"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Performance Optimization",
+    "question": "What does string interning optimize?\nstring a = \"test\";\nstring b = \"test\";\nConsole.WriteLine(ReferenceEquals(a, b));",
+    "options": ["True (same reference)", "False (different references)", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "String interning caches identical strings, reducing memory and speeding comparison.",
+    "difficulty": "Medium",
+    "tags": ["string-interning", "memory", "string-optimization"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Performance Optimization",
+    "question": "What does StringBuilder do for string concatenation?\nvar sb = new StringBuilder();\nfor (int i = 0; i < 1000; i++) {\n  sb.Append(\"x\");\n}\nvar result = sb.ToString();",
+    "options": ["Efficient O(n) concatenation", "Inefficient repeated allocations", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "StringBuilder avoids repeated string allocations, maintaining a mutable buffer.",
+    "difficulty": "Medium",
+    "tags": ["stringbuilder", "string-concatenation", "performance"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Performance Optimization",
+    "question": "What does object pooling prevent?\nvar pool = new ObjectPool<ExpensiveObject>();\nvar obj = pool.Get();\n// Use obj\npool.Return(obj);",
+    "options": ["Repeated allocation/deallocation", "Memory leaks", "Compilation error", "Nothing"],
+    "correctIndex": 0,
+    "explanation": "Object pooling reuses instances, avoiding expensive allocation and GC pauses.",
+    "difficulty": "Medium",
+    "tags": ["object-pooling", "garbage-collection", "performance"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Performance Optimization",
+    "question": "What does Span<T> optimize?\nSpan<int> data = stackalloc int[100];\nfor (int i = 0; i < 100; i++) {\n  data[i] = i;\n}",
+    "options": ["Stack allocation, no heap", "Heap allocation", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Span<T> with stackalloc allocates on stack, avoiding heap allocation and GC.",
+    "difficulty": "Medium-Hard",
+    "tags": ["span", "stackalloc", "performance"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Performance Optimization",
+    "question": "What does SIMD optimization enable?\nvar vector = new Vector<int>(new[] { 1, 2, 3, 4 });\nvar doubled = vector * 2;",
+    "options": ["Parallel operations on multiple values", "Sequential processing", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "SIMD (vectorization) processes multiple data elements in parallel using CPU instructions.",
+    "difficulty": "Medium-Hard",
+    "tags": ["simd", "vectorization", "performance"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Performance Optimization",
+    "question": "What does memory allocation cost?\nvar list1 = new List<int> { 1, 2, 3, 4, 5 };\nvar list2 = new List<int>(10);\nlist2.AddRange(list1);",
+    "options": ["Pre-allocating capacity avoids reallocations", "Reallocates every Add", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Pre-allocated capacity avoids repeated array resizing during collection growth.",
+    "difficulty": "Medium",
+    "tags": ["memory-allocation", "capacity", "performance"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Performance Optimization",
+    "question": "What does lazy initialization optimize?\nvar lazy = new Lazy<ExpensiveObject>(() => new ExpensiveObject());\nvar obj = lazy.Value;",
+    "options": ["Defers creation until first use", "Creates immediately", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Lazy<T> delays expensive initialization until the Value property is accessed.",
+    "difficulty": "Medium",
+    "tags": ["lazy", "initialization", "performance"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Performance Optimization",
+    "question": "What does boxing cost for performance?\nint value = 42;\nobject box = value;\nint unbox = (int)box;",
+    "options": ["Allocates heap object, causes GC pressure", "No allocation", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Boxing allocates a heap object and triggers GC; repeated boxing degrades performance.",
+    "difficulty": "Medium",
+    "tags": ["boxing", "heap-allocation", "performance"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Error Handling",
+    "question": "package main\nimport \"fmt\"\nfunc f() error {\n  return fmt.Errorf(\"failed: %d\", 42)\n}\nfunc main() {\n  err := f()\n  if err != nil {\n    fmt.Println(err)\n  }\n}",
+    "options": ["failed: 42", "failed", "nil", "panic"],
+    "correctIndex": 0,
+    "explanation": "fmt.Errorf creates formatted error; prints the error message.",
+    "difficulty": "Medium",
+    "tags": ["errors", "error-interface"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Error Handling",
+    "question": "package main\nimport \"fmt\"\ntype MyErr struct{}\nfunc (m *MyErr) Error() string {\n  return \"my error\"\n}\nfunc main() {\n  var e error = &MyErr{}\n  fmt.Println(e)\n}",
+    "options": ["my error", "&{}", "panic", "compile error"],
+    "correctIndex": 0,
+    "explanation": "Custom error implements Error() method; interface calls it to get message.",
+    "difficulty": "Medium",
+    "tags": ["error-interface", "custom-errors"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Error Handling",
+    "question": "package main\nimport \"fmt\"\nfunc f() (int, error) {\n  return 0, fmt.Errorf(\"error\")\n}\nfunc main() {\n  x, err := f()\n  if err == nil {\n    fmt.Println(x)\n  }\n}",
+    "options": ["nothing", "0", "error", "panic"],
+    "correctIndex": 0,
+    "explanation": "f returns error; err is not nil, so the if block skips.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "control-flow"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Error Handling",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  defer func() {\n    if r := recover(); r != nil {\n      fmt.Println(\"caught:\", r)\n    }\n  }()\n  panic(\"oops\")\n  fmt.Println(\"after\")\n}",
+    "options": ["caught: oops", "oops", "after", "panic"],
+    "correctIndex": 0,
+    "explanation": "Deferred recover catches panic value; prints caught: oops.",
+    "difficulty": "Medium",
+    "tags": ["panic", "recover", "defer"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Error Handling",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"errors\"\n)\nfunc main() {\n  err := errors.New(\"test\")\n  fmt.Println(err)\n}",
+    "options": ["test", "error", "nil", "panic"],
+    "correctIndex": 0,
+    "explanation": "errors.New creates a new error value; prints the message.",
+    "difficulty": "Medium",
+    "tags": ["errors", "error-creation"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Error Handling",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"errors\"\n)\nfunc f() error {\n  return errors.New(\"wrapped error\")\n}\nfunc main() {\n  err := f()\n  if errors.Is(err, errors.New(\"wrapped error\")) {\n    fmt.Println(\"match\")\n  } else {\n    fmt.Println(\"no match\")\n  }\n}",
+    "options": ["no match", "match", "panic", "compile error"],
+    "correctIndex": 0,
+    "explanation": "errors.Is checks if err equals the target error by value; New() returns different instances.",
+    "difficulty": "Medium-Hard",
+    "tags": ["errors.Is", "error-wrapping"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Error Handling",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"errors\"\n)\nvar ErrNotFound = errors.New(\"not found\")\nfunc f() error {\n  return ErrNotFound\n}\nfunc main() {\n  if errors.Is(f(), ErrNotFound) {\n    fmt.Println(\"found error\")\n  }\n}",
+    "options": ["found error", "not found", "nothing", "panic"],
+    "correctIndex": 0,
+    "explanation": "errors.Is matches the same error instance; correctly identifies ErrNotFound.",
+    "difficulty": "Medium",
+    "tags": ["errors.Is", "error-comparison"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Error Handling",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"errors\"\n)\ntype MyErr struct{ Code int }\nfunc (m *MyErr) Error() string { return \"error\" }\nfunc main() {\n  err := &MyErr{Code: 500}\n  if e, ok := err.(interface{Code int}); ok {\n    fmt.Println(e.Code)\n  }\n}",
+    "options": ["500", "0", "compile error", "panic"],
+    "correctIndex": 2,
+    "explanation": "Type assertion on embedded field interface is invalid; embedded structs must match exact type.",
+    "difficulty": "Medium-Hard",
+    "tags": ["type-assertion", "interfaces", "errors"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Error Handling",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"errors\"\n)\ntype CustomErr struct{ msg string }\nfunc (c *CustomErr) Error() string { return c.msg }\nfunc main() {\n  var e error = &CustomErr{msg: \"test\"}\n  fmt.Println(e)\n}",
+    "options": ["test", "CustomErr", "panic", "compile error"],
+    "correctIndex": 0,
+    "explanation": "Custom type implements Error() method; fmt.Println calls it and prints msg.",
+    "difficulty": "Medium",
+    "tags": ["custom-errors", "error-interface"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Error Handling",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  defer func() {\n    recover()\n  }()\n  var p *int\n  *p = 1\n}",
+    "options": ["nothing", "panic", "nil", "0"],
+    "correctIndex": 0,
+    "explanation": "Nil pointer dereference panics; deferred recover catches it; program exits normally.",
+    "difficulty": "Medium-Hard",
+    "tags": ["panic", "recover", "nil-dereference"]
+  }
+]

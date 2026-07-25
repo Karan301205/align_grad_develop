@@ -1,0 +1,167 @@
+[
+  {
+    "skillName": "Express JS",
+    "subtopic": "Express Framework",
+    "question": "Your Express app calls app.use(middleware) multiple times with different handlers. You run two requests simultaneously. In what order are middleware functions called?",
+    "options": [
+      "Both requests execute the middleware in parallel without order guarantee",
+      "Each request flows through middleware in the order they were registered, independently",
+      "Only the first registered middleware runs; others are skipped",
+      "Middleware runs in reverse order of registration"
+    ],
+    "correctIndex": 1,
+    "explanation": "Each request flows through the middleware stack sequentially in the order registered; simultaneous requests have independent middleware chains.",
+    "difficulty": "Medium",
+    "tags": ["middleware", "request-flow", "ordering"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Express Framework",
+    "question": "An app.get() and app.all() both match the same route '/data'. If both are registered, why does only one handler execute?",
+    "options": [
+      "app.all() has priority and skips app.get() handlers",
+      "app.get() has priority and skips app.all() handlers",
+      "Whichever is registered first executes; the second is ignored",
+      "Both execute in registration order unless next() is not called"
+    ],
+    "correctIndex": 3,
+    "explanation": "Both handlers execute in registration order, but if the first handler sends a response without calling next(), the second never runs because the response is complete.",
+    "difficulty": "Medium",
+    "tags": ["routing", "handler-order", "next", "response-flow"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Express Framework",
+    "question": "You set app.set('view engine', 'ejs') but a template still renders with another engine. What's the most likely cause?",
+    "options": [
+      "app.set() was never called correctly",
+      "The file extension doesn't match the engine (e.g., file.pug with ejs engine)",
+      "The view directory is set to the wrong path",
+      "EJS package is not installed in node_modules"
+    ],
+    "correctIndex": 1,
+    "explanation": "Express matches the file extension to the registered engine; if the template has the wrong extension, Express uses a different engine even if app.set() declared EJS.",
+    "difficulty": "Medium",
+    "tags": ["view-engine", "template-rendering", "file-matching"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Express Framework",
+    "question": "app.disable('x-powered-by') should remove the 'X-Powered-By: Express' header, but it still appears in responses. Which debugging step would reveal the issue?",
+    "options": [
+      "Check if a middleware is explicitly setting the header after disable()",
+      "Verify the HTTP version supports headers",
+      "Ensure the client supports receiving headers",
+      "Check if Express was compiled with headers enabled"
+    ],
+    "correctIndex": 0,
+    "explanation": "app.disable('x-powered-by') removes Express's automatic header, but a middleware added after could re-set it; trace the middleware stack to find the culprit.",
+    "difficulty": "Medium",
+    "tags": ["headers", "configuration", "middleware", "debugging"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Express Framework",
+    "question": "You create a custom middleware function that returns a function returning a function: (options) => (req, res, next) => { ... }. Why use this pattern?",
+    "options": [
+      "It's faster than a normal middleware function",
+      "It allows configuration parameters to be set at startup, not per-request",
+      "Express requires all middleware to be triple-nested",
+      "It prevents res.send() from being called more than once"
+    ],
+    "correctIndex": 1,
+    "explanation": "Higher-order middleware (HOF pattern) lets you pass configuration options when registering, capturing them in a closure for every request.",
+    "difficulty": "Medium",
+    "tags": ["middleware", "higher-order-functions", "configuration", "closure"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Express Framework",
+    "question": "app.use('/api', router) mounts a router at /api. Inside the router, a route is defined as router.get('/users'). What is the full path to match requests?",
+    "options": [
+      "/users",
+      "/api/users",
+      "/api/api/users",
+      "/routers/api/users"
+    ],
+    "correctIndex": 1,
+    "explanation": "Mounted routers prepend their mount path, so /api + /users = /api/users for the full matching route.",
+    "difficulty": "Medium",
+    "tags": ["routing", "router-mounting", "path-composition"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Express Framework",
+    "question": "You call app.engine('custom', customRenderFunction) and set app.set('view engine', 'custom'). A template renders but the customRenderFunction receives unexpected arguments. Why?",
+    "options": [
+      "app.engine() always passes the same 3 arguments regardless of configuration",
+      "res.render() calls the engine with (path, options, callback); ensure your function signature matches",
+      "Custom engines can't receive options from res.render()",
+      "The file path is always passed as the second argument, never the first"
+    ],
+    "correctIndex": 1,
+    "explanation": "res.render() calls the engine function with (path, options, callback); mismatch between expected and actual arguments causes undefined behavior.",
+    "difficulty": "Medium",
+    "tags": ["view-engine", "custom-engine", "function-signature"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Express Framework",
+    "question": "An app.listen(port, callback) callback never fires. What's NOT a possible cause?",
+    "options": [
+      "The port is already in use by another process",
+      "The port number is negative or exceeds 65535",
+      "A middleware threw a synchronous error before the app started",
+      "The callback is wrapped in a Promise that never resolves"
+    ],
+    "correctIndex": 2,
+    "explanation": "Synchronous middleware errors occur during route definition, not during app.listen(); listen() will still fire its callback unless the port itself is problematic.",
+    "difficulty": "Medium-Hard",
+    "tags": ["app.listen", "startup", "error-handling", "port"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Express Framework",
+    "question": "app.locals.user = {name: 'John'} sets a template variable. In a route, res.render('page', {user: {name: 'Jane'}}) is called. Which user object reaches the template?",
+    "options": [
+      "app.locals.user (John), because it's set at the app level",
+      "res.locals.user (Jane), because it's passed directly to render()",
+      "Both are merged; the template receives {name: 'John', name: 'Jane'}",
+      "Neither; the template receives an empty object"
+    ],
+    "correctIndex": 1,
+    "explanation": "res.render() options override app.locals; Jane's user object is rendered, because passed-in variables have higher precedence.",
+    "difficulty": "Medium",
+    "tags": ["templates", "locals", "variable-scope", "precedence"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Express Framework",
+    "question": "You register app.use(express.json()) but req.body is undefined in a POST handler. The Content-Type header is set to 'application/json'. What's the issue?",
+    "options": [
+      "express.json() only works with Content-Type 'application/x-www-form-urlencoded'",
+      "The request payload didn't reach the middleware (e.g., client sent no body)",
+      "You called app.use(express.json()) after the route handler",
+      "express.json() requires app.use(express.urlencoded()) first"
+    ],
+    "correctIndex": 2,
+    "explanation": "Middleware must be registered before route handlers; if express.json() is registered after the route, it never parses the body for that route.",
+    "difficulty": "Medium",
+    "tags": ["middleware", "body-parsing", "registration-order", "req.body"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Express Framework",
+    "question": "app.use(express.static('public')) serves static files. A file at public/index.html is requested as GET /index.html, but returns 404. Why?",
+    "options": [
+      "Static middleware only serves files if the exact path matches case-sensitively",
+      "The file exists but static middleware is disabled by default",
+      "express.static() serves from a public URL path, not the file system root",
+      "The file name 'index.html' is reserved and cannot be served statically"
+    ],
+    "correctIndex": 0,
+    "explanation": "On case-sensitive file systems (Linux, macOS), express.static() requires case-sensitive paths; GET /Index.html won't match public/index.html.",
+    "difficulty": "Medium-Hard",
+    "tags": ["static-files", "file-system", "case-sensitivity", "404"]
+  }
+]

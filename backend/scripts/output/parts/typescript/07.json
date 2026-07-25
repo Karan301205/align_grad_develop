@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Error Handling",
+    "question": "Given `try { } catch (e) { }` — what is the type of e without explicit annotation?",
+    "options": ["Error", "unknown", "any", "void"],
+    "correctIndex": 1,
+    "explanation": "TypeScript 4.0+ types caught errors as unknown, forcing runtime checks before accessing properties.",
+    "difficulty": "Medium",
+    "tags": ["try-catch", "error-types", "type-safety"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Error Handling",
+    "question": "Can you throw a value that is not an Error instance?",
+    "options": ["No, only Error can be thrown", "Yes, any value is throwable", "Yes, but TypeScript warns", "No, throwing requires instanceof"],
+    "correctIndex": 1,
+    "explanation": "JavaScript allows throwing any value; TypeScript does not restrict what can be thrown.",
+    "difficulty": "Medium",
+    "tags": ["throw-statements", "error-objects", "type-safety"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Error Handling",
+    "question": "Does `function f(): never { throw new Error(); }` correctly indicate it never returns?",
+    "options": ["No, never is for non-exhaustive", "Yes, never means no return paths", "Yes, but function must actually throw", "No, function must have explicit return"],
+    "correctIndex": 1,
+    "explanation": "never return type indicates the function always throws or loops infinitely, never reaching a return statement.",
+    "difficulty": "Medium",
+    "tags": ["never-type", "unreachable-code", "exhaustiveness"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Error Handling",
+    "question": "Given `try { JSON.parse(x); } catch (e: unknown) { console.log(e.message); }` — does this compile?",
+    "options": ["Yes, unknown has all properties", "No, unknown has no accessible properties", "Yes, with optional chaining", "No, e cannot be annotated"],
+    "correctIndex": 1,
+    "explanation": "unknown disallows property access without narrowing; e.message is not accessible unless e is checked/cast first.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "unknown-type", "type-safety"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Error Handling",
+    "question": "Can you use a type guard function to narrow error types in catch blocks?",
+    "options": ["No, type guards do not apply to errors", "Yes, with a custom type guard", "Yes, but only built-in checks work", "No, errors are always any or unknown"],
+    "correctIndex": 1,
+    "explanation": "A type guard like `(e: unknown): e is TypeError => e instanceof TypeError` enables safe error type narrowing.",
+    "difficulty": "Medium-Hard",
+    "tags": ["type-guards", "error-handling", "error-narrowing"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Error Handling",
+    "question": "Given `async function f() { throw new Error(); }` — what is the return type?",
+    "options": ["Promise<never>", "Promise<void>", "Promise<Error>", "Error"],
+    "correctIndex": 0,
+    "explanation": "Async functions returning a Promise<T>; if the function throws, T is never (no completion path), so return is Promise<never>.",
+    "difficulty": "Medium-Hard",
+    "tags": ["async-functions", "promise-types", "error-propagation"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Error Handling",
+    "question": "Does `const err: Error = new TypeError('x');` work because TypeError extends Error?",
+    "options": ["No, TypeError is a separate type", "Yes, TypeError is a subtype of Error", "Yes, but with a warning", "No, each error type is nominal"],
+    "correctIndex": 1,
+    "explanation": "TypeError extends Error; more specific error types are assignable to the base Error type.",
+    "difficulty": "Medium",
+    "tags": ["error-inheritance", "subtyping", "error-types"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Error Handling",
+    "question": "Given `try { } catch (e) { } finally { return 5; }` — does the finally block's return override?",
+    "options": ["No, catch return takes precedence", "Yes, finally return overrides", "Yes, but TypeScript warns", "No, return in finally is an error"],
+    "correctIndex": 1,
+    "explanation": "A return statement in finally overrides any pending return from try or catch; finally executes last.",
+    "difficulty": "Medium-Hard",
+    "tags": ["try-finally", "control-flow", "return-semantics"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Error Handling",
+    "question": "Can TypeScript enforce that all thrown errors are instances of a specific class?",
+    "options": ["No, throw accepts any value", "Yes, with strict error handling flags", "Yes, if all throws are annotated", "No, but linters can warn"],
+    "correctIndex": 0,
+    "explanation": "TypeScript does not enforce error types on throw statements; only linters can suggest best practices.",
+    "difficulty": "Medium",
+    "tags": ["throw-statements", "error-types", "type-enforcement"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Error Handling",
+    "question": "Given `function f(x: number | undefined) { if (!x) throw new Error(); return x + 1; }` — what is x's type after the check?",
+    "options": ["number | undefined", "number", "undefined", "never"],
+    "correctIndex": 1,
+    "explanation": "Control flow analysis sees the throw as a guard; x is narrowed to number (excluding undefined and falsy values).",
+    "difficulty": "Medium",
+    "tags": ["control-flow-analysis", "type-narrowing", "error-guards"]
+  }
+]

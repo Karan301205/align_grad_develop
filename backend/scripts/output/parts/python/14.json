@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Web Development Frameworks",
+    "question": "What does Flask's @app.route decorator do?\n```python\nfrom flask import Flask\napp = Flask(__name__)\n\n@app.route('/hello')\ndef hello():\n    return 'Hello World'\n```",
+    "options": ["Runs function on startup", "Maps URL path to function", "Creates database table", "Authenticates user"],
+    "correctIndex": 1,
+    "explanation": "route decorator maps a URL path to a view function; accessing /hello calls hello().",
+    "difficulty": "Medium",
+    "tags": ["flask", "routing", "decorator"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Web Development Frameworks",
+    "question": "What does request.args access in Flask?\n```python\nfrom flask import Flask, request\n\n@app.route('/search')\ndef search():\n    q = request.args.get('q')\n    return f'Searching for {q}'\n```",
+    "options": ["POST data", "Query string parameters", "Cookies", "Headers"],
+    "correctIndex": 1,
+    "explanation": "request.args is a dict-like object containing URL query parameters from GET requests.",
+    "difficulty": "Medium",
+    "tags": ["flask", "request", "query-parameters"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Web Development Frameworks",
+    "question": "What does request.form do in Flask?\n```python\nfrom flask import Flask, request\n\n@app.route('/submit', methods=['POST'])\ndef submit():\n    data = request.form.get('field')\n    return f'Received: {data}'\n```",
+    "options": ["Query parameters", "POST form data", "JSON body", "File uploads"],
+    "correctIndex": 1,
+    "explanation": "request.form accesses form-encoded data from POST requests (application/x-www-form-urlencoded).",
+    "difficulty": "Medium",
+    "tags": ["flask", "request", "form-data"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Web Development Frameworks",
+    "question": "What does Flask jsonify() return?\n```python\nfrom flask import Flask, jsonify\n\n@app.route('/data')\ndef get_data():\n    return jsonify({'key': 'value'})\n```",
+    "options": ["Dict object", "JSON string with correct content-type header", "Python dict", "Error"],
+    "correctIndex": 1,
+    "explanation": "jsonify converts a dict to JSON response with correct headers (application/json).",
+    "difficulty": "Medium",
+    "tags": ["flask", "jsonify", "json-response"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Web Development Frameworks",
+    "question": "What does Django ORM Model represent?\n```python\nfrom django.db import models\n\nclass User(models.Model):\n    name = models.CharField(max_length=100)\n    email = models.EmailField()\n```",
+    "options": ["Database table structure", "Maps to database table; instances are rows", "API endpoint", "Middleware"],
+    "correctIndex": 1,
+    "explanation": "Django Model class represents a database table; defining fields creates the table schema.",
+    "difficulty": "Medium",
+    "tags": ["django", "orm", "model"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Web Development Frameworks",
+    "question": "What does Django QuerySet filter() return?\n```python\nfrom django.db.models import QuerySet\n\nUsers.objects.filter(age__gt=18)\n```",
+    "options": ["Single user", "List of users matching condition", "Boolean", "User count"],
+    "correctIndex": 1,
+    "explanation": "filter() returns a QuerySet of objects matching the condition; __gt is 'greater than' lookup.",
+    "difficulty": "Medium",
+    "tags": ["django", "queryset", "filter"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Web Development Frameworks",
+    "question": "What does Django's @login_required decorator do?\n```python\nfrom django.contrib.auth.decorators import login_required\n\n@login_required\ndef protected_view(request):\n    return HttpResponse('Private content')\n```",
+    "options": ["Logs in user automatically", "Redirects unauthenticated users to login", "Checks permissions", "Blocks all access"],
+    "correctIndex": 1,
+    "explanation": "login_required redirects unauthenticated requests to the login page.",
+    "difficulty": "Medium",
+    "tags": ["django", "authentication", "decorator"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Web Development Frameworks",
+    "question": "What does REST API status code 201 indicate?\n```python\nfrom flask import Flask, jsonify\n\n@app.route('/users', methods=['POST'])\ndef create_user():\n    return jsonify(user), 201\n```",
+    "options": ["OK success", "Resource created", "Not found", "Server error"],
+    "correctIndex": 1,
+    "explanation": "201 Created indicates a resource was successfully created via POST.",
+    "difficulty": "Medium",
+    "tags": ["rest-api", "http-status", "http-codes"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Web Development Frameworks",
+    "question": "What does CORS middleware prevent?\n```python\nfrom flask_cors import CORS\nCORS(app)\n```",
+    "options": ["SQL injection", "CSRF attacks", "Cross-Origin Resource Sharing errors", "Invalid input"],
+    "correctIndex": 2,
+    "explanation": "CORS (Cross-Origin Resource Sharing) middleware allows cross-origin requests; without it, browser blocks them.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cors", "middleware", "security"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Web Development Frameworks",
+    "question": "What does Flask session store?\n```python\nfrom flask import Flask, session\n\n@app.route('/login')\ndef login():\n    session['user_id'] = 123\n    return 'Logged in'\n```",
+    "options": ["Server memory only", "Encrypted client-side cookie", "Database", "Files"],
+    "correctIndex": 1,
+    "explanation": "Flask session stores data in signed cookies; data persists across requests but is client-side.",
+    "difficulty": "Medium-Hard",
+    "tags": ["flask", "session", "cookies"]
+  }
+]

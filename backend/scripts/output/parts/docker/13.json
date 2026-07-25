@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Kubernetes Integration",
+    "question": "A Docker image is built locally and needs to be deployed to Kubernetes. Running `docker build -t app:v1 .` creates an image in the local Docker daemon, but Kubernetes cannot find it. What is the issue?",
+    "options": ["Kubernetes requires images to be pushed to a registry (Docker Hub, ECR, etc.); use `docker push` before deploying", "Kubernetes has its own image cache; use `kubectl pull app:v1` to import the image", "Kubernetes can access local Docker images if the node has the image; otherwise, images must be in a registry", "The image needs to be tagged with the registry hostname (e.g., `docker build -t registry.io/app:v1 .`)"],
+    "correctIndex": 2,
+    "explanation": "Kubernetes can use local images (imagePullPolicy: Never) on a single-node cluster, but for multi-node clusters, the image must be on all nodes or in a registry; best practice is to push to a registry and use imagePullPolicy: Always.",
+    "difficulty": "Medium",
+    "tags": ["kubernetes-images", "image-registry", "image-pull-policy"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Kubernetes Integration",
+    "question": "A Docker container runs with `docker run -v /data:/data app`. When converting to Kubernetes, you define a Pod with `volumeMounts: [{name: data, mountPath: /data}]` and `volumes: [{name: data, emptyDir: {}}]`. The Pod starts, but data written to /data is lost when the Pod restarts. Is this expected?",
+    "options": ["Yes, emptyDir volumes are ephemeral and are deleted when the Pod terminates; use PersistentVolumeClaim for persistent data", "No, emptyDir should persist across Pod restarts; check if the underlying node is rebooting", "Yes, this is expected; emptyDir is only for temporary files like caches", "No, you must use `volumeMounts: {persistentVolumeClaim: data}` to preserve data"],
+    "correctIndex": 0,
+    "explanation": "emptyDir is a temporary volume tied to the Pod's lifecycle; when the Pod is deleted or restarted, emptyDir is lost; use PersistentVolumeClaim (PVC) with a PersistentVolume for data that must survive Pod restarts.",
+    "difficulty": "Medium",
+    "tags": ["kubernetes-volumes", "emptydir", "persistent-storage"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Kubernetes Integration",
+    "question": "A Dockerfile specifies `EXPOSE 8000` and the Kubernetes Pod runs this image. The Service has `ports: [{containerPort: 8000, protocol: TCP}]`. Traffic to the Service IP fails to reach the container. What is the issue?",
+    "options": ["EXPOSE is only for documentation; Kubernetes must explicitly declare the port in the Service; this is correct", "The Service port must match the EXPOSE port; they are 8000 and 8000, so this is correct", "The application inside the container must listen on all interfaces (0.0.0.0); verify with `kubectl exec -it <pod> netstat -tlnp`", "Kubernetes services automatically expose EXPOSE ports; no further configuration is needed"],
+    "correctIndex": 2,
+    "explanation": "EXPOSE and Service port declaration both declare port 8000, but if the application listens only on 127.0.0.1 inside the container, external traffic cannot reach it; verify the app binds to 0.0.0.0:8000 with `netstat` or `ss`.",
+    "difficulty": "Medium",
+    "tags": ["kubernetes-services", "port-binding", "container-networking"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Kubernetes Integration",
+    "question": "A Docker Compose file has `services: {app: {image: app:v1}, db: {image: postgres:13}}`. Converting to Kubernetes, you create two Pods (one for app, one for db). The app Pod's connection string is `postgresql://db:5432/mydb`. The app cannot connect. Why?",
+    "options": ["Kubernetes Pods do not automatically discover service names; create a Kubernetes Service named `db` to enable DNS resolution", "The connection string should use the Pod name, not the Service name; use `postgresql://db-pod:5432/mydb`", "Kubernetes automatically creates Services; the connection string is correct but the database Pod is not listening on TCP 5432", "The connection string format is wrong for Kubernetes; use `postgresql://db.default:5432/mydb` with the namespace"],
+    "correctIndex": 0,
+    "explanation": "Kubernetes does not auto-create Services; create a Service named `db` with a selector matching the database Pod; then the app Pod can reach it via `db.<namespace>.svc.cluster.local` (or just `db` in the same namespace).",
+    "difficulty": "Medium",
+    "tags": ["kubernetes-services", "service-discovery", "pod-communication"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Kubernetes Integration",
+    "question": "A Docker image includes a startup script that reads config from `/etc/app/config.json`. Converting to Kubernetes, you mount a ConfigMap at `/etc/app/`. The Pod starts but the application crashes because it cannot find the config file. What is the issue?",
+    "options": ["ConfigMap mounting replaces the entire directory; if other files were expected in /etc/app/, they are lost; use subPath to mount individual files", "The ConfigMap must be created with `kubectl create configmap app-config --from-file=/etc/app/config.json`", "Kubernetes ConfigMap volumes are read-only by default; the application cannot write to the config", "The Pod is trying to read the ConfigMap before it is initialized; add a startup delay with `sleep 5`"],
+    "correctIndex": 0,
+    "explanation": "Mounting a ConfigMap at a directory replaces that directory's entire content; if the original image has other files in /etc/app/, they are inaccessible; use `subPath: config.json` to mount only the config file without replacing the directory.",
+    "difficulty": "Medium-Hard",
+    "tags": ["kubernetes-configmaps", "volume-mounting", "subpath"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Kubernetes Integration",
+    "question": "A Dockerfile runs the application as root (`USER root`). When deployed to Kubernetes with a non-root SecurityContext (`runAsUser: 1000`), the container fails to start with 'Permission denied'. What is the issue?",
+    "options": ["Kubernetes' runAsUser overrides the Dockerfile's USER; if the application needs root, remove the SecurityContext", "The application or a file it needs (binary, config) has root-only permissions; fix with `chmod` in the Dockerfile before the USER directive", "Kubernetes does not support changing users; use Docker's built-in user isolation instead", "The SecurityContext is incompatible with this image; use `allowPrivilegeEscalation: true` to bypass it"],
+    "correctIndex": 1,
+    "explanation": "Kubernetes' runAsUser overrides the Dockerfile's USER; if files in the image are owned by root with 0600 permissions, a non-root user cannot access them; either fix permissions in the Dockerfile or accept running as root if necessary.",
+    "difficulty": "Medium-Hard",
+    "tags": ["kubernetes-security-context", "user-permissions", "security"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Kubernetes Integration",
+    "question": "A Docker image is 1 GB and takes 30 seconds to pull from the registry. With 100 Kubernetes Nodes and a rolling update, pulling the image to all nodes takes 50 minutes. How can this be optimized?",
+    "options": ["Use a smaller base image (alpine) to reduce image size and pull time", "Cache the image on all nodes before the update using a DaemonSet that pre-pulls images", "Use `imagePullPolicy: IfNotPresent` to skip pulling if the image already exists on the node", "Split the application into multiple smaller images and use multi-container Pods"],
+    "correctIndex": 1,
+    "explanation": "A DaemonSet that runs `docker pull` on each node before the update ensures the image is cached; subsequent updates pull from local cache or skip pulling, reducing overall deployment time.",
+    "difficulty": "Medium-Hard",
+    "tags": ["kubernetes-image-pulling", "daemonset", "deployment-optimization"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Kubernetes Integration",
+    "question": "A Dockerfile declares `VOLUME /data`. When deployed to Kubernetes, the Pod has no volumeMounts defined. The container creates files in /data. After the Pod restarts, the files are gone. Is this expected?",
+    "options": ["Yes, Dockerfile VOLUME is only for documentation in Kubernetes; without a volumeMount, /data uses emptyDir which is ephemeral", "No, Kubernetes automatically creates PersistentVolume for Dockerfile VOLUMEs", "Yes, but the files are actually stored in a hidden emptyDir; use `kubectl describe pod` to find them", "No, Kubernetes should preserve /data across restarts"],
+    "correctIndex": 0,
+    "explanation": "Dockerfile VOLUME declarations are ignored in Kubernetes; Kubernetes requires explicit volumeMounts and volumes to persist data; without them, /data data is ephemeral and lost when the Pod restarts.",
+    "difficulty": "Medium",
+    "tags": ["kubernetes-volumes", "dockerfile-volume", "ephemeral-storage"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Kubernetes Integration",
+    "question": "A Docker container has a CPU request of 100m and a limit of 500m. In Kubernetes, you set `requests: {cpu: 100m}` and `limits: {cpu: 500m}`. The Pod is scheduled on a node with 2 CPUs available. After the application starts, it uses 600m of CPU. What happens?",
+    "options": ["The application is throttled by the 500m limit; CPU usage is capped at 500m", "The application exceeds the limit and is killed by the kernel", "Kubernetes violates the limit to allow the application to run; the node may become oversubscribed", "The Pod is terminated with an OOMKilled status"],
+    "correctIndex": 0,
+    "explanation": "CPU limits are enforced by cgroups (CFS throttling); if the application tries to use 600m but the limit is 500m, the kernel throttles the process, reducing its CPU time. This may cause performance degradation, but the container is not killed.",
+    "difficulty": "Medium",
+    "tags": ["kubernetes-resources", "cpu-limits", "throttling"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Kubernetes Integration",
+    "question": "A Docker container is run with `docker run --net=host app` for low-latency network access. Converting to Kubernetes, you set `hostNetwork: true` in the Pod spec. The Pod can now access the host's network interfaces. What are the security and networking implications?",
+    "options": ["Using hostNetwork bypasses network isolation; the Pod can see all host traffic and is vulnerable to eavesdropping; use only for system-level services", "hostNetwork is safe; it only affects the Pod's performance, not security", "hostNetwork prevents port conflicts; multiple Pods can now bind to the same port without collision", "Using hostNetwork requires root privileges; regular Pods cannot use it"],
+    "correctIndex": 0,
+    "explanation": "hostNetwork shares the host's network namespace, allowing the Pod to see and interact with all host network interfaces and traffic; this is a security risk and should only be used for infrastructure services (monitoring, kube-proxy) that need host-level network access.",
+    "difficulty": "Medium-Hard",
+    "tags": ["kubernetes-networking", "host-network", "security-implications"]
+  }
+]

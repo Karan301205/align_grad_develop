@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "Data Types",
+    "question": "What is the output?\nint x = 5;\nobject box = x;\nint y = (int)box;\nConsole.WriteLine(y);",
+    "options": ["5", "0", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "Boxing converts the value type to object, unboxing retrieves it; the value is preserved.",
+    "difficulty": "Medium",
+    "tags": ["boxing", "unboxing", "value-types"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Data Types",
+    "question": "What is the output?\nstring s1 = \"test\";\nstring s2 = \"te\" + \"st\";\nConsole.WriteLine(s1 == s2);",
+    "options": ["True", "False", "Compilation error", "NullReferenceException"],
+    "correctIndex": 0,
+    "explanation": "String interning ensures compile-time string concatenation results in the same interned reference.",
+    "difficulty": "Medium",
+    "tags": ["string-interning", "reference-types", "string-comparison"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Data Types",
+    "question": "What is the output?\nint? x = null;\nint y = x ?? 10;\nConsole.WriteLine(y);",
+    "options": ["10", "0", "Compilation error", "NullReferenceException"],
+    "correctIndex": 0,
+    "explanation": "The null-coalescing operator ?? returns the right operand when the left is null.",
+    "difficulty": "Medium",
+    "tags": ["nullable-types", "null-coalescing", "operators"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Data Types",
+    "question": "What is the output?\ndecimal d = 0.1m + 0.2m;\nConsole.WriteLine(d == 0.3m);",
+    "options": ["True", "False", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Decimal type provides exact decimal arithmetic unlike double, avoiding floating-point precision issues.",
+    "difficulty": "Medium-Hard",
+    "tags": ["decimal", "precision", "floating-point"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Data Types",
+    "question": "What is the output?\nstruct Point { public int X; public int Y; }\nPoint p1 = new Point { X = 1, Y = 2 };\nPoint p2 = p1;\np2.X = 5;\nConsole.WriteLine(p1.X);",
+    "options": ["1", "5", "Compilation error", "NullReferenceException"],
+    "correctIndex": 0,
+    "explanation": "Structs are value types; assignment creates a copy, so modifications to p2 don't affect p1.",
+    "difficulty": "Medium",
+    "tags": ["value-types", "structs", "copy-semantics"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Data Types",
+    "question": "What is the output?\nobject x = 5;\nobject y = 5;\nConsole.WriteLine(x == y);",
+    "options": ["True", "False", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "Reference equality for boxed integers with small values uses cached instances per MSDN spec.",
+    "difficulty": "Medium-Hard",
+    "tags": ["boxing", "object-equality", "reference-caching"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Data Types",
+    "question": "What is the output?\nchar c = '5';\nint i = c - '0';\nConsole.WriteLine(i);",
+    "options": ["5", "53", "Compilation error", "NullReferenceException"],
+    "correctIndex": 0,
+    "explanation": "Char arithmetic uses ASCII values; subtracting '0' converts digit char to its numeric value.",
+    "difficulty": "Medium",
+    "tags": ["char", "ascii", "type-conversion"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Data Types",
+    "question": "What is the output?\nvar x = new[] { 1, 2, 3 };\nConsole.WriteLine(x.GetType().Name);",
+    "options": ["Int32[]", "Array", "Object[]", "List`1"],
+    "correctIndex": 0,
+    "explanation": "Var infers array type from initializer; GetType().Name returns the element type with brackets.",
+    "difficulty": "Medium",
+    "tags": ["var", "type-inference", "arrays"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Data Types",
+    "question": "What is the output?\ndouble d = double.NaN;\nConsole.WriteLine(d == double.NaN);",
+    "options": ["False", "True", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "NaN is not equal to itself per IEEE 754; use double.IsNaN() to test for NaN.",
+    "difficulty": "Medium-Hard",
+    "tags": ["double", "nan", "floating-point-special-values"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Data Types",
+    "question": "What is the output?\nstring s = null;\nConsole.WriteLine(s?.Length ?? 0);",
+    "options": ["0", "NullReferenceException", "Compilation error", "1"],
+    "correctIndex": 0,
+    "explanation": "Null-conditional operator ?. returns null when receiver is null, then ?? substitutes 0.",
+    "difficulty": "Medium",
+    "tags": ["null-conditional", "null-coalescing", "string"]
+  }
+]

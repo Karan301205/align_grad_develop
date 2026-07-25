@@ -1,0 +1,167 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Security Best Practices",
+    "question": "A pod runs with securityContext.runAsUser: 0 (root). A container executes a command that exploits a vulnerability in the application. What is the blast radius?",
+    "options": [
+      "Limited to the container; the host is protected",
+      "The attacker gains root access to the node and potentially the cluster",
+      "The pod is automatically quarantined by Kubernetes",
+      "Only other pods in the namespace are at risk"
+    ],
+    "correctIndex": 1,
+    "explanation": "Running as root gives an attacker full container control; container breakouts (via kernel exploits) can lead to node compromise.",
+    "difficulty": "Medium",
+    "tags": ["security", "pod-security", "runasuser"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Security Best Practices",
+    "question": "A pod is deployed with securityContext.allowPrivilegeEscalation: true and capabilities including NET_ADMIN. An attacker gains access to the pod. What can they do?",
+    "options": [
+      "Limited to the pod's namespace and network interface",
+      "Potentially escalate to root inside the container and manipulate network traffic (packet sniffing, spoofing)",
+      "Automatically denied by the container runtime",
+      "Only access files within the pod's mounted volumes"
+    ],
+    "correctIndex": 1,
+    "explanation": "allowPrivilegeEscalation and powerful capabilities (NET_ADMIN, SYS_ADMIN) enable root escalation and system-level attacks.",
+    "difficulty": "Medium-Hard",
+    "tags": ["security", "pod-security", "capabilities"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Security Best Practices",
+    "question": "A pod's securityContext sets readOnlyRootFilesystem: true. The application crashes because it cannot write to /tmp. How do you fix this while maintaining security?",
+    "options": [
+      "Disable readOnlyRootFilesystem to allow all writes",
+      "Mount an emptyDir volume at /tmp for the pod to write to",
+      "Change the pod's permissions to allow root writes",
+      "Use a different base image that pre-creates writable directories"
+    ],
+    "correctIndex": 1,
+    "explanation": "emptyDir provides ephemeral, writable storage mounted at /tmp; this maintains read-only root security while allowing necessary writes.",
+    "difficulty": "Medium",
+    "tags": ["security", "pod-security", "emptydir"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Security Best Practices",
+    "question": "You implement RBAC with a ClusterRole that grants 'verbs: [\"*\"]' and 'resources: [\"*\"]'. What is the security risk?",
+    "options": [
+      "A user bound to this role can perform any action on any resource; this is overly permissive",
+      "RBAC restricts this to read-only operations automatically",
+      "Kubernetes blocks this configuration to prevent abuse",
+      "This is acceptable if the user is trusted"
+    ],
+    "correctIndex": 0,
+    "explanation": "Wildcard verbs and resources grant admin-level access; following least-privilege, roles should specify only required actions and resources.",
+    "difficulty": "Medium",
+    "tags": ["security", "rbac", "least-privilege"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Security Best Practices",
+    "question": "A NetworkPolicy is created to deny all ingress traffic to a namespace. Pods in that namespace cannot reach a database in another namespace. How do you fix this?",
+    "options": [
+      "Delete the NetworkPolicy entirely",
+      "Create an egress allow rule for the pod to reach the database pod",
+      "Add the database namespace as an exception to the deny rule",
+      "Move the database to the same namespace"
+    ],
+    "correctIndex": 1,
+    "explanation": "NetworkPolicy ingress controls inbound traffic; for outbound traffic to the database, an egress allow rule is needed.",
+    "difficulty": "Medium-Hard",
+    "tags": ["security", "networkpolicy", "egress"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Security Best Practices",
+    "question": "A PodSecurityPolicy is deprecated and removed from Kubernetes 1.25+. What is the replacement approach?",
+    "options": [
+      "Pod security is no longer enforced in new clusters",
+      "Use PodSecurityStandards (enforced/restricted/baseline modes) via Pod Security Admission",
+      "Use custom webhook validators to enforce pod security",
+      "Manually audit pods for security compliance"
+    ],
+    "correctIndex": 1,
+    "explanation": "Pod Security Admission replaced PSP; it enforces security standards via labels and admission webhooks at the namespace or cluster level.",
+    "difficulty": "Medium-Hard",
+    "tags": ["security", "pod-security", "psa"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Security Best Practices",
+    "question": "You store API keys in an unencrypted ConfigMap. A user with read access to ConfigMaps can view them in plaintext. What should you use instead?",
+    "options": [
+      "ConfigMaps are designed for secrets; no change is necessary",
+      "Use Secrets with encryption at rest enabled in etcd",
+      "Encrypt ConfigMaps manually with third-party tools",
+      "Store API keys in pod startup scripts"
+    ],
+    "correctIndex": 1,
+    "explanation": "Secrets are intended for sensitive data; with encryption at rest enabled, they are more secure than ConfigMaps for API keys.",
+    "difficulty": "Medium",
+    "tags": ["security", "secret", "encryption"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Security Best Practices",
+    "question": "A pod's service account is granted the cluster-admin ClusterRole. What is the security impact if the pod is compromised?",
+    "options": [
+      "Limited to pod-level permissions; cluster-admin is only for administrators",
+      "An attacker gains admin access to the cluster via the service account's token",
+      "Only the pod's namespace is affected",
+      "The attack is automatically detected and blocked by admission controllers"
+    ],
+    "correctIndex": 1,
+    "explanation": "A compromised pod with cluster-admin can modify any cluster resource, create backdoors, and escalate privileges across the cluster.",
+    "difficulty": "Medium",
+    "tags": ["security", "rbac", "service-account"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Security Best Practices",
+    "question": "You enable audit logging to track API server events. Audit logs show sensitive data (API keys, passwords). How do you prevent this?",
+    "options": [
+      "Disable audit logging entirely",
+      "Use audit policy rules to redact sensitive fields from logs",
+      "Store audit logs on a separate node with restricted access",
+      "Rotate audit logs daily to limit exposure"
+    ],
+    "correctIndex": 1,
+    "explanation": "Audit policy rules can redact sensitive fields from logged events, preventing secrets from appearing in audit trails.",
+    "difficulty": "Medium-Hard",
+    "tags": ["security", "audit-logging", "data-redaction"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Security Best Practices",
+    "question": "A pod mounts the host's /var directory as a volume to read logs. An attacker gains pod access and can read/write to /var on the host. Why is this dangerous?",
+    "options": [
+      "It allows access only to pod-specific data",
+      "It enables host file system manipulation, potentially compromising the host OS and other pods",
+      "It is contained to the mounted directory only",
+      "Kubernetes automatically prevents writing to host paths"
+    ],
+    "correctIndex": 1,
+    "explanation": "Mounting host paths without restrictions grants access to host filesystem; attackers can modify configurations, install malware, or disrupt the node.",
+    "difficulty": "Hard",
+    "tags": ["security", "hostpath", "pod-escape"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Security Best Practices",
+    "question": "A container image is pulled from a public registry without image verification (no digest pinning, no signature validation). What is the risk?",
+    "options": [
+      "The image registry is more trustworthy than private registries",
+      "An attacker can push a malicious image with the same tag, and the pod will pull the compromised version",
+      "Public images are automatically scanned for vulnerabilities",
+      "Kubernetes verifies image integrity automatically"
+    ],
+    "correctIndex": 1,
+    "explanation": "Without digest pinning or signature validation, image tags can be overwritten with malicious versions; always verify image integrity before pulling.",
+    "difficulty": "Hard",
+    "tags": ["security", "image-verification", "supply-chain"]
+  }
+]

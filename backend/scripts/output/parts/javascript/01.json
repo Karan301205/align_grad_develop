@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Data Types",
+    "question": "What will this code output?\n```javascript\nconst a = '5';\nconst b = 5;\nconst result = a == b;\nconsole.log(result);\n```",
+    "options": [
+      "false because types differ",
+      "true due to loose equality coercion",
+      "undefined because of type mismatch",
+      "throws a TypeError immediately"
+    ],
+    "correctIndex": 1,
+    "explanation": "Loose equality (==) coerces the string '5' to number 5, making them equal.",
+    "difficulty": "Medium",
+    "tags": ["coercion", "equality", "types"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Data Types",
+    "question": "What is the output?\n```javascript\nconst obj1 = { a: 1 };\nconst obj2 = obj1;\nobj2.a = 2;\nconsole.log(obj1.a);\n```",
+    "options": [
+      "1 because objects are immutable",
+      "2 because both reference the same object",
+      "undefined due to shallow copy",
+      "null because obj2 overwrites obj1"
+    ],
+    "correctIndex": 1,
+    "explanation": "obj2 is a reference to obj1, not a copy, so modifying obj2 affects obj1.",
+    "difficulty": "Medium",
+    "tags": ["reference", "objects", "memory"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Data Types",
+    "question": "What does this return?\n```javascript\nconst result = typeof null;\nconsole.log(result);\n```",
+    "options": [
+      "null",
+      "object",
+      "undefined",
+      "NullType"
+    ],
+    "correctIndex": 1,
+    "explanation": "typeof null returns 'object' due to a JavaScript specification quirk from the language's inception.",
+    "difficulty": "Medium",
+    "tags": ["typeof", "null", "gotcha"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Data Types",
+    "question": "What is logged?\n```javascript\nconsole.log(0.1 + 0.2 === 0.3);\n```",
+    "options": [
+      "true because of precise floating point math",
+      "false due to binary floating point representation",
+      "NaN because the result is undefined",
+      "undefined because comparison fails"
+    ],
+    "correctIndex": 1,
+    "explanation": "Binary floating point arithmetic causes 0.1 + 0.2 to equal approximately 0.30000000000000004, not 0.3.",
+    "difficulty": "Medium",
+    "tags": ["floats", "precision", "IEEE754"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Data Types",
+    "question": "What is the output?\n```javascript\nconst arr = [1, 2, 3];\nconst copy = arr;\ncopy[0] = 99;\nconsole.log(arr[0]);\n```",
+    "options": [
+      "1 because copy is independent",
+      "99 because copy references the same array",
+      "undefined due to array copy semantics",
+      "throws ReferenceError"
+    ],
+    "correctIndex": 1,
+    "explanation": "Arrays are reference types; assigning to a variable creates a reference, not a copy.",
+    "difficulty": "Medium",
+    "tags": ["arrays", "reference", "mutation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Data Types",
+    "question": "What is logged?\n```javascript\nconsole.log(NaN === NaN);\n```",
+    "options": [
+      "true because they are the same value",
+      "false because NaN is not equal to itself",
+      "undefined because NaN is not a number",
+      "throws a TypeError"
+    ],
+    "correctIndex": 1,
+    "explanation": "NaN is uniquely not equal to itself per IEEE 754; use Number.isNaN() for checking.",
+    "difficulty": "Medium",
+    "tags": ["NaN", "equality", "gotcha"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Data Types",
+    "question": "What does this code output?\n```javascript\nconst x = undefined;\nconst y = null;\nconsole.log(x === y);\n```",
+    "options": [
+      "true because both are empty values",
+      "false because strict equality checks type",
+      "undefined due to comparison failure",
+      "null because null takes precedence"
+    ],
+    "correctIndex": 1,
+    "explanation": "Strict equality (===) requires both value and type to match; null and undefined have different types.",
+    "difficulty": "Medium",
+    "tags": ["null", "undefined", "strict-equality"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Data Types",
+    "question": "What is the result?\n```javascript\nconst str = '42';\nconst num = +str;\nconsole.log(typeof num);\n```",
+    "options": [
+      "string because the unary plus preserves type",
+      "number because unary plus coerces to number",
+      "undefined due to coercion failure",
+      "throws a SyntaxError"
+    ],
+    "correctIndex": 1,
+    "explanation": "The unary plus operator (+) explicitly coerces the string to a number.",
+    "difficulty": "Medium",
+    "tags": ["coercion", "unary-operator", "type-conversion"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Data Types",
+    "question": "What is output?\n```javascript\nconst bool = Boolean(0);\nconsole.log(bool);\n```",
+    "options": [
+      "true because 0 is a valid number",
+      "false because 0 is falsy",
+      "0 because Boolean preserves value",
+      "NaN due to type mismatch"
+    ],
+    "correctIndex": 1,
+    "explanation": "Boolean(0) coerces 0 to its boolean equivalent, which is false.",
+    "difficulty": "Medium",
+    "tags": ["falsy", "coercion", "boolean"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Data Types",
+    "question": "What is logged?\n```javascript\nconst a = Symbol('id');\nconst b = Symbol('id');\nconsole.log(a === b);\n```",
+    "options": [
+      "true because both symbols are identical strings",
+      "false because each Symbol() creates a unique value",
+      "undefined due to symbol comparison rules",
+      "throws a TypeError"
+    ],
+    "correctIndex": 1,
+    "explanation": "Each Symbol() call creates a unique, non-identical symbol even with the same description.",
+    "difficulty": "Medium-Hard",
+    "tags": ["symbols", "uniqueness", "reference"]
+  }
+]

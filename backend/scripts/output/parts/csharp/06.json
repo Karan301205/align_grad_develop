@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\nclass Base {\n  public virtual void Print() => Console.WriteLine(\"Base\");\n}\nclass Derived : Base {\n  public override void Print() => Console.WriteLine(\"Derived\");\n}\nBase b = new Derived();\nb.Print();",
+    "options": ["Base", "Derived", "Compilation error", "Runtime exception"],
+    "correctIndex": 1,
+    "explanation": "Virtual method with override uses dynamic dispatch; actual type is Derived, so Derived.Print() is called.",
+    "difficulty": "Medium",
+    "tags": ["virtual-methods", "polymorphism", "inheritance"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\nclass A { public int X { get; set; } }\nvar obj = new A { X = 5 };\nConsole.WriteLine(obj.X);",
+    "options": ["5", "0", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "Auto-property with object initializer sets X to 5 via the setter.",
+    "difficulty": "Medium",
+    "tags": ["properties", "auto-properties", "object-initializer"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\nclass A {\n  public A() { Console.WriteLine(\"A\"); }\n}\nclass B : A {\n  public B() { Console.WriteLine(\"B\"); }\n}\nnew B();",
+    "options": ["B", "A", "AB", "BA"],
+    "correctIndex": 3,
+    "explanation": "Base constructor runs first implicitly, then derived; outputs A then B.",
+    "difficulty": "Medium",
+    "tags": ["constructors", "inheritance", "base-class-initialization"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\nclass Box<T> {\n  public T Value { get; set; }\n}\nvar box = new Box<int> { Value = 42 };\nConsole.WriteLine(box.Value);",
+    "options": ["42", "0", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "Generic class Box<int> stores int values; Value is set to 42 via object initializer.",
+    "difficulty": "Medium",
+    "tags": ["generics", "generic-classes", "properties"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\nabstract class Shape { public abstract void Draw(); }\nclass Circle : Shape {\n  public override void Draw() => Console.WriteLine(\"Circle\");\n}\nnew Circle().Draw();",
+    "options": ["Circle", "Compilation error", "Runtime exception", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Abstract method must be overridden in derived class; Circle.Draw() prints \"Circle\".",
+    "difficulty": "Medium",
+    "tags": ["abstract-classes", "abstract-methods", "inheritance"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\ninterface IValue { int Get(); }\nclass A : IValue {\n  public int Get() => 10;\n}\nIValue v = new A();\nConsole.WriteLine(v.Get());",
+    "options": ["10", "0", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "Interface method is implemented; calling Get() via interface reference executes the implementation.",
+    "difficulty": "Medium",
+    "tags": ["interfaces", "implementation", "polymorphism"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\nstatic class Utility { public static int Add(int a, int b) => a + b; }\nConsole.WriteLine(Utility.Add(3, 4));",
+    "options": ["7", "0", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "Static class contains static methods callable without instantiation; 3 + 4 = 7.",
+    "difficulty": "Medium",
+    "tags": ["static-classes", "static-methods", "utility"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\nclass A {\n  private int x = 10;\n  public int X { get => x; }\n}\nvar a = new A();\nConsole.WriteLine(a.X);",
+    "options": ["10", "0", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "Property X has private backing field x with read-only getter; X returns 10.",
+    "difficulty": "Medium",
+    "tags": ["properties", "encapsulation", "backing-fields"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\nclass A {\n  public static int Count = 0;\n  public A() { Count++; }\n}\nnew A();\nnew A();\nConsole.WriteLine(A.Count);",
+    "options": ["2", "1", "0", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Static field Count is shared across all instances; incremented twice by two constructor calls.",
+    "difficulty": "Medium",
+    "tags": ["static-fields", "class-variables", "constructors"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\nclass A {\n  public void M() { Console.WriteLine(\"A\"); }\n  public void M(int x) { Console.WriteLine(\"B\"); }\n}\nnew A().M(5);",
+    "options": ["A", "B", "Compilation error", "Cannot determine"],
+    "correctIndex": 1,
+    "explanation": "Method overloading: M(int) matches the argument type, so B is printed.",
+    "difficulty": "Medium",
+    "tags": ["method-overloading", "polymorphism"]
+  }
+]

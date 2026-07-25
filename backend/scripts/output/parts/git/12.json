@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Architecture",
+    "question": "Your organization has three related projects (API, frontend, shared utilities) that are tightly coupled. Should you use a monorepo or separate repositories, and what are the trade-offs?",
+    "options": [
+      "Monorepo simplifies cross-project changes and dependency management but requires discipline in structure and CI configuration; separate repos isolate changes but complicate shared dependencies",
+      "Always use monorepo",
+      "Always use separate repositories",
+      "It makes no difference"
+    ],
+    "correctIndex": 0,
+    "explanation": "Monorepos excel with tightly-coupled projects; separate repos work better for independent projects with different release cycles.",
+    "difficulty": "Medium-Hard",
+    "tags": ["monorepo", "architecture", "dependency-management"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Architecture",
+    "question": "Your repository has a vendor/ directory containing third-party code that is frequently updated. You want to track it in Git but easily distinguish it from your own code for reviews. What approach should you use?",
+    "options": [
+      "Use git subtree or git submodule to link the third-party repository separately; this isolates their history from yours and simplifies updates",
+      "Commit vendor code directly with your code",
+      "Delete vendor code and add a note to install it manually",
+      "Use symlinks to reference external code"
+    ],
+    "correctIndex": 0,
+    "explanation": "Subtree and submodule integrate external repositories while keeping their history separate; updates can be pulled independently.",
+    "difficulty": "Medium-Hard",
+    "tags": ["subtree", "submodule", "vendor-management"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Architecture",
+    "question": "Your team uses a branching model with main (stable), develop (integration), and short-lived feature branches. A critical bug is discovered in production (main). How should you apply the fix using this model?",
+    "options": [
+      "Create a hotfix branch from main, fix and merge back to main, then merge main back to develop to keep histories in sync",
+      "Apply the fix to develop first, then merge to main",
+      "Create a separate emergency branch",
+      "Modify main directly without branching"
+    ],
+    "correctIndex": 0,
+    "explanation": "Hotfix branches handle production emergencies; merging both directions ensures the fix reaches all active branches and prevents regression when develop is next merged.",
+    "difficulty": "Medium",
+    "tags": ["git-flow", "hotfix", "branching-model"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Architecture",
+    "question": "Your repository root is cluttered with configuration files (package.json, tsconfig.json, .eslintrc, Dockerfile, etc.). Should these be organized into subdirectories, and what are the implications?",
+    "options": [
+      "Root-level config files are conventional and easier for tools to discover; moving them to subdirectories requires adjusting tool configurations and breaking conventions, only do this if you have many configs and clear organization need",
+      "Always move config to subdirectories",
+      "Config location does not matter",
+      "Spread configs across the project randomly"
+    ],
+    "correctIndex": 0,
+    "explanation": "Tools expect config files in the root (e.g., package.json); moving them requires explicit configuration in tool invocations or environment variables.",
+    "difficulty": "Medium",
+    "tags": ["repository-structure", "configuration", "conventions"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Architecture",
+    "question": "Your project has a large /docs directory (100MB) that is rarely accessed. Should it be in the same Git repository as the code, or should you separate it?",
+    "options": [
+      "Keep it separate (git submodule or separate repo) if docs have independent release cycles, different teams, or rarely accessed; keep it together if docs are tightly coupled with code and always deployed together",
+      "Always keep docs in the main repository",
+      "Always separate docs into a different repository",
+      "Size alone should determine separation"
+    ],
+    "correctIndex": 0,
+    "explanation": "Separation makes sense when release cycles differ; coupling makes sense when docs evolve with code.",
+    "difficulty": "Medium",
+    "tags": ["documentation", "repository-organization"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Architecture",
+    "question": "You are setting up a repository for a multi-platform mobile app (iOS, Android, web) developed by separate teams. Should this be one repository or three separate ones?",
+    "options": [
+      "One monorepo with clear directory structure (ios/, android/, web/) and separate CI pipelines per platform enables shared code/utilities while maintaining independent builds and deployments",
+      "Always use a monorepo",
+      "Always use separate repositories",
+      "Platform is irrelevant to repository structure"
+    ],
+    "correctIndex": 0,
+    "explanation": "Monorepo with platform isolation balances code sharing and team independence; the choice depends on whether platforms share code or release independently.",
+    "difficulty": "Medium-Hard",
+    "tags": ["monorepo", "platform-structure", "ci-cd"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Architecture",
+    "question": "Your repository has a src/ directory with application code and a tests/ directory with separate tests. A reviewer suggests co-locating tests with source files (e.g., src/module.js and src/module.test.js). What are the trade-offs?",
+    "options": [
+      "Co-location improves maintainability (tests stay with code) but complicates production builds (excluding tests); separate directories isolate tests and simplify builds but risk tests drifting from code",
+      "Co-location is always better",
+      "Separate directories are always better",
+      "There is no difference"
+    ],
+    "correctIndex": 0,
+    "explanation": "Co-location pairs tests with code logically; production builds must explicitly exclude .test.js files to avoid shipping tests.",
+    "difficulty": "Medium",
+    "tags": ["test-organization", "structure", "build-config"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Architecture",
+    "question": "Your team is adopting trunk-based development (all work on main) instead of long-lived branches. What infrastructure and practices are essential to make this safe?",
+    "options": [
+      "Require strong CI/CD (automated tests, fast feedback), feature flags to hide incomplete work, and frequent (daily) deployments to catch issues early",
+      "Just push to main without checks",
+      "Long-lived branches are mandatory",
+      "No infrastructure changes are needed"
+    ],
+    "correctIndex": 0,
+    "explanation": "Trunk-based development requires rapid feedback loops (CI) and feature flags to isolate work; without these, main becomes unstable.",
+    "difficulty": "Medium-Hard",
+    "tags": ["trunk-based", "ci-cd", "feature-flags"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Architecture",
+    "question": "Your open-source project is hosted on GitHub. You want to encourage external contributions while maintaining code quality. What repository structure should you establish?",
+    "options": [
+      "Maintain clear CONTRIBUTING.md with setup instructions, branching guidelines, and PR checklist; enforce code review and CI; have a CODEOWNERS file to route reviews; label issues for new contributors",
+      "Accept all PRs without review",
+      "Reject contributions from outsiders",
+      "Repository structure does not matter for OSS"
+    ],
+    "correctIndex": 0,
+    "explanation": "Open repositories require clear documentation and process; CODEOWNERS and issue labels reduce friction for contributors.",
+    "difficulty": "Medium",
+    "tags": ["open-source", "documentation", "contribution-workflow"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Architecture",
+    "question": "You inherit a repository with 10 years of history, 500GB of Git objects (mostly old binaries), and hundreds of unused branches. What is the best approach to modernize it?",
+    "options": [
+      "Use git filter-repo to remove old binaries from history, prune unused branches with git branch -D, run git gc --aggressive, then document the cleanup in the README",
+      "Recreate the repository from scratch",
+      "Leave it as-is since changing it is risky",
+      "Delete the repository and restart"
+    ],
+    "correctIndex": 0,
+    "explanation": "filter-repo cleans history safely; pruning and gc reduce size; documentation preserves the history of cleanup for future developers.",
+    "difficulty": "Hard",
+    "tags": ["repository-cleanup", "history-cleaning", "maintenance"]
+  }
+]

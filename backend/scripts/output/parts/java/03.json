@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is printed?\n```java\nclass Animal {\n  void sound() { System.out.println(\"Generic\"); }\n}\nclass Dog extends Animal {\n  void sound() { System.out.println(\"Bark\"); }\n}\nAnimal a = new Dog();\na.sound();\n```",
+    "options": ["Generic", "Bark", "Compilation error", "Generic, Bark"],
+    "correctIndex": 1,
+    "explanation": "Polymorphic method call invokes the actual object's type (Dog), not the reference type (Animal), so 'Bark' is printed.",
+    "difficulty": "Medium",
+    "tags": ["polymorphism", "method-override", "dynamic-dispatch"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Object Oriented Programming",
+    "question": "What happens when you compile this?\n```java\nclass Parent {\n  private void method() { }\n}\nclass Child extends Parent {\n  void method() { }\n}\n```",
+    "options": ["Compiles fine", "Compilation error", "Runtime error", "Warning only"],
+    "correctIndex": 0,
+    "explanation": "This is method hiding, not overriding (private methods are not inherited), so Child.method() is a new public method that hides nothing.",
+    "difficulty": "Medium",
+    "tags": ["access-modifiers", "method-hiding", "inheritance"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\n```java\nclass A {\n  int x = 10;\n}\nclass B extends A {\n  int x = 20;\n}\nA a = new B();\nSystem.out.println(a.x);\n```",
+    "options": ["10", "20", "Compilation error", "NullPointerException"],
+    "correctIndex": 0,
+    "explanation": "Field access is resolved at compile-time by reference type (A), not runtime type (B), so a.x accesses A.x which is 10.",
+    "difficulty": "Medium-Hard",
+    "tags": ["field-shadowing", "compile-time-binding", "inheritance"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is printed?\n```java\nclass Base {\n  Base() { System.out.println(\"Base\"); }\n}\nclass Derived extends Base {\n  Derived() { System.out.println(\"Derived\"); }\n}\nnew Derived();\n```",
+    "options": ["Base", "Derived", "Derived, Base", "Base, Derived"],
+    "correctIndex": 3,
+    "explanation": "Derived constructor implicitly calls super() before executing its own body, so Base prints first, then Derived.",
+    "difficulty": "Medium",
+    "tags": ["constructor", "super-call", "inheritance"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the result of this code?\n```java\ninterface I1 { void method(); }\ninterface I2 { void method(); }\nclass C implements I1, I2 {\n  public void method() { }\n}\n```",
+    "options": ["Compiles fine", "Compilation error due to ambiguity", "Runtime error", "Requires method overloading"],
+    "correctIndex": 0,
+    "explanation": "Both interfaces declare the same method signature; implementing one method satisfies both contracts, so it compiles fine.",
+    "difficulty": "Medium",
+    "tags": ["interfaces", "multiple-inheritance", "diamond-problem"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is printed?\n```java\nclass Outer {\n  private int x = 10;\n  class Inner {\n    void display() { System.out.println(x); }\n  }\n}\nOuter o = new Outer();\nOuter.Inner inner = o.new Inner();\ninner.display();\n```",
+    "options": ["10", "Compilation error", "NullPointerException", "0"],
+    "correctIndex": 0,
+    "explanation": "Inner classes can access private members of the enclosing class; Inner has implicit reference to Outer instance and accesses x = 10.",
+    "difficulty": "Medium",
+    "tags": ["inner-classes", "enclosing-context", "access-control"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\n```java\nabstract class Animal {\n  abstract void sound();\n  void eat() { System.out.println(\"Eating\"); }\n}\nclass Cat extends Animal {\n  void sound() { System.out.println(\"Meow\"); }\n}\nCat c = new Cat();\nc.eat();\nc.sound();\n```",
+    "options": ["Eating, Meow", "Meow", "Compilation error", "Eating"],
+    "correctIndex": 0,
+    "explanation": "Abstract class can have both abstract methods (must be overridden) and concrete methods; Cat inherits eat() and implements sound().",
+    "difficulty": "Medium",
+    "tags": ["abstract-classes", "abstract-methods", "inheritance"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Object Oriented Programming",
+    "question": "Which statement is true about static methods?\n```java\nclass Test {\n  static void method() { }\n  void instanceMethod() { method(); }\n}\n```",
+    "options": ["Cannot call static methods from instance methods", "Can call static methods from instance methods", "Requires this.method() syntax", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "Static methods can be called from instance methods without qualification; the instance context can access static members.",
+    "difficulty": "Medium",
+    "tags": ["static-methods", "method-calls", "context"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is printed?\n```java\nclass A {\n  void test() { System.out.println(\"A\"); }\n}\nclass B extends A {\n  @Override\n  void test() { System.out.println(\"B\"); }\n}\nclass C extends B {\n  @Override\n  void test() { System.out.println(\"C\"); }\n}\nA obj = new C();\nobj.test();\n```",
+    "options": ["A", "B", "C", "Runtime error"],
+    "correctIndex": 2,
+    "explanation": "Method invocation is resolved at runtime using the actual object type (C), not the reference type (A), so C's implementation is called.",
+    "difficulty": "Medium",
+    "tags": ["method-override", "polymorphism", "method-resolution"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Object Oriented Programming",
+    "question": "What happens here?\n```java\nclass Test {\n  private int x = 10;\n  Test(Test t) { this.x = t.x; }\n}\nTest t1 = new Test(5);\n```",
+    "options": ["Compilation error", "Runtime error", "t1.x is set to some default value", "Compilation error: no matching constructor"],
+    "correctIndex": 3,
+    "explanation": "The constructor takes a Test parameter, but new Test(5) passes an int; there is no matching constructor, causing a compilation error.",
+    "difficulty": "Medium",
+    "tags": ["constructors", "method-overloading", "type-matching"]
+  }
+]

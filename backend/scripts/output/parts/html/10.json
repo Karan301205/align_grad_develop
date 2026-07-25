@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "Cross Browser Compatibility",
+    "question": "A page uses `<video>` tag with `<source src='video.webm' type='video/webm'>`. On older browsers without WebM support, what displays?",
+    "options": ["fallback text inside the video tag is shown", "the browser downloads webm anyway and fails silently", "a broken player icon appears", "nothing displays because the browser ignores the unsupported tag"],
+    "correctIndex": 0,
+    "explanation": "Browsers without WebM support ignore the `<video>` tag's source; any HTML content inside the `<video>` tag serves as fallback (e.g., error message or alternative format).",
+    "difficulty": "Medium",
+    "tags": ["video-element", "fallback-content", "browser-support"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Cross Browser Compatibility",
+    "question": "Why might `<nav>` element behave differently in Internet Explorer 8?",
+    "options": ["nav is not recognized by IE8 and is treated as an unknown element", "nav renders as inline instead of block, requiring css reset", "ie8 does not parse nav and skips its content", "nav requires a polyfill or conditional comment to work in ie8"],
+    "correctIndex": 0,
+    "explanation": "HTML5 semantic elements like `<nav>` are not recognized by older browsers like IE8, which treat them as unknown elements that don't style properly without CSS intervention.",
+    "difficulty": "Medium",
+    "tags": ["semantic-elements", "browser-compatibility", "ie8"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Cross Browser Compatibility",
+    "question": "A page uses `<input type='date'>`. On browsers without date input support, what displays?",
+    "options": ["a text input field that accepts any text", "a date picker calendar", "an error message", "the page fails to render"],
+    "correctIndex": 0,
+    "explanation": "Browsers without `type='date'` support gracefully degrade to `type='text'`, allowing manual date entry even if no picker is available.",
+    "difficulty": "Medium",
+    "tags": ["input-types", "graceful-degradation"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Cross Browser Compatibility",
+    "question": "A page includes `<!--[if IE]><p>You are using Internet Explorer</p><![endif]-->`. On non-IE browsers, what displays?",
+    "options": ["the conditional comment is parsed and the text is shown", "the text is hidden and only displayed in IE", "the conditional comment is invalid syntax", "modern browsers ignore this syntax"],
+    "correctIndex": 1,
+    "explanation": "Conditional comments (deprecated) are IE-specific; IE parses them and shows content, while other browsers treat them as regular HTML comments and ignore them.",
+    "difficulty": "Medium-Hard",
+    "tags": ["conditional-comments", "ie-specific"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Cross Browser Compatibility",
+    "question": "A page uses `<details open><summary>Click me</summary>Content</details>`. On browsers without details support, what happens?",
+    "options": ["the content is always visible because the element is not recognized", "the details element is ignored and nothing is shown", "content is hidden and requires a polyfill", "the open attribute is ignored and content is hidden by default"],
+    "correctIndex": 0,
+    "explanation": "Browsers without `<details>` support treat it as an unknown element and render its content; the `open` attribute has no effect, so content displays by default.",
+    "difficulty": "Medium",
+    "tags": ["details-element", "graceful-degradation"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Cross Browser Compatibility",
+    "question": "Why might a form with `<input type='email'>` validate differently across browsers?",
+    "options": ["email validation is not standardized and browsers use different rules", "some browsers do not support email type and fall back to text without validation", "email regex patterns vary between browser vendors", "html5 validation is optional and browsers can ignore it"],
+    "correctIndex": 1,
+    "explanation": "Browsers without HTML5 email validation fall back to text input without validation; older browsers like IE9 provide no validation, while modern browsers enforce RFC-based email checks.",
+    "difficulty": "Medium-Hard",
+    "tags": ["email-validation", "input-types", "browser-differences"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Cross Browser Compatibility",
+    "question": "A page uses SVG embedded via `<object data='image.svg'>`. On IE8, what displays?",
+    "options": ["svg renders normally", "svg renders but without css styling", "the fallback text provided by object is shown", "the page crashes"],
+    "correctIndex": 2,
+    "explanation": "IE8 has limited SVG support; `<object>` fallback content (if provided) may display instead of rendering the SVG.",
+    "difficulty": "Medium",
+    "tags": ["svg", "ie8", "fallback-content"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Cross Browser Compatibility",
+    "question": "A page uses `<canvas id='myCanvas'></canvas>` with JavaScript. On browsers without canvas support, what displays?",
+    "options": ["nothing is displayed", "canvas element is rendered as empty", "fallback content inside canvas tag is shown if provided", "an error message is displayed"],
+    "correctIndex": 2,
+    "explanation": "Browsers without canvas support ignore the `<canvas>` tag but render any HTML content inside it as fallback, allowing developers to provide alternative content.",
+    "difficulty": "Medium",
+    "tags": ["canvas-element", "fallback-content"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Cross Browser Compatibility",
+    "question": "A page uses `<img srcset='large.jpg 1024w, small.jpg 512w'>` on a browser without srcset support. Which image loads?",
+    "options": ["both images are downloaded", "the browser ignores srcset and loads the src if present", "no image is loaded", "a polyfill is required"],
+    "correctIndex": 1,
+    "explanation": "Browsers without srcset support fall back to the `src` attribute if present; srcset is a progressive enhancement that is ignored by older browsers.",
+    "difficulty": "Medium",
+    "tags": ["srcset", "graceful-degradation"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Cross Browser Compatibility",
+    "question": "A page includes `<audio><source src='song.mp3'></audio>` without a src attribute on audio. On browsers without audio support, why might nothing display?",
+    "options": ["audio element is not recognized and content is hidden", "the browser looks for a src attribute on audio, not source", "fallback text inside audio is not rendered if source is present", "audio always requires a src attribute on the element"],
+    "correctIndex": 2,
+    "explanation": "Browsers without audio support may still ignore fallback content inside the `<audio>` tag if `<source>` elements are present, resulting in a missing fallback display.",
+    "difficulty": "Hard",
+    "tags": ["audio-element", "fallback-content"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Database Integration",
+    "question": "What does a database cursor do?\n```python\nimport sqlite3\nconn = sqlite3.connect(':memory:')\ncursor = conn.cursor()\ncursor.execute('SELECT 1')\nresult = cursor.fetchone()\n```",
+    "options": ["Closes connection", "Executes queries and fetches results", "Creates database", "Returns database name"],
+    "correctIndex": 1,
+    "explanation": "A cursor is an interface to execute SQL queries and retrieve results.",
+    "difficulty": "Medium",
+    "tags": ["database", "cursor", "sql-execution"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Database Integration",
+    "question": "What does parameterized query prevent?\n```python\nimport sqlite3\nconn = sqlite3.connect(':memory:')\ncursor = conn.cursor()\ncursor.execute('SELECT * FROM users WHERE id = ?', (1,))\n```",
+    "options": ["Type errors", "SQL injection", "Database errors", "Syntax errors"],
+    "correctIndex": 1,
+    "explanation": "Parameterized queries with ? placeholders prevent SQL injection attacks by safely escaping inputs.",
+    "difficulty": "Medium",
+    "tags": ["sql-injection", "parameterized-queries", "security"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Database Integration",
+    "question": "What does cursor.fetchall() return vs cursor.fetchone()?\n```python\nimport sqlite3\nconn = sqlite3.connect(':memory:')\ncursor = conn.cursor()\ncursor.execute('SELECT 1 UNION SELECT 2 UNION SELECT 3')\none = cursor.fetchone()\nall_rows = cursor.fetchall()\n```",
+    "options": ["Both return tuples", "one is tuple, all is list of tuples", "both return lists", "one is list, all is tuple"],
+    "correctIndex": 1,
+    "explanation": "fetchone() returns a single row, fetchall() returns all remaining rows as a list.",
+    "difficulty": "Medium",
+    "tags": ["fetchone", "fetchall", "cursor-methods"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Database Integration",
+    "question": "What does connection.commit() do?\n```python\nimport sqlite3\nconn = sqlite3.connect(':memory:')\ncursor = conn.cursor()\ncursor.execute('INSERT INTO users VALUES (1, \"alice\")')\nconn.commit()\n```",
+    "options": ["Closes connection", "Saves changes to database", "Rolls back transaction", "Deletes data"],
+    "correctIndex": 1,
+    "explanation": "commit() finalizes a transaction; without it, INSERT/UPDATE changes remain uncommitted.",
+    "difficulty": "Medium",
+    "tags": ["commit", "transactions", "persistence"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Database Integration",
+    "question": "What does connection.rollback() accomplish?\n```python\nimport sqlite3\nconn = sqlite3.connect(':memory:')\nconn.execute('INSERT INTO data VALUES (1)')\nconn.rollback()\n```",
+    "options": ["Saves changes", "Undoes uncommitted changes", "Closes connection", "Resets database"],
+    "correctIndex": 1,
+    "explanation": "rollback() undoes all changes in the current transaction, returning to the last commit.",
+    "difficulty": "Medium",
+    "tags": ["rollback", "transactions", "undo"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Database Integration",
+    "question": "What does an ORM like SQLAlchemy provide?\n```python\nfrom sqlalchemy import Column, Integer, String\nfrom sqlalchemy.orm import declarative_base\n\nBase = declarative_base()\nclass User(Base):\n    __tablename__ = 'users'\n    id = Column(Integer, primary_key=True)\n    name = Column(String)\n```",
+    "options": ["Direct SQL execution", "Object mapping to database tables", "Database connection", "Schema validation only"],
+    "correctIndex": 1,
+    "explanation": "ORMs map Python classes to database tables, abstracting SQL and preventing injection.",
+    "difficulty": "Medium",
+    "tags": ["orm", "sqlalchemy", "object-mapping"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Database Integration",
+    "question": "What is connection context manager syntax?\n```python\nimport sqlite3\nwith sqlite3.connect(':memory:') as conn:\n    cursor = conn.cursor()\n    cursor.execute('SELECT 1')\n```",
+    "options": ["Syntax error", "Auto-commits on success, rolls back on error", "Requires manual commit", "Auto-closes without commit"],
+    "correctIndex": 1,
+    "explanation": "The context manager auto-commits on success and rolls back on exception, then closes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["context-manager", "database", "transaction-management"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Database Integration",
+    "question": "What does connection.row_factory do?\n```python\nimport sqlite3\nconn = sqlite3.connect(':memory:')\nconn.row_factory = sqlite3.Row\ncursor = conn.cursor()\ncursor.execute('SELECT id, name FROM users')\nrow = cursor.fetchone()\nprint(row['id'])\n```",
+    "options": ["Returns tuples", "Returns dicts with column names as keys", "Creates tables", "Syntax error"],
+    "correctIndex": 1,
+    "explanation": "row_factory changes how rows are returned; sqlite3.Row allows dict-like access by column name.",
+    "difficulty": "Medium-Hard",
+    "tags": ["row-factory", "sqlite3", "dict-access"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Database Integration",
+    "question": "What does a foreign key enforce?\n```python\nCREATE TABLE orders (\n    id INTEGER PRIMARY KEY,\n    user_id INTEGER,\n    FOREIGN KEY (user_id) REFERENCES users(id)\n);\n```",
+    "options": ["No data validation", "Referential integrity between tables", "Automatic deletion", "Column naming"],
+    "correctIndex": 1,
+    "explanation": "Foreign keys ensure user_id values exist in the users table, maintaining data consistency.",
+    "difficulty": "Medium",
+    "tags": ["foreign-key", "referential-integrity", "database-constraints"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Database Integration",
+    "question": "What does executemany() optimize?\n```python\nimport sqlite3\nconn = sqlite3.connect(':memory:')\ncursor = conn.cursor()\ndata = [(1, 'alice'), (2, 'bob'), (3, 'charlie')]\ncursor.executemany('INSERT INTO users VALUES (?, ?)', data)\n```",
+    "options": ["Single execution", "Batch execution of multiple statements", "Parallel execution", "Query optimization only"],
+    "correctIndex": 1,
+    "explanation": "executemany() executes the same query with different parameter sets, more efficient than looping.",
+    "difficulty": "Medium",
+    "tags": ["executemany", "batch-operations", "performance"]
+  }
+]

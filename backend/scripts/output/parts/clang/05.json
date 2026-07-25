@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "C",
+    "subtopic": "Functions",
+    "question": "int func();\nint result = func();\nint func() { return 42; }\nWhy does this compile?",
+    "options": [
+      "Function declaration (prototype) on line 1 satisfies the forward reference; definition on line 3 provides the implementation",
+      "C allows calling undefined functions",
+      "The compiler automatically generates a default func() if none exists",
+      "Compiler error: func is used before definition"
+    ],
+    "correctIndex": 0,
+    "explanation": "A function prototype (declaration) without a body is a forward declaration; the actual definition can come later in the file.",
+    "difficulty": "Medium",
+    "tags": ["function declaration", "forward declaration", "linking"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Functions",
+    "question": "int add(int a, int b);\nint result = add(5);\nWhy might this compile despite one missing argument?",
+    "options": [
+      "Old C (no prototypes): the call is uncheck, assumes the prototype exists; modern C with -std=c99+ and warnings would flag this",
+      "C automatically fills missing arguments with 0",
+      "Compiler error: missing argument",
+      "The second argument defaults to b=0"
+    ],
+    "correctIndex": 0,
+    "explanation": "Without a full prototype visible at the call site (K&R style), the compiler cannot verify argument count; calling with too few arguments is unpredictable.",
+    "difficulty": "Medium-Hard",
+    "tags": ["function prototypes", "argument checking", "K&R style"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Functions",
+    "question": "void func(int x) { printf(\"%d\", x); }\nfunc(5.5);\nWhat is printed?",
+    "options": [
+      "5 (the float 5.5 is implicitly converted to int, truncating to 5)",
+      "5.5 (float is printed as-is)",
+      "Compiler error: type mismatch",
+      "Undefined behavior"
+    ],
+    "correctIndex": 0,
+    "explanation": "When a float argument is passed to an int parameter, it is implicitly converted; 5.5 truncates to 5.",
+    "difficulty": "Medium",
+    "tags": ["type conversion", "implicit casting", "function arguments"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Functions",
+    "question": "int func(int x) {\nint result = x * 2;\nreturn result;\nreturn 0;\n}\nWhy does the second return never execute?",
+    "options": [
+      "The first return exits the function; code after return is unreachable",
+      "Both returns execute sequentially",
+      "Compiler error: duplicate return",
+      "The second return overrides the first"
+    ],
+    "correctIndex": 0,
+    "explanation": "A return statement immediately transfers control out of the function; subsequent statements are unreachable.",
+    "difficulty": "Medium",
+    "tags": ["return statement", "control flow", "unreachable code"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Functions",
+    "question": "void func(void) { }\nfunc();\nfunc(42);\nWhy might the second call fail?",
+    "options": [
+      "void in the parameter list explicitly forbids arguments; func(42) violates this",
+      "func only accepts one argument: 42",
+      "Compiler allows extra arguments to be ignored",
+      "The function signature is ignored at call time"
+    ],
+    "correctIndex": 0,
+    "explanation": "void parameters mean the function takes no arguments; passing any argument is a type error.",
+    "difficulty": "Medium",
+    "tags": ["function parameters", "void keyword", "type checking"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Functions",
+    "question": "int* func() {\nint x = 10;\nreturn &x;\n}\nWhy is this undefined behavior?",
+    "options": [
+      "x is a local variable; its storage is destroyed when func returns; the pointer points to deallocated memory",
+      "Returning pointers from functions is not allowed",
+      "The address of a local variable is always invalid",
+      "Compiler error: cannot return address of local"
+    ],
+    "correctIndex": 0,
+    "explanation": "Local variables are stack-allocated; when the function returns, their memory is reused; the returned pointer becomes a dangling pointer.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dangling pointers", "stack memory", "function returns"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Functions",
+    "question": "int func(int a, int b, ...) {\nva_list args;\nva_start(args, b);\nint c = va_arg(args, int);\nva_end(args);\nreturn a + b + c;\n}\nint result = func(1, 2, 3);\nWhat is the purpose of ...?",
+    "options": [
+      "To allow variadic arguments (variable number of arguments) after the fixed parameters",
+      "To denote the end of the function declaration",
+      "To indicate optional parameters",
+      "Compiler error: ... is invalid syntax"
+    ],
+    "correctIndex": 0,
+    "explanation": "The ... (ellipsis) enables variadic functions; va_start/va_arg macros allow accessing the variable arguments.",
+    "difficulty": "Medium-Hard",
+    "tags": ["variadic functions", "va_list", "variable arguments"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Functions",
+    "question": "int fibonacci(int n) {\nif (n <= 1) return n;\nreturn fibonacci(n-1) + fibonacci(n-2);\n}\nWhy is this inefficient for large n?",
+    "options": [
+      "Exponential time complexity: same subproblems are recalculated repeatedly; fibonacci(n-2) is computed many times",
+      "Recursion is inherently slower than loops",
+      "The function does not use memoization",
+      "Integer overflow prevents computing large values"
+    ],
+    "correctIndex": 0,
+    "explanation": "Naive recursive fibonacci has O(2^n) time; dynamic programming or memoization reduces this to O(n).",
+    "difficulty": "Medium-Hard",
+    "tags": ["recursion", "time complexity", "optimization"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Functions",
+    "question": "int stack_depth = 0;\nint func() {\nstack_depth++;\nif (stack_depth > 1000) {\nprintf(\"Stack overflow risk\");\nreturn -1;\n}\nreturn func();\n}\nWhy is this not a reliable stack overflow detection?",
+    "options": [
+      "Stack space depends on platform/OS; a recursive depth limit is unreliable for detecting actual stack exhaustion",
+      "The counter always prevents overflow",
+      "Stack overflow cannot be detected in C",
+      "printf() itself causes stack overflow"
+    ],
+    "correctIndex": 0,
+    "explanation": "Stack size varies; the depth counter is heuristic, not deterministic; the function could overflow at any depth or avoid it.",
+    "difficulty": "Medium-Hard",
+    "tags": ["stack overflow", "recursion limits", "platform dependence"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Functions",
+    "question": "static int func() { return 1; }\nCan this function be called from other files?",
+    "options": [
+      "No: static limits linkage to this translation unit only",
+      "Yes: static is a style convention with no effect on linkage",
+      "Only if the function is declared extern in the other file",
+      "Compiler error: static functions must be exported"
+    ],
+    "correctIndex": 0,
+    "explanation": "static on a function restricts its linkage to internal (file-scope); other translation units cannot call it.",
+    "difficulty": "Medium",
+    "tags": ["static functions", "linkage", "translation units"]
+  }
+]

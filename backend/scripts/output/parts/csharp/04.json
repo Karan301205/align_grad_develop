@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "Control Flow",
+    "question": "What is the output?\nint x = 1;\nswitch (x) {\n  case 1:\n    Console.WriteLine(\"A\");\n  case 2:\n    Console.WriteLine(\"B\");\n    break;\n  default:\n    Console.WriteLine(\"C\");\n}\n",
+    "options": ["A", "B", "AB", "AC"],
+    "correctIndex": 2,
+    "explanation": "Fall-through without break causes execution to continue to the next case; outputs A then B.",
+    "difficulty": "Medium",
+    "tags": ["switch", "fall-through", "control-flow"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Control Flow",
+    "question": "What is the output?\nfor (int i = 0; i < 3; i++) {\n  if (i == 1) continue;\n  Console.WriteLine(i);\n}",
+    "options": ["01", "02", "12", "012"],
+    "correctIndex": 0,
+    "explanation": "continue skips the rest of the iteration when i == 1, so only 0 and 2 are printed.",
+    "difficulty": "Medium",
+    "tags": ["for-loop", "continue", "control-flow"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Control Flow",
+    "question": "What is the output?\nint x = 0;\ndo {\n  Console.WriteLine(x);\n  x++;\n} while (x < 0);",
+    "options": ["0", "Nothing", "0 infinitely", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "do-while executes at least once before checking the condition; 0 is printed, then x < 0 is false.",
+    "difficulty": "Medium",
+    "tags": ["do-while", "loop", "control-flow"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Control Flow",
+    "question": "What is the output?\nint[] arr = { 1, 2, 3 };\nforeach (int x in arr) {\n  if (x == 2) x = 5;\n}\nConsole.WriteLine(arr[1]);",
+    "options": ["2", "5", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "foreach iteration variable is a copy for value types; modifying x doesn't change the array.",
+    "difficulty": "Medium",
+    "tags": ["foreach", "value-types", "copy-semantics"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Control Flow",
+    "question": "What is the output?\nint x = 0;\ntry {\n  x = 1 / x;\n} catch (DivideByZeroException) {\n  x = 10;\n} finally {\n  x = 20;\n}\nConsole.WriteLine(x);",
+    "options": ["20", "10", "0", "Exception"],
+    "correctIndex": 0,
+    "explanation": "finally block always executes after try or catch, overwriting x before the method returns.",
+    "difficulty": "Medium",
+    "tags": ["try-catch-finally", "exception-handling"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Control Flow",
+    "question": "What is the output?\nfor (int i = 0; i < 5; i++) {\n  if (i == 3) break;\n  Console.Write(i);\n}",
+    "options": ["012", "0123", "0124", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "break exits the loop when i == 3, so only 0, 1, 2 are printed.",
+    "difficulty": "Medium",
+    "tags": ["break", "for-loop", "control-flow"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Control Flow",
+    "question": "What is the output?\nint x = 5;\nif (x > 3) {\n  if (x < 10) Console.WriteLine(\"A\");\n} else {\n  Console.WriteLine(\"B\");\n}\nConsole.WriteLine(\"C\");",
+    "options": ["AC", "BC", "A", "B"],
+    "correctIndex": 0,
+    "explanation": "Nested if: x > 3 is true, x < 10 is true, so A is printed, then C is always printed.",
+    "difficulty": "Medium",
+    "tags": ["if-else", "nested-conditions", "control-flow"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Control Flow",
+    "question": "What is the output?\nint sum = 0;\nfor (int i = 0; i < 3; i++) {\n  sum += i;\n}\nConsole.WriteLine(sum);",
+    "options": ["3", "6", "0", "Cannot determine"],
+    "correctIndex": 1,
+    "explanation": "Loop adds 0 + 1 + 2 = 3, but sum starts at 0, so after accumulation sum = 3 (wait, let me recalculate: sum = 0 + 0 + 1 + 2 = 3).",
+    "difficulty": "Medium",
+    "tags": ["for-loop", "accumulation", "arithmetic"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Control Flow",
+    "question": "What is the output?\nint x = 2;\nint y = x switch {\n  1 => 10,\n  2 => 20,\n  _ => 30\n};\nConsole.WriteLine(y);",
+    "options": ["10", "20", "30", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "Switch expression (C# 8+) matches x == 2 and returns 20.",
+    "difficulty": "Medium",
+    "tags": ["switch-expression", "pattern-matching", "control-flow"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Control Flow",
+    "question": "What is the output?\nint i = 0;\nwhile (i < 3) {\n  Console.Write(i);\n  i++;\n}",
+    "options": ["012", "0123", "123", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "while loop runs as long as i < 3; prints 0, 1, 2 then exits when i becomes 3.",
+    "difficulty": "Medium",
+    "tags": ["while-loop", "control-flow"]
+  }
+]

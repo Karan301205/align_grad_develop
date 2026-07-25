@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Deployments",
+    "question": "You deploy a Deployment with rolling update strategy. After 30 seconds, you realize the new image has a critical bug. How do you quickly roll back?",
+    "options": [
+      "Delete the Deployment and redeploy with the old image",
+      "Use kubectl rollout undo to revert to the previous revision",
+      "Manually delete the new ReplicaSet and scale up the old one",
+      "Redeploy the same manifest with the old image tag"
+    ],
+    "correctIndex": 1,
+    "explanation": "kubectl rollout undo automatically reverts the Deployment to its previous revision, restoring the old ReplicaSet and minimizing downtime.",
+    "difficulty": "Medium",
+    "tags": ["deployment", "rollout", "rollback"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Deployments",
+    "question": "A Deployment is rolling out a new image with maxSurge: 1 and maxUnavailable: 1. You have 10 replicas. During the rollout, how many pods can be running at once?",
+    "options": [
+      "Between 9 and 11 pods",
+      "Exactly 10 pods",
+      "Between 10 and 11 pods",
+      "Between 8 and 12 pods"
+    ],
+    "correctIndex": 0,
+    "explanation": "maxSurge allows 1 extra pod (11 total), and maxUnavailable allows 1 old pod to be removed; the pod count fluctuates between 9 (when old pods are removed first) and 11 (when new pods are added).",
+    "difficulty": "Medium-Hard",
+    "tags": ["deployment", "rolling-update", "maxsurge", "maxunavailable"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Deployments",
+    "question": "A Deployment's rollout is stuck in progress for 15 minutes. The new pods are created but never become ready. What is the most efficient troubleshooting step?",
+    "options": [
+      "Manually delete the new ReplicaSet and restart the rollout",
+      "Check kubectl describe pod and pod logs to diagnose why readiness probes fail",
+      "Increase the progressDeadlineSeconds in the Deployment spec",
+      "Scale down the Deployment and redeploy from scratch"
+    ],
+    "correctIndex": 1,
+    "explanation": "Readiness probe failures prevent rollout progression; examining pod events and logs reveals the root cause (misconfigured probe, dependency issue, etc.) faster than other interventions.",
+    "difficulty": "Medium",
+    "tags": ["deployment", "rollout", "readiness-probe", "debugging"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Deployments",
+    "question": "You set the Deployment strategy to Recreate instead of RollingUpdate. What is a tradeoff of this approach?",
+    "options": [
+      "All old pods terminate immediately; new pods start; there is downtime during the transition",
+      "It is faster but uses more temporary resources",
+      "Pods gradually terminate and start without downtime",
+      "The Recreate strategy is not a valid Deployment option"
+    ],
+    "correctIndex": 0,
+    "explanation": "Recreate stops all old pods before starting new ones, causing a brief outage but simplifying resource management compared to rolling updates.",
+    "difficulty": "Medium",
+    "tags": ["deployment", "strategy", "recreate"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Deployments",
+    "question": "A Deployment has revisionHistoryLimit set to 3. After 5 successful rollouts, how many ReplicaSets from past revisions exist?",
+    "options": [
+      "5 ReplicaSets for all revisions",
+      "3 ReplicaSets; the oldest 2 are deleted",
+      "Only 1 ReplicaSet; the rest are cleaned up",
+      "2 ReplicaSets; one is active and one is the immediate previous revision"
+    ],
+    "correctIndex": 1,
+    "explanation": "revisionHistoryLimit controls how many old ReplicaSets are retained; when exceeded, the oldest ones are garbage collected.",
+    "difficulty": "Medium",
+    "tags": ["deployment", "revision-history", "cleanup"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Deployments",
+    "question": "You update a Deployment's CPU request from 500m to 1000m, but the nodes are at full capacity. What happens to the rollout?",
+    "options": [
+      "New pods are created and immediately start sharing resources with existing pods",
+      "New pods enter Pending state because there isn't enough CPU; the rollout stalls until resources are available",
+      "Kubernetes automatically evicts lower-priority pods to make room",
+      "The old pods are terminated to free resources for new pods"
+    ],
+    "correctIndex": 1,
+    "explanation": "Rolling updates respect resource requests; new pods cannot be scheduled if nodes lack capacity, causing the rollout to halt until resources are freed.",
+    "difficulty": "Medium-Hard",
+    "tags": ["deployment", "rolling-update", "resource-constraints"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Deployments",
+    "question": "A Deployment uses the image tag 'latest'. You push a new build to your image repository and update the Deployment, keeping the tag as 'latest'. Do the pods automatically use the new image?",
+    "options": [
+      "Yes, the new image is automatically pulled when the Deployment is updated",
+      "No, because kubelet caches the 'latest' tag; you must restart the pods or use imagePullPolicy: Always",
+      "Only if you explicitly delete the old pods",
+      "Yes, but only if you set pullPolicy to OnPush"
+    ],
+    "correctIndex": 1,
+    "explanation": "By default, imagePullPolicy is IfNotPresent for non-latest tags; for 'latest', the policy is Always, but kubelet's local cache may prevent updates unless pods are restarted.",
+    "difficulty": "Medium-Hard",
+    "tags": ["deployment", "image-tag", "imagepullpolicy"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Deployments",
+    "question": "You manually scale a Deployment to 2 replicas, then change the YAML replicas field to 5 and reapply it. What is the final replica count?",
+    "options": [
+      "2 replicas (kubectl keeps manual scale changes)",
+      "5 replicas (kubectl reapply enforces the YAML definition)",
+      "7 replicas (manual scale plus YAML replicas are added)",
+      "An error occurs because of the conflict"
+    ],
+    "correctIndex": 1,
+    "explanation": "kubectl apply enforces the YAML definition; reapplying with replicas: 5 overrides manual scaling and sets the desired count to 5.",
+    "difficulty": "Medium",
+    "tags": ["deployment", "scaling", "kubectl-apply"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Deployments",
+    "question": "A rolling update begins with maxSurge: 0 and maxUnavailable: 1. Why would someone use this conservative configuration?",
+    "options": [
+      "To ensure backward compatibility during rollouts",
+      "To minimize resource consumption while guaranteeing zero additional pods during updates",
+      "Because it's faster than the default rolling update strategy",
+      "To force all pods to update simultaneously"
+    ],
+    "correctIndex": 1,
+    "explanation": "maxSurge: 0 prevents temporary resource spikes (no extra pods), while maxUnavailable: 1 controls blast radius; this is ideal for resource-constrained environments.",
+    "difficulty": "Medium-Hard",
+    "tags": ["deployment", "rolling-update", "maxsurge", "maxunavailable"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Deployments",
+    "question": "You apply a Deployment manifest and kubectl reports 'Deployment is progressing.' Three minutes later, it shows a ProgressDeadlineExceeded condition. What should you do?",
+    "options": [
+      "Wait longer; the Deployment will eventually succeed",
+      "Investigate why the rollout isn't progressing (readiness probes failing, scheduling issues, etc.)",
+      "Immediately scale up to force the rollout to proceed",
+      "Delete and reapply the Deployment to reset the deadline"
+    ],
+    "correctIndex": 1,
+    "explanation": "ProgressDeadlineExceeded means the rollout exceeded the configured deadline; this indicates a genuine problem (failed probes, resource constraints) requiring diagnosis.",
+    "difficulty": "Medium-Hard",
+    "tags": ["deployment", "progressdeadline", "debugging"]
+  }
+]

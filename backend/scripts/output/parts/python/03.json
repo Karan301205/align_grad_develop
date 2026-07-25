@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "File Input Output",
+    "question": "What is the correct way to ensure a file is closed even if an exception occurs?\n```python\nwith open('file.txt', 'r') as f:\n    data = f.read()\nprint(data)\n```\nAfter the with block, is the file still open?",
+    "options": ["Yes, must call close manually", "No, closed automatically", "Only if no exception occurred", "NameError accessing data"],
+    "correctIndex": 1,
+    "explanation": "The with statement (context manager) automatically closes the file when exiting the block, handling exceptions gracefully.",
+    "difficulty": "Medium",
+    "tags": ["context-manager", "file-handling", "resource-management"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "File Input Output",
+    "question": "What does this code output?\n```python\nwith open('data.txt', 'w') as f:\n    f.write('hello')\n    f.seek(0)\n    f.write('hi')\nwith open('data.txt', 'r') as f:\n    print(f.read())\n```",
+    "options": ["hello", "hi", "hillo", "IOError"],
+    "correctIndex": 2,
+    "explanation": "In write mode, seek(0) repositions but write() overwrites from that position; result is 'hillo'.",
+    "difficulty": "Medium-Hard",
+    "tags": ["file-modes", "seek", "write-operations"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "File Input Output",
+    "question": "What is the difference in output between these two reads?\n```python\nwith open('file.txt', 'r') as f:\n    lines1 = f.readlines()\n    f.seek(0)\n    lines2 = f.read().split('\\n')\nprint(lines1 == lines2)\n```",
+    "options": ["True always", "False if file ends with newline", "Always False", "Depends on file size"],
+    "correctIndex": 1,
+    "explanation": "readlines() keeps newline characters but split() on read() discards them; equality fails if file ends with newline.",
+    "difficulty": "Hard",
+    "tags": ["readlines", "split", "newline-handling"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "File Input Output",
+    "question": "What does json.load() require compared to json.loads()?\n```python\nimport json\ndata_str = '{\"a\": 1}'\nresult1 = json.loads(data_str)\nwith open('data.json', 'r') as f:\n    result2 = json.load(f)\n```",
+    "options": ["load requires a file object, loads requires a string", "load requires a string, loads requires a file", "Both require strings", "Both require file objects"],
+    "correctIndex": 0,
+    "explanation": "json.load() accepts a file object, json.loads() accepts a string (s = string).",
+    "difficulty": "Medium",
+    "tags": ["json-parsing", "file-io", "string-vs-file"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "File Input Output",
+    "question": "What will this code do?\n```python\nwith open('file.txt', 'r') as f:\n    for line in f:\n        print(line, end='')\n```\nWhy use end=''?",
+    "options": ["Prevents double newlines since line includes \\n", "Required to read the file", "Reverses the file order", "Has no effect on output"],
+    "correctIndex": 0,
+    "explanation": "Each line from file iteration includes the trailing newline; end='' prevents print() from adding another.",
+    "difficulty": "Medium",
+    "tags": ["file-iteration", "print-function", "newline-characters"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "File Input Output",
+    "question": "What is the output of this pathlib operation?\n```python\nfrom pathlib import Path\np = Path('dir/subdir/file.txt')\nprint(p.parent.parent)\n```",
+    "options": ["dir", "subdir", "dir/subdir", "file.txt"],
+    "correctIndex": 0,
+    "explanation": "Path.parent gives the parent directory; calling it twice goes up two levels to 'dir'.",
+    "difficulty": "Medium",
+    "tags": ["pathlib", "path-navigation", "parent-directory"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "File Input Output",
+    "question": "What mode should be used to read a binary file like an image?\n```python\nwith open('image.png', 'rb') as f:\n    data = f.read()\n```",
+    "options": ["'r' is fine", "'rb' reads as bytes", "'b' alone works", "'rB' same as rb"],
+    "correctIndex": 1,
+    "explanation": "Binary mode 'rb' reads the file as bytes, preventing encoding/decoding issues with binary data.",
+    "difficulty": "Medium",
+    "tags": ["binary-mode", "file-modes", "bytes"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "File Input Output",
+    "question": "What is the result of this CSV reading scenario?\n```python\nimport csv\nwith open('data.csv', 'r') as f:\n    reader = csv.DictReader(f)\n    rows = list(reader)\n```\nWhat does each row contain?",
+    "options": ["A list of values", "A dict with column names as keys", "A tuple of values", "A set of values"],
+    "correctIndex": 1,
+    "explanation": "csv.DictReader treats the first row as headers and each subsequent row becomes a dict.",
+    "difficulty": "Medium",
+    "tags": ["csv", "dictreader", "file-parsing"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "File Input Output",
+    "question": "What happens if you open a file in append mode and then seek backwards?\n```python\nwith open('file.txt', 'a') as f:\n    f.seek(0)\n    f.write('data')\n```",
+    "options": ["Writes at position 0", "Writes at the end", "Raises an error", "Seeks are ignored in append mode"],
+    "correctIndex": 1,
+    "explanation": "Append mode always writes at the end of the file regardless of seek position.",
+    "difficulty": "Medium-Hard",
+    "tags": ["append-mode", "file-modes", "seek"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "File Input Output",
+    "question": "What does this context manager practice accomplish?\n```python\nfrom contextlib import closing\nimport io\n\nwith closing(io.StringIO()) as sio:\n    sio.write('test')\n    print(sio.getvalue())\n```",
+    "options": ["StringIO must always use closing", "closing calls close() on exit", "Converts string to IO object", "Has no effect on StringIO"],
+    "correctIndex": 1,
+    "explanation": "closing() wraps an object and calls close() when exiting, useful for objects without native __exit__.",
+    "difficulty": "Medium-Hard",
+    "tags": ["context-manager", "closing", "stringio"]
+  }
+]

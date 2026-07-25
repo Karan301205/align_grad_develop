@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Production Deployment",
+    "question": "A production deployment runs containers with `--restart=always`. After a node restart, all containers start automatically. One container starts before its dependency (database) and fails to connect. The container is repeatedly restarted. How should restart policy be configured?",
+    "options": ["Use `--restart=on-failure:5` to limit retries and prevent infinite restart loops", "Use `--restart=unless-stopped` and add orchestration to manage startup order (Docker Compose depends_on or Kubernetes init containers)", "Accept the restart loops; the application should implement retry logic", "Use `--restart=always` but add a health check to detect the startup failure"],
+    "correctIndex": 1,
+    "explanation": "Docker Compose's depends_on or Kubernetes init containers enforce startup order; combining with `--restart=unless-stopped` ensures restarts without infinite loops on startup failures; the application should still implement retry logic for transient failures.",
+    "difficulty": "Medium",
+    "tags": ["restart-policy", "startup-order", "production-deployment"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Production Deployment",
+    "question": "A production system has two Docker hosts running containers. After a network partition, the two hosts cannot communicate. Containers on both hosts continue running but cannot reach each other. When the partition heals, containers have inconsistent state. How should the system be designed to handle this?",
+    "options": ["Use a distributed orchestrator (Kubernetes, Docker Swarm) with quorum-based consensus to detect and resolve partitions", "Accept network partitions; design applications to be partition-tolerant (CAP theorem) with eventual consistency", "Mirror state across hosts with synchronous replication to prevent inconsistencies", "Use a shared storage backend (NFS, distributed filesystem) to ensure state consistency"],
+    "correctIndex": 0,
+    "explanation": "Orchestrators with quorum (Kubernetes etcd, Docker Swarm raft) detect partitions; the majority partition continues and minority partition stops services, preventing split-brain scenarios; applications should also be partition-tolerant for resilience.",
+    "difficulty": "Medium-Hard",
+    "tags": ["network-partitions", "distributed-systems", "consistency"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Production Deployment",
+    "question": "A production database container is deployed with `docker run -v dbdata:/var/lib/postgresql app`. After 6 months, the volume size is 500 GB. Backup and restore operations take hours. What is a better production practice?",
+    "options": ["Use managed database services (RDS, Cloud SQL) instead of containerized databases for production", "Implement incremental backups and point-in-time recovery using the database's native tools", "Switch to a smaller database engine or archive old data to reduce volume size", "Use storage snapshots (AWS EBS, Azure Snapshots) for fast backups instead of data dumps"],
+    "correctIndex": 3,
+    "explanation": "Storage-level snapshots are far faster than application-level backups for large volumes; however, containerized databases are not recommended for production use; managed services provide better reliability, scaling, and backup capabilities.",
+    "difficulty": "Medium-Hard",
+    "tags": ["database-deployment", "backup-strategy", "production-best-practices"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Production Deployment",
+    "question": "A production deployment uses Docker with a single Docker daemon on one host. All containers restart on that host, creating a single point of failure. What is the recommended architecture?",
+    "options": ["Use multiple Docker hosts with an orchestrator (Docker Swarm, Kubernetes) to distribute containers and provide high availability", "Accept single-host deployment but add redundant hosts with manual failover", "Use a hypervisor (KVM, Hyper-V) to run multiple Docker daemons on the same host for increased resilience", "Deploy on cloud infrastructure (AWS ECS, Google GKE) for automatic scaling and failover"],
+    "correctIndex": 0,
+    "explanation": "Multi-host orchestrators automatically restart containers on healthy nodes when a host fails, providing true high availability; cloud-managed services (ECS, GKE) are also valid for production but require API changes.",
+    "difficulty": "Medium",
+    "tags": ["high-availability", "orchestration", "production-architecture"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Production Deployment",
+    "question": "A production application logs to stdout and Docker forwards logs to syslog. After a few days, syslog fills up the disk, and new logs are discarded. How should logging be configured for production?",
+    "options": ["Configure log rotation for the syslog driver using `--log-opt max-size` and `--log-opt max-file`", "Switch to a centralized logging system (ELK, Splunk, CloudWatch) that sends logs to a remote server", "Use `--log-driver=json-file` instead of syslog for better performance", "Set up a log retention policy on the syslog server to delete old logs"],
+    "correctIndex": 1,
+    "explanation": "Centralized logging (ELK, Splunk) is the production standard; it provides search, aggregation, and retention across many containers; combined with log rotation (`--log-opt max-size`), it prevents disk exhaustion and enables forensics.",
+    "difficulty": "Medium",
+    "tags": ["centralized-logging", "log-management", "production-deployment"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Production Deployment",
+    "question": "A production deployment has containers with resource requests but no limits set. During a traffic spike, one container consumes all host CPU and memory, starving other containers. How should resource limits be configured?",
+    "options": ["Set limits equal to requests; requests guarantee minimum resources, limits prevent over-consumption by any single container", "Set limits higher than requests to allow burst capacity; use monitoring to detect and alert on overages", "Set limits only; omit requests to allow the orchestrator to schedule containers more flexibly", "Implement CPU and memory quotas at the cgroup level independent of Docker limits"],
+    "correctIndex": 1,
+    "explanation": "Limits should be higher than requests to allow temporary bursts (traffic spikes); monitoring and alerts detect sustained overages; this balances resource efficiency with resilience to temporary load spikes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["resource-management", "limits-and-requests", "container-orchestration"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Production Deployment",
+    "question": "A production system uses docker-compose for deployment, manually managed on a fleet of 50 hosts. Deployments require SSH into each host and running `docker-compose up -d`. This is error-prone. What is a better approach?",
+    "options": ["Use an orchestrator (Docker Swarm, Kubernetes) that supports declarative deployments and rolling updates", "Automate with Ansible or Terraform scripts to parallelize deployments across hosts", "Use a CI/CD pipeline (Jenkins, GitLab CI) to build images and trigger deployments", "Implement a container registry with webhooks to auto-pull and restart containers"],
+    "correctIndex": 0,
+    "explanation": "Orchestrators provide centralized deployment, versioning, and rollback; Swarm (`docker service`) and Kubernetes both support declarative desired state and automatic reconciliation, eliminating manual SSH deployments.",
+    "difficulty": "Medium",
+    "tags": ["production-deployment", "orchestration", "operational-excellence"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Production Deployment",
+    "question": "A production deployment runs containers on bare metal hosts using `docker run`. The host kernel is patched for security vulnerability but requires a reboot. How should this be handled without disrupting service?",
+    "options": ["Use orchestration (Docker Swarm, Kubernetes) with drain/cordon to gracefully migrate containers before rebooting", "Accept downtime; schedule maintenance windows and notify users", "Use containerized applications that can migrate via `docker save` and `docker load` to preserve state", "Implement redundancy with multiple replicas; drain containers to other hosts before rebooting"],
+    "correctIndex": 0,
+    "explanation": "Orchestrators provide drain/cordon commands to gracefully migrate containers before host maintenance; this is the production standard for zero-downtime updates.",
+    "difficulty": "Medium",
+    "tags": ["maintenance-windows", "zero-downtime", "orchestration"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Production Deployment",
+    "question": "A production database container stores state in a volume that is replicated to a backup host via rsync every 6 hours. After a host failure, the backup is 4 hours stale and some transactions are lost. How can data loss be prevented?",
+    "options": ["Use managed database services with continuous replication and automated failover instead of containerized databases", "Implement continuous backup with point-in-time recovery using the database's transaction log", "Increase replication frequency to 1 hour to reduce data loss window", "Use synchronous replication to ensure data is written to multiple hosts before acknowledging transactions"],
+    "correctIndex": 0,
+    "explanation": "Containerized stateful services are not recommended for production; managed databases (RDS, Cloud SQL) provide continuous replication, automated failover, and point-in-time recovery, eliminating the need for custom backup scripts.",
+    "difficulty": "Medium-Hard",
+    "tags": ["stateful-services", "disaster-recovery", "production-architecture"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Production Deployment",
+    "question": "A production system has containers accessing secrets from environment variables (API keys, database passwords). These secrets are visible in `docker inspect` and `docker ps` output. How should secrets be managed?",
+    "options": ["Use orchestrator-native secrets (Docker Secrets in Swarm, Kubernetes Secrets) that mount as files instead of env vars", "Use a secrets management service (HashiCorp Vault, AWS Secrets Manager) and load secrets at runtime", "Encrypt secrets in environment variables using a key management service (KMS)", "All of the above approaches provide better security than plaintext env vars"],
+    "correctIndex": 3,
+    "explanation": "Environment variables are visible to any user with docker inspect/ps access; orchestrator secrets and external vaults provide better security by mounting secrets as files or loading them at runtime; encrypt in transit and at rest.",
+    "difficulty": "Medium-Hard",
+    "tags": ["secrets-management", "security", "production-deployment"]
+  }
+]

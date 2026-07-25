@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "VPC Network Architecture",
+    "question": "Your VPC has a private subnet with route table: 0.0.0.0/0 -> NAT Gateway (nat-12345). A Lambda function in this subnet can't reach an external API. You check the NAT Gateway status: it's available. What's the most likely issue?",
+    "options": [
+      "The security group attached to the Lambda function's ENI doesn't allow outbound HTTPS",
+      "The network ACL for the private subnet denies outbound traffic on port 443",
+      "The NAT Gateway's Elastic IP has run out of port capacity",
+      "The external API is blocking requests from the NAT Gateway's IP"
+    ],
+    "correctIndex": 1,
+    "explanation": "Route table and security group are configured correctly; NACLs are the next layer to check; they must allow outbound on relevant ports (443, 80) and return traffic (ephemeral 1024-65535).",
+    "difficulty": "Hard",
+    "tags": ["nacl", "vpc", "troubleshooting"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "VPC Network Architecture",
+    "question": "You have two VPCs: VPC-A (10.0.0.0/16) and VPC-B (10.1.0.0/16). You create a VPC peering connection and add route: 10.1.0.0/16 -> pcx-12345 in VPC-A's route table. An instance in VPC-A still cannot reach VPC-B. What's missing?",
+    "options": [
+      "The peering connection must be accepted in VPC-B; route alone is insufficient",
+      "VPC-B's security group must allow inbound traffic from VPC-A's CIDR block",
+      "VPC-B's route table must have a reciprocal route: 10.0.0.0/16 -> pcx-12345",
+      "Enable DNS resolution in the peering connection settings"
+    ],
+    "correctIndex": 2,
+    "explanation": "VPC peering is bidirectional; both VPCs must have routes pointing to the peering connection; VPC-A routes to B, VPC-B must route back to A; no asymmetric routing.",
+    "difficulty": "Medium",
+    "tags": ["vpc-peering", "routing", "troubleshooting"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "VPC Network Architecture",
+    "question": "You're designing a multi-tier application: public subnet (web tier), private subnet (app tier), private subnet (database tier). The web servers need to reach the app servers, but the database tier should only accept connections from the app tier. How should you configure security groups?",
+    "options": [
+      "Web SG allows all; app SG allows from web SG; database SG allows from app SG",
+      "All tiers allow from 0.0.0.0/0; rely on NACLs for restriction",
+      "Database SG allows from app SG IP range; app SG allows from web SG IP range",
+      "All tiers use the same security group for simplicity"
+    ],
+    "correctIndex": 0,
+    "explanation": "Security groups should reference other security groups, not IP ranges; web -> app via web SG, app -> database via app SG provides least-privilege with dynamic scaling; NACLs are stateless and harder to maintain.",
+    "difficulty": "Medium-Hard",
+    "tags": ["security-groups", "multi-tier", "least-privilege"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "VPC Network Architecture",
+    "question": "Your VPC has two subnets in different AZs: us-east-1a and us-east-1b. You create an internet gateway and attach it to the VPC. Instances in us-east-1a can reach the internet, but instances in us-east-1b cannot. What's the most likely cause?",
+    "options": [
+      "The internet gateway is only functional in us-east-1a",
+      "The us-east-1b subnet's route table doesn't have 0.0.0.0/0 -> internet gateway route",
+      "The us-east-1b subnet needs a separate internet gateway",
+      "Instances in us-east-1b need Elastic IPs to reach the internet"
+    ],
+    "correctIndex": 1,
+    "explanation": "Internet gateway is VPC-wide; issue is routing; each subnet has its own route table; us-east-1b route table must explicitly route 0.0.0.0/0 to the IGW.",
+    "difficulty": "Medium",
+    "tags": ["vpc", "routing", "troubleshooting"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "VPC Network Architecture",
+    "question": "You're migrating a 10.0.0.0/16 network from on-premises to AWS. Your VPC uses 10.0.0.0/16 and you need to connect to on-premises via a VPN. The VPN connection is established, but instances can't reach on-premises hosts. What's the issue?",
+    "options": [
+      "CIDR overlap; both VPC and on-premises use 10.0.0.0/16; routes are ambiguous",
+      "The VPN gateway's status light is yellow instead of green",
+      "On-premises hosts need to be configured to accept AWS traffic",
+      "The VPC needs a separate VPN gateway in each AZ"
+    ],
+    "correctIndex": 0,
+    "explanation": "CIDR overlap causes routing conflicts; the VPN can't distinguish which 10.0.0.0/16 route applies; must re-IP either VPC or on-premises, or use VPN with NAT.",
+    "difficulty": "Hard",
+    "tags": ["vpn", "cidr-overlap", "routing"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "VPC Network Architecture",
+    "question": "Your VPC has a NAT instance (not NAT Gateway) in the public subnet. Private subnet instances route 0.0.0.0/0 through the NAT instance. The NAT instance unexpectedly terminates. What happens to traffic from private instances?",
+    "options": [
+      "Traffic continues through the backup NAT instance if configured",
+      "Traffic is immediately re-routed through the second NAT instance in the ASG",
+      "Traffic fails; there's no automatic failover for NAT instances",
+      "AWS automatically launches a replacement NAT instance"
+    ],
+    "correctIndex": 2,
+    "explanation": "NAT instances are single points of failure; you must manage failover (ASG, monitoring, failover scripts); NAT Gateways are AWS-managed and highly available by default.",
+    "difficulty": "Medium",
+    "tags": ["nat", "high-availability", "failover"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "VPC Network Architecture",
+    "question": "You configure a VPC endpoint for S3 (gateway endpoint). Private subnet instances can now access S3 without going through the NAT Gateway. Your NAT Gateway costs drop 30%. What are you missing from the design?",
+    "options": [
+      "Nothing; VPC endpoints for S3 eliminate NAT Gateway need for S3 traffic",
+      "Gateway endpoints support S3 and DynamoDB only; other services still require NAT or interface endpoints",
+      "You should also create an interface endpoint for CloudWatch Logs",
+      "Gateway endpoints are slower than NAT Gateway; cost savings aren't worth the latency"
+    ],
+    "correctIndex": 1,
+    "explanation": "Gateway endpoints (S3, DynamoDB) are free and reduce NAT costs; interface endpoints (other services: EC2, Secrets Manager, SNS) are also beneficial; combining them provides comprehensive private access.",
+    "difficulty": "Medium-Hard",
+    "tags": ["vpc-endpoints", "cost-optimization", "architecture"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "VPC Network Architecture",
+    "question": "You have a VPC with public and private subnets. Instances in the private subnet need to communicate with an on-premises database via a VPN. You create a VPN connection to a virtual private gateway. Do you need to modify the private subnet's network ACL?",
+    "options": [
+      "No; VPN traffic bypasses NACLs entirely",
+      "Yes; add inbound rule allowing traffic from on-premises CIDR on the relevant port",
+      "Only if the NACL currently denies all traffic; otherwise defaults allow everything",
+      "No; security groups on instances are sufficient for VPN traffic"
+    ],
+    "correctIndex": 1,
+    "explanation": "NACLs are stateless and filter all traffic entering/leaving the subnet, including VPN; inbound rule for on-premises CIDR and outbound ephemeral response ports are required.",
+    "difficulty": "Medium-Hard",
+    "tags": ["nacl", "vpn", "network-design"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "VPC Network Architecture",
+    "question": "You want to extend a corporate network into AWS. You have 10 office locations that need to connect to a VPC with 50 subnets. Should you create 10 separate VPN connections or use a Transit Gateway?",
+    "options": [
+      "10 separate VPN connections; each office gets a dedicated connection",
+      "Transit Gateway; single managed hub routes traffic between VPC and all office locations",
+      "Both; use Transit Gateway for most, VPN connections for backup",
+      "Use AWS Direct Connect instead; VPNs can't scale to 10 locations"
+    ],
+    "correctIndex": 1,
+    "explanation": "Transit Gateway provides centralized routing hub; scales to thousands of attachments (VPNs, VPCs, on-premises); 10 VPN connections require manual routing; TGW is more manageable.",
+    "difficulty": "Hard",
+    "tags": ["transit-gateway", "vpn", "multi-site"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "VPC Network Architecture",
+    "question": "Your application is distributed across 3 VPCs (dev, staging, prod). You're using VPC peering to connect them. Each VPC has 10 subnets with complex routing rules. Managing routes across 6 peering connections is becoming error-prone. What's a better approach?",
+    "options": [
+      "Consolidate all VPCs into one; split by security groups instead",
+      "Use AWS Transit Gateway to centralize routing; replace 6 peering connections with TGW attachments",
+      "Automate route management via Terraform; generate routes programmatically",
+      "Use AWS Resource Access Manager to share subnets across VPCs"
+    ],
+    "correctIndex": 1,
+    "explanation": "Transit Gateway simplifies multi-VPC routing; centralized hub-and-spoke model is more maintainable than mesh of peering; TGW route tables replace manual route management.",
+    "difficulty": "Hard",
+    "tags": ["transit-gateway", "multi-vpc", "architecture"]
+  }
+]

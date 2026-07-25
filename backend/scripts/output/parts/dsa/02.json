@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Array Operations",
+    "question": "Inserting an element at index 0 in an unsorted array requires shifting all n elements. Bulk-inserting m elements sequentially at index 0 costs how much total work?",
+    "options": ["linear time", "quadratic time", "linearithmic time", "m times n"],
+    "correctIndex": 1,
+    "explanation": "Each insertion costs O(n), and doing m insertions means m * O(n) = O(m*n), which is quadratic if m and n are comparable.",
+    "difficulty": "Medium",
+    "tags": ["insertion-cost", "shift-operations"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Array Operations",
+    "question": "Given a sorted array, finding an element via binary search costs O(log n). Inserting a new element while preserving order costs O(n) due to shifts. What is the bottleneck for a sequence of k searches then one insert?",
+    "options": ["the searches dominate at k log n", "the insert dominates at O(n)", "they contribute equally", "depends on the value of k"],
+    "correctIndex": 1,
+    "explanation": "k searches = O(k log n); one insert = O(n); for typical k, the single insert O(n) is the bottleneck because even k = n/log n gives k log n ≈ n.",
+    "difficulty": "Medium-Hard",
+    "tags": ["amortized-analysis", "operation-bottleneck"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Array Operations",
+    "question": "An array of n elements is rotated left by 1 (first element moves to end, all others shift left). What is the time complexity and minimum number of element assignments needed?",
+    "options": ["constant time with one swap", "linear time with n assignments", "logarithmic time with log n swaps", "quadratic time with multiple passes"],
+    "correctIndex": 1,
+    "explanation": "To rotate left, each of the n elements must be assigned to a new position, requiring at least n write operations, thus O(n) time.",
+    "difficulty": "Medium",
+    "tags": ["array-rotation", "in-place-operations"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Array Operations",
+    "question": "Removing a specific element from the middle of an unsorted array of size n requires shifting elements. What is the minimum number of shifts needed in the worst case?",
+    "options": ["constant shifts", "log n shifts", "n divided by 2 shifts", "n minus 1 shifts"],
+    "correctIndex": 3,
+    "explanation": "Removing the first element forces all remaining n-1 elements to shift left by one position, requiring n-1 shifts.",
+    "difficulty": "Medium",
+    "tags": ["deletion-cost", "element-shifting"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Array Operations",
+    "question": "Merging two sorted arrays of sizes n and m into a single sorted array requires comparing elements. What is the best-case number of comparisons?",
+    "options": ["log of n plus m", "min of n and m", "max of n and m", "n times m"],
+    "correctIndex": 2,
+    "explanation": "Best case: if one array is entirely less than the other, we still must read all n + m elements at least once, giving O(n + m) = max(n, m) comparisons.",
+    "difficulty": "Medium-Hard",
+    "tags": ["merge-operation", "comparison-count"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Array Operations",
+    "question": "An algorithm partitions an array in-place by swapping elements. What is the space complexity if no extra array is allocated?",
+    "options": ["constant space", "linear space", "logarithmic space", "quadratic space"],
+    "correctIndex": 0,
+    "explanation": "In-place partitioning using only a few pointer variables requires O(1) additional space regardless of array size n.",
+    "difficulty": "Medium",
+    "tags": ["in-place", "space-complexity"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Array Operations",
+    "question": "To find the k-th smallest element, one approach is sorting the array (O(n log n)) then accessing index k. A better approach uses quickselect. What is quickselect's expected complexity?",
+    "options": ["logarithmic time", "linear time", "linearithmic time", "quadratic time"],
+    "correctIndex": 1,
+    "explanation": "Quickselect, like quicksort, partitions arrays recursively; expected time is O(n) because the search space halves on average.",
+    "difficulty": "Medium-Hard",
+    "tags": ["selection-algorithm", "average-case"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Array Operations",
+    "question": "Reversing an array of size n in-place requires swapping element i with element n-1-i for i from 0 to n/2-1. How many swaps are needed?",
+    "options": ["n swaps", "n minus 1 swaps", "n divided by 2 swaps", "log n swaps"],
+    "correctIndex": 2,
+    "explanation": "Swapping positions 0↔n-1, 1↔n-2, etc., up to the midpoint requires exactly n/2 swaps to reverse the entire array.",
+    "difficulty": "Medium",
+    "tags": ["in-place-reverse", "swap-count"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Array Operations",
+    "question": "Deduplicating a sorted array by removing duplicates in-place requires two pointers: one read, one write. What is the time complexity?",
+    "options": ["constant time", "logarithmic time", "linear time", "quadratic time"],
+    "correctIndex": 2,
+    "explanation": "Each element is visited once by the read pointer, and each unique element is written once by the write pointer, giving O(n) linear time.",
+    "difficulty": "Medium",
+    "tags": ["two-pointer", "in-place-modification"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Array Operations",
+    "question": "An unsorted array must be searched for a target value. Linear search scans all n elements in worst case. Binary search requires O(log n) comparisons. Why is binary search not always used?",
+    "options": ["binary search is always better", "binary search requires the array to be sorted first", "binary search uses more memory", "linear search is easier to code"],
+    "correctIndex": 1,
+    "explanation": "Binary search requires a sorted array; if the array is unsorted, sorting first takes O(n log n), which may cost more than a single linear search.",
+    "difficulty": "Medium-Hard",
+    "tags": ["search-tradeoff", "preprocessing-cost"]
+  }
+]

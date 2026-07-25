@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Web Storage",
+    "question": "What is logged?\n```javascript\nlocalStorage.setItem('key', 'value');\nconst item = localStorage.getItem('key');\nconsole.log(item);\nlocalStorage.removeItem('key');\nconsole.log(localStorage.getItem('key'));\n```",
+    "options": [
+      "value null because item persists after setItem",
+      "value null because removeItem deletes the item",
+      "null null due to storage failure",
+      "undefined undefined because getItem returns object"
+    ],
+    "correctIndex": 1,
+    "explanation": "setItem stores the value; removeItem deletes it; getItem returns null for missing keys.",
+    "difficulty": "Medium",
+    "tags": ["localStorage", "setItem", "removeItem"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Web Storage",
+    "question": "What is the difference between localStorage and sessionStorage?\n```javascript\nlocalStorage.setItem('a', '1');\nsessionStorage.setItem('b', '2');\n```",
+    "options": [
+      "Same behavior because both are web storage",
+      "localStorage persists after close; sessionStorage clears",
+      "sessionStorage is faster than localStorage",
+      "localStorage is limited to 5MB; sessionStorage unlimited"
+    ],
+    "correctIndex": 1,
+    "explanation": "localStorage persists across sessions; sessionStorage clears when tab closes.",
+    "difficulty": "Medium",
+    "tags": ["localStorage", "sessionStorage", "storage-lifetime"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Web Storage",
+    "question": "What is logged?\n```javascript\nconst obj = { a: 1, b: 2 };\nlocalStorage.setItem('obj', obj);\nconst retrieved = localStorage.getItem('obj');\nconsole.log(typeof retrieved);\n```",
+    "options": [
+      "object because setItem preserves type",
+      "string because localStorage only stores strings",
+      "undefined due to object storage failure",
+      "null because objects cannot be stored"
+    ],
+    "correctIndex": 1,
+    "explanation": "localStorage only stores strings; objects are coerced to [object Object].",
+    "difficulty": "Medium",
+    "tags": ["localStorage", "type-coercion", "string-storage"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Web Storage",
+    "question": "What is the proper way to store and retrieve an object?\n```javascript\nconst obj = { a: 1 };\nlocalStorage.setItem('obj', JSON.stringify(obj));\nconst retrieved = JSON.parse(localStorage.getItem('obj'));\nconsole.log(retrieved.a);\n```",
+    "options": [
+      "Incorrect because JSON methods fail on storage",
+      "Correct because JSON serialization handles objects",
+      "Unnecessary because objects store automatically",
+      "Wrong because retrieved is still a string"
+    ],
+    "correctIndex": 1,
+    "explanation": "JSON.stringify serializes objects; JSON.parse deserializes strings back to objects.",
+    "difficulty": "Medium",
+    "tags": ["localStorage", "JSON", "serialization"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Web Storage",
+    "question": "What happens?\n```javascript\nlocalStorage.setItem('key1', 'value1');\nlocalStorage.setItem('key2', 'value2');\nconsole.log(localStorage.length);\nlocalStorage.clear();\nconsole.log(localStorage.length);\n```",
+    "options": [
+      "2 2 because clear does not affect length",
+      "2 0 because clear removes all items",
+      "undefined 2 because length is not a property",
+      "1 0 due to clear affecting count differently"
+    ],
+    "correctIndex": 1,
+    "explanation": "localStorage.length counts items; clear() removes all items, setting length to 0.",
+    "difficulty": "Medium",
+    "tags": ["localStorage", "clear", "length-property"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Web Storage",
+    "question": "What is the storage capacity?\n```javascript\ntry {\n  let data = 'x'.repeat(10000000);\n  localStorage.setItem('large', data);\n} catch (e) {\n  console.log(e.name);\n}\n```",
+    "options": [
+      "Success because localStorage is unlimited",
+      "QuotaExceededError because 10MB exceeds typical limit",
+      "TypeError because large strings fail",
+      "SyntaxError due to setItem overload"
+    ],
+    "correctIndex": 1,
+    "explanation": "Most browsers limit localStorage to 5-10MB; exceeding quota throws QuotaExceededError.",
+    "difficulty": "Medium",
+    "tags": ["localStorage", "quota", "storage-limit"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Web Storage",
+    "question": "What is logged?\n```javascript\nwindow.addEventListener('storage', (e) => {\n  console.log(e.key, e.newValue);\n});\nlocalStorage.setItem('shared', 'data');\n```",
+    "options": [
+      "shared data because event fires on same tab",
+      "nothing because storage event fires on other tabs",
+      "error because event listener is invalid",
+      "null null due to event propagation failure"
+    ],
+    "correctIndex": 1,
+    "explanation": "storage event fires only on OTHER tabs, not the one that triggered the change.",
+    "difficulty": "Medium-Hard",
+    "tags": ["storage-event", "cross-tab-communication", "event-firing"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Web Storage",
+    "question": "What is the output?\n```javascript\nlocalStorage.setItem('key', 'value1');\nlocalStorage.setItem('key', 'value2');\nconsole.log(localStorage.getItem('key'));\n```",
+    "options": [
+      "value1 because first write wins",
+      "value2 because second write overwrites",
+      "value1value2 due to concatenation",
+      "undefined because duplicate keys fail"
+    ],
+    "correctIndex": 1,
+    "explanation": "setItem overwrites existing keys; the latest value is stored.",
+    "difficulty": "Medium",
+    "tags": ["localStorage", "setItem", "overwrite"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Web Storage",
+    "question": "How do you iterate localStorage?\n```javascript\nfor (let i = 0; i < localStorage.length; i++) {\n  const key = localStorage.key(i);\n  const value = localStorage.getItem(key);\n  console.log(key, value);\n}\n```",
+    "options": [
+      "Invalid because localStorage is not iterable",
+      "Correct because key(i) and length work together",
+      "Incorrect because getItem requires index",
+      "Wrong because localStorage keys are not accessible"
+    ],
+    "correctIndex": 1,
+    "explanation": "localStorage.key(i) returns the i-th key; combined with length, enables iteration.",
+    "difficulty": "Medium",
+    "tags": ["localStorage", "iteration", "key-method"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Web Storage",
+    "question": "What distinguishes these storage methods?\n```javascript\n// localStorage persists across sessions\n// sessionStorage clears on tab close\n// IndexedDB is for large structured data\n```",
+    "options": [
+      "All three are identical in behavior",
+      "Persistence duration and capacity differ",
+      "Only localStorage supports structured data",
+      "sessionStorage is always preferred"
+    ],
+    "correctIndex": 1,
+    "explanation": "localStorage persists permanently; sessionStorage is session-specific; IndexedDB is for large datasets.",
+    "difficulty": "Medium",
+    "tags": ["storage-comparison", "persistence", "storage-types"]
+  }
+]

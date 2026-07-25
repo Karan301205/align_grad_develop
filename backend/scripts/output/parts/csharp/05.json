@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "Functions",
+    "question": "What is the output?\nvoid Modify(int x) {\n  x = 10;\n}\nint y = 5;\nModify(y);\nConsole.WriteLine(y);",
+    "options": ["5", "10", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "int is a value type; passing by value creates a copy, so Modify changes only the copy, not y.",
+    "difficulty": "Medium",
+    "tags": ["value-types", "pass-by-value", "functions"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Functions",
+    "question": "What is the output?\nvoid Modify(ref int x) {\n  x = 10;\n}\nint y = 5;\nModify(ref y);\nConsole.WriteLine(y);",
+    "options": ["5", "10", "Compilation error", "Runtime exception"],
+    "correctIndex": 1,
+    "explanation": "ref parameter passes by reference; modifications inside the function affect the original variable.",
+    "difficulty": "Medium",
+    "tags": ["ref-parameter", "pass-by-reference", "functions"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Functions",
+    "question": "What is the output?\nint Add(params int[] nums) {\n  int sum = 0;\n  foreach (int n in nums) sum += n;\n  return sum;\n}\nConsole.WriteLine(Add(1, 2, 3));",
+    "options": ["6", "3", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "params allows passing variable number of arguments as an array; 1 + 2 + 3 = 6.",
+    "difficulty": "Medium",
+    "tags": ["params", "variadic-functions", "arrays"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Functions",
+    "question": "What is the output?\nint Factorial(int n) {\n  if (n <= 1) return 1;\n  return n * Factorial(n - 1);\n}\nConsole.WriteLine(Factorial(5));",
+    "options": ["120", "5", "Compilation error", "StackOverflowException"],
+    "correctIndex": 0,
+    "explanation": "Recursive function computes 5! = 5 * 4 * 3 * 2 * 1 = 120.",
+    "difficulty": "Medium",
+    "tags": ["recursion", "functions", "factorial"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Functions",
+    "question": "What is the output?\nint Method(int x = 5) {\n  return x * 2;\n}\nConsole.WriteLine(Method());",
+    "options": ["10", "5", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Default parameter value of 5 is used when Method() is called without arguments; returns 5 * 2 = 10.",
+    "difficulty": "Medium",
+    "tags": ["default-parameters", "functions"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Functions",
+    "question": "What is the output?\nvoid OutExample(out int x) {\n  x = 10;\n}\nint y;\nOutExample(out y);\nConsole.WriteLine(y);",
+    "options": ["10", "0", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "out parameter must be assigned before function returns; y is assigned 10 by OutExample.",
+    "difficulty": "Medium",
+    "tags": ["out-parameter", "functions"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Functions",
+    "question": "What is the output?\nstring FormatNumber(int n, string format = \"D\") {\n  return n.ToString(format);\n}\nConsole.WriteLine(FormatNumber(42));",
+    "options": ["42", "42D", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "ToString(\"D\") formats as decimal; default parameter format=\"D\" is used, outputting \"42\".",
+    "difficulty": "Medium",
+    "tags": ["default-parameters", "string-formatting", "functions"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Functions",
+    "question": "What is the output?\nint Double(int x) => x * 2;\nConsole.WriteLine(Double(5));",
+    "options": ["10", "5", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "Expression-bodied method using => syntax; returns x * 2 = 10.",
+    "difficulty": "Medium",
+    "tags": ["expression-bodied-members", "lambda-style", "functions"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Functions",
+    "question": "What is the output?\nint Method(int x, int y = 5, int z = 10) {\n  return x + y + z;\n}\nConsole.WriteLine(Method(1, z: 20));",
+    "options": ["26", "31", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Named argument z: 20 skips y, which uses default 5; returns 1 + 5 + 20 = 26.",
+    "difficulty": "Medium",
+    "tags": ["named-arguments", "default-parameters", "functions"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Functions",
+    "question": "What is the output?\nvoid Modify(List<int> list) {\n  list.Add(5);\n}\nvar myList = new List<int> { 1, 2, 3 };\nModify(myList);\nConsole.WriteLine(myList.Count);",
+    "options": ["4", "3", "Compilation error", "Runtime exception"],
+    "correctIndex": 0,
+    "explanation": "List<T> is a reference type; passing to a function passes the reference, so modifications affect the original.",
+    "difficulty": "Medium",
+    "tags": ["reference-types", "pass-by-reference", "collections"]
+  }
+]

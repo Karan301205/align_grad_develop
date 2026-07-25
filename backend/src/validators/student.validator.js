@@ -98,7 +98,11 @@ const updateProfileSchema = {
       link: z.string().url().or(z.literal('')).optional().nullable(),
       description: z.string().optional().nullable()
     })).optional().nullable(),
-    isOnboarded: z.boolean().optional().nullable()
+    isOnboarded: z.boolean().optional().nullable(),
+    preferredWorkModes: z.array(z.string()).optional().nullable(),
+    preferredWorkTypes: z.array(z.string()).optional().nullable(),
+    preferredLocations: z.array(z.string()).optional().nullable(),
+    openToAnyLocation: z.boolean().optional().nullable()
   })
 };
 
