@@ -51,6 +51,47 @@ function getCompanyColor(name) {
   return BG_COLORS[idx];
 }
 
+function formatStipendDisplay(job) {
+  if (!job) return 'Stipend Unspecified';
+
+  const full = job.stipendFullTime || job.stipendFull;
+  const part = job.stipendPartTime || job.stipendPart;
+  const sal = job.salary;
+  const st = job.stipend;
+
+  const formatAmount = (val) => {
+    if (!val) return '';
+    const str = String(val).trim();
+    if (!str) return '';
+    const clean = str.replace(/^₹\s*/, '');
+    const num = parseInt(clean.replace(/,/g, ''), 10);
+    if (!isNaN(num) && num > 0) {
+      return num.toLocaleString('en-IN');
+    }
+    return clean;
+  };
+
+  if (full && part) {
+    const formattedPart = formatAmount(part);
+    const formattedFull = formatAmount(full);
+    if (formattedPart === formattedFull) {
+      return `₹ ${formattedPart} /mo`;
+    }
+    return `₹ ${formattedPart} - ${formattedFull} /mo`;
+  }
+
+  const singleVal = full || part || sal || st;
+  if (singleVal) {
+    const formatted = formatAmount(singleVal);
+    if (formatted.toLowerCase().includes('/mo') || formatted.toLowerCase().includes('month') || formatted.toLowerCase().includes('k/mo')) {
+      return `₹ ${formatted}`;
+    }
+    return `₹ ${formatted} /mo`;
+  }
+
+  return 'Stipend Unspecified';
+}
+
 export default function StudentDashboard({ 
   profile,
   user,
@@ -399,7 +440,7 @@ export default function StudentDashboard({
                 <div className="space-y-1.5 text-xs text-on-surface-variant">
                   <div className="flex items-center gap-4 flex-wrap">
                     <span className="font-mono text-primary font-bold text-sm bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 flex items-center gap-1">
-                      ₹ {job.salary || '15 - 25 K/mo'}
+                      {formatStipendDisplay(job)}
                     </span>
                     <span className="flex items-center gap-1 truncate font-sans text-on-surface-variant font-medium">
                       <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
@@ -440,17 +481,22 @@ export default function StudentDashboard({
                   )}
                 </div>
 
-                {/* Footer Row: Deadline / Status Badge */}
+                {/* Footer Row: Deadline / Verification Status Badge */}
                 <div className="pt-2 border-t border-outline-variant/60 flex items-center justify-between text-[11px] font-mono">
                   {isApplied ? (
                     <span className="px-3 py-1 bg-secondary/15 border border-secondary/30 text-secondary font-bold rounded-full flex items-center gap-1 uppercase tracking-wider">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Applied
                     </span>
+                  ) : job.matched ? (
+                    <span className="px-3 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold rounded-full flex items-center gap-1 uppercase tracking-wider">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Eligible to Apply
+                    </span>
                   ) : (
                     <span className="px-3 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 font-bold rounded-full flex items-center gap-1 uppercase tracking-wider">
-                      <Clock className="w-3.5 h-3.5" />
-                      Deadline - Active
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      Test Required
                     </span>
                   )}
 

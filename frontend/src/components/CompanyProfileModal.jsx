@@ -33,7 +33,7 @@ export default function CompanyProfileModal({ companyId, isOpen, onClose, token,
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent animate-fade-in">
       <div className="bg-surface-container border border-outline-variant rounded-3xl w-full max-w-3xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col relative animate-zoom-in">
         
         {/* Close Button */}

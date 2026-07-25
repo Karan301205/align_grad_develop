@@ -549,24 +549,25 @@
 }
 
 .glass-button {
-  background-color: var(--c-surface-container-lowest);
+  background-color: var(--c-surface-container-high);
   border: 1px solid var(--c-on-surface);
+  color: var(--c-on-surface);
   box-shadow: 2px 2px 0px 0px var(--c-on-surface);
   transition: all 100ms ease-out;
 }
 
 .glass-button-primary {
-  background-color: var(--c-primary-container);
+  background-color: var(--c-primary);
   border: 1px solid var(--c-on-surface);
-  color: var(--c-on-primary);
+  color: #ffffff;
   box-shadow: 2px 2px 0px 0px var(--c-on-surface);
   transition: all 100ms ease-out;
 }
 
 .glass-button-secondary {
-  background-color: var(--c-secondary-container);
+  background-color: var(--c-heading);
   border: 1px solid var(--c-on-surface);
-  color: var(--c-on-secondary-container);
+  color: #ffffff;
   box-shadow: 2px 2px 0px 0px var(--c-on-surface);
   transition: all 100ms ease-out;
 }

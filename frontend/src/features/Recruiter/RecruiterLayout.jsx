@@ -262,9 +262,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'jobs', icon: Briefcase, label: 'Active Jobs' },
     { id: 'candidates', icon: User, label: 'Candidates' },
-    { id: 'community', icon: Users, label: 'Community Hub' },
     { id: 'post-job', icon: Plus, label: 'Post New Job' },
-    { id: 'gigs', icon: DollarSign, label: 'Gigs Marketplace' },
     { id: 'verification', icon: ShieldCheck, label: 'Company Profile' },
   ];
 
@@ -408,29 +406,12 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
               <RecruiterCandidates candidates={candidates} />
             )}
 
-            {activeTab === 'community' && (
-              <CommunityLayout
-                user={user}
-                token={token}
-              />
-            )}
-
             {activeTab === 'post-job' && (
               <RecruiterPostJob 
                 submittingJob={submittingJob}
                 handlePostJob={handlePostJob}
                 recentJobs={jobs}
                 goToTab={goToTab}
-              />
-            )}
-
-            {activeTab === 'gigs' && (
-              <GigsMarketplace
-                user={user}
-                token={token}
-                theme={theme}
-                profile={null}
-                onUpdateProfile={fetchRecruiterData}
               />
             )}
 

@@ -148,7 +148,7 @@ export default function ParsedResumeReviewModal({ isOpen, parsedData, onConfirm,
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent animate-fade-in">
       <div className="bg-surface-container border border-outline-variant w-full max-w-4xl h-[85vh] rounded-2xl shadow-2xl shadow-black/80 flex flex-col overflow-hidden">
         
         {/* Header */}

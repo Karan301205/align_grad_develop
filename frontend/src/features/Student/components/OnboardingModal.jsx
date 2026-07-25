@@ -41,7 +41,7 @@ export default function OnboardingModal({ isOpen, onUpload, onSkip, isUploading 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent animate-fade-in">
       <div className="bg-surface-container border border-outline-variant w-full max-w-lg rounded-2xl shadow-2xl shadow-black/80 p-8 flex flex-col items-center text-center space-y-6 relative overflow-hidden">
         
         {/* Decorative Neumorphic background light */}
