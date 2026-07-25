@@ -336,7 +336,6 @@ export default function RecruiterPostJob({ submittingJob, handlePostJob, recentJ
               {[
                 { id: 'JOB', label: 'Full-Time / Part-Time Job', desc: 'Permanent career roles with competitive packages' },
                 { id: 'INTERNSHIP', label: 'Internship', desc: 'Fixed-duration positions with monthly stipends' },
-                { id: 'GIG', label: 'Gig (Short-Term Task)', desc: 'Contract task-based milestone deliverables' },
               ].map((opt) => {
                 const isSelected = opportunityType === opt.id;
                 return (

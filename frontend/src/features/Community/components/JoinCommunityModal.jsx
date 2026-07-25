@@ -80,7 +80,7 @@ export default function JoinCommunityModal({ isOpen, onClose, token, onJoined })
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in text-left">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent animate-fade-in text-left">
       <div className="bg-surface-container border border-outline-variant rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden space-y-0">
         <div className="p-5 border-b border-outline-variant flex justify-between items-center bg-surface-container-high/40">
           <div className="flex items-center gap-2">

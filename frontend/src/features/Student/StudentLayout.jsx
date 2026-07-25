@@ -810,9 +810,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const navItems = [
     { id: 'dashboard', icon: Briefcase, label: 'Opportunities', locked: !isComplete },
     { id: 'profile', icon: User, label: 'Profile & Ratings', locked: false },
-    { id: 'community', icon: Users, label: 'Community Hub', locked: false },
     { id: 'resume', icon: FileText, label: 'Resume', locked: !isComplete },
-    { id: 'gigs', icon: DollarSign, label: 'Gigs Marketplace', locked: !isComplete },
     { id: 'tests', icon: BookOpen, label: 'Your Tests', locked: !isComplete },
     { id: 'showcase', icon: Video, label: 'Showcase Yourself', locked: false },
     { id: 'progress', icon: ClipboardList, label: 'Your Job Progress', locked: !isComplete },
@@ -1087,26 +1085,6 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 profile={profile}
                 token={token}
                 onVideoSaved={(url) => setProfile(prev => ({ ...prev, introVideoUrl: url }))}
-              />
-            )}
-
-            {activeTab === 'gigs' && (
-              <GigsMarketplace
-                user={user}
-                token={token}
-                theme={theme}
-                profile={profile}
-                onUpdateProfile={fetchProfileAndJobs}
-                onOpenCompanyProfile={onOpenCompanyProfile}
-                autoSelectOpportunity={autoSelectOpportunity}
-                setAutoSelectOpportunity={setAutoSelectOpportunity}
-              />
-            )}
-
-            {activeTab === 'community' && (
-              <CommunityLayout
-                user={user}
-                token={token}
               />
             )}
 

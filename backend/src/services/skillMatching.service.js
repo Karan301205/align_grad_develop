@@ -10,21 +10,25 @@ const registryCache = require('./questionBank/skills/registryCache');
 // When the registry is unloaded, resolve() returns its input unchanged and this
 // behaves exactly as it did before.
 
-// Builds a case-insensitive lookup of a candidate's self-rated skills:
-//   { "react": 8, "css": 6, ... }
+// Builds a case-insensitive lookup of a candidate's skills:
+//   { "react": { rating: 1, verifiedRating: 4, isVerified: true }, ... }
 function buildStudentSkillMap(profile) {
   const studentSkills = {};
   if (profile && profile.skills) {
     profile.skills.forEach(s => {
-      studentSkills[registryCache.resolve(s.name).toLowerCase()] = s.rating;
+      studentSkills[registryCache.resolve(s.name).toLowerCase()] = {
+        rating: s.rating || 0,
+        verifiedRating: s.verifiedRating || 0,
+        isVerified: Boolean(s.verifiedRating && s.verifiedRating > 0)
+      };
     });
   }
   return studentSkills;
 }
 
 // Returns the list of technical requirements the candidate falls short on.
-// Only technical skills (present in TECHNICAL_SKILLS) gate an application;
-// non-technical requirements are ignored, matching the original controller logic.
+// A requirement is only satisfied if the candidate has passed the verification test
+// and obtained a verifiedRating >= minRating.
 function getMissingRequirements(job, studentSkills) {
   const missingRequirements = [];
   if (job && job.requirements) {
@@ -32,12 +36,23 @@ function getMissingRequirements(job, studentSkills) {
       const canonical = registryCache.resolve(reqSkill.skillName).toLowerCase();
       const isTech = TECHNICAL_SKILLS.has(canonical);
       if (isTech) {
-        const studentRating = studentSkills[canonical] || 0;
-        if (studentRating < reqSkill.minRating) {
+        const studentSkillData = studentSkills[canonical];
+        const isPresent = Boolean(studentSkillData);
+        const verifiedRating = typeof studentSkillData === 'object'
+          ? (studentSkillData.verifiedRating || 0)
+          : (typeof studentSkillData === 'number' ? studentSkillData : 0);
+        const selfRating = typeof studentSkillData === 'object'
+          ? (studentSkillData.rating || 0)
+          : verifiedRating;
+
+        if (verifiedRating < reqSkill.minRating) {
           missingRequirements.push({
             skillName: reqSkill.skillName,
             requiredRating: reqSkill.minRating,
-            currentRating: studentRating
+            currentRating: verifiedRating,
+            selfRating: selfRating,
+            isMissingFromProfile: !isPresent,
+            isUnverified: isPresent && (!verifiedRating || verifiedRating < reqSkill.minRating)
           });
         }
       }
