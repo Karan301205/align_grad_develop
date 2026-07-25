@@ -452,7 +452,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Risk**: Medium.
 
 #### [backend/src/services/skillMatching.service.js](file:///Users/karanrawat/Desktop/a_g/backend/src/services/skillMatching.service.js)
-* **Purpose**: Analyzes student skill scores against job requirements to flag eligibility and compute missing requirements. Enforces test-verified ratings (`verifiedRating >= minRating`) for application gating. Both sides of every name comparison resolve through `questionBank/skills/registryCache` (alias-aware matching); `missingRequirements` reports the recruiter's original `skillName` with `isMissingFromProfile` and `isUnverified` flags.
+* **Purpose**: Analyzes student skill scores against job requirements to flag eligibility and compute missing requirements. Enforces test-verified ratings (`verifiedRating >= minRating`) for application gating when MCQs exist in the Question Bank; skills without MCQs generated yet are marked as auto-verified for now so candidates are not blocked. `getRequirementStatuses` returns detailed status flags (`VERIFIED_BY_TEST`, `AUTO_VERIFIED_NO_QUIZ`, `UNVERIFIED`, `MISSING_FROM_PROFILE`).
 * **Used By**: [backend/src/controllers/student.controller.js](file:///Users/karanrawat/Desktop/a_g/backend/src/controllers/student.controller.js).
 * **Dependencies**: [backend/src/constants/technicalSkills.js](file:///Users/karanrawat/Desktop/a_g/backend/src/constants/technicalSkills.js).
 * **Safe Modifications**: Modifying eligibility logic (e.g. adding relaxed match rules for certifications).

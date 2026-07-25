@@ -245,14 +245,20 @@ export default function StudentSkillTests({
             </div>
           ) : techSkills.length > 0 ? (
             (() => {
-              const filteredSkills = techSkills.filter(skill => {
-                const isVerified = skill.verifiedRating !== null && skill.verifiedRating !== undefined;
+              const testableSkills = techSkills.filter(s => s.hasQuiz !== false);
+              const pendingSkills = techSkills.filter(s => s.hasQuiz === false || s.autoVerifiedForNow === true);
+
+              const filterSkills = (list) => list.filter(skill => {
+                const isVerified = (skill.verifiedRating !== null && skill.verifiedRating !== undefined) || skill.autoVerifiedForNow;
                 if (filter === 'verified') return isVerified;
-                if (filter === 'unverified') return !isVerified;
+                if (filter === 'unverified') return !isVerified && !skill.autoVerifiedForNow;
                 return true;
               });
 
-              if (filteredSkills.length === 0) {
+              const filteredTestable = filterSkills(testableSkills);
+              const filteredPending = filterSkills(pendingSkills);
+
+              if (filteredTestable.length === 0 && filteredPending.length === 0) {
                 return (
                   <div className="text-center py-16 bg-surface-container border border-outline-variant rounded-2xl">
                     <p className="text-xs text-on-surface-variant italic font-mono">No {filter} skills found.</p>
@@ -261,44 +267,102 @@ export default function StudentSkillTests({
               }
 
               return (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredSkills.map((skill, idx) => (
-                    <div key={idx} className="p-5 bg-surface-container border border-outline-variant rounded-2xl flex flex-col justify-between h-35 hover:border-primary/20 transition-all">
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-start">
-                          <h4 className="text-base font-bold text-on-surface truncate max-w-[150px] uppercase font-headline">
-                            {skill.name}
-                          </h4>
-                          <span className="px-2 py-0.5 bg-surface-container-high border border-outline-variant rounded text-[9px] font-mono text-on-surface-variant uppercase">
-                            Technical
-                          </span>
-                        </div>
-                        
-                        <div className="space-y-1 pt-1">
-                          <div className="flex justify-between text-[10px] font-mono">
-                            <span className="text-on-surface-variant">Verified Rating:</span>
-                            {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? (
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-success font-bold flex items-center gap-0.5">
-                                  <ShieldCheck className="w-3.5 h-3.5" /> Lvl {skill.verifiedRating}/10
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="text-on-surface-variant italic">Unverified</span>
-                            )}
-                          </div>
-                        </div>
+                <div className="space-y-8">
+                  {/* 1. Available Assessments Section */}
+                  {filteredTestable.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 border-b border-outline-variant/60 pb-2">
+                        <Award className="w-4 h-4 text-primary" />
+                        <h3 className="font-headline font-bold text-sm text-on-surface uppercase tracking-wider">
+                          Available Skill Assessments (Test Now)
+                        </h3>
+                        <span className="px-2 py-0.5 bg-primary/10 text-primary font-mono text-[10px] rounded-full font-bold">
+                          {filteredTestable.length}
+                        </span>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleStartSkillTest(skill.name)}
-                        className="w-full py-2 bg-primary/10 border border-primary/20 text-primary font-bold hover:bg-primary text-xs hover:text-on-primary font-mono rounded-lg transition-all"
-                      >
-                        {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? 'Retake Verification Test' : 'Take Verification Test'}
-                      </button>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {filteredTestable.map((skill, idx) => (
+                          <div key={idx} className="p-5 bg-surface-container border border-outline-variant rounded-2xl flex flex-col justify-between space-y-4 hover:border-primary/40 transition-all shadow-xs">
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-start">
+                                <h4 className="text-base font-bold text-on-surface truncate max-w-[160px] uppercase font-headline">
+                                  {skill.name}
+                                </h4>
+                                <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded text-[9px] font-mono font-bold uppercase">
+                                  Quiz Available
+                                </span>
+                              </div>
+                              
+                              <div className="space-y-1 pt-1">
+                                <div className="flex justify-between text-[11px] font-mono">
+                                  <span className="text-on-surface-variant">Verified Rating:</span>
+                                  {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? (
+                                    <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                                      <ShieldCheck className="w-3.5 h-3.5" /> Lvl {skill.verifiedRating}/10
+                                    </span>
+                                  ) : (
+                                    <span className="text-amber-600 dark:text-amber-400 font-bold italic">Unverified</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleStartSkillTest(skill.name)}
+                              className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs font-mono rounded-xl transition-all shadow-sm cursor-pointer"
+                            >
+                              {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? 'Retake Verification Test' : 'Take Verification Test'}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
+                  )}
+
+                  {/* 2. Pending Quiz Generation (Auto-Verified for Now) Section */}
+                  {filteredPending.length > 0 && (
+                    <div className="space-y-3 pt-4">
+                      <div className="flex items-center justify-between border-b border-outline-variant/60 pb-2">
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          <h3 className="font-headline font-bold text-sm text-on-surface uppercase tracking-wider">
+                            Pending Quiz Generation (Auto-Verified for Now)
+                          </h3>
+                        </div>
+                        <span className="px-2 py-0.5 bg-amber-500/15 text-amber-700 dark:text-amber-400 font-mono text-[10px] rounded-full font-bold">
+                          {filteredPending.length} Skills
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {filteredPending.map((skill, idx) => (
+                          <div key={idx} className="p-5 bg-surface-container-low border border-outline-variant/80 rounded-2xl flex flex-col justify-between space-y-4 shadow-xs relative">
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-start">
+                                <h4 className="text-base font-bold text-on-surface truncate max-w-[160px] uppercase font-headline">
+                                  {skill.name}
+                                </h4>
+                                <span className="px-2 py-0.5 bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded text-[9px] font-mono font-bold uppercase">
+                                  Quiz Coming Soon
+                                </span>
+                              </div>
+                              
+                              <p className="text-[11px] text-on-surface-variant leading-relaxed font-sans">
+                                Quiz for this skill is being generated. It is <strong className="text-emerald-600 dark:text-emerald-400 font-bold">temporarily auto-verified</strong> so you can apply for opportunities requiring this skill without restriction.
+                              </p>
+                            </div>
+
+                            <div className="py-2 px-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-mono font-bold text-[11px] rounded-xl flex items-center justify-center gap-1.5">
+                              <ShieldCheck className="w-4 h-4" />
+                              <span>Auto-Verified for Applications</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })()

@@ -354,7 +354,8 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                   job.requirements.map((req, i) => {
                     const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === req.skillName.toLowerCase());
                     const isTech = skillObj ? skillObj.type === 'technical' : true;
-                    const missing = job.missingRequirements?.find(m => m.skillName.toLowerCase() === req.skillName.toLowerCase());
+                    const reqStatus = job.requirementStatuses?.find(s => s.skillName.toLowerCase() === req.skillName.toLowerCase());
+                    const isAutoVerified = reqStatus ? reqStatus.status === 'AUTO_VERIFIED_NO_QUIZ' : false;
 
                     return (
                       <div key={i} className="flex justify-between items-center p-2.5 bg-surface-container border border-outline-variant rounded-lg">
@@ -362,6 +363,10 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                           <span className="text-on-surface font-semibold">{req.skillName}</span>
                           {!isTech ? (
                             <span className="text-on-surface-variant/70 font-mono text-[9px] uppercase tracking-wider bg-surface-container-high border border-outline-variant px-1.5 py-0.5 rounded">Non-Technical</span>
+                          ) : isAutoVerified ? (
+                            <span className="text-[9px] font-mono font-bold bg-blue-500/15 border border-blue-500/30 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1" title="Quiz is coming soon. Temporarily auto-verified so you can apply!">
+                              <CheckCircle className="w-2.5 h-2.5" /> Auto-Verified (Quiz Coming Soon)
+                            </span>
                           ) : missing ? (
                             <button
                               type="button"
@@ -385,7 +390,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                           )}
                         </div>
                         {isTech && (
-                          <span className={`font-mono font-bold text-xs ${missing ? 'text-amber-600 dark:text-amber-400' : 'text-primary'}`}>
+                          <span className={`font-mono font-bold text-xs ${isAutoVerified ? 'text-blue-600 dark:text-blue-400' : missing ? 'text-amber-600 dark:text-amber-400' : 'text-primary'}`}>
                             Lvl {req.minRating}/10
                           </span>
                         )}

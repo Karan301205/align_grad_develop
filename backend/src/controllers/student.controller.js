@@ -194,10 +194,18 @@ exports.getJobs = async (req, res) => {
       where: { studentId: profile.id }
     });
 
+    const activeQuestions = await prisma.question.findMany({
+      where: { status: 'ACTIVE' },
+      select: { skillName: true },
+      distinct: ['skillName']
+    });
+    const skillsWithQuestionsSet = new Set(activeQuestions.map(q => q.skillName.toLowerCase()));
+
     const studentSkills = buildStudentSkillMap(profile);
 
     const matchedJobs = jobs.map(job => {
-      const missingRequirements = getMissingRequirements(job, studentSkills);
+      const missingRequirements = getMissingRequirements(job, studentSkills, skillsWithQuestionsSet);
+      const requirementStatuses = getRequirementStatuses(job, studentSkills, skillsWithQuestionsSet);
 
       const applied = applications.some(app => app.jobId === job.id);
 
@@ -205,6 +213,7 @@ exports.getJobs = async (req, res) => {
         ...job,
         matched: missingRequirements.length === 0,
         missingRequirements,
+        requirementStatuses,
         applied
       };
     });
@@ -235,9 +244,16 @@ exports.applyJob = async (req, res) => {
       return res.status(404).json({ error: 'Job not found' });
     }
 
+    const activeQuestions = await prisma.question.findMany({
+      where: { status: 'ACTIVE' },
+      select: { skillName: true },
+      distinct: ['skillName']
+    });
+    const skillsWithQuestionsSet = new Set(activeQuestions.map(q => q.skillName.toLowerCase()));
+
     const studentSkills = buildStudentSkillMap(profile);
 
-    const hasMissing = getMissingRequirements(job, studentSkills).length > 0;
+    const hasMissing = getMissingRequirements(job, studentSkills, skillsWithQuestionsSet).length > 0;
 
     if (hasMissing) {
       return res.status(400).json({ error: 'You do not meet the minimum rating requirements for this job.' });
@@ -305,14 +321,27 @@ exports.getTechnicalSkills = async (req, res) => {
       return res.json({ technicalSkills: [] });
     }
 
+    const activeQuestions = await prisma.question.findMany({
+      where: { status: 'ACTIVE' },
+      select: { skillName: true },
+      distinct: ['skillName']
+    });
+    const skillsWithMCQs = new Set(activeQuestions.map(q => q.skillName.toLowerCase()));
+
     // Filter skills locally using TECHNICAL_SKILLS Set
     const technicalSkills = skills
       .filter(s => TECHNICAL_SKILLS.has(s.name.toLowerCase()))
-      .map(s => ({
-        name: s.name,
-        rating: s.rating,
-        verifiedRating: s.verifiedRating || null
-      }));
+      .map(s => {
+        const hasQuiz = skillsWithMCQs.has(s.name.toLowerCase());
+        return {
+          name: s.name,
+          rating: s.rating,
+          verifiedRating: s.verifiedRating || null,
+          hasQuiz: hasQuiz,
+          canTestNow: hasQuiz,
+          autoVerifiedForNow: !hasQuiz
+        };
+      });
 
     res.json({ technicalSkills });
   } catch (err) {
