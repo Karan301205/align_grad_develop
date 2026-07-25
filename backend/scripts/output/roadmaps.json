@@ -1,0 +1,695 @@
+[
+  {
+    "skillName": "Python",
+    "popularityRank": 1,
+    "subtopics": [
+      "Basic Syntax",
+      "Data Structures",
+      "File Input Output",
+      "Object Oriented Programming",
+      "Error Handling",
+      "Modules Packages",
+      "Regular Expressions",
+      "Database Integration",
+      "Concurrency Multithreading",
+      "Performance Optimization",
+      "Debugging Techniques",
+      "Testing Frameworks",
+      "Design Patterns",
+      "Web Development Frameworks"
+    ]
+  },
+  {
+    "skillName": "JavaScript",
+    "popularityRank": 2,
+    "subtopics": [
+      "Data Types",
+      "Functions",
+      "DOM Manipulation",
+      "Event Handling",
+      "JSON Parsing",
+      "Object Oriented Programming",
+      "Closures",
+      "Async Programming",
+      "Error Handling",
+      "Performance Optimization",
+      "Web Storage",
+      "Module Patterns",
+      "Security Best Practices",
+      "Code Refactoring"
+    ]
+  },
+  {
+    "skillName": "Java",
+    "popularityRank": 3,
+    "subtopics": [
+      "Java Syntax",
+      "Data Types",
+      "Object Oriented Programming",
+      "Exception Handling",
+      "Multithreading",
+      "Java Collections",
+      "File Input Output",
+      "Java Streams",
+      "Design Patterns",
+      "Memory Management",
+      "Concurrency Controls",
+      "Performance Optimization",
+      "Debugging Techniques",
+      "Microservices Architecture"
+    ]
+  },
+  {
+    "skillName": "TypeScript",
+    "popularityRank": 4,
+    "subtopics": [
+      "Type Basics",
+      "Interfaces",
+      "Classes",
+      "Modules",
+      "Generics",
+      "Type Inference",
+      "Error Handling",
+      "Decorator Pattern",
+      "Async Programming",
+      "Type Guards",
+      "Performance Optimization",
+      "Dependency Injection",
+      "Architecture Patterns"
+    ]
+  },
+  {
+    "skillName": "SQL",
+    "popularityRank": 5,
+    "subtopics": [
+      "SQL Basics",
+      "Query Syntax",
+      "Data Modeling",
+      "Database Design",
+      "Indexing Techniques",
+      "Query Optimization",
+      "JOIN Operations",
+      "Subqueries",
+      "Stored Procedures",
+      "Database Security",
+      "Performance Tuning",
+      "Transaction Management",
+      "Data Normalization",
+      "SQL Best Practices"
+    ]
+  },
+  {
+    "skillName": "React",
+    "popularityRank": 6,
+    "subtopics": [
+      "JavaScript Fundamentals",
+      "React Core Concepts",
+      "JSX Syntax",
+      "Component Lifecycle",
+      "State Management",
+      "Props Validation",
+      "Redux Architecture",
+      "React Hooks",
+      "Context API",
+      "Error Handling",
+      "Performance Optimization",
+      "Server Side Rendering",
+      "Testing Strategies",
+      "Best Practices"
+    ]
+  },
+  {
+    "skillName": "Node.js",
+    "popularityRank": 7,
+    "subtopics": [
+      "JavaScript Fundamentals",
+      "Node.js Core Modules",
+      "Async Programming",
+      "Event Loop Management",
+      "Error Handling Mechanisms",
+      "HTTP Protocol Handling",
+      "Express Framework",
+      "RESTful API Design",
+      "Database Integration",
+      "Security Best Practices",
+      "Performance Optimization",
+      "Testing Frameworks",
+      "Microservices Architecture",
+      "Containerization Techniques"
+    ]
+  },
+  {
+    "skillName": "HTML",
+    "popularityRank": 8,
+    "subtopics": [
+      "HTML Syntax",
+      "Semantic Elements",
+      "Document Structure",
+      "Header Tags",
+      "Linking Strategies",
+      "Image Optimization",
+      "Table Rendering",
+      "Form Handling",
+      "Accessibility Guidelines",
+      "Cross Browser Compatibility",
+      "HTML5 Features",
+      "Microformats Usage",
+      "DOM Manipulation"
+    ]
+  },
+  {
+    "skillName": "CSS",
+    "popularityRank": 9,
+    "subtopics": [
+      "CSS Syntax Basics",
+      "Selector Types",
+      "Box Model",
+      "Layout Systems",
+      "Media Queries",
+      "Responsive Design",
+      "CSS Preprocessors",
+      "CSS Frameworks",
+      "Debugging Tools",
+      "Performance Optimization",
+      "Accessibility Guidelines",
+      "CSS Architecture Patterns"
+    ]
+  },
+  {
+    "skillName": "Git and Github",
+    "popularityRank": 10,
+    "subtopics": [
+      "Version Control Basics",
+      "Git Installation",
+      "Repository Creation",
+      "Branch Management",
+      "Commit History",
+      "Merge Conflicts",
+      "Git Remote",
+      "Github Workflow",
+      "Pull Request Process",
+      "Code Review Best",
+      "Git Performance",
+      "Repository Architecture",
+      "Git Debugging Tools"
+    ]
+  },
+  {
+    "skillName": "AWS",
+    "popularityRank": 11,
+    "subtopics": [
+      "Cloud Computing Fundamentals",
+      "AWS Account Management",
+      "EC2 Instance Management",
+      "S3 Storage Solutions",
+      "IAM Role Management",
+      "VPC Network Architecture",
+      "RDS Database Services",
+      "Lambda Function Development",
+      "CloudFormation Template Design",
+      "CloudWatch Monitoring Tools",
+      "AWS Security Best Practices",
+      "Disaster Recovery Planning",
+      "Cost Optimization Techniques",
+      "Scalable Architecture Design"
+    ]
+  },
+  {
+    "skillName": "Docker",
+    "popularityRank": 12,
+    "subtopics": [
+      "Container Basics",
+      "Docker Image Management",
+      "Container Networking",
+      "Docker Volumes",
+      "Docker Compose",
+      "Container Orchestration",
+      "Docker Security",
+      "Performance Optimization",
+      "Debugging Techniques",
+      "Microservices Architecture",
+      "Containerization Best Practices",
+      "Docker Swarm",
+      "Kubernetes Integration",
+      "Production Deployment"
+    ]
+  },
+  {
+    "skillName": "Kubernetes",
+    "popularityRank": 13,
+    "subtopics": [
+      "Container Orchestration",
+      "Pod Management",
+      "Replica Sets",
+      "Deployments",
+      "Services Networking",
+      "Persistent Volumes",
+      "ConfigMaps Secrets",
+      "Cluster Architecture",
+      "Scaling Strategies",
+      "Resource Management",
+      "Logging Monitoring",
+      "Security Best Practices",
+      "Cluster Upgrades"
+    ]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "popularityRank": 14,
+    "subtopics": [
+      "Big O Notation",
+      "Array Operations",
+      "Linked List",
+      "Stack Implementation",
+      "Queue Data Structure",
+      "TreeTraversal",
+      "Graph Algorithms",
+      "Hash Tables",
+      "Sorting Techniques",
+      "Dynamic Programming",
+      "Greedy Algorithms",
+      "Bit Manipulation",
+      "String Matching"
+    ]
+  },
+  {
+    "skillName": "C++",
+    "popularityRank": 15,
+    "subtopics": [
+      "Data Types",
+      "Operators",
+      "Control Structures",
+      "Functions",
+      "Object Oriented Programming",
+      "Templates",
+      "Exception Handling",
+      "Memory Management",
+      "Smart Pointers",
+      "Multithreading",
+      "STL Containers",
+      "Algorithm Complexity",
+      "Performance Optimization",
+      "Best Practices"
+    ]
+  },
+  {
+    "skillName": "C",
+    "popularityRank": 16,
+    "subtopics": [
+      "Basic Syntax",
+      "Data Types",
+      "Operators",
+      "Control Structures",
+      "Functions",
+      "Arrays",
+      "Pointers",
+      "Memory Management",
+      "File Input Output",
+      "Error Handling",
+      "Data Structures",
+      "System Programming",
+      "Performance Optimization"
+    ]
+  },
+  {
+    "skillName": "C#",
+    "popularityRank": 17,
+    "subtopics": [
+      "Syntax Basics",
+      "Data Types",
+      "Operators",
+      "Control Flow",
+      "Functions",
+      "Object Oriented Programming",
+      "Exception Handling",
+      "File Input Output",
+      "Multi Threading",
+      "Lambda Expressions",
+      "LINQ Queries",
+      "Async Programming",
+      "Performance Optimization",
+      "Design Patterns"
+    ]
+  },
+  {
+    "skillName": "Go",
+    "popularityRank": 18,
+    "subtopics": [
+      "Go Basics",
+      "Data Types",
+      "Control Structures",
+      "Functions",
+      "Error Handling",
+      "Goroutines",
+      "Channels",
+      "Concurrency",
+      "Go Modules",
+      "System Programming",
+      "Performance Optimization",
+      "Memory Management",
+      "Testing Strategies",
+      "Go Architecture"
+    ]
+  },
+  {
+    "skillName": "Express JS",
+    "popularityRank": 19,
+    "subtopics": [
+      "JavaScript Fundamentals",
+      "Node JS Basics",
+      "Express Framework",
+      "Routing Mechanisms",
+      "Middleware Functions",
+      "Request Response Objects",
+      "Template Engine Integration",
+      "Database Connectivity",
+      "Error Handling Techniques",
+      "API Security Best Practices",
+      "Performance Optimization",
+      "Scalable Architecture"
+    ]
+  },
+  {
+    "skillName": "Next.js",
+    "popularityRank": 20,
+    "subtopics": [
+      "React Fundamentals",
+      "Next.js Installation",
+      "Page Routing System",
+      "Server Side Rendering",
+      "Static Site Generation",
+      "Client Side Rendering",
+      "Get Static Props",
+      "Internationalization Support",
+      "Performance Optimization",
+      "Error Handling Mechanisms",
+      "Security Best Practices",
+      "Production Deployment Strategies",
+      "Serverless Architecture"
+    ]
+  },
+  {
+    "skillName": "MongoDB",
+    "popularityRank": 21,
+    "subtopics": [
+      "Data Modeling",
+      "Document Structure",
+      "Query Language",
+      "Indexing Techniques",
+      "Data Retrieval",
+      "Update Operations",
+      "Data Replication",
+      "Sharding Strategy",
+      "Performance Optimization",
+      "Database Security",
+      "Scalability Planning",
+      "Error Handling"
+    ]
+  },
+  {
+    "skillName": "PostgreSQL",
+    "popularityRank": 22,
+    "subtopics": [
+      "Database Fundamentals",
+      "SQL Basics",
+      "Data Modeling",
+      "Database Design",
+      "Indexing Strategies",
+      "Query Optimization",
+      "Transaction Management",
+      "Concurrency Control",
+      "Database Security",
+      "Performance Tuning",
+      "Data Replication",
+      "Backup Recovery"
+    ]
+  },
+  {
+    "skillName": "MySQL",
+    "popularityRank": 23,
+    "subtopics": [
+      "Database Fundamentals",
+      "SQL Basics",
+      "Data Modeling",
+      "MySQL Data Types",
+      "Indexing Strategies",
+      "Query Optimization",
+      "Transaction Management",
+      "Locking Mechanisms",
+      "Database Security",
+      "Performance Tuning",
+      "Replication Techniques",
+      "Backup Recovery"
+    ]
+  },
+  {
+    "skillName": "Linux",
+    "popularityRank": 24,
+    "subtopics": [
+      "File System Hierarchy",
+      "Shell Scripting Basics",
+      "User Authentication",
+      "Process Management",
+      "System Logging",
+      "Network Configuration",
+      "Package Management",
+      "Security Best Practices",
+      "System Performance Monitoring",
+      "Kernel Modules",
+      "System Call Interface",
+      "Debugging Tools",
+      "System Architecture"
+    ]
+  },
+  {
+    "skillName": "Redis",
+    "popularityRank": 28,
+    "subtopics": [
+      "Redis Data Types",
+      "Key Value Stores",
+      "Hash Tables",
+      "Redis Clustering",
+      "Pub Sub Messaging",
+      "Transaction Management",
+      "Redis Persistence",
+      "Cache Strategies",
+      "Performance Optimization",
+      "Redis Security",
+      "Redis Monitoring",
+      "Data Expiration Policies",
+      "Redis Cluster Architecture",
+      "Sharding Techniques"
+    ]
+  },
+  {
+    "skillName": "Tailwind",
+    "popularityRank": 29,
+    "subtopics": [
+      "CSS Framework Basics",
+      "Tailwind Configuration",
+      "Responsive Design",
+      "Utility Classes",
+      "Custom Components",
+      "Layout Management",
+      "State Variations",
+      "Pseudo Classes",
+      "Dark Mode Implementation",
+      "Accessibility Best Practices",
+      "Performance Optimization",
+      "Debugging Techniques"
+    ]
+  },
+  {
+    "skillName": "Redux",
+    "popularityRank": 30,
+    "subtopics": [
+      "State Management Basics",
+      "Store Configuration",
+      "Actions Payloads",
+      "Reducers Functions",
+      "Action Creators",
+      "Dispatching Actions",
+      "State Selectors",
+      "Redux Middleware",
+      "Asynchronous Actions",
+      "React Integration",
+      "Debugging Tools",
+      "Performance Optimization",
+      "Scalable Architecture"
+    ]
+  },
+  {
+    "skillName": "API",
+    "popularityRank": 31,
+    "subtopics": [
+      "API Fundamentals",
+      "RESTful Design",
+      "HTTP Methods",
+      "Request Response",
+      "API Security",
+      "Authentication Protocols",
+      "Error Handling",
+      "API Gateway",
+      "Microservices Architecture",
+      "API Performance",
+      "API Testing",
+      "API Documentation",
+      "API Deployment"
+    ]
+  },
+  {
+    "skillName": "GraphQL",
+    "popularityRank": 32,
+    "subtopics": [
+      "GraphQL Basics",
+      "Schema Design",
+      "Query Language",
+      "Mutation Types",
+      "Resolvers Implementation",
+      "Data Fetching Strategies",
+      "Error Handling Mechanisms",
+      "GraphQL Validation",
+      "Performance Optimization",
+      "Caching Techniques",
+      "Security Best Practices",
+      "Query Complexity Analysis",
+      "Pagination Strategies",
+      "Realtime Updates"
+    ]
+  },
+  {
+    "skillName": "FastAPI",
+    "popularityRank": 33,
+    "subtopics": [
+      "API Fundamentals",
+      "FastAPI Basics",
+      "Route Handling",
+      "Request Response",
+      "Data Validation",
+      "Dependency Injection",
+      "Error Handling",
+      "Async Programming",
+      "Database Integration",
+      "Security Best Practices",
+      "Performance Optimization",
+      "API Documentation",
+      "Testing Strategies"
+    ]
+  },
+  {
+    "skillName": "Vue.js",
+    "popularityRank": 33,
+    "subtopics": [
+      "Vue Basics",
+      "Template Syntax",
+      "Components Lifecycle",
+      "State Management",
+      "Event Handling",
+      "Vue Router",
+      "Vuex Store",
+      "Server Side Rendering",
+      "Error Handling",
+      "Performance Optimization",
+      "Security Best Practices",
+      "Component Architecture",
+      "Testing Strategies",
+      "Production Deployment"
+    ]
+  },
+  {
+    "skillName": "AngularJS",
+    "popularityRank": 34,
+    "subtopics": [
+      "Controllers and Scopes",
+      "Template Bindings",
+      "Dependency Injection",
+      "Modules and Routing",
+      "Services and Factories",
+      "Directives and Filters",
+      "Form Validation",
+      "RESTful API Integration",
+      "Error Handling and Logging",
+      "Performance Optimization",
+      "Security Best Practices",
+      "State Management"
+    ]
+  },
+  {
+    "skillName": "Django",
+    "popularityRank": 35,
+    "subtopics": [
+      "Python Basics",
+      "Django Installation",
+      "Project Structure",
+      "Models Definition",
+      "Database Integration",
+      "URL Routing",
+      "View Functions",
+      "Template Engine",
+      "Form Handling",
+      "Authentication System",
+      "Authorization System",
+      "Error Handling",
+      "Performance Optimization",
+      "Production Deployment"
+    ]
+  },
+  {
+    "skillName": ".Net",
+    "popularityRank": 37,
+    "subtopics": [
+      "Multithreading",
+      "Error Handling",
+      "Performance Optimization",
+      "Security Best Practices",
+      "Microservices Architecture",
+      "Azure Integration",
+      "C# Fundamentals",
+      "Object Oriented Principles",
+      "Data Structures",
+      "LINQ Querying",
+      "ASP.Net Core",
+      "Entity Framework",
+      "Dependency Injection"
+    ]
+  },
+  {
+    "skillName": "Machine Learning",
+    "popularityRank": 38,
+    "subtopics": [
+      "Hyperparameter Tuning",
+      "Deep Learning Architecture",
+      "Transfer Learning",
+      "Model Deployment Strategies",
+      "Anomaly Detection Techniques",
+      "Natural Language Processing",
+      "Linear Regression",
+      "Data Preprocessing",
+      "Neural Network Fundamentals",
+      "Supervised Learning",
+      "Unsupervised Learning",
+      "Model Evaluation Metrics",
+      "Overfitting Prevention"
+    ]
+  },
+  {
+    "skillName": "Generative AI",
+    "popularityRank": 39,
+    "subtopics": [
+      "Natural Language Processing",
+      "Text Generation",
+      "Model Evaluation Metrics",
+      "Hyperparameter Tuning",
+      "Model Deployment Strategies",
+      "Explainable AI Techniques",
+      "Adversarial Attack Defense",
+      "Deep Learning Fundamentals",
+      "Neural Network Architectures",
+      "Generative Models",
+      "Variational Autoencoders",
+      "Generative Adversarial Networks",
+      "Sequence Generation",
+      "Image Synthesis"
+    ]
+  }
+]
