@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Guards",
+    "question": "Given `function isString(x: unknown): x is string { return typeof x === 'string'; }` — what does `x is string` do?",
+    "options": ["Type-hint to the reader", "Narrows x to string after the guard", "Validates x is a string", "Ensures return is boolean"],
+    "correctIndex": 1,
+    "explanation": "A type predicate `x is T` tells TypeScript that if the function returns true, x is narrowed to type T in the caller's scope.",
+    "difficulty": "Medium",
+    "tags": ["type-predicates", "type-guards", "type-narrowing"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Guards",
+    "question": "Does `typeof x === 'string'` automatically narrow x to string?",
+    "options": ["No, manual guards are required", "Yes, in conditional branches", "Yes, with type predicates only", "No, typeof is not a guard"],
+    "correctIndex": 1,
+    "explanation": "TypeScript's control flow analysis recognizes typeof checks as type guards; x is narrowed in the true branch.",
+    "difficulty": "Medium",
+    "tags": ["typeof-guards", "control-flow-analysis", "narrowing"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Guards",
+    "question": "Given `x instanceof Error` — does TypeScript narrow x to Error?",
+    "options": ["No, instanceof is not a guard", "Yes, in the true branch", "Yes, but only with type predicate", "No, Error is too generic"],
+    "correctIndex": 1,
+    "explanation": "instanceof checks are recognized as type guards; x is narrowed to Error (or the constructor's type) in the true branch.",
+    "difficulty": "Medium",
+    "tags": ["instanceof-guards", "type-narrowing", "control-flow"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Guards",
+    "question": "Can a type predicate return a wider type than the input parameter?",
+    "options": ["No, predicates must narrow", "Yes, if explicitly returned", "Yes, but TypeScript warns", "No, predicates are always narrowing"],
+    "correctIndex": 0,
+    "explanation": "Type predicates are contracts; returning a wider type breaks the narrowing guarantee and defeats their purpose.",
+    "difficulty": "Medium-Hard",
+    "tags": ["type-predicates", "narrowing-contracts", "type-safety"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Guards",
+    "question": "Given `function isStr(x: unknown): asserts x is string { if (typeof x !== 'string') throw new Error(); }` — what does asserts do?",
+    "options": ["Checks x at runtime", "Narrows x without a conditional", "Asserts x is a string or throws", "Compiles to assertions"],
+    "correctIndex": 2,
+    "explanation": "An assertion guard narrows x after the function returns (without throwing); if it throws, x is undefined, so the caller assumes x is narrowed.",
+    "difficulty": "Medium-Hard",
+    "tags": ["assertion-guards", "asserts-predicate", "control-flow"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Guards",
+    "question": "Does `x !== null && typeof x.prop === 'string'` narrow x's structure?",
+    "options": ["No, only the typeof check narrows", "Yes, the conjunction narrows both", "Yes, but null check is redundant", "No, structure cannot be narrowed"],
+    "correctIndex": 1,
+    "explanation": "Control flow analysis chains guards; x !== null eliminates null, then typeof x.prop narrows based on the property check.",
+    "difficulty": "Medium",
+    "tags": ["control-flow-analysis", "chained-guards", "type-narrowing"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Guards",
+    "question": "Given `const x: number | string; if (x) { /* what is x here */ }` — what type is x inside the if?",
+    "options": ["number | string", "Truthy number | string", "number (never string truthy)", "string"],
+    "correctIndex": 1,
+    "explanation": "Truthiness guards narrow out falsy values (0, '', false, null, undefined); non-zero numbers and non-empty strings remain.",
+    "difficulty": "Medium",
+    "tags": ["truthiness-guards", "falsy-values", "control-flow"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Guards",
+    "question": "Can you create a type guard for a discriminated union?",
+    "options": ["No, unions are not guarded", "Yes, by checking a discriminator property", "Yes, with typeof only", "No, requires manual casting"],
+    "correctIndex": 1,
+    "explanation": "Discriminated unions have a common property distinguishing variants; checking that property narrows the type.",
+    "difficulty": "Medium",
+    "tags": ["discriminated-unions", "type-guards", "pattern-matching"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Guards",
+    "question": "Does `Array.isArray(x)` narrow x to an array type?",
+    "options": ["No, isArray is not recognized", "Yes, x becomes unknown[]", "Yes, x narrows to any[]", "Yes, if x was previously unknown"],
+    "correctIndex": 1,
+    "explanation": "TypeScript recognizes Array.isArray as a type guard; x narrows to unknown[] (or the array type if x was a union).",
+    "difficulty": "Medium",
+    "tags": ["array-guards", "type-narrowing", "control-flow"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Guards",
+    "question": "Given `function guard(x: T | null): x is T { return x !== null; }` — does this work for any T?",
+    "options": ["No, T must be concrete", "Yes, T is inferred from calls", "Yes, the guard works generically", "No, generics cannot be guarded"],
+    "correctIndex": 2,
+    "explanation": "Generic type guards work by preserving the type parameter; `x is T` narrows x from T|null to T regardless of T's actual type.",
+    "difficulty": "Medium-Hard",
+    "tags": ["generic-type-guards", "type-predicates", "generics"]
+  }
+]

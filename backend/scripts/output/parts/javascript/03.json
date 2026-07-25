@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "DOM Manipulation",
+    "question": "What does this code do?\n```javascript\nconst div = document.getElementById('myDiv');\ndiv.innerHTML = '<img src=x onerror=\"alert(1)\">';\n```",
+    "options": [
+      "Safely inserts an image element without executing scripts",
+      "Creates an XSS vulnerability by executing injected JavaScript",
+      "Renders plain text without triggering any events",
+      "Throws a DOMException due to malformed HTML"
+    ],
+    "correctIndex": 1,
+    "explanation": "innerHTML parses HTML and executes inline event handlers like onerror; use textContent for untrusted data.",
+    "difficulty": "Medium-Hard",
+    "tags": ["XSS", "innerHTML", "security"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "DOM Manipulation",
+    "question": "What is the output?\n```javascript\nconst parent = document.querySelector('#parent');\nconst child = parent.appendChild(document.createElement('div'));\nchild.textContent = 'Hello';\nconsole.log(parent.children.length);\n```",
+    "options": [
+      "0 because appendChild returns null in this context",
+      "1 because appendChild adds child and increases length",
+      "undefined due to appendChild not updating parent",
+      "NaN because children is not a valid property"
+    ],
+    "correctIndex": 1,
+    "explanation": "appendChild adds a new child element and returns the appended node; parent.children.length reflects the addition.",
+    "difficulty": "Medium",
+    "tags": ["appendChild", "DOM-manipulation", "element-creation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "DOM Manipulation",
+    "question": "What is logged?\n```javascript\nconst elem = document.querySelector('div');\nconsole.log(elem.classList.contains('active'));\nelem.classList.add('active');\nconsole.log(elem.classList.contains('active'));\n```",
+    "options": [
+      "false true because classList operations update the element",
+      "false false because classList is read-only",
+      "true true because active class exists by default",
+      "undefined true due to classList behavior"
+    ],
+    "correctIndex": 0,
+    "explanation": "classList.add() modifies the element's classes; contains() reflects changes immediately.",
+    "difficulty": "Medium",
+    "tags": ["classList", "DOM-classes", "element-attributes"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "DOM Manipulation",
+    "question": "What is the output?\n```javascript\nconst div = document.createElement('div');\nconst span = document.createElement('span');\nspan.textContent = 'Text';\ndiv.appendChild(span);\nconsole.log(div.querySelector('span').textContent);\n```",
+    "options": [
+      "Text because querySelector finds the appended span",
+      "undefined due to span not being in document tree",
+      "null because querySelector fails on unattached nodes",
+      "ReferenceError because div has no method querySelector"
+    ],
+    "correctIndex": 0,
+    "explanation": "querySelector works on any element tree, even detached fragments; finds the span and returns its textContent.",
+    "difficulty": "Medium",
+    "tags": ["querySelector", "document-fragments", "DOM-traversal"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "DOM Manipulation",
+    "question": "What is logged?\n```javascript\nconst elem = document.querySelector('button');\nelem.setAttribute('disabled', '');\nconsole.log(elem.getAttribute('disabled'));\nconsole.log(elem.disabled);\n```",
+    "options": [
+      "empty-string false because setAttribute and property differ",
+      "empty-string true because disabled attribute is set",
+      "null false due to setAttribute failure",
+      "disabled true because setAttribute sets the attribute"
+    ],
+    "correctIndex": 1,
+    "explanation": "setAttribute('disabled', '') sets the attribute; elem.disabled property checks if any value exists.",
+    "difficulty": "Medium-Hard",
+    "tags": ["setAttribute", "getAttribute", "properties-vs-attributes"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "DOM Manipulation",
+    "question": "What is the output?\n```javascript\nconst fragment = document.createDocumentFragment();\nfor (let i = 0; i < 3; i++) {\n  const div = document.createElement('div');\n  fragment.appendChild(div);\n}\nconst container = document.getElementById('container');\ncontainer.appendChild(fragment);\nconsole.log(fragment.children.length);\n```",
+    "options": [
+      "3 because fragment retains children after append",
+      "0 because appendChild empties the fragment",
+      "undefined because fragments have no children property",
+      "null due to appendChild removing fragment reference"
+    ],
+    "correctIndex": 1,
+    "explanation": "appendChild moves elements out of a DocumentFragment; the fragment becomes empty after appending to the container.",
+    "difficulty": "Medium-Hard",
+    "tags": ["DocumentFragment", "appendChild", "DOM-performance"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "DOM Manipulation",
+    "question": "What is logged?\n```javascript\nconst elem = document.querySelector('div');\nelem.style.color = 'red';\nconsole.log(getComputedStyle(elem).color);\n```",
+    "options": [
+      "red because inline style sets the property directly",
+      "rgb(255 0 0) because computed style returns RGB format",
+      "depends on CSS because external styles may override",
+      "undefined due to getComputedStyle failure"
+    ],
+    "correctIndex": 1,
+    "explanation": "getComputedStyle returns computed values in browser standard format; 'red' becomes 'rgb(255, 0, 0)'.",
+    "difficulty": "Medium",
+    "tags": ["getComputedStyle", "inline-styles", "CSS-values"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "DOM Manipulation",
+    "question": "What is the output?\n```javascript\nconst elem = document.querySelector('p');\nconst clone = elem.cloneNode(true);\nelem.parentNode.appendChild(clone);\nconsole.log(elem === clone);\n```",
+    "options": [
+      "true because clone is a reference to elem",
+      "false because cloneNode creates a new independent element",
+      "undefined due to cloneNode returning null",
+      "ReferenceError because cloneNode is not defined"
+    ],
+    "correctIndex": 1,
+    "explanation": "cloneNode(true) creates a deep copy; the clone is a distinct object, not equal to the original.",
+    "difficulty": "Medium",
+    "tags": ["cloneNode", "deep-copy", "element-duplication"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "DOM Manipulation",
+    "question": "What is logged?\n```javascript\nconst parent = document.querySelector('#parent');\nconst child = document.querySelector('#child');\nparent.insertBefore(child, parent.firstChild);\nconsole.log(parent.firstChild === child);\n```",
+    "options": [
+      "false because insertBefore does not change element order",
+      "true because insertBefore moves child to first position",
+      "undefined due to insertBefore returning null",
+      "null because child remains in original position"
+    ],
+    "correctIndex": 1,
+    "explanation": "insertBefore(node, ref) moves node before the reference; child becomes the first child.",
+    "difficulty": "Medium",
+    "tags": ["insertBefore", "DOM-reordering", "element-manipulation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "DOM Manipulation",
+    "question": "What is the output?\n```javascript\nconst elem = document.querySelector('div');\nelem.textContent = 'Hello <b>World</b>';\nconsole.log(elem.textContent);\n```",
+    "options": [
+      "Hello World because textContent renders HTML tags",
+      "Hello <b>World</b> because textContent ignores HTML parsing",
+      "Hello World because tags are stripped automatically",
+      "undefined due to textContent setting failure"
+    ],
+    "correctIndex": 1,
+    "explanation": "textContent treats input as plain text; HTML tags are not parsed and appear literally.",
+    "difficulty": "Medium",
+    "tags": ["textContent", "innerText", "plain-text"]
+  }
+]

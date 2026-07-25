@@ -23,12 +23,13 @@ try {
   activeClient = mockClient;
 }
 
-// Proxy wrapper so we can dynamically swap out the active client if connection fails
+// Proxy wrapper so we can dynamically swap out the active client if connection fails or model is unindexed
 const prismaProxy = new Proxy({}, {
   get(target, prop) {
-    const val = activeClient[prop];
+    const client = (activeClient && activeClient[prop]) ? activeClient : mockClient;
+    const val = client ? client[prop] : undefined;
     if (typeof val === 'function') {
-      return val.bind(activeClient);
+      return val.bind(client);
     }
     return val;
   }

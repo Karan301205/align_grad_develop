@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Volumes",
+    "question": "You create a named volume and mount it in a container: `docker run -v mydata:/data app`. Later, you inspect the volume with `docker volume inspect mydata` and see the Mountpoint is `/var/lib/docker/volumes/mydata/_data`. You delete the container with `docker rm app`. Is the volume data still there?",
+    "options": ["Yes, named volumes persist after container deletion; they are only removed with `docker volume rm`", "No, Docker automatically deletes volumes with their containers unless flagged with --rm-volume=false", "Only the metadata remains; the actual data in /var/lib/docker is cleaned up", "The volume is orphaned and inaccessible until a new container mounts it"],
+    "correctIndex": 0,
+    "explanation": "Named volumes are independent lifecycle objects; they persist after container deletion and must be explicitly removed with `docker volume rm`; this is the key difference from anonymous volumes (created with `-v /path` without a name), which are deleted when the container is removed.",
+    "difficulty": "Medium",
+    "tags": ["named-volumes", "volume-lifecycle", "docker-volumes"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Volumes",
+    "question": "A Dockerfile specifies `VOLUME /data` and the image is built. Later, you run the container with `docker run -v /tmp/host/data:/data app`. The host directory `/tmp/host/data` is empty. Inside the container, `/data` is also empty, but after writing a 1 GB file inside, the host's `/tmp/host/data` does not show the file. Why?",
+    "options": ["The VOLUME declaration in the Dockerfile creates an anonymous volume that takes precedence over the bind mount specified at runtime", "Bind mounts are read-only by default when combined with VOLUME declarations", "Docker volumes do not sync data back to bind mounts in real-time; use `docker cp` to retrieve files", "The file is written to a temporary layer and discarded after the container exits"],
+    "correctIndex": 0,
+    "explanation": "The VOLUME instruction creates an anonymous volume at runtime; if both a VOLUME and a -v bind mount target the same path, the VOLUME (anonymous volume) takes precedence, shadowing the bind mount, so writes go to the anonymous volume instead of the host.",
+    "difficulty": "Medium-Hard",
+    "tags": ["volume-declaration", "bind-mounts", "volume-precedence"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Volumes",
+    "question": "Two containers share a named volume: `docker run -d -v shared:/data app1` and `docker run -d -v shared:/data app2`. Inside app1, you write a file at `/data/file.txt`. Inside app2, you `ls /data` but the file is not visible. Both are still running. What is the most likely cause?",
+    "options": ["Container app2 mounted the volume before app1 wrote the file; the app2 process cached the directory listing", "Volumes are write-isolated and do not share data between containers; create a network-mounted filesystem instead", "The file is on the same volume but the filesystem cache in app2 is stale; run `sync` on app1 to flush", "This is impossible; named volumes guarantee data consistency between containers"],
+    "correctIndex": 0,
+    "explanation": "If app2 mounted and cached the directory listing before app1 wrote the file, app2's in-memory dir cache is stale; this is an application-level caching issue, not a Docker issue; run `ls -la /data` again or send SIGHUP to refresh the application's file handles.",
+    "difficulty": "Medium-Hard",
+    "tags": ["shared-volumes", "data-consistency", "filesystem-cache"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Volumes",
+    "question": "You mount a volume at a path that already contains files in the image: `docker run -v mydata:/existing app`, where the image has files in `/existing`. Inside the container, `ls /existing` returns empty. Where are the original image files?",
+    "options": ["They are hidden by the volume mount; the volume shadows the image content at that path", "Docker merges the volume and image files; you must have insufficient permissions to see them", "The files were deleted because a volume cannot coexist with preexisting image content", "The files are still there but require explicit mount with `--mount type=overlay` to be visible"],
+    "correctIndex": 0,
+    "explanation": "A volume mount at a path shadows any content in the underlying image at that same path; the image files are not deleted but are inaccessible as long as the volume is mounted; unmounting would reveal them.",
+    "difficulty": "Medium",
+    "tags": ["volume-shadowing", "mount-precedence", "docker-volumes"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Volumes",
+    "question": "A container uses a read-only volume: `docker run -v mydata:/data:ro app`. Inside the container, you can read files in `/data` but cannot write. Later, you run `docker run -v mydata:/data:rw app2` on the same volume without the :ro flag. Both containers are running simultaneously. Can app2 write to the volume while app1 is reading?",
+    "options": ["Yes, the :ro flag is a client-side restriction; app2 bypasses it by mounting with :rw and can write even while app1 reads", "No, Docker enforces read-only state at the volume level; app2 will also be read-only", "Yes, but only if the filesystem supports concurrent read-write access (unlikely with ext4)", "No, because Docker locks the volume for the first mounted container until it exits"],
+    "correctIndex": 0,
+    "explanation": "The :ro flag is enforced only on the container that mounts the volume; it does not prevent other containers from mounting the same volume in read-write mode, creating a potential data corruption risk if one process reads while another writes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["read-only-volumes", "concurrent-access", "data-integrity"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Volumes",
+    "question": "You run `docker run -v /host/data:/container/data app` with a host directory that has 1000 files totaling 2 GB. Inside the container, `du -sh /container/data` reports only 500 MB. The host still shows 2 GB. How is this possible?",
+    "options": ["The container's filesystem is using a different block size or compression", "The container's view is limited by a cgroup memory limit that restricts reported usage", "This is impossible; bind-mounted directories must show the same size in both the container and host", "The mount is sparse or using a copy-on-write mechanism that has not copied all files yet"],
+    "correctIndex": 0,
+    "explanation": "Filesystem block size and allocation differ between the host and container; ext4 and other filesystems report apparent size vs. allocated size, and the container may be using a different block size or viewing the filesystem with different accounting, leading to different `du` output.",
+    "difficulty": "Medium-Hard",
+    "tags": ["bind-mounts", "disk-usage", "filesystem-accounting"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Volumes",
+    "question": "You create a volume from a container: `docker run --name source -v /data alpine sh -c 'echo test > /data/file'`, then create another container that mounts from the first: `docker run --volumes-from source -it alpine`. Inside the second container, `/data/file` contains 'test'. You then delete the first container with `docker rm source`. Can the second container still access the file?",
+    "options": ["Yes, volumes-from creates a reference to the underlying volume, not the container; deleting the container does not affect the volume", "No, deleting the source container breaks the volumes-from reference, making the data inaccessible", "Yes, but only until the second container exits; then the data is garbage collected", "It depends on whether the volume is named or anonymous; anonymous volumes are deleted, named volumes persist"],
+    "correctIndex": 0,
+    "explanation": "`volumes-from` references the volume itself, not the container; deleting the source container does not affect the underlying volume, so the second container retains access as long as it keeps the mount active.",
+    "difficulty": "Medium",
+    "tags": ["volumes-from", "volume-references", "container-deletion"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Volumes",
+    "question": "A volume is initialized with `docker volume create mydata`, then mounted with `VOLUME /data` in a Dockerfile. When a new container is built from that image, the `/data` path is empty, not initialized with the contents of the named volume `mydata`. Why?",
+    "options": ["The VOLUME instruction in the Dockerfile creates a new anonymous volume, not a reference to the named volume", "Named volumes must be explicitly mounted with -v at runtime; VOLUME only creates paths, not volume assignments", "Docker does not support linking Dockerfile VOLUME declarations to pre-created named volumes", "The image's /data directory is initialized only if the VOLUME is mounted from the host"],
+    "correctIndex": 0,
+    "explanation": "VOLUME in a Dockerfile creates an anonymous volume at build/run time; it does not reference existing named volumes; to use a named volume, explicitly mount it with `docker run -v mydata:/data`, not with VOLUME in the Dockerfile.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dockerfile-volume", "named-volumes", "volume-initialization"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Volumes",
+    "question": "You run `docker run -v mydata:/data:nocopy app`. After checking the volume mountpoint on the host, it is empty. Inside the container, `/data` is also empty. Later, you create a file inside the container at `/data/newfile`. On the host, it appears in `/var/lib/docker/volumes/mydata/_data/newfile`. Why did the nocopy flag work?",
+    "options": ["The nocopy flag prevents Docker from copying the image's /data content to the volume at mount time", "Nocopy is the default behavior; files are never copied; you must use :copy to copy image content", "The image had no content in /data, so nocopy had no effect", "Nocopy mounts the volume as read-only until the first write, then enables writes"],
+    "correctIndex": 0,
+    "explanation": "By default, Docker copies image content to an empty named volume at mount time; the :nocopy flag disables this behavior, leaving the volume empty even if the image has content at that path.",
+    "difficulty": "Medium",
+    "tags": ["nocopy-flag", "volume-initialization", "docker-volumes"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Volumes",
+    "question": "A bind mount is created: `docker run -v /host/db/data:/container/data app`. On the host, the directory `/host/db/data` is removed with `rm -rf` while the container is running. Inside the container, can you still access `/container/data`?",
+    "options": ["Yes, the container maintains a file descriptor to the mount point; the directory is inaccessible, but the mount remains until the container exits", "No, removing the host directory unmounts the volume immediately, causing the container to lose access", "Yes, but only for files already open in the container; new file operations fail", "No, Docker detects the deletion and terminates the container to maintain data integrity"],
+    "correctIndex": 2,
+    "explanation": "Deleting the host directory does not immediately break the mount or disconnect opened file handles; however, new operations (opening files, listing directories) will fail because the underlying directory no longer exists, while in-flight operations with existing file descriptors may continue.",
+    "difficulty": "Medium-Hard",
+    "tags": ["bind-mounts", "host-deletion", "file-descriptors"]
+  }
+]

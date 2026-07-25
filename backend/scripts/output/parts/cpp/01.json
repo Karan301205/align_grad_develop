@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Data Types",
+    "question": "Given `int x = INT_MAX; x += 1;`, what is the value of x and why?",
+    "options": ["undefined behavior with unpredictable result", "wraps to INT_MIN due to two's complement overflow", "throws an exception", "remains INT_MAX"],
+    "correctIndex": 0,
+    "explanation": "Signed integer overflow is undefined behavior in C++; the compiler can optimize or transform the code in unexpected ways.",
+    "difficulty": "Medium-Hard",
+    "tags": ["undefined-behavior", "integer-overflow", "type-safety"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Data Types",
+    "question": "What is the output of `sizeof(struct S { char a; int b; char c; })`? (assume 4-byte int, 1-byte char)",
+    "options": ["6 bytes", "9 bytes", "12 bytes", "8 bytes"],
+    "correctIndex": 2,
+    "explanation": "Memory alignment padding is added: char(1) + 3 padding + int(4) + char(1) + 3 padding = 12 bytes total.",
+    "difficulty": "Medium",
+    "tags": ["alignment", "padding", "struct-layout"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Data Types",
+    "question": "A `short` is guaranteed to be how many bits by the C++ standard?",
+    "options": ["exactly 16 bits", "at least 16 bits", "at least 8 bits", "implementation-defined with no guarantee"],
+    "correctIndex": 1,
+    "explanation": "The standard mandates sizeof(short) ≥ 2, meaning at least 16 bits, but exact width varies by platform.",
+    "difficulty": "Medium",
+    "tags": ["type-sizes", "standard-guarantee"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Data Types",
+    "question": "What does `static_cast<int>(3.7)` produce and is it safe?",
+    "options": ["4 via rounding, always safe", "3 via truncation, safe but lossy", "undefined, compiler-dependent", "compilation error"],
+    "correctIndex": 1,
+    "explanation": "Explicit casts truncate (discard fractional part); the conversion is well-defined but loses precision.",
+    "difficulty": "Medium",
+    "tags": ["type-conversion", "casting", "precision-loss"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Data Types",
+    "question": "In `bool b = 5; int x = b;`, what is x and does conversion work both directions?",
+    "options": ["x is 1; bool accepts any integer via implicit narrowing", "x is 1; bool narrows only 0 to false and nonzero to true", "x is 5; implicit conversion preserves value", "compilation error due to narrowing"],
+    "correctIndex": 1,
+    "explanation": "Bool-to-int is safe (converts false→0, true→1); int-to-bool is also safe (0→false, nonzero→true).",
+    "difficulty": "Medium",
+    "tags": ["type-conversion", "bool-narrowing"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Data Types",
+    "question": "What is the difference between `signed char` and `char` for negative values?",
+    "options": ["no difference; char is always signed", "char signedness is implementation-defined; signed char is guaranteed signed", "both are identical by standard", "signed char cannot represent negative values"],
+    "correctIndex": 1,
+    "explanation": "Plain `char` signedness depends on the compiler, but `signed char` and `unsigned char` are always deterministic.",
+    "difficulty": "Medium",
+    "tags": ["character-types", "signedness", "portability"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Data Types",
+    "question": "Given `uint8_t a = 200, b = 100; uint8_t c = a + b;`, what is c?",
+    "options": ["300", "44 (wraps: 300 % 256)", "undefined behavior", "compilation error"],
+    "correctIndex": 1,
+    "explanation": "Unsigned overflow wraps modulo 2^n; 300 mod 256 = 44, a well-defined value.",
+    "difficulty": "Medium",
+    "tags": ["unsigned-overflow", "modular-arithmetic"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Data Types",
+    "question": "Can you safely reinterpret_cast a `double*` to `int*` and read the bits?",
+    "options": ["yes, always; both are numeric types", "yes, but only on little-endian systems", "no; violates strict aliasing and causes undefined behavior", "only if compiler flag disables strict aliasing"],
+    "correctIndex": 2,
+    "explanation": "Reinterpreting pointers across unrelated types violates strict aliasing rules and is undefined behavior.",
+    "difficulty": "Hard",
+    "tags": ["reinterpret-cast", "strict-aliasing", "undefined-behavior"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Data Types",
+    "question": "What is the value of `(unsigned short)(-1)` on a typical system?",
+    "options": ["65535 on 16-bit systems only", "65535 (2^16 - 1) on all systems", "-1 stored as a signed value", "implementation-defined"],
+    "correctIndex": 1,
+    "explanation": "Converting -1 to unsigned fills all bits to 1, yielding the maximum unsigned value for that type.",
+    "difficulty": "Medium",
+    "tags": ["unsigned-conversion", "bit-patterns"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Data Types",
+    "question": "Why does `void*` require explicit cast to other pointer types, but arrays and functions decay?",
+    "options": ["arrays and functions are not pointers", "void* is generic but loses type info; decay preserves the type", "C++ forbids implicit narrowing from void to specific types", "this is a compiler quirk with no deep reason"],
+    "correctIndex": 2,
+    "explanation": "Implicit void* conversion would hide type information; decay and decay-to-pointer are explicit type operations that preserve safety.",
+    "difficulty": "Hard",
+    "tags": ["pointer-types", "type-safety", "implicit-conversion"]
+  }
+]

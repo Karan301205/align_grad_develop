@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Security Best Practices",
+    "question": "What security vulnerability exists?\n```javascript\nconst userInput = '<img src=x onerror=\"fetch(\\\"https://evil.com\\\")';\nconst div = document.getElementById('content');\ndiv.innerHTML = userInput;\n```",
+    "options": [
+      "No vulnerability because HTML is sanitized",
+      "XSS vulnerability because onerror executes injected code",
+      "CSRF attack because fetch is restricted",
+      "SQL injection because user input bypasses validation"
+    ],
+    "correctIndex": 1,
+    "explanation": "innerHTML parses and executes embedded scripts/event handlers; use textContent for untrusted data.",
+    "difficulty": "Medium",
+    "tags": ["XSS", "innerHTML", "security"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Security Best Practices",
+    "question": "What is the safer approach?\n```javascript\nconst userInput = '<img src=x onerror=\"alert(1)\">';\nconst div = document.getElementById('content');\ndiv.textContent = userInput;\n```",
+    "options": [
+      "Still vulnerable because textContent can execute",
+      "Safe because textContent treats input as plain text",
+      "Unsafe because textContent allows HTML parsing",
+      "Ineffective because event handlers still fire"
+    ],
+    "correctIndex": 1,
+    "explanation": "textContent renders HTML as literal text, preventing script execution.",
+    "difficulty": "Medium",
+    "tags": ["XSS-prevention", "textContent", "safe-rendering"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Security Best Practices",
+    "question": "What is the vulnerability?\n```javascript\nconst endpoint = '/api/data?id=' + userSuppliedId;\nfetch(endpoint).then(r => r.json()).then(data => {\n  console.log(data);\n});\n```",
+    "options": [
+      "XSS because endpoint is constructed unsafely",
+      "Query injection if userSuppliedId contains malicious characters",
+      "No vulnerability because fetch validates input",
+      "CSRF attack because credentials are sent"
+    ],
+    "correctIndex": 1,
+    "explanation": "Query parameters must be URL-encoded; unencoded input can manipulate the endpoint.",
+    "difficulty": "Medium-Hard",
+    "tags": ["query-injection", "URL-encoding", "parameter-validation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Security Best Practices",
+    "question": "How should this be fixed?\n```javascript\nconst id = userSuppliedId;\nconst url = new URL('/api/data', window.location.origin);\nurl.searchParams.append('id', id);\nfetch(url).then(r => r.json());\n```",
+    "options": [
+      "Still unsafe because userInput bypasses validation",
+      "Safe because URL and searchParams handle encoding",
+      "Ineffective because encoding is not applied",
+      "Vulnerable to parameter pollution"
+    ],
+    "correctIndex": 1,
+    "explanation": "URL and searchParams automatically URL-encode parameters, preventing injection.",
+    "difficulty": "Medium",
+    "tags": ["URL-encoding", "parameter-safety", "secure-requests"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Security Best Practices",
+    "question": "What CSRF mitigation is missing?\n```javascript\nfetch('/api/delete', {\n  method: 'POST',\n  body: JSON.stringify({ id: 123 })\n}).then(r => r.json());\n```",
+    "options": [
+      "CSRF token validation in request headers",
+      "No issue because POST method is inherently safe",
+      "Credentials must be sent with the request",
+      "Request body must be encrypted"
+    ],
+    "correctIndex": 0,
+    "explanation": "CSRF protection requires server-side token validation; include token in headers.",
+    "difficulty": "Medium-Hard",
+    "tags": ["CSRF", "token-validation", "security"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Security Best Practices",
+    "question": "What is the security issue?\n```javascript\nconst apiKey = 'sk_live_abc123xyz';\nfetch('https://api.example.com/pay', {\n  headers: { 'Authorization': 'Bearer ' + apiKey }\n});\n```",
+    "options": [
+      "Exposing API key in client-side code",
+      "Safe because API key is bearer token format",
+      "Issue is only with HTTP, not HTTPS",
+      "No vulnerability if request is cached"
+    ],
+    "correctIndex": 0,
+    "explanation": "API keys in frontend code are visible to anyone; sensitive tokens must only exist on server.",
+    "difficulty": "Medium",
+    "tags": ["API-key-exposure", "credential-security", "frontend-secrets"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Security Best Practices",
+    "question": "What vulnerability does this prevent?\n```javascript\nconst sanitize = (str) => str.replace(/[<>]/g, '');\nconst userInput = '<script>alert(1)</script>';\nconst safe = sanitize(userInput);\ndocument.body.innerHTML = safe;\n```",
+    "options": [
+      "Prevents XSS by removing angle brackets",
+      "Incomplete XSS prevention; event handlers bypass it",
+      "Safe because script tag is removed",
+      "Ineffective because sanitization is server-side"
+    ],
+    "correctIndex": 1,
+    "explanation": "Simple sanitization fails; attackers use onerror, onclick, etc; use DOMPurify or CSP.",
+    "difficulty": "Medium-Hard",
+    "tags": ["XSS-prevention", "sanitization-limits", "security-bypasses"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Security Best Practices",
+    "question": "What does this Content Security Policy help prevent?\n```html\n<meta http-equiv=\"Content-Security-Policy\" \n  content=\"script-src 'self'\">\n```",
+    "options": [
+      "CSRF attacks by restricting origins",
+      "Inline script execution and external script injection",
+      "SQL injection by sanitizing input",
+      "CORS violations by blocking cross-origin requests"
+    ],
+    "correctIndex": 1,
+    "explanation": "CSP restricts script execution to same-origin; prevents inline/external script XSS.",
+    "difficulty": "Medium",
+    "tags": ["CSP", "XSS-prevention", "security-headers"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Security Best Practices",
+    "question": "What is the security implication?\n```javascript\nconst userText = getUserInput();\neval(userText);\n```",
+    "options": [
+      "No issue because eval is a standard function",
+      "Extremely dangerous; eval executes arbitrary code",
+      "Safe if input is validated with regex",
+      "Only unsafe with malicious intent"
+    ],
+    "correctIndex": 1,
+    "explanation": "eval executes user-supplied code with full privileges; never use with untrusted input.",
+    "difficulty": "Medium",
+    "tags": ["eval", "code-injection", "dangerous-functions"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Security Best Practices",
+    "question": "What does this code safely do?\n```javascript\nconst userInput = getFromUser();\nconst obj = JSON.parse(userInput);\nconsole.log(obj.name);\n```",
+    "options": [
+      "Unsafe because JSON.parse can execute code",
+      "Safe because JSON.parse only deserializes data",
+      "Dangerous if object contains prototype pollution",
+      "Secure only with input length validation"
+    ],
+    "correctIndex": 1,
+    "explanation": "JSON.parse only deserializes; objects cannot execute code (though prototype pollution is possible).",
+    "difficulty": "Medium-Hard",
+    "tags": ["JSON.parse", "deserialization", "prototype-pollution"]
+  }
+]

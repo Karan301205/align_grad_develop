@@ -1,0 +1,167 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Upgrades",
+    "question": "You plan to upgrade the Kubernetes control plane from 1.27 to 1.29. The API server and kubelet versions differ by 2 minor versions. Is this supported?",
+    "options": [
+      "Yes, any version combination is supported",
+      "No, versions must be identical",
+      "Partially; API server can be up to 2 minor versions ahead of kubelet, but not vice versa",
+      "Only 1 minor version difference is supported between all components"
+    ],
+    "correctIndex": 2,
+    "explanation": "Kubernetes supports API server up to N+2 versions ahead of kubelet; kubelet cannot be ahead of API server, ensuring compatibility.",
+    "difficulty": "Medium",
+    "tags": ["upgrade", "version-compatibility", "control-plane"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Upgrades",
+    "question": "During a control plane upgrade, the kube-apiserver is briefly restarted. What happens to running pods and ongoing API requests?",
+    "options": [
+      "All pods are terminated automatically",
+      "Running pods continue unaffected; API requests fail briefly until the server restarts",
+      "Kubernetes pauses all cluster operations until the restart completes",
+      "The kubelet stops managing pods until the API server is responsive"
+    ],
+    "correctIndex": 1,
+    "explanation": "Pod execution is independent of API server; kubelet continues managing pods locally while API requests buffer until the server recovers.",
+    "difficulty": "Medium",
+    "tags": ["upgrade", "control-plane", "apiserver"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Upgrades",
+    "question": "You upgrade a node's kubelet from 1.27 to 1.29 but forget to drain the node first. Several pods terminate unexpectedly. Why?",
+    "options": [
+      "The new kubelet automatically restarts all pods to apply the upgrade",
+      "The kubelet upgrade incompatibility causes pods to be forcefully terminated",
+      "Draining is optional; this is a best practice but not required",
+      "The node's NotReady state triggers automatic pod eviction"
+    ],
+    "correctIndex": 0,
+    "explanation": "Without draining, pods are not gracefully evicted; restarting the kubelet causes existing pods to be terminated abruptly, violating graceful shutdown.",
+    "difficulty": "Medium",
+    "tags": ["upgrade", "kubelet", "pod-drain"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Upgrades",
+    "question": "You use kubectl drain <node> to prepare for a kubelet upgrade. A pod with local storage is blocking the drain. What option allows you to proceed?",
+    "options": [
+      "--force to override the block",
+      "--delete-emptydir-data to force removal of pods with emptyDir volumes",
+      "--ignore-daemonsets to skip DaemonSet pods",
+      "All of the above"
+    ],
+    "correctIndex": 3,
+    "explanation": "kubectl drain has multiple flags: --ignore-daemonsets (skip system pods), --delete-emptydir-data (remove ephemeral storage pods), --force (bypass grace periods).",
+    "difficulty": "Medium-Hard",
+    "tags": ["upgrade", "kubectl-drain", "pod-eviction"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Upgrades",
+    "question": "A cluster is upgraded to a new Kubernetes version. Existing API objects use deprecated API versions. What happens to them?",
+    "options": [
+      "They are automatically converted to the new API version",
+      "They continue working if the API version is still supported; Kubernetes warns if the version is deprecated",
+      "They are immediately removed and cause pod failures",
+      "Manual migration is required before the upgrade"
+    ],
+    "correctIndex": 1,
+    "explanation": "Kubernetes maintains backward compatibility for deprecated API versions; however, warning logs appear and eventual removal is announced.",
+    "difficulty": "Medium-Hard",
+    "tags": ["upgrade", "api-version", "deprecation"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Upgrades",
+    "question": "You upgrade the API server but a CRD (Custom Resource Definition) becomes incompatible due to schema changes. Pods depending on this CRD fail to start. How do you recover?",
+    "options": [
+      "Downgrade the API server to the previous version",
+      "Update the CRD schema to match the pod's expectations or update the pod to use the new schema",
+      "Delete all CRs (Custom Resources) and recreate them",
+      "Wait for a patch release of Kubernetes to fix compatibility"
+    ],
+    "correctIndex": 1,
+    "explanation": "CRD schema mismatches must be resolved by updating either the CRD schema or the pods that depend on it; downgrading is a last resort.",
+    "difficulty": "Hard",
+    "tags": ["upgrade", "crd", "schema-migration"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Upgrades",
+    "question": "During a rolling node upgrade, you encounter a pod that fails to drain after 5 minutes. The pod has terminationGracePeriod: 300. What is the next step?",
+    "options": [
+      "The drain command waits indefinitely; manually kill the pod",
+      "Use --force to immediately evict the pod bypassing graceful shutdown",
+      "The pod will eventually drain after the terminationGracePeriod expires",
+      "Cancel the upgrade and address the pod's issue first"
+    ],
+    "correctIndex": 2,
+    "explanation": "kubectl drain respects terminationGracePeriod; if the period is 300 seconds, drain waits up to 5 minutes before forcing eviction.",
+    "difficulty": "Medium-Hard",
+    "tags": ["upgrade", "kubectl-drain", "termination"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Upgrades",
+    "question": "After upgrading the control plane, a feature flag is disabled in the new version. Workloads using this feature crash. How do you investigate?",
+    "options": [
+      "Check release notes for deprecated or removed features",
+      "Query kube-apiserver logs for feature gate changes",
+      "Examine kubectl api-resources to see available APIs",
+      "All of the above"
+    ],
+    "correctIndex": 3,
+    "explanation": "Release notes document feature gates and deprecations; API server logs and kubectl api-resources reveal what changed post-upgrade.",
+    "difficulty": "Hard",
+    "tags": ["upgrade", "feature-gates", "release-notes"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Upgrades",
+    "question": "A control plane node is upgraded while etcd (running on the same node) is restarted. What is the risk?",
+    "options": [
+      "No risk; etcd is automatically replicated across nodes",
+      "If this is a single-node etcd cluster, all cluster data is briefly unavailable during restart",
+      "Etcd handles version mismatches automatically",
+      "The cluster enters maintenance mode and prevents API requests"
+    ],
+    "correctIndex": 1,
+    "explanation": "Single-node etcd clusters are unavailable when restarted; this causes brief API unavailability and potential data loss if the node crashes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["upgrade", "etcd", "high-availability"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Upgrades",
+    "question": "You execute a cluster upgrade but nodes fail to rejoin after the kubelet upgrade completes. Nodes remain NotReady. What should you check first?",
+    "options": [
+      "Kubelet logs on the node for connectivity or API server errors",
+      "The API server is accepting connections and the cluster is fully upgraded",
+      "Node certificates haven't expired during the upgrade process",
+      "All of the above"
+    ],
+    "correctIndex": 3,
+    "explanation": "Node NotReady after upgrade indicates kubelet connection issues; investigate logs, API server availability, and certificate validity.",
+    "difficulty": "Medium-Hard",
+    "tags": ["upgrade", "troubleshooting", "node-rejoin"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Cluster Upgrades",
+    "question": "You upgrade Kubernetes and then discover that etcd snapshots from before the upgrade cannot be restored to the new version. What principle should you follow for future upgrades?",
+    "options": [
+      "Always skip etcd upgrades during Kubernetes upgrades",
+      "Test restore procedures before upgrading, and ensure backup compatibility across versions",
+      "Assume backups are version-agnostic and never validate",
+      "Use external backup solutions that handle version mismatches"
+    ],
+    "correctIndex": 1,
+    "explanation": "Backup compatibility must be verified before upgrades; etcd versions may differ, affecting restore capabilities.",
+    "difficulty": "Hard",
+    "tags": ["upgrade", "backup", "disaster-recovery"]
+  }
+]

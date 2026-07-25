@@ -1,0 +1,112 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "Containerization Techniques",
+    "question": "What does each Docker layer represent?\n```dockerfile\nFROM node:18\nRUN npm install -g nodemon\nCOPY . /app\nRUN npm install\nCMD ['npm', 'start']\n```",
+    "options": ["all layers are combined before execution", "each instruction creates a new layer", "layers are only metadata", "layers are never reused"],
+    "correctIndex": 1,
+    "explanation": "Each Dockerfile instruction creates a layer; Docker caches layers; reordering instructions (dependencies last) optimizes rebuild time.",
+    "difficulty": "Medium",
+    "tags": ["docker", "layers", "caching"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Containerization Techniques",
+    "question": "How should you optimize a Docker image for Node.js?\n```dockerfile\n# Bad: 500MB\nFROM node:18\nCOPY . /app\nRUN npm install\n\n# Better: ?\nFROM node:18-alpine\n```",
+    "options": ["alpine is smaller but breaks dependencies", "alpine is a minimal Linux distro, reducing image size", "image size does not matter", "all images are same size"],
+    "correctIndex": 1,
+    "explanation": "alpine-based images are 50-100MB vs 500MB+; they include only essential packages, speeding up pulls and deployments.",
+    "difficulty": "Medium",
+    "tags": ["docker", "image-optimization"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Containerization Techniques",
+    "question": "When should you use multi-stage builds?\n```dockerfile\n# Stage 1: build\nFROM node:18 AS builder\nCOPY . /app\nRUN npm install && npm run build\n\n# Stage 2: runtime\nFROM node:18-alpine\nCOPY --from=builder /app/dist /app\nCMD ['npm', 'start']\n```",
+    "options": ["multi-stage builds are unnecessary", "builds in stage 1 are discarded; stage 2 contains only production files", "both stages are included in final image", "multi-stage is only for monoliths"],
+    "correctIndex": 1,
+    "explanation": "Multi-stage builds keep only runtime dependencies in the final image; build tools (npm, compilers) are discarded, reducing size.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker", "multi-stage-builds", "image-optimization"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Containerization Techniques",
+    "question": "What does .dockerignore do?\n```dockerfile\n# .dockerignore\nnode_modules\n.git\n.env\ntest\n```",
+    "options": ["files are deleted from container", "files are excluded from build context, speeding up builds", "docker copy ignores it", "only git files are ignored"],
+    "correctIndex": 1,
+    "explanation": "dockerignore excludes files from the build context sent to Docker daemon; node_modules is redownloaded in RUN npm install, not copied.",
+    "difficulty": "Medium",
+    "tags": ["docker", "dockerignore", "build-optimization"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Containerization Techniques",
+    "question": "How should you pass environment variables to a container?\n```bash\n# Option A\ndocker run -e DATABASE_URL=mongodb://... app\n\n# Option B\ndocker run --env-file .env app\n\n# Option C\nDockerfile: ENV DATABASE_URL=...\n```",
+    "options": ["hardcode in Dockerfile", "use -e flag or --env-file to pass at runtime", "environment variables cannot be passed", "all options are equivalent"],
+    "correctIndex": 1,
+    "explanation": "Never hardcode secrets in images; use -e or env-file to inject at runtime, keeping secrets out of git and images.",
+    "difficulty": "Medium",
+    "tags": ["docker", "environment-variables", "secrets"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Containerization Techniques",
+    "question": "What is the purpose of docker-compose?\n```yaml\nversion: '3'\nservices:\n  app:\n    build: .\n    ports:\n      - '3000:3000'\n  db:\n    image: mongo:latest\n    environment:\n      - MONGO_INITDB_ROOT_USERNAME=root\n```",
+    "options": ["composes a single Dockerfile", "orchestrates multiple containers locally for development", "replaces Kubernetes", "unnecessary for development"],
+    "correctIndex": 1,
+    "explanation": "docker-compose defines multi-container setups in YAML; ideal for development (app + database + cache) without manual CLI commands.",
+    "difficulty": "Medium",
+    "tags": ["docker-compose", "local-development", "orchestration"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Containerization Techniques",
+    "question": "What is the difference between a container and an image?\n```bash\ndocker build -t myapp:1.0 .  # Creates image\ndocker run myapp:1.0          # Creates and starts container from image\n```",
+    "options": ["image and container are the same", "image is a blueprint; container is a running instance", "containers build images", "images run processes"],
+    "correctIndex": 1,
+    "explanation": "Image is a template; container is a live process running from that template; one image can start multiple containers.",
+    "difficulty": "Medium",
+    "tags": ["docker", "image-vs-container"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Containerization Techniques",
+    "question": "How should container networking work in Kubernetes?\n```yaml\napiVersion: v1\nkind: Service\nmetadata:\n  name: app-service\nspec:\n  ports:\n    - port: 80\n      targetPort: 3000\n```",
+    "options": ["containers must be on same machine", "Service provides stable DNS and load-balancing across pods", "networking is automatic", "Kubernetes has no networking"],
+    "correctIndex": 1,
+    "explanation": "Kubernetes Services abstract pod networking; clients connect to service hostname; traffic is load-balanced to pod IPs.",
+    "difficulty": "Medium-Hard",
+    "tags": ["kubernetes", "services", "networking"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Containerization Techniques",
+    "question": "What is a health check in Docker?\n```dockerfile\nHEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\\n  CMD curl -f http://localhost:3000/health || exit 1\n```",
+    "options": ["health checks are optional", "periodically verifies container is healthy; unhealthy containers are restarted", "health checks prevent all failures", "only used in production"],
+    "correctIndex": 1,
+    "explanation": "Health checks periodically run; if they fail, the container is considered unhealthy and orchestrators can restart it.",
+    "difficulty": "Medium",
+    "tags": ["docker", "health-checks", "reliability"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Containerization Techniques",
+    "question": "How should you handle Node.js graceful shutdown in a container?\n```javascript\nprocess.on('SIGTERM', async () => {\n  console.log('shutting down gracefully');\n  await server.close();\n  process.exit(0);\n});\n```",
+    "options": ["ignore SIGTERM signals", "handle SIGTERM to close connections and exit cleanly", "containers always stop instantly", "graceful shutdown is optional"],
+    "correctIndex": 1,
+    "explanation": "Kubernetes sends SIGTERM to pods before terminating; handlers close connections gracefully, preventing data loss.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker", "kubernetes", "graceful-shutdown"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Containerization Techniques",
+    "question": "What is the benefit of using a registry like Docker Hub or private registry?\n```bash\ndocker push mycompany/myapp:1.0.0\ndocker pull mycompany/myapp:1.0.0  # on another machine\n```",
+    "options": ["images are stored locally only", "registries centralize image storage, enabling distribution across servers", "registries slow down pulls", "all images must be rebuilt"],
+    "correctIndex": 1,
+    "explanation": "Registries store and distribute images; teams share images; orchestrators pull from registries to deploy.",
+    "difficulty": "Medium",
+    "tags": ["docker-registry", "image-distribution"]
+  }
+]

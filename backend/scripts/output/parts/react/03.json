@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "JSX Syntax",
+    "question": "Given <Component {...props} x={1} />, if props already contains x: 5, what value does Component receive for x and why?",
+    "options": ["x is 1, later properties override earlier ones in spread", "x is 5, spread overwrites explicit props", "x is undefined, duplicate keys throw error", "x is both 1 and 5, stored as array"],
+    "correctIndex": 0,
+    "explanation": "Spread and explicit props are processed left-to-right; x={1} comes after {...props}, so it overrides props.x with 1.",
+    "difficulty": "Medium",
+    "tags": ["spread", "jsx", "props"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JSX Syntax",
+    "question": "Why does <MyComponent className='text' class='text' /> only use one of the two attributes?",
+    "options": ["JSX requires className for HTML, class attribute is ignored", "class is a reserved word, className is the JSX equivalent", "Both are passed to React, but the browser only sees className", "React merges them into a single className property"],
+    "correctIndex": 1,
+    "explanation": "JSX maps class to className because class is a reserved word in JavaScript; the React element receives className, not class.",
+    "difficulty": "Medium",
+    "tags": ["jsx", "classname", "reserved"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JSX Syntax",
+    "question": "Given const Comp = props => <div>{props.x}</div>; <Comp x={1 + 2} />, what is rendered and when is the arithmetic evaluated?",
+    "options": ["Renders 3, evaluated at JSX creation time", "Renders '1 + 2', expression is treated as string", "Renders undefined, arithmetic in JSX is not allowed", "Renders 3, evaluated during component function call"],
+    "correctIndex": 0,
+    "explanation": "1 + 2 is evaluated immediately when the JSX is created (before Comp is called), so props.x is 3, not an expression.",
+    "difficulty": "Medium",
+    "tags": ["jsx", "expression", "evaluation"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JSX Syntax",
+    "question": "Why might <Button {...{ onClick: handler, disabled: true }} /> cause different behavior than <Button onClick={handler} disabled={true} />?",
+    "options": ["Spread object evaluation order can affect how props merge", "Both are identical, spread and explicit props produce the same result", "Spread creates a shallow copy, explicit props reference the original", "Objects in spread are always immutable, explicit props are mutable"],
+    "correctIndex": 1,
+    "explanation": "Both patterns are functionally identical; spread object syntax is just another way to pass props, evaluated before the JSX element is created.",
+    "difficulty": "Medium-Hard",
+    "tags": ["spread", "jsx", "syntax"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JSX Syntax",
+    "question": "Given <Component key='1' ref={myRef} />, why can't the component access key and ref like normal props?",
+    "options": ["key and ref are special props that React reserves, not passed to children", "key is passed but ref requires forwardRef", "Both are accessible via props.key and props.ref normally", "They are added to a special reserved object"],
+    "correctIndex": 0,
+    "explanation": "key and ref are reserved by React for internal use; they do not appear in props, so Component cannot access them without forwardRef for ref.",
+    "difficulty": "Medium",
+    "tags": ["key", "ref", "reserved"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JSX Syntax",
+    "question": "Why does <Component foo-bar='baz' /> set the attribute differently on a DOM element vs. a React component?",
+    "options": ["DOM elements receive foo-bar as-is, React components receive fooBar in props", "React always passes attributes as-is, DOM elements convert to camelCase", "Hyphenated attributes are invalid in both DOM and React", "React components must use fooBar, DOM elements must use foo-bar"],
+    "correctIndex": 0,
+    "explanation": "React components receive string props exactly as written; foo-bar stays foo-bar in props but the DOM normalizes it (though non-standard attributes are preserved).",
+    "difficulty": "Medium-Hard",
+    "tags": ["jsx", "attributes", "dom"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JSX Syntax",
+    "question": "Given <div>{condition ? <A /> : <B />}</div>, what is the key difference compared to <div>{condition && <A />}</div>?",
+    "options": ["Ternary renders A or B, && renders A or nothing", "&& is faster than ternary", "Both render identically, choice is stylistic", "Ternary renders both A and B, && renders conditionally"],
+    "correctIndex": 0,
+    "explanation": "&&  renders A or false/nothing (falsy renders as nothing), while ternary explicitly returns A or B, making intent clearer and avoiding falsy-text bugs.",
+    "difficulty": "Medium",
+    "tags": ["conditional", "jsx", "operator"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JSX Syntax",
+    "question": "Why might <Component data={{ x: 1 }} /> cause unnecessary re-renders if data is not memoized at the parent level?",
+    "options": ["New object created on each render, props.data reference changes", "Objects in JSX are cached automatically", "Object content matters, not reference, so re-renders are correct", "Memoization only works for functions, not objects"],
+    "correctIndex": 0,
+    "explanation": "{{ x: 1 }} creates a new object on every render; even if Component content is identical, the props.data reference differs, breaking memo() or shallow equality.",
+    "difficulty": "Medium",
+    "tags": ["jsx", "object", "reference"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JSX Syntax",
+    "question": "Given <Component x={1} {...props} y={2} />, if props = { x: 5, y: 5 }, what props does Component receive?",
+    "options": ["x=1, y=2, explicit properties override spread", "x=5, y=5, spread overwrites explicit properties", "x=1, y=2, then x=5, y=5 merged together", "Error, duplicate property keys in JSX"],
+    "correctIndex": 0,
+    "explanation": "Props are merged left-to-right: x=1 is set, then {...props} sets x=5 but y=2 is set after, so final result is x=1, y=2.",
+    "difficulty": "Medium-Hard",
+    "tags": ["jsx", "spread", "order"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "JSX Syntax",
+    "question": "Why does <MyComponent children={<div>Text</div>} > <div>Text</div> </MyComponent> render children twice in some cases?",
+    "options": ["JSX children prop and content are merged, both render", "Explicit children prop overrides tag content", "Tag content is ignored if children prop is provided", "React renders the tag content and ignores the prop"],
+    "correctIndex": 0,
+    "explanation": "Both the children prop and the JSX content between tags become children; React may merge them into an array, causing duplication if not handled.",
+    "difficulty": "Medium-Hard",
+    "tags": ["children", "jsx", "props"]
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Testing Strategies",
+    "question": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\n\n@app.get(\"/users/{user_id}\")\ndef get_user(user_id: int):\n    return {\"id\": user_id, \"name\": \"John\"}\n\nclient = TestClient(app)\n\ndef test_get_user():\n    response = client.get(\"/users/1\")\n    assert response.status_code == 200\n    assert response.json() == {\"id\": 1, \"name\": \"John\"}\n\nWhat does TestClient do differently than httpx.AsyncClient?",
+    "options": [
+      "Runs FastAPI app synchronously; no actual server",
+      "Starts real server; makes HTTP requests",
+      "Converts async code to sync automatically",
+      "Uses in-memory database"
+    ],
+    "correctIndex": 0,
+    "explanation": "TestClient wraps the app and executes routes directly in process; no server startup/network latency; it handles async-to-sync conversion.",
+    "difficulty": "Medium",
+    "tags": ["testing", "testclient", "unit-tests"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Testing Strategies",
+    "question": "from fastapi import FastAPI, Depends\nfrom fastapi.testclient import TestClient\nfrom unittest.mock import patch\n\napp = FastAPI()\n\ndef get_db():\n    return db_connection\n\n@app.get(\"/users/{user_id}\")\ndef get_user(user_id: int, db = Depends(get_db)):\n    return db.query(User).filter(User.id == user_id).first()\n\nclient = TestClient(app)\n\ndef test_get_user():\n    with patch('main.get_db') as mock_db:\n        mock_db.return_value.query.return_value.filter.return_value.first.return_value = {\"id\": 1, \"name\": \"John\"}\n        response = client.get(\"/users/1\")\n        assert response.status_code == 200\n\nDoes this mock approach work?",
+    "options": [
+      "Yes; mocks get_db dependency correctly",
+      "No; patch location may be wrong",
+      "No; Depends() ignores mocks",
+      "Only works with async functions"
+    ],
+    "correctIndex": 1,
+    "explanation": "patch('main.get_db') works only if imported from main; use app.dependency_overrides to override Depends() dependencies in FastAPI tests.",
+    "difficulty": "Medium-Hard",
+    "tags": ["mocking", "dependencies", "testing"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Testing Strategies",
+    "question": "from fastapi import FastAPI, Depends\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\n\ndef get_db():\n    return real_db_connection\n\n@app.get(\"/users/{user_id}\")\ndef get_user(user_id: int, db = Depends(get_db)):\n    return db.query(User).filter(User.id == user_id).first()\n\nclient = TestClient(app)\n\n@pytest.fixture\ndef override_get_db():\n    mock_db = MagicMock()\n    app.dependency_overrides[get_db] = lambda: mock_db\n    yield mock_db\n    app.dependency_overrides.clear()\n\ndef test_get_user(override_get_db):\n    override_get_db.query.return_value.filter.return_value.first.return_value = {\"id\": 1, \"name\": \"John\"}\n    response = client.get(\"/users/1\")\n    assert response.status_code == 200\n\nWhat is correct about this approach?",
+    "options": [
+      "Overrides dependencies correctly; cleans up after test",
+      "Dependency override not applied to TestClient",
+      "MagicMock doesn't support chained method calls",
+      "fixture should not clear overrides"
+    ],
+    "correctIndex": 0,
+    "explanation": "app.dependency_overrides[get_db] = lambda: mock_db properly injects mock; yielding and clearing is correct fixture cleanup.",
+    "difficulty": "Medium",
+    "tags": ["dependency-override", "fixtures", "mocking"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Testing Strategies",
+    "question": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\nclass User(BaseModel):\n    name: str\n    email: str\n\n@app.post(\"/users\")\ndef create_user(user: User):\n    if User.objects.filter(email=user.email).exists():\n        return {\"error\": \"Email exists\"}\n    return {\"id\": 1, \"name\": user.name}\n\nclient = TestClient(app)\n\ndef test_create_duplicate_email():\n    response = client.post(\"/users\", json={\"name\": \"John\", \"email\": \"john@example.com\"})\n    # Should fail because email exists\n\nHow do you set up test data for this test?",
+    "options": [
+      "Use pytest fixture with in-memory database",
+      "Seed real database before test",
+      "Create dummy User.objects entry",
+      "Depends on testing framework configuration"
+    ],
+    "correctIndex": 0,
+    "explanation": "Fixtures manage test data lifecycle; use pytest.fixture with conftest.py to seed in-memory DB before test, clean up after.",
+    "difficulty": "Medium",
+    "tags": ["test-fixtures", "test-data", "setup-teardown"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Testing Strategies",
+    "question": "from fastapi import FastAPI, status\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\n\n@app.post(\"/login\")\ndef login(username: str, password: str):\n    if username == \"admin\" and password == \"secret\":\n        return {\"access_token\": \"abc123\", \"token_type\": \"bearer\"}\n    return {\"error\": \"Invalid credentials\"}\n\nclient = TestClient(app)\n\ndef test_login_success():\n    response = client.post(\"/login\", data={\"username\": \"admin\", \"password\": \"secret\"})\n    assert response.status_code == 200\n\ndef test_login_invalid():\n    response = client.post(\"/login\", data={\"username\": \"admin\", \"password\": \"wrong\"})\n    assert response.status_code == 401\n\nWhat is the issue with test_login_invalid?",
+    "options": [
+      "Response status is 200; test expects 401 but doesn't return it",
+      "Password hardcoded; should use parameterized test",
+      "data parameter incorrect; should use json",
+      "TestClient doesn't support status code assertions"
+    ],
+    "correctIndex": 0,
+    "explanation": "The endpoint returns {\"error\": \"Invalid credentials\"} with status 200 by default; test expects 401 but endpoint doesn't raise HTTPException.",
+    "difficulty": "Medium",
+    "tags": ["assertions", "status-codes", "test-expectations"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Testing Strategies",
+    "question": "from fastapi import FastAPI, Depends\nfrom fastapi.security import HTTPBearer, HTTPAuthCredentials\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\nsecurity = HTTPBearer()\n\n@app.get(\"/protected\")\ndef protected_route(credentials: HTTPAuthCredentials = Depends(security)):\n    return {\"message\": \"secret\"}\n\nclient = TestClient(app)\n\ndef test_protected_no_token():\n    response = client.get(\"/protected\")\n    assert response.status_code == 403\n\ndef test_protected_with_token():\n    response = client.get(\"/protected\", headers={\"Authorization\": \"Bearer token123\"})\n    assert response.status_code == 200\n\nDoes test_protected_with_token verify anything about token validity?",
+    "options": [
+      "Yes; HTTPBearer validates token format",
+      "No; HTTPBearer only checks header presence, not validity",
+      "Depends on JWT verification logic",
+      "Token is checked via status code"
+    ],
+    "correctIndex": 1,
+    "explanation": "HTTPBearer checks only that Bearer header exists; actual validation (JWT signature, expiry) happens in decode logic; test needs to mock or verify that.",
+    "difficulty": "Medium-Hard",
+    "tags": ["authentication-testing", "security", "mocking"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Testing Strategies",
+    "question": "import pytest\nfrom fastapi import FastAPI\nfrom fastapi.testclient import TestClient\n\napp = FastAPI()\n\n@app.get(\"/items/{item_id}\")\ndef get_item(item_id: int):\n    return {\"item_id\": item_id, \"value\": item_id * 10}\n\nclient = TestClient(app)\n\n@pytest.mark.parametrize(\"item_id,expected\", [(1, 10), (5, 50), (10, 100)])\ndef test_get_item(item_id, expected):\n    response = client.get(f\"/items/{item_id}\")\n    assert response.json()[\"value\"] == expected\n\nWhat does @pytest.mark.parametrize accomplish?",
+    "options": [
+      "Runs single test function 3 times with different inputs",
+      "Runs 3 separate test functions",
+      "Generates test report with parameters",
+      "Parameterizes the FastAPI endpoint"
+    ],
+    "correctIndex": 0,
+    "explanation": "@pytest.mark.parametrize creates multiple test runs from single test definition; DRY principle for similar test cases.",
+    "difficulty": "Medium",
+    "tags": ["parametrize", "test-repetition", "dry-principle"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Testing Strategies",
+    "question": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\nfrom unittest.mock import MagicMock, patch\n\napp = FastAPI()\n\n@app.get(\"/external-data\")\ndef get_external_data():\n    response = requests.get(\"https://api.example.com/data\")\n    return response.json()\n\nclient = TestClient(app)\n\ndef test_external_call():\n    with patch('requests.get') as mock_get:\n        mock_response = MagicMock()\n        mock_response.json.return_value = {\"data\": \"mocked\"}\n        mock_get.return_value = mock_response\n        \n        response = client.get(\"/external-data\")\n        assert response.json() == {\"data\": \"mocked\"}\n\nWhy is the patch location important?",
+    "options": [
+      "Must patch where 'requests' is imported, not requests module itself",
+      "Module path irrelevant; requests is global",
+      "Patch location determines test isolation",
+      "Must patch requests.get globally"
+    ],
+    "correctIndex": 0,
+    "explanation": "patch('requests.get') globally patches; patch('module_name.requests.get') patches the import where endpoint uses it; latter prevents affecting other tests.",
+    "difficulty": "Medium-Hard",
+    "tags": ["mocking", "patch-location", "test-isolation"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Testing Strategies",
+    "question": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\nimport time\n\napp = FastAPI()\n\n@app.get(\"/slow\")\ndef slow_endpoint():\n    time.sleep(5)\n    return {\"status\": \"done\"}\n\nclient = TestClient(app)\n\ndef test_slow_endpoint():\n    start = time.time()\n    response = client.get(\"/slow\")\n    elapsed = time.time() - start\n    assert response.status_code == 200\n    assert elapsed > 4.5  # Verify actual 5s delay\n\nWhat is the issue with testing time-based behavior?",
+    "options": [
+      "Time-based assertions make tests flaky",
+      "TestClient doesn't measure elapsed time",
+      "sleep() doesn't work in tests",
+      "No issue; timing is reliable"
+    ],
+    "correctIndex": 0,
+    "explanation": "Elapsed time varies due to system load; use mock.patch('time.sleep') or freeze_time to control time, avoiding flaky tests.",
+    "difficulty": "Medium",
+    "tags": ["flaky-tests", "time-testing", "mocking"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Testing Strategies",
+    "question": "from fastapi import FastAPI\nfrom fastapi.testclient import TestClient\nfrom sqlalchemy.orm import Session\n\napp = FastAPI()\n\ndef get_db():\n    db = SessionLocal()\n    try:\n        yield db\n    finally:\n        db.close()\n\n@app.post(\"/users\")\ndef create_user(user_data: dict, db: Session = Depends(get_db)):\n    db.add(User(**user_data))\n    db.commit()\n    return {\"status\": \"created\"}\n\nclient = TestClient(app)\n\ndef test_create_user():\n    response = client.post(\"/users\", json={\"name\": \"John\", \"email\": \"john@example.com\"})\n    assert response.status_code == 200\n    # Verify user actually created?\n\nHow do you verify the user was actually created in the database?",
+    "options": [
+      "Query database directly in test after POST",
+      "Check response contains user ID",
+      "Mock database; verify mock was called",
+      "Use dependency override to verify database calls"
+    ],
+    "correctIndex": 0,
+    "explanation": "Query database directly: assert db.query(User).filter(User.email == ...).first() is not None; verifies persistence, not just response.",
+    "difficulty": "Medium",
+    "tags": ["integration-tests", "database-testing", "assertions"]
+  }
+]

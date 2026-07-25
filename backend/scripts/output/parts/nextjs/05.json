@@ -1,0 +1,112 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "Static Site Generation",
+    "question": "You use getStaticProps with revalidate: 3600 (1 hour). A user views the page at 10:00 AM. What time does the page re-generate?",
+    "options": ["10:05 AM (5 minutes later as per ISR interval)", "11:00 AM (1 hour later)", "11:01 AM (when the next user accesses after 1 hour)", "Only on demand if you call revalidatePath()"],
+    "correctIndex": 2,
+    "explanation": "ISR revalidate is on-demand: the cached page serves until 1 hour passes and a new request arrives, triggering background regeneration.",
+    "difficulty": "Medium-Hard",
+    "tags": ["isr", "revalidate", "static-generation"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Static Site Generation",
+    "question": "You define getStaticProps with fallback: 'blocking' and getStaticPaths returns paths for 100 products. A user requests a product ID not in getStaticPaths. What happens?",
+    "options": ["404 is returned immediately", "Next.js generates the page on-demand and serves it after generation", "A skeleton/fallback page renders while background generation completes", "Build fails because all paths must be enumerated in getStaticPaths"],
+    "correctIndex": 1,
+    "explanation": "fallback: 'blocking' generates missing pages on first request and caches the result for future requests.",
+    "difficulty": "Medium",
+    "tags": ["getstaticpaths", "fallback", "static-generation"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Static Site Generation",
+    "question": "You call an external API in getStaticProps that has a 99.9% uptime SLA. If the API is down during build, what happens?",
+    "options": ["Build completes with stale data from cache", "Build fails; no page is generated", "getStaticProps throws; build falls back to SSR", "Build succeeds but the page is marked as failed until next revalidate"],
+    "correctIndex": 1,
+    "explanation": "If getStaticProps throws during build, page generation fails; no HTML is created unless you handle the error.",
+    "difficulty": "Medium-Hard",
+    "tags": ["getstaticprops", "error-handling", "build-time"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Static Site Generation",
+    "question": "You have a blog with 100,000 posts. getStaticPaths returns all 100k paths. What's the build consequence?",
+    "options": ["Build time doubles for each 10k paths; ~100 paths per second", "Build time grows linearly; 100k pages means 100k renders (potentially hours)", "Next.js uses parallel rendering; time is constant", "Build skips static generation and uses ISR instead"],
+    "correctIndex": 1,
+    "explanation": "Each path in getStaticPaths generates a static page at build time; 100k paths means 100k page renders, which is slow.",
+    "difficulty": "Medium",
+    "tags": ["getstaticpaths", "build-time", "scalability"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Static Site Generation",
+    "question": "You deploy a page with getStaticProps that fetches from a private database. The .next/server/pages build folder is deployed to production. Is the database query visible in the output?",
+    "options": ["No; getStaticProps runs at build, not runtime", "Yes; query strings are embedded in static HTML", "Yes, if the database URL is hardcoded in getStaticProps", "No; Next.js strips server code from build artifacts"],
+    "correctIndex": 3,
+    "explanation": "getStaticProps code does not ship to production; only props are serialized into the static HTML, keeping server logic private.",
+    "difficulty": "Medium-Hard",
+    "tags": ["getstaticprops", "security", "build-artifacts"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Static Site Generation",
+    "question": "You want to generate static pages for the top 1,000 products on build, then generate others on-demand. How do you configure getStaticPaths?",
+    "options": ["Return fallback: 'blocking' with only 1,000 paths", "Return paths for 1,000 products and fallback: true", "Return paths for 1,000 products and fallback: 'blocking'", "Define getStaticProps without getStaticPaths for on-demand generation"],
+    "correctIndex": 2,
+    "explanation": "fallback: 'blocking' generates missing paths on-demand after the build; fallback: true shows a skeleton.",
+    "difficulty": "Medium",
+    "tags": ["getstaticpaths", "fallback", "on-demand-generation"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Static Site Generation",
+    "question": "Your static page is built at 10:00 AM with a timestamp from getStaticProps. Users see the old timestamp throughout the day. At 11:00 PM with revalidate: 60, does the timestamp update?",
+    "options": ["Yes; revalidate: 60 means every 60 seconds", "No; timestamp is baked into the static HTML at build time", "Only if a user visits after 11:00 PM (60 minutes later)", "Only on the next deployment"],
+    "correctIndex": 2,
+    "explanation": "ISR regenerates in the background after the revalidate window; the next visitor triggers generation and sees the fresh timestamp.",
+    "difficulty": "Medium-Hard",
+    "tags": ["isr", "revalidate", "static-content"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Static Site Generation",
+    "question": "getStaticPaths returns { paths: [], fallback: 'blocking' }. No paths are pre-generated. When the app starts, what happens?",
+    "options": ["Deployment fails; at least one path must be provided", "App deploys; all pages generate on-demand as users access them", "A default index page is generated; others use fallback", "getStaticProps is skipped; pages fall back to SSR"],
+    "correctIndex": 1,
+    "explanation": "Empty paths with fallback: 'blocking' is valid; pages are generated on-demand when first accessed.",
+    "difficulty": "Medium",
+    "tags": ["getstaticpaths", "fallback", "on-demand-generation"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Static Site Generation",
+    "question": "You call process.env.SECRET_API_KEY in getStaticProps. It's set in .env.local. Is it exposed in the built static HTML?",
+    "options": ["No; getStaticProps runs at build, not runtime", "Yes; props contain the API key", "No; Next.js masks env vars in production", "Only if explicitly passed to props"],
+    "correctIndex": 3,
+    "explanation": "getStaticProps code doesn't ship, but if you pass process.env.SECRET_API_KEY in props, it's embedded in the HTML.",
+    "difficulty": "Medium-Hard",
+    "tags": ["getstaticprops", "security", "environment-variables"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Static Site Generation",
+    "question": "You deploy a page with getStaticProps, then realize you forgot to regenerate after updating the database. What's the fastest fix?",
+    "options": ["Redeploy to trigger a new build", "Call revalidatePath() or revalidateTag() from an API endpoint", "Wait for the ISR revalidate interval to pass", "Edit the HTML file in .next/server manually"],
+    "correctIndex": 1,
+    "explanation": "On-demand revalidation via revalidatePath (Next.js 12.2+) regenerates specific pages without a full redeploy.",
+    "difficulty": "Medium-Hard",
+    "tags": ["isr", "on-demand-revalidation", "regeneration"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Static Site Generation",
+    "question": "Your e-commerce site has 50,000 products with getStaticProps. After deployment, users report stale prices for 2 hours. What's the issue?",
+    "options": ["revalidate: 7200 is too long; reduce to 300", "Build time was slow; revalidation hasn't started yet", "ISR is waiting for the next user request; background generation hasn't run", "Prices require real-time updates; SSR is needed instead"],
+    "correctIndex": 2,
+    "explanation": "ISR waits for a user request after the revalidate window; no automatic background regeneration happens without a trigger.",
+    "difficulty": "Medium-Hard",
+    "tags": ["isr", "revalidate", "real-time-data"]
+  }
+]

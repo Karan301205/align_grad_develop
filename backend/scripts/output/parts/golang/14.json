@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Go Architecture",
+    "question": "package main\ntype Reader interface { Read(p []byte) (n int, err error) }\ntype Writer interface { Write(p []byte) (n int, err error) }\ntype ReadWriter interface { Reader; Writer }\n\nHow many methods does ReadWriter have?",
+    "options": ["2", "1", "3", "compile error"],
+    "correctIndex": 0,
+    "explanation": "ReadWriter embeds Reader and Writer; has 2 methods: Read and Write.",
+    "difficulty": "Medium",
+    "tags": ["interfaces", "embedding"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Architecture",
+    "question": "package main\ntype Logger interface { Log(string) }\ntype DB interface { Query(string) error }\ntype Service struct { *DB; Logger }\n\nCan Service satisfy both DB and Logger?",
+    "options": ["compile error", "yes", "no, named fields", "runtime error"],
+    "correctIndex": 0,
+    "explanation": "Embedding pointer to interface is invalid syntax in Go.",
+    "difficulty": "Medium-Hard",
+    "tags": ["interfaces", "embedding", "pointers"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Architecture",
+    "question": "package main\ntype Handler interface { Handle(req string) string }\nfunc Process(h Handler, req string) string { return h.Handle(req) }\n\nDesign principle: is this dependency injection?",
+    "options": ["yes, invert dependency", "no, tight coupling", "partial", "static"],
+    "correctIndex": 0,
+    "explanation": "Process depends on Handler interface, not concrete type; classic DI pattern.",
+    "difficulty": "Medium",
+    "tags": ["architecture", "design-patterns", "DI"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Architecture",
+    "question": "Comparing package organization: cmd/app vs app/main vs main package. Which is idiomatic?",
+    "options": ["cmd/app/main.go", "app/main.go", "main.go root", "lib/app/cmd"],
+    "correctIndex": 0,
+    "explanation": "Go convention: cmd/ directory for executables, lib/package for libraries.",
+    "difficulty": "Medium",
+    "tags": ["architecture", "project-layout"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Architecture",
+    "question": "package db\nvar pool *sql.DB\nfunc Init(dsn string) error { var err error; pool, err = sql.Open(...); return err }\nfunc Query(q string) (*sql.Rows, error) { return pool.Query(q) }\n\nWhat's the concurrency risk?",
+    "options": ["data race on pool", "nil dereference", "deadlock", "no risk"],
+    "correctIndex": 0,
+    "explanation": "Global pool variable unsynchronized; concurrent Init/Query may race.",
+    "difficulty": "Medium-Hard",
+    "tags": ["concurrency", "global-state", "architecture"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Architecture",
+    "question": "package calc\nfunc Add(a, b int) int { return a + b }\npackage main\nimport \"calc\"\nfunc main() { calc.add(1, 2) }\n\nCompile result?",
+    "options": ["undefined calc.add", "works", "private access error", "import error"],
+    "correctIndex": 0,
+    "explanation": "Exported functions start with capital letter; calc.add not exported.",
+    "difficulty": "Medium",
+    "tags": ["packages", "exports"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Architecture",
+    "question": "package config\ntype Config struct { db string; api string }\nfunc New() *Config { return &Config{db: \"localhost\"} }\n\nHow to provide api via constructor?",
+    "options": ["Config{db, api string}", "option pattern", "public fields", "setters"],
+    "correctIndex": 1,
+    "explanation": "Option pattern (Config.WithAPI()) is idiomatic Go for flexible constructors.",
+    "difficulty": "Medium-Hard",
+    "tags": ["architecture", "constructors", "patterns"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Architecture",
+    "question": "package api\nimport \"encoding/json\"\ntype User struct { Name string `json:\"name\"` }\n\nWhat's the tag purpose?",
+    "options": ["JSON field mapping", "metadata", "validation", "documentation"],
+    "correctIndex": 0,
+    "explanation": "json tag controls JSON marshaling/unmarshaling field names.",
+    "difficulty": "Medium",
+    "tags": ["tags", "serialization"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Architecture",
+    "question": "package main\nvar (\n  logger = log.New(os.Stdout, \"APP: \", 0)\n  db *sql.DB\n)\nfunc init() { db, _ = sql.Open(\"postgres\", dsn) }\nfunc main() { logger.Println(\"started\") }\n\nDesign issue?",
+    "options": ["init() for state is risky", "package-level vars ok", "no issues", "missing defer close"],
+    "correctIndex": 0,
+    "explanation": "init() for setup is hard to test; better to use constructor/dependency injection.",
+    "difficulty": "Medium-Hard",
+    "tags": ["architecture", "init", "testing"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Architecture",
+    "question": "package main\ntype Server struct { handler http.Handler }\nfunc (s *Server) Start(port string) error { return http.ListenAndServe(\":\" + port, s.handler) }\n\nWhat's the architectural pattern?",
+    "options": ["dependency injection", "factory", "singleton", "observer"],
+    "correctIndex": 0,
+    "explanation": "Server receives handler dependency; decoupled from handler creation.",
+    "difficulty": "Medium",
+    "tags": ["architecture", "DI", "patterns"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "Linking Strategies",
+    "question": "A link has `<a href='https://example.com' target='_blank' rel='noopener'>`. Which security vulnerability does rel='noopener' prevent?",
+    "options": ["prevents the new window from accessing window.opener and navigating the original page", "prevents the new page from reading cookies from the original domain", "prevents cross-origin requests from the new window", "prevents the new window from closing the original tab"],
+    "correctIndex": 0,
+    "explanation": "Without `rel='noopener'`, the new window retains a reference to `window.opener`, allowing the new page to navigate or manipulate the original window, creating a security risk.",
+    "difficulty": "Medium-Hard",
+    "tags": ["target-blank", "security", "rel-attribute"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Linking Strategies",
+    "question": "A site uses `<a href='../images/photo.jpg'>Download</a>` to link to an image. When clicked, what happens?",
+    "options": ["the image is downloaded to the user's device", "the image is displayed in a new page or tab", "the browser navigates to the image url like any link", "behavior depends on whether the server sends content-disposition header"],
+    "correctIndex": 2,
+    "explanation": "An anchor tag navigates to the URL; whether the image is displayed or downloaded depends on the server's Content-Disposition header and the browser's file-handling rules.",
+    "difficulty": "Medium",
+    "tags": ["anchor-navigation", "http-headers"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Linking Strategies",
+    "question": "A link uses `<a href='page.php?id=5&name=test'>`. Why might a database lookup fail?",
+    "options": ["url parameters must be separated by semicolons, not ampersands", "php does not parse query strings in href attributes", "the ampersand should be escaped as &amp; in html", "the php file cannot receive multiple parameters in url"],
+    "correctIndex": 2,
+    "explanation": "In HTML, `&` must be escaped as `&amp;` to be valid markup; some parsers may misinterpret unescaped `&` as the start of an entity reference.",
+    "difficulty": "Medium",
+    "tags": ["url-parameters", "entity-escaping"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Linking Strategies",
+    "question": "A page uses `<link rel='canonical' href='https://example.com/page'>` pointing to itself. Why is this redundant?",
+    "options": ["canonical should point to a different version of the page, not itself", "canonical links are ignored by search engines when pointing to the same url", "search engines already treat the current page as canonical", "having any canonical tag makes pointing to self unnecessary"],
+    "correctIndex": 0,
+    "explanation": "The canonical link is for indicating the preferred version when duplicate content exists; self-referencing is redundant since the page is inherently canonical.",
+    "difficulty": "Medium",
+    "tags": ["canonical-link", "seo", "duplicate-content"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Linking Strategies",
+    "question": "Why might `<a href='#top'>Back to Top</a>` not work if the page has no `<a name='top'>` or `<div id='top'>`?",
+    "options": ["the anchor fragment is ignored if no matching id or name exists", "modern browsers create an implicit top anchor", "hash navigation only works for ids, not name attributes", "the link will cause a JavaScript error"],
+    "correctIndex": 0,
+    "explanation": "Fragment identifiers require a matching element with an `id` attribute or (in older HTML) a `name` attribute; if neither exists, the link is ineffective.",
+    "difficulty": "Medium",
+    "tags": ["anchor-fragments", "id-attribute", "name-attribute"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Linking Strategies",
+    "question": "A link uses `<a href='http://example.com' download>`. Which file is downloaded?",
+    "options": ["the entire webpage is downloaded as an html file", "the resource pointed to by the href is downloaded with its name", "the browser prompts for a filename and downloads the resource", "download attribute requires a filename, this link is invalid"],
+    "correctIndex": 1,
+    "explanation": "The `download` attribute (with or without a value) causes the browser to download the linked resource instead of navigating to it, using the provided name or the resource name.",
+    "difficulty": "Medium",
+    "tags": ["download-attribute"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Linking Strategies",
+    "question": "A page has `<link rel='prefetch' href='next-page.html'>`. Why might this not prefetch on slow networks?",
+    "options": ["prefetch requires a minimum bandwidth threshold before fetching", "prefetch is a hint, not a guarantee; browsers may ignore it based on connection speed or user settings", "prefetch only works for css and js, not html", "slow networks require rel='preload' instead"],
+    "correctIndex": 1,
+    "explanation": "The `prefetch` directive is a performance hint; browsers may choose not to prefetch on slow connections, low-battery devices, or when data-saving mode is enabled.",
+    "difficulty": "Medium-Hard",
+    "tags": ["prefetch", "resource-hints", "performance"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Linking Strategies",
+    "question": "Why should `<a href='data:text/html,<script>alert(1)</script>' target='_blank'>` be avoided?",
+    "options": ["data: urls are blocked by default in all browsers", "data urls with script content execute in the context of the current origin", "target=_blank is incompatible with data: urls", "data urls are deprecated and will be removed"],
+    "correctIndex": 1,
+    "explanation": "Data URLs with HTML/script content execute in the same origin context, potentially creating XSS vulnerabilities if user input is embedded.",
+    "difficulty": "Hard",
+    "tags": ["data-urls", "xss-vulnerability", "security"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Linking Strategies",
+    "question": "A site uses `<a href='//cdn.example.com/file.js'>` instead of `https://cdn.example.com/file.js`. What advantage does this provide?",
+    "options": ["protocol-relative urls use http if the page is http, https if the page is https", "protocol-relative urls load faster because they skip protocol negotiation", "protocol-relative urls bypass the browser cache", "there is no advantage; protocol-relative urls are obsolete"],
+    "correctIndex": 0,
+    "explanation": "Protocol-relative URLs (starting with `//`) automatically use the same protocol as the current page, allowing http/https compatibility without explicitly specifying the protocol.",
+    "difficulty": "Medium",
+    "tags": ["protocol-relative-urls", "http-https"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Linking Strategies",
+    "question": "A navigation link is marked as `<a href='/about' aria-current='page'>`. Which screen reader behavior changes?",
+    "options": ["the link is not announced as clickable; screen readers read it as static text", "screen readers announce the link with an indication that it is the current page", "the link is visually highlighted to match current page", "aria-current only works with role='navigation' parent"],
+    "correctIndex": 1,
+    "explanation": "The `aria-current='page'` attribute signals to assistive tech that this link represents the currently viewed page, allowing users to know their location in navigation.",
+    "difficulty": "Medium",
+    "tags": ["aria-current", "navigation", "a11y"]
+  }
+]

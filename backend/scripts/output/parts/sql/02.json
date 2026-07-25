@@ -1,0 +1,167 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Syntax",
+    "question": "Which of these queries will execute without syntax error?\nA: SELECT id, name FROM users WHERE age >= 18 AND age <= 65;\nB: SELECT id, name FROM users WHERE age BETWEEN 18 AND 65;\nC: SELECT id, name FROM users FILTER age >= 18;\nD: SELECT id, name FROM users WHERE age >= 18 OR AND age <= 65;",
+    "options": [
+      "Only A and B",
+      "Only A",
+      "Only C",
+      "All four queries"
+    ],
+    "correctIndex": 0,
+    "explanation": "A and B are valid; C uses FILTER (not SQL) and D has invalid AND after OR without a second condition.",
+    "difficulty": "Medium",
+    "tags": ["syntax", "where-clause", "between"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Syntax",
+    "question": "What is the output of this query?\nSELECT id, name FROM users WHERE id IN (SELECT user_id FROM orders WHERE total > 1000);",
+    "options": [
+      "User records where the associated order total exceeds 1000",
+      "Order records with total greater than 1000",
+      "All users and their order totals",
+      "A syntax error due to nested SELECT"
+    ],
+    "correctIndex": 0,
+    "explanation": "The subquery returns user_ids from orders with total > 1000, then the outer query selects users matching those IDs.",
+    "difficulty": "Medium",
+    "tags": ["subquery", "in-clause", "nested-select"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Syntax",
+    "question": "What is the difference between these two queries?\nA: SELECT * FROM employees;\nB: SELECT id, name, salary, department FROM employees;\n\nAssume the table has exactly those four columns.",
+    "options": [
+      "No functional difference; B is more explicit",
+      "A returns all columns, B returns only four specific ones",
+      "B uses more memory than A",
+      "A includes hidden columns that B doesn't"
+    ],
+    "correctIndex": 0,
+    "explanation": "With exactly four columns, both return the same data; B is explicit but functionally identical to A.",
+    "difficulty": "Medium",
+    "tags": ["select-star", "explicit-columns"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Syntax",
+    "question": "What does this query return?\nSELECT name, COUNT(*) FROM employees GROUP BY name HAVING COUNT(*) > 1;",
+    "options": [
+      "All employee names and their counts, only where duplicate names exist",
+      "All employee names and total employee count",
+      "Counts of all employees grouped by name",
+      "An error because HAVING requires a WHERE clause"
+    ],
+    "correctIndex": 0,
+    "explanation": "GROUP BY groups by name, HAVING filters groups to only those with COUNT(*) > 1, returning duplicate names.",
+    "difficulty": "Medium",
+    "tags": ["group-by", "having", "aggregate"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Syntax",
+    "question": "What is the result of:\nSELECT 10 / 3 AS result;",
+    "options": [
+      "3.33333 (decimal division)",
+      "3 (integer division)",
+      "3.0 (float)",
+      "An error due to mixed types"
+    ],
+    "correctIndex": 1,
+    "explanation": "In SQL, integer division of 10 / 3 yields 3 (truncated), not a decimal; use CAST or FLOAT for decimal results.",
+    "difficulty": "Medium",
+    "tags": ["arithmetic", "integer-division"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Syntax",
+    "question": "What happens when you execute:\nSELECT CASE WHEN salary > 100000 THEN 'High' WHEN salary > 50000 THEN 'Medium' ELSE 'Low' END AS salary_band FROM employees;\n\nFor an employee with salary = 75000?",
+    "options": [
+      "Medium",
+      "High",
+      "Low",
+      "An error due to multiple WHEN clauses"
+    ],
+    "correctIndex": 0,
+    "explanation": "CASE evaluates WHEN conditions top-to-bottom; 75000 fails the first (> 100000) but matches the second (> 50000), returning Medium.",
+    "difficulty": "Medium",
+    "tags": ["case-when", "conditional"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Syntax",
+    "question": "What is the syntax error in this query?\nSELECT id, name FROM users LIMIT 10, 20;",
+    "options": [
+      "LIMIT offset,count is valid in MySQL but the comma syntax is non-standard",
+      "There is no syntax error",
+      "LIMIT must use OFFSET keyword in all databases",
+      "LIMIT cannot exceed result set size"
+    ],
+    "correctIndex": 0,
+    "explanation": "LIMIT 10, 20 is MySQL-specific syntax (skip 10, return 20); standard SQL uses LIMIT 20 OFFSET 10.",
+    "difficulty": "Medium-Hard",
+    "tags": ["limit", "offset", "portability"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Syntax",
+    "question": "What output is produced by:\nSELECT id, name FROM users WHERE name != 'John' AND status = 'active';",
+    "options": [
+      "Active users whose name is not John",
+      "All users except those named John",
+      "An error due to != operator",
+      "Active users whose name is null or not John"
+    ],
+    "correctIndex": 0,
+    "explanation": "!= (not equal) and AND are valid; the query filters for active users whose name is anything other than John.",
+    "difficulty": "Medium",
+    "tags": ["where-clause", "not-equal"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Syntax",
+    "question": "What does this query do?\nSELECT id, name, UPPER(name) AS name_upper FROM users ORDER BY UPPER(name);",
+    "options": [
+      "Returns names in uppercase and sorts by the uppercase version",
+      "Sorts by original name, displays uppercase separately",
+      "Returns an error because ORDER BY cannot use functions",
+      "Converts all names permanently to uppercase"
+    ],
+    "correctIndex": 0,
+    "explanation": "ORDER BY UPPER(name) sorts using the uppercase transformation; output shows original name and uppercase alias separately.",
+    "difficulty": "Medium",
+    "tags": ["string-function", "order-by"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Syntax",
+    "question": "What is the difference between UNION and UNION ALL?\nGiven: Query A returns 100 rows with duplicates, Query B returns 50 rows with duplicates, and they share 20 identical rows.",
+    "options": [
+      "UNION ALL returns 150 rows, UNION removes duplicates",
+      "UNION ALL returns 130 rows, UNION returns 150 rows",
+      "UNION removes all duplicates, UNION ALL keeps none",
+      "They are identical operators"
+    ],
+    "correctIndex": 0,
+    "explanation": "UNION ALL concatenates all rows (100+50=150), UNION removes duplicates across both sets.",
+    "difficulty": "Medium",
+    "tags": ["union", "set-operations"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Syntax",
+    "question": "What is the result of:\nSELECT CONCAT(first_name, ' ', last_name) AS full_name FROM users WHERE first_name IS NOT NULL AND last_name IS NOT NULL;",
+    "options": [
+      "Full names only for users with both first and last names",
+      "Full names for all users, with NULL for incomplete names",
+      "An error because CONCAT requires string literals",
+      "First and last names separated by space for all users"
+    ],
+    "correctIndex": 0,
+    "explanation": "CONCAT combines strings; the WHERE clause ensures both names are non-NULL, filtering out incomplete records.",
+    "difficulty": "Medium",
+    "tags": ["concat", "string-function", "null-check"]
+  }
+]

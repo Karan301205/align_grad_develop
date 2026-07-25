@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "FastAPI",
+    "subtopic": "API Documentation",
+    "question": "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\nclass User(BaseModel):\n    id: int\n    name: str\n    email: str\n\n@app.get(\"/users/{user_id}\", response_model=User)\ndef get_user(user_id: int):\n    \"\"\"Get a user by ID.\"\"\"\n    return db.query(User).filter(User.id == user_id).first()\n\nWhat does FastAPI automatically generate from this code?",
+    "options": [
+      "OpenAPI schema with request/response models",
+      "HTML docstring only; no machine-readable schema",
+      "SQL queries and database schema",
+      "Authentication documentation"
+    ],
+    "correctIndex": 0,
+    "explanation": "FastAPI inspects type hints and Pydantic models to generate OpenAPI 3.0 schema automatically; visit /docs for Swagger UI or /redoc for ReDoc.",
+    "difficulty": "Medium",
+    "tags": ["openapi", "documentation", "type-hints"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "API Documentation",
+    "question": "from fastapi import FastAPI, Query\nfrom pydantic import Field\n\napp = FastAPI()\n\n@app.get(\"/items/\")\ndef list_items(\n    skip: int = Query(0, ge=0, description=\"Skip N items\"),\n    limit: int = Query(10, le=100, description=\"Max items per page\")\n):\n    return {\"skip\": skip, \"limit\": limit}\n\nWhat validation and documentation does this generate?",
+    "options": [
+      "Swagger docs show descriptions; only Python validates constraints",
+      "OpenAPI schema includes min/max constraints and descriptions",
+      "Constraints enforced client-side",
+      "No documentation generated"
+    ],
+    "correctIndex": 1,
+    "explanation": "Query(ge=0, le=100) embeds validation constraints into OpenAPI schema; Swagger displays ranges, and FastAPI validates at runtime.",
+    "difficulty": "Medium",
+    "tags": ["validation", "query-parameters", "openapi-schema"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "API Documentation",
+    "question": "from fastapi import FastAPI\nfrom pydantic import BaseModel, Field\nfrom typing import Optional\n\napp = FastAPI()\n\nclass Product(BaseModel):\n    id: int\n    name: str = Field(..., min_length=1, max_length=100, description=\"Product name\")\n    price: float = Field(..., gt=0, description=\"Price in USD\")\n    tags: Optional[list[str]] = Field(None, description=\"Search tags\")\n\n@app.post(\"/products\", response_model=Product)\ndef create_product(product: Product):\n    return product\n\nWhen viewed in Swagger UI, what does the schema show for the 'tags' field?",
+    "options": [
+      "Array of strings, optional (nullable)",
+      "Array of strings, required",
+      "String, required (confuses list type)",
+      "Object, type unknown"
+    ],
+    "correctIndex": 0,
+    "explanation": "Optional[list[str]] with Field(None) shows as 'array of strings, nullable' in OpenAPI; default=None indicates optional field.",
+    "difficulty": "Medium",
+    "tags": ["pydantic", "openapi-schema", "optional-fields"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "API Documentation",
+    "question": "from fastapi import FastAPI, status\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\nclass User(BaseModel):\n    id: int\n    name: str\n\n@app.post(\"/users\", response_model=User, status_code=status.HTTP_201_CREATED)\ndef create_user(user_data: dict):\n    return {\"id\": 1, \"name\": user_data[\"name\"]}\n\n@app.get(\"/users/{user_id}\")\ndef get_user(user_id: int):\n    return {\"id\": user_id, \"name\": \"John\"}\n\nWhat HTTP status codes are documented in OpenAPI for get_user?",
+    "options": [
+      "200 (default); 404 not documented",
+      "200 (default); 404 requires explicit response_model",
+      "200 and 404 both documented automatically",
+      "None; status_code not specified"
+    ],
+    "correctIndex": 0,
+    "explanation": "FastAPI defaults to status 200; to document 404, use responses={404: {\"model\": ErrorDetail}} to add additional status codes to OpenAPI.",
+    "difficulty": "Medium",
+    "tags": ["status-codes", "openapi", "response-models"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "API Documentation",
+    "question": "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI(\n    title=\"My API\",\n    description=\"API for managing users\",\n    version=\"1.0.0\"\n)\n\nclass User(BaseModel):\n    \"\"\"Represents a user account.\"\"\"\n    id: int\n    name: str\n\n@app.get(\n    \"/users/{user_id}\",\n    summary=\"Get user by ID\",\n    tags=[\"users\"]\n)\ndef get_user(user_id: int):\n    \"\"\"Retrieve a single user.\n    \n    Returns user details if found.\n    \"\"\"\n    return {\"id\": user_id, \"name\": \"John\"}\n\nWhat appears in the OpenAPI schema?",
+    "options": [
+      "Endpoint summary, description, tags, model docstrings",
+      "Only endpoint docstring; tags ignored",
+      "Title and version only",
+      "Model docstring, no endpoint metadata"
+    ],
+    "correctIndex": 0,
+    "explanation": "All metadata (title, description, version, tags, summary, docstrings) populate OpenAPI schema; Swagger UI organizes by tags and displays summaries.",
+    "difficulty": "Medium",
+    "tags": ["openapi-metadata", "documentation", "swagger-ui"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "API Documentation",
+    "question": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom typing import Union\n\napp = FastAPI()\n\nclass SuccessResponse(BaseModel):\n    status: str = \"success\"\n    data: dict\n\nclass ErrorResponse(BaseModel):\n    status: str = \"error\"\n    message: str\n\n@app.get(\n    \"/process\",\n    responses={\n        200: {\"model\": SuccessResponse},\n        400: {\"model\": ErrorResponse, \"description\": \"Invalid input\"}\n    }\n)\ndef process(data: str):\n    if not data:\n        return {\"status\": \"error\", \"message\": \"Empty input\"}\n    return {\"status\": \"success\", \"data\": {}}\n\nWhat does Swagger UI show for this endpoint?",
+    "options": [
+      "Two response examples: 200 and 400 with proper models",
+      "Only 200 response; 400 ignored",
+      "Error response shown but 200 model not used",
+      "Swagger shows union type without branching"
+    ],
+    "correctIndex": 0,
+    "explanation": "responses dict documents multiple status codes and their models; Swagger displays both 200 and 400 examples separately with schema details.",
+    "difficulty": "Medium",
+    "tags": ["response-models", "error-responses", "openapi"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "API Documentation",
+    "question": "from fastapi import FastAPI, OpenAPI\nfrom fastapi.openapi.utils import get_openapi\n\napp = FastAPI()\n\ndef custom_openapi():\n    if not app.openapi_schema:\n        app.openapi_schema = get_openapi(\n            title=\"My API\",\n            version=\"1.0.0\",\n            routes=app.routes\n        )\n    return app.openapi_schema\n\napp.openapi = custom_openapi\n\nWhy would you customize the OpenAPI schema generation?",
+    "options": [
+      "Add custom authentication schemes, external docs, or modify paths",
+      "Improve Swagger UI performance",
+      "Remove endpoints from documentation",
+      "Validate incoming requests"
+    ],
+    "correctIndex": 0,
+    "explanation": "Custom openapi() function allows adding security schemes (OAuth2, API keys), external documentation, examples, or filtering endpoints from schema.",
+    "difficulty": "Medium",
+    "tags": ["openapi-customization", "schema-generation", "documentation"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "API Documentation",
+    "question": "from fastapi import FastAPI\nfrom pydantic import BaseModel, Field\n\napp = FastAPI()\n\nclass User(BaseModel):\n    id: int = Field(..., example=1)\n    name: str = Field(..., example=\"John Doe\")\n    email: str = Field(..., example=\"john@example.com\")\n\n@app.post(\"/users\", response_model=User)\ndef create_user(user: User):\n    return user\n\nWhen a user clicks 'Try it out' in Swagger UI, what values are pre-filled?",
+    "options": [
+      "Examples from Field(..., example=...)",
+      "Random generated values",
+      "Empty fields; user must enter data",
+      "Depends on Swagger version"
+    ],
+    "correctIndex": 0,
+    "explanation": "Field(example=...) populates OpenAPI schema with examples; Swagger uses these to pre-fill 'Try it out' form, helping users test endpoints.",
+    "difficulty": "Medium",
+    "tags": ["examples", "swagger-ui", "field-documentation"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "API Documentation",
+    "question": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom enum import Enum\n\nclass Color(str, Enum):\n    RED = \"red\"\n    GREEN = \"green\"\n    BLUE = \"blue\"\n\napp = FastAPI()\n\nclass Product(BaseModel):\n    name: str\n    color: Color\n\n@app.post(\"/products\", response_model=Product)\ndef create_product(product: Product):\n    return product\n\nHow does Swagger UI represent the 'color' field?",
+    "options": [
+      "Dropdown list with red, green, blue options",
+      "Text input field",
+      "Regex validation based on enum values",
+      "Hidden field"
+    ],
+    "correctIndex": 0,
+    "explanation": "Enum fields generate OpenAPI 'enum' constraint; Swagger renders as dropdown with predefined options, preventing invalid values.",
+    "difficulty": "Medium",
+    "tags": ["enums", "swagger-ui", "validation"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "API Documentation",
+    "question": "from fastapi import FastAPI\n\napp = FastAPI(\n    openapi_url=\"/api/v1/openapi.json\",\n    docs_url=\"/api/docs\",\n    redoc_url=\"/api/redoc\"\n)\n\n@app.get(\"/hello\")\ndef hello():\n    return {\"message\": \"world\"}\n\nWhere are the API docs accessible?",
+    "options": [
+      "\"/api/docs\" (Swagger) and \"/api/redoc\" (ReDoc)",
+      "\"/docs\" only; custom URLs not supported",
+      "\"/api/v1/openapi.json\" is the docs URL",
+      "Default /docs and /redoc remain active"
+    ],
+    "correctIndex": 0,
+    "explanation": "openapi_url defines schema location; docs_url and redoc_url override default /docs and /redoc paths; set to None to disable.",
+    "difficulty": "Medium",
+    "tags": ["docs-url", "configuration", "documentation"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Generics",
+    "question": "Given `function f<T extends { x: number }>(t: T): T { return t; }` — what is the return type of f({x: 5, y: 'a'})?",
+    "options": ["{x: number}", "{x: number, y: string}", "T", "error: y is not in constraint"],
+    "correctIndex": 1,
+    "explanation": "Generic T is inferred from the full argument type {x: 5, y: 'a'}; the constraint only requires x: number, so T includes y.",
+    "difficulty": "Medium",
+    "tags": ["generic-constraints", "type-inference", "generic-functions"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Generics",
+    "question": "Does `function f<T>(x: T): T[]` require specifying T, or is it inferred from x?",
+    "options": ["Must specify T", "T is always inferred", "Inferred if x is provided", "Error: ambiguous"],
+    "correctIndex": 2,
+    "explanation": "TypeScript infers type parameters from actual arguments; if x is provided, T is deduced from its type.",
+    "difficulty": "Medium",
+    "tags": ["generic-type-inference", "generic-functions", "type-parameter-inference"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Generics",
+    "question": "Given `type Box<T> = { value: T }; type StringBox = Box<string>;` — can you assign StringBox to Box<any>?",
+    "options": ["No, StringBox is too specific", "Yes, StringBox is assignable to Box<any>", "Yes, but requires casting", "No, Box<any> is not a supertype"],
+    "correctIndex": 1,
+    "explanation": "Box<string> is a subtype of Box<any>; assigning a more specific generic to a less specific one is safe.",
+    "difficulty": "Medium",
+    "tags": ["generic-variance", "subtyping", "type-compatibility"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Generics",
+    "question": "Does `interface I<T extends string | number> {}; type X = I<boolean>;` compile?",
+    "options": ["Yes, boolean is a valid type", "No, boolean does not satisfy the constraint", "Yes, with a warning", "No, constraints are not enforced"],
+    "correctIndex": 1,
+    "explanation": "Generic type parameters must satisfy constraints; boolean is not assignable to string|number, so X is a compile error.",
+    "difficulty": "Medium",
+    "tags": ["generic-constraints", "constraint-checking", "type-bounds"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Generics",
+    "question": "Given `function f<T, U extends T>(t: T, u: U): U { return u; }` — what is the constraint relationship?",
+    "options": ["U must be a subtype of T", "T must be a subtype of U", "U and T must be equal", "No relationship enforced"],
+    "correctIndex": 0,
+    "explanation": "U extends T means U is a subtype of T; every value of type U is also a valid T.",
+    "difficulty": "Medium",
+    "tags": ["generic-constraints", "constraint-ordering", "type-bounds"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Generics",
+    "question": "Does `type A<T> = T; type B = A<number>; const x: B = 5;` work?",
+    "options": ["No, A is a generic alias", "Yes, A<number> resolves to number", "Yes, but B is not type-safe", "No, type aliases require extends"],
+    "correctIndex": 1,
+    "explanation": "Generic type aliases are instantiated when applied; A<number> evaluates to number, making B assignable from 5.",
+    "difficulty": "Medium",
+    "tags": ["generic-type-aliases", "type-instantiation", "type-resolution"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Generics",
+    "question": "Given `class C<T> { m() { return new C<T>(); } }` — is T preserved through the constructor call?",
+    "options": ["No, the inner C<T> loses T", "Yes, T is inferred from the class context", "Yes, but only in strict mode", "No, requires explicit type parameter"],
+    "correctIndex": 1,
+    "explanation": "When instantiating a generic class, TypeScript infers type parameters from the enclosing class context.",
+    "difficulty": "Medium-Hard",
+    "tags": ["generic-classes", "type-inference", "class-type-parameters"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Generics",
+    "question": "Does `function f<T>(x: T, y: T): T { return x || y; }` compile if T is generic?",
+    "options": ["Yes, || is always valid", "No, || is not defined for all T", "Yes, but unsafely", "Yes, with a type guard"],
+    "correctIndex": 1,
+    "explanation": "The || operator expects boolean operands; T could be any type where || is undefined, causing a compile error.",
+    "difficulty": "Medium-Hard",
+    "tags": ["generic-constraints", "type-safety", "operator-overloading"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Generics",
+    "question": "Given `type First<T extends any[]> = T[0]; type X = First<[string, number]>;` — what is X?",
+    "options": ["any", "string", "string | number", "error: tuple is not any[]"],
+    "correctIndex": 1,
+    "explanation": "First extracts the first element; T is inferred as [string, number], so T[0] is string.",
+    "difficulty": "Medium",
+    "tags": ["generic-type-aliases", "tuple-indexing", "mapped-types"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Generics",
+    "question": "Can you use two generic type parameters with no constraint between them in a generic function?",
+    "options": ["No, generics must be related", "Yes, independent type parameters are valid", "Yes, but only with extends", "No, TypeScript requires ordering"],
+    "correctIndex": 1,
+    "explanation": "Type parameters are independent unless explicitly constrained; `<T, U>` allows T and U to be any types.",
+    "difficulty": "Medium",
+    "tags": ["multiple-type-parameters", "generic-functions", "type-parameter-independence"]
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "C",
+    "subtopic": "Data Types",
+    "question": "int x = 2147483647; x++;\nWhat is the value of x after overflow on a typical 32-bit system?",
+    "options": [
+      "Undefined behavior; value is unpredictable",
+      "2147483648",
+      "Wraps to -2147483648",
+      "Compiler error: overflow not allowed"
+    ],
+    "correctIndex": 0,
+    "explanation": "Signed integer overflow is undefined behavior in C; the result is not guaranteed and may differ across platforms.",
+    "difficulty": "Medium-Hard",
+    "tags": ["integer overflow", "undefined behavior", "signed integers"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Types",
+    "question": "unsigned int u = -1;\nprintf(\"%u\", u);\nWhat does this print on a typical system?",
+    "options": [
+      "4294967295 (or similar large number)",
+      "-1",
+      "Compiler error: cannot assign negative to unsigned",
+      "0"
+    ],
+    "correctIndex": 0,
+    "explanation": "The signed -1 is reinterpreted as the bit pattern of the maximum unsigned value (2^32-1).",
+    "difficulty": "Medium",
+    "tags": ["signed/unsigned", "type conversion", "bit patterns"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Types",
+    "question": "char c = 256;\nprintf(\"%d\", c);\nWhat is likely printed?",
+    "options": [
+      "0 (or -128 on signed char systems; truncated to 8 bits)",
+      "256",
+      "Compiler error: overflow in char",
+      "Garbage value"
+    ],
+    "correctIndex": 0,
+    "explanation": "256 is truncated to 8 bits; the resulting byte is 0x00, printed as 0.",
+    "difficulty": "Medium",
+    "tags": ["char overflow", "truncation", "type sizes"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Types",
+    "question": "float f = 0.1;\nif (f == 0.1) printf(\"equal\");\nelse printf(\"not equal\");\nWhat is likely printed?",
+    "options": [
+      "not equal (due to floating-point precision loss)",
+      "equal",
+      "Compiler error: cannot compare float literals",
+      "equal half the time depending on rounding mode"
+    ],
+    "correctIndex": 0,
+    "explanation": "0.1 cannot be exactly represented in binary floating-point; f may differ from 0.1 in the last bits.",
+    "difficulty": "Medium-Hard",
+    "tags": ["floating-point", "precision", "comparison pitfalls"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Types",
+    "question": "double d = 1.0 / 3.0;\nprintf(\"%.20f\", d);\nWhy is the result not exactly 0.33333... repeating?",
+    "options": [
+      "Binary floating-point cannot exactly represent 1/3; it stores the closest approximation",
+      "The printf format is limited to 20 digits",
+      "Division by 3 is undefined in floating-point",
+      "Floating-point arithmetic rounds toward zero"
+    ],
+    "correctIndex": 0,
+    "explanation": "1/3 in binary is a non-terminating fraction; double stores a finite approximation in its 53-bit mantissa.",
+    "difficulty": "Medium-Hard",
+    "tags": ["floating-point representation", "precision", "binary fractions"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Types",
+    "question": "size_t sz = -1;\nprintf(\"%zu\", sz);\nWhat is printed on a 64-bit system?",
+    "options": [
+      "18446744073709551615 (2^64 - 1)",
+      "-1",
+      "Compiler error: cannot assign signed to size_t",
+      "0"
+    ],
+    "correctIndex": 0,
+    "explanation": "size_t is unsigned; -1 wraps to the maximum value (all bits set).",
+    "difficulty": "Medium",
+    "tags": ["size_t", "unsigned types", "type conversions"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Types",
+    "question": "int a = 5;\nint *p = &a;\nint **pp = &p;\nWhat is sizeof(**pp)?",
+    "options": [
+      "sizeof(int)",
+      "sizeof(int *)",
+      "sizeof(int **)",
+      "Compiler error: invalid dereference"
+    ],
+    "correctIndex": 0,
+    "explanation": "**pp dereferences twice: pp to p, then p to the int a; sizeof gives the size of the int type.",
+    "difficulty": "Medium",
+    "tags": ["pointers", "pointer dereference", "sizeof"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Types",
+    "question": "struct S { char c; int i; };\nprintf(\"%zu\", sizeof(S));\nWhy is it not sizeof(char) + sizeof(int)?",
+    "options": [
+      "Padding/alignment: the char is padded to align the int on a 4-byte boundary",
+      "sizeof counts hidden metadata for the struct",
+      "The compiler adds a hidden terminator byte",
+      "int is actually 5 bytes in structs"
+    ],
+    "correctIndex": 0,
+    "explanation": "Structs are padded to align members on their natural boundaries; char may waste 3 bytes before the int.",
+    "difficulty": "Medium-Hard",
+    "tags": ["struct layout", "memory alignment", "padding"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Types",
+    "question": "union U { int i; char c; };\nU u; u.i = 0x12345678;\nprintf(\"%02x\", u.c);\nWhat is printed on a little-endian system?",
+    "options": [
+      "78 (the least significant byte of 0x12345678)",
+      "12 (the most significant byte)",
+      "Compiler error: cannot access union member after different assignment",
+      "00"
+    ],
+    "correctIndex": 0,
+    "explanation": "Union members share the same memory; on little-endian, the low byte 0x78 is stored first in the u.c address.",
+    "difficulty": "Medium-Hard",
+    "tags": ["unions", "endianness", "memory overlap"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Data Types",
+    "question": "int x = 5;\nconst int *p = &x;\nx = 10;\nprintf(\"%d\", *p);\nWhy does this work despite const?",
+    "options": [
+      "const int * means the pointer itself prevents modification through p, but x can be changed directly",
+      "const prevents all modifications to x",
+      "The const keyword is ignored for pointers",
+      "x is silently copied to a read-only location"
+    ],
+    "correctIndex": 0,
+    "explanation": "const int * restricts modification through the pointer, not the underlying variable; x can be modified via other means.",
+    "difficulty": "Medium",
+    "tags": ["const pointers", "type qualifiers", "pointer semantics"]
+  }
+]

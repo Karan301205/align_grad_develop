@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Orchestration",
+    "question": "In Kubernetes, a Pod with one container receives an OOMKilled status after the container consumes more memory than the `memory: 512Mi` limit. Restarting the container with the same limit causes it to be OOMKilled again immediately. What is the issue?",
+    "options": ["The application has a memory leak and will consume memory until killed", "The Pod's memory limit is too low for the application; increase the limit or reduce the application's memory usage", "Kubernetes cannot track memory usage in userspace; the limit is ineffective unless cgroups v2 is enabled", "The container is inheriting memory from the previous container; clear the cache with `sync; sysctl -w vm.drop_caches=3`"],
+    "correctIndex": 1,
+    "explanation": "OOMKilled indicates the application exceeded the allocated limit; if it happens immediately after restart with the same code, the limit is insufficient for that application; increase the limit or optimize the application to use less memory.",
+    "difficulty": "Medium",
+    "tags": ["kubernetes-limits", "memory-management", "container-orchestration"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Orchestration",
+    "question": "A Kubernetes Deployment has `replicas: 3` and a rolling update changes the image version. The strategy is `maxUnavailable: 1, maxSurge: 1`. The update takes 10 minutes to complete with all replicas on the new version. During the update, what is the minimum number of replicas running at any time?",
+    "options": ["2, because maxUnavailable: 1 means at least replicas - maxUnavailable are running", "3, because the desired state is always maintained", "1, because maxSurge allows temporarily exceeding capacity", "4, because maxSurge: 1 temporarily adds a replica"],
+    "correctIndex": 0,
+    "explanation": "`maxUnavailable: 1` means at most 1 replica can be unavailable at a time, so minimum running = 3 - 1 = 2; `maxSurge: 1` allows up to 4 replicas during the update, but the minimum is guaranteed by maxUnavailable.",
+    "difficulty": "Medium",
+    "tags": ["kubernetes-rolling-updates", "replica-management", "orchestration"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Orchestration",
+    "question": "A Docker Swarm service is created with `docker service create --replicas 3 app`. One manager node becomes unavailable. Swarm automatically restarts the lost replicas on remaining nodes. If a second manager node becomes unavailable simultaneously, what happens?",
+    "options": ["The remaining manager node continues to manage the service and reschedule replicas", "Swarm loses quorum (majority of managers down) and stops accepting new commands, though running containers continue", "All running containers are immediately terminated to maintain consistency", "The service is automatically promoted to a new manager node from the remaining replicas"],
+    "correctIndex": 1,
+    "explanation": "Docker Swarm requires a quorum of manager nodes to make decisions; if more than half of managers go down, the remaining managers cannot reach consensus and stop scheduling/rescheduling, though existing containers keep running on worker nodes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker-swarm", "manager-quorum", "high-availability"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Orchestration",
+    "question": "A Kubernetes Pod with `spec.restartPolicy: Never` fails to start due to an image pull error. The Pod's status is Pending. After 5 hours, the Pod is still Pending and has not been rescheduled to another node. What is preventing progress?",
+    "options": ["The image pull error is permanent (invalid image name); the Pod never transitions to Running, and restartPolicy: Never prevents automatic restarts", "Kubernetes will eventually reschedule the Pod, but only after the imagePullBackOff timeout expires (default 24 hours)", "The node is marked as NotReady and Kubernetes is waiting for it to recover before attempting a new pull", "The Pod is stuck in a loop waiting for image pull; use kubectl delete pod to remove it and create a new one"],
+    "correctIndex": 0,
+    "explanation": "`restartPolicy: Never` only affects container restarts within a Pod, not Pod rescheduling; if the image pull fails and is permanent (wrong registry, wrong image name, etc.), the Pod remains Pending indefinitely unless manually deleted or the image error is fixed.",
+    "difficulty": "Medium-Hard",
+    "tags": ["kubernetes-restart-policy", "image-pull-errors", "pod-status"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Orchestration",
+    "question": "In Docker Swarm, you create a service with `docker service create --constraint node.role==worker app`. The only available node is a manager. The service remains in `0/1 running` with replicas stuck. What is the issue?",
+    "options": ["The constraint is invalid; use `node.role==manager` instead", "Docker Swarm does not support node constraints; use labels with `--constraint node.labels.type==worker`", "The manager node does not match the constraint, so no node is available; remove the constraint or promote a worker node", "The service is waiting for a worker node to join the Swarm"],
+    "correctIndex": 2,
+    "explanation": "The constraint `node.role==worker` filters only worker nodes; if only a manager exists, no node matches the constraint, and the service cannot be scheduled; remove the constraint, change it to `node.role==manager`, or add worker nodes to the cluster.",
+    "difficulty": "Medium",
+    "tags": ["docker-swarm-constraints", "node-selection", "service-scheduling"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Orchestration",
+    "question": "A Kubernetes StatefulSet uses a PersistentVolumeClaim (PVC) for each replica. After scaling up from 1 to 3 replicas, the new Pods are created but remain Pending because the PVCs are not bound. What is the most likely cause?",
+    "options": ["The cluster has no PersistentVolume resources available", "StatefulSets require manual PVC creation for each replica; the controller does not create them automatically", "The StorageClass is misconfigured or the provisioner is offline", "All of the above are possible; check events with `kubectl describe pvc` to diagnose"],
+    "correctIndex": 3,
+    "explanation": "PVC binding depends on available PersistentVolumes or a working dynamic provisioner; without one, PVCs remain unbound and Pods cannot start; `kubectl describe pvc` and `kubectl get events` reveal the root cause.",
+    "difficulty": "Medium-Hard",
+    "tags": ["kubernetes-statefulsets", "pvc-binding", "persistent-storage"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Orchestration",
+    "question": "A Kubernetes Service is created with `type: LoadBalancer`. After several minutes, the EXTERNAL-IP is still `<pending>`. The cluster is running on-premises (not on a public cloud). What is preventing IP assignment?",
+    "options": ["On-premises clusters do not support LoadBalancer services by default; install a load balancer controller like MetalLB", "Kubernetes is waiting for a cloud provider to allocate an IP; on-premises clusters can only use ClusterIP or NodePort", "The node is not labeled with `node-role.kubernetes.io/worker`; add the label and the IP will be assigned", "The Service is misconfigured; change type to NodePort or ClusterIP to resolve the pending state"],
+    "correctIndex": 0,
+    "explanation": "LoadBalancer services require a cloud provider or a load balancer controller to allocate external IPs; on-premises clusters don't have this by default; install MetalLB or use NodePort instead.",
+    "difficulty": "Medium",
+    "tags": ["kubernetes-services", "load-balancer", "on-premises-deployment"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Orchestration",
+    "question": "A Docker Swarm service uses a global scheduling mode (`docker service create --mode global app`) on a 5-node cluster. After scaling to 10 nodes, the service still shows `5/5 running` replicas. What must be done to update the replica count?",
+    "options": ["Global services automatically scale to the number of nodes; this is expected and no action is needed", "Global services run one replica per node; after adding 5 nodes, use `docker service update --replicas 10 app` to match", "Global services do not auto-scale; manually update the service or recreate it with the new node count", "Stop and restart the service with `docker service update --force app` to trigger rebalancing"],
+    "correctIndex": 0,
+    "explanation": "Global mode automatically runs one replica per node; after adding nodes, Swarm schedules new replicas on the new nodes without manual intervention; the replica count reflects the node count.",
+    "difficulty": "Medium",
+    "tags": ["docker-swarm-scheduling", "global-mode", "service-scaling"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Orchestration",
+    "question": "In Kubernetes, two Pods are scheduled on the same node with resource requests: Pod A requests 2 CPUs, Pod B requests 1 CPU. The node has 4 CPUs. After both Pods start, Pod A begins throttling (CPU limit exceeded). Why does Pod A throttle if the node has sufficient CPU?",
+    "options": ["Pod A has a CPU limit set lower than its request; limits control the maximum usage, while requests control scheduling", "The node's other processes (kubelet, docker daemon) are consuming the remaining CPU", "Kubernetes applies CPU limits at the cgroup level; Pod A is limited by its Pod or Container spec.resources.limits.cpu", "The CPU request does not guarantee availability; Kubernetes prioritizes other system workloads"],
+    "correctIndex": 0,
+    "explanation": "Requests and limits are separate; requests are used for scheduling, limits enforce maximum usage via cgroups; if Pod A's limit is 2 CPUs but request is 2 CPUs, it may be throttled if the node's other workloads use CPU; check the Pod's resources.limits.cpu.",
+    "difficulty": "Medium-Hard",
+    "tags": ["kubernetes-cpu-limits", "resource-management", "throttling"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Orchestration",
+    "question": "A Docker Swarm cluster has 3 manager nodes and 5 worker nodes. One manager becomes unavailable, then another manager fails. Swarm continues accepting commands and rescheduling services. How is this possible with only 1 manager remaining?",
+    "options": ["Swarm requires only a plurality, not a majority, of managers; 1 out of 3 is sufficient", "The remaining manager has cached the cluster state and can continue operating independently", "This is impossible; Swarm loses quorum and should refuse commands", "The two failed managers rejoin the cluster automatically, restoring quorum"],
+    "correctIndex": 2,
+    "explanation": "Swarm requires a strict majority (quorum) of managers to make decisions; with 1 out of 3 managers up, quorum is lost (need at least 2), so commands are refused and services cannot be rescheduled; this demonstrates why odd numbers of managers are important.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker-swarm-quorum", "manager-nodes", "high-availability"]
+  }
+]

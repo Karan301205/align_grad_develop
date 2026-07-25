@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "C",
+    "subtopic": "Operators",
+    "question": "int x = 5, y = 10;\nint result = x < y ? x++ : y++;\nWhat are x, y, and result after this?",
+    "options": [
+      "x=6, y=10, result=5 (ternary evaluates x < y as true, executes x++, which returns old x)",
+      "x=5, y=11, result=10 (ternary evaluates false, executes y++)",
+      "x=6, y=11, result=5 (both branches execute)",
+      "Compiler error: cannot use ++ in ternary operator"
+    ],
+    "correctIndex": 0,
+    "explanation": "The ternary operator evaluates the condition; x < y is true, so x++ executes (returning the old value 5), and x becomes 6.",
+    "difficulty": "Medium-Hard",
+    "tags": ["ternary operator", "post-increment", "operator precedence"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Operators",
+    "question": "int x = 5;\nint y = x++ + ++x;\nWhat is the value of y?",
+    "options": [
+      "Undefined behavior; order of evaluation of side effects is unspecified",
+      "12 (5 + 7)",
+      "11 (5 + 6)",
+      "Compiler error: conflicting modifications"
+    ],
+    "correctIndex": 0,
+    "explanation": "x++ and ++x both modify x between sequence points with no intervening sequence point, causing undefined behavior.",
+    "difficulty": "Hard",
+    "tags": ["post-increment", "pre-increment", "sequence points", "undefined behavior"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Operators",
+    "question": "int x = 5;\nint y = (x = 10) + x;\nWhat is y?",
+    "options": [
+      "20 (x is assigned 10, then 10 + 10 evaluates)",
+      "15 (x is assigned 10, then 10 + 5 uses the old value)",
+      "Compiler error: assignment in expression",
+      "Undefined behavior: order of operations unspecified"
+    ],
+    "correctIndex": 0,
+    "explanation": "Assignment is an expression that returns the assigned value; (x = 10) evaluates to 10, then 10 + 10 = 20.",
+    "difficulty": "Medium",
+    "tags": ["assignment operator", "expression evaluation", "return values"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Operators",
+    "question": "int x = -5;\nint y = x >> 1;\nWhat is y on a typical system (arithmetic right shift)?",
+    "options": [
+      "-3 (arithmetic shift: sign bit is extended)",
+      "-2 (rounding toward zero)",
+      "Compiler error: right shift of negative integers undefined",
+      "Cannot be determined portably"
+    ],
+    "correctIndex": 3,
+    "explanation": "Right shift of negative signed integers is implementation-defined (arithmetic or logical); portable code avoids this.",
+    "difficulty": "Medium-Hard",
+    "tags": ["bitwise shift", "signed integers", "implementation-defined"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Operators",
+    "question": "unsigned char a = 0xAB, b = 0xCD;\nint result = a | b;\nWhat is result?",
+    "options": [
+      "0xEF (bitwise OR: 0xAB | 0xCD)",
+      "0xAB (first operand)",
+      "Compiler error: cannot OR different types",
+      "0xCD (second operand)"
+    ],
+    "correctIndex": 0,
+    "explanation": "Bitwise OR applies bit-by-bit: 1010 1011 | 1100 1101 = 1110 1111 = 0xEF.",
+    "difficulty": "Medium",
+    "tags": ["bitwise OR", "integer promotion", "bit operations"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Operators",
+    "question": "int x = 5;\nif (x & 1) printf(\"odd\");\nelse printf(\"even\");\nWhat is printed?",
+    "options": [
+      "odd (5 & 1 = 0b101 & 0b001 = 0b001, nonzero, true)",
+      "even",
+      "Compiler error: bitwise AND in condition",
+      "5"
+    ],
+    "correctIndex": 0,
+    "explanation": "5 & 1 checks the least significant bit; if it's 1, the number is odd.",
+    "difficulty": "Medium",
+    "tags": ["bitwise AND", "parity check", "bit manipulation"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Operators",
+    "question": "int x = 0x0F;\nint y = ~x;\nprintf(\"%x\", y);\nWhat is printed?",
+    "options": [
+      "fffffff0 (or similar: all bits flipped, typically 32-bit result is 0xFFFFFFF0)",
+      "f0",
+      "Compiler error: undefined operator ~",
+      "00"
+    ],
+    "correctIndex": 0,
+    "explanation": "Bitwise NOT flips all bits; 0x0F becomes 0xFFFFFFF0 on a 32-bit system (int promotion applies).",
+    "difficulty": "Medium",
+    "tags": ["bitwise NOT", "integer promotion", "two's complement"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Operators",
+    "question": "int x = 1, y = 2, z = 3;\nint result = x, y, z;\nWhat is result?",
+    "options": [
+      "3 (comma operator: evaluates left to right, returns rightmost value)",
+      "1 (first value)",
+      "Compiler error: invalid use of comma",
+      "6 (sum)"
+    ],
+    "correctIndex": 0,
+    "explanation": "The comma operator evaluates all expressions left to right and returns the value of the rightmost.",
+    "difficulty": "Medium-Hard",
+    "tags": ["comma operator", "expression evaluation", "operator precedence"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Operators",
+    "question": "int x = 2;\nint y = x << 3;\nWhat is y?",
+    "options": [
+      "16 (2 * 2^3 = 2 * 8)",
+      "8 (2 * 4)",
+      "32 (2 * 16)",
+      "10 (string representation)"
+    ],
+    "correctIndex": 0,
+    "explanation": "Left shift by 3 is equivalent to multiplying by 2^3 = 8; 2 << 3 = 16.",
+    "difficulty": "Medium",
+    "tags": ["bitwise shift", "multiplication", "bit manipulation"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Operators",
+    "question": "int x = 0x12;\nint y = x & 0xFF;\nprintf(\"%x\", y);\nWhy might this be used?",
+    "options": [
+      "To mask x to its low 8 bits; useful when casting or working with byte-aligned data",
+      "To multiply x by 0xFF",
+      "To check if x is equal to 0xFF",
+      "To clear the high bits of x and sign-extend the low bits"
+    ],
+    "correctIndex": 0,
+    "explanation": "Masking with 0xFF isolates the least significant 8 bits (one byte), a common pattern for multi-byte operations.",
+    "difficulty": "Medium",
+    "tags": ["bitwise AND", "masking", "byte operations"]
+  }
+]

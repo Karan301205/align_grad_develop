@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "RDS Database Services",
+    "question": "Your Lambda function (15-minute timeout) connects to RDS and runs a heavy query that takes 20 minutes to complete. Lambda times out while waiting for results. The query can't be optimized further. What's the best solution?",
+    "options": [
+      "Increase Lambda timeout to 30 minutes; AWS allows up to 15-minute timeout limit",
+      "Move the query to a scheduled RDS event (AWS RDS automation); store results, Lambda reads cached results",
+      "Use RDS Proxy to extend query timeouts",
+      "Offload to an EC2 instance with longer execution time; Lambda triggers EC2 via SNS"
+    ],
+    "correctIndex": 3,
+    "explanation": "Lambda's max timeout is 15 minutes (900 seconds); you cannot extend it; offloading to EC2 or using async patterns (SQS/SNS trigger) solves the timeout; RDS Proxy manages connection pooling, not query execution time.",
+    "difficulty": "Hard",
+    "tags": ["lambda", "rds", "architecture", "timeout"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "RDS Database Services",
+    "question": "You're running RDS MySQL db.t3.small with 8GB storage. You forecast 5GB growth over the next 6 months. Storage is approaching the limit. Should you modify the instance to db.t3.medium or enable auto-scaling?",
+    "options": [
+      "Modify to db.t3.medium; larger instance provides more storage and CPU",
+      "Enable RDS auto-scaling for storage; automatically increases storage as needed without instance changes",
+      "Create a read replica on db.m5.large; migrate traffic to the larger instance",
+      "Enable RDS automated backups; they compress data and extend storage capacity"
+    ],
+    "correctIndex": 1,
+    "explanation": "RDS auto-scaling storage grows automatically (up to 1TB limit); instance type (t3.medium) changes CPU/memory, not storage; separate concerns; auto-scaling storage is the most cost-effective.",
+    "difficulty": "Medium",
+    "tags": ["rds", "storage", "auto-scaling"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "RDS Database Services",
+    "question": "Your RDS PostgreSQL instance handles transactional reads and writes. You're adding analytics queries that are heavy and lock tables for 10+ minutes. Users report slow transaction response times. What's the best approach to isolate analytics without impacting transactional workload?",
+    "options": [
+      "Run analytics queries during off-hours; schedule with AWS Scheduler",
+      "Create an RDS read replica; run analytics queries against the replica",
+      "Increase RDS instance to a larger size; more resources handle both workloads",
+      "Use RDS Proxy with connection pooling; isolation happens at connection level"
+    ],
+    "correctIndex": 1,
+    "explanation": "Read replicas are eventually-consistent copies; heavy queries on replicas don't lock the primary; transactional workload stays unaffected; off-hours scheduling is inflexible; Proxy manages connections, not query isolation.",
+    "difficulty": "Medium-Hard",
+    "tags": ["rds", "read-replicas", "workload-isolation"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "RDS Database Services",
+    "question": "Your RDS instance is in us-east-1 with automated daily backups retained for 7 days. You need a disaster recovery plan with RTO of 1 hour and RPO of 30 minutes. Should you create a read replica or multi-AZ deployment?",
+    "options": [
+      "Read replica in us-west-2; promotes to primary on failure; RPO is near-zero",
+      "Multi-AZ deployment in same region; automatic failover is <2 minutes; doesn't address region failure",
+      "Both: multi-AZ in us-east-1 plus read replica in us-west-2; multi-AZ for AZ failure, replica for region failure",
+      "Increase backup retention to 30 days; rely on point-in-time recovery for RPO"
+    ],
+    "correctIndex": 2,
+    "explanation": "Multi-AZ (same region) protects against AZ failure with <2-minute failover; read replica (different region) protects against region failure; meeting 1-hour RTO and 30-minute RPO requires both layers.",
+    "difficulty": "Hard",
+    "tags": ["disaster-recovery", "multi-az", "read-replicas", "rpo-rto"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "RDS Database Services",
+    "question": "You're running RDS Aurora MySQL cluster with 1 writer and 2 readers. Write workload is consistently high (90% CPU). Read queries against readers are fast. Should you scale up the writer instance or add more readers?",
+    "options": [
+      "Add more readers; they handle reads, reducing primary CPU load",
+      "Scale up the writer instance; CPU usage indicates write scalability bottleneck",
+      "Add a second writer; Aurora supports multi-master write capability",
+      "Switch to RDS MySQL; Aurora is hitting its limits"
+    ],
+    "correctIndex": 1,
+    "explanation": "Readers only handle READ queries; write-heavy workload means writer CPU is the bottleneck; additional readers don't reduce writer CPU; scaling up the writer is the correct fix.",
+    "difficulty": "Medium-Hard",
+    "tags": ["rds-aurora", "scaling", "performance"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "RDS Database Services",
+    "question": "Your RDS MySQL instance uses manual backups. During a corruption incident, you need to restore from a specific point in time 3 hours ago. Can you recover this way?",
+    "options": [
+      "Yes; manual backups preserve point-in-time recovery capability",
+      "No; point-in-time recovery requires automated backups and transaction logs; manual backups are static snapshots",
+      "Yes; use AWS RDS CloudFormation to template the backup",
+      "No; you can only restore from the most recent backup snapshot"
+    ],
+    "correctIndex": 1,
+    "explanation": "Manual snapshots are static point-in-time captures; PITR requires AWS to maintain transaction logs from automated backups; to enable PITR, enable automated backups and set retention period.",
+    "difficulty": "Medium",
+    "tags": ["rds", "backup", "point-in-time-recovery"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "RDS Database Services",
+    "question": "You have RDS PostgreSQL with a db.r5.4xlarge instance (memory-optimized) and 80% RAM utilization. Queries are slow despite high memory. What's the likely cause and solution?",
+    "options": [
+      "RAM usage is too high; need db.r5.6xlarge with more memory",
+      "Query execution plan is inefficient; RAM is plentiful; index or query optimization needed",
+      "I/O throughput is the bottleneck; switch to instance-store volumes (non-persistent)",
+      "Network bandwidth is saturated; upgrade the DB subnet group"
+    ],
+    "correctIndex": 1,
+    "explanation": "Memory-optimized instance with 80% RAM means caching is effective; slow queries indicate query plan issues, not memory shortage; adding more RAM won't fix bad queries.",
+    "difficulty": "Hard",
+    "tags": ["rds", "performance-tuning", "troubleshooting"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "RDS Database Services",
+    "question": "You're evaluating RDS Enhanced Monitoring. The cost is $0.06/hour for a db.r5.large instance. Annual cost of RDS: $5,000. Is Enhanced Monitoring worth enabling?",
+    "options": [
+      "No; monitoring cost ($525/year) adds 10% to RDS cost without performance benefits",
+      "Yes; Enhanced Monitoring provides granular metrics at 1-second resolution; worth the cost for production databases",
+      "Only enable for production; dev/test databases don't need it",
+      "Use CloudWatch detailed monitoring instead; it's free for EC2 and includes RDS"
+    ],
+    "correctIndex": 1,
+    "explanation": "Enhanced Monitoring provides OS-level metrics (CPU, memory, I/O), disk activity, and process-level visibility; critical for performance debugging; 10% cost is justified for production databases.",
+    "difficulty": "Medium",
+    "tags": ["rds", "monitoring", "cost-benefit"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "RDS Database Services",
+    "question": "Your RDS MariaDB instance is on db.t3.small with burstable CPU. During peak hours, CPU exceeds baseline (20%) and uses burst credits. After peak, you see slow queries and warnings about burst credits running low. What's happening?",
+    "options": [
+      "Burst credits are consumed; when exhausted, instance is throttled to 20% baseline; queries slow down",
+      "CloudWatch alarms are incorrectly triggering; actual performance is unaffected",
+      "Database corruption is causing slow queries; unrelated to burst credits",
+      "Network throughput is saturated; not a CPU issue"
+    ],
+    "correctIndex": 0,
+    "explanation": "Burstable instances have baseline CPU and burst credits; credits are finite; when exhausted, instance throttles to baseline (20%), causing severe slowdown; switch to non-burstable or larger instance.",
+    "difficulty": "Medium",
+    "tags": ["rds", "burstable", "performance"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "RDS Database Services",
+    "question": "You're migrating a legacy SQL Server on-premises database (2TB) to AWS RDS. You need minimal downtime (<5 minutes). Should you use AWS DMS (Database Migration Service) or create a snapshot and restore?",
+    "options": [
+      "Snapshot and restore; fastest migration method for large databases",
+      "AWS DMS with continuous replication; replicates data, then switches over with minimal downtime",
+      "Manual backup and restore; on-premises tools are more reliable than AWS services",
+      "RDS Fast Failover; mirrors on-premises database to RDS, then switches"
+    ],
+    "correctIndex": 1,
+    "explanation": "DMS continuously replicates changes; at cutover, only remaining delta is applied (minutes, not hours); snapshot restore requires offline period for entire 2TB; DMS is purpose-built for zero-downtime migration.",
+    "difficulty": "Hard",
+    "tags": ["rds", "database-migration", "dms"]
+  }
+]

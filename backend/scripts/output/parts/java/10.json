@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "Memory Management",
+    "question": "What is a memory leak in Java?\n```java\nList<String> cache = new ArrayList<>();\nfor (int i = 0; i < 1000000; i++) {\n  cache.add(new String(\"Item \" + i));\n}\n// cache never cleared, holds references\n```",
+    "options": ["Normal behavior", "Cache holds objects, preventing GC", "Compilation error", "No memory issue"],
+    "correctIndex": 1,
+    "explanation": "The cache holds references to all objects indefinitely; GC cannot reclaim them even if unused, eventually causing OutOfMemoryError.",
+    "difficulty": "Medium",
+    "tags": ["memory-leak", "garbage-collection", "reference-holding"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Memory Management",
+    "question": "What does this code cause?\n```java\nint[] data = new int[1000000];\ndata = null;\nSystem.out.println(\"Done\");\n```",
+    "options": ["Memory leak", "Array eligible for GC", "Compilation error", "NullPointerException"],
+    "correctIndex": 1,
+    "explanation": "Setting data to null removes the only reference; the array is now unreachable and eligible for garbage collection.",
+    "difficulty": "Medium",
+    "tags": ["garbage-collection", "reachability", "reference-removal"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Memory Management",
+    "question": "What happens with circular references?\n```java\nclass Node {\n  Node next;\n}\nNode a = new Node();\nNode b = new Node();\na.next = b;\nb.next = a;\na = null; b = null;\n```",
+    "options": ["Memory leak", "Both nodes eligible for GC (generational GC handles cycles)", "Compilation error", "Stack overflow"],
+    "correctIndex": 1,
+    "explanation": "Modern JVM uses generational garbage collection that detects and collects cyclic references; both nodes are unreachable and reclaimed.",
+    "difficulty": "Medium",
+    "tags": ["circular-references", "garbage-collection", "reachability"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Memory Management",
+    "question": "What is the issue with this code?\n```java\nstatic List<String> cache = new ArrayList<>();\npublic void addToCache(String item) {\n  cache.add(item);\n}\n```",
+    "options": ["No issue", "Static cache creates memory leak if never cleared", "Compilation error", "Thread-safe issue only"],
+    "correctIndex": 1,
+    "explanation": "Static field holds references until class is unloaded (rarely); if addToCache is called repeatedly, cache grows indefinitely.",
+    "difficulty": "Medium",
+    "tags": ["static-fields", "memory-leak", "unbounded-growth"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Memory Management",
+    "question": "What is a WeakReference used for?\n```java\nWeakReference<Object> wr = new WeakReference<>(new Object());\nObject obj = wr.get();\n```",
+    "options": ["Prevents GC of the object", "Allows GC even if referenced", "Compilation error", "Faster memory access"],
+    "correctIndex": 1,
+    "explanation": "WeakReference does not prevent garbage collection; the object can be reclaimed by GC, and wr.get() returns null after GC.",
+    "difficulty": "Medium",
+    "tags": ["weak-reference", "garbage-collection", "soft-references"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Memory Management",
+    "question": "What is the heap vs stack?\n```java\nint x = 10;           // Stack\nObject obj = new Object(); // Object on heap, reference on stack\n```",
+    "options": ["Both on stack", "x on stack, obj on heap", "Both on heap", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "Primitives and references live on the stack (fast, auto-freed); objects live on the heap (managed by GC).",
+    "difficulty": "Medium",
+    "tags": ["heap", "stack", "memory-layout"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Memory Management",
+    "question": "What causes an OutOfMemoryError?\n```java\nList<int[]> list = new ArrayList<>();\nwhile (true) {\n  list.add(new int[1000000]);\n}\n```",
+    "options": ["Normal operation", "Heap exhausted, no memory for new objects", "Compilation error", "Stack overflow"],
+    "correctIndex": 1,
+    "explanation": "Allocating large arrays indefinitely fills the heap; when heap is full, OutOfMemoryError is thrown.",
+    "difficulty": "Medium",
+    "tags": ["out-of-memory", "heap-exhaustion", "resource-limits"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Memory Management",
+    "question": "What is object reachability?\n```java\nObject obj = new Object();\nobj = null;\nSystem.gc(); // Suggest GC\n```",
+    "options": ["obj is still reachable", "obj is unreachable and eligible for GC", "Compilation error", "Stack overflow"],
+    "correctIndex": 1,
+    "explanation": "After obj = null, there are no references to the object; it is unreachable and eligible for garbage collection.",
+    "difficulty": "Medium",
+    "tags": ["reachability", "garbage-collection", "reference-tracking"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Memory Management",
+    "question": "What does the GC do with unreachable objects?\n```java\nList<String> list = new ArrayList<>();\nlist.add(\"item\");\nlist.clear();\nlist = null;\n```",
+    "options": ["Objects stay in memory", "GC collects unreachable objects", "Compilation error", "Manual deletion required"],
+    "correctIndex": 1,
+    "explanation": "After list = null, the list and all its contents are unreachable; GC reclaims that heap memory automatically.",
+    "difficulty": "Medium",
+    "tags": ["garbage-collection", "automatic-memory", "java-advantage"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Memory Management",
+    "question": "What prevents GC of an object?\n```java\nclass Listener {\n  public void onEvent() { }\n}\nListListener listener = new Listener();\nbutton.addEventListener(listener);\nlistener = null; // Does this allow GC?\n```",
+    "options": ["Yes, GC will collect it", "No, button holds a reference", "Compilation error", "Depends on implementation"],
+    "correctIndex": 1,
+    "explanation": "The button holds a reference via addEventListener(); setting listener to null does not allow GC because the button still references it.",
+    "difficulty": "Medium",
+    "tags": ["listener-leaks", "memory-leak", "event-handlers"]
+  }
+]

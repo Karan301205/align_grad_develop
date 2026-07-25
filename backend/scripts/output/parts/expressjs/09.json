@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Express JS",
+    "subtopic": "Error Handling Techniques",
+    "question": "A route throws new Error('Database error'). No error-handling middleware is defined. What happens?",
+    "options": [
+      "The error is silently ignored and the route continues",
+      "Express catches the error and sends a generic 500 response",
+      "The error message is logged to console but the app keeps running",
+      "The entire Express app crashes"
+    ],
+    "correctIndex": 1,
+    "explanation": "Express has built-in error handling that catches thrown errors in sync routes and sends a 500 response; without custom error middleware, it uses the default handler.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "try-catch", "express-default"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Error Handling Techniques",
+    "question": "An async route handler has no try-catch: app.get('/api', async (req, res) => { throw new Error(); }). Will the built-in error handler catch it?",
+    "options": [
+      "Yes; Express wraps async routes automatically",
+      "No; promise rejections bypass Express error handlers",
+      "Only if the error is thrown before the first await",
+      "Only if app.use((err, req, res, next) => {...}) is defined"
+    ],
+    "correctIndex": 1,
+    "explanation": "Express doesn't automatically catch promise rejections in async handlers; errors must be caught with try-catch and passed to next(err) or the promise rejection will crash the process (pre-Express 5.x).",
+    "difficulty": "Medium-Hard",
+    "tags": ["async", "error-handling", "promises", "express-versions"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Error Handling Techniques",
+    "question": "Error-handling middleware is defined: app.use((err, req, res, next) => { res.status(500).send(err.message); }). A synchronous error is thrown in a route. Which middleware handles it?",
+    "options": [
+      "All middleware processes the request normally; the sync error propagates",
+      "The error-handling middleware catches it because it has 4 parameters",
+      "Express built-in handler processes it; custom error middleware is skipped",
+      "The sync error bypasses the error-handling middleware"
+    ],
+    "correctIndex": 1,
+    "explanation": "Express recognizes error-handling middleware by the 4-parameter signature (err, req, res, next); synchronous route errors are caught and routed to this middleware.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "middleware", "error-routing"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Error Handling Techniques",
+    "question": "Error middleware calls next(err) after logging the error. What happens?",
+    "options": [
+      "The error is passed to the next error-handling middleware",
+      "The error propagates to the client",
+      "next(err) is invalid; error middleware should send a response",
+      "The error is stored for later processing"
+    ],
+    "correctIndex": 0,
+    "explanation": "Calling next(err) in error middleware passes the error to the next error-handling middleware in the stack, allowing chaining of handlers.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "middleware", "next", "error-propagation"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Error Handling Techniques",
+    "question": "An error is thrown after res.send() has been called. The error-handling middleware doesn't trigger. Why?",
+    "options": [
+      "Errors after res.send() are ignored by Express",
+      "res.send() sets a flag that prevents error handling",
+      "Once the response is sent, the request is complete and error handlers don't run",
+      "The error must be thrown before any response method is called"
+    ],
+    "correctIndex": 2,
+    "explanation": "After any response method (send, json, etc.) executes, the response is committed; subsequent errors can't be handled via middleware because headers are already sent.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "response", "headers-sent"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Error Handling Techniques",
+    "question": "try { await db.query(...); } catch (err) { next(err); } passes the error to next(). The error-handling middleware receives it. What should it do?",
+    "options": [
+      "Log the error and call next() again to propagate it further",
+      "Log the error and send an appropriate HTTP response like res.status(500).json({error: err.message})",
+      "Rethrow the error to keep it propagating",
+      "Call next(err) again to ensure the error reaches the built-in handler"
+    ],
+    "correctIndex": 1,
+    "explanation": "Error-handling middleware should log, process, and send a client response; calling next() or re-throwing leaves the client hanging.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "response", "next", "try-catch"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Error Handling Techniques",
+    "question": "res.status(500).send(error) is called in error middleware, where error is an Error object. The response includes [object Object]. Why?",
+    "options": [
+      "Error objects can't be sent directly; they must be stringified",
+      "res.send() converts objects to [object Object]; use res.json() for objects",
+      "The error doesn't have a toString() method",
+      "Express doesn't support Error object serialization"
+    ],
+    "correctIndex": 1,
+    "explanation": "res.send() with an object doesn't serialize it like JSON; use res.json(error) or res.json({error: error.message}) to properly format error responses.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "response", "serialization", "res.send"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Error Handling Techniques",
+    "question": "A route handler wraps db.query() in try-catch but doesn't call next(err) when an error occurs: catch (err) { res.status(500).json({error: 'Server error'}); }. Is this acceptable?",
+    "options": [
+      "No; all errors must be passed to next(err) for consistency",
+      "Yes; catching and responding directly is a valid error-handling pattern",
+      "No; the handler must call next() after sending a response",
+      "Yes, only if the route is the last route before error middleware"
+    ],
+    "correctIndex": 1,
+    "explanation": "Both patterns are valid: catch-and-respond locally or pass to error middleware via next(err); choose one consistently across your app.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "try-catch", "patterns", "consistency"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Error Handling Techniques",
+    "question": "process.on('uncaughtException', (err) => { console.error(err); process.exit(1); }) is set up. An unhandled rejection occurs in Express. Will this handler catch it?",
+    "options": [
+      "Yes; uncaughtException covers all errors including promise rejections",
+      "No; unhandled rejections require a separate 'unhandledRejection' handler",
+      "Only if the rejection happens outside async functions",
+      "It depends on whether the app is in development or production mode"
+    ],
+    "correctIndex": 1,
+    "explanation": "Promise rejections are different from uncaught exceptions; listen to 'unhandledRejection' event instead, or use error-handling middleware to catch them.",
+    "difficulty": "Medium-Hard",
+    "tags": ["error-handling", "promises", "events", "process"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Error Handling Techniques",
+    "question": "Error middleware logs err.stack but err.stack is undefined. The error was created manually: throw {message: 'Custom'}. Why?",
+    "options": [
+      "Custom objects don't have a stack property",
+      "The stack property is only generated for Error instances, not plain objects",
+      "The stack was stripped during error propagation",
+      "err.stack is only available in development mode"
+    ],
+    "correctIndex": 1,
+    "explanation": "Always throw Error instances, not plain objects; Error objects capture the stack trace at creation time for debugging, plain objects don't.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "error-objects", "debugging", "stack-traces"]
+  }
+]

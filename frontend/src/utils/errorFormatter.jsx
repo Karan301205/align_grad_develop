@@ -1,94 +1,70 @@
-import React from 'react';
-import { X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check, X, AlertCircle } from 'lucide-react';
 
 /**
- * Parses and formats alert messages (both success and error) into a premium scalloped card.
+ * Top-Right Sliding Toast Notification Card (Screenshot 2 design)
  */
-export const formatAlertMessage = (msg, type = 'error', onClose) => {
+export const ToastNotification = ({ msg, type = 'error', onClose, duration = 4000 }) => {
+  const [isExiting, setIsExiting] = useState(false);
+
+  useEffect(() => {
+    if (!duration || duration <= 0) return;
+    const timer = setTimeout(() => {
+      handleClose();
+    }, duration);
+    return () => clearTimeout(timer);
+  }, [duration]);
+
+  const handleClose = () => {
+    setIsExiting(true);
+    setTimeout(() => {
+      if (onClose) onClose();
+    }, 300);
+  };
+
   if (!msg) return null;
 
-  let errors = [];
+  const isSuccess = type === 'success';
   const isError = type === 'error';
-  const accentColor = isError ? '#dc2626' : '#10b981';
-  const titleText = isError ? 'Error !' : 'Success !';
-
-  const trimmed = String(msg).trim();
-
-  if (isError && trimmed.startsWith('[') && trimmed.endsWith(']')) {
-    try {
-      errors = JSON.parse(trimmed);
-    } catch (e) {
-      errors = [{ message: msg }];
-    }
-  } else {
-    errors = [{ message: msg }];
-  }
 
   return (
-    <div className="relative overflow-hidden bg-surface-container-high dark:bg-[#313a3c] border border-outline-variant rounded-2xl shadow-[var(--shadow-card)] p-5 pl-7 pr-12 text-left w-full animate-fade-in">
-      {/* Decorative Scalloped Wave on Left */}
-      <div className="absolute top-0 left-0 bottom-0 w-4 overflow-hidden select-none pointer-events-none">
-        <svg className="h-full w-full" preserveAspectRatio="none" viewBox="0 0 16 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path 
-            d="M 0 0 
-               L 10 0 
-               Q 16 5, 10 10 
-               Q 16 15, 10 20 
-               Q 16 25, 10 30 
-               Q 16 35, 10 40 
-               Q 16 45, 10 50 
-               Q 16 55, 10 60 
-               Q 16 65, 10 70 
-               Q 16 75, 10 80 
-               Q 16 85, 10 90 
-               Q 16 95, 10 100 
-               L 0 100 Z" 
-            fill={accentColor} 
-          />
-        </svg>
+    <div
+      className={`fixed top-6 right-6 z-50 pointer-events-auto flex items-center gap-3.5 px-4 py-3.5 rounded-2xl shadow-xl border backdrop-blur-md transition-all min-w-[320px] max-w-md ${
+        isExiting ? 'animate-toast-fade-out' : 'animate-toast-slide-in'
+      } ${
+        isSuccess
+          ? 'bg-emerald-50 dark:bg-emerald-950/90 border-emerald-500/40 text-emerald-950 dark:text-emerald-50'
+          : isError
+          ? 'bg-rose-50 dark:bg-rose-950/90 border-rose-500/40 text-rose-950 dark:text-rose-50'
+          : 'bg-surface-container-high border-outline-variant text-on-surface'
+      }`}
+    >
+      {/* Icon Badge */}
+      <div
+        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-white shadow-sm ${
+          isSuccess ? 'bg-emerald-500' : isError ? 'bg-rose-500' : 'bg-primary'
+        }`}
+      >
+        {isSuccess ? <Check className="w-5 h-5 stroke-[3]" /> : <AlertCircle className="w-5 h-5 stroke-[2.5]" />}
       </div>
 
-      <div className="space-y-1.5">
-        {!isError && (
-          <div 
-            className="font-headline font-extrabold text-sm tracking-wide"
-            style={{ color: accentColor }}
-          >
-            {titleText}
-          </div>
-        )}
-        <ul className="space-y-1.5 text-xs leading-relaxed text-on-surface-variant font-medium">
-          {errors.map((err, idx) => {
-            const pathStr = err.path && err.path.length > 0
-              ? err.path.map(p => {
-                  if (typeof p === 'number') return `#${p + 1}`;
-                  return p
-                    .replace(/([A-Z])/g, ' $1')
-                    .replace(/^./, s => s.toUpperCase())
-                    .trim();
-                }).join(' ➔ ')
-              : '';
-
-            return (
-              <li key={idx} className="flex flex-wrap items-baseline gap-1.5">
-                {pathStr && (
-                  <span className="shrink-0 font-mono font-bold text-[9px] bg-surface-container border border-outline-variant text-[#dc2626] px-1.5 py-0.5 rounded uppercase tracking-wide">
-                    {pathStr}
-                  </span>
-                )}
-                <span className="text-on-surface dark:text-white/90">{err.message}</span>
-              </li>
-            );
-          })}
-        </ul>
+      {/* Message Content */}
+      <div className="flex-1 min-w-0 text-left">
+        <h4 className="font-headline font-bold text-sm text-slate-900 dark:text-white leading-tight">
+          {isSuccess ? 'Congratulations!' : 'Alert'}
+        </h4>
+        <p className="text-xs text-slate-600 dark:text-slate-200 mt-0.5 leading-relaxed font-sans truncate">
+          {String(msg)}
+        </p>
       </div>
 
+      {/* Dismiss Button */}
       {onClose && (
         <button
           type="button"
-          onClick={onClose}
-          className="absolute top-4 right-4 text-on-surface-variant/70 hover:text-primary transition-colors p-1 rounded-lg hover:bg-surface-container-low"
-          aria-label="Dismiss alert"
+          onClick={handleClose}
+          className="w-7 h-7 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+          aria-label="Close notification"
         >
           <X className="w-4 h-4" />
         </button>
@@ -97,6 +73,10 @@ export const formatAlertMessage = (msg, type = 'error', onClose) => {
   );
 };
 
+export const formatAlertMessage = (msg, type = 'error', onClose) => {
+  return <ToastNotification key={String(msg)} msg={msg} type={type} onClose={onClose} />;
+};
+
 export const formatErrorMessage = (msg, onClose) => {
-  return formatAlertMessage(msg, 'error', onClose);
+  return <ToastNotification key={String(msg)} msg={msg} type="error" onClose={onClose} />;
 };

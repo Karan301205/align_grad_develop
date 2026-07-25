@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "Syntax Basics",
+    "question": "What will this code output?\n\nstring x = \"hello\";\nstring y = x;\ny += \" world\";\nConsole.WriteLine(x);",
+    "options": ["hello world", "hello", "NullReferenceException", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "Strings are immutable; += creates a new string object, leaving x unchanged.",
+    "difficulty": "Medium",
+    "tags": ["string-immutability", "reference-semantics", "string-concatenation"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Syntax Basics",
+    "question": "What is the output?\n\nint[] arr = new int[3];\nConsole.WriteLine(arr[0]);",
+    "options": ["0", "null", "IndexOutOfRangeException", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Array elements of value types are initialized to their default value (0 for int).",
+    "difficulty": "Medium",
+    "tags": ["array-initialization", "default-values", "value-types"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Syntax Basics",
+    "question": "What does this code print?\n\nbool result = !true && false || true;\nConsole.WriteLine(result);",
+    "options": ["true", "false", "NullReferenceException", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "!true is false; false && false is false; false || true is true.",
+    "difficulty": "Medium",
+    "tags": ["boolean-operators", "operator-precedence", "logical-operators"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Syntax Basics",
+    "question": "What happens when this runs?\n\nint x = 0;\nConsole.WriteLine(x++ + ++x);",
+    "options": ["1", "2", "0", "Undefined behavior"],
+    "correctIndex": 3,
+    "explanation": "The evaluation order of x++ and ++x is unspecified; different compilers may produce different results.",
+    "difficulty": "Hard",
+    "tags": ["operator-precedence", "side-effects", "undefined-behavior"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Syntax Basics",
+    "question": "What is the output?\n\nstring s = null;\nConsole.WriteLine(s?.Length ?? 0);",
+    "options": ["null", "0", "NullReferenceException", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "The null-conditional operator ?. returns null if s is null, then ?? replaces it with 0.",
+    "difficulty": "Medium",
+    "tags": ["null-conditional", "null-coalescing", "null-handling"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Syntax Basics",
+    "question": "What does this output?\n\nvar x = 5;\nvar y = x.ToString();\nConsole.WriteLine(y.GetType().Name);",
+    "options": ["Int32", "String", "Object", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "ToString() returns a String object, and GetType().Name on a string returns \"String\".",
+    "difficulty": "Medium",
+    "tags": ["var-keyword", "type-inference", "method-calls"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Syntax Basics",
+    "question": "What will compile and run without error?\n\nstruct Point { public int X; }\nPoint p = new Point();\nConsole.WriteLine(p.X);",
+    "options": ["0", "null", "NullReferenceException", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Structs are value types; new Point() initializes all fields to default values (X = 0).",
+    "difficulty": "Medium",
+    "tags": ["structs", "value-types", "default-initialization"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Syntax Basics",
+    "question": "What is the output?\n\nint x = 10;\nint y = 3;\nConsole.WriteLine(x / y + \" \" + x % y);",
+    "options": ["3 1", "3.33 0", "3 0", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Integer division 10 / 3 = 3 (truncates), and 10 % 3 = 1.",
+    "difficulty": "Medium",
+    "tags": ["integer-arithmetic", "division", "modulo-operator"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Syntax Basics",
+    "question": "What happens when this code executes?\n\nchar c = 'A';\nConsole.WriteLine((int)c);",
+    "options": ["65", "A", "1", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Casting a char to int returns its Unicode/ASCII value; 'A' is 65.",
+    "difficulty": "Medium",
+    "tags": ["type-casting", "char-type", "unicode-values"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Syntax Basics",
+    "question": "What is the output?\n\ndecimal price = 10.5m;\nint quantity = 3;\nConsole.WriteLine(price * quantity);",
+    "options": ["31.5", "31", "Compilation error", "31.50"],
+    "correctIndex": 0,
+    "explanation": "decimal * int promotes int to decimal; result is 31.5m, printed as \"31.5\".",
+    "difficulty": "Medium",
+    "tags": ["decimal-type", "numeric-types", "type-promotion"]
+  }
+]

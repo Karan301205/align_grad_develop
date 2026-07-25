@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "Cost Optimization Techniques",
+    "question": "Your monthly AWS bill: EC2 $8,000, RDS $3,000, S3 $1,000. You're using all on-demand instances. An analysis shows baseline load is constant 80%, spikes reach 120%. Which cost optimization should you prioritize?",
+    "options": [
+      "Buy 3-year all-upfront Reserved Instances for all 80% baseline; supplement spikes with on-demand",
+      "Migrate to Lambda; serverless always costs less",
+      "Downsize instances to reduce on-demand rates",
+      "Implement S3 Intelligent-Tiering; storage is the largest spend"
+    ],
+    "correctIndex": 0,
+    "explanation": "EC2 is 73% of spend and baseline is predictable (80%); RIs cover 80% at 50-60% discount = $2,400-3,200 savings; largest impact; S3 is only 9% of spend.",
+    "difficulty": "Medium",
+    "tags": ["cost-optimization", "reserved-instances", "spending-analysis"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cost Optimization Techniques",
+    "question": "You're running 100 small EC2 instances (t3.micro, $0.01/hour each) in a production environment. Annual cost: $8,760. Performance requirements are minimal. Should you consolidate to fewer larger instances?",
+    "options": [
+      "Yes; consolidate to 10 larger instances for 30% cost savings",
+      "No; t3.micro instances are already cheap; consolidation increases blast radius",
+      "Yes; use Compute Optimizer to recommend right-sized instances",
+      "No; scale is an architectural advantage; don't sacrifice for minor savings"
+    ],
+    "correctIndex": 1,
+    "explanation": "Consolidating 100 instances to 10 trades cost savings ($2,600) for resilience (10 instances = 10x larger blast radius); at $8,760/year, $2,600 savings (30%) doesn't justify increased risk.",
+    "difficulty": "Hard",
+    "tags": ["cost-optimization", "right-sizing", "architecture"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cost Optimization Techniques",
+    "question": "Your DynamoDB bill: 1 million RCUs/month (on-demand) costing $350. A cost analysis tool recommends provisioned capacity (200 RCU reserved = $100/month). You switch, but during peak hours, you exceed 200 RCU. What happens?",
+    "options": [
+      "Peak traffic is throttled; requests are rejected if exceeding capacity",
+      "DynamoDB auto-scales beyond 200 RCU; you pay on-demand overage rate (~$0.25 per 100 RCU)",
+      "Provisioned capacity is soft-limited; you pay penalty but requests succeed",
+      "Peak traffic requires different regional capacity; no impact to current region"
+    ],
+    "correctIndex": 1,
+    "explanation": "Provisioned capacity has hard limit; exceeding 200 RCU throttles writes; cost analysis must account for peak; if peak is unpredictable, on-demand is better despite higher baseline cost.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dynamodb", "cost-optimization", "capacity-planning"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cost Optimization Techniques",
+    "question": "You have 1TB of infrequently accessed logs in S3 Standard. Monthly storage cost: $20. Estimated access frequency: 1 query per month. Glacier Deep Archive cost: $4/month. Is switching worth it?",
+    "options": [
+      "No; $20 -> $4 saves only $192/year; not significant",
+      "Yes; but only if retrieval costs are acceptable; retrieving from Deep Archive costs $5-10/month",
+      "Yes; Deep Archive is always cheaper for infrequent access",
+      "No; S3 Intelligent-Tiering is better; transitions automatically"
+    ],
+    "correctIndex": 1,
+    "explanation": "Storage: $20 -> $4 saves $192/year; retrieval adds cost ($50/query if expedited); break-even occurs after ~3 queries/month; 1 query/month = net savings $140/year, but retrieval cost must be considered.",
+    "difficulty": "Medium-Hard",
+    "tags": ["s3", "cost-optimization", "storage-classes"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cost Optimization Techniques",
+    "question": "You're using CloudWatch Logs extensively. 50GB logs/month at $0.50/GB = $25/month storage, plus $0.01/GB scanned in queries. Monthly queries scan 100GB. Total cost: $26/month. Using Athena to query S3 logs (2GB/query cost $0.01): quarterly cost analysis shows Athena at $30/month. Should you switch?",
+    "options": [
+      "Yes; Athena provides better performance for analytical queries",
+      "No; CloudWatch Logs is cheaper ($26 vs $30); stick with current setup",
+      "Yes; but only if query performance is more important than cost",
+      "Switch 50%; use CloudWatch Logs for real-time, Athena for historical analysis"
+    ],
+    "correctIndex": 3,
+    "explanation": "CloudWatch Logs excels at real-time, Athena at exploratory/batch queries; hybrid approach: stream to CloudWatch (real-time), export to S3 (historical), query with Athena; total cost ~$28 with better UX.",
+    "difficulty": "Hard",
+    "tags": ["cost-optimization", "logging-strategy", "hybrid-approach"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cost Optimization Techniques",
+    "question": "Your AWS account has $10,000/month spend across multiple services. You're considering AWS Cost Anomaly Detection (free) and AWS Trusted Advisor (premium $100/month). Is Trusted Advisor worth the cost?",
+    "options": [
+      "Yes; Trusted Advisor identifies $500+/month optimization opportunities; pays for itself",
+      "No; Cost Anomaly Detection is free and detects overspending; Trusted Advisor is redundant",
+      "Only if you have complex infrastructure; simple architectures don't benefit",
+      "Yes; Trusted Advisor includes security audits beyond cost savings"
+    ],
+    "correctIndex": 0,
+    "explanation": "At $10k/month spend, Trusted Advisor typically identifies 5-10% waste ($500-1000); premium version ($100/month) pays for itself in weeks; benefits include cost, performance, and security checks.",
+    "difficulty": "Medium",
+    "tags": ["cost-optimization", "trusted-advisor", "investment-analysis"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cost Optimization Techniques",
+    "question": "You're running a batch processing job on EC2 (r5.2xlarge, $0.504/hour, 8 hours/day). Annual cost: ~$1,472. Alternatively, Lambda with same workload: $0.0000166 per 100ms + storage. Estimated: 8 hours = 28,800 invocations * $0.0000002 = $0.006/day = $2.19/year. Should you switch?",
+    "options": [
+      "Yes; Lambda is 99.8% cheaper for batch processing",
+      "No; Lambda has 15-minute timeout; batch job may exceed limit",
+      "Yes; but only if cold starts don't degrade performance",
+      "No; always use EC2 for batch processing; Lambda isn't designed for it"
+    ],
+    "correctIndex": 1,
+    "explanation": "Lambda is cheaper, but 15-minute timeout is a hard limit; if batch takes 8 hours, Lambda is unsuitable; EC2 is correct for long-running jobs regardless of cost.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lambda", "ec2", "cost-comparison"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cost Optimization Techniques",
+    "question": "Your VPC has a NAT Gateway ($32/month) serving private subnet instances. Monthly data processed: 10GB. NAT Gateway cost: $0.045/GB = $0.45 data + $32 = $32.45/month. VPC Endpoint (Gateway) for S3: free. Should you add an S3 endpoint?",
+    "options": [
+      "No; $0.45 S3 traffic cost is negligible compared to NAT Gateway fixed cost",
+      "Yes; S3 endpoint eliminates $0.45 traffic cost; adds $32.70 annual savings if traffic is S3-only",
+      "Yes; S3 endpoints are always recommended for production",
+      "No; endpoints add complexity; NAT Gateway is simpler"
+    ],
+    "correctIndex": 1,
+    "explanation": "Endpoint saves $0.45/month ($5.40/year), which is modest; but if S3 is the primary traffic, the principle is sound; endpoints are free and worthwhile for any S3-heavy workload.",
+    "difficulty": "Medium",
+    "tags": ["cost-optimization", "vpc-endpoints", "nat-gateway"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cost Optimization Techniques",
+    "question": "You've over-provisioned Elastic Load Balancer (ALB). Current traffic is 10 requests/second, but ALB is configured for 1,000 requests/second capacity. Monthly cost: $16 (fixed) + $0.006 per request hour = $25/month total. Downscaling to 100 RPS ALB would cost $14/month. Should you change?",
+    "options": [
+      "Yes; $11/month savings by right-sizing to actual traffic",
+      "No; ALB costs are minimal; the $11 savings doesn't justify downtime during migration",
+      "Yes; over-provisioning is always wasteful",
+      "No; keeping headroom for traffic spikes is worth the cost"
+    ],
+    "correctIndex": 1,
+    "explanation": "Absolute savings of $11/month (~$132/year) is small; migration downtime, testing, and DNS propagation cost (in effort) outweigh benefit; worthwhile only if part of larger optimization.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cost-optimization", "alb", "right-sizing"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Cost Optimization Techniques",
+    "question": "You're evaluating AWS Savings Plans (Compute) vs Reserved Instances (EC2-specific). Savings Plans commit to $10,000/year and cover EC2, Lambda, Fargate. RIs commit to 100 EC2 instances for $10,000/year. Compute Savings Plans offer 20% discount, RIs offer 40% discount. Which is more flexible?",
+    "options": [
+      "Savings Plans; they cover multiple services, enabling flexibility to shift between services",
+      "RIs; they guarantee lowest cost for EC2-only workloads",
+      "RIs; they have no expiration, unlike Savings Plans",
+      "Savings Plans are always better; RIs are deprecated"
+    ],
+    "correctIndex": 0,
+    "explanation": "Savings Plans discount is lower (20% vs 40%) but flexibility is higher (cover EC2, Lambda, Fargate); if you might shift to Lambda, Savings Plans are better; RIs are cheaper if staying on EC2.",
+    "difficulty": "Hard",
+    "tags": ["cost-optimization", "savings-plans", "reserved-instances"]
+  }
+]

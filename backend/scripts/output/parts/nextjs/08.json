@@ -1,0 +1,112 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "Internationalization Support",
+    "question": "You implement i18n with locale in the URL: /en/about, /fr/about. In getStaticPaths for a dynamic [locale]/[page].js, how do you enumerate both paths?",
+    "options": ["Return paths: [{params: {locale: 'en', page: 'about'}}, {params: {locale: 'fr', page: 'about'}}]", "Return paths: ['en', 'fr'] and fallback: true", "Next.js auto-detects locales; no need for getStaticPaths", "Define locales in next.config.js and getStaticPaths handles it"],
+    "correctIndex": 0,
+    "explanation": "getStaticPaths must explicitly enumerate all locale/page combinations as separate path objects.",
+    "difficulty": "Medium",
+    "tags": ["i18n", "getstaticpaths", "dynamic-routes"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Internationalization Support",
+    "question": "You store the user's language preference in localStorage. On server-side render (getServerSideProps), how do you access it?",
+    "options": ["Read localStorage in getServerSideProps directly", "Access via req.cookies if stored as a cookie", "localStorage is client-only; pass locale from query or path", "Use useRouter().locale in getServerSideProps"],
+    "correctIndex": 2,
+    "explanation": "localStorage is a browser API; server-side code must receive locale via URL, cookies, or headers, not client storage.",
+    "difficulty": "Medium-Hard",
+    "tags": ["i18n", "localstorage", "getserversideprops"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Internationalization Support",
+    "question": "You have content in 5 languages. A user visits /en/about. You want to set a cookie to remember their locale preference. Where do you set it?",
+    "options": ["In getStaticProps", "In getServerSideProps using res.setHeader", "In a useEffect on the client", "In middleware before the route"],
+    "correctIndex": 3,
+    "explanation": "Middleware runs before route handlers; it's the ideal place to detect locale and set cookies for all routes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["i18n", "cookies", "middleware"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Internationalization Support",
+    "question": "You implement SEO for i18n sites with hreflang tags. For a page available in en and fr, what hreflang structure is correct?",
+    "options": ["<link rel='alternate' hreflang='en' href='/en/about' />", "<link rel='alternate' hreflang='en-US' href='/en/about' /> + <link rel='alternate' hreflang='fr-FR' href='/fr/about' /> + <link rel='alternate' hreflang='x-default' href='/en/about' />", "Single hreflang pointing to canonical URL", "hreflang is not needed for i18n sites"],
+    "correctIndex": 1,
+    "explanation": "hreflang for i18n must specify each locale, include x-default for fallback, and use language-region or language-only codes consistently.",
+    "difficulty": "Medium-Hard",
+    "tags": ["i18n", "seo", "hreflang"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Internationalization Support",
+    "question": "You use next-i18next for translations. User visits /de/products but German isn't in your supported languages. What's the expected behavior?",
+    "options": ["next-i18next returns English (default) automatically", "404 error is thrown", "Depends on i18n fallbackLng config", "Page renders without translations"],
+    "correctIndex": 2,
+    "explanation": "next-i18next respects fallbackLng configuration; unsupported locales fall back to the configured default language.",
+    "difficulty": "Medium",
+    "tags": ["i18n", "next-i18next", "fallback"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Internationalization Support",
+    "question": "You serve the same content for /en/about and /about (no locale prefix). Search engines index both. How do you prevent duplicate content issues?",
+    "options": ["Use 301 redirect from /about to /en/about", "Set canonical URLs pointing to the default locale version", "Use rel='alternate' hreflang to signal locale versions", "Search engines automatically handle locale duplicates"],
+    "correctIndex": 1,
+    "explanation": "Canonical URLs tell search engines which version is primary; combine with hreflang to signal locale alternatives.",
+    "difficulty": "Medium-Hard",
+    "tags": ["i18n", "seo", "canonical-urls"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Internationalization Support",
+    "question": "You use useRouter().locale to access the current locale in a client component. During hydration, locale is undefined. Why?",
+    "options": ["Router hasn't mounted yet; wait for useEffect", "locale is server-only and not available on client", "You must pass locale via props from getServerSideProps", "next-router-events must be enabled in next.config.js"],
+    "correctIndex": 0,
+    "explanation": "useRouter() is async; locale is undefined until the router is ready (use useEffect or check isReady flag).",
+    "difficulty": "Medium-Hard",
+    "tags": ["i18n", "userouter", "hydration"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Internationalization Support",
+    "question": "You translate strings using i18n keys (e.g., t('home.title')). A translator adds a new language but forgets to include all keys. What happens?",
+    "options": ["Missing keys fall back to the source language", "Missing keys show the key name (e.g., 'home.title')", "Page throws an error on render", "Depends on i18n library configuration"],
+    "correctIndex": 3,
+    "explanation": "i18n fallback behavior (missing key handling) depends on library config; some use source language, others show the key.",
+    "difficulty": "Medium",
+    "tags": ["i18n", "translations", "fallback"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Internationalization Support",
+    "question": "You implement subdomain-based i18n (en.example.com, fr.example.com). In getServerSideProps, how do you detect the language?",
+    "options": ["Read from router.query", "Parse req.headers.host to extract the subdomain", "Use accept-language header", "next.config.js handles subdomain routing automatically"],
+    "correctIndex": 1,
+    "explanation": "Subdomain detection requires parsing the Host header from req.headers; next.config.js doesn't auto-handle this.",
+    "difficulty": "Medium-Hard",
+    "tags": ["i18n", "subdomains", "getserversideprops"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Internationalization Support",
+    "question": "You have 50 pages × 10 languages = 500 static pages. getStaticPaths enumerates all 500 paths. Build time is 10 minutes. Is this acceptable for daily deploys?",
+    "options": ["Yes; 10 minutes is normal for 500 pages", "No; consider on-demand ISR or dynamic i18n instead", "Yes if the build uses parallel workers", "No; reduce languages or pages"],
+    "correctIndex": 1,
+    "explanation": "10-minute builds hinder rapid iteration; consider ISR, dynamic i18n, or fewer build-time pages for faster deploys.",
+    "difficulty": "Medium-Hard",
+    "tags": ["i18n", "build-time", "scalability"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Internationalization Support",
+    "question": "You implement i18n and want to redirect users to their preferred language on first visit. Where is the best place for this logic?",
+    "options": ["In getServerSideProps", "In middleware before the route handler", "In a useEffect in pages/_app.js", "In next.config.js redirect rules"],
+    "correctIndex": 1,
+    "explanation": "Middleware runs before any page handler; it's ideal for locale detection and redirects without rendering overhead.",
+    "difficulty": "Medium",
+    "tags": ["i18n", "middleware", "redirects"]
+  }
+]

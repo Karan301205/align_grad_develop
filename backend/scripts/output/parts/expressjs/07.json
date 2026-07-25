@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Express JS",
+    "subtopic": "Template Engine Integration",
+    "question": "res.render('page', {title: 'Home'}) loads a template. The template references a variable 'title'. Where does Express look for the 'page' template file?",
+    "options": [
+      "The current working directory",
+      "The views/ directory by default (configured via app.set('views', path))",
+      "The public/ directory",
+      "The node_modules/ directory"
+    ],
+    "correctIndex": 1,
+    "explanation": "Express looks in the views/ directory by default; override with app.set('views', '/custom/path'). The view engine appends its file extension automatically.",
+    "difficulty": "Medium",
+    "tags": ["templates", "res.render", "view-engine", "paths"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Template Engine Integration",
+    "question": "A template renders {{ data }}, but the output shows the literal string '{{ data }}' instead of the value. The view engine is Handlebars. Why?",
+    "options": [
+      "Handlebars uses single braces {}, not double {{ }}",
+      "The data variable wasn't passed to res.render()",
+      "Double braces in Handlebars represent comments, not variables",
+      "The template syntax is correct; this indicates data is undefined"
+    ],
+    "correctIndex": 0,
+    "explanation": "Handlebars uses single braces {{ name }}, not double {{ }}; double braces are treated as literal text and rendered as-is.",
+    "difficulty": "Medium",
+    "tags": ["templates", "handlebars", "syntax", "variables"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Template Engine Integration",
+    "question": "app.set('view engine', 'ejs') is configured. A template file is saved as 'page.html'. res.render('page') is called. Why doesn't it render?",
+    "options": [
+      "The file extension should match the engine: 'page.ejs'",
+      "Express requires the full filename including extension",
+      "'page' doesn't exist as a valid template name",
+      "HTML files can't be used with EJS"
+    ],
+    "correctIndex": 0,
+    "explanation": "Express appends the view engine extension automatically; res.render('page') looks for 'page.ejs', not 'page.html'.",
+    "difficulty": "Medium",
+    "tags": ["templates", "file-extension", "view-engine", "res.render"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Template Engine Integration",
+    "question": "app.engine('custom', (path, options, callback) => { ... }) registers a custom engine. res.render('page', {}) is called, but the engine function receives only 2 arguments. Why?",
+    "options": [
+      "Custom engines don't receive the callback; they must call res.send() directly",
+      "res.render() doesn't pass the callback to custom engines",
+      "The engine signature is incorrect; it should accept (path, options, callback)",
+      "Custom engines bypass the standard Engine interface"
+    ],
+    "correctIndex": 2,
+    "explanation": "Custom engine functions must have the signature (path, options, callback); if the callback is missing, the engine definition is incorrect or missing a parameter.",
+    "difficulty": "Medium-Hard",
+    "tags": ["custom-engine", "callbacks", "signature", "app.engine"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Template Engine Integration",
+    "question": "res.render('page', {user: null, title: 'Home'}) passes null for user. In the EJS template, <% if (user) %> evaluates. Will the block execute?",
+    "options": [
+      "Yes; null is truthy in EJS templates",
+      "No; null is falsy and the condition is false",
+      "Only if user is explicitly checked with === null",
+      "EJS throws an error when user is null"
+    ],
+    "correctIndex": 1,
+    "explanation": "EJS uses JavaScript truthiness; null is falsy, so <% if (user) %> evaluates to false and the block doesn't execute.",
+    "difficulty": "Medium",
+    "tags": ["templates", "ejs", "truthiness", "conditionals"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Template Engine Integration",
+    "question": "A Pug template uses - var x = 5; to define a variable. Later, x is referenced in the template. Why can't other routes access this variable?",
+    "options": [
+      "Template variables are global and persist across requests",
+      "Variables defined in a template are scoped to that render call only",
+      "Pug variables must be declared in Express middleware to persist",
+      "x is accessible but must be re-rendered to be seen"
+    ],
+    "correctIndex": 1,
+    "explanation": "Template variables are local to the render call; each res.render() is isolated and doesn't persist state between requests.",
+    "difficulty": "Medium",
+    "tags": ["templates", "pug", "scope", "variables"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Template Engine Integration",
+    "question": "res.render('page') is called but the template requires a 'helper' variable. The helper function isn't passed in options. Where can it be defined to auto-inject into all templates?",
+    "options": [
+      "In app.locals using app.locals.helper = helperFunc",
+      "In a global.js file that's required before Express starts",
+      "In res.locals in middleware",
+      "Helpers must always be passed to res.render()"
+    ],
+    "correctIndex": 0,
+    "explanation": "app.locals properties are automatically available in all template renders; res.locals are per-request. Set app.locals.helper to inject a helper into every view.",
+    "difficulty": "Medium",
+    "tags": ["templates", "app.locals", "helpers", "injection"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Template Engine Integration",
+    "question": "A template includes another template: <% include('header') %>. The include fails with 'header not found'. What's likely?",
+    "options": [
+      "The included file must be 'header.js', not 'header.ejs'",
+      "The include path is relative to the views/ directory, and 'header.ejs' doesn't exist there",
+      "Include statements require an absolute path",
+      "The included file must be registered with app.engine() first"
+    ],
+    "correctIndex": 1,
+    "explanation": "Include paths are relative to the views directory; ensure the included file has the correct extension (.ejs for EJS) and exists in the views folder.",
+    "difficulty": "Medium",
+    "tags": ["templates", "includes", "paths", "file-resolution"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Template Engine Integration",
+    "question": "res.render('page', {}, (err, html) => { if (!err) res.send(html); }) renders asynchronously. The callback receives html. What does this pattern enable?",
+    "options": [
+      "It allows modifying the HTML before sending it to the client",
+      "It's the only way to use res.render() in Express",
+      "It speeds up rendering compared to res.render('page')",
+      "It enables error handling; without it, errors are ignored"
+    ],
+    "correctIndex": 0,
+    "explanation": "Using the callback pattern lets you inspect or modify the rendered HTML before sending; standard res.render() auto-sends without this flexibility.",
+    "difficulty": "Medium",
+    "tags": ["templates", "res.render", "callbacks", "html-manipulation"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Template Engine Integration",
+    "question": "res.render('page', {user: userData}) passes user data. In the template, <%= user.email %> outputs the email. If user.email is undefined, what is rendered?",
+    "options": [
+      "The literal string 'undefined'",
+      "An empty string (undefined is silently ignored)",
+      "The template throws an error and doesn't render",
+      "Nothing is rendered; the line is skipped"
+    ],
+    "correctIndex": 0,
+    "explanation": "In EJS, <%= undefined %> outputs the string 'undefined'; use <% if (user && user.email) %> to avoid this or set default values in app.locals.",
+    "difficulty": "Medium",
+    "tags": ["templates", "ejs", "undefined", "output"]
+  }
+]

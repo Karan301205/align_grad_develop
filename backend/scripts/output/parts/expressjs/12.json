@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Express JS",
+    "subtopic": "Scalable Architecture",
+    "question": "A single Express server handles 1000 concurrent users. Traffic doubles, and the server maxes out at 100% CPU. Scaling horizontally requires running multiple server instances. What distributes requests among them?",
+    "options": [
+      "Express automatically load-balances across instances",
+      "A load balancer (nginx, HAProxy) routes requests to different instances based on algorithms like round-robin",
+      "Each instance is independent; clients must manually choose which to connect to",
+      "Scaling horizontally requires no additional infrastructure"
+    ],
+    "correctIndex": 1,
+    "explanation": "Horizontal scaling requires a load balancer to distribute traffic; Express instances themselves don't coordinate load distribution.",
+    "difficulty": "Medium",
+    "tags": ["scalability", "load-balancing", "horizontal-scaling"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Scalable Architecture",
+    "question": "Two Express instances store user sessions in app-local memory: req.session = {userId: 123}. A user is routed to Instance A, then Instance B. Why is this problematic?",
+    "options": [
+      "Instance B has no knowledge of the session created on Instance A",
+      "In-memory sessions don't work across instances; use Redis or a session store instead",
+      "Express syncs sessions automatically across instances",
+      "Sessions are shared via the database connection"
+    ],
+    "correctIndex": 1,
+    "explanation": "In-memory sessions are lost when requests route to different instances; use centralized session stores (Redis, MongoDB) for distributed architectures.",
+    "difficulty": "Medium",
+    "tags": ["sessions", "horizontal-scaling", "session-store", "stateless"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Scalable Architecture",
+    "question": "An API depends on a single database instance. If the database goes down, the API is unavailable. How does replication improve reliability?",
+    "options": [
+      "Replication makes the database faster but doesn't prevent downtime",
+      "Replicas create read-only copies; automatic failover can switch to a replica if the primary fails",
+      "Replication prevents all database errors permanently",
+      "Express handles failover automatically without configuration"
+    ],
+    "correctIndex": 1,
+    "explanation": "Database replication creates redundant copies; automatic failover mechanisms promote a replica to primary if the primary is unavailable.",
+    "difficulty": "Medium",
+    "tags": ["reliability", "database-replication", "failover", "high-availability"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Scalable Architecture",
+    "question": "An API needs to send emails after creating a user. The email service is sometimes slow. Sending emails synchronously in the route handler could cause timeout issues. What's a better approach?",
+    "options": [
+      "Always wait for the email to send before responding",
+      "Queue the email job asynchronously and respond immediately to the user",
+      "Skip email sending in production",
+      "Increase the request timeout to 60 seconds"
+    ],
+    "correctIndex": 1,
+    "explanation": "Use a job queue (Bull, RabbitMQ, Celery) to defer slow operations; respond immediately and process jobs in the background.",
+    "difficulty": "Medium",
+    "tags": ["job-queues", "async-processing", "scalability"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Scalable Architecture",
+    "question": "An API serves different regions (US, EU, Asia). Users in Asia experience high latency. Why might deploying regional instances help?",
+    "options": [
+      "Regional instances reduce network distance and latency for local users",
+      "All regions must use the same instance; deployment doesn't help latency",
+      "Latency is solely determined by bandwidth, not server location",
+      "Regional deployment increases costs without latency benefits"
+    ],
+    "correctIndex": 0,
+    "explanation": "Geographic distribution reduces round-trip time; users connect to nearby instances (CDNs, edge servers) for lower latency.",
+    "difficulty": "Medium",
+    "tags": ["global-scalability", "geo-distribution", "latency", "cdn"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Scalable Architecture",
+    "question": "An API scales to 5 instances, but they share a single database connection pool with maxConnections: 10. High load causes 'No connections available' errors. Why?",
+    "options": [
+      "The pool size is too small for 5 instances; increase maxConnections to 50",
+      "Each instance opens its own pool (10 connections each = 50 total to the database); the database connection limit is exhausted",
+      "Database pooling doesn't work across multiple instances",
+      "Connection errors indicate a database crash"
+    ],
+    "correctIndex": 1,
+    "explanation": "Each server instance maintains its own connection pool; multiply pool size by instance count when calculating database connection limits.",
+    "difficulty": "Medium-Hard",
+    "tags": ["connection-pooling", "scaling", "database-limits"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Scalable Architecture",
+    "question": "An API logs errors to the file system. With multiple instances running, logs are scattered across different servers. Why is centralized logging important?",
+    "options": [
+      "Centralized logging is unnecessary; local logs are sufficient",
+      "Centralized logging (ELK, Splunk) aggregates logs in one place for easier monitoring and debugging across all instances",
+      "File system logging is always faster than centralized logging",
+      "Multiple instances invalidate logging capabilities"
+    ],
+    "correctIndex": 1,
+    "explanation": "Distributed logs across multiple instances are hard to search and correlate; centralized logging aggregates all logs for comprehensive monitoring.",
+    "difficulty": "Medium",
+    "tags": ["logging", "monitoring", "distributed-systems", "scalability"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Scalable Architecture",
+    "question": "A microservice architecture has a User Service and an Order Service. The Order Service calls the User Service API to get user details. If the User Service is down, what happens?",
+    "options": [
+      "The Order Service automatically uses cached data or a fallback response",
+      "Without error handling, the call fails and the Order Service returns an error to the client",
+      "The services are automatically rerouted to another instance",
+      "Microservices always sync directly; the call will eventually succeed"
+    ],
+    "correctIndex": 1,
+    "explanation": "Microservices are independent; without circuit breakers or fallback logic, a down dependency causes cascading failures.",
+    "difficulty": "Medium-Hard",
+    "tags": ["microservices", "fault-tolerance", "circuit-breaker", "resilience"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Scalable Architecture",
+    "question": "An API uses API keys for authentication. Revoking a key requires updating it in a database, but the change takes 5 minutes to propagate to all instances due to caching. Why is this a problem?",
+    "options": [
+      "API keys are not important; they can be ignored until cache expires",
+      "A revoked key can still be used for 5 minutes on cached instances, creating a security window",
+      "All instances should sync instantly without caching",
+      "This delay doesn't affect security"
+    ],
+    "correctIndex": 1,
+    "explanation": "Cached credentials can create security windows; use short cache TTLs and consider real-time invalidation mechanisms for security-sensitive data.",
+    "difficulty": "Medium-Hard",
+    "tags": ["caching", "security", "credential-management"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "Scalable Architecture",
+    "question": "A monolithic Express app with 100,000 lines of code is deployed on a single server. Scaling requires buying a more powerful machine (vertical). Why is horizontal scaling preferred?",
+    "options": [
+      "Vertical scaling is always better for large codebases",
+      "Horizontal scaling distributes load across cheap commodity servers and provides higher availability; vertical scaling has a hardware ceiling",
+      "Horizontal scaling requires rewriting the entire application",
+      "Vertical and horizontal scaling have identical costs"
+    ],
+    "correctIndex": 1,
+    "explanation": "Vertical scaling is limited by hardware; horizontal scaling is more cost-effective, resilient (single server failure doesn't crash the app), and can scale indefinitely.",
+    "difficulty": "Medium",
+    "tags": ["scalability", "vertical-vs-horizontal", "architecture", "resilience"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Basic Syntax",
+    "question": "What will this code output?\n```python\nx = 5\ny = x\nx = 10\nprint(y)\n```",
+    "options": ["5", "10", "NameError", "None"],
+    "correctIndex": 0,
+    "explanation": "y is assigned the value 5 before x is reassigned, so y remains 5 due to immutability of integers.",
+    "difficulty": "Medium",
+    "tags": ["immutability", "assignment", "integers"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Basic Syntax",
+    "question": "What is the result of this expression?\n```python\nresult = (10 // 3) * 3 + (10 % 3)\nprint(result)\n```",
+    "options": ["10", "9", "12", "11"],
+    "correctIndex": 0,
+    "explanation": "Integer division 10 // 3 = 3, then 3 * 3 = 9, plus remainder 10 % 3 = 1, yielding 10.",
+    "difficulty": "Medium",
+    "tags": ["arithmetic", "operators", "precedence"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Basic Syntax",
+    "question": "Given this mutable default argument, how many times does the list grow?\n```python\ndef append_item(item, lst=[]):\n    lst.append(item)\n    return lst\nprint(append_item(1))\nprint(append_item(2))\nprint(append_item(3))\n```",
+    "options": ["[1], [2], [3]", "[1], [1, 2], [1, 2, 3]", "[1], [1], [1]", "[1, 2, 3], [1, 2, 3], [1, 2, 3]"],
+    "correctIndex": 1,
+    "explanation": "Default arguments are evaluated once at function definition; the same list object persists across calls.",
+    "difficulty": "Hard",
+    "tags": ["mutable-defaults", "function-arguments", "gotcha"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Basic Syntax",
+    "question": "What will this code print?\n```python\nvalues = [1, 2, 3]\nfor i in range(len(values)):\n    values[i] *= 2\nprint(values)\n```",
+    "options": ["[1, 2, 3]", "[2, 4, 6]", "[2, 4, 3]", "TypeError"],
+    "correctIndex": 1,
+    "explanation": "Each element is multiplied by 2 in place, so the list becomes [2, 4, 6].",
+    "difficulty": "Medium",
+    "tags": ["loops", "list-mutation", "iteration"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Basic Syntax",
+    "question": "What happens with this walrus operator usage?\n```python\nif (n := 10) > 5:\n    print(n)\nprint(n)\n```",
+    "options": ["NameError on second print", "10 then 10", "10 then undefined", "SyntaxError"],
+    "correctIndex": 1,
+    "explanation": "The walrus operator := assigns and returns the value; n persists in the enclosing scope after the if block.",
+    "difficulty": "Medium-Hard",
+    "tags": ["walrus-operator", "assignment-expression", "scope"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Basic Syntax",
+    "question": "What does this expression evaluate to?\n```python\nresult = True and False or True\nprint(result)\n```",
+    "options": ["True", "False", "None", "TypeError"],
+    "correctIndex": 0,
+    "explanation": "True and False = False; False or True = True; logical operators short-circuit and return the first truthy/falsy operand.",
+    "difficulty": "Medium",
+    "tags": ["boolean-logic", "short-circuit", "precedence"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Basic Syntax",
+    "question": "What will the output be?\n```python\ndata = {'a': 1, 'b': 2}\nfor key in data:\n    print(key, end=' ')\n```",
+    "options": ["a b", "1 2", "a 1 b 2", "KeyError"],
+    "correctIndex": 0,
+    "explanation": "Iterating over a dict yields keys only; to iterate over key-value pairs use items().",
+    "difficulty": "Medium",
+    "tags": ["dictionaries", "iteration", "dict-methods"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Basic Syntax",
+    "question": "What is the result of this slice operation?\n```python\ns = 'Python'\nprint(s[-2::-1])\n```",
+    "options": ["on", "no", "nohtyP", "yP"],
+    "correctIndex": 2,
+    "explanation": "s[-2::-1] starts at index -2 (o), goes to the beginning, and reverses; result is 'nohtyP'.",
+    "difficulty": "Hard",
+    "tags": ["slicing", "negative-indices", "step"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Basic Syntax",
+    "question": "What does this code output?\n```python\nx = [1, 2, 3]\ny = x\nx += [4]\nprint(y)\n```",
+    "options": ["[1, 2, 3]", "[1, 2, 3, 4]", "NameError", "[4]"],
+    "correctIndex": 1,
+    "explanation": "The += operator on a list modifies the list in place; since y references the same list, it also shows [1, 2, 3, 4].",
+    "difficulty": "Medium-Hard",
+    "tags": ["list-mutation", "augmented-assignment", "references"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Basic Syntax",
+    "question": "What is printed?\n```python\ndef func(*args, **kwargs):\n    print(args, kwargs)\nfunc(1, 2, a=3, b=4)\n```",
+    "options": ["(1, 2) {'a': 3, 'b': 4}", "(1, 2, 'a', 'b') (3, 4)", "[1, 2] {a: 3, b: 4}", "(1, 2) [3, 4]"],
+    "correctIndex": 0,
+    "explanation": "*args collects positional arguments as a tuple, **kwargs collects keyword arguments as a dict.",
+    "difficulty": "Medium",
+    "tags": ["variadic-arguments", "unpacking", "function-parameters"]
+  }
+]

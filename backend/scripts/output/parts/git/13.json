@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Debugging Tools",
+    "question": "You suspect a commit corrupted the repository's Git objects. The repository is still accessible but you want to verify object integrity. Which command checks for corruption?",
+    "options": [
+      "Use git fsck --full to verify all Git objects and their references, reporting any missing or corrupted objects",
+      "Run git status to check the repository health",
+      "Use git verify-pack to check a specific pack file",
+      "Clone the repository to verify it"
+    ],
+    "correctIndex": 0,
+    "explanation": "git fsck scans the entire object database and index; --full checks unreachable objects; it reports dangling or corrupt objects.",
+    "difficulty": "Medium-Hard",
+    "tags": ["fsck", "corruption", "object-integrity"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Debugging Tools",
+    "question": "You accidentally deleted a commit with git reset --hard, but you cannot remember the commit hash. How do you find the deleted commit to recover it?",
+    "options": [
+      "Use git reflog to view the history of HEAD movements and find the deleted commit; use git checkout -b recovery-branch <commit-hash> to recover it",
+      "The commit is permanently lost",
+      "Use git log to find the deleted commit",
+      "Ask Git support for recovery"
+    ],
+    "correctIndex": 0,
+    "explanation": "Reflog is the first resort for recovery; it shows where HEAD pointed even if commits are no longer reachable from branches.",
+    "difficulty": "Medium",
+    "tags": ["reflog", "recovery", "deleted-commit"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Debugging Tools",
+    "question": "A developer claims they pushed a commit, but git log does not show it on the remote. The commit is not in git reflog either. What strategy should you use to investigate?",
+    "options": [
+      "Use git log --all --reflog to show all branches and reflog entries; check git branch -a for hidden branches; use git fetch --all to refresh remote tracking; check server logs if available",
+      "The commit was never pushed",
+      "The server deleted the commit",
+      "Git is malfunctioning"
+    ],
+    "correctIndex": 0,
+    "explanation": "--all and --reflog cast a wider net; --all fetches remote branches; the commit may be on a different branch or pushed to a different remote.",
+    "difficulty": "Medium-Hard",
+    "tags": ["debugging", "missing-commit", "investigation"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Debugging Tools",
+    "question": "git push fails with a cryptic error message about the remote. You want to see detailed debug output from Git. How do you enable verbose logging?",
+    "options": [
+      "Set GIT_TRACE environment variable to 1 (GIT_TRACE=1 git push) or use git push -v for verbosity; use GIT_TRACE_PERFORMANCE=1 to measure operations",
+      "Edit the .git/config file",
+      "Upgrade Git to a newer version",
+      "Contact GitHub support"
+    ],
+    "correctIndex": 0,
+    "explanation": "GIT_TRACE=1 enables protocol-level debugging; -v shows verbose output; GIT_TRACE_PERFORMANCE measures operation time.",
+    "difficulty": "Medium",
+    "tags": ["debug-logging", "trace", "troubleshooting"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Debugging Tools",
+    "question": "You want to understand why git status is slow. You suspect the untracked file scanner is the bottleneck. How do you profile git status to identify where time is spent?",
+    "options": [
+      "Use git status --porcelain and time it separately, or use GIT_TRACE_PERFORMANCE=1 to measure each suboperation",
+      "Just accept that status is slow",
+      "Rewrite Git from scratch",
+      "Disable status checking entirely"
+    ],
+    "correctIndex": 0,
+    "explanation": "GIT_TRACE_PERFORMANCE=1 breaks down git status into components (index loading, untracked file scanning, etc.), showing where time is spent.",
+    "difficulty": "Medium-Hard",
+    "tags": ["profiling", "performance-debugging", "trace"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Debugging Tools",
+    "question": "A branch mysteriously shows as 'behind origin' even though you believe you have the latest commits. How do you debug the branch tracking state?",
+    "options": [
+      "Use git branch -vv to show tracking branches and their status, or use git rev-list origin/<branch>..HEAD to see commits unique to your branch",
+      "Force-push to override the state",
+      "Delete and recreate the branch",
+      "Accept the status without investigating"
+    ],
+    "correctIndex": 0,
+    "explanation": "git branch -vv shows the upstream tracking state; git rev-list compares commits; these reveal whether the status is accurate.",
+    "difficulty": "Medium",
+    "tags": ["tracking-status", "debugging", "branch-divergence"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Debugging Tools",
+    "question": "You want to trace the exact git commands being executed when you run git pull. You suspect a configuration is causing unexpected behavior. What debugging approach should you use?",
+    "options": [
+      "Use bash -x to trace shell execution (bash -x -c 'git pull') or set GIT_TRACE=2 to trace Git's internal operations at the command level",
+      "Read the git source code",
+      "Ask in a forum",
+      "Just re-run git pull"
+    ],
+    "correctIndex": 0,
+    "explanation": "bash -x shows what commands are run (useful if git pull is a shell wrapper); GIT_TRACE=2 shows which Git commands are invoked.",
+    "difficulty": "Medium-Hard",
+    "tags": ["trace", "shell-debugging", "configuration"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Debugging Tools",
+    "question": "You suspect a file in your repository has the wrong encoding or contains hidden characters. How do you inspect the file at the Git level without relying on your editor?",
+    "options": [
+      "Use git cat-file -p <object-hash> to view file contents, or use git diff --word-diff or hexdump to reveal hidden characters and encodings",
+      "Open in a different editor",
+      "Delete and recreate the file",
+      "Inspect only in GitHub UI"
+    ],
+    "correctIndex": 0,
+    "explanation": "git cat-file dumps file contents as Git stores them; --word-diff shows character-level differences; hexdump shows bytes.",
+    "difficulty": "Medium",
+    "tags": ["file-inspection", "encoding", "hidden-characters"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Debugging Tools",
+    "question": "A merge conflict is extremely complex (many conflicting sections). You want to manually view all three versions (base, ours, theirs) side-by-side to understand the conflict. How do you access them?",
+    "options": [
+      "Use git show :1:<file> (base), git show :2:<file> (ours), git show :3:<file> (theirs) to view all three versions, or configure a merge tool like vimdiff to show them",
+      "Manually recreate the versions",
+      "Use git diff to see only two versions",
+      "Ask someone else to resolve it"
+    ],
+    "correctIndex": 0,
+    "explanation": "git show :<stage>:<path> accesses conflict stages; merge tools like vimdiff visualize all three versions in a unified view.",
+    "difficulty": "Medium",
+    "tags": ["merge-conflict-debugging", "conflict-stages", "merge-tool"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Git Debugging Tools",
+    "question": "You want to audit exactly what was changed between two versions of a file across many commits. You need to understand the evolution of specific functions. What git commands help with this?",
+    "options": [
+      "Use git log -S <string> to find commits that modified the function, git blame to see who last changed each line, or git log -p -- <file> to see full diffs over time",
+      "Use git diff alone to compare two versions",
+      "Manually inspect each commit",
+      "Use git status to check current changes"
+    ],
+    "correctIndex": 0,
+    "explanation": "git log -S finds commits that introduced/removed code; git blame maps lines to commits; git log -p provides full context.",
+    "difficulty": "Medium-Hard",
+    "tags": ["audit", "blame", "log-filtering"]
+  }
+]

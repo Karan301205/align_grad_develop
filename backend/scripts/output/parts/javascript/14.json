@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Code Refactoring",
+    "question": "What refactoring improves this?\n```javascript\nlet discount = 0;\nif (userType === 'premium') discount = 0.2;\nelse if (userType === 'standard') discount = 0.1;\nelse discount = 0;\nconst price = basePrice * (1 - discount);\n```",
+    "options": [
+      "Add comments to explain logic",
+      "Use object lookup map instead of nested if",
+      "Convert to ternary operator chain",
+      "Split into separate functions"
+    ],
+    "correctIndex": 1,
+    "explanation": "Object map replaces conditionals: const discounts = {premium: 0.2, standard: 0.1}; more maintainable.",
+    "difficulty": "Medium",
+    "tags": ["refactoring", "conditionals", "code-clarity"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Code Refactoring",
+    "question": "What is the refactored version?\n```javascript\nfunction calculateTotal(items) {\n  let total = 0;\n  for (let i = 0; i < items.length; i++) {\n    total += items[i].price * items[i].quantity;\n  }\n  return total;\n}\n```",
+    "options": [
+      "No refactoring needed; code is clear",
+      "Use reduce to eliminate loop and accumulator",
+      "Use forEach instead of for loop",
+      "Extract price calculation to separate function"
+    ],
+    "correctIndex": 1,
+    "explanation": "reduce eliminates manual loop and accumulator: items.reduce((sum, item) => sum + item.price * item.quantity, 0)",
+    "difficulty": "Medium",
+    "tags": ["reduce", "functional-programming", "refactoring"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Code Refactoring",
+    "question": "What improves this code?\n```javascript\nconst user = { name: '', email: '', age: 0 };\nif (user.name) {\n  if (user.email) {\n    if (user.age > 0) {\n      console.log('valid');\n    }\n  }\n}\n```",
+    "options": [
+      "Use switch statement for multiple checks",
+      "Early return to flatten nesting",
+      "Add else clauses for clarity",
+      "Combine all conditions in single if"
+    ],
+    "correctIndex": 1,
+    "explanation": "Early return inverts conditions: if (!user.name || !user.email || user.age <= 0) return; else console.log('valid')",
+    "difficulty": "Medium",
+    "tags": ["refactoring", "early-return", "reduce-nesting"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Code Refactoring",
+    "question": "What refactoring applies here?\n```javascript\nconst processUser = (user) => {\n  validateEmail(user.email);\n  validateAge(user.age);\n  validateName(user.name);\n  if (valid) {\n    saveToDb(user);\n  }\n};\n```",
+    "options": [
+      "Extract validation to separate function",
+      "Combine validations using composition",
+      "Use async/await for database operations",
+      "Remove redundant if statement"
+    ],
+    "correctIndex": 1,
+    "explanation": "Compose validations: const isValid = compose([validateEmail, validateAge, validateName]); cleaner flow.",
+    "difficulty": "Medium-Hard",
+    "tags": ["composition", "refactoring", "function-chaining"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Code Refactoring",
+    "question": "What does this refactoring achieve?\n```javascript\n// Before\nfunction getUserData(id) {\n  const user = fetchUser(id);\n  const posts = fetchPosts(id);\n  const comments = fetchComments(id);\n  return { user, posts, comments };\n}\n\n// After\nconst getUserData = (id) => Promise.all([\n  fetchUser(id),\n  fetchPosts(id),\n  fetchComments(id)\n]).then(([user, posts, comments]) => ({ user, posts, comments }));\n```",
+    "options": [
+      "Improves readability by using async",
+      "Enables parallel requests instead of sequential",
+      "Reduces code complexity significantly",
+      "Prevents network errors in requests"
+    ],
+    "correctIndex": 1,
+    "explanation": "Promise.all runs requests in parallel instead of sequentially, improving performance.",
+    "difficulty": "Medium-Hard",
+    "tags": ["async-refactoring", "Promise.all", "performance"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Code Refactoring",
+    "question": "What refactoring prevents duplication?\n```javascript\nconst API_URL = 'https://api.example.com';\nfunction getUser(id) {\n  return fetch(API_URL + '/users/' + id).then(r => r.json());\n}\nfunction getPost(id) {\n  return fetch(API_URL + '/posts/' + id).then(r => r.json());\n}\n```",
+    "options": [
+      "Extract URL construction into helper function",
+      "Create generic fetch wrapper for API calls",
+      "Use template literals for string building",
+      "Combine both functions into one"
+    ],
+    "correctIndex": 1,
+    "explanation": "Create apiFetch wrapper: const apiFetch = (endpoint) => fetch(`${API_URL}${endpoint}`).then(r => r.json())",
+    "difficulty": "Medium",
+    "tags": ["DRY", "refactoring", "reusable-functions"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Code Refactoring",
+    "question": "What improves error handling?\n```javascript\nfunction saveData(data) {\n  try {\n    const result = processData(data);\n    persistToDb(result);\n    return result;\n  } catch (e) {\n    console.log('error: ' + e);\n  }\n}\n```",
+    "options": [
+      "Logging is sufficient for errors",
+      "Re-throw error after logging for caller handling",
+      "Use finally block to ensure cleanup",
+      "Wrap in additional try/catch blocks"
+    ],
+    "correctIndex": 1,
+    "explanation": "Catch and re-throw lets caller handle error: catch (e) { console.log('error: ' + e); throw e; }",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "refactoring", "error-propagation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Code Refactoring",
+    "question": "What refactoring simplifies this?\n```javascript\nconst formatName = (user) => {\n  const first = user.firstName || '';\n  const last = user.lastName || '';\n  return (first + ' ' + last).trim();\n};\n```",
+    "options": [
+      "Use template literals instead of concatenation",
+      "Add input validation before processing",
+      "Extract defaults to helper function",
+      "Decompose into multiple smaller functions"
+    ],
+    "correctIndex": 0,
+    "explanation": "Template literals are clearer: return `${user.firstName || ''} ${user.lastName || ''}`.trim()",
+    "difficulty": "Medium",
+    "tags": ["template-literals", "code-clarity", "refactoring"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Code Refactoring",
+    "question": "What pattern improves this callback?\n```javascript\ngetUser(id, (err, user) => {\n  if (err) {\n    handleError(err);\n  } else {\n    getPost(user.id, (err, post) => {\n      if (err) handleError(err);\n      else console.log(post);\n    });\n  }\n});\n```",
+    "options": [
+      "Add comments to explain nesting",
+      "Refactor to async/await to reduce nesting",
+      "Split into named callback functions",
+      "Use multiple nested if statements"
+    ],
+    "correctIndex": 1,
+    "explanation": "async/await eliminates callback hell: const user = await getUser(id); const post = await getPost(user.id)",
+    "difficulty": "Medium-Hard",
+    "tags": ["callback-hell", "async-await", "refactoring"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Code Refactoring",
+    "question": "What refactoring follows DRY principle?\n```javascript\nconst validateEmail = (email) => {\n  if (!email) throw new Error('Email required');\n  if (!email.includes('@')) throw new Error('Invalid email');\n};\nconst validatePhone = (phone) => {\n  if (!phone) throw new Error('Phone required');\n  if (phone.length < 10) throw new Error('Invalid phone');\n};\n```",
+    "options": [
+      "Combine into single validation function",
+      "Extract validation logic into reusable validator factory",
+      "Add more specific error messages",
+      "Use regex for all pattern matching"
+    ],
+    "correctIndex": 1,
+    "explanation": "Create validator factory: const createValidator = (field, rules) => (value) => rules.forEach(r => r(value, field))",
+    "difficulty": "Medium-Hard",
+    "tags": ["DRY", "factory-pattern", "refactoring"]
+  }
+]

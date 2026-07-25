@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "STL Containers",
+    "question": "What happens to iterators when an element is erased from a std::vector?",
+    "options": ["all iterators remain valid", "iterators to erased element and beyond are invalidated", "only the erased iterator is invalid", "iterators are never invalidated in vectors"],
+    "correctIndex": 1,
+    "explanation": "Erasing invalidates the erased element and all iterators past it; iterators before the erase point remain valid.",
+    "difficulty": "Medium",
+    "tags": ["vector", "iterator-invalidation", "erase"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "STL Containers",
+    "question": "What is the time complexity of inserting an element at the front of a std::vector?",
+    "options": ["O(1)", "O(n)", "O(log n)", "depends on the implementation"],
+    "correctIndex": 1,
+    "explanation": "Inserting at the front requires shifting all elements, making it O(n); use std::deque for O(1) front insertion.",
+    "difficulty": "Medium",
+    "tags": ["vector", "time-complexity", "performance"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "STL Containers",
+    "question": "Can you modify a std::set element directly via an iterator?",
+    "options": ["yes; iterators allow modification", "no; iterators are const to preserve order", "yes, but the set reorders automatically", "modification is only forbidden for keys"],
+    "correctIndex": 1,
+    "explanation": "std::set iterators are const to prevent key modification, which would violate ordering invariants.",
+    "difficulty": "Medium",
+    "tags": ["std-set", "const-iterators", "ordering"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "STL Containers",
+    "question": "What does std::vector::reserve() do, and how does it differ from resize()?",
+    "options": ["reserve allocates memory; resize allocates and initializes elements", "both allocate the same amount", "resize is faster than reserve", "reserve is deprecated in C++11"],
+    "correctIndex": 0,
+    "explanation": "reserve(n) allocates capacity for n elements without creating them; resize(n) creates/destroys elements to size n.",
+    "difficulty": "Medium",
+    "tags": ["vector", "reserve", "resize", "capacity"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "STL Containers",
+    "question": "What is the difference between std::map and std::unordered_map in terms of performance?",
+    "options": ["map is always faster", "map is O(log n), unordered_map is O(1) average but O(n) worst-case", "unordered_map is always O(1)", "performance is identical"],
+    "correctIndex": 1,
+    "explanation": "map guarantees O(log n) via tree structure; unordered_map aims for O(1) via hashing but can degrade to O(n) on hash collisions.",
+    "difficulty": "Medium",
+    "tags": ["std-map", "std-unordered-map", "time-complexity"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "STL Containers",
+    "question": "When a std::vector reallocates to grow, what happens to existing iterators?",
+    "options": ["iterators remain valid and point to new locations", "all iterators are invalidated", "only iterators to the reallocated memory are invalid", "reallocation never occurs"],
+    "correctIndex": 1,
+    "explanation": "Reallocation moves all elements to new memory; all iterators, pointers, and references to old elements are invalidated.",
+    "difficulty": "Medium",
+    "tags": ["vector", "reallocation", "iterator-invalidation"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "STL Containers",
+    "question": "What is the space complexity of a std::list compared to std::vector?",
+    "options": ["list uses less memory due to no padding", "vector uses O(n), list uses O(n) plus overhead per node", "list is more space-efficient for large elements", "both have identical space usage"],
+    "correctIndex": 1,
+    "explanation": "list allocates separate memory for each node plus prev/next pointers, using more memory than vector.",
+    "difficulty": "Medium",
+    "tags": ["std-list", "std-vector", "space-complexity"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "STL Containers",
+    "question": "Can std::map have duplicate keys?",
+    "options": ["yes; map allows any number of duplicates", "no; map enforces key uniqueness", "yes; via std::multimap", "depends on the key type"],
+    "correctIndex": 1,
+    "explanation": "std::map enforces key uniqueness; use std::multimap to allow duplicate keys.",
+    "difficulty": "Medium",
+    "tags": ["std-map", "key-uniqueness", "multimap"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "STL Containers",
+    "question": "What does find() return if the element is not found in a std::set?",
+    "options": ["nullptr", "end() iterator", "0 or -1", "throws std::not_found exception"],
+    "correctIndex": 1,
+    "explanation": "find() returns end() if the element is not found, consistent across all STL associative containers.",
+    "difficulty": "Medium",
+    "tags": ["std-set", "find-function", "iterators"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "STL Containers",
+    "question": "Is std::vector guaranteed to use contiguous memory?",
+    "options": ["no; implementation may use fragmented memory", "yes; since C++03, vector guarantees contiguous storage", "only in C++11 onwards", "depends on the compiler"],
+    "correctIndex": 1,
+    "explanation": "std::vector guarantees contiguous memory for efficient array-like access and cache locality.",
+    "difficulty": "Medium",
+    "tags": ["vector", "contiguous-memory", "cache-efficiency"]
+  }
+]

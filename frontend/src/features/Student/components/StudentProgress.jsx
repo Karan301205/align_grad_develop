@@ -22,7 +22,9 @@ export default function StudentProgress({ applications, loading }) {
 
   const getInitials = (name) => {
     if (!name) return '??';
-    return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    const cleanName = name.replace(/^c_/i, '').trim();
+    if (!cleanName) return '??';
+    return cleanName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
   };
 
   const getAvatarBg = (name) => {
@@ -173,6 +175,9 @@ export default function StudentProgress({ applications, loading }) {
               const isActive = activeApp?.id === app.id;
               const hasRejected = (app.roundStatuses || []).some(r => r.status?.toUpperCase() === 'REJECTED');
               const displayStatus = hasRejected ? 'REJECTED' : app.status;
+              const rawCompanyName = app.job?.companyName || app.job?.company?.name || '';
+              const companyDisplayName = rawCompanyName.replace(/^c_/i, '');
+              const logoUrl = app.job?.company?.logoUrl || app.job?.logoUrl || app.job?.companyLogo;
 
               return (
                 <div
@@ -185,12 +190,16 @@ export default function StudentProgress({ applications, loading }) {
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-sm font-bold shadow ${getAvatarBg(app.job?.companyName)}`}>
-                      {getInitials(app.job?.companyName)}
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-sm font-bold shadow overflow-hidden ${getAvatarBg(companyDisplayName)}`}>
+                      {logoUrl ? (
+                        <img src={logoUrl} alt={companyDisplayName} className="w-full h-full object-cover" />
+                      ) : (
+                        getInitials(companyDisplayName)
+                      )}
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-on-surface truncate">{app.job?.title}</p>
-                      <p className="text-xs text-on-surface-variant truncate mt-0.5">{app.job?.companyName}</p>
+                      <p className="text-xs text-on-surface-variant truncate mt-0.5">{companyDisplayName}</p>
                     </div>
                   </div>
                   
@@ -207,17 +216,25 @@ export default function StudentProgress({ applications, loading }) {
 
         {/* Right Side: Detailed Rounds Stepper */}
         <div className="lg:col-span-2">
-          {activeApp && (
+          {activeApp && (() => {
+            const rawActiveCompany = activeApp.job?.companyName || activeApp.job?.company?.name || '';
+            const activeCompanyDisplayName = rawActiveCompany.replace(/^c_/i, '');
+            const activeLogoUrl = activeApp.job?.company?.logoUrl || activeApp.job?.logoUrl || activeApp.job?.companyLogo;
+            return (
             <Card className="p-6 space-y-6">
               {/* Header Info */}
               <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4 pb-5 border-b border-outline-variant">
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-bold shadow-md shrink-0 ${getAvatarBg(activeApp.job?.companyName)}`}>
-                    {getInitials(activeApp.job?.companyName)}
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold shadow-md shrink-0 overflow-hidden ${getAvatarBg(activeCompanyDisplayName)}`}>
+                    {activeLogoUrl ? (
+                      <img src={activeLogoUrl} alt={activeCompanyDisplayName} className="w-full h-full object-cover" />
+                    ) : (
+                      getInitials(activeCompanyDisplayName)
+                    )}
                   </div>
                   <div>
                     <h3 className="text-xl font-headline font-bold text-on-surface">{activeApp.job?.title}</h3>
-                    <p className="text-sm text-on-surface-variant font-mono mt-0.5">{activeApp.job?.companyName}</p>
+                    <p className="text-sm text-on-surface-variant font-mono mt-0.5">{activeCompanyDisplayName}</p>
                     
                     {/* Metadata tags */}
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-on-surface-variant mt-2 font-mono">
@@ -291,7 +308,8 @@ export default function StudentProgress({ applications, loading }) {
                 </div>
               </div>
             </Card>
-          )}
+            );
+          })()}
         </div>
 
       </div>

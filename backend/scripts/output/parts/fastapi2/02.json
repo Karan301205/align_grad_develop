@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Database Integration",
+    "question": "from fastapi import FastAPI, Depends\nfrom sqlalchemy import create_engine\nfrom sqlalchemy.orm import Session, sessionmaker\n\nengine = create_engine(\"postgresql://...\")\nSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)\n\ndef get_db():\n    db = SessionLocal()\n    try:\n        yield db\n    finally:\n        db.close()\n\napp = FastAPI()\n\n@app.get(\"/users\")\ndef list_users(db: Session = Depends(get_db)):\n    return db.query(User).all()\n\nWhat happens if two concurrent requests both call list_users()?",
+    "options": [
+      "Both requests share the same Session object",
+      "Each request gets its own Session from the pool",
+      "Second request waits for first to complete",
+      "RuntimeError due to session reuse"
+    ],
+    "correctIndex": 1,
+    "explanation": "Depends() creates a new dependency instance per request, so each concurrent request receives a separate Session from the SessionLocal factory.",
+    "difficulty": "Medium",
+    "tags": ["depends", "session-management", "connection-pool"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Database Integration",
+    "question": "from fastapi import FastAPI, Depends\nfrom sqlalchemy.orm import Session\n\ndef get_db():\n    db = SessionLocal()\n    try:\n        yield db\n    finally:\n        db.close()\n\napp = FastAPI()\n\n@app.post(\"/users\")\ndef create_user(user_data: dict, db: Session = Depends(get_db)):\n    db.add(User(**user_data))\n    db.commit()\n    return {\"status\": \"created\"}\n\nIf db.commit() raises an IntegrityError, what state is the session in?",
+    "options": [
+      "Rolled back; safe to reuse for next query",
+      "In failed state; must be closed before next operation",
+      "Partial commit; some data inserted",
+      "Auto-recovers after 5 seconds"
+    ],
+    "correctIndex": 1,
+    "explanation": "SQLAlchemy sessions enter a failed state on commit error; the finally block closes it, and a new request gets a fresh session.",
+    "difficulty": "Medium-Hard",
+    "tags": ["transaction", "error-handling", "session-state"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Database Integration",
+    "question": "from sqlalchemy.orm import Session\nfrom sqlalchemy import select\n\ndef get_user_with_posts(db: Session, user_id: int):\n    user = db.query(User).filter(User.id == user_id).first()\n    posts = db.query(Post).filter(Post.user_id == user_id).all()\n    return {\"user\": user, \"posts\": posts}\n\nWhat database problem occurs if a User has 1000 posts?",
+    "options": [
+      "Two separate queries execute; N+1 not present",
+      "Loads all 1000 posts unnecessarily per request",
+      "Memory limit exceeded in ORM",
+      "SQLAlchemy raises QueryError"
+    ],
+    "correctIndex": 1,
+    "explanation": "The query loads every post row when only displaying (e.g.) 10 per page; use pagination (.offset().limit()) or eager loading (joinedload) instead.",
+    "difficulty": "Medium",
+    "tags": ["pagination", "eager-loading", "query-optimization"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Database Integration",
+    "question": "from sqlalchemy.orm import Session, relationship\nfrom sqlalchemy import Column, Integer, String, ForeignKey\n\nclass User(Base):\n    __tablename__ = \"users\"\n    id = Column(Integer, primary_key=True)\n    posts = relationship(\"Post\", back_populates=\"author\")\n\nclass Post(Base):\n    __tablename__ = \"posts\"\n    id = Column(Integer, primary_key=True)\n    user_id = Column(Integer, ForeignKey(\"users.id\"))\n    author = relationship(\"User\", back_populates=\"posts\")\n\ndef get_user(db: Session, user_id: int):\n    user = db.query(User).filter(User.id == user_id).first()\n    print(len(user.posts))  # Accessed after query\n    return user\n\nWhat happens when accessing user.posts after the session closes?",
+    "options": [
+      "Posts are pre-loaded and available",
+      "DetachedInstanceError raised; posts not accessible",
+      "Lazy-loads posts with implicit query",
+      "Empty list returned"
+    ],
+    "correctIndex": 1,
+    "explanation": "Relationship attributes are lazy by default; accessing them outside the session scope raises DetachedInstanceError; use eager loading or access before session closes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["orm-relationships", "lazy-loading", "session-scope"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Database Integration",
+    "question": "from fastapi import FastAPI, Depends\nfrom sqlalchemy.orm import Session\nfrom sqlalchemy.dialects.postgresql import insert\n\n@app.post(\"/bulk-users\")\ndef bulk_create(users: list[dict], db: Session = Depends(get_db)):\n    stmt = insert(User).values(users)\n    db.execute(stmt)\n    db.commit()\n    return {\"inserted\": len(users)}\n\nCompared to looping with db.add() per user, what is the performance difference?",
+    "options": [
+      "Insert statement: 1 query; loop: N queries",
+      "Both execute same number of queries",
+      "Insert statement: slower due to batch overhead",
+      "Loop: faster because results are returned immediately"
+    ],
+    "correctIndex": 0,
+    "explanation": "insert().values() sends one batch query to the database; the loop sends N individual INSERT queries, making bulk insert dramatically faster.",
+    "difficulty": "Medium",
+    "tags": ["bulk-operations", "performance", "batch-insert"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Database Integration",
+    "question": "from sqlalchemy.orm import Session\n\ndef update_user(db: Session, user_id: int, new_name: str):\n    db.query(User).filter(User.id == user_id).update({User.name: new_name})\n    db.commit()\n    user = db.query(User).filter(User.id == user_id).first()\n    return user\n\nWhy does the returned user sometimes show stale data immediately after update?",
+    "options": [
+      "Caching layer delays visibility",
+      "Session expiry timeout not configured",
+      "SQLAlchemy identity map keeps stale object in memory",
+      "Commit error silently ignored"
+    ],
+    "correctIndex": 2,
+    "explanation": "The query() returns the old User object from session identity cache; call db.expunge_all() before re-querying or use db.refresh(user).",
+    "difficulty": "Medium-Hard",
+    "tags": ["session-cache", "identity-map", "refresh"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Database Integration",
+    "question": "from sqlalchemy.orm import Session\nfrom sqlalchemy import text\n\n@app.get(\"/search\")\ndef search_users(db: Session, query: str = \"\"):\n    result = db.execute(\n        text(\"SELECT * FROM users WHERE name LIKE :q\"),\n        {\"q\": query}\n    )\n    return result.fetchall()\n\nWhat security issue exists if query is user-supplied?",
+    "options": [
+      "SQL injection possible; parameterization doesn't protect LIKE wildcards",
+      "No issue; text() with named params prevents injection",
+      "SQL injection from ':q' placeholder not replaced",
+      "Database connection string exposed in error logs"
+    ],
+    "correctIndex": 1,
+    "explanation": "Named parameters like :q are properly parameterized by SQLAlchemy/database driver, preventing SQL injection; this code is safe.",
+    "difficulty": "Medium",
+    "tags": ["sql-injection", "parameterized-queries", "security"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Database Integration",
+    "question": "from sqlalchemy import event\nfrom sqlalchemy.orm import Session\n\n@event.listens_for(Session, \"after_commit\")\ndef receive_after_commit(session):\n    print(\"Transaction committed\")\n\n@app.post(\"/data\")\ndef insert_data(db: Session = Depends(get_db)):\n    db.add(Data(value=1))\n    db.commit()\n    return {\"status\": \"done\"}\n\nIf the after_commit listener raises an exception, what happens to the database transaction?",
+    "options": [
+      "Transaction rolls back; data not inserted",
+      "Data already committed; exception doesn't roll back",
+      "Listener exception retried automatically",
+      "Both data and exception logged to database"
+    ],
+    "correctIndex": 1,
+    "explanation": "after_commit listeners fire after commit succeeds; exceptions in listeners don't roll back the committed transaction.",
+    "difficulty": "Medium-Hard",
+    "tags": ["event-listeners", "transaction-lifecycle", "error-handling"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Database Integration",
+    "question": "from sqlalchemy.pool import QueuePool\nfrom sqlalchemy import create_engine\n\nengine = create_engine(\n    \"postgresql://...\",\n    poolclass=QueuePool,\n    pool_size=10,\n    max_overflow=20\n)\n\nIf 50 concurrent requests arrive and all request database connections, what happens?",
+    "options": [
+      "First 10 get connections; next 20 wait in queue; last 20 fail immediately",
+      "All 50 connections created; no limit enforced",
+      "First 30 (10 + 20) get connections; last 20 raise Pool timeout error",
+      "Requests are serialized; only 10 processed per second"
+    ],
+    "correctIndex": 2,
+    "explanation": "pool_size=10 provides 10 connections; max_overflow=20 allows 20 temporary connections; remaining 20 requests timeout or error.",
+    "difficulty": "Medium",
+    "tags": ["connection-pooling", "concurrency", "resource-limits"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Database Integration",
+    "question": "from sqlalchemy import event\nfrom sqlalchemy.engine import Engine\n\n@event.listens_for(Engine, \"before_cursor_execute\")\ndef receive_before_cursor_execute(conn, cursor, statement, params, context, executemany):\n    if \"DELETE\" in statement.upper():\n        raise Exception(\"DELETE operations disabled\")\n\nengine = create_engine(\"postgresql://...\")\n\ndef delete_user(db: Session, user_id: int):\n    db.query(User).filter(User.id == user_id).delete()\n    db.commit()\n\nWhat happens when delete_user() is called?",
+    "options": [
+      "Exception raised before delete executes",
+      "Delete succeeds; exception ignored",
+      "Exception raised after delete completes",
+      "No change; listener doesn't apply to ORM queries"
+    ],
+    "correctIndex": 0,
+    "explanation": "before_cursor_execute fires for all SQL, including ORM queries; the exception blocks the DELETE from reaching the database.",
+    "difficulty": "Medium-Hard",
+    "tags": ["event-listeners", "query-interception", "safety-mechanisms"]
+  }
+]

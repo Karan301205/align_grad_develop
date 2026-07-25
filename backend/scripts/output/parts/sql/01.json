@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Basics",
+    "question": "Given the query:\nSELECT id, name, salary FROM employees WHERE salary > 50000 AND department = 'Engineering';\n\nIf no rows match, what is returned?",
+    "options": [
+      "An empty result set with zero rows",
+      "NULL values for all columns",
+      "A single row with default values",
+      "An error indicating no data found"
+    ],
+    "correctIndex": 0,
+    "explanation": "A SELECT with no matching WHERE conditions returns an empty result set (zero rows), not NULL values, defaults, or an error.",
+    "difficulty": "Medium",
+    "tags": ["select", "where", "empty-result"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Basics",
+    "question": "What is the output of:\nSELECT id, name FROM users WHERE status = NULL;\n\nAssume status IS NULL for one row.",
+    "options": [
+      "The row with NULL status is returned",
+      "The row with NULL status is not returned",
+      "All rows are returned",
+      "An error is raised"
+    ],
+    "correctIndex": 1,
+    "explanation": "NULL comparisons using = always evaluate to UNKNOWN, not true, so IS NULL must be used instead; = NULL returns no rows.",
+    "difficulty": "Medium",
+    "tags": ["null-handling", "where-clause"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Basics",
+    "question": "What does this query return?\nSELECT COUNT(*) FROM orders WHERE amount BETWEEN 100 AND 200;\n\nThere are 50 orders with amount exactly 100, 50 with amount exactly 200, and 100 with amounts in between.",
+    "options": [
+      "100",
+      "200",
+      "50",
+      "150"
+    ],
+    "correctIndex": 1,
+    "explanation": "BETWEEN is inclusive on both ends, so it includes amounts of 100, 200, and all values between them, totaling 200 rows.",
+    "difficulty": "Medium",
+    "tags": ["between", "count", "inclusive-range"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Basics",
+    "question": "What happens when you execute:\nSELECT id, name, 'Active' AS status FROM users LIMIT 0;\n\nAssume the users table has 1000 rows.",
+    "options": [
+      "Zero rows are returned with the column headers",
+      "All 1000 rows are returned",
+      "An error occurs due to invalid LIMIT",
+      "Exactly one row is returned"
+    ],
+    "correctIndex": 0,
+    "explanation": "LIMIT 0 returns zero rows but the query still executes and column headers (id, name, status) are included in the result set.",
+    "difficulty": "Medium",
+    "tags": ["limit", "result-set"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Basics",
+    "question": "What is the output of:\nSELECT DISTINCT department FROM employees WHERE salary > 50000 ORDER BY department DESC;\n\nThe employees table has departments: Engineering, Sales, HR (multiple rows each, all with salary > 50000).",
+    "options": [
+      "HR, Sales, Engineering",
+      "Engineering, Sales, HR",
+      "All employee records sorted by department",
+      "Only one department is returned"
+    ],
+    "correctIndex": 0,
+    "explanation": "DISTINCT removes duplicates and ORDER BY DESC sorts alphabetically in reverse, giving HR, Sales, Engineering.",
+    "difficulty": "Medium",
+    "tags": ["distinct", "order-by"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Basics",
+    "question": "What does this query output?\nSELECT id, COALESCE(nickname, name, 'Unknown') AS display_name FROM users;\n\nOne row has nickname=NULL, name='Alice', another has nickname='Bob', name='Bobby'.",
+    "options": [
+      "Alice in the first row, Bob in the second",
+      "NULL in the first row, Bob in the second",
+      "Unknown in the first row, Bobby in the second",
+      "Alice in the first row, Bobby in the second"
+    ],
+    "correctIndex": 0,
+    "explanation": "COALESCE returns the first non-NULL value, so NULL nickname falls through to 'Alice' (name), and 'Bob' nickname is used directly.",
+    "difficulty": "Medium",
+    "tags": ["coalesce", "null-handling"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Basics",
+    "question": "What is the result of:\nSELECT id FROM products WHERE name LIKE '%phone%';\n\nTable has products: 'Smartphone', 'phone case', 'Telephone', 'Cellphone'. LIKE is case-sensitive in your database.",
+    "options": [
+      "All four products match",
+      "Only Smartphone and Cellphone match",
+      "Only phone case and Telephone match",
+      "No products match"
+    ],
+    "correctIndex": 0,
+    "explanation": "LIKE '%phone%' performs a case-insensitive pattern match in most SQL databases (MySQL, PostgreSQL default), matching all variations.",
+    "difficulty": "Medium-Hard",
+    "tags": ["like", "pattern-matching"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Basics",
+    "question": "What query result is produced by:\nSELECT 1 WHERE 1=1 AND 1=0;\n\nWith no FROM clause.",
+    "options": [
+      "An empty result set",
+      "A single row with value 1",
+      "An error due to missing FROM clause",
+      "NULL is returned"
+    ],
+    "correctIndex": 0,
+    "explanation": "The AND condition short-circuits to false (1=0), so the WHERE filters out the implicit row, returning zero rows.",
+    "difficulty": "Medium",
+    "tags": ["where-filtering", "boolean-logic"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Basics",
+    "question": "Given:\nSELECT id, name, salary FROM employees WHERE salary BETWEEN 40000 AND 60000 ORDER BY salary ASC LIMIT 5;\n\nWhat does this query always guarantee?",
+    "options": [
+      "Exactly 5 rows are returned",
+      "At most 5 rows are returned",
+      "All employees with salary between 40000 and 60000 are returned",
+      "The result is sorted and limited to those with salary exactly between 40k and 60k"
+    ],
+    "correctIndex": 1,
+    "explanation": "LIMIT 5 returns at most 5 rows, but if fewer than 5 rows satisfy the WHERE clause, fewer rows are returned.",
+    "difficulty": "Medium",
+    "tags": ["limit", "where", "guarantees"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Basics",
+    "question": "What does this query return?\nSELECT COUNT(DISTINCT status) FROM orders WHERE status IN ('pending', 'shipped', 'delivered') OR status IS NULL;\n\nTable has 100 orders: 30 pending, 40 shipped, 20 delivered, 10 with NULL status.",
+    "options": [
+      "4",
+      "3",
+      "100",
+      "110"
+    ],
+    "correctIndex": 0,
+    "explanation": "COUNT(DISTINCT status) counts unique non-NULL status values: pending, shipped, delivered, plus NULL counts as one distinct value in this context.",
+    "difficulty": "Medium-Hard",
+    "tags": ["count-distinct", "null-handling"]
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "Disaster Recovery Planning",
+    "question": "Your RPO (Recovery Point Objective) is 1 hour and RTO (Recovery Time Objective) is 4 hours. You're evaluating backup strategies. Daily manual backups take 2 hours to restore. Which approach meets your requirements?",
+    "options": [
+      "Daily manual backups; 1-hour RPO requires snapshots every hour, which is impractical",
+      "Hourly automated backups; RTO 4 hours requires pre-testing recovery time in advance",
+      "Continuous replication (read replica or DMS); RPO approaches zero, RTO is manual failover time (~15 min)",
+      "Weekly backups stored in Glacier; cost-effective for long-term retention"
+    ],
+    "correctIndex": 2,
+    "explanation": "RPO 1 hour requires frequent backup/replication; hourly automated backups are insufficient if recovery takes 2+ hours (violates 4-hour RTO); continuous replication meets both by keeping backup fresh.",
+    "difficulty": "Hard",
+    "tags": ["disaster-recovery", "rpo-rto", "backup-strategy"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Disaster Recovery Planning",
+    "question": "You implement a multi-region disaster recovery plan: primary in us-east-1, standby in us-west-2. During an us-east-1 outage, you manually promote the standby database to primary. Users in us-east-1 are now 1000+ miles away from the primary. Is this acceptable?",
+    "options": [
+      "Yes; DNS failover automatically routes users to the nearest region",
+      "No; Route 53 latency-based routing redirects requests, but users still connect to us-west-2; latency increases",
+      "Yes; multi-region deployments always reduce latency",
+      "No; you should have deployed a primary in each region"
+    ],
+    "correctIndex": 1,
+    "explanation": "Promoting standby restores availability but increases latency; Route 53 failover is automatic, but routing to us-west-2 from us-east-1 adds 50-100ms latency; acceptable as temporary recovery.",
+    "difficulty": "Medium-Hard",
+    "tags": ["disaster-recovery", "multi-region", "failover"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Disaster Recovery Planning",
+    "question": "You're designing DR for a web application with 99.99% availability SLA. Current architecture: single region, no backups, RTO 8 hours, RPO 24 hours. To meet SLA, what's the minimum RTO/RPO?",
+    "options": [
+      "RTO < 1 hour, RPO < 1 minute; 99.99% allows ~44 minutes downtime/year",
+      "RTO < 5 minutes, RPO < 5 minutes; stricter targets reduce risk",
+      "RTO < 15 minutes, RPO < 15 minutes; balances cost and availability",
+      "99.99% is impossible without multi-region active-active setup"
+    ],
+    "correctIndex": 0,
+    "explanation": "99.99% = 52.6 minutes downtime/year; RTO must be < ~1 hour; RPO must be < ~1 minute; current 8-hour RTO makes 99.99% unachievable; requires backup/replication infrastructure.",
+    "difficulty": "Hard",
+    "tags": ["disaster-recovery", "sla", "rto-rpo"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Disaster Recovery Planning",
+    "question": "You have RDS backups stored in S3 (cross-region). A ransomware attack encrypts S3 objects in all regions simultaneously. Backups are inaccessible. How should you have protected against this?",
+    "options": [
+      "Enable S3 Object Lock (WORM mode); prevents deletion or encryption of backups",
+      "Store backups in Glacier; Glacier objects can't be encrypted by attackers",
+      "Use S3 versioning; restore previous unencrypted versions",
+      "Enable MFA delete on S3; requires MFA to delete backups"
+    ],
+    "correctIndex": 0,
+    "explanation": "Object Lock with WORM (Write-Once-Read-Many) prevents all modifications, including encryption; versioning doesn't help (attacker encrypts all versions); MFA delete is per-deletion, not encryption.",
+    "difficulty": "Hard",
+    "tags": ["disaster-recovery", "s3-object-lock", "ransomware"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Disaster Recovery Planning",
+    "question": "You implement Aurora Global Database for multi-region DR. Read replicas in us-west-2 are automatically synced from us-east-1. During an us-east-1 region failure, you manually promote the replica to primary. How long does promotion take?",
+    "options": [
+      "Seconds; promoted replica becomes primary immediately",
+      "Minutes; Aurora must rebuild connection and replication settings",
+      "Hours; data must be validated before promotion",
+      "Promotion fails; you must manually create a new database"
+    ],
+    "correctIndex": 0,
+    "explanation": "Aurora Global Database promotes read replicas in seconds (no data validation needed); replication lag is <1 second; promotion is fast because replica is already fully synchronized.",
+    "difficulty": "Medium",
+    "tags": ["aurora-global-database", "disaster-recovery", "promotion"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Disaster Recovery Planning",
+    "question": "Your backup strategy: hourly RDS snapshots (1TB each) stored in S3, retention 30 days = 720 snapshots/month. Monthly storage cost is $15,000. You need to lower costs while maintaining RPO of 6 hours. What's the best approach?",
+    "options": [
+      "Keep hourly snapshots; cost is non-negotiable for compliance",
+      "Switch to 6-hour snapshots (4/day); RPO 6 hours, cost drops to $2,500/month",
+      "Use incremental snapshots (EBS native); cost drops to $1,000/month, RPO unchanged",
+      "Delete snapshots older than 7 days; cost drops to $3,000/month, RPO unaffected"
+    ],
+    "correctIndex": 2,
+    "explanation": "Incremental snapshots store only changed blocks; RDS doesn't support native incremental (EBS does for EC2); switching to 6-hour snapshots reduces retention but meets RPO; incremental via EBS-to-RDS snapshot export is cost-optimal.",
+    "difficulty": "Hard",
+    "tags": ["disaster-recovery", "backup-strategy", "cost-optimization"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Disaster Recovery Planning",
+    "question": "You're testing your DR plan. You restore a production database backup to a dev environment and perform a failover drill. The drill shows RTO of 2 hours (restoring from backup). Your SLA requires RTO < 1 hour. What should you change?",
+    "options": [
+      "Increase backup frequency to hourly; faster restoration",
+      "Pre-position a warm standby (read replica); failover is seconds, not hours",
+      "Switch to automated backups; manual backups are slower",
+      "Smaller database sizes restore faster; ask developers to reduce schema"
+    ],
+    "correctIndex": 1,
+    "explanation": "Backup restoration is inherently slow (2 hours for 1TB); pre-positioned standby/replica enables < 1-minute failover; failover is faster than restore + validation.",
+    "difficulty": "Medium-Hard",
+    "tags": ["disaster-recovery", "rto", "testing"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Disaster Recovery Planning",
+    "question": "You implement cross-region DynamoDB Global Tables for DR. Tables are replicated from us-east-1 to us-west-2 with <1-second lag. During us-east-1 failure, applications in us-east-1 are redirected to us-west-2. Data is eventually consistent. Is this acceptable?",
+    "options": [
+      "Yes; eventual consistency is acceptable for most applications; high availability is more important",
+      "No; eventual consistency violates data integrity; must use strong consistency",
+      "Depends on application; financial systems need strong consistency; content sites tolerate eventual",
+      "Yes, but only if applications refresh data after failover"
+    ],
+    "correctIndex": 2,
+    "explanation": "Eventual consistency is a trade-off: high availability vs. consistency; acceptable for web/content apps, unacceptable for financial transactions; application design determines acceptability.",
+    "difficulty": "Hard",
+    "tags": ["dynamodb-global-tables", "consistency", "disaster-recovery"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Disaster Recovery Planning",
+    "question": "You document your DR plan: RTO 4 hours, RPO 1 hour, restore from S3 backups. Six months later, a real disaster occurs. You attempt to restore a 500GB database from S3. Restoration fails: S3 object is inaccessible, and you have no test results confirming restorability. What went wrong?",
+    "options": [
+      "S3 has a reliability issue; this is AWS's fault",
+      "DR plan wasn't tested; untested procedures fail under pressure; you must regularly test restore",
+      "Object permissions were lost; update bucket policies",
+      "S3 backup format is incompatible with current RDS version"
+    ],
+    "correctIndex": 1,
+    "explanation": "Untested DR plans fail in real disasters; you must regularly (quarterly) test restore procedures, validate data, and confirm RTO/RPO are achievable; documentation alone is insufficient.",
+    "difficulty": "Medium",
+    "tags": ["disaster-recovery", "testing", "best-practices"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Disaster Recovery Planning",
+    "question": "Your DR strategy includes periodic backups to Glacier. You have a 48-hour RTO. During a recovery, Glacier retrieval takes 24 hours (standard class). Another 10 hours to restore database. Total: 34 hours. Does this meet your RTO?",
+    "options": [
+      "Yes; 34 hours < 48 hours",
+      "No; 34 hours is too close to 48-hour limit; add buffer for unexpected delays",
+      "Yes, but only if retrieval is expedited (faster); standard is too slow",
+      "No; RTO calculation should include testing time, not just retrieval + restore"
+    ],
+    "correctIndex": 1,
+    "explanation": "RTO of 48 hours leaves no margin for error; if retrieval+restore takes 34 hours and a step fails, you exceed RTO; best practice: RTO should be 20-30% shorter than actual measured time.",
+    "difficulty": "Medium-Hard",
+    "tags": ["disaster-recovery", "rto", "buffer"]
+  }
+]

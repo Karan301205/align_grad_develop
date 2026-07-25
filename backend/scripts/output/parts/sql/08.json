@@ -1,0 +1,167 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "Subqueries",
+    "question": "What is the output of:\nSELECT name FROM users WHERE id IN (SELECT user_id FROM orders WHERE amount > 1000);\n\nIf there are 5 users with no high-value orders?",
+    "options": [
+      "Only users with at least one order over 1000 are returned",
+      "All 5 users are returned",
+      "An error due to subquery mismatch",
+      "NULL values are returned for users with no matching orders"
+    ],
+    "correctIndex": 0,
+    "explanation": "The subquery filters to user_ids with high-value orders; IN returns only those users, excluding the 5 with no such orders.",
+    "difficulty": "Medium",
+    "tags": ["in-subquery", "scalar-result"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Subqueries",
+    "question": "What is a correlated subquery, and what does this return?\nSELECT name FROM users u WHERE EXISTS (SELECT 1 FROM orders o WHERE o.user_id = u.id);",
+    "options": [
+      "A subquery that references the outer query; returns users with at least one order",
+      "A subquery that is independent; returns all users",
+      "A subquery that always returns NULL",
+      "An error due to forward reference"
+    ],
+    "correctIndex": 0,
+    "explanation": "A correlated subquery references the outer query (u.id); EXISTS checks if each user has orders, returning only those who do.",
+    "difficulty": "Medium",
+    "tags": ["correlated-subquery", "exists"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Subqueries",
+    "question": "What is the difference in performance between:\nA: SELECT * FROM users WHERE id IN (SELECT user_id FROM orders);\nB: SELECT DISTINCT u.* FROM users u JOIN orders o ON u.id = o.user_id;",
+    "options": [
+      "Both are logically equivalent; B may be faster depending on index strategy",
+      "A is always faster; subqueries are optimized",
+      "B is always faster; JOINs avoid subqueries",
+      "No difference; both produce identical plans"
+    ],
+    "correctIndex": 0,
+    "explanation": "Modern query optimizers handle both similarly, but JOIN + DISTINCT can be faster if orders are indexed; subquery performance depends on optimization.",
+    "difficulty": "Medium-Hard",
+    "tags": ["in-subquery", "join-optimization"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Subqueries",
+    "question": "What does this scalar subquery return?\nSELECT name, (SELECT COUNT(*) FROM orders WHERE user_id = users.id) AS order_count FROM users;",
+    "options": [
+      "User names with the count of orders for each user",
+      "A single count of all orders",
+      "An error because subqueries must return one row",
+      "User names only; COUNT is ignored"
+    ],
+    "correctIndex": 0,
+    "explanation": "A scalar subquery returns one value per outer row; here, the correlated subquery counts orders for each user.",
+    "difficulty": "Medium",
+    "tags": ["scalar-subquery", "correlated"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Subqueries",
+    "question": "What is the result of:\nSELECT name FROM users WHERE id NOT IN (SELECT user_id FROM orders WHERE user_id IS NOT NULL);\n\nAssuming some orders have user_id = NULL?",
+    "options": [
+      "Users with no orders (NULL values in the subquery are excluded from NOT IN)",
+      "All users, including those with NULL order user_ids",
+      "An error because NOT IN cannot handle NULLs",
+      "Users with NULL orders only"
+    ],
+    "correctIndex": 0,
+    "explanation": "NOT IN with NULL values is tricky; the query works because WHERE user_id IS NOT NULL filters out NULLs from the subquery.",
+    "difficulty": "Medium-Hard",
+    "tags": ["not-in", "null-handling", "subquery"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Subqueries",
+    "question": "When is NOT EXISTS more efficient than NOT IN?\nA: When the subquery returns many rows\nB: When the subquery returns NULL values\nC: When dealing with large result sets and NULLs",
+    "options": [
+      "All three are correct reasons to prefer NOT EXISTS",
+      "Only A is correct",
+      "Only B is correct",
+      "NOT IN is always preferred"
+    ],
+    "correctIndex": 0,
+    "explanation": "NOT EXISTS handles NULLs naturally, can use indexed lookup, and short-circuits (stops after first match), making it often faster than NOT IN.",
+    "difficulty": "Medium-Hard",
+    "tags": ["not-exists", "not-in", "performance"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Subqueries",
+    "question": "What does this query return?\nSELECT name FROM users WHERE salary > (SELECT AVG(salary) FROM users);",
+    "options": [
+      "Users whose salary exceeds the company average",
+      "An error because the subquery selects from the same table",
+      "Users with the highest salary only",
+      "The average salary for each user"
+    ],
+    "correctIndex": 0,
+    "explanation": "A scalar subquery calculates the average once; users with above-average salaries are returned (no error, no recursion).",
+    "difficulty": "Medium",
+    "tags": ["scalar-subquery", "aggregate"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Subqueries",
+    "question": "What is the output of:\nSELECT (SELECT name FROM users LIMIT 1) AS first_user;\n\nIf the users table has 1000 rows?",
+    "options": [
+      "The name of the first user (one row, one column)",
+      "All 1000 user names",
+      "An error because LIMIT is not allowed in subqueries",
+      "NULL values"
+    ],
+    "correctIndex": 0,
+    "explanation": "A scalar subquery with LIMIT 1 returns a single value; the query outputs one row with one column.",
+    "difficulty": "Medium",
+    "tags": ["scalar-subquery", "limit"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Subqueries",
+    "question": "What is the difference between using IN and EXISTS?\nA: IN checks if a value exists in a list; EXISTS checks if a subquery returns any rows\nB: EXISTS is always faster\nC: IN cannot be used with subqueries",
+    "options": [
+      "Only A is correct",
+      "A and B are correct",
+      "All three are correct",
+      "None are correct"
+    ],
+    "correctIndex": 0,
+    "explanation": "IN and EXISTS are semantically similar; performance depends on indexes and query optimizer; both are valid with subqueries.",
+    "difficulty": "Medium",
+    "tags": ["in-clause", "exists", "subquery"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Subqueries",
+    "question": "What does this derived table (subquery in FROM) return?\nSELECT avg_salary FROM (SELECT AVG(salary) AS avg_salary FROM employees) AS salary_stats;",
+    "options": [
+      "The average salary as a single value in one row",
+      "Average salary for each employee",
+      "An error because subqueries cannot be used in FROM",
+      "All employees grouped by average salary"
+    ],
+    "correctIndex": 0,
+    "explanation": "A derived table in FROM computes the average once, returns one row; the outer query selects that one value.",
+    "difficulty": "Medium",
+    "tags": ["derived-table", "aggregate", "subquery"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Subqueries",
+    "question": "Performance: A large orders table is joined to itself via a subquery:\nSELECT o1.* FROM orders o1 WHERE o1.id IN (SELECT MIN(id) FROM orders o2 WHERE o1.user_id = o2.user_id GROUP BY o2.user_id);\n\nWhy might this be slow?",
+    "options": [
+      "The correlated subquery executes once per row in the outer query, causing O(n) subquery evaluations",
+      "Subqueries are inherently slower than JOINs",
+      "GROUP BY on a large table is slow",
+      "The self-join is inefficient"
+    ],
+    "correctIndex": 0,
+    "explanation": "A correlated subquery can be slow because it re-evaluates for each outer row; rewriting with window functions is often faster.",
+    "difficulty": "Medium-Hard",
+    "tags": ["correlated-subquery", "performance"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "Props Validation",
+    "question": "Given Component.propTypes = { x: PropTypes.number.isRequired };, why might <Component x={null} /> pass validation but cause bugs?",
+    "options": ["isRequired doesn't reject null, only undefined", "PropTypes.number accepts null as a valid number", "isRequired is a development-only check, not enforced at runtime", "null is coerced to 0 automatically"],
+    "correctIndex": 0,
+    "explanation": "PropTypes.isRequired only checks for undefined, not null; passing null passes validation but may break code expecting a number.",
+    "difficulty": "Medium",
+    "tags": ["proptypes", "validation", "null"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Props Validation",
+    "question": "Why might PropTypes not catch type errors in production? Component.propTypes = { x: PropTypes.string };",
+    "options": ["PropTypes are stripped in production builds for performance", "PropTypes validate in all environments", "PropTypes only work in development if explicitly enabled", "Production uses TypeScript instead"],
+    "correctIndex": 0,
+    "explanation": "PropTypes are a development-only warning system; production builds strip them to reduce bundle size, so type errors go undetected.",
+    "difficulty": "Medium",
+    "tags": ["proptypes", "production", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Props Validation",
+    "question": "Given PropTypes.oneOf(['a', 'b']), why might <Component x={'A'} /> fail validation even if 'A' is a valid option?",
+    "options": ["oneOf is case-sensitive, 'A' doesn't match 'a'", "oneOf ignores case by design", "String comparison is loose equality", "'A' is coerced to lowercase automatically"],
+    "correctIndex": 0,
+    "explanation": "PropTypes.oneOf uses === comparison, so 'A' !== 'a'; validation fails unless the exact case matches.",
+    "difficulty": "Medium",
+    "tags": ["proptypes", "case", "equality"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Props Validation",
+    "question": "Why might custom PropTypes validators cause performance issues? const validate = (props) => { ... check ... };",
+    "options": ["Validators run on every render, every prop, every parent re-render", "Validators cache results and only run once", "Validators are asynchronous and don't block render", "PropTypes don't impact performance significantly"],
+    "correctIndex": 0,
+    "explanation": "Custom PropTypes validators run on every render for every prop in development; expensive logic causes performance degradation in dev.",
+    "difficulty": "Medium",
+    "tags": ["proptypes", "performance", "custom"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Props Validation",
+    "question": "Given PropTypes.shape({ x: PropTypes.number }), why does <Component obj={{ x: '5' }} /> pass validation?",
+    "options": ["shape doesn't validate nested properties strictly", "PropTypes.shape checks only that obj is an object", "Nested PropTypes are not validated by shape", "String '5' is coerced to number 5"],
+    "correctIndex": 1,
+    "explanation": "PropTypes.shape validates that obj is an object and has the keys, but doesn't enforce nested type validation deeply; '5' is a string, not a number.",
+    "difficulty": "Medium-Hard",
+    "tags": ["proptypes", "shape", "nested"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Props Validation",
+    "question": "Why might removing PropTypes as a dependency reduce bundle size but increase runtime errors? import PropTypes from 'prop-types';",
+    "options": ["PropTypes are stripped from production; removing them saves kb", "PropTypes are necessary for type safety", "PropTypes only work with npm install", "Removing PropTypes has no bundle impact"],
+    "correctIndex": 0,
+    "explanation": "PropTypes are development-only; removing the import saves bundle size in production, but you lose development-time warnings for prop mismatches.",
+    "difficulty": "Medium",
+    "tags": ["proptypes", "bundle", "dependency"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Props Validation",
+    "question": "Given const Comp = (props) => <div>{props.x}</div>;, why is using PropTypes better than no validation at all?",
+    "options": ["PropTypes provide dev-time warnings when prop expectations are violated", "PropTypes prevent runtime errors completely", "PropTypes are mandatory for production code", "PropTypes and no validation are equivalent"],
+    "correctIndex": 0,
+    "explanation": "PropTypes catch mismatches early in development, logging warnings before bugs surface at runtime; they're a safety net, not a guardrail.",
+    "difficulty": "Medium",
+    "tags": ["proptypes", "warning", "development"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Props Validation",
+    "question": "Why might Component.propTypes = { render: PropTypes.func } allow <Component render={undefined} /> to pass?",
+    "options": ["func without isRequired allows any value including undefined", "PropTypes.func rejects undefined always", "undefined is treated as a function", "This pattern always throws an error"],
+    "correctIndex": 0,
+    "explanation": "PropTypes.func without isRequired allows undefined, null, and other falsy values; add isRequired to enforce a function is provided.",
+    "difficulty": "Medium",
+    "tags": ["proptypes", "func", "undefined"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Props Validation",
+    "question": "Given PropTypes.arrayOf(PropTypes.number), why does <Component list={[1, 2, 'three']} /> pass validation?",
+    "options": ["arrayOf validates the array type, not elements", "arrayOf checks only that the prop is an array", "String 'three' is coerced to a number", "This should fail validation"],
+    "correctIndex": 1,
+    "explanation": "PropTypes.arrayOf checks that the prop is an array; in development, it should warn about element '3' being a string, but some implementations are lenient.",
+    "difficulty": "Medium-Hard",
+    "tags": ["proptypes", "array", "element"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Props Validation",
+    "question": "Why is TypeScript often used alongside PropTypes in large projects, and what's the trade-off?",
+    "options": ["TypeScript catches errors at compile-time, PropTypes at runtime", "PropTypes are TypeScript, they're the same thing", "TypeScript and PropTypes are redundant", "Only PropTypes are needed, TypeScript is optional"],
+    "correctIndex": 0,
+    "explanation": "TypeScript provides static checking before runtime; PropTypes provide dynamic checks at dev-time; using both adds safety but increases complexity.",
+    "difficulty": "Medium",
+    "tags": ["proptypes", "typescript", "tradeoff"]
+  }
+]

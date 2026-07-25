@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "Lambda Function Development",
+    "question": "Your Lambda function handles 1,000 concurrent requests during peak. You notice P99 latency spikes to 30 seconds. Function timeout is 60 seconds. Reserved concurrency is not set. What's the issue?",
+    "options": [
+      "Lambda is throttling requests; concurrent calls exceed account default limit of 1,000",
+      "Cold starts from scaling up to 1,000 concurrent invocations add latency",
+      "Lambda is overprovisioned; P99 latency indicates inefficiency, not throttling",
+      "VPC Lambda cold start overhead increases to 30 seconds at scale"
+    ],
+    "correctIndex": 1,
+    "explanation": "When concurrency ramps from idle to 1,000, new instances are provisioned; cold starts (container initialization, dependency loading) add 0.5-3 seconds per new instance; distributed across invocations, this causes P99 spike.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lambda", "concurrency", "cold-start"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Lambda Function Development",
+    "question": "Your Lambda function writes logs to CloudWatch using console.log(). During debugging, you need to trace a single request through 10 service calls (Lambda -> SQS -> Lambda -> RDS, etc.). How should you design logging?",
+    "options": [
+      "Add request IDs to all log messages; grep CloudWatch Logs by request ID",
+      "Use AWS X-Ray for distributed tracing; see the full request path visually",
+      "Store logs in S3; query with Athena to correlate request flows",
+      "Increase verbosity; log every function call with timestamps"
+    ],
+    "correctIndex": 1,
+    "explanation": "X-Ray traces requests across service boundaries, showing latency and errors per service; CloudWatch Logs (grep) is manual and error-prone; X-Ray is purpose-built for this use case.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lambda", "logging", "x-ray", "debugging"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Lambda Function Development",
+    "question": "Your Lambda function processes images from S3 (30-second average processing time). Invocations are triggered by S3:ObjectCreated events. Daily volume is 10,000 images. Processing time often exceeds 60 seconds during peak hours. What's the best solution?",
+    "options": [
+      "Increase Lambda timeout to 3 minutes; handle longer processing",
+      "Use SQS between S3 and Lambda; decouple event source from processing; scale workers independently",
+      "Upgrade Lambda memory; higher memory = higher CPU, faster processing",
+      "Use Step Functions to orchestrate processing; handle timeouts via retries"
+    ],
+    "correctIndex": 1,
+    "explanation": "SQS provides buffering; Lambda workers consume at their pace without timeout pressure; decoupling allows independent scaling; Lambda timeout increase is a band-aid, not a solution.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lambda", "async-processing", "architecture"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Lambda Function Development",
+    "question": "Your Lambda function is deployed in a VPC (private subnet) to access RDS. Cold start time increased from 0.5 seconds to 8 seconds after VPC deployment. What's causing this?",
+    "options": [
+      "RDS connection handshake adds network latency",
+      "VPC ENI attachment adds 7-10 seconds to cold start; warm connections are fast",
+      "Security group rules are evaluated at cold start, slowing initialization",
+      "VPC subnets have slow DNS resolution"
+    ],
+    "correctIndex": 1,
+    "explanation": "VPC Lambda creates and attaches ENIs at first invocation; this is a one-time cold start tax (~7 seconds); subsequent invocations reuse the ENI (warm start <100ms).",
+    "difficulty": "Medium",
+    "tags": ["lambda", "vpc", "cold-start"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Lambda Function Development",
+    "question": "Your Lambda function reads from DynamoDB with on-demand pricing. You process 10 million items daily, each requiring 2 read units. Daily cost is $2,000. You're considering DynamoDB provisioned capacity with reserved capacity pricing. Should you switch?",
+    "options": [
+      "Yes; reserved capacity for 100 RCU saves 50% annually; matches your consistent load",
+      "No; on-demand pricing scales to zero during off-hours; reserved wastes money if load is variable",
+      "Yes; but use auto-scaling instead of reserved to handle peaks",
+      "No; DynamoDB on-demand is always cheaper than provisioned"
+    ],
+    "correctIndex": 0,
+    "explanation": "20 million RCUs/day = ~230 RCU average; reserved 100 RCU saves 50% + can burst to 400 RCU; if load is stable, reserved is cheaper; if highly variable, on-demand is better.",
+    "difficulty": "Hard",
+    "tags": ["lambda", "dynamodb", "cost-optimization"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Lambda Function Development",
+    "question": "You're using Lambda Layers to share common code (dependencies, utilities) across 20 functions. Layer size is 250MB. Functions are in both us-east-1 and eu-west-1. Do you need to upload the Layer in both regions?",
+    "options": [
+      "No; Lambda Layers are global; one upload serves all regions",
+      "Yes; Lambda Layers are region-specific; must upload to each region",
+      "Only if functions cross regions within a single invocation",
+      "Layer availability depends on the S3 bucket location; no regional restriction"
+    ],
+    "correctIndex": 1,
+    "explanation": "Lambda Layers are region-specific; each region has its own Layer registry; to use a Layer in eu-west-1, it must be uploaded to eu-west-1; replication across regions is manual.",
+    "difficulty": "Medium",
+    "tags": ["lambda", "layers", "multi-region"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Lambda Function Development",
+    "question": "Your Lambda function is asynchronously invoked by SNS. On error, the function is retried twice (3 total attempts) by default. The third attempt fails and is discarded. How should you handle failed messages?",
+    "options": [
+      "Add retry logic inside the function; don't rely on SNS retries",
+      "Configure an SNS Dead Letter Queue (DLQ) for failed messages; process DLQ separately",
+      "Enable Lambda Destinations to route failures to SQS; consumers can retry",
+      "Increase SNS MaximumReceiveCount to 5; more retries improve success rate"
+    ],
+    "correctIndex": 1,
+    "explanation": "SNS DLQ captures failed messages after retries; enables separate error handling/alerting; Lambda Destinations are newer alternative; internal function retries are appropriate for transient failures only.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lambda", "sns", "error-handling", "dlq"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Lambda Function Development",
+    "question": "Your Lambda function's memory is set to 3,008MB (maximum). P99 duration is still 5 seconds for a simple API call. You want to optimize cost without sacrificing latency. Should you use Lambda Power Tuning to find the optimal memory?",
+    "options": [
+      "No; maximum memory already provides maximum CPU; latency isn't memory-bound",
+      "Yes; Power Tuning finds the sweet spot for memory vs. cost; you might reduce to 512MB cost-effectively",
+      "No; 5 seconds indicates network I/O latency, not compute; memory won't help",
+      "Yes; but only if billing model is provisioned concurrency"
+    ],
+    "correctIndex": 2,
+    "explanation": "Simple API calls are I/O-bound (network latency to external service), not compute-bound (CPU); more memory adds CPU power, not network bandwidth; the 5s latency is external, not Lambda's fault.",
+    "difficulty": "Hard",
+    "tags": ["lambda", "memory", "performance-tuning"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Lambda Function Development",
+    "question": "You're using Lambda with provisioned concurrency set to 100. Your actual peak concurrency is 50. During off-peak, concurrency drops to 5. Annual cost for provisioned concurrency (100 concurrency) is $13,000. What's the cost-effectiveness assessment?",
+    "options": [
+      "Provisioned is worth it; guaranteed 100ms cold start latency justifies the cost",
+      "Provisioned is wasteful; paying for 100 when peak is 50; reduce to 50 or use on-demand",
+      "Provisioned is required for production; cost is non-negotiable",
+      "Provisioned is cheap; cost is negligible compared to on-demand pricing"
+    ],
+    "correctIndex": 1,
+    "explanation": "Paying for 100 concurrency when peak is 50 is 50% waste; reduce provisioned to match actual peak (50), cover excess with on-demand; hybrid approach minimizes cost while maintaining latency for peak.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lambda", "provisioned-concurrency", "cost-optimization"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "Lambda Function Development",
+    "question": "Your Lambda function reads environment variables for database connection details. You need to rotate the password monthly. Should you store the password in Lambda environment variables, AWS Systems Manager Parameter Store, or AWS Secrets Manager?",
+    "options": [
+      "Lambda environment variables; simple and always available",
+      "Parameter Store; free tier, can store encrypted values, versioning supported",
+      "Secrets Manager; automatic rotation capability, audit trail, cost $0.40/secret/month",
+      "Environment variables are fine; rotate them during deployment"
+    ],
+    "correctIndex": 2,
+    "explanation": "Secrets Manager's automatic rotation is purpose-built for credentials; audit trail meets compliance; cost is justified for production databases; Parameter Store lacks automatic rotation.",
+    "difficulty": "Medium",
+    "tags": ["lambda", "secrets-manager", "credential-rotation"]
+  }
+]

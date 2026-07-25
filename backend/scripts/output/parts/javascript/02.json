@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Functions",
+    "question": "What is the output?\n```javascript\nfunction test() {\n  console.log(x);\n}\nvar x = 5;\ntest();\n```",
+    "options": [
+      "5 because var is hoisted",
+      "undefined due to hoisting of declaration only",
+      "ReferenceError because x is not defined",
+      "null because var is initialized to null"
+    ],
+    "correctIndex": 1,
+    "explanation": "var x is hoisted but not initialized; hoisting moves the declaration to the top with value undefined.",
+    "difficulty": "Medium",
+    "tags": ["hoisting", "var", "temporal-dead-zone"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Functions",
+    "question": "What is logged?\n```javascript\nconst arrowFunc = () => ({ name: 'test' });\nconsole.log(arrowFunc());\n```",
+    "options": [
+      "undefined because arrow functions cannot return objects",
+      "{ name: 'test' } because of parentheses wrapping object",
+      "SyntaxError due to arrow function syntax",
+      "null because implicit return fails"
+    ],
+    "correctIndex": 1,
+    "explanation": "Parentheses around an object literal in arrow function indicate implicit return of that object.",
+    "difficulty": "Medium",
+    "tags": ["arrow-functions", "implicit-return", "objects"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Functions",
+    "question": "What is the output?\n```javascript\nconst obj = {\n  value: 42,\n  getValue: function() { return this.value; }\n};\nconst getValue = obj.getValue;\nconsole.log(getValue());\n```",
+    "options": [
+      "42 because function remembers object context",
+      "undefined because this is not bound to object",
+      "ReferenceError due to this binding loss",
+      "NaN because this.value is unavailable"
+    ],
+    "correctIndex": 1,
+    "explanation": "Detaching a method loses its this binding; this refers to global object or undefined in strict mode.",
+    "difficulty": "Medium-Hard",
+    "tags": ["this-binding", "method-detachment", "context"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Functions",
+    "question": "What is logged?\n```javascript\nfunction outer() {\n  let count = 0;\n  return function inner() {\n    return ++count;\n  };\n}\nconst counter = outer();\nconsole.log(counter(), counter(), counter());\n```",
+    "options": [
+      "0 0 0 because count resets each call",
+      "1 2 3 because closure maintains count state",
+      "3 3 3 because all calls increment together",
+      "undefined undefined undefined due to scope"
+    ],
+    "correctIndex": 1,
+    "explanation": "Closure captures the count variable; each call increments the same reference.",
+    "difficulty": "Medium",
+    "tags": ["closures", "function-factory", "state-management"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Functions",
+    "question": "What is the output?\n```javascript\nconst add = (a, b = 5) => a + b;\nconsole.log(add(10), add(10, 20));\n```",
+    "options": [
+      "15 30 because default parameter replaces missing argument",
+      "10 20 due to default not applying",
+      "NaN 30 because first call lacks second argument",
+      "undefined 30 due to parameter mismatch"
+    ],
+    "correctIndex": 0,
+    "explanation": "Default parameters fill in when arguments are omitted; add(10) uses b = 5, add(10, 20) overrides it.",
+    "difficulty": "Medium",
+    "tags": ["default-parameters", "functions", "parameters"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Functions",
+    "question": "What is logged?\n```javascript\nfunction test(a, b, ...rest) {\n  console.log(rest);\n}\ntest(1, 2, 3, 4, 5);\n```",
+    "options": [
+      "[3 4 5] because rest collects remaining arguments",
+      "[1 2 3 4 5] because rest gets all arguments",
+      "undefined due to spread syntax error",
+      "3 because rest captures the third argument"
+    ],
+    "correctIndex": 0,
+    "explanation": "Rest parameters (...rest) collect all remaining arguments into an array.",
+    "difficulty": "Medium",
+    "tags": ["rest-parameters", "variadic", "spread"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Functions",
+    "question": "What is the output?\n```javascript\nconst greet = (name) => `Hello ${name}`;\nconsole.log(typeof greet);\n```",
+    "options": [
+      "arrow because greet is an arrow function",
+      "function because greet is a function",
+      "object because arrow functions are objects",
+      "undefined due to arrow syntax"
+    ],
+    "correctIndex": 1,
+    "explanation": "typeof any function (arrow or regular) returns 'function'.",
+    "difficulty": "Medium",
+    "tags": ["typeof", "arrow-functions", "functions"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Functions",
+    "question": "What is output?\n```javascript\nfunction outer() {\n  return function() {\n    console.log(arguments);\n  };\n}\nconst inner = outer();\ninner(1, 2, 3);\n```",
+    "options": [
+      "[1 2 3] because arguments captures all parameters",
+      "{0 1 2 3 4 5} due to arguments object structure",
+      "object Arguments { '0': 1, '1': 2, '2': 3 } arguments array-like object",
+      "undefined because arrow functions have no arguments"
+    ],
+    "correctIndex": 2,
+    "explanation": "arguments is an array-like object containing all passed arguments; logging shows the full structure.",
+    "difficulty": "Medium-Hard",
+    "tags": ["arguments", "array-like", "function-scope"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Functions",
+    "question": "What is logged?\n```javascript\nconst multiply = function(a) {\n  return function(b) {\n    return a * b;\n  };\n};\nconst double = multiply(2);\nconsole.log(double(5));\n```",
+    "options": [
+      "7 because values are added in nested functions",
+      "10 due to currying capturing and using first argument",
+      "NaN because nested function parameters conflict",
+      "undefined due to closure chain failure"
+    ],
+    "correctIndex": 1,
+    "explanation": "Currying allows partial application; double = multiply(2) captures a=2, then double(5) multiplies 2*5.",
+    "difficulty": "Medium-Hard",
+    "tags": ["currying", "closures", "partial-application"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Functions",
+    "question": "What is the output?\n```javascript\nconst test = function namedFunc() {\n  console.log(typeof namedFunc);\n};\ntest();\n```",
+    "options": [
+      "undefined because named function expressions hide scope",
+      "function because namedFunc is accessible inside itself",
+      "ReferenceError outside the function due to scope",
+      "object because named expressions have type object"
+    ],
+    "correctIndex": 1,
+    "explanation": "Named function expressions make the name available only inside the function for recursion.",
+    "difficulty": "Medium-Hard",
+    "tags": ["named-function-expressions", "function-scope", "recursion"]
+  }
+]

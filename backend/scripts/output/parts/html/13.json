@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "DOM Manipulation",
+    "question": "A script uses `element.innerHTML = '<img src=x onerror=\"alert(1)\">'`. What security vulnerability is this?",
+    "options": ["innerHTML parses html and executes event handlers, creating an xss vulnerability", "innerHTML is safe because it escapes html", "onerror attributes are not executed in innerHTML context", "the script is invalid and causes an error"],
+    "correctIndex": 0,
+    "explanation": "innerHTML parses HTML markup, including event handlers; user-controlled HTML injected via innerHTML can execute arbitrary JavaScript (XSS).",
+    "difficulty": "Medium-Hard",
+    "tags": ["innerHTML", "xss-vulnerability", "security"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "DOM Manipulation",
+    "question": "A script uses `element.textContent = '<b>Bold</b>'`. What displays in the element?",
+    "options": ["the text '<b>Bold</b>' is displayed literally", "bold text is rendered and displayed", "an error occurs because textcontent does not accept html", "the element remains empty"],
+    "correctIndex": 0,
+    "explanation": "textContent treats its input as plain text, not HTML; angle brackets and tags are displayed as literal characters, not parsed as markup.",
+    "difficulty": "Medium",
+    "tags": ["textContent", "innerHTML"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "DOM Manipulation",
+    "question": "A script finds an element with `document.querySelector('#main .widget')`. If no element matches, what is returned?",
+    "options": ["null is returned if no match is found", "an empty array is returned", "undefined is returned", "a nodelist with zero items is returned"],
+    "correctIndex": 0,
+    "explanation": "querySelector returns the first matching element or null if no match is found; querySelectorAll returns a NodeList (possibly empty).",
+    "difficulty": "Medium",
+    "tags": ["querySelector", "dom-api"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "DOM Manipulation",
+    "question": "A script uses `parent.appendChild(child)`. If child already exists elsewhere in the DOM, what happens?",
+    "options": ["child is cloned and appended, leaving the original in place", "the child is moved from its current location to the parent", "an error occurs because child is already in the tree", "child appears in both locations"],
+    "correctIndex": 1,
+    "explanation": "appendChild removes the child from its current location and reinserts it at the new position; a node cannot exist in two places simultaneously.",
+    "difficulty": "Medium",
+    "tags": ["appendChild", "node-movement"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "DOM Manipulation",
+    "question": "A script uses `element.addEventListener('click', handler, true)`. What does the third parameter do?",
+    "options": ["true enables event bubbling", "true enables event capturing (fire during capture phase)", "true removes the listener after firing once", "the third parameter is ignored in modern browsers"],
+    "correctIndex": 1,
+    "explanation": "The third parameter (useCapture) determines if the listener fires during the capture phase (true) or bubbling phase (false, default).",
+    "difficulty": "Medium",
+    "tags": ["addEventListener", "event-capturing", "event-phases"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "DOM Manipulation",
+    "question": "A script uses `element.removeEventListener('click', namedFunction)`. If namedFunction was added with an arrow function instead, what happens?",
+    "options": ["the event listener is removed successfully", "the removal fails because arrow functions cannot be removed", "arrow functions are removed but named functions persist", "removeEventListener does not distinguish between function types"],
+    "correctIndex": 1,
+    "explanation": "removeEventListener requires the exact same function reference; if added with an inline or arrow function without storing a reference, removal will fail.",
+    "difficulty": "Medium-Hard",
+    "tags": ["removeEventListener", "function-references"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "DOM Manipulation",
+    "question": "A script inserts `<script>alert('loaded')</script>` via innerHTML. Does the script execute?",
+    "options": ["the script executes immediately", "the script is parsed but not executed", "scripts inserted via innerHTML are executed asynchronously", "scripts inserted via innerHTML never execute"],
+    "correctIndex": 3,
+    "explanation": "Scripts inserted via innerHTML are parsed as text content and are not executed; they are inert and must be inserted via appendChild or eval (not recommended).",
+    "difficulty": "Hard",
+    "tags": ["innerHTML", "script-execution"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "DOM Manipulation",
+    "question": "A script uses `element.getAttribute('data-value')` vs `element.dataset.value`. Which returns the live attribute value?",
+    "options": ["getAttribute always returns the current attribute value from the dom", "dataset reflects attribute changes in real time", "both always return the current value", "getAttribute caches the value, dataset does not"],
+    "correctIndex": 0,
+    "explanation": "getAttribute reads the current HTML attribute directly; dataset is a convenient accessor but both reflect live attribute values.",
+    "difficulty": "Medium",
+    "tags": ["getAttribute", "dataset", "data-attributes"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "DOM Manipulation",
+    "question": "A script uses `element.parentElement` vs `element.parentNode`. On an element with no parent, what is the difference?",
+    "options": ["parentElement returns null, parentNode returns undefined", "both return null", "parentElement returns the document, parentnode returns null", "there is no difference"],
+    "correctIndex": 1,
+    "explanation": "Both parentElement and parentNode return null if there is no parent; the difference is that parentNode can be a text node, while parentElement is always an element.",
+    "difficulty": "Medium-Hard",
+    "tags": ["parentElement", "parentNode", "dom-traversal"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "DOM Manipulation",
+    "question": "A script uses `element.cloneNode(true)` to duplicate a subtree. Event listeners attached to the original are cloned with it?",
+    "options": ["event listeners are cloned and remain attached", "event listeners are not cloned; only the dom structure is", "clonenode copies listeners only if they were added with addeventlistener", "cloning listeners depends on the browser"],
+    "correctIndex": 1,
+    "explanation": "cloneNode duplicates the DOM tree structure only; event listeners attached via JavaScript are not cloned.",
+    "difficulty": "Medium",
+    "tags": ["cloneNode", "event-listeners"]
+  }
+]

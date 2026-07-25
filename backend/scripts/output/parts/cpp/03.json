@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Control Structures",
+    "question": "What is the output of `for (int i = 0; i < 3; ++i) { if (i == 1) continue; cout << i; }`?",
+    "options": ["012", "02", "01", "0"],
+    "correctIndex": 1,
+    "explanation": "continue skips the rest of the loop iteration; i=0 prints 0, i=1 skips print, i=2 prints 2.",
+    "difficulty": "Medium",
+    "tags": ["continue-statement", "loop-control"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Control Structures",
+    "question": "Does a `goto` statement inside a try block to outside the try block cause the destructor to run?",
+    "options": ["no; goto bypasses destructors", "yes; destructors run during exception unwinding", "yes; but only if compiler supports it", "depends on whether goto targets a catch block"],
+    "correctIndex": 1,
+    "explanation": "goto from try to outside triggers automatic cleanup of in-scope objects via their destructors.",
+    "difficulty": "Medium-Hard",
+    "tags": ["goto-statement", "destructors", "raii"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Control Structures",
+    "question": "In a do-while loop, when is the condition checked relative to body execution?",
+    "options": ["before first execution", "after first execution", "both before and after", "never checked, only in for loops"],
+    "correctIndex": 1,
+    "explanation": "do-while always executes the body at least once, then checks the condition to decide on repetition.",
+    "difficulty": "Medium",
+    "tags": ["do-while-loop", "loop-control"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Control Structures",
+    "question": "What happens if you use a variable declared in a switch case before entering that case?",
+    "options": ["undefined behavior", "the variable is uninitialized", "compilation error if no initialization crosses case boundary", "C++17 allows it with structured bindings"],
+    "correctIndex": 2,
+    "explanation": "Variables declared in a case without initialization cannot be skipped; the compiler forbids jumping over their declaration.",
+    "difficulty": "Medium-Hard",
+    "tags": ["switch-statement", "variable-scope", "compilation-error"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Control Structures",
+    "question": "Can a switch statement have multiple default cases?",
+    "options": ["yes; all are tried in order", "no; compilation error if more than one", "yes; but only the first is used", "only in C++17 and later"],
+    "correctIndex": 1,
+    "explanation": "The default label is a target for the switch; having two results in a redefinition error at compile time.",
+    "difficulty": "Medium",
+    "tags": ["switch-statement", "default-label"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Control Structures",
+    "question": "What is the output of nested loops: `for (int i=0; i<2; ++i) for (int j=0; j<2; ++j) { if (i==1 && j==1) break; cout << i << j; }`?",
+    "options": ["000102", "0001021", "000110", "000102"],
+    "correctIndex": 2,
+    "explanation": "The inner break exits only the j-loop; i=0 prints 00 and 01, i=1 prints 10 then breaks, output is 000110.",
+    "difficulty": "Medium",
+    "tags": ["nested-loops", "break-statement"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Control Structures",
+    "question": "Given `if (ptr) { /* A */ } else if (!ptr) { /* B */ }`, can both blocks execute?",
+    "options": ["yes, if ptr changes between checks", "no; exactly one executes", "both execute if ptr is null", "undefined behavior"],
+    "correctIndex": 1,
+    "explanation": "else-if forms a chain where at most one branch executes; the conditions are mutually exclusive.",
+    "difficulty": "Medium",
+    "tags": ["if-else-if", "control-flow"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Control Structures",
+    "question": "What does a `switch` statement do if no case matches and there is no default?",
+    "options": ["exits the switch; no block executes", "throws a runtime exception", "executes the first case", "undefined behavior"],
+    "correctIndex": 0,
+    "explanation": "switch without a matching case and no default simply skips the entire statement.",
+    "difficulty": "Medium",
+    "tags": ["switch-statement", "default-fallthrough"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Control Structures",
+    "question": "Does the ternary operator `a ? b : c` short-circuit evaluation of b and c?",
+    "options": ["no; both are always evaluated", "yes; only the chosen branch is evaluated", "yes; but only if a is a compile-time constant", "depends on compiler optimization"],
+    "correctIndex": 1,
+    "explanation": "The ternary operator short-circuits: if a is true, c is not evaluated; if false, b is not evaluated.",
+    "difficulty": "Medium",
+    "tags": ["ternary-operator", "short-circuit"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Control Structures",
+    "question": "In a range-based for loop `for (auto x : container)`, is the loop variable always a copy?",
+    "options": ["yes; auto always creates a copy", "no; auto deduces by reference if declared auto&", "yes; only auto& creates a reference", "depends on whether container is const"],
+    "correctIndex": 1,
+    "explanation": "auto x copies; auto& references; auto&& binds to temporaries; deduction follows template rules.",
+    "difficulty": "Medium",
+    "tags": ["range-based-for", "auto-deduction", "reference-semantics"]
+  }
+]

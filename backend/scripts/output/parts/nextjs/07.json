@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "Get Static Props",
+    "question": "You export getStaticProps but not getStaticPaths for a dynamic route [id].js. What happens?",
+    "options": ["Build fails; getStaticPaths is required", "getStaticProps runs on every request (SSR fallback)", "Pages for all IDs are pre-generated automatically", "Only the first page is generated; others use ISR"],
+    "correctIndex": 0,
+    "explanation": "Dynamic routes must define getStaticPaths to enumerate paths; without it, Next.js cannot determine which pages to build.",
+    "difficulty": "Medium",
+    "tags": ["getstaticprops", "getstaticpaths", "dynamic-routes"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Get Static Props",
+    "question": "getStaticProps returns { props: { data: null }, revalidate: 60 }. Is this valid?",
+    "options": ["No; props must have non-null values", "Yes; null props are valid and passed to the component", "Yes; but revalidate is ignored for null props", "Depends on whether the page is dynamic"],
+    "correctIndex": 1,
+    "explanation": "Null props are valid; getStaticProps can pass any serializable data, including null.",
+    "difficulty": "Medium",
+    "tags": ["getstaticprops", "props", "serialization"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Get Static Props",
+    "question": "Your getStaticProps fetches from a database that updates every second. You set revalidate: 1. Is this reliable?",
+    "options": ["Yes; the page regenerates every second", "No; revalidate: 1 is too aggressive and causes excessive rebuilds", "Partially; regeneration is on-demand after 1 second, not guaranteed every second", "No; minimum revalidate is 60 seconds"],
+    "correctIndex": 2,
+    "explanation": "revalidate: 1 regenerates on-demand after 1 second; without a user request, no regeneration occurs.",
+    "difficulty": "Medium-Hard",
+    "tags": ["isr", "revalidate", "real-time-data"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Get Static Props",
+    "question": "You call a 3rd-party API in getStaticProps with no retry logic. If the API fails during build, what's the safest recovery?",
+    "options": ["Catch the error and return a fallback prop", "Let the build fail and fix the API", "Wrap the call in try-catch and return empty props on error", "Use getServerSideProps to defer the fetch"],
+    "correctIndex": 0,
+    "explanation": "Graceful error handling in getStaticProps allows builds to succeed with fallback data; this is safer than failing the build.",
+    "difficulty": "Medium-Hard",
+    "tags": ["getstaticprops", "error-handling", "resilience"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Get Static Props",
+    "question": "getStaticProps takes 30 seconds to run (heavy query). During build, you have 10 pages. What's the total build time for static generation?",
+    "options": ["30 seconds (parallel rendering)", "~300 seconds (~30s per page, sequential)", "Depends on how many CPU cores you have", "Cannot determine without profiling"],
+    "correctIndex": 2,
+    "explanation": "Next.js uses worker processes; build time depends on CPU cores, RAM, and I/O; 10 pages × 30s assumes single-threaded execution.",
+    "difficulty": "Medium-Hard",
+    "tags": ["build-time", "performance", "getstaticprops"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Get Static Props",
+    "question": "You use getStaticProps with revalidate: false. What happens after deployment?",
+    "options": ["Pages never regenerate; they remain static until the next build", "Pages are treated as SSR", "Revalidation is disabled but ISR is enabled", "Same as revalidate: Infinity"],
+    "correctIndex": 0,
+    "explanation": "revalidate: false disables ISR; pages are permanently static until the next full build and deployment.",
+    "difficulty": "Medium",
+    "tags": ["isr", "revalidate", "static-pages"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Get Static Props",
+    "question": "getStaticProps calls a function that reads a file from the disk. When does this file read happen?",
+    "options": ["At build time on the server", "At request time on the server", "On the client after hydration", "Never; file reads require getServerSideProps"],
+    "correctIndex": 0,
+    "explanation": "getStaticProps runs only at build time on the build server; file I/O is executed once to generate static HTML.",
+    "difficulty": "Medium",
+    "tags": ["getstaticprops", "build-time", "file-i-o"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Get Static Props",
+    "question": "You set revalidate: 86400 (24 hours) for a product page. A user reports seeing outdated stock levels. What's the issue?",
+    "options": ["ISR is not configured correctly", "24 hours is too long for frequently-changing data", "Background regeneration hasn't triggered yet", "Product stock requires SSR or a real-time update mechanism"],
+    "correctIndex": 3,
+    "explanation": "ISR with 24-hour windows is unsuitable for real-time data like stock levels; consider SSR or client-side polling.",
+    "difficulty": "Medium-Hard",
+    "tags": ["isr", "revalidate", "real-time-data"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Get Static Props",
+    "question": "getStaticProps returns { props: { huge: largeObject }, revalidate: 60 }. The props object is 5MB. Is this a problem?",
+    "options": ["No; large props are serialized and cached", "Yes; 5MB props bloat the generated HTML", "Only on slow networks", "Next.js compresses props automatically"],
+    "correctIndex": 1,
+    "explanation": "Large props are embedded in the static HTML file; 5MB per page creates bloated HTML and slow downloads.",
+    "difficulty": "Medium-Hard",
+    "tags": ["getstaticprops", "payload-size", "performance"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Get Static Props",
+    "question": "You want to regenerate a specific page on-demand without redeploying. Which Next.js feature enables this?",
+    "options": ["ISR with getStaticProps", "On-demand revalidation via revalidatePath() or revalidateTag()", "Calling getStaticProps manually from an API route", "getServerSideProps is required for on-demand updates"],
+    "correctIndex": 1,
+    "explanation": "revalidatePath() and revalidateTag() (Next.js 12.2+) trigger on-demand regeneration without full redeployment.",
+    "difficulty": "Medium",
+    "tags": ["isr", "on-demand-revalidation", "regeneration"]
+  }
+]

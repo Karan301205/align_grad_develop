@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is logged?\n```javascript\nfunction Animal(name) {\n  this.name = name;\n}\nAnimal.prototype.speak = function() { return this.name; };\nconst dog = new Animal('Dog');\nconsole.log(dog.speak());\n```",
+    "options": [
+      "undefined because speak is not on dog",
+      "Dog because dog inherits speak from Animal.prototype",
+      "null because prototype lookup fails",
+      "ReferenceError because this is not bound"
+    ],
+    "correctIndex": 1,
+    "explanation": "new Animal() creates an instance with prototype chain to Animal.prototype; speak is found via chain.",
+    "difficulty": "Medium",
+    "tags": ["prototypes", "constructor", "prototype-chain"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\n```javascript\nclass Animal {\n  constructor(name) { this.name = name; }\n  speak() { return this.name; }\n}\nclass Dog extends Animal {\n  constructor(name, breed) {\n    super(name);\n    this.breed = breed;\n  }\n}\nconst dog = new Dog('Rex', 'Labrador');\nconsole.log(dog.speak());\n```",
+    "options": [
+      "undefined because Dog does not inherit speak",
+      "Rex because Dog extends Animal and inherits speak",
+      "Labrador due to property override",
+      "null because super() breaks inheritance"
+    ],
+    "correctIndex": 1,
+    "explanation": "extends creates a prototype chain; Dog instances inherit speak() from Animal.",
+    "difficulty": "Medium",
+    "tags": ["class-inheritance", "extends", "super"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is logged?\n```javascript\nclass Counter {\n  count = 0;\n  increment() { this.count++; }\n}\nconst c1 = new Counter();\nconst c2 = new Counter();\nc1.increment();\nconsole.log(c2.count);\n```",
+    "options": [
+      "1 because count is shared across instances",
+      "0 because each instance has its own count property",
+      "undefined due to field initialization error",
+      "null because increment modifies global state"
+    ],
+    "correctIndex": 1,
+    "explanation": "Class fields are instance properties; each instance gets its own count variable.",
+    "difficulty": "Medium",
+    "tags": ["class-fields", "instance-properties", "encapsulation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\n```javascript\nclass Rectangle {\n  constructor(width, height) {\n    this.width = width;\n    this.height = height;\n  }\n  get area() { return this.width * this.height; }\n}\nconst rect = new Rectangle(5, 10);\nconsole.log(rect.area);\n```",
+    "options": [
+      "undefined because getters require parentheses",
+      "50 because get creates a property accessor method",
+      "null due to getter definition error",
+      "ReferenceError because area is not a method"
+    ],
+    "correctIndex": 1,
+    "explanation": "get keyword creates a computed property; rect.area calls the getter without parentheses.",
+    "difficulty": "Medium",
+    "tags": ["getters", "computed-properties", "accessors"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is logged?\n```javascript\nconst obj = {};\nObject.defineProperty(obj, 'value', {\n  value: 42,\n  writable: false\n});\nobj.value = 99;\nconsole.log(obj.value);\n```",
+    "options": [
+      "99 because assignment succeeds",
+      "42 because writable false prevents mutation",
+      "undefined due to property definition error",
+      "null because defineProperty has no effect"
+    ],
+    "correctIndex": 1,
+    "explanation": "defineProperty with writable: false makes the property immutable in strict mode.",
+    "difficulty": "Medium-Hard",
+    "tags": ["Object.defineProperty", "property-descriptors", "immutability"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\n```javascript\nclass Animal {}\nclass Dog extends Animal {}\nconst dog = new Dog();\nconsole.log(dog instanceof Dog, dog instanceof Animal);\n```",
+    "options": [
+      "false true because instanceof checks parent class only",
+      "true true because instanceof traverses prototype chain",
+      "true false due to inheritance behavior",
+      "false false because instanceof fails with extends"
+    ],
+    "correctIndex": 1,
+    "explanation": "instanceof checks the prototype chain; Dog instance is instance of both Dog and Animal.",
+    "difficulty": "Medium",
+    "tags": ["instanceof", "prototype-chain", "inheritance"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is logged?\n```javascript\nclass Base {\n  method() { return 'base'; }\n}\nclass Child extends Base {\n  method() { return super.method() + ' extended'; }\n}\nconst child = new Child();\nconsole.log(child.method());\n```",
+    "options": [
+      "base extended because super calls parent method",
+      "extended only because override replaces parent",
+      "undefined due to super syntax error",
+      "null because super cannot access methods"
+    ],
+    "correctIndex": 0,
+    "explanation": "super.method() calls the parent class method; Child's override wraps the result.",
+    "difficulty": "Medium",
+    "tags": ["super", "method-override", "inheritance"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\n```javascript\nconst obj = { a: 1 };\nconsole.log(obj.hasOwnProperty('a'));\nconsole.log(obj.hasOwnProperty('toString'));\n```",
+    "options": [
+      "true true because both properties are owned",
+      "true false because toString is inherited",
+      "false true due to property lookup order",
+      "false false because hasOwnProperty is unavailable"
+    ],
+    "correctIndex": 1,
+    "explanation": "hasOwnProperty checks direct properties only; toString is inherited from Object.prototype.",
+    "difficulty": "Medium",
+    "tags": ["hasOwnProperty", "inheritance", "prototype-chain"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is logged?\n```javascript\nfunction makeCounter() {\n  let count = 0;\n  return {\n    increment: () => ++count,\n    get: () => count\n  };\n}\nconst counter = makeCounter();\nconsole.log(counter.increment(), counter.get());\n```",
+    "options": [
+      "undefined 0 because closures do not work",
+      "1 1 because closure captures count variable",
+      "0 1 due to timing difference",
+      "null null because makeCounter returns invalid object"
+    ],
+    "correctIndex": 1,
+    "explanation": "Closure pattern encapsulates count; both methods access the same private variable.",
+    "difficulty": "Medium-Hard",
+    "tags": ["closures", "encapsulation", "factory-pattern"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output?\n```javascript\nconst obj = Object.create({ inherited: 'value' });\nobj.own = 'property';\nconsole.log(Object.keys(obj));\n```",
+    "options": [
+      "[\"inherited\" \"own\"] because keys include inherited",
+      "[\"own\"] because Object.keys returns own properties only",
+      "[\"inherited\"] due to inherited property priority",
+      "[] because Object.create prevents keys"
+    ],
+    "correctIndex": 1,
+    "explanation": "Object.keys returns only own properties, not inherited ones.",
+    "difficulty": "Medium",
+    "tags": ["Object.create", "Object.keys", "own-properties"]
+  }
+]

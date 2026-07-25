@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Go Modules",
+    "question": "A project has go.mod with module example.com/app and require statement for github.com/pkg v1.0.0. After running go get github.com/pkg@v1.1.0, which file changes reflect the new version?",
+    "options": ["go.mod and go.sum", "only go.mod", "only go.sum", "neither"],
+    "correctIndex": 0,
+    "explanation": "go get updates the require line in go.mod and records hash in go.sum.",
+    "difficulty": "Medium",
+    "tags": ["modules", "go.mod", "go.sum"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Modules",
+    "question": "package main\nimport \"example.com/missing\"\nfunc main() {}",
+    "options": ["compile error", "runtime error", "builds fine", "warning"],
+    "correctIndex": 0,
+    "explanation": "Missing import module causes compile error.",
+    "difficulty": "Medium",
+    "tags": ["imports", "modules"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Modules",
+    "question": "A module declares go.mod:1.20 but imports testing/slogtest, available in Go 1.21+. What happens?",
+    "options": ["compile error", "warning", "builds with compat", "runtime error"],
+    "correctIndex": 0,
+    "explanation": "Go enforces go.mod version constraint; unavailable API causes compile error.",
+    "difficulty": "Medium-Hard",
+    "tags": ["modules", "version-constraint"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Modules",
+    "question": "go.mod lists require (\n  github.com/pkg v1.0.0\n  github.com/pkg/sub v1.1.0\n). What's the issue?",
+    "options": ["versions conflict", "compile error", "allowed via major versions", "warning only"],
+    "correctIndex": 2,
+    "explanation": "pkg and pkg/sub are different paths; v1.0.0 and v1.1.0 both allowed in modules.",
+    "difficulty": "Medium-Hard",
+    "tags": ["modules", "dependencies"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Modules",
+    "question": "A go.mod uses require v0.0.0-20231225120000-abcdef123456. What does this version indicate?",
+    "options": ["pseudo-version from untagged commit", "invalid", "prerelease", "local version"],
+    "correctIndex": 0,
+    "explanation": "v0.0.0-YYYYMMDDhhmmss-commit is a pseudo-version for untagged git commits.",
+    "difficulty": "Medium",
+    "tags": ["modules", "pseudo-version"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Modules",
+    "question": "Running go mod tidy with unused imports in code and go.mod. What happens?",
+    "options": ["removes unused from go.mod", "warns only", "errors", "keeps unused"],
+    "correctIndex": 0,
+    "explanation": "go mod tidy removes unused dependencies from go.mod.",
+    "difficulty": "Medium",
+    "tags": ["modules", "go.mod", "tidy"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Modules",
+    "question": "package main\nimport (\n  \"fmt\"\n  _ \"database/sql/driver\"\n)\nfunc main() {\n  fmt.Println(\"ok\")\n}",
+    "options": ["ok", "compile error", "warning", "unused import error"],
+    "correctIndex": 0,
+    "explanation": "Blank import _ executes init() but discards the package; prints ok.",
+    "difficulty": "Medium",
+    "tags": ["imports", "blank-import"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Modules",
+    "question": "go.mod declares module example.com/v2 and requires example.com v1.0.0. Allowed?",
+    "options": ["error", "allowed", "warning", "requires major version suffix"],
+    "correctIndex": 1,
+    "explanation": "Different module paths (v2 vs unversioned) can coexist in same project.",
+    "difficulty": "Medium-Hard",
+    "tags": ["modules", "major-versions"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Modules",
+    "question": "After adding require github.com/new v1.0.0 to go.mod, running go build without go get. Result?",
+    "options": ["downloads module", "compile error", "builds fine", "warning"],
+    "correctIndex": 0,
+    "explanation": "go build automatically downloads required modules.",
+    "difficulty": "Medium",
+    "tags": ["modules", "download"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Modules",
+    "question": "package main\nimport \"fmt\"\nfunc main() {\n  fmt.Println(\"x\")\n}\n\nAfter editing to remove fmt import, running go mod tidy without building. Result?",
+    "options": ["tidy removes fmt", "tidy keeps fmt", "tidy errors", "no change"],
+    "correctIndex": 1,
+    "explanation": "go mod tidy only removes unused imports found by parsing code; unused fmt is kept if present.",
+    "difficulty": "Medium-Hard",
+    "tags": ["modules", "tidy", "imports"]
+  }
+]

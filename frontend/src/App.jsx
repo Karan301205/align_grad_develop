@@ -7,6 +7,7 @@ import RecruiterAuth from './features/Auth/RecruiterAuth';
 import StudentLayout from './features/Student/StudentLayout';
 import RecruiterLayout from './features/Recruiter/RecruiterLayout';
 import ConnectionLoader from './components/ConnectionLoader';
+import CompanyProfileModal from './components/CompanyProfileModal';
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
@@ -15,12 +16,22 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [testSkill, setTestSkill] = useState(null); // { skillName, targetRating, jobId }
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+  const [autoSelectOpportunity, setAutoSelectOpportunity] = useState(null);
 
-  const [theme, setTheme] = useState(() => {
-    const stored = localStorage.getItem('theme');
-    if (stored === 'light' || stored === 'dark') return stored;
-    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
+  const handleOpenCompanyProfile = (companyId) => {
+    setSelectedCompanyId(companyId);
+    setIsCompanyModalOpen(true);
+  };
+
+  const [theme, setTheme] = useState('light');
+
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+    localStorage.setItem('theme', 'light');
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -37,11 +48,6 @@ export default function App() {
       localStorage.removeItem('user');
     }
   }, [user]);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem('theme', theme);
-  }, [theme]);
 
   useEffect(() => {
     const handleLocationChange = () => {
@@ -195,6 +201,9 @@ export default function App() {
           handleLogout={handleLogout}
           theme={theme}
           toggleTheme={toggleTheme}
+          onOpenCompanyProfile={handleOpenCompanyProfile}
+          autoSelectOpportunity={autoSelectOpportunity}
+          setAutoSelectOpportunity={setAutoSelectOpportunity}
         />
       ) : (
         <RecruiterLayout
@@ -205,8 +214,26 @@ export default function App() {
           handleLogout={handleLogout}
           theme={theme}
           toggleTheme={toggleTheme}
+          onOpenCompanyProfile={handleOpenCompanyProfile}
         />
       )}
+
+      <CompanyProfileModal
+        companyId={selectedCompanyId}
+        isOpen={isCompanyModalOpen}
+        onClose={() => setIsCompanyModalOpen(false)}
+        token={token}
+        onViewOpportunity={(id, type) => {
+          if (user.role === 'STUDENT') {
+            setAutoSelectOpportunity({ id, type });
+            if (type === 'gig') {
+              setActiveTab('gigs');
+            } else {
+              setActiveTab('dashboard');
+            }
+          }
+        }}
+      />
     </div>
   );
 }

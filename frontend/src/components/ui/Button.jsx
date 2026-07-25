@@ -11,9 +11,9 @@ const VARIANT_CLASSES = {
 };
 
 const SIZE_CLASSES = {
-  sm: 'px-4 py-2 text-[11px] gap-1.5 rounded-md',
-  md: 'px-5 py-2.5 text-xs gap-2 rounded-lg',
-  lg: 'px-7 py-3.5 text-sm gap-2 rounded-lg',
+  sm: 'px-3.5 py-1.5 text-[13px] gap-1.5 rounded-md font-semibold',
+  md: 'px-5 py-2.5 text-[15px] gap-2 rounded-xl font-semibold',
+  lg: 'px-7 py-3.5 text-[15px] gap-2 rounded-xl font-semibold',
 };
 
 export default function Button({
@@ -32,7 +32,7 @@ export default function Button({
     <button
       type={type}
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center font-bold font-headline uppercase tracking-[0.06em] transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
+      className={`inline-flex items-center justify-center font-semibold font-sans tracking-tight transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
       {...rest}
     >
       {loading ? (

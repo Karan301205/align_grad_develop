@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Linked List",
+    "question": "Inserting a node at a known position in the middle of a singly linked list (given the previous node) costs how much time?",
+    "options": ["constant time", "linear time", "logarithmic time", "quadratic time"],
+    "correctIndex": 0,
+    "explanation": "If you already have a pointer to the previous node, insertion is just updating two pointers (prev.next and new.next), which is O(1) constant time.",
+    "difficulty": "Medium",
+    "tags": ["insertion-constant", "pointer-manipulation"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Linked List",
+    "question": "Searching for an element in a singly linked list requires traversing from the head. What is the time complexity?",
+    "options": ["constant time", "logarithmic time", "linear time", "quadratic time"],
+    "correctIndex": 2,
+    "explanation": "Without random access, you must follow each node's next pointer sequentially until finding the target or reaching the end, which is O(n) linear.",
+    "difficulty": "Medium",
+    "tags": ["sequential-traversal", "no-random-access"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Linked List",
+    "question": "Reversing a singly linked list in-place requires updating all n node pointers. Using three pointers (prev, curr, next), what is the time complexity?",
+    "options": ["constant time", "linear time", "logarithmic time", "quadratic time"],
+    "correctIndex": 1,
+    "explanation": "Each of the n nodes is visited exactly once and its pointer is updated once, giving O(n) linear time with O(1) extra space.",
+    "difficulty": "Medium",
+    "tags": ["reversal", "in-place-pointer-update"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Linked List",
+    "question": "To delete a node from the middle of a singly linked list given only a pointer to that node (not the previous node), what must you do?",
+    "options": ["swap the node's value with the next node and delete the next node", "you cannot delete it", "traverse from the head", "use doubly linked list"],
+    "correctIndex": 0,
+    "explanation": "Copy the next node's data into the current node, then delete the next node by updating pointers; this bypasses the need for the previous node pointer.",
+    "difficulty": "Medium-Hard",
+    "tags": ["node-deletion-trick", "pointer-manipulation"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Linked List",
+    "question": "Detecting a cycle in a singly linked list using Floyd's cycle-detection algorithm (tortoise and hare) requires two pointers moving at different speeds. What is the time complexity?",
+    "options": ["constant time", "logarithmic time", "linear time", "quadratic time"],
+    "correctIndex": 2,
+    "explanation": "The fast pointer travels twice as fast as the slow pointer; if a cycle exists, they meet within at most n steps, giving O(n) linear time.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cycle-detection", "two-pointer"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Linked List",
+    "question": "Merging two sorted singly linked lists of sizes m and n requires comparing node values and updating pointers. What is the time complexity?",
+    "options": ["linear time", "logarithmic time", "linearithmic time", "quadratic time"],
+    "correctIndex": 0,
+    "explanation": "Each node is visited exactly once and inserted into the merged list, requiring m + n comparisons and pointer updates, which is O(m + n) linear.",
+    "difficulty": "Medium",
+    "tags": ["merge-lists", "two-pointer"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Linked List",
+    "question": "Finding the middle node of a singly linked list without knowing its length can be done with two pointers: one advances by 1 step, one by 2. Why is this better than counting first?",
+    "options": ["it uses less space", "it uses less time", "it requires only a single pass", "it is not better"],
+    "correctIndex": 2,
+    "explanation": "Counting first requires one pass to get length, then another to reach the middle; two pointers reach the middle in a single pass.",
+    "difficulty": "Medium",
+    "tags": ["two-pointer", "single-pass"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Linked List",
+    "question": "Accessing the element at index k in a singly linked list requires traversing k nodes. What makes this fundamentally different from array access?",
+    "options": ["lists are always faster", "arrays support random access in constant time", "lists are always slower", "it depends on the implementation"],
+    "correctIndex": 1,
+    "explanation": "Arrays store elements contiguously in memory and calculate address directly via base + k offset; linked lists must follow pointers sequentially, hence O(k) time.",
+    "difficulty": "Medium-Hard",
+    "tags": ["random-access", "memory-layout"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Linked List",
+    "question": "A singly linked list node stores a value and a next pointer. Removing every other node (1st, 3rd, 5th, ...) requires traversing the list. Best-case time complexity?",
+    "options": ["constant time", "linear time", "logarithmic time", "depends on list structure"],
+    "correctIndex": 1,
+    "explanation": "Even in the best case, you must visit every node at least once to identify and remove targets, which is O(n) linear.",
+    "difficulty": "Medium-Hard",
+    "tags": ["traversal", "deletion-pattern"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Linked List",
+    "question": "To implement a singly linked list that supports efficient insertion at both head and tail, which operation(s) benefit from keeping a tail pointer?",
+    "options": ["only head insertion", "only tail insertion", "tail insertion becomes constant time", "no improvement"],
+    "correctIndex": 2,
+    "explanation": "Without a tail pointer, appending requires traversing to the end (O(n)); a tail pointer allows direct append in O(1) constant time.",
+    "difficulty": "Medium",
+    "tags": ["tail-pointer", "optimization"]
+  }
+]

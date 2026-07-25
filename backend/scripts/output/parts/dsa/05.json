@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Queue Data Structure",
+    "question": "A queue implemented as a circular array of fixed size c allows n enqueues followed by n dequeues without reallocation. What is the space complexity?",
+    "options": ["constant space", "linear space in n", "linear space in c", "quadratic space"],
+    "correctIndex": 2,
+    "explanation": "A fixed circular array queue reserves O(c) space at initialization regardless of how many operations occur; space is linear in capacity c.",
+    "difficulty": "Medium",
+    "tags": ["circular-queue", "fixed-capacity"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Queue Data Structure",
+    "question": "A queue is implemented using a singly linked list where enqueue adds to tail and dequeue removes from head. What is the time complexity of enqueue if a tail pointer is maintained?",
+    "options": ["constant time", "linear time", "logarithmic time", "quadratic time"],
+    "correctIndex": 0,
+    "explanation": "With a tail pointer, enqueue appends directly to tail.next without traversal, requiring only pointer updates, which is O(1) constant time.",
+    "difficulty": "Medium",
+    "tags": ["linked-list-queue", "tail-pointer"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Queue Data Structure",
+    "question": "Breadth-first search (BFS) of a graph with V vertices and E edges using a queue visits each vertex once and each edge twice. What is the time complexity?",
+    "options": ["linear time", "linearithmic time", "quadratic time", "O of V times E"],
+    "correctIndex": 0,
+    "explanation": "BFS processes each vertex once and examines each edge once (in undirected graphs, each edge is checked from both endpoints, but total is O(V + E)).",
+    "difficulty": "Medium",
+    "tags": ["BFS", "graph-traversal"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Queue Data Structure",
+    "question": "A naive queue using an array with front and rear pointers will waste space as elements are dequeued because front advances but cannot wrap around. What is the fix?",
+    "options": ["use a linked list", "use a circular array with modulo arithmetic", "resize the array", "accept space waste"],
+    "correctIndex": 1,
+    "explanation": "A circular array treats the end of the array as connected to the beginning using modulo arithmetic, allowing front and rear to wrap without waste.",
+    "difficulty": "Medium",
+    "tags": ["circular-array", "space-efficiency"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Queue Data Structure",
+    "question": "Finding the shortest path in an unweighted graph from source to target using BFS is guaranteed to give the optimal solution. Why not use DFS instead?",
+    "options": ["DFS is slower", "DFS uses more space", "BFS explores level-by-level and finds shortest path first", "BFS and DFS have equal cost"],
+    "correctIndex": 2,
+    "explanation": "BFS explores all nodes at distance k before distance k+1; DFS explores one path to depth before backtracking, missing closer solutions.",
+    "difficulty": "Medium-Hard",
+    "tags": ["BFS-optimality", "shortest-path"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Queue Data Structure",
+    "question": "A queue-based simulation processes events in arrival order. If n events are enqueued and dequeued, and each dequeue triggers processing taking O(k) time, what is total complexity?",
+    "options": ["linear time", "linear time in n and k", "quadratic time", "depends on the processing"],
+    "correctIndex": 1,
+    "explanation": "Enqueuing all n events is O(n); dequeuing and processing each of n events takes n * O(k) time; total is O(n + n * k) = O(n * k).",
+    "difficulty": "Medium-Hard",
+    "tags": ["event-simulation", "amortized-analysis"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Queue Data Structure",
+    "question": "Implementing a deque (double-ended queue) allows efficient insertion and deletion at both ends. Using two stacks (left and right), what happens when one stack is empty and a pop is requested from that end?",
+    "options": ["transfer half of the other stack", "reverse and move all elements from the other stack", "raise an exception", "return null"],
+    "correctIndex": 1,
+    "explanation": "To pop from an empty end, reverse the non-empty stack and reassign; this amortizes to O(1) per operation over many calls.",
+    "difficulty": "Medium-Hard",
+    "tags": ["deque", "two-stack-deque"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Queue Data Structure",
+    "question": "A priority queue using a min-heap stores n elements. Extracting the minimum requires removing the root and reheapifying. What is the time complexity?",
+    "options": ["constant time", "linear time", "logarithmic time", "quadratic time"],
+    "correctIndex": 2,
+    "explanation": "Removing the root and restoring the heap property by sinking the new root takes O(log n) time due to the tree depth.",
+    "difficulty": "Medium",
+    "tags": ["priority-queue", "heapify"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Queue Data Structure",
+    "question": "A queue-based level-order traversal of a binary tree with n nodes uses auxiliary space for the queue. What is the maximum queue size during traversal?",
+    "options": ["logarithmic space", "linear space equal to n", "space proportional to tree width", "quadratic space"],
+    "correctIndex": 2,
+    "explanation": "The queue size at any time equals the number of nodes at the current level; maximum occurs at the widest level, which can be up to n/2 in a complete tree.",
+    "difficulty": "Medium-Hard",
+    "tags": ["level-order-traversal", "queue-space"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Queue Data Structure",
+    "question": "Implementing a queue using two stacks where one is the inbox and one is the outbox: when is the outbox reversed and populated from the inbox?",
+    "options": ["after each dequeue", "only when outbox is empty", "before each enqueue", "never"],
+    "correctIndex": 1,
+    "explanation": "Lazy reversal: push all enqueues to inbox; reverse inbox into outbox only when a dequeue occurs and outbox is empty, amortizing reversals.",
+    "difficulty": "Medium-Hard",
+    "tags": ["two-stack-queue", "lazy-reversal"]
+  }
+]

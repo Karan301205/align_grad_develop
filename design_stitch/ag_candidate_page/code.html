@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AlignGrad | Candidate Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-tertiary-fixed-variant": "#38485d", "tertiary-fixed": "#d3e4fe", "surface-container-lowest": "#ffffff", "tertiary-fixed-dim": "#b7c8e1", "inverse-on-surface": "#eff1f3", "on-tertiary": "#ffffff", "on-surface": "#191c1e", "primary-container": "#131b2e", outline: "#76777d", background: "#f7f9fb", "surface-variant": "#e0e3e5", "surface-dim": "#d8dadc", "on-primary-container": "#7c839b", "on-primary": "#ffffff", "surface-container-low": "#f2f4f6", "inverse-primary": "#bec6e0", "on-tertiary-fixed": "#0b1c30", "surface-container-high": "#e6e8ea", "on-surface-variant": "#45464d", "on-error": "#ffffff", "on-background": "#191c1e", "inverse-surface": "#2d3133", tertiary: "#000000", "outline-variant": "#c6c6cd", "on-secondary": "#ffffff", "error-container": "#ffdad6", "secondary-container": "#d5e3fd", secondary: "#515f74", "primary-fixed-dim": "#bec6e0", "on-error-container": "#93000a", "on-secondary-container": "#57657b", "on-primary-fixed-variant": "#3f465c", "tertiary-container": "#0b1c30", "secondary-fixed": "#d5e3fd", "on-secondary-fixed": "#0d1c2f", surface: "#f7f9fb", "surface-bright": "#f7f9fb", "on-secondary-fixed-variant": "#3a485c", "surface-container": "#eceef0", "on-tertiary-container": "#75859d", "primary-fixed": "#dae2fd", error: "#ba1a1a", "surface-tint": "#565e74", primary: "#000000", "secondary-fixed-dim": "#b9c7e0", "surface-container-highest": "#e0e3e5", "on-primary-fixed": "#131b2e"}, borderRadius: {DEFAULT: "0.125rem", lg: "0.25rem", xl: "0.5rem", full: "0.75rem"}, spacing: {xl: "32px", md: "16px", gutter: "24px", xs: "4px", sm: "8px", "container-max": "1280px", xxl: "48px", xxxl: "64px", lg: "24px", base: "4px"}, fontFamily: {"label-md": ["Inter"], "body-sm": ["Inter"], "body-lg": ["Inter"], "headline-sm": ["Inter"], "headline-md": ["Inter"], "label-sm": ["Inter"], "display-lg": ["Inter"], "headline-lg": ["Inter"], "body-md": ["Inter"], headline: ["Inter"], display: ["Inter"], body: ["Inter"], label: ["Inter"]}, fontSize: {"label-md": ["14px", {lineHeight: "20px", fontWeight: "500"}], "body-sm": ["14px", {lineHeight: "20px", fontWeight: "400"}], "body-lg": ["18px", {lineHeight: "28px", fontWeight: "400"}], "headline-sm": ["20px", {lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600"}], "headline-md": ["24px", {lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600"}], "label-sm": ["12px", {lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600"}], "display-lg": ["48px", {lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700"}], "headline-lg": ["32px", {lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600"}], "body-md": ["16px", {lineHeight: "24px", fontWeight: "400"}]}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .ambient-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            transition: box-shadow 0.3s ease;
+        }
+        .ambient-card:hover {
+            box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.05), 0 4px 6px -1px rgba(15, 23, 42, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #E2E8F0;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex overflow-hidden">
+<!-- Sidebar Navigation Shell -->
+<aside class="flex flex-col h-full py-xl px-md gap-sm bg-surface-container-lowest border-r border-outline-variant w-64 fixed left-0 top-0 z-50">
+<div class="flex flex-col gap-xs mb-xxl">
+<div class="flex items-center gap-md mb-md">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary">AlignGrad</h1>
+<p class="text-secondary font-label-sm uppercase tracking-widest text-[10px]">Candidate Hub</p>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary py-md rounded-lg font-label-md flex items-center justify-center gap-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+                Quick Apply
+            </button>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-md px-md py-sm bg-secondary-container text-on-secondary-container font-semibold rounded-lg group" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-secondary hover:bg-surface-container-low transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">work</span>
+<span class="font-label-md">Jobs</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-secondary hover:bg-surface-container-low transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">verified_user</span>
+<span class="font-label-md">Assessments</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-secondary hover:bg-surface-container-low transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-md">Network</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-secondary hover:bg-surface-container-low transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md">Analytics</span>
+</a>
+</nav>
+<div class="mt-auto pt-xl border-t border-outline-variant space-y-1">
+<a class="flex items-center gap-md px-md py-sm text-secondary hover:bg-surface-container-low transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md">Support</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-secondary hover:bg-surface-container-low transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 h-screen overflow-y-auto custom-scrollbar">
+<!-- Header -->
+<header class="h-16 px-xxl flex items-center justify-between sticky top-0 bg-background/80 backdrop-blur-md z-40">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary">Welcome back, Alex.</h2>
+<p class="text-secondary font-body-sm">Your skill verification level is <span class="font-semibold text-primary">Top 5%</span></p>
+</div>
+<div class="flex items-center gap-lg">
+<div class="relative">
+<span class="material-symbols-outlined text-secondary cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-error rounded-full border-2 border-background"></span>
+</div>
+<div class="w-10 h-10 rounded-full border border-outline-variant overflow-hidden cursor-pointer active:scale-95 transition-transform">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a young technology professional with a confident, slight smile. The person is wearing a minimalist dark sweater, set against a clean, softly lit architectural background with neutral gray tones and clean lines, reflecting an elite corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBA0MNdJHpU0Kob8sITv8zzBEszlHb7DkhklB3O5fsR7WZy8XJAgf4ZAeRR6ksr1bmMqqYZoZoWMBmudI_pIky2UK0ALKv_gH4hAQBmXjB4HeMXnb4FVbGf3i8OYy-OqCRGICmneSSGMjO6X8hAmBQ2iiwLl5WnWTLUpeadsaxh00vy0nbYv7CTfiDQ6E52jVRLzgboNvxGXXWShiNzM7jHt_3J3ZX6TvJu3NMrMFlOT9hmw3-VXJWyrPOklQx34LM5An6TF0tMXt8"/>
+</div>
+</div>
+</header>
+<div class="px-xxl py-xl max-w-7xl mx-auto space-y-xl">
+<!-- Top Section: Bento Grid -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Profile Completion -->
+<div class="col-span-12 lg:col-span-4 ambient-card rounded-xl p-lg flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-md">
+<h3 class="font-headline-sm text-headline-sm text-primary">Profile Integrity</h3>
+<span class="text-primary font-label-md bg-secondary-container px-sm py-xs rounded">84%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden mb-lg">
+<div class="bg-primary h-full transition-all duration-1000 ease-out" style="width: 84%"></div>
+</div>
+<p class="text-secondary font-body-sm mb-lg">Complete your portfolio to unlock high-priority verification status.</p>
+</div>
+<button class="text-primary font-label-md flex items-center gap-xs hover:gap-sm transition-all">
+                        Complete details <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+<!-- Skill Verification Snapshot -->
+<div class="col-span-12 lg:col-span-8 ambient-card rounded-xl p-lg bg-primary-container text-on-primary">
+<div class="flex justify-between items-start mb-xl">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-white">Verification Center</h3>
+<p class="text-on-primary-container font-body-sm">Industry-standard badges to prove your expertise.</p>
+</div>
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full bg-secondary-container border-2 border-primary-container flex items-center justify-center text-primary" title="React Advanced Badge">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-secondary-container border-2 border-primary-container flex items-center justify-center text-primary" title="Python Data Badge">
+<span class="material-symbols-outlined text-[16px]">terminal</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="bg-white/5 border border-white/10 rounded-lg p-md backdrop-blur-sm group cursor-pointer hover:bg-white/10 transition-colors">
+<div class="flex items-center gap-sm mb-sm">
+<span class="material-symbols-outlined text-white">psychology</span>
+<span class="font-label-sm text-white">System Design</span>
+</div>
+<p class="text-on-primary-container text-[12px] mb-md">45-min advanced scenario test.</p>
+<span class="text-white font-label-sm border-b border-white/20 pb-xs">Start Now</span>
+</div>
+<div class="bg-white/5 border border-white/10 rounded-lg p-md backdrop-blur-sm group cursor-pointer hover:bg-white/10 transition-colors">
+<div class="flex items-center gap-sm mb-sm">
+<span class="material-symbols-outlined text-white">database</span>
+<span class="font-label-sm text-white">SQL Mastery</span>
+</div>
+<p class="text-on-primary-container text-[12px] mb-md">Interactive schema challenges.</p>
+<span class="text-white font-label-sm border-b border-white/20 pb-xs">Resume (25%)</span>
+</div>
+<div class="bg-white/10 border border-white/20 rounded-lg p-md flex items-center justify-center text-white/40 border-dashed">
+<span class="font-label-sm">Browse 12+ More</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Middle Section: Main Dashboard Layout -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Application Timeline (Left Column) -->
+<div class="col-span-12 lg:col-span-7 space-y-lg">
+<div class="ambient-card rounded-xl overflow-hidden">
+<div class="px-lg py-md border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+<h3 class="font-label-sm uppercase tracking-widest text-primary">Active Application Status</h3>
+<span class="text-secondary font-label-sm">3 Active Roles</span>
+</div>
+<div class="p-lg space-y-xxl relative">
+<!-- Timeline Line -->
+<div class="absolute left-[39px] top-lg bottom-lg w-px bg-outline-variant"></div>
+<!-- Application 1 -->
+<div class="relative pl-xl flex gap-lg">
+<div class="absolute left-0 top-1 w-6 h-6 rounded-full bg-primary border-4 border-background z-10"></div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-xs">
+<h4 class="font-headline-sm text-primary">Senior Interface Engineer</h4>
+<span class="bg-secondary-container text-on-secondary-container font-label-sm px-sm py-xs rounded-full">Interview Phase</span>
+</div>
+<p class="text-secondary font-body-sm mb-md">Quantum Systems • Zurich (Remote)</p>
+<div class="bg-surface-container-low p-md rounded-lg border border-outline-variant/30 flex items-center gap-md">
+<span class="material-symbols-outlined text-primary">event_upcoming</span>
+<div>
+<p class="font-label-md text-primary">Panel Interview Scheduled</p>
+<p class="text-secondary text-[12px]">Tomorrow, 10:30 AM (CET)</p>
+</div>
+<button class="ml-auto text-primary font-label-md border border-primary px-sm py-xs rounded hover:bg-primary hover:text-white transition-all">Prepare</button>
+</div>
+</div>
+</div>
+<!-- Application 2 -->
+<div class="relative pl-xl flex gap-lg">
+<div class="absolute left-0 top-1 w-6 h-6 rounded-full bg-outline-variant border-4 border-background z-10"></div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-xs text-on-surface-variant">
+<h4 class="font-headline-sm opacity-60">Lead Product Architect</h4>
+<span class="bg-surface-container-high text-on-surface-variant font-label-sm px-sm py-xs rounded-full">Technical Review</span>
+</div>
+<p class="text-on-surface-variant font-body-sm mb-md opacity-60">Nexus Fintech • London</p>
+<p class="text-secondary text-[12px]">Status: Hiring manager is reviewing your skill verification scores.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Recommended Jobs (Right Column) -->
+<div class="col-span-12 lg:col-span-5 space-y-lg">
+<div class="ambient-card rounded-xl p-lg">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-label-sm uppercase tracking-widest text-primary">Recommended For You</h3>
+<span class="material-symbols-outlined text-secondary cursor-pointer hover:rotate-180 transition-transform duration-500">sync</span>
+</div>
+<div class="space-y-md">
+<!-- Job 1 -->
+<div class="p-md rounded-lg border border-outline-variant hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between mb-xs">
+<p class="font-label-md text-primary group-hover:text-primary transition-colors">Staff Engineer</p>
+<span class="text-on-secondary-container font-label-sm bg-secondary-container px-xs rounded">98% Match</span>
+</div>
+<p class="text-secondary text-[12px] mb-md">CloudFlare • San Francisco (Hybrid)</p>
+<div class="flex flex-wrap gap-xs">
+<span class="px-xs py-[2px] bg-surface-container-low text-secondary text-[10px] rounded border border-outline-variant/30">Go</span>
+<span class="px-xs py-[2px] bg-surface-container-low text-secondary text-[10px] rounded border border-outline-variant/30">Kubernetes</span>
+<span class="px-xs py-[2px] bg-surface-container-low text-secondary text-[10px] rounded border border-outline-variant/30">Distributed Systems</span>
+</div>
+</div>
+<!-- Job 2 -->
+<div class="p-md rounded-lg border border-outline-variant hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between mb-xs">
+<p class="font-label-md text-primary">Engineering Manager</p>
+<span class="text-on-secondary-container font-label-sm bg-secondary-container px-xs rounded">92% Match</span>
+</div>
+<p class="text-secondary text-[12px] mb-md">Stripe • Dublin (Remote)</p>
+<div class="flex flex-wrap gap-xs">
+<span class="px-xs py-[2px] bg-surface-container-low text-secondary text-[10px] rounded border border-outline-variant/30">Leadership</span>
+<span class="px-xs py-[2px] bg-surface-container-low text-secondary text-[10px] rounded border border-outline-variant/30">Product</span>
+</div>
+</div>
+<!-- Job 3 -->
+<div class="p-md rounded-lg border border-outline-variant hover:border-primary transition-colors cursor-pointer group">
+<div class="flex justify-between mb-xs">
+<p class="font-label-md text-primary">Senior Full-Stack Developer</p>
+<span class="text-on-secondary-container font-label-sm bg-secondary-container px-xs rounded">89% Match</span>
+</div>
+<p class="text-secondary text-[12px] mb-md">Vercel • Remote</p>
+<div class="flex flex-wrap gap-xs">
+<span class="px-xs py-[2px] bg-surface-container-low text-secondary text-[10px] rounded border border-outline-variant/30">Next.js</span>
+<span class="px-xs py-[2px] bg-surface-container-low text-secondary text-[10px] rounded border border-outline-variant/30">TypeScript</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-lg py-sm font-label-md text-secondary border border-outline-variant rounded-lg hover:bg-surface-container-low transition-colors">
+                            View All Matches
+                        </button>
+</div>
+<!-- Career Insights Card -->
+<div class="ambient-card rounded-xl overflow-hidden relative h-48 group">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A clean, minimalist high-key photograph of a sleek office desk with a silver laptop, a notebook with architect-style sketches, and a single green plant. The lighting is soft and bright morning sun filtering through a window, creating a serene and ambitious career-focused environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKVaPZlCZkb_yNWmWg2UuRihXid-wl8i2qHG1IdTKWjO9qjoWgzmC7R2AJiNrOQLZYbwnCr8rlNXSOaPVk92mChM3AcDb6268Xfn-cTvCR7TLfmCNs4N4ZWAYAMXrhpYBsogdqHGhVOmW3eR2VdAXBPh2xE0nbFSrzWTeClXFZ1NxvqDbNf_8Phg7SrEHbYqcGM_liacsme6-4cMmksIVy_ntFz5107P6jc11wZaA146yJ41kl7_MKuXvOZwrAepAqYmGvtJxW-7k"/>
+<div class="absolute inset-0 bg-primary/40 backdrop-blur-[2px] flex flex-col justify-end p-lg">
+<h4 class="text-white font-headline-sm mb-xs">Salary Benchmarking</h4>
+<p class="text-white/80 text-[12px]">See how your skills rank in the current market for top-tier roles.</p>
+<button class="mt-md w-fit px-md py-xs bg-white text-primary font-label-sm rounded shadow-lg active:scale-95 transition-transform">Get Report</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Micro-interaction Scripts -->
+<script>
+        // Subtle hover effects for cards using JS to handle dynamic classes
+        document.querySelectorAll('.ambient-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                // Potential for dynamic content loading or subtle animation
+            });
+        });
+
+        // Simple mock search or notification toggle logic
+        const notificationsBtn = document.querySelector('.material-symbols-outlined[style*="notifications"]');
+        if(notificationsBtn) {
+            notificationsBtn.addEventListener('click', () => {
+                // Would normally open a popover
+                console.log('Notification center toggled');
+            });
+        }
+    </script>
+</body></html>

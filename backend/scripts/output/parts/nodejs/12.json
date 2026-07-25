@@ -1,0 +1,112 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "Testing Frameworks",
+    "question": "What does a unit test verify?\n```javascript\ndescribe('Math.add', () => {\n  it('adds two numbers', () => {\n    expect(Math.add(2, 3)).toBe(5);\n  });\n});\n```",
+    "options": ["tests the entire application", "tests one function in isolation", "integration tests are the same", "unit tests are obsolete"],
+    "correctIndex": 1,
+    "explanation": "Unit tests verify individual functions in isolation, separate from dependencies; easy to write, fast to run, and catch logic errors.",
+    "difficulty": "Medium",
+    "tags": ["unit-testing", "jest"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Testing Frameworks",
+    "question": "When should you mock dependencies?\n```javascript\nconst fetchUser = jest.fn().mockResolvedValue({id: 1});\nconst user = await getUserById(1, fetchUser);\nexpect(fetchUser).toHaveBeenCalledWith(1);\n```",
+    "options": ["never mock; always use real dependencies", "mock external services to avoid flaky tests", "mocking makes tests slow", "mocking is only for unit tests"],
+    "correctIndex": 1,
+    "explanation": "Mocking replaces external dependencies (APIs, databases) with controlled substitutes; tests are fast, isolated, and deterministic.",
+    "difficulty": "Medium",
+    "tags": ["mocking", "jest", "unit-testing"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Testing Frameworks",
+    "question": "What does test coverage measure?\n```javascript\n// 80% line coverage\nif (user.admin) {\n  // not tested\n}\n```",
+    "options": ["percentage of code paths executed by tests", "ensures code is correct", "100% coverage guarantees no bugs", "coverage is not useful"],
+    "correctIndex": 0,
+    "explanation": "Coverage measures which lines are executed during tests; high coverage does not guarantee correctness but identifies untested code.",
+    "difficulty": "Medium",
+    "tags": ["test-coverage", "jest"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Testing Frameworks",
+    "question": "How should you test async functions?\n```javascript\nit('fetches user data', async () => {\n  const user = await getUser(1);\n  expect(user.id).toBe(1);\n});\n```",
+    "options": ["async tests are not supported", "use async/await in test function", "return Promise without await", "callbacks are required"],
+    "correctIndex": 1,
+    "explanation": "Jest recognizes async test functions; jest waits for the Promise to settle before ending the test.",
+    "difficulty": "Medium",
+    "tags": ["jest", "async-testing"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Testing Frameworks",
+    "question": "What does beforeEach hook do?\n```javascript\nbeforeEach(() => {\n  db.clearCache();\n});\nit('test 1', () => { /* runs after beforeEach */ });\nit('test 2', () => { /* runs after beforeEach again */ });\n```",
+    "options": ["runs once before all tests", "runs before each test, ensuring clean state", "runs after tests", "hooks are not needed"],
+    "correctIndex": 1,
+    "explanation": "beforeEach runs before each test; useful for setup (clearing mocks, resetting state) so tests don't interfere with each other.",
+    "difficulty": "Medium",
+    "tags": ["jest", "test-setup"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Testing Frameworks",
+    "question": "Which assertion fails if object.property does not exist?\n```javascript\nconst obj = {a: 1};\nexpect(obj.b).toBeUndefined(); // pass\nexpect(obj).toHaveProperty('b'); // fail\n```",
+    "options": ["both pass", "toBeUndefined passes, toHaveProperty fails", "both fail", "expect is not a function"],
+    "correctIndex": 1,
+    "explanation": "toBeUndefined checks if a value is undefined; toHaveProperty checks if a key exists; the second assertion fails because 'b' is not a property.",
+    "difficulty": "Medium",
+    "tags": ["jest", "assertions"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Testing Frameworks",
+    "question": "How should you test error handling?\n```javascript\nit('throws on invalid input', () => {\n  expect(() => parseInput('bad')).toThrow();\n});\n```",
+    "options": ["should wrap function in another function to test throw", "errors cannot be tested", "toThrow checks for any thrown error", "all of the above"],
+    "correctIndex": 2,
+    "explanation": "toThrow expects the wrapped function to throw; the wrapper delays execution so Jest catches the error.",
+    "difficulty": "Medium",
+    "tags": ["jest", "error-testing"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Testing Frameworks",
+    "question": "What does jest.spyOn do?\n```javascript\nconst spy = jest.spyOn(console, 'log');\nconsole.log('test');\nexpect(spy).toHaveBeenCalledWith('test');\nspy.mockRestore();\n```",
+    "options": ["spies track function calls without replacing implementation", "completely replaces the function", "spying slows down tests", "spyOn is deprecated"],
+    "correctIndex": 0,
+    "explanation": "spyOn wraps a function to track calls while keeping the original behavior; afterward, restore() removes the spy.",
+    "difficulty": "Medium",
+    "tags": ["jest", "spying", "mocking"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Testing Frameworks",
+    "question": "How should you test HTTP endpoints?\n```javascript\nconst request = require('supertest');\nit('GET /users returns 200', async () => {\n  const res = await request(app).get('/users');\n  expect(res.status).toBe(200);\n});\n```",
+    "options": ["supertest sends real HTTP requests", "supertest makes in-process requests to Express app", "integration tests are different", "endpoints cannot be tested"],
+    "correctIndex": 1,
+    "explanation": "supertest attaches to the Express app and sends requests in-process; no need for a running server, making tests fast.",
+    "difficulty": "Medium",
+    "tags": ["supertest", "integration-testing", "express"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Testing Frameworks",
+    "question": "When should you use snapshot testing?\n```javascript\nit('renders UI', () => {\n  const html = render(<Button />);\n  expect(html).toMatchSnapshot();\n});\n```",
+    "options": ["snapshots guarantee UI correctness", "snapshots detect unexpected changes but require review", "snapshots are obsolete", "snapshots should be in git"],
+    "correctIndex": 1,
+    "explanation": "Snapshots save output and compare on rerun; useful for detecting regressions, but must be reviewed before committing (snapshots are usually in git).",
+    "difficulty": "Medium",
+    "tags": ["jest", "snapshot-testing"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Testing Frameworks",
+    "question": "What is the difference between describe and it?\n```javascript\ndescribe('User API', () => {\n  it('fetches users', () => { /* test */ });\n  it('creates user', () => { /* test */ });\n});\n```",
+    "options": ["describe and it are interchangeable", "describe groups related tests, it defines individual test", "describe is optional", "it must come before describe"],
+    "correctIndex": 1,
+    "explanation": "describe creates a test suite for organization; it defines a single test case within that suite.",
+    "difficulty": "Medium",
+    "tags": ["jest", "test-structure"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Graph Algorithms",
+    "question": "Depth-first search (DFS) on a graph with V vertices and E edges takes how much time if implemented using an adjacency list?",
+    "options": ["linear time in V", "linear time in E", "O of V plus E time", "quadratic time"],
+    "correctIndex": 2,
+    "explanation": "DFS visits each vertex once (V) and inspects each edge once (E); total is O(V + E) linear time.",
+    "difficulty": "Medium",
+    "tags": ["DFS", "graph-complexity"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Graph Algorithms",
+    "question": "Breadth-first search finds the shortest path in an unweighted graph. Dijkstra's algorithm extends this to weighted graphs. What is the primary difference in time complexity?",
+    "options": ["BFS is faster", "Dijkstra is faster", "BFS is O(V+E) while Dijkstra with a min-heap is O((V+E) log V)", "both are identical"],
+    "correctIndex": 2,
+    "explanation": "Dijkstra uses a priority queue to always process the nearest unvisited vertex, requiring log V time per extraction, giving O((V + E) log V) total.",
+    "difficulty": "Medium-Hard",
+    "tags": ["shortest-path", "priority-queue"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Graph Algorithms",
+    "question": "Detecting a cycle in an undirected graph using DFS requires tracking visited and recursion-stack nodes. If a back-edge is found (edge to an ancestor), what does it indicate?",
+    "options": ["the graph is a tree", "a cycle exists", "the edge is safe", "more information is needed"],
+    "correctIndex": 1,
+    "explanation": "A back-edge (edge to a non-parent ancestor in DFS tree) indicates a cycle in an undirected graph.",
+    "difficulty": "Medium",
+    "tags": ["cycle-detection", "back-edge"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Graph Algorithms",
+    "question": "Topological sorting of a directed acyclic graph (DAG) using DFS requires recording post-order traversal times. Why is post-order used instead of pre-order?",
+    "options": ["pre-order is also valid", "post-order ensures dependencies are resolved before dependents", "post-order is faster", "either order works equally well"],
+    "correctIndex": 1,
+    "explanation": "Topological sort requires a node to come after all nodes that point to it; post-order ensures this by finishing a node only after its descendants.",
+    "difficulty": "Medium-Hard",
+    "tags": ["topological-sort", "post-order-property"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Graph Algorithms",
+    "question": "A graph is represented as an adjacency matrix of size V x V vs. an adjacency list of total size O(V + E). Space complexity of each representation is?",
+    "options": ["matrix is O(V) and list is O(E)", "matrix is O(V^2) and list is O(V+E)", "matrix is O(E) and list is O(V)", "both are O(V + E)"],
+    "correctIndex": 1,
+    "explanation": "Adjacency matrix requires V^2 space for all possible edges; adjacency list uses O(V) for vertices plus O(E) for edges.",
+    "difficulty": "Medium",
+    "tags": ["graph-representation", "space-complexity"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Graph Algorithms",
+    "question": "Bellman-Ford algorithm finds shortest paths even with negative edge weights. What is its time complexity and how does it compare to Dijkstra?",
+    "options": ["O(V+E) and faster than Dijkstra", "O(V*E) and slower than Dijkstra", "O(log V) and faster", "O(V^2) and much slower"],
+    "correctIndex": 1,
+    "explanation": "Bellman-Ford relaxes all E edges V-1 times, giving O(V*E); Dijkstra is O((V+E) log V) with a min-heap, making it faster for non-negative weights.",
+    "difficulty": "Medium-Hard",
+    "tags": ["shortest-path", "negative-weights"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Graph Algorithms",
+    "question": "A connected component of a graph can be found using DFS or BFS from one vertex. To find all connected components in an undirected graph, what is the overall complexity?",
+    "options": ["O(V+E) for one DFS plus O(V+E) times the number of components", "O(V+E) regardless of component count", "O(V*E)", "quadratic time"],
+    "correctIndex": 1,
+    "explanation": "Run DFS/BFS from any unvisited vertex; each vertex and edge is visited exactly once across all components, giving O(V + E) total.",
+    "difficulty": "Medium",
+    "tags": ["connected-components", "graph-exploration"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Graph Algorithms",
+    "question": "Finding all strongly connected components (SCCs) in a directed graph using Kosaraju or Tarjan's algorithm requires two passes of DFS. What is the total time complexity?",
+    "options": ["linear time", "linearithmic time", "quadratic time", "cubic time"],
+    "correctIndex": 0,
+    "explanation": "Both algorithms perform DFS twice on the same graph; total is O(V + E) + O(V + E) = O(V + E) linear time.",
+    "difficulty": "Medium-Hard",
+    "tags": ["SCC", "two-pass-DFS"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Graph Algorithms",
+    "question": "In Floyd-Warshall algorithm, an n x n distance matrix is updated using an intermediate-node loop. What is the space complexity of storing the distance matrix for V vertices?",
+    "options": ["linear space", "logarithmic space", "quadratic space", "exponential space"],
+    "correctIndex": 2,
+    "explanation": "A V x V matrix requires O(V^2) quadratic space; the number of rows and columns is V, so area is V * V = V^2.",
+    "difficulty": "Medium",
+    "tags": ["all-pairs-shortest-path", "matrix-storage"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Graph Algorithms",
+    "question": "Implementing a weighted graph using an adjacency list requires storing edge weights. Compared to an adjacency matrix, what is the space advantage for sparse graphs?",
+    "options": ["matrix is more space-efficient", "adjacency list is O(V+E) while matrix is O(V^2)", "no difference", "it depends on weights"],
+    "correctIndex": 1,
+    "explanation": "For sparse graphs where E is much less than V^2, adjacency list uses O(V + E) while matrix uses O(V^2), making list far more efficient.",
+    "difficulty": "Medium",
+    "tags": ["sparse-graph", "representation-efficiency"]
+  }
+]

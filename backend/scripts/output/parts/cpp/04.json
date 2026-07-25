@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Functions",
+    "question": "If a function is declared but never defined, and it's never called, does the linker error?",
+    "options": ["yes; linker always requires definition", "no; linker only checks called functions", "yes; but only in release builds", "yes; but only if ODR is enforced"],
+    "correctIndex": 1,
+    "explanation": "The linker only reports missing symbols for functions that are actually called; unused declarations are ignored.",
+    "difficulty": "Medium-Hard",
+    "tags": ["linker", "one-definition-rule", "forward-declaration"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Functions",
+    "question": "What is the output of a function that returns a reference to a local variable?",
+    "options": ["the value the local had before returning", "undefined behavior on dereferencing the reference", "compilation error", "the reference is valid until the function ends"],
+    "correctIndex": 1,
+    "explanation": "Returning a reference to a local creates a dangling reference; dereferencing it invokes undefined behavior.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dangling-reference", "undefined-behavior", "return-value"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Functions",
+    "question": "Can two functions have the same name if they differ only in return type?",
+    "options": ["yes; function signature includes return type", "no; return type is not part of the signature for overload resolution", "yes in C++17 onwards", "only for virtual functions"],
+    "correctIndex": 1,
+    "explanation": "Function overload resolution ignores return type; return-type-only differences cause redefinition errors.",
+    "difficulty": "Medium",
+    "tags": ["function-overloading", "signature"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Functions",
+    "question": "What does `int f(const int x)` mean for the caller, and how does it differ from `int f(int x)`?",
+    "options": ["caller must pass const int; otherwise compilation error", "no difference in caller behavior; const is applied to the copy inside f", "caller cannot modify x after function returns", "const here is an error"],
+    "correctIndex": 1,
+    "explanation": "const on value parameters is ignored by callers; both signatures are equivalent and the const is internal to the function.",
+    "difficulty": "Medium",
+    "tags": ["const-qualification", "value-parameters", "overloading"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Functions",
+    "question": "If a function has a default argument, can the non-default version also exist?",
+    "options": ["yes; both overloads can coexist", "no; it creates ambiguity", "yes, but caller must call with all arguments explicit", "only if declared in different scopes"],
+    "correctIndex": 1,
+    "explanation": "Having both f(int x) and f(int x = 5) causes ambiguity when called with f(3), creating a compiler error.",
+    "difficulty": "Medium",
+    "tags": ["default-arguments", "function-overloading", "ambiguity"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Functions",
+    "question": "What happens if you declare a function with ellipsis (`...`) but don't use va_list?",
+    "options": ["compilation error", "valid; variadic function with type checking disabled", "undefined behavior if called with extra arguments", "the ellipsis is ignored"],
+    "correctIndex": 1,
+    "explanation": "Ellipsis declares a variadic function without type-safe access; calling it with extra arguments is allowed but unsafe.",
+    "difficulty": "Medium-Hard",
+    "tags": ["variadic-functions", "va-list", "type-safety"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Functions",
+    "question": "Can you take the address of an inline function?",
+    "options": ["no; inline functions have no address", "yes; inline is a hint to the compiler, not a restriction on addresses", "only if the function is not actually inlined", "only in debug builds"],
+    "correctIndex": 1,
+    "explanation": "inline is merely an optimization hint; the address of an inline function is still valid and usable.",
+    "difficulty": "Medium",
+    "tags": ["inline-functions", "function-pointers"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Functions",
+    "question": "If a function is declared static, where is it visible?",
+    "options": ["visible in the current translation unit only", "visible globally with mangled name", "visible to the entire program", "error; static functions do not exist"],
+    "correctIndex": 0,
+    "explanation": "static on a function at file scope limits visibility to that translation unit (internal linkage).",
+    "difficulty": "Medium",
+    "tags": ["static-functions", "linkage", "visibility"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Functions",
+    "question": "What is the difference between `void f()` and `void f(void)` in C++?",
+    "options": ["no difference; both take no parameters", "f(void) is a C style; C++ ignores void", "f() may take any parameters; f(void) takes none", "f(void) is invalid in C++"],
+    "correctIndex": 0,
+    "explanation": "In C++, both void f() and void f(void) declare a function with no parameters; f(void) is accepted for C compatibility.",
+    "difficulty": "Medium",
+    "tags": ["function-parameters", "c-compatibility"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Functions",
+    "question": "Does a recursive function call count toward stack depth, or does the compiler optimize tail calls?",
+    "options": ["recursion always uses stack depth", "compiler may optimize tail calls to loops, but no guarantee", "C++ standard requires tail-call optimization", "tail recursion is impossible in C++"],
+    "correctIndex": 1,
+    "explanation": "Tail-call optimization is not guaranteed by the standard; stack depth depends on the compiler and optimization level.",
+    "difficulty": "Medium-Hard",
+    "tags": ["recursion", "tail-call-optimization", "stack-depth"]
+  }
+]

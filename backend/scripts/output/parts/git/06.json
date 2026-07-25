@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Merge Conflicts",
+    "question": "You encounter a merge conflict in a file with conflicting markers (<<<<<<<, =======, >>>>>>>). Both versions look correct. You run git merge --abort to restart. How do you determine which version should be kept without re-merging manually?",
+    "options": [
+      "Use git diff --ours and git diff --theirs to compare your branch against the incoming branch, or use git show :1 :2 :3 to view all three versions",
+      "Manually read each version and decide",
+      "Use git merge --squash to combine both versions",
+      "Rebase to avoid the conflict entirely"
+    ],
+    "correctIndex": 0,
+    "explanation": "git diff --ours/--theirs shows your version vs incoming; git show :N accesses conflict stages (1=base, 2=ours, 3=theirs) for detailed comparison.",
+    "difficulty": "Medium-Hard",
+    "tags": ["merge-conflict", "conflict-markers", "resolution-strategy"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Merge Conflicts",
+    "question": "During a rebase, a conflict occurs in a file that was previously resolved identically in another commit. Instead of re-resolving manually, how can you reuse the previous resolution?",
+    "options": [
+      "Use git rerere (reuse recorded resolution) to automatically apply previously resolved conflicts",
+      "Manually re-resolve the conflict again",
+      "Skip the commit with git rebase --skip",
+      "Use git merge --ours to automatically pick your version"
+    ],
+    "correctIndex": 0,
+    "explanation": "rerere records conflict resolutions in .git/rr-cache/; enabling rerere.enabled=true makes rebase automatically reuse past resolutions for identical conflicts.",
+    "difficulty": "Medium-Hard",
+    "tags": ["rerere", "rebase", "conflict-reuse"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Merge Conflicts",
+    "question": "You merge two branches and Git reports a merge conflict in a binary file (image or compiled object). The conflict markers are useless in binary files. What strategy resolves this?",
+    "options": [
+      "Use git checkout --ours or --theirs to select one version, or configure .gitattributes with merge=union to automate the choice",
+      "Manually edit the binary file",
+      "Use git merge --abort and rebase instead",
+      "Delete the binary file and regenerate it"
+    ],
+    "correctIndex": 0,
+    "explanation": "Binary files cannot be textually merged; --ours/--theirs select one version; .gitattributes merge=union or merge=driver avoids manual intervention.",
+    "difficulty": "Medium",
+    "tags": ["binary-conflict", "merge-strategy", "gitattributes"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Merge Conflicts",
+    "question": "You attempt to merge a feature branch, and Git reports a conflict in a file that you don't recognize from your branch. When you check git status, the file shows as both modified by you and the incoming branch. What likely happened?",
+    "options": [
+      "The file was modified in both branches independently; even if you didn't explicitly edit it, your branch inherited changes from its base",
+      "Git made an error in the merge detection",
+      "The file is corrupted and needs to be regenerated",
+      "The merge was not completed properly"
+    ],
+    "correctIndex": 0,
+    "explanation": "Merge conflicts occur when both branches modified overlapping regions; if you didn't edit the file, it was likely changed in a commit you rebased on.",
+    "difficulty": "Medium",
+    "tags": ["merge-conflict", "inheritance", "branch-divergence"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Merge Conflicts",
+    "question": "During a merge, you resolve a conflict incorrectly. The merge completes and you push to remote. Hours later, you discover the resolution was wrong. What is the safest way to fix it?",
+    "options": [
+      "Create a new commit that corrects the issue, or use git revert to undo the merge entirely and re-merge with the correct resolution",
+      "Force-push the branch with the corrected resolution",
+      "Rebase to remove the merge commit",
+      "Delete the remote branch and re-push"
+    ],
+    "correctIndex": 0,
+    "explanation": "A follow-up commit is safe and preserves history; git revert undoes the merge if the error is significant; force-push risks breaking collaborators' branches.",
+    "difficulty": "Medium",
+    "tags": ["merge-resolution", "correction", "history-preservation"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Merge Conflicts",
+    "question": "You are merging a branch with conflicts and want to resolve all conflicts using your version (current branch) automatically. Which command achieves this without manual intervention?",
+    "options": [
+      "Use git merge -X ours to automatically select your version for all conflicts",
+      "Use git merge --ff-only to avoid conflicts",
+      "Run git merge --squash to combine changes",
+      "Use git rebase with --autostash to preserve your changes"
+    ],
+    "correctIndex": 0,
+    "explanation": "-X ours is a merge strategy option that auto-resolves conflicts in favor of the current branch; useful for automated merges when your version is correct.",
+    "difficulty": "Medium",
+    "tags": ["merge-strategy", "automatic-resolution", "ours-strategy"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Merge Conflicts",
+    "question": "You rebase your branch onto main, and a conflict occurs in the first commit of the rebase. You resolve it correctly and run git rebase --continue. More conflicts appear in the next commits. Is it possible all conflicts are due to the same root issue?",
+    "options": [
+      "Yes, if the first commit introduced a change that conflicts with multiple downstream commits; resolving the root cause in the first commit may eliminate subsequent conflicts",
+      "No, each conflict must be resolved independently",
+      "Conflicts in rebase are random and cannot indicate a pattern",
+      "You must abort and rebase differently"
+    ],
+    "correctIndex": 0,
+    "explanation": "Rebase replays commits sequentially; a change in the first commit can cascade and cause conflicts in later commits if they depend on the original state.",
+    "difficulty": "Medium-Hard",
+    "tags": ["rebase-cascade", "root-cause", "conflict-pattern"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Merge Conflicts",
+    "question": "You encounter a conflict in a whitespace-only line (indentation or blank lines). Git's conflict markers show both versions as identical in the editor, but it still reports a conflict. What is the most likely cause?",
+    "options": [
+      "Line ending differences (CRLF vs LF) or trailing whitespace are encoded in the conflict; use git diff --word-diff or git config core.safecrlf to diagnose",
+      "The editor is not displaying whitespace characters",
+      "Git made an error in conflict detection",
+      "The file has mixed encodings"
+    ],
+    "correctIndex": 0,
+    "explanation": "Whitespace-only conflicts often involve invisible characters (tabs vs spaces, CRLF); git diff --word-diff reveals them; core.safecrlf detects line-ending issues.",
+    "difficulty": "Medium-Hard",
+    "tags": ["whitespace-conflict", "line-endings", "invisible-characters"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Merge Conflicts",
+    "question": "After resolving merge conflicts and staging the resolved file (git add), you want to review the resolution before committing. Which command shows the resolution as it will appear in the final merge commit?",
+    "options": [
+      "Use git diff --cached or git diff --staged to view the staged resolution",
+      "Use git status to see the file state",
+      "Run git show to display the merge commit",
+      "Use git log to check commit history"
+    ],
+    "correctIndex": 0,
+    "explanation": "git diff --cached shows staged changes (the resolved version) that will be committed; this allows verification before completing the merge.",
+    "difficulty": "Medium",
+    "tags": ["staged-changes", "merge-resolution", "verification"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Merge Conflicts",
+    "question": "You use git merge --no-ff to ensure a merge commit is always created. A conflict occurs during the merge. After resolving and committing, you realize the merge strategy was wrong for this case. Can you easily undo just the merge without losing the resolution work?",
+    "options": [
+      "Yes, use git revert -m 1 to undo the merge commit while preserving the resolution history; this creates a new commit that reverts the merge",
+      "No, you must reset and re-merge from scratch",
+      "Use git reset --hard to discard everything",
+      "Delete the branch and start over"
+    ],
+    "correctIndex": 0,
+    "explanation": "git revert -m 1 undoes a merge commit; -m 1 specifies that mainline parent (parent 1) is the one to revert to, creating a new commit.",
+    "difficulty": "Medium-Hard",
+    "tags": ["revert-merge", "undo-merge", "merge-commit"]
+  }
+]

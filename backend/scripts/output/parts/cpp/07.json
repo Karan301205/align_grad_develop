@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Exception Handling",
+    "question": "What happens if an exception is thrown but not caught?",
+    "options": ["the exception is silently ignored", "the program calls std::terminate", "the program continues normally", "compilation error"],
+    "correctIndex": 1,
+    "explanation": "An uncaught exception causes std::terminate to be called, which by default aborts the program.",
+    "difficulty": "Medium",
+    "tags": ["uncaught-exception", "terminate", "exception-safety"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Exception Handling",
+    "question": "Can you throw an exception from a destructor?",
+    "options": ["yes; destructors support exceptions", "no; it is undefined behavior", "yes, but it causes std::terminate during unwinding", "only in C++11 onwards"],
+    "correctIndex": 2,
+    "explanation": "Throwing from a destructor during stack unwinding causes std::terminate; it is technically allowed but dangerous.",
+    "difficulty": "Medium-Hard",
+    "tags": ["destructors", "exception-safety", "noexcept"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Exception Handling",
+    "question": "What does the `noexcept` specifier guarantee?",
+    "options": ["the function never throws exceptions", "the compiler prevents exception throwing in the function", "if an exception is thrown, std::terminate is called", "it is only a documentation hint"],
+    "correctIndex": 2,
+    "explanation": "noexcept promises no exceptions; if one occurs, std::terminate is invoked without unwinding.",
+    "difficulty": "Medium",
+    "tags": ["noexcept", "exception-specification", "move-semantics"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Exception Handling",
+    "question": "Can you catch a base class exception and rethrow it as a derived class exception?",
+    "options": ["yes; exceptions are polymorphic", "no; the derived type is not available", "only if explicitly cast", "yes; but rethrow without new loses data"],
+    "correctIndex": 1,
+    "explanation": "Catching by base type slices the exception; rethrowing a new derived exception loses original context.",
+    "difficulty": "Medium-Hard",
+    "tags": ["exception-hierarchy", "polymorphic-exceptions"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Exception Handling",
+    "question": "What is the difference between `catch (std::exception e)` and `catch (const std::exception& e)`?",
+    "options": ["no difference; both catch the same exceptions", "first copies the exception; second references it", "second is safer and prevents slicing", "both prevent slicing if derived exception is thrown"],
+    "correctIndex": 2,
+    "explanation": "Catching by value slices derived exceptions; catching by const reference preserves the actual type.",
+    "difficulty": "Medium",
+    "tags": ["exception-catching", "const-reference", "slicing"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Exception Handling",
+    "question": "Does a try block need a corresponding catch block?",
+    "options": ["yes; every try must have a catch", "no; try without catch is valid if there is a function-try-block", "only if the try block contains throwing code", "error in C++"],
+    "correctIndex": 1,
+    "explanation": "try without catch is valid in limited contexts; more commonly, at least one catch or resource handler is needed.",
+    "difficulty": "Medium",
+    "tags": ["try-catch", "exception-handling"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Exception Handling",
+    "question": "What does `catch (...)` do, and should it be used?",
+    "options": ["catches all exceptions; safe to use for cleanup", "catches all exceptions; use sparingly for logging", "syntax error", "deprecated in C++11"],
+    "correctIndex": 1,
+    "explanation": "catch (...) catches all exceptions, even non-std::exception types; useful for cleanup but can hide bugs if used carelessly.",
+    "difficulty": "Medium",
+    "tags": ["catch-all", "exception-handling", "best-practice"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Exception Handling",
+    "question": "If a constructor throws an exception, is the destructor called?",
+    "options": ["yes; destructors always run", "no; the object is not fully constructed", "only if the exception is caught", "only for member objects, not the main object"],
+    "correctIndex": 1,
+    "explanation": "If the constructor throws before the object is fully constructed, the destructor does not run; cleanup must use RAII.",
+    "difficulty": "Medium-Hard",
+    "tags": ["constructor-exceptions", "object-construction", "raii"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Exception Handling",
+    "question": "What is the purpose of std::exception::what()?",
+    "options": ["returns a description of the exception", "checks if an exception occurred", "rethrows the exception", "converts the exception to a string type"],
+    "correctIndex": 0,
+    "explanation": "what() returns a const char* describing the exception; useful for logging and debugging.",
+    "difficulty": "Medium",
+    "tags": ["std-exception", "error-messages"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Exception Handling",
+    "question": "Can you throw an exception in a const member function?",
+    "options": ["no; const functions cannot modify state", "yes; throwing does not modify state", "only if the exception is caught", "error in C++"],
+    "correctIndex": 1,
+    "explanation": "const prevents state modification but not exception throwing; exceptions are valid in const member functions.",
+    "difficulty": "Medium",
+    "tags": ["const-functions", "exception-throwing"]
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Container Orchestration",
+    "question": "Your application spawned 50 container instances across 10 nodes. Half the nodes now become unavailable due to hardware failure. What does Kubernetes do automatically?",
+    "options": [
+      "Waits for the nodes to recover before taking action",
+      "Reschedules the pods from failed nodes to healthy nodes and maintains replica counts",
+      "Terminates all pods so you can redeploy manually",
+      "Reports an error and stops accepting new requests"
+    ],
+    "correctIndex": 1,
+    "explanation": "Kubernetes automatically detects node failures and reschedules pods to available nodes, ensuring application continuity without manual intervention.",
+    "difficulty": "Medium",
+    "tags": ["orchestration", "failover", "resilience"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Container Orchestration",
+    "question": "You deploy a web service expecting traffic to grow 10x in the next hour. How should you configure Kubernetes to handle this automatically?",
+    "options": [
+      "Manually add more nodes before the traffic arrives",
+      "Use Horizontal Pod Autoscaler to scale pod replicas based on CPU/memory metrics",
+      "Increase the CPU limit on each pod to handle more load",
+      "Configure the ClusterRole to allow more permissions"
+    ],
+    "correctIndex": 1,
+    "explanation": "HPA monitors metrics and automatically adjusts the number of pod replicas to meet demand, allowing efficient scaling without manual intervention.",
+    "difficulty": "Medium",
+    "tags": ["scaling", "autoscaling", "hpa"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Container Orchestration",
+    "question": "A stateless microservice container crashes immediately after startup with no error logs. How would you diagnose the issue in Kubernetes?",
+    "options": [
+      "Check kubectl logs and describe the pod to examine events and restart count",
+      "Assume the image is corrupted and rebuild it immediately",
+      "Delete the pod and redeploy the entire cluster",
+      "Scale up to 10 replicas to see if one survives"
+    ],
+    "correctIndex": 0,
+    "explanation": "kubectl logs shows container output while kubectl describe pod reveals CrashLoopBackOff patterns, exit codes, and cluster events that diagnose startup failures.",
+    "difficulty": "Medium",
+    "tags": ["debugging", "troubleshooting", "crashloopbackoff"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Container Orchestration",
+    "question": "You need to run a batch job that processes data for 2 hours then completes. Should you use a Deployment, DaemonSet, or Job?",
+    "options": [
+      "Deployment, because it manages multiple replicas and restarts failed pods",
+      "DaemonSet, because it runs one pod per node for distributed work",
+      "Job, because it runs pods to completion and tracks the outcome",
+      "Any of them—they all handle batch workloads equally"
+    ],
+    "correctIndex": 2,
+    "explanation": "Job is designed for finite workloads; it runs to completion and doesn't restart pods on success, unlike Deployments which assume long-lived processes.",
+    "difficulty": "Medium",
+    "tags": ["job", "workload", "batch-processing"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Container Orchestration",
+    "question": "Your DaemonSet runs exactly one monitoring agent pod on every node in the cluster. You add 5 new nodes. What happens automatically?",
+    "options": [
+      "You must manually schedule pods on the new nodes",
+      "The DaemonSet controller detects new nodes and deploys pods to all of them",
+      "The DaemonSet ignores new nodes until you restart the control plane",
+      "An error is raised because DaemonSet pods exceed resource limits"
+    ],
+    "correctIndex": 1,
+    "explanation": "DaemonSet controller watches the cluster and automatically schedules its pod template on every node, including newly added ones.",
+    "difficulty": "Medium",
+    "tags": ["daemonset", "node-management", "automation"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Container Orchestration",
+    "question": "A pod consumes 100Mi of memory but is killed with OOMKilled status. After increasing the memory limit to 500Mi, the pod still crashes. What might be wrong?",
+    "options": [
+      "The memory limit on the node itself is too low",
+      "The request is set higher than the limit, preventing scheduling",
+      "The application has a genuine memory leak requiring code fixes, not just higher limits",
+      "The pod's namespace has a hard memory quota you must increase"
+    ],
+    "correctIndex": 2,
+    "explanation": "Raising memory limits treats a symptom; if the application still crashes, the root cause is likely a memory leak in the code, not insufficient resources.",
+    "difficulty": "Medium-Hard",
+    "tags": ["resource-limits", "debugging", "oomkilled"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Container Orchestration",
+    "question": "You create a Pod manifest but Kubernetes refuses to schedule it to any node. The event shows 'Insufficient resources.' What is the most likely cause?",
+    "options": [
+      "The pod's resource request exceeds available capacity on all nodes",
+      "The pod lacks a service account",
+      "The pod needs a network policy to be scheduled",
+      "The scheduler crashed and needs a restart"
+    ],
+    "correctIndex": 0,
+    "explanation": "When all nodes lack sufficient free resources to meet the pod's CPU/memory requests, the scheduler cannot place it and raises an 'Insufficient resources' event.",
+    "difficulty": "Medium",
+    "tags": ["scheduling", "resource-requests", "node-capacity"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Container Orchestration",
+    "question": "Your Deployment rolls out a new image. Three minutes into the rollout, 30% of the old pods are still running alongside new pods. The readiness probe is passing for both versions. Should you manually intervene?",
+    "options": [
+      "Yes, because old and new versions should never coexist",
+      "Yes, because the rollout is stalled and stuck",
+      "No, this is a normal rolling update; let it complete",
+      "No, but scale down the old ReplicaSet manually to speed it up"
+    ],
+    "correctIndex": 2,
+    "explanation": "Rolling updates are designed to overlap old and new pods briefly for zero-downtime transitions; this is expected behavior as long as the update progresses to completion.",
+    "difficulty": "Medium",
+    "tags": ["deployment", "rolling-update", "rollout"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Container Orchestration",
+    "question": "A pod is in Pending state for 10 minutes. You check kubectl describe and see 'node.kubernetes.io/not-ready:NoSchedule' taint. What does this mean?",
+    "options": [
+      "The pod's image is too large to pull",
+      "One or more nodes are in a NotReady state and the pod has no toleration for this taint",
+      "The pod is waiting for DNS to resolve",
+      "The kube-proxy is not running on any nodes"
+    ],
+    "correctIndex": 1,
+    "explanation": "Taints on NotReady nodes prevent pod scheduling unless the pod explicitly tolerates that taint; pods without matching tolerations remain Pending.",
+    "difficulty": "Medium-Hard",
+    "tags": ["taints", "tolerations", "node-status"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Container Orchestration",
+    "question": "You run a load test and see pods evicted from nodes with 'insufficient memory' even though the node has 500Mi free. The pods are requesting 1Gi each. Why are they evicted?",
+    "options": [
+      "Kubernetes preemptively evicts pods to prevent node pressure",
+      "The requests are guaranteed but the system daemon and kubelet are consuming enough memory that allocatable space is too low",
+      "The pod's limit is higher than the node's total capacity",
+      "The node's memory is reserved entirely for the control plane"
+    ],
+    "correctIndex": 1,
+    "explanation": "Node allocatable capacity accounts for reserved resources; when system daemons consume memory, fewer resources remain for pods, and requests exceeding this allocatable space cause eviction.",
+    "difficulty": "Hard",
+    "tags": ["resource-management", "eviction", "node-allocatable"]
+  }
+]

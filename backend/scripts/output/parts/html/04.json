@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "Header Tags",
+    "question": "A page has `<h2>Welcome</h2>` as the first visible heading, with no h1. Why might this confuse the document outline?",
+    "options": ["the outline starts with h2 instead of h1, creating an implicit h1 at the top level", "h1 is required and the page is invalid without it", "screen readers skip h2 if h1 is missing", "the outline is unaffected, h2 as the first heading is valid"],
+    "correctIndex": 0,
+    "explanation": "The HTML5 outline algorithm creates an implicit untitled section if the first heading is not h1; this breaks logical hierarchy for assistive tech users.",
+    "difficulty": "Medium",
+    "tags": ["heading-hierarchy", "outline-algorithm", "a11y"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Header Tags",
+    "question": "A page has two `<h1>` tags: one in header and one in main. Why is this problematic for SEO?",
+    "options": ["search engines penalize pages with multiple h1 tags", "the first h1 is treated as the page title, the second confuses ranking", "multiple h1s indicate missing page hierarchy to crawlers", "modern search engines handle multiple h1s correctly and rank normally"],
+    "correctIndex": 2,
+    "explanation": "While modern search engines are more forgiving, multiple h1 tags historically confused outline algorithms and hierarchy signals; best practice is one h1 per page for clarity.",
+    "difficulty": "Medium",
+    "tags": ["heading-hierarchy", "seo", "best-practice"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Header Tags",
+    "question": "A page skips from `<h1>` to `<h3>` with no h2 between them. A screen reader user navigates by headings. What happens?",
+    "options": ["the screen reader announces a missing h2 level", "the outline shows h3 nested under h1 with an implied h2", "navigation continues normally; h2 omission is ignored", "the page structure is invalid and rendering stops"],
+    "correctIndex": 1,
+    "explanation": "The HTML5 outline algorithm creates implicit heading levels for skipped hierarchy, so h3 becomes nested under h1, which may confuse navigation.",
+    "difficulty": "Medium-Hard",
+    "tags": ["heading-hierarchy", "outline-algorithm"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Header Tags",
+    "question": "A developer uses `<h4>` for a prominent page title and `<h1>` for small component labels. Why is this backwards?",
+    "options": ["h1 should be the primary page title, h4 should be smaller subsections", "headings are purely semantic and can be used in any order", "h4 is deprecated and cannot be used for titles", "css styling makes hierarchy irrelevant"],
+    "correctIndex": 0,
+    "explanation": "Heading levels indicate semantic importance and document structure; h1 should mark the main page title, h4 should mark deeper subsections, regardless of visual size.",
+    "difficulty": "Medium",
+    "tags": ["heading-hierarchy", "semantics"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Header Tags",
+    "question": "Why might `<h1 style='display:none'>Page Title</h1>` plus a visible h2 break accessibility?",
+    "options": ["hidden h1 is still in the outline, creating a mismatch with visible h2", "display:none removes the element from the dom and outline", "screen readers ignore display:none elements", "visibility:hidden would work better than display:none"],
+    "correctIndex": 0,
+    "explanation": "Even with `display:none`, the h1 exists in the DOM and outline, so screen readers see an h1-to-h2 jump while sighted users only see h2, causing confusion.",
+    "difficulty": "Hard",
+    "tags": ["display:none", "outline-algorithm", "accessibility"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Header Tags",
+    "question": "A page has `<h1>Widgets</h1>` in the header, then later `<h1>Widgets</h1>` in the footer. Which is true?",
+    "options": ["html5 allows this; both are treated as separate page titles", "search engines count both h1s and may lower ranking", "the second h1 starts a new implicit section in the outline", "duplicate h1 text is invalid and one must be removed"],
+    "correctIndex": 2,
+    "explanation": "In HTML5 outline algorithm, each h1 starts a new implicit section; multiple h1s with the same text typically indicate missing structure rather than proper hierarchy.",
+    "difficulty": "Medium-Hard",
+    "tags": ["outline-algorithm", "h1-duplicates"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Header Tags",
+    "question": "A `<hgroup>` element wraps `<h1>Title</h1><h2>Subtitle</h2>`. Why might this be misunderstood?",
+    "options": ["hgroup suppresses h2 from the outline, treating both as a single heading unit", "hgroup is deprecated and should not be used", "hgroup only works if h1 comes after h2", "the outline shows h1 and h2 separately regardless of hgroup"],
+    "correctIndex": 0,
+    "explanation": "`<hgroup>` is designed to group related headings so that only the h1 enters the outline, suppressing the h2 subtitle from hierarchy navigation.",
+    "difficulty": "Hard",
+    "tags": ["hgroup-element", "outline-algorithm"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Header Tags",
+    "question": "A page uses `<h2>Important Section</h2>` inside a reusable component. When the component is embedded twice, why might the outline break?",
+    "options": ["the h2 is repeated, creating duplicate headings in the outline", "components should only use h6 to avoid hierarchy conflicts", "the outline algorithm nests the second h2 differently than the first", "component headings must be dynamic based on nesting depth"],
+    "correctIndex": 2,
+    "explanation": "Outline algorithm nesting is context-dependent; the same h2 in different parts of the page may nest at different levels, breaking consistent hierarchy.",
+    "difficulty": "Hard",
+    "tags": ["outline-algorithm", "component-reusability", "heading-hierarchy"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Header Tags",
+    "question": "A developer marks up `<h1><strong>Bold Title</strong></h1>`. Does the strong tag affect heading semantics?",
+    "options": ["strong inside h1 changes the semantic level of the heading", "heading semantics are unchanged; strong is just styling", "strong suppresses the h1 from the outline", "strong forces the heading to be treated as h2"],
+    "correctIndex": 1,
+    "explanation": "Inline elements like `<strong>` do not change heading semantics; the heading level is determined by the h1-h6 tag, not its children.",
+    "difficulty": "Medium",
+    "tags": ["inline-elements", "heading-semantics"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Header Tags",
+    "question": "Why is using a heading tag for styling (e.g., `<h6>` because it is the smallest) considered an anti-pattern?",
+    "options": ["heading tags must match visual size or the page is invalid", "using heading for style violates semantic html; css should control size", "h6 is deprecated and should never be used", "screen readers announce h6 differently, confusing users"],
+    "correctIndex": 1,
+    "explanation": "Heading semantics should reflect document structure, not visual presentation; CSS controls size, so using h1-h6 for styling alone disconnects semantics from outline.",
+    "difficulty": "Medium",
+    "tags": ["semantic-html", "heading-semantics", "css-styling"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Debugging Techniques",
+    "question": "A container exits immediately after starting. Running `docker logs <id>` returns empty. The Dockerfile does not explicitly set a CMD, so it inherits from the base image. How do you determine why the container failed?",
+    "options": ["Run `docker run -it <image> /bin/bash` to start an interactive container and manually run the inherited CMD", "Check `docker inspect <id>` to see the last exit code and timestamps, but logs are empty", "The base image's CMD is unknown; rebuild the image with an explicit CMD for debugging", "Run `docker run -d <image> /bin/sh -c 'sleep 1000'` to override the CMD and investigate the image"],
+    "correctIndex": 0,
+    "explanation": "Interactive mode (`docker run -it`) bypasses the default CMD and drops into a shell, allowing manual execution of commands to identify failures; check what the base image's CMD is with `docker inspect --format '{{.Config.Cmd}}'` on the base image.",
+    "difficulty": "Medium",
+    "tags": ["container-debugging", "exit-codes", "dockerfile-cmd"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Debugging Techniques",
+    "question": "Inside a running container, you need to inspect the network configuration but `ip` command is not installed. Using `docker exec -it <id> bash` and then `apt-get install iproute2` takes time. What is a faster debugging approach?",
+    "options": ["Run `docker exec -it <id> cat /proc/net/tcp` to read raw network state from procfs", "Use `docker inspect <id>` on the host to see the container's IP and network configuration", "Start a debug container with `docker run --network container:<id> --cap-add NET_ADMIN <debug-image>` to inspect the container's network namespace", "Connect to the container with `docker attach <id>` and use shell builtins"],
+    "correctIndex": 1,
+    "explanation": "`docker inspect` shows network mode, IP address, and port mappings without entering the container; for detailed inspection, use `docker exec -it <id> cat /proc/net/tcp` or start a debug container with `--network container:` to share the namespace without installing tools.",
+    "difficulty": "Medium",
+    "tags": ["container-debugging", "network-inspection", "docker-exec"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Debugging Techniques",
+    "question": "A container's CPU usage is consistently 95%, but performance is unexpectedly slow. Running `docker stats <id>` shows high CPU but the application logs show no errors. What is the most likely cause?",
+    "options": ["The application is CPU-bound and optimized for single-threaded execution on a fast CPU; check application profiling", "The container is throttled by a `--cpus` limit; increase the limit to see if performance improves", "The kernel is consuming CPU due to a misbehaving system call (e.g., excessive mmap or fork)", "High CPU usage indicates an infinite loop or runaway thread; restart the container"],
+    "correctIndex": 0,
+    "explanation": "High CPU + slow performance suggests compute bottleneck (algorithm inefficiency, excessive GC, single-threaded code); profile the application with `docker exec -it <id> top -p <pid>` or attach a profiler; a true infinite loop would crash or hang, not run slow.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cpu-profiling", "performance-debugging", "container-stats"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Debugging Techniques",
+    "question": "A container's disk writes are slow. Running `docker stats` shows I/O metrics are available. Using `docker exec -it <id> dd if=/dev/zero of=/tmp/testfile bs=1M count=100` takes 30 seconds for 100 MB. The host filesystem is fast (SSD). What is the bottleneck?",
+    "options": ["The overlay2 storage driver is inefficient; switch to `btrfs` for better I/O performance", "The container's tmpfs is limited; increase with `--tmpfs /tmp:size=1g` to improve performance", "Writing to /tmp inside the container goes through the storage driver even with tmpfs; mount a real tmpfs first", "The container is I/O throttled by a cgroup limit; check with `docker inspect --format '{{.HostConfig.BlkioWeight}}'`"],
+    "correctIndex": 2,
+    "explanation": "By default, /tmp is part of the container's writable layer on the storage driver, not a tmpfs; even if /tmp exists, data goes through overlay2; mount a tmpfs with `docker run --tmpfs /tmp:size=1g` to write to memory instead of the storage driver.",
+    "difficulty": "Medium-Hard",
+    "tags": ["io-debugging", "tmpfs", "storage-driver"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Debugging Techniques",
+    "question": "A container running a Node.js application stops after 10 minutes without any error logs. Using `docker logs <id>` shows normal operation until the last second when it exits. How do you debug an unexpected silent exit?",
+    "options": ["Run with `--log-driver=json-file --log-opt max-size=10m` to ensure logs are not truncated", "Check `docker inspect <id>` for the last exit code (should be non-zero if the process crashed)", "Start the container with `docker run --sig-proxy=false` to prevent signal propagation", "Attach a debugger with `docker exec -it <id> node --inspect-brk` after the container starts to catch the crash"],
+    "correctIndex": 1,
+    "explanation": "Check `docker inspect --format '{{.State.ExitCode}}'` to see the exit code; zero means normal exit, non-zero means crash; then check logs for memory exhaustion (OOMKilled: true in inspect), signal termination, or examine the last few seconds of logs with `docker logs --tail 50`.",
+    "difficulty": "Medium",
+    "tags": ["container-debugging", "exit-codes", "docker-inspect"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Debugging Techniques",
+    "question": "Two containers on the same network cannot reach each other by hostname despite being on a custom network. Running `docker network inspect <network>` shows both containers are connected. Pinging the IP address works, but pinging the hostname fails. What is the issue?",
+    "options": ["DNS caching is stale in one of the containers; flush with `docker exec -it <id> nscd -i hosts`", "The custom network's DNS server has not resolved the hostname yet; wait a few seconds for propagation", "One or both containers are running custom DNS configurations (in /etc/resolv.conf) that override Docker's embedded DNS", "The container's hostname is not the service name; check with `docker exec -it <id> hostname`"],
+    "correctIndex": 2,
+    "explanation": "If IP works but hostname fails, DNS is the issue; check `/etc/resolv.conf` inside the container to see which nameserver it is using; if it points to a custom server, that server may not have entries for Docker Compose services; ensure the container uses Docker's embedded DNS (127.0.0.11:53).",
+    "difficulty": "Medium-Hard",
+    "tags": ["dns-debugging", "network-debugging", "docker-dns"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Debugging Techniques",
+    "question": "Running `docker run -p 8080:80 nginx` makes the service accessible locally, but a remote machine cannot connect to `<host-ip>:8080`. The host firewall is disabled. Using `docker exec -it <id> nc -l 0.0.0.0 9000` inside the container works when accessed remotely. What is different?",
+    "options": ["Port 8080 is being blocked by a kernel network filter; port 9000 is not", "The -p flag binds only to localhost by default; use `-p 0.0.0.0:8080:80` to bind to all interfaces", "Nginx is listening only on localhost (127.0.0.1) inside the container; nc listens on all interfaces", "Remote access to port 8080 requires explicit `--expose 8080` in addition to -p"],
+    "correctIndex": 2,
+    "explanation": "Port mapping (`-p`) binds the host port, but if nginx inside the container listens only on 127.0.0.1, it is unreachable from outside the container; verify with `docker exec -it <id> netstat -tlnp` to confirm nginx listens on 0.0.0.0:80, not 127.0.0.1:80.",
+    "difficulty": "Medium",
+    "tags": ["port-binding", "network-debugging", "netstat"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Debugging Techniques",
+    "question": "A container runs a Python web server with `CMD python -u app.py`. The application creates files but `docker logs` output is buffered and delayed by 30 seconds. How do you see logs in real-time?",
+    "options": ["Use `docker logs -f <id>` to follow logs in real-time", "The -u flag in python -u should disable buffering; add PYTHONUNBUFFERED=1 environment variable to ensure", "Run `docker exec -it <id> tail -f <logfile>` to follow the application's logfile directly", "Increase the log driver buffer with `--log-opt max-buffer-size=10m`"],
+    "correctIndex": 1,
+    "explanation": "`python -u` disables line buffering for stdout/stderr, but combining with Docker's logging driver may still buffer; set the environment variable `PYTHONUNBUFFERED=1` explicitly or use `docker logs -f` to stream logs from the daemon's buffer in real-time.",
+    "difficulty": "Medium",
+    "tags": ["log-buffering", "docker-logs", "python-debugging"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Debugging Techniques",
+    "question": "A container is stuck and does not respond to `docker stop <id>` (SIGTERM). After 10 seconds, Docker sends SIGKILL and the container exits. The logs show the application received a signal but did not exit. What is the issue?",
+    "options": ["The application is ignoring SIGTERM; it must call exit() or return from main to terminate gracefully", "The application is in an uninterruptible sleep state (D state); it cannot handle signals until I/O completes", "Docker's SIGKILL timeout is too short; increase with `--stop-timeout` flag", "The application is holding a resource lock; SIGTERM cannot interrupt it"],
+    "correctIndex": 1,
+    "explanation": "Processes in an uninterruptible sleep (D state, usually waiting for I/O or system call) cannot handle signals; SIGKILL will eventually kill them, but SIGTERM is ineffective; check with `docker exec -it <id> ps aux` and look for `<D>` state; fix the underlying I/O issue.",
+    "difficulty": "Medium-Hard",
+    "tags": ["signal-handling", "process-state", "graceful-shutdown"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Debugging Techniques",
+    "question": "A container's memory usage grows over time from 100 MB to 500 MB over 1 hour, indicating a memory leak. Using `docker stats <id>` shows the exact growth. How do you identify which component (application vs. Python vs. Docker) is leaking?",
+    "options": ["Run `docker exec -it <id> ps aux` and check the RSS column for each process to identify the culprit", "Use `docker exec -it <id> python -m memory_profiler app.py` to profile Python memory usage", "Attach a Python debugger with `docker run --cap-add SYS_PTRACE` and use gdb to inspect heap", "Start a new container without the application to determine if Docker itself is leaking"],
+    "correctIndex": 0,
+    "explanation": "Check `ps aux` to see which process (app, Python interpreter, etc.) is consuming memory; if RSS for the application process is growing, the app or its libraries leak; if Python interpreter RSS grows, it's a Python-level leak; if all others are stable, Docker/system is not leaking.",
+    "difficulty": "Medium-Hard",
+    "tags": ["memory-leak-debugging", "process-inspection", "docker-exec"]
+  }
+]

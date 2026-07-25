@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Modeling",
+    "question": "You are modeling a many-to-many relationship between students and courses. A student can take multiple courses, and a course can have multiple students. Which approach is correct?",
+    "options": [
+      "Create a junction table with student_id and course_id foreign keys",
+      "Add a courses array column to the students table",
+      "Add a students array column to the courses table",
+      "Use a single students_courses table with no foreign keys"
+    ],
+    "correctIndex": 0,
+    "explanation": "Many-to-many relationships require a junction table with foreign keys to both parent tables to maintain referential integrity.",
+    "difficulty": "Medium",
+    "tags": ["entity-relationship", "foreign-key", "many-to-many"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Modeling",
+    "question": "In a user profile table, you have columns: email and phone. Both must be unique across users, but both can be NULL. How should you define these constraints?",
+    "options": [
+      "UNIQUE NOT NULL on email, UNIQUE NULL on phone",
+      "UNIQUE on both, allowing nulls by default",
+      "UNIQUE NOT NULL on email, UNIQUE on phone with a check that at least one is not NULL",
+      "UNIQUE on email, UNIQUE on phone, no other constraints"
+    ],
+    "correctIndex": 1,
+    "explanation": "UNIQUE constraints allow NULL by default, and multiple NULL values are permitted (NULL is not equal to NULL), so both can be UNIQUE.",
+    "difficulty": "Medium-Hard",
+    "tags": ["unique-constraint", "null-semantics"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Modeling",
+    "question": "You have an orders table and need to track order statuses (pending, shipped, delivered, cancelled). Which approach is best?",
+    "options": [
+      "Add a status_id column with a foreign key to a statuses reference table",
+      "Add a status column with VARCHAR and document allowed values",
+      "Add status_pending, status_shipped, status_delivered boolean columns",
+      "Store status as a JSON object in a text column"
+    ],
+    "correctIndex": 0,
+    "explanation": "A reference table with foreign key enforces referential integrity and makes status values maintainable without application logic.",
+    "difficulty": "Medium",
+    "tags": ["reference-table", "foreign-key", "denormalization"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Modeling",
+    "question": "When modeling a one-to-one relationship between users and profiles (every user has exactly one profile, every profile belongs to one user), where should the foreign key be placed?",
+    "options": [
+      "Either table can hold the foreign key, depending on access patterns",
+      "The foreign key must be in the users table",
+      "The foreign key must be in the profiles table",
+      "A junction table is required for one-to-one relationships"
+    ],
+    "correctIndex": 0,
+    "explanation": "One-to-one relationships allow the foreign key in either table; placement depends on which entity is the primary owner.",
+    "difficulty": "Medium",
+    "tags": ["one-to-one", "foreign-key", "entity-relationship"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Modeling",
+    "question": "Your application logs events with user_id, event_type, timestamp, and data (JSON). You want to query events by event_type and timestamp range efficiently. How should you model this?",
+    "options": [
+      "Single events table with columns for user_id, event_type, timestamp, data; composite index on (event_type, timestamp)",
+      "Separate table per event_type with identical schema",
+      "Store all events as JSON in a single text column, parse at query time",
+      "Create columns event_type_login, event_type_logout, etc., for each type"
+    ],
+    "correctIndex": 0,
+    "explanation": "A single table with a composite index on (event_type, timestamp) is maintainable and enables efficient range queries by type and time.",
+    "difficulty": "Medium",
+    "tags": ["indexing", "schema-design", "composite-index"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Modeling",
+    "question": "You store product variants (e.g., shirt in S, M, L sizes and red, blue colors). Which design avoids redundancy?",
+    "options": [
+      "products (id, name, base_price), variants (id, product_id, size, color, price)",
+      "variants (id, product_id, size, color) with price stored in each variant",
+      "products with columns product_size_s_price, product_size_m_price, etc.",
+      "All variant data in a single text JSON column"
+    ],
+    "correctIndex": 0,
+    "explanation": "Separating products and variants allows the base product to exist once while variants inherit properties; allows size/color to be independent dimensions.",
+    "difficulty": "Medium-Hard",
+    "tags": ["normalization", "entity-design"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Modeling",
+    "question": "In a comments table on posts, you have: comment_id, post_id, user_id, content, created_at, updated_at. If you need to delete a post and its comments, what is the best foreign key constraint?",
+    "options": [
+      "FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE",
+      "FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE RESTRICT",
+      "FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE SET NULL",
+      "No foreign key needed, handle deletion in application code"
+    ],
+    "correctIndex": 0,
+    "explanation": "ON DELETE CASCADE automatically removes child comments when a post is deleted, maintaining referential integrity without manual cleanup.",
+    "difficulty": "Medium",
+    "tags": ["foreign-key", "referential-integrity", "cascade"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Modeling",
+    "question": "You have a users table with age stored as an INTEGER. An insurance company applies different rates based on age brackets (18-30, 31-50, 51+). Should you add a bracket column?",
+    "options": [
+      "No, calculate the bracket in queries using CASE or BETWEEN logic",
+      "Yes, add an age_bracket_id foreign key to reference a brackets table",
+      "Yes, add a denormalized age_bracket VARCHAR column for performance",
+      "Yes, add a computed column that derives the bracket from age"
+    ],
+    "correctIndex": 0,
+    "explanation": "Calculate brackets dynamically in queries to avoid denormalization; if rates change, only the CASE logic changes, not data.",
+    "difficulty": "Medium-Hard",
+    "tags": ["denormalization", "calculated-columns"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Modeling",
+    "question": "A users table has first_name and last_name. A reports system needs to query by full name. Should you add a full_name column?",
+    "options": [
+      "No, use CONCAT in queries or triggers to generate full_name only when needed",
+      "Yes, always store full_name for query speed",
+      "Yes, add full_name as a generated/computed column in the schema",
+      "No, denormalization is never acceptable"
+    ],
+    "correctIndex": 2,
+    "explanation": "A computed column provides both clarity and minimal overhead: it's generated automatically and indexable if needed.",
+    "difficulty": "Medium",
+    "tags": ["denormalization", "computed-column", "query-performance"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Data Modeling",
+    "question": "You model a file system tree (folders containing folders). Each folder has a parent_folder_id. What query determines if a file is deleted when its parent folder is deleted?",
+    "options": [
+      "FOREIGN KEY (parent_folder_id) REFERENCES folders(id) ON DELETE CASCADE constraint",
+      "A trigger on the folders table that manually deletes children",
+      "A stored procedure called during deletion",
+      "Application code that queries and deletes recursively"
+    ],
+    "correctIndex": 0,
+    "explanation": "The ON DELETE CASCADE constraint at the foreign key level automatically cascades deletion to child rows.",
+    "difficulty": "Medium",
+    "tags": ["foreign-key", "cascade", "tree-structure"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "Client Side Rendering",
+    "question": "You fetch data in useEffect without dependencies. How often does the fetch run?",
+    "options": ["Once on component mount", "On every render (infinite loop risk)", "After every state change", "Only when the component unmounts"],
+    "correctIndex": 1,
+    "explanation": "Without dependency array, useEffect runs after every render, including renders caused by state updates from the fetch, creating a loop.",
+    "difficulty": "Medium",
+    "tags": ["useeffect", "dependencies", "infinite-loops"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Client Side Rendering",
+    "question": "In your client component, you use useState to store user data fetched via useEffect. The data loads correctly, but the component re-renders every time the parent re-renders. How do you prevent it?",
+    "options": ["Move useState to a parent component", "Wrap the component in React.memo", "Use useMemo to cache the data", "useEffect prevents re-renders automatically"],
+    "correctIndex": 1,
+    "explanation": "React.memo prevents re-renders if props don't change; it's the standard solution for memoizing functional components.",
+    "difficulty": "Medium",
+    "tags": ["react-memo", "re-renders", "performance"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Client Side Rendering",
+    "question": "You use the Fetch API in useEffect to load data but never clean up the request on component unmount. What's the consequence?",
+    "options": ["No issue; requests complete automatically", "Unmounted component tries to update state; warning appears", "Memory leak; completed requests hold memory", "Next.js cancels the request when the component unmounts"],
+    "correctIndex": 1,
+    "explanation": "Setting state on an unmounted component is a React anti-pattern; use AbortController or return cleanup functions to cancel requests.",
+    "difficulty": "Medium-Hard",
+    "tags": ["useeffect", "cleanup", "memory-leaks"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Client Side Rendering",
+    "question": "You render a list of 1,000 items fetched via CSR in useEffect. Each item renders in 1ms. What's the total render time?",
+    "options": ["~1 second (1ms × 1,000)", "~1 second total (React batches renders)", "Depends on user hardware", "Cannot determine without profiling"],
+    "correctIndex": 1,
+    "explanation": "React batches state updates in async handlers; the entire list is reconciled in a single render cycle.",
+    "difficulty": "Medium-Hard",
+    "tags": ["react-reconciliation", "performance", "batching"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Client Side Rendering",
+    "question": "You fetch data with fetch() and don't set a timeout. The API server is down. What happens?",
+    "options": ["Fetch returns a 500 error immediately", "The request hangs indefinitely", "Browser timeout occurs after 30 seconds", "Next.js terminates the request"],
+    "correctIndex": 1,
+    "explanation": "fetch() has no built-in timeout; if the server doesn't respond, the request can hang indefinitely.",
+    "difficulty": "Medium",
+    "tags": ["fetch", "timeouts", "error-handling"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Client Side Rendering",
+    "question": "Your component uses useEffect to fetch user data and set loading: true before the fetch. The initial render shows loading: true. Is this a problem?",
+    "options": ["No; useEffect runs before first paint", "Yes; users see a flash of loading state", "No; React defers useEffect until after render", "Depends on network speed"],
+    "correctIndex": 1,
+    "explanation": "useEffect runs after paint; users see loading state flash, then content appears (hydration mismatch if used with SSR).",
+    "difficulty": "Medium-Hard",
+    "tags": ["useeffect", "loading-states", "hydration"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Client Side Rendering",
+    "question": "You use next/dynamic to lazy-load a heavy component with ssr: false. Does the component render on the server?",
+    "options": ["Yes; ssr: false is ignored on the server", "No; the component only renders on the client", "The component is pre-rendered but not hydrated", "Depends on the fallback prop"],
+    "correctIndex": 1,
+    "explanation": "ssr: false prevents server-side rendering of dynamic components; they load only in the browser.",
+    "difficulty": "Medium",
+    "tags": ["dynamic-imports", "ssr-false", "code-splitting"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Client Side Rendering",
+    "question": "You store large cached data in a context and provide it to your entire app. After navigation, users see the same cached data. What's the issue?",
+    "options": ["Context persists across route changes; cache is not invalidated", "Context is reset on navigation but data still displays", "You must clear the cache manually on route changes", "All of the above are possible"],
+    "correctIndex": 0,
+    "explanation": "Context persists in memory across navigation; you must manually clear or invalidate cache on route changes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["context", "caching", "route-changes"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Client Side Rendering",
+    "question": "You fetch an API endpoint that returns 10,000 rows of data on each page view. Users experience slow first paint. How do you optimize?",
+    "options": ["Paginate data and fetch on-demand in useEffect", "Use React Query for automatic caching", "Move the fetch to getStaticProps", "All of the above depending on requirements"],
+    "correctIndex": 3,
+    "explanation": "Solutions vary: pagination reduces payload, React Query caches results, and getStaticProps avoids runtime fetching.",
+    "difficulty": "Medium-Hard",
+    "tags": ["performance", "data-fetching", "optimization"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Client Side Rendering",
+    "question": "Your client component imports a module that uses process.env.SECRET. Does it leak the secret?",
+    "options": ["No; env vars are injected at build time only", "Yes; process.env is bundled into client code if referenced", "Only if the secret is explicitly exported", "Next.js masks secrets in production"],
+    "correctIndex": 1,
+    "explanation": "Any process.env reference in client code gets bundled as a string; server secrets should not be referenced in client components.",
+    "difficulty": "Medium-Hard",
+    "tags": ["environment-variables", "security", "bundling"]
+  }
+]

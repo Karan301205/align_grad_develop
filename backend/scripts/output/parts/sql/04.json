@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Design",
+    "question": "You design a schema for a web server's request logs. Each request has: timestamp, method (GET, POST, etc.), status_code (200, 404, 500, etc.), and response_time_ms. How should you handle status_code?",
+    "options": [
+      "Store as SMALLINT and create a reference table for codes (200, 404, etc.)",
+      "Store as VARCHAR with CHECK constraint for valid codes",
+      "Store as TINYINT since most codes are 3 digits",
+      "Store as INTEGER with no constraints; filter in application"
+    ],
+    "correctIndex": 0,
+    "explanation": "A reference table enables queries (e.g., COUNT by code) and prevents invalid codes; SMALLINT efficiently stores 3-digit numbers.",
+    "difficulty": "Medium",
+    "tags": ["reference-table", "data-type", "constraint"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Design",
+    "question": "You have an orders table with 100M rows. Each row has customer_id, order_date, and total_amount. Queries often filter by customer_id AND order_date. What index strategy is best?",
+    "options": [
+      "Single composite index (customer_id, order_date)",
+      "Two separate indexes: one on customer_id, one on order_date",
+      "No index; a full table scan is fast enough for 100M rows",
+      "A covering index with (customer_id, order_date, total_amount)"
+    ],
+    "correctIndex": 0,
+    "explanation": "Composite index (customer_id, order_date) enables efficient range scans when both columns are in the WHERE clause.",
+    "difficulty": "Medium",
+    "tags": ["composite-index", "query-planning"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Design",
+    "question": "You design a products table with categories. One product can belong to multiple categories (e.g., 'shirt' in both 'clothing' AND 'new_arrivals'). What is the risk of storing category_ids as a comma-separated list in a VARCHAR?",
+    "options": [
+      "Impossible to query by category without parsing, violates first normal form",
+      "Comma parsing is slow but acceptable for small result sets",
+      "Comma-separated lists are efficient and standard in SQL",
+      "No risk; it simplifies the schema"
+    ],
+    "correctIndex": 0,
+    "explanation": "Comma-separated lists violate normalization, prevent SQL-level queries on individual categories, and require string parsing in the application.",
+    "difficulty": "Medium",
+    "tags": ["normalization", "data-structure"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Design",
+    "question": "You store user activity logs with a timestamp column. Timestamps are in UTC. Should you store timezone information in the database?",
+    "options": [
+      "No, store all times in UTC; convert to local timezone at the application layer",
+      "Yes, add a timezone_offset column to each log entry",
+      "Yes, add a timezone column with the user's timezone string",
+      "Yes, store both UTC and local time in separate columns"
+    ],
+    "correctIndex": 0,
+    "explanation": "Storing all times in UTC standardizes queries and comparisons; conversion to local timezone is an application concern.",
+    "difficulty": "Medium",
+    "tags": ["timezone", "data-integrity"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Design",
+    "question": "A users table has email stored as VARCHAR(255). Emails are case-insensitive for login but you want to preserve the user's original casing. What is the risk of this design?",
+    "options": [
+      "UNIQUE constraint on email will treat different cases as different values; use COLLATE or LOWER() in unique index",
+      "Storing original case is impossible in SQL",
+      "Case-insensitive uniqueness is guaranteed by default",
+      "Email comparisons are always case-sensitive regardless of storage"
+    ],
+    "correctIndex": 0,
+    "explanation": "UNIQUE email will allow duplicates if casing differs (e.g., john@example.com vs John@example.com); use a COLLATE NOCASE or functional index on LOWER(email).",
+    "difficulty": "Medium-Hard",
+    "tags": ["collation", "unique-constraint", "case-sensitivity"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Design",
+    "question": "You design a subscription table: user_id, start_date, end_date (nullable if subscription is active). How do you find active subscriptions on a given date?",
+    "options": [
+      "WHERE start_date <= given_date AND (end_date IS NULL OR end_date > given_date)",
+      "WHERE start_date = given_date",
+      "WHERE end_date IS NULL",
+      "WHERE start_date <= given_date AND end_date >= given_date"
+    ],
+    "correctIndex": 0,
+    "explanation": "Active subscriptions started on or before the date and either have no end date (still active) or end after the date.",
+    "difficulty": "Medium",
+    "tags": ["date-logic", "nullable-columns"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Design",
+    "question": "You store prices in a products table as DECIMAL(10, 2). A concurrent transaction attempts to update price from 19.99 to 29.99. What isolation level prevents reading an intermediate state (e.g., NULL)?",
+    "options": [
+      "READ COMMITTED or higher isolation levels prevent dirty reads",
+      "SERIALIZABLE is the only safe level",
+      "READ UNCOMMITTED is recommended for price data",
+      "Isolation levels do not affect numeric updates"
+    ],
+    "correctIndex": 0,
+    "explanation": "READ COMMITTED prevents dirty reads; SERIALIZABLE prevents phantom reads but is slower; READ COMMITTED is typical for pricing.",
+    "difficulty": "Medium-Hard",
+    "tags": ["isolation-level", "concurrent-update"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Design",
+    "question": "You design a comments table on an article. Comment IDs are generated sequentially (1, 2, 3, ...). A concurrent 1000 users post comments. What contention risk exists?",
+    "options": [
+      "Sequential IDs cause lock contention on the sequence; consider UUID for high-concurrency scenarios",
+      "Sequential IDs are optimal; no risk",
+      "UUIDs are slower and should not be used",
+      "Contention only occurs on the comments table itself, not the ID generator"
+    ],
+    "correctIndex": 0,
+    "explanation": "Sequence generators can become a bottleneck under high concurrency; UUIDs or random-partitioned sequences mitigate this.",
+    "difficulty": "Medium-Hard",
+    "tags": ["concurrency", "primary-key", "sequence"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Design",
+    "question": "You store user passwords as CHAR(60) for bcrypt hashes. Should you add a password_algorithm column to handle future migrations to SHA256?",
+    "options": [
+      "Yes, add a password_algorithm column to support algorithm migrations",
+      "No, the hash length implicitly identifies the algorithm",
+      "No, passwords are not stored in production databases",
+      "Yes, but only if you expect frequent algorithm changes"
+    ],
+    "correctIndex": 0,
+    "explanation": "Adding a password_algorithm column allows future algorithm changes and makes the schema flexible; it's a best practice.",
+    "difficulty": "Medium",
+    "tags": ["security", "schema-evolution"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Design",
+    "question": "You have a table with 50M rows. Adding an index on a column takes 2 hours. During indexing, INSERT/UPDATE/DELETE operations are slow. How do you minimize impact?",
+    "options": [
+      "Create index CONCURRENTLY (PostgreSQL) or use ALGORITHM=INPLACE (MySQL) to allow concurrent reads/writes",
+      "Create the index during peak hours when queries are minimal",
+      "Pause all application writes during indexing",
+      "Skip indexing in production; index only in development"
+    ],
+    "correctIndex": 0,
+    "explanation": "CONCURRENTLY (PostgreSQL) or INPLACE (MySQL) allow reads and writes during indexing, reducing downtime impact.",
+    "difficulty": "Medium",
+    "tags": ["index-maintenance", "downtime", "production"]
+  }
+]

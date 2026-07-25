@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "Production Deployment Strategies",
+    "question": "You run `npm run build` and see: 'info  - Collecting page data'. After 10 minutes, the build still shows the same message. What's happening?",
+    "options": ["Build is frozen; restart the build", "Collecting page data is slow; generating static pages for all routes", "Database query in getStaticProps is hanging", "All of the above are possible"],
+    "correctIndex": 3,
+    "explanation": "Slow builds can be caused by many factors: heavy getStaticProps queries, timeout issues, or large route counts.",
+    "difficulty": "Medium-Hard",
+    "tags": ["build-performance", "production", "debugging"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Production Deployment Strategies",
+    "question": "You deploy to Vercel with next.config.js that references process.env.DATABASE_URL. The build fails because DATABASE_URL is missing. How do you fix it?",
+    "options": ["Add DATABASE_URL to next.config.js default", "Set DATABASE_URL in Vercel project settings (Environment Variables)", "Hardcode the URL in next.config.js", "Use a .env file checked into git"],
+    "correctIndex": 1,
+    "explanation": "Build-time env vars must be set in the deployment platform (Vercel dashboard) or via CI/CD secrets; .env is not used in deployments.",
+    "difficulty": "Medium",
+    "tags": ["environment-variables", "deployment", "vercel"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Production Deployment Strategies",
+    "question": "You deploy a new version with a database migration. Briefly, both old and new code run. Can this cause data inconsistency?",
+    "options": ["No; schema changes are atomic", "Yes; old code writing to new schema can fail", "Only if transactions are disabled", "Depends on ORM"],
+    "correctIndex": 1,
+    "explanation": "Deployments with migrations have a window where old code reads/writes new schema; use backward-compatible migrations.",
+    "difficulty": "Medium-Hard",
+    "tags": ["deployment", "database-migrations", "zero-downtime"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Production Deployment Strategies",
+    "question": "You enable ISR with revalidate: 60. A new deployment introduces a bug. How long until users see the fix?",
+    "options": ["Immediately after deployment", "Up to 60 seconds after someone visits the page", "When ISR revalidation interval expires", "Requires manual cache invalidation"],
+    "correctIndex": 1,
+    "explanation": "ISR caches for 60 seconds; new deployments don't invalidate cache; users see the buggy version until revalidation or manual flush.",
+    "difficulty": "Medium-Hard",
+    "tags": ["isr", "caching", "deployment"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Production Deployment Strategies",
+    "question": "You deploy to a serverless platform (AWS Lambda). A database connection is created in the global scope. Is this efficient?",
+    "options": ["Yes; connections are reused across invocations", "No; connection is recreated every cold start", "Yes, but only if connection pooling is configured", "Depends on function memory"],
+    "correctIndex": 0,
+    "explanation": "Global connections are reused by warm Lambda instances; for cold starts, consider connection pooling (PgBouncer) or serverless DBs.",
+    "difficulty": "Medium-Hard",
+    "tags": ["serverless", "aws-lambda", "database-connections"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Production Deployment Strategies",
+    "question": "Your production Next.js app logs 'Warning: Missing CSS for ...' after deployment. What's the cause?",
+    "options": ["CSS files are not included in build", "Styles are loaded dynamically but haven't initialized yet", "Build is incomplete; redeploy", "Cache mismatch between CSS and JS"],
+    "correctIndex": 3,
+    "explanation": "CSS-in-JS libraries may cache builds; a mismatch between the CSS file and JS chunks causes missing styles; full cache purge fixes this.",
+    "difficulty": "Medium-Hard",
+    "tags": ["css", "build-cache", "deployment"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Production Deployment Strategies",
+    "question": "You want to run a database migration before deploying a new version. How do you orchestrate this in a serverless environment?",
+    "options": ["Run migration in the function handler on startup", "Use a separate build/pre-deploy step", "Migrations are not supported in serverless", "Run in the deployment pipeline before traffic is routed"],
+    "correctIndex": 3,
+    "explanation": "Serverless deployments should run migrations in the CI/CD pipeline before activating the new version.",
+    "difficulty": "Medium-Hard",
+    "tags": ["serverless", "migrations", "deployment-pipeline"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Production Deployment Strategies",
+    "question": "You monitor production and see high CPU usage on the build server after deployment. What's a likely cause?",
+    "options": ["Heavy getStaticProps queries during build", "Post-deployment ISR revalidation is generating pages", "Application code is inefficient", "CDN is not caching static assets"],
+    "correctIndex": 1,
+    "explanation": "After deployment, ISR revalidation begins when users visit; high CPU indicates page generation is slow.",
+    "difficulty": "Medium-Hard",
+    "tags": ["monitoring", "isr", "performance"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Production Deployment Strategies",
+    "question": "You use a CDN (like Cloudflare) in front of Next.js. Cache-Control headers set by getServerSideProps are ignored. Why?",
+    "options": ["CDN doesn't respect Set-Cookie headers", "getServerSideProps doesn't set Cache-Control by default", "CDN caches all responses regardless of headers", "Conflict between CDN and Next.js cache logic"],
+    "correctIndex": 1,
+    "explanation": "getServerSideProps doesn't set Cache-Control headers; explicitly set res.setHeader('Cache-Control', '...') to control CDN caching.",
+    "difficulty": "Medium-Hard",
+    "tags": ["caching", "cdn", "getserversideprops"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Production Deployment Strategies",
+    "question": "After deploying a new version, users report 'Unexpected version mismatch' errors. What's the cause?",
+    "options": ["Client and server have different app versions", "Browser cache is serving old JavaScript while server runs new code", "Hydration mismatch due to code changes", "All of the above can cause version mismatches"],
+    "correctIndex": 3,
+    "explanation": "Version mismatches occur from browser caching old JS, hydration differences, or incompatible client/server code.",
+    "difficulty": "Medium-Hard",
+    "tags": ["versioning", "caching", "deployment"]
+  }
+]

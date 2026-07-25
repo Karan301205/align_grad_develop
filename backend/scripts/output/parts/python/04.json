@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Object Oriented Programming",
+    "question": "What does this code output?\n```python\nclass A:\n    x = 10\n\na = A()\nprint(a.x)\na.x = 20\nprint(A.x)\n```",
+    "options": ["10 then 20", "10 then 10", "20 then 20", "AttributeError"],
+    "correctIndex": 1,
+    "explanation": "Instance attribute a.x shadows class attribute A.x; modifying a.x creates an instance-only attribute, leaving A.x unchanged.",
+    "difficulty": "Medium-Hard",
+    "tags": ["class-attributes", "instance-attributes", "attribute-resolution"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is the output of this inheritance scenario?\n```python\nclass Parent:\n    def method(self):\n        return 'parent'\n\nclass Child(Parent):\n    def method(self):\n        return 'child'\n\nobj = Child()\nprint(obj.method())\n```",
+    "options": ["parent", "child", "parentchild", "TypeError"],
+    "correctIndex": 1,
+    "explanation": "Child.method overrides Parent.method; method resolution order (MRO) calls the child's version first.",
+    "difficulty": "Medium",
+    "tags": ["inheritance", "method-overriding", "mro"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Object Oriented Programming",
+    "question": "What does this super() call do?\n```python\nclass Parent:\n    def __init__(self, name):\n        self.name = name\n\nclass Child(Parent):\n    def __init__(self, name, age):\n        super().__init__(name)\n        self.age = age\n\nobj = Child('alice', 25)\nprint(obj.name, obj.age)\n```",
+    "options": ["AttributeError", "alice 25", "None 25", "alice None"],
+    "correctIndex": 1,
+    "explanation": "super().__init__() calls the parent's __init__, setting self.name; child then sets self.age.",
+    "difficulty": "Medium",
+    "tags": ["super", "inheritance", "initialization"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Object Oriented Programming",
+    "question": "What does this @property decorator accomplish?\n```python\nclass Circle:\n    def __init__(self, radius):\n        self.radius = radius\n    \n    @property\n    def area(self):\n        return 3.14 * self.radius ** 2\n\nc = Circle(5)\nprint(c.area)\n```",
+    "options": ["Requires c.area() to call", "Allows c.area without parentheses", "Stores area in memory", "TypeError"],
+    "correctIndex": 1,
+    "explanation": "The @property decorator lets a method be accessed as an attribute without calling it.",
+    "difficulty": "Medium",
+    "tags": ["property", "decorator", "encapsulation"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Object Oriented Programming",
+    "question": "What happens when you compare two instances with __eq__?\n```python\nclass Point:\n    def __init__(self, x, y):\n        self.x = x\n        self.y = y\n    \n    def __eq__(self, other):\n        return self.x == other.x and self.y == other.y\n\np1 = Point(1, 2)\np2 = Point(1, 2)\nprint(p1 == p2)\n```",
+    "options": ["False", "True", "None", "ComparisonError"],
+    "correctIndex": 1,
+    "explanation": "Defining __eq__ allows custom equality comparison; p1 and p2 compare equal because their coordinates match.",
+    "difficulty": "Medium",
+    "tags": ["dunder-methods", "comparison", "equality"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Object Oriented Programming",
+    "question": "What does this staticmethod do?\n```python\nclass Utility:\n    @staticmethod\n    def add(a, b):\n        return a + b\n\nprint(Utility.add(3, 4))\nprint(Utility().add(3, 4))\n```",
+    "options": ["Must use instance", "Works both ways", "Only works on instance", "MethodError"],
+    "correctIndex": 1,
+    "explanation": "A staticmethod doesn't receive self or cls; it can be called on the class or an instance.",
+    "difficulty": "Medium",
+    "tags": ["staticmethod", "decorator", "class-methods"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Object Oriented Programming",
+    "question": "What does @classmethod pass as the first argument?\n```python\nclass Counter:\n    count = 0\n    \n    @classmethod\n    def increment(cls):\n        cls.count += 1\n        return cls.count\n\nprint(Counter.increment())\nprint(Counter.count)\n```",
+    "options": ["self instance", "cls the class", "None", "TypeError"],
+    "correctIndex": 1,
+    "explanation": "@classmethod passes the class itself as cls, allowing modification of class attributes.",
+    "difficulty": "Medium",
+    "tags": ["classmethod", "decorator", "class-attributes"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Object Oriented Programming",
+    "question": "What is printed in this multiple inheritance scenario?\n```python\nclass A:\n    def method(self):\n        return 'A'\n\nclass B:\n    def method(self):\n        return 'B'\n\nclass C(A, B):\n    pass\n\nprint(C().method())\n```",
+    "options": ["B", "A", "AB", "MRO error"],
+    "correctIndex": 1,
+    "explanation": "Method resolution order (MRO) checks A before B based on inheritance order; returns A.",
+    "difficulty": "Medium-Hard",
+    "tags": ["multiple-inheritance", "mro", "method-resolution"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Object Oriented Programming",
+    "question": "What does __init__ vs __new__ control?\n```python\nclass MyClass:\n    def __new__(cls):\n        print('new')\n        return super().__new__(cls)\n    \n    def __init__(self):\n        print('init')\n\nobj = MyClass()\n```",
+    "options": ["Both do same thing", "new creates, init initializes", "init creates, new initializes", "Only init is called"],
+    "correctIndex": 1,
+    "explanation": "__new__ creates the instance, __init__ initializes it; __new__ is called first.",
+    "difficulty": "Hard",
+    "tags": ["dunder-methods", "initialization", "object-creation"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Object Oriented Programming",
+    "question": "What does this decorator scenario demonstrate?\n```python\ndef decorator(func):\n    def wrapper(*args, **kwargs):\n        print('before')\n        result = func(*args, **kwargs)\n        print('after')\n        return result\n    return wrapper\n\n@decorator\ndef greet(name):\n    return f'hello {name}'\n\nprint(greet('alice'))\n```",
+    "options": ["before alice after hello", "before after hello alice", "before then after then hello alice", "SyntaxError"],
+    "correctIndex": 2,
+    "explanation": "The decorator wraps the function, printing 'before', calling greet(), returning the result, printing 'after'.",
+    "difficulty": "Medium-Hard",
+    "tags": ["decorators", "function-wrapping", "execution-flow"]
+  }
+]

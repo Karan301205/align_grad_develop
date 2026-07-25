@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Go Basics",
+    "question": "```go\nfunc main() {\n  var x int\n  fmt.Println(x)\n}\n```\nWhat is the output?",
+    "options": ["panic: nil", "0", "undefined", "compilation error"],
+    "correctIndex": 1,
+    "explanation": "Uninitialized int variables default to 0 in Go, not panic or error.",
+    "difficulty": "Medium",
+    "tags": ["zero_value", "initialization"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Basics",
+    "question": "```go\npackage main\nimport \"fmt\"\nfunc init() { fmt.Println(\"init\") }\nfunc main() { fmt.Println(\"main\") }\n```\nWhat is the output order?",
+    "options": ["main then init", "init then main", "concurrent output", "init only"],
+    "correctIndex": 1,
+    "explanation": "init() functions execute automatically before main() in source file order.",
+    "difficulty": "Medium",
+    "tags": ["init", "execution_order", "package_initialization"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Basics",
+    "question": "```go\nfunc example() (int, error) {\n  return 42, nil\n}\nfunc main() {\n  x, _ := example()\n  fmt.Println(x)\n}\n```\nWhat pattern is shown?",
+    "options": ["error suppression", "named returns", "variadic args", "type assertion"],
+    "correctIndex": 0,
+    "explanation": "Using `_` discards the error return value, a common pattern for ignoring non-essential returns.",
+    "difficulty": "Medium",
+    "tags": ["blank_identifier", "error_handling", "return_values"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Basics",
+    "question": "```go\nconst (\n  A = iota\n  B\n  C = iota\n)\nfmt.Println(A, B, C)\n```\nWhat is the output?",
+    "options": ["0 1 2", "0 1 1", "0 0 2", "0 1 0"],
+    "correctIndex": 1,
+    "explanation": "iota increments per line in const blocks; B inherits the iota value from A's line (0), C restarts iota (2).",
+    "difficulty": "Medium-Hard",
+    "tags": ["iota", "constants", "const_block"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Basics",
+    "question": "```go\nvar s string\nif s == \"\" { fmt.Println(\"empty\") }\nvar p *int\nif p == nil { fmt.Println(\"nil\") }\n```\nHow many lines print?",
+    "options": ["0", "1", "2", "panic"],
+    "correctIndex": 2,
+    "explanation": "Both conditions are true: uninitialized string is empty string, uninitialized pointer is nil.",
+    "difficulty": "Medium",
+    "tags": ["nil", "zero_values", "pointer_basics"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Basics",
+    "question": "```go\nfunc modify(x int) { x = 99 }\nfunc main() {\n  a := 5\n  modify(a)\n  fmt.Println(a)\n}\n```\nWhat is the output?",
+    "options": ["99", "5", "0", "panic"],
+    "correctIndex": 1,
+    "explanation": "Go passes ints by value; modifications inside modify() do not affect the caller's variable.",
+    "difficulty": "Medium",
+    "tags": ["pass_by_value", "function_calls", "parameter_passing"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Basics",
+    "question": "```go\ntype Person struct { Name string }\nfunc (p Person) SetName(n string) { p.Name = n }\nfunc main() {\n  x := Person{\"Alice\"}\n  x.SetName(\"Bob\")\n  fmt.Println(x.Name)\n}\n```\nWhat is the output?",
+    "options": ["Bob", "Alice", "panic", "compilation error"],
+    "correctIndex": 1,
+    "explanation": "Receiver p is a copy (value receiver), so modifications inside SetName do not affect x.",
+    "difficulty": "Medium",
+    "tags": ["receiver", "value_receiver", "method_receiver"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Basics",
+    "question": "```go\nfunc main() {\n  defer fmt.Println(\"1\")\n  defer fmt.Println(\"2\")\n  fmt.Println(\"3\")\n}\n```\nWhat is the output?",
+    "options": ["1 2 3", "3 1 2", "3 2 1", "2 1 3"],
+    "correctIndex": 2,
+    "explanation": "defer calls execute in LIFO order (last-in, first-out) after the function's main code completes.",
+    "difficulty": "Medium",
+    "tags": ["defer", "defer_order", "execution_order"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Basics",
+    "question": "```go\nfunc main() {\n  var x interface{} = \"hello\"\n  s := x.(string)\n  fmt.Println(s)\n}\n```\nWhat is the output?",
+    "options": ["hello", "panic", "type error", "nil"],
+    "correctIndex": 0,
+    "explanation": "Type assertion x.(string) succeeds because x holds a string value.",
+    "difficulty": "Medium",
+    "tags": ["interface", "type_assertion", "empty_interface"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Go Basics",
+    "question": "```go\nfunc main() {\n  x := 5\n  p := &x\n  *p = 10\n  fmt.Println(x)\n}\n```\nWhat is the output?",
+    "options": ["5", "10", "panic", "0"],
+    "correctIndex": 1,
+    "explanation": "p points to x; dereferencing p and assigning 10 modifies x through the pointer.",
+    "difficulty": "Medium",
+    "tags": ["pointer", "dereference", "pointer_indirection"]
+  }
+]

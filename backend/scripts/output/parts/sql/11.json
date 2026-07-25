@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "Performance Tuning",
+    "question": "A query takes 10 seconds. EXPLAIN PLAN shows:\nSeq Scan on users (cost=0..5000 rows=1M)\nwith a predicate on status = 'active'.\n\nWhat optimization would help?",
+    "options": [
+      "Create an index on status to avoid the full table scan",
+      "Increase the table cache size",
+      "Rewrite the query using UNION",
+      "No optimization is possible"
+    ],
+    "correctIndex": 0,
+    "explanation": "A full table scan (Seq Scan) on a 1M-row table is slow; an index on status enables efficient range access.",
+    "difficulty": "Medium",
+    "tags": ["query-plan", "index-addition"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Performance Tuning",
+    "question": "A large table has stale statistics. EXPLAIN PLAN estimates rows incorrectly:\nIndex Scan cost=100 (estimated 1000 rows, actual 100k rows).\n\nWhat causes the wrong estimate?",
+    "options": [
+      "Outdated statistics from the last ANALYZE; rerun ANALYZE to update them",
+      "The index is broken",
+      "The query is written incorrectly",
+      "Incorrect statistics cannot be fixed"
+    ],
+    "correctIndex": 0,
+    "explanation": "Query planners rely on statistics gathered by ANALYZE; outdated stats lead to poor plan choices; re-running ANALYZE fixes estimates.",
+    "difficulty": "Medium",
+    "tags": ["statistics", "analyze"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Performance Tuning",
+    "question": "A query does a full table scan instead of using an available index. Why?\nSELECT * FROM orders WHERE amount / 100 > 50;",
+    "options": [
+      "Expression (amount/100) prevents index use; rewrite as amount > 5000 to use an index on amount",
+      "The index is always preferred; the planner should use it",
+      "Expressions never prevent index use",
+      "Full scans are faster for small result sets"
+    ],
+    "correctIndex": 0,
+    "explanation": "Applying a function/expression to an indexed column disables index use; rewrite to apply the expression to the constant instead.",
+    "difficulty": "Medium",
+    "tags": ["index-disabling", "expression"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Performance Tuning",
+    "question": "A paginated query retrieves page 1000:\nSELECT * FROM huge_table ORDER BY id LIMIT 100 OFFSET 99900;",
+    "options": [
+      "OFFSET 99900 skips 99.9k rows (slow); use keyset pagination (WHERE id > last_id) instead",
+      "OFFSET is optimized for large values",
+      "Pagination has no performance impact",
+      "LIMIT always uses an index"
+    ],
+    "correctIndex": 0,
+    "explanation": "Large OFFSET values require scanning and discarding many rows; keyset pagination (seek by last ID) avoids skipping.",
+    "difficulty": "Medium-Hard",
+    "tags": ["pagination", "offset", "keyset-pagination"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Performance Tuning",
+    "question": "A JOIN query is slow:\nSELECT * FROM big_table a JOIN small_table b ON a.id = b.a_id;\n\nBig_table has 10M rows, small_table has 100 rows. What join order is optimal?",
+    "options": [
+      "Start with small_table, join to big_table (smaller set first reduces work)",
+      "Start with big_table, join to small_table",
+      "Join order doesn't matter; the optimizer chooses",
+      "Always join the larger table first"
+    ],
+    "correctIndex": 0,
+    "explanation": "Joining the smaller table first (100 rows) against the larger one is more efficient than joining 10M rows against 100.",
+    "difficulty": "Medium",
+    "tags": ["join-order", "optimization"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Performance Tuning",
+    "question": "Database memory is low. A query runs slow due to spilling to disk. How do you reduce memory usage?\nSELECT DISTINCT name, COUNT(*) FROM huge_table GROUP BY name;",
+    "options": [
+      "Add a LIMIT clause or use STREAMING GROUP BY if available to reduce memory footprint",
+      "Increase database memory allocation",
+      "Remove DISTINCT to speed up the query",
+      "Memory issues cannot be resolved in SQL"
+    ],
+    "correctIndex": 0,
+    "explanation": "LIMIT reduces output rows; streaming aggregation processes groups incrementally; both reduce peak memory usage.",
+    "difficulty": "Medium",
+    "tags": ["memory", "spill-to-disk"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Performance Tuning",
+    "question": "A subquery is correlated and runs slowly:\nSELECT name FROM users u WHERE salary > (SELECT AVG(salary) FROM users WHERE department = u.department);\n\nHow would you optimize?",
+    "options": [
+      "Rewrite using a window function: SELECT name FROM (SELECT *, AVG(salary) OVER (PARTITION BY department) avg_dept_salary FROM users) WHERE salary > avg_dept_salary",
+      "Remove the subquery entirely",
+      "Use a JOIN instead (though it's not semantically the same)",
+      "No optimization is possible"
+    ],
+    "correctIndex": 0,
+    "explanation": "Window functions compute aggregates once per group instead of re-evaluating the subquery for each row.",
+    "difficulty": "Medium-Hard",
+    "tags": ["correlated-subquery", "window-function"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Performance Tuning",
+    "question": "A query with many CASE WHEN conditions is slow:\nSELECT id, CASE WHEN ... THEN ... WHEN ... THEN ... ELSE ... END FROM big_table;",
+    "options": [
+      "Complex expressions add CPU overhead; if many queries use the same logic, precompute in a lookup table",
+      "CASE is never optimized",
+      "Add an index to fix performance",
+      "Rewrite every CASE into a separate query"
+    ],
+    "correctIndex": 0,
+    "explanation": "Many CASE branches add CPU cost; if used repeatedly, store pre-computed results in a table and JOIN instead.",
+    "difficulty": "Medium",
+    "tags": ["expression-cost", "lookup-table"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Performance Tuning",
+    "question": "Queries on a frequently accessed table are slow despite indexes. Cache at the database level is fragmented. What helps?\nANALYZE TABLE users;\nOR\nVACUUM FULL users;",
+    "options": [
+      "Both; ANALYZE updates statistics and VACUUM reclaims space and defragments",
+      "Only ANALYZE helps",
+      "Only VACUUM helps",
+      "Neither operation helps"
+    ],
+    "correctIndex": 0,
+    "explanation": "ANALYZE updates statistics for better planning; VACUUM removes dead tuples and defragments pages, improving cache efficiency.",
+    "difficulty": "Medium",
+    "tags": ["maintenance", "analyze", "vacuum"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Performance Tuning",
+    "question": "A UNION query combines results from two tables with different schemas:\nSELECT id, name FROM users UNION SELECT id, title FROM products;\n\nWhy might this be slow?",
+    "options": [
+      "UNION removes duplicates (default behavior), requiring a sort; use UNION ALL if duplicates are acceptable",
+      "UNION is always slow",
+      "Combining two tables is inherently slow",
+      "No performance issue exists"
+    ],
+    "correctIndex": 0,
+    "explanation": "UNION performs a sort to identify duplicates; UNION ALL concatenates without sorting, often much faster.",
+    "difficulty": "Medium",
+    "tags": ["union", "union-all"]
+  }
+]

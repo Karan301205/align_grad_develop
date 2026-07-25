@@ -1,0 +1,167 @@
+[
+  {
+    "skillName": "C",
+    "subtopic": "Pointers",
+    "question": "int x = 10;\nint *p = &x;\nint **pp = &p;\nprintf(\"%d\", **pp);\nWhat is printed?",
+    "options": [
+      "10 (pp points to p, which points to x; **pp dereferences to x)",
+      "Compiler error: invalid double dereference",
+      "The address of x",
+      "Garbage value"
+    ],
+    "correctIndex": 0,
+    "explanation": "pp is a pointer to a pointer; *pp gives p, and **pp dereferences p to yield x.",
+    "difficulty": "Medium",
+    "tags": ["pointers to pointers", "dereferencing", "indirection"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Pointers",
+    "question": "int arr[5] = {10, 20, 30, 40, 50};\nint *p = arr;\nprintf(\"%d\", *(p + 2));\nWhat is printed?",
+    "options": [
+      "30 (pointer arithmetic: p + 2 skips 2 ints; *(p+2) is arr[2])",
+      "20 (p points to arr[0]; +2 adds 2 bytes)",
+      "Compiler error: pointer arithmetic not allowed",
+      "50 (p + 2 adds 2 to the address)"
+    ],
+    "correctIndex": 0,
+    "explanation": "Pointer arithmetic scales by the size of the type; p + 2 advances 2 * sizeof(int) bytes, reaching arr[2].",
+    "difficulty": "Medium",
+    "tags": ["pointer arithmetic", "array indexing", "scaling"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Pointers",
+    "question": "char *str1 = \"hello\";\nchar str2[] = \"hello\";\nCan str1[0] and str2[0] both be modified?",
+    "options": [
+      "No: str1 points to a read-only literal; str2 is a modifiable array (both point to the same string, but different storage types)",
+      "Yes: both can be modified",
+      "Only str1 can be modified",
+      "Compiler error: char* cannot point to string literals"
+    ],
+    "correctIndex": 0,
+    "explanation": "str1 is a pointer to a string literal (read-only); str2 is an array initialized from a literal (modifiable copy).",
+    "difficulty": "Medium-Hard",
+    "tags": ["string literals", "read-only memory", "pointer vs array"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Pointers",
+    "question": "int *p = NULL;\n*p = 5;\nWhat happens?",
+    "options": [
+      "Undefined behavior: dereferencing NULL is illegal and typically causes a segmentation fault",
+      "The value 5 is stored at address 0",
+      "Compiler error: cannot dereference NULL",
+      "Nothing happens; NULL is just a pointer constant"
+    ],
+    "correctIndex": 0,
+    "explanation": "NULL is a null pointer (address 0); dereferencing it accesses invalid memory, causing undefined behavior.",
+    "difficulty": "Medium",
+    "tags": ["null pointers", "dereferencing", "segfault"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Pointers",
+    "question": "int x = 5, y = 10;\nint *p = &x;\nint *q = &y;\nprintf(\"%d\", (int)(q - p));\nWhat is printed?",
+    "options": [
+      "1 (or -1 depending on order): pointer subtraction gives the difference in elements, not bytes",
+      "Address difference in bytes (typically 4 or 8)",
+      "Compiler error: cannot subtract pointers",
+      "Undefined behavior (p and q point to different objects)"
+    ],
+    "correctIndex": 3,
+    "explanation": "Subtracting pointers is only valid within the same array; q - p here is undefined behavior (they point to unrelated variables).",
+    "difficulty": "Medium-Hard",
+    "tags": ["pointer subtraction", "pointer comparison", "undefined behavior"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Pointers",
+    "question": "int arr[3] = {1, 2, 3};\nint *p = arr + 3;\nprintf(\"%d\", *p);\nWhy is this undefined behavior?",
+    "options": [
+      "p points one past the end of the array; dereferencing it accesses memory outside the array bounds",
+      "arr + 3 is a compiler error",
+      "*p is valid but returns garbage",
+      "p is NULL; dereferencing NULL is the issue"
+    ],
+    "correctIndex": 0,
+    "explanation": "Pointers to one past the end are allowed for loop bounds, but dereferencing them is undefined behavior.",
+    "difficulty": "Medium",
+    "tags": ["array bounds", "pointer dereference", "out of bounds"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Pointers",
+    "question": "void *pv = malloc(10);\nint *pi = (int *)pv;\nchar *pc = (int *)pv;\nWhy is the cast necessary for int *pi but pc could use the void * directly?",
+    "options": [
+      "void * is a generic pointer; explicit casting is required when assigning to typed pointers, though some casts are implicit or omitted in loose code",
+      "void * cannot be cast to other pointer types",
+      "int * and char * are incompatible types",
+      "The cast has no purpose; it's optional"
+    ],
+    "correctIndex": 0,
+    "explanation": "In C89, void* casts are often needed; in C99+, void* implicitly converts to typed pointers in assignments.",
+    "difficulty": "Medium-Hard",
+    "tags": ["void pointers", "type casting", "malloc"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Pointers",
+    "question": "int *p = &x;\np++;\nWhy does p point to a different variable?",
+    "options": [
+      "p++ increments the pointer itself (not x); p now points to the next int in memory, likely a different variable or garbage",
+      "p++ increments the value pointed to (*x increments, not the pointer)",
+      "Compiler error: cannot increment pointers",
+      "p still points to x; ++ only changes the integer value"
+    ],
+    "correctIndex": 0,
+    "explanation": "p++ has higher precedence than *; it increments the pointer by sizeof(int), not the dereferenced value.",
+    "difficulty": "Medium-Hard",
+    "tags": ["pointer arithmetic", "operator precedence", "post-increment"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Pointers",
+    "question": "const int *p;\nint * const q;\nWhat is the difference?",
+    "options": [
+      "p is a pointer to a const int (data is const, pointer is not); q is a const pointer to int (pointer is const, data is not)",
+      "Both prevent modification of the data",
+      "Both prevent modification of the pointer",
+      "Compiler error: duplicate const"
+    ],
+    "correctIndex": 0,
+    "explanation": "const before * restricts the data; const after * restricts the pointer.",
+    "difficulty": "Medium-Hard",
+    "tags": ["const pointers", "type qualifiers", "const semantics"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Pointers",
+    "question": "int arr[5][5];\nint **pp = (int **)arr;\nWhy is this dangerous?",
+    "options": [
+      "arr decays to int (*)[5] (pointer to array); casting to int** (pointer to pointer) misaligns the type; dereferencing pp may read incorrect memory",
+      "The cast is invalid syntax",
+      "arr cannot be cast to a pointer type",
+      "int** requires explicit allocation with malloc"
+    ],
+    "correctIndex": 0,
+    "explanation": "int (*)[5] and int** have different sizes/behavior; this cast is a type punning error leading to undefined behavior.",
+    "difficulty": "Hard",
+    "tags": ["pointer casting", "type misalignment", "undefined behavior"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Pointers",
+    "question": "int x = 5;\nint *p = &x;\nfree(p);\nprintf(\"%d\", *p);\nWhy is this undefined behavior?",
+    "options": [
+      "free() deallocates p; accessing *p afterward is a use-after-free error (reading deallocated memory)",
+      "free() only works on pointers from malloc; x is a stack variable",
+      "Compiler error: cannot free a local variable address",
+      "printf() cannot read from freed memory"
+    ],
+    "correctIndex": 0,
+    "explanation": "free() requires pointers from malloc/calloc; calling it on a stack variable (or then dereferencing) is double error and causes undefined behavior.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dangling pointers", "use-after-free", "memory safety"]
+  }
+]

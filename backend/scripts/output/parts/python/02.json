@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Data Structures",
+    "question": "What does this list comprehension output?\n```python\nresult = [x*2 for x in range(5) if x % 2 == 0]\nprint(result)\n```",
+    "options": ["[0, 4, 8]", "[0, 2, 4, 6, 8]", "[2, 6]", "[1, 3]"],
+    "correctIndex": 0,
+    "explanation": "The comprehension iterates 0-4, filters even numbers (0, 2, 4), and multiplies by 2, yielding [0, 4, 8].",
+    "difficulty": "Medium",
+    "tags": ["list-comprehension", "filtering", "generators"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Data Structures",
+    "question": "What is the output?\n```python\ndata = {'a': 1, 'b': 2, 'c': 3}\nresult = {k: v*2 for k, v in data.items() if v > 1}\nprint(result)\n```",
+    "options": ["{b: 4, c: 6}", "{'b': 4, 'c': 6}", "{'a': 1, 'b': 4, 'c': 6}", "KeyError"],
+    "correctIndex": 1,
+    "explanation": "Dict comprehension iterates items, filters values > 1, and doubles them; b and c qualify.",
+    "difficulty": "Medium",
+    "tags": ["dict-comprehension", "filtering", "dictionary-iteration"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Data Structures",
+    "question": "What happens with this nested list?\n```python\nmatrix = [[1, 2], [3, 4]]\nflat = [x for row in matrix for x in row]\nprint(flat)\n```",
+    "options": ["[[1, 2], [3, 4]]", "[1, 2, 3, 4]", "[row for row in matrix]", "TypeError"],
+    "correctIndex": 1,
+    "explanation": "Nested comprehension with multiple for clauses flattens the matrix into [1, 2, 3, 4].",
+    "difficulty": "Medium-Hard",
+    "tags": ["nested-comprehension", "flattening", "iteration"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Data Structures",
+    "question": "What is the result of this set operation?\n```python\nset_a = {1, 2, 3}\nset_b = {2, 3, 4}\nresult = set_a ^ set_b\nprint(result)\n```",
+    "options": ["{1, 4}", "{2, 3}", "{1, 2, 3, 4}", "{3}"],
+    "correctIndex": 0,
+    "explanation": "The ^ operator computes symmetric difference, returning elements in either set but not both: {1, 4}.",
+    "difficulty": "Medium",
+    "tags": ["set-operations", "symmetric-difference", "operators"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Data Structures",
+    "question": "What does this tuple unpacking produce?\n```python\na, b, *rest = [1, 2, 3, 4, 5]\nprint(rest)\n```",
+    "options": ["[3, 4, 5]", "(3, 4, 5)", "3", "ValueError"],
+    "correctIndex": 1,
+    "explanation": "Extended unpacking with * collects remaining items into a tuple, so rest = (3, 4, 5).",
+    "difficulty": "Medium",
+    "tags": ["unpacking", "variadic", "tuple-assignment"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Data Structures",
+    "question": "What will this code output?\n```python\nfrom collections import defaultdict\ndd = defaultdict(list)\ndd['a'].append(1)\ndd['a'].append(2)\nprint(dict(dd))\n```",
+    "options": ["{'a': (1, 2)}", "{'a': [1, 2]}", "{'a': 1}", "KeyError"],
+    "correctIndex": 1,
+    "explanation": "defaultdict with list factory creates an empty list for missing keys; appending gives {'a': [1, 2]}.",
+    "difficulty": "Medium",
+    "tags": ["defaultdict", "collections", "factory-function"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Data Structures",
+    "question": "What does this deque operation return?\n```python\nfrom collections import deque\ndq = deque([1, 2, 3])\ndq.rotate(1)\nprint(list(dq))\n```",
+    "options": ["[2, 3, 1]", "[3, 1, 2]", "[1, 2, 3]", "[1, 3, 2]"],
+    "correctIndex": 1,
+    "explanation": "rotate(1) shifts elements to the right by one position; last element wraps to front: [3, 1, 2].",
+    "difficulty": "Medium-Hard",
+    "tags": ["deque", "collections", "rotation"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Data Structures",
+    "question": "What is printed?\n```python\ndata = [1, 2, 2, 3, 3, 3]\nfrom collections import Counter\nc = Counter(data)\nprint(c.most_common(1))\n```",
+    "options": ["[3]", "[(3, 3)]", "[(2, 2)]", "[1]"],
+    "correctIndex": 1,
+    "explanation": "Counter.most_common(1) returns a list of (element, count) tuples; 3 appears most with count 3.",
+    "difficulty": "Medium",
+    "tags": ["counter", "collections", "most-common"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Data Structures",
+    "question": "What does list slicing with negative indices yield?\n```python\nlst = [1, 2, 3, 4, 5]\nresult = lst[-3:-1]\nprint(result)\n```",
+    "options": ["[3, 4]", "[4, 5]", "[3]", "[2, 3, 4]"],
+    "correctIndex": 0,
+    "explanation": "Negative indices count from the end; -3 is index 2, -1 is index 4; slice [2:4] = [3, 4].",
+    "difficulty": "Medium",
+    "tags": ["slicing", "negative-indices", "list-operations"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Data Structures",
+    "question": "What is the result of this zip operation?\n```python\nkeys = ['a', 'b', 'c']\nvalues = [1, 2, 3, 4]\nresult = dict(zip(keys, values))\nprint(result)\n```",
+    "options": ["{a: 1, b: 2, c: 3, 4}", "{'a': 1, 'b': 2, 'c': 3}", "TypeError", "{'a': 1, 'b': 2, 'c': 3, 4}"],
+    "correctIndex": 1,
+    "explanation": "zip pairs elements until the shorter sequence ends; dict() converts pairs to a dict with 3 entries.",
+    "difficulty": "Medium",
+    "tags": ["zip", "dictionary-creation", "iteration"]
+  }
+]

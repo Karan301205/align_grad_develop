@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "Java Collections",
+    "question": "What is printed?\n```java\nArrayList<Integer> list = new ArrayList<>();\nlist.add(1);\nlist.add(2);\nlist.add(3);\nfor (Integer x : list) {\n  list.remove(x);\n}\nSystem.out.println(list.size());\n```",
+    "options": ["0", "1", "3", "ConcurrentModificationException"],
+    "correctIndex": 3,
+    "explanation": "Modifying a collection during iteration over it throws ConcurrentModificationException, even in single-threaded code.",
+    "difficulty": "Medium",
+    "tags": ["concurrent-modification", "iteration", "collection-safety"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Collections",
+    "question": "What is the output?\n```java\nHashSet<Integer> set = new HashSet<>();\nset.add(1);\nset.add(2);\nset.add(1);\nSystem.out.println(set.size());\n```",
+    "options": ["1", "2", "3", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "HashSet stores unique elements; adding 1 twice only adds it once, resulting in size 2.",
+    "difficulty": "Medium",
+    "tags": ["hashset", "uniqueness", "set-semantics"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Collections",
+    "question": "What is printed?\n```java\nLinkedList<String> list = new LinkedList<>();\nlist.add(\"A\");\nlist.add(\"B\");\nlist.remove();\nSystem.out.println(list.get(0));\n```",
+    "options": ["A", "B", "Null", "Exception"],
+    "correctIndex": 1,
+    "explanation": "remove() on LinkedList removes the first element (A); get(0) now returns the second element (B).",
+    "difficulty": "Medium",
+    "tags": ["linked-list", "deque-operations", "removal"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Collections",
+    "question": "What is the output?\n```java\nHashMap<String, Integer> map = new HashMap<>();\nmap.put(\"a\", 1);\nmap.put(\"b\", 2);\nfor (String key : map.keySet()) {\n  if (key.equals(\"a\")) map.put(\"c\", 3);\n}\nSystem.out.println(map.size());\n```",
+    "options": ["2", "3", "ConcurrentModificationException", "Compilation error"],
+    "correctIndex": 2,
+    "explanation": "Modifying a HashMap while iterating over its keySet() throws ConcurrentModificationException.",
+    "difficulty": "Medium-Hard",
+    "tags": ["concurrent-modification", "hashmap", "iteration"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Collections",
+    "question": "What is printed?\n```java\nTreeMap<Integer, String> map = new TreeMap<>();\nmap.put(3, \"C\");\nmap.put(1, \"A\");\nmap.put(2, \"B\");\nfor (Integer key : map.keySet()) {\n  System.out.print(key + \" \");\n}\n```",
+    "options": ["3 1 2", "1 2 3", "Random order", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "TreeMap maintains sorted order by key; iterating over keySet() returns keys in sorted order: 1, 2, 3.",
+    "difficulty": "Medium",
+    "tags": ["treemap", "sorted-order", "navigation"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Collections",
+    "question": "What is the result?\n```java\nList<String> list = Arrays.asList(\"a\", \"b\", \"c\");\nlist.add(\"d\");\n```",
+    "options": ["Works fine", "UnsupportedOperationException", "Compilation error", "Returns null"],
+    "correctIndex": 1,
+    "explanation": "Arrays.asList() returns a fixed-size list backed by the array; add() is not supported.",
+    "difficulty": "Medium",
+    "tags": ["arrays-aslist", "fixed-size-list", "unsupported-operations"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Collections",
+    "question": "What is printed?\n```java\nPriorityQueue<Integer> pq = new PriorityQueue<>();\npq.add(3);\npq.add(1);\npq.add(2);\nwhile (!pq.isEmpty()) {\n  System.out.print(pq.poll() + \" \");\n}\n```",
+    "options": ["3 1 2", "1 2 3", "1 3 2", "2 1 3"],
+    "correctIndex": 1,
+    "explanation": "PriorityQueue orders elements by priority (min-heap by default); poll() extracts in order: 1, 2, 3.",
+    "difficulty": "Medium",
+    "tags": ["priority-queue", "heap", "ordering"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Collections",
+    "question": "What is the output?\n```java\nMap<String, Integer> map = new HashMap<>();\nmap.put(\"a\", 1);\nmap.put(\"b\", 2);\nInteger value = map.getOrDefault(\"c\", 0);\nSystem.out.println(value);\n```",
+    "options": ["null", "0", "Compilation error", "NullPointerException"],
+    "correctIndex": 1,
+    "explanation": "getOrDefault() returns the value if key exists, otherwise the default value (0); key 'c' doesn't exist.",
+    "difficulty": "Medium",
+    "tags": ["hashmap", "getordefault", "null-safety"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Collections",
+    "question": "What is printed?\n```java\nCollection<String> col = new ArrayList<>();\ncol.add(\"a\");\ncol.add(\"b\");\nIterator<String> it = col.iterator();\nit.next();\nit.remove();\nSystem.out.println(col.size());\n```",
+    "options": ["0", "1", "2", "Exception"],
+    "correctIndex": 1,
+    "explanation": "Iterator.remove() safely removes the element returned by next(), resulting in size 1.",
+    "difficulty": "Medium",
+    "tags": ["iterator", "remove", "safe-removal"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Java Collections",
+    "question": "What is the output?\n```java\nClass<?> c = String.class;\nList<String> list = new ArrayList<>();\nlist.add(\"hello\");\nSystem.out.println(list instanceof List);\n```",
+    "options": ["true", "false", "Compilation error", "ClassCastException"],
+    "correctIndex": 0,
+    "explanation": "instanceof checks if list is an instance of the List interface; ArrayList implements List, so result is true.",
+    "difficulty": "Medium",
+    "tags": ["instanceof", "type-checking", "interfaces"]
+  }
+]

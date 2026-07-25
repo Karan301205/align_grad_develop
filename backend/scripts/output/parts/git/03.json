@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Creation",
+    "question": "You want to create a new Git repository that shares a .git directory with an existing repository, so both repositories have the same commit history and object database. Which approach achieves this without duplicating data?",
+    "options": [
+      "Use git clone --bare followed by git new-worktree-dir, or configure gitdir to point to a shared .git directory",
+      "Copy the .git folder from one repository to another",
+      "Create two separate repositories and use git remote add to link them",
+      "Use git submodule to embed one repository inside another"
+    ],
+    "correctIndex": 0,
+    "explanation": "git worktree or configuring core.worktreeConfig allows multiple working directories to share a single .git; git new-worktree-dir sets up the linkage without duplication.",
+    "difficulty": "Hard",
+    "tags": ["worktree", "shared-git", "object-database", "storage"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Creation",
+    "question": "You initialize a repository with git init, but you want to immediately configure it so that the default branch is main instead of master. Which approach works at initialization time?",
+    "options": [
+      "Use git init -b main or git config --initial-branch main to set the default branch name",
+      "Rename master to main with git branch -m master main after initialization",
+      "Edit the HEAD file in .git to point to refs/heads/main",
+      "Use git symbolic-ref to update HEAD before the first commit"
+    ],
+    "correctIndex": 0,
+    "explanation": "git init -b main (Git 2.28+) or git config --initial-branch main sets the default branch at initialization; renaming after creation requires special handling for the first commit.",
+    "difficulty": "Medium",
+    "tags": ["init", "branch-naming", "default-branch"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Creation",
+    "question": "You have a monorepo with five independent projects, each with its own package.json and build system. You want to organize them so that each project can have separate CI/CD triggers but share version control history. Which structure should you use?",
+    "options": [
+      "Keep all projects in a single repository with separate directories and use .github/workflows to trigger CI based on path filters",
+      "Create five separate repositories and use git submodule to reference them",
+      "Use git worktree to create separate checkouts for each project",
+      "Create one repository per project and use git merge to combine histories quarterly"
+    ],
+    "correctIndex": 0,
+    "explanation": "A monorepo with path-based CI triggers in workflows allows independent builds while sharing commit history; submodules complicate workflow and lose history integration.",
+    "difficulty": "Medium-Hard",
+    "tags": ["monorepo", "ci-triggers", "path-filters", "workflow"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Creation",
+    "question": "You clone a repository that has a deeply nested .git directory in a subdirectory (due to a misconfiguration). When you run git status, it operates on the nested .git instead of the parent. How do you fix this without losing any commits?",
+    "options": [
+      "Move the nested .git to the repository root and update core.gitdir if needed, or use git rev-parse --git-dir to identify the current git directory",
+      "Delete the nested .git and run git init in the root",
+      "Clone the repository again to get the correct structure",
+      "Run git fsck to repair the corrupted repository structure"
+    ],
+    "correctIndex": 0,
+    "explanation": "git rev-parse --git-dir shows which .git directory Git is using; moving it to the correct location or updating gitdir in .git/config restores proper operation.",
+    "difficulty": "Medium-Hard",
+    "tags": ["git-dir", "nested-git", "repository-structure"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Creation",
+    "question": "You initialize a bare repository (with git init --bare) to use as a central server repository. A developer pushes to it, but the working files are not visible on the server. Is this the expected behavior, and if so, why?",
+    "options": [
+      "Yes, bare repositories store only Git objects and refs without a working directory; they are designed as central repositories, not for development work",
+      "No, bare repositories should include working files; you should run git checkout to restore them",
+      "No, the developer must have used the wrong branch; switch to main to see files",
+      "Yes, but you should create a post-receive hook to run git checkout in a separate worktree"
+    ],
+    "correctIndex": 0,
+    "explanation": "Bare repositories (created with --bare or .git/config core.bare=true) store objects and refs but no working directory; this prevents merge conflicts when multiple developers push.",
+    "difficulty": "Medium",
+    "tags": ["bare-repository", "central-repo", "working-directory"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Creation",
+    "question": "You want to create a new repository that is based on an existing repository but with its entire history rewritten to exclude sensitive files. What is the correct sequence of operations?",
+    "options": [
+      "Use git clone, then git filter-branch or git filter-repo to rewrite history, then push to the new repository origin",
+      "Use git init and manually commit all files from the original repository",
+      "Use git subtree to extract the files you want to keep",
+      "Clone the repository and use git rebase to rewrite commits selectively"
+    ],
+    "correctIndex": 0,
+    "explanation": "filter-branch or filter-repo rewrites commit history across all branches; after filtering, force-push to a fresh repository to replace the origin.",
+    "difficulty": "Medium-Hard",
+    "tags": ["filter-branch", "history-rewriting", "sensitive-files"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Creation",
+    "question": "You create a new repository with git init, then initialize it with an empty initial commit. Why might this be useful?",
+    "options": [
+      "An empty initial commit provides a stable root commit for rebasing, cherry-picking, and history analysis without breaking when reaching the beginning",
+      "It improves performance for large repositories",
+      "It prevents accidental force-pushes to main",
+      "It enables faster cloning by reducing object count"
+    ],
+    "correctIndex": 0,
+    "explanation": "An empty root commit acts as an anchor; rebasing on top of an implicit root can fail, but an explicit empty commit ensures git log and rebase work predictably.",
+    "difficulty": "Medium-Hard",
+    "tags": ["initial-commit", "rebase", "git-root"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Creation",
+    "question": "After running git init in a directory, the .gitignore file is not recognized by Git. What is the most likely reason?",
+    "options": [
+      ".gitignore must be committed to the repository for Git to parse it; untracked .gitignore files are ignored by design",
+      "The file must be named .git-ignore instead of .gitignore",
+      ".gitignore only works after the first commit is made",
+      "The core.excludesfile configuration must be set to enable .gitignore"
+    ],
+    "correctIndex": 0,
+    "explanation": ".gitignore works only when committed because Git reads it from the index; untracked .gitignore files in the working directory are themselves ignored to prevent configuration leaks.",
+    "difficulty": "Medium",
+    "tags": ["gitignore", "tracking", "commit"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Creation",
+    "question": "You clone a repository and notice the .git folder is suspiciously small (a few KB). When you run git log, it shows only a few commits despite the remote having thousands. What configuration is in place?",
+    "options": [
+      "The repository is a shallow clone (created with --depth or --single-branch); convert it to a full clone with git fetch --unshallow",
+      "The repository uses LFS and most files are not downloaded",
+      "Git is configured to show only recent commits",
+      "The clone operation was corrupted and you need to re-clone"
+    ],
+    "correctIndex": 0,
+    "explanation": "Shallow clones (--depth N) download only recent history to save bandwidth; git fetch --unshallow converts the repository to a full clone by fetching all missing commits.",
+    "difficulty": "Medium",
+    "tags": ["shallow-clone", "depth", "unshallow"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Repository Creation",
+    "question": "You initialize a repository with git init but want to immediately add a standard template of files (LICENSE, README, .gitignore) without manual creation. Which Git feature or workflow should you use?",
+    "options": [
+      "Use git init --template to specify a template directory with pre-populated files, or use git init then copy files from a template repository",
+      "Use git clone with a template URL",
+      "Create a hook that generates files automatically",
+      "Use git config to enable a file generation script"
+    ],
+    "correctIndex": 0,
+    "explanation": "git init --template=<dir> copies files from a template directory into the new repository; templates are useful for enforcing organization standards.",
+    "difficulty": "Medium",
+    "tags": ["init-template", "repository-template", "standardization"]
+  }
+]

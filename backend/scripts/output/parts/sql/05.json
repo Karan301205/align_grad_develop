@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "Indexing Techniques",
+    "question": "A query is: SELECT id, name FROM users WHERE created_at > '2024-01-01' ORDER BY created_at;\n\nYou have an index on created_at. Will the index satisfy both the WHERE and ORDER BY?",
+    "options": [
+      "Yes, the index provides both filter and sort order",
+      "No, you need two separate indexes",
+      "Only if the index is UNIQUE",
+      "Only if the table is small enough"
+    ],
+    "correctIndex": 0,
+    "explanation": "A single B-tree index on created_at provides both the WHERE filter and ORDER BY sort in one efficient scan.",
+    "difficulty": "Medium",
+    "tags": ["index-design", "where-orderby"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Indexing Techniques",
+    "question": "You have a composite index (user_id, created_at). Which queries will use this index efficiently?\nA: WHERE user_id = 5 AND created_at > '2024-01-01'\nB: WHERE created_at > '2024-01-01' AND user_id = 5\nC: WHERE created_at > '2024-01-01'",
+    "options": [
+      "Only A uses the index efficiently",
+      "A and B use the index, but C does not (breaks the leftmost prefix rule)",
+      "All three use the index equally",
+      "Only C uses the index"
+    ],
+    "correctIndex": 1,
+    "explanation": "Composite indexes use the leftmost prefix rule; A and B both filter by user_id first (matching the index order), but C skips user_id.",
+    "difficulty": "Medium-Hard",
+    "tags": ["composite-index", "leftmost-prefix"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Indexing Techniques",
+    "question": "Your query: SELECT id, name FROM employees WHERE salary > 50000 AND department = 'Engineering';\n\nYou have index (department, salary). A query planner can:\nA: Use the index to filter by department, then filter by salary\nB: Use the index to filter by salary range only\nC: Use neither index condition and do a full table scan\nD: Use the index efficiently for both conditions",
+    "options": [
+      "Only A is possible",
+      "Only B is possible",
+      "A is most likely; B may work but is not optimal",
+      "D is possible with index column reordering"
+    ],
+    "correctIndex": 2,
+    "explanation": "With (department, salary), filtering by department first uses the leftmost prefix; salary filtering then works on the index subtree.",
+    "difficulty": "Medium-Hard",
+    "tags": ["index-order", "query-planning"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Indexing Techniques",
+    "question": "You want to find all users with names starting with 'A'. Which index type is most efficient?\nSELECT id FROM users WHERE name LIKE 'A%';",
+    "options": [
+      "A B-tree index on name; the LIKE 'A%' pattern can use the index",
+      "A hash index on name",
+      "A full-text search index",
+      "No index helps; full table scan is required"
+    ],
+    "correctIndex": 0,
+    "explanation": "B-tree indexes support prefix matching (LIKE 'A%') by scanning index entries starting with 'A'.",
+    "difficulty": "Medium",
+    "tags": ["like-pattern", "btree-index"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Indexing Techniques",
+    "question": "A table has 1M rows. Query: SELECT COUNT(*) FROM orders WHERE status = 'completed';\n\nStatus has 100 'completed' rows, 900k 'pending', 99.9k 'cancelled'. What index helps most?",
+    "options": [
+      "Index on status; small result set benefits from index-only scan",
+      "Full table scan is better when result set is small",
+      "Index only helps if it's a covering index",
+      "No index helps for COUNT(*) without GROUP BY"
+    ],
+    "correctIndex": 0,
+    "explanation": "An index on status provides a smaller subtree to scan for 100 'completed' rows rather than scanning 1M rows.",
+    "difficulty": "Medium",
+    "tags": ["selectivity", "index-design"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Indexing Techniques",
+    "question": "You have a UNIQUE index on email. What happens when you attempt to insert a duplicate email?\nA: The INSERT fails with a unique constraint error\nB: The INSERT succeeds; UNIQUE is advisory only\nC: The row is inserted with a NULL email",
+    "options": [
+      "Only A occurs",
+      "Only B is possible",
+      "Both A and B depending on settings",
+      "Only C occurs"
+    ],
+    "correctIndex": 0,
+    "explanation": "UNIQUE indexes are enforced constraints; duplicate insertion fails with an error, not a silent allow or NULL substitution.",
+    "difficulty": "Medium",
+    "tags": ["unique-constraint", "constraint-enforcement"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Indexing Techniques",
+    "question": "You create a covering index: CREATE INDEX idx ON orders(customer_id, created_at, total_amount);\n\nThis index covers which query most efficiently?\nA: SELECT total_amount FROM orders WHERE customer_id = 5 AND created_at > '2024-01-01';\nB: SELECT customer_id FROM orders WHERE total_amount > 1000;\nC: SELECT * FROM orders WHERE customer_id = 5;",
+    "options": [
+      "Only A; all required columns are in the index",
+      "Only B; it has the largest selectivity",
+      "Only C; the WHERE clause is simple",
+      "All three equally"
+    ],
+    "correctIndex": 0,
+    "explanation": "A covering index satisfies a query using only the index (no table lookup); query A has all needed columns in the index.",
+    "difficulty": "Medium-Hard",
+    "tags": ["covering-index", "index-only-scan"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Indexing Techniques",
+    "question": "A frequently updated table has an index on a TIMESTAMP column. Updates change the timestamp to NOW(). What index maintenance overhead occurs?",
+    "options": [
+      "B-tree index entries are updated, moving them to new positions; O(log n) per update",
+      "No overhead; timestamp indexes are immutable",
+      "Hash indexes avoid this overhead better than B-tree",
+      "Indexes are rebuilt from scratch after each update"
+    ],
+    "correctIndex": 0,
+    "explanation": "Updating a timestamp changes the indexed value; B-tree reorganizes entries to maintain order, adding O(log n) work per update.",
+    "difficulty": "Medium",
+    "tags": ["index-maintenance", "update-performance"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Indexing Techniques",
+    "question": "A table has columns: id (PRIMARY KEY), status (many values), created_at (recent dates). Most queries filter by created_at. Index suggestions?\nA: Index on created_at\nB: Index on (status, created_at)\nC: Index on (created_at, status)\nD: Full table scan is fine",
+    "options": [
+      "A is most appropriate; created_at selectivity is high",
+      "B is best; status should come first for filtering",
+      "C is best; it can handle both created_at and status queries",
+      "D is correct; indexing is unnecessary"
+    ],
+    "correctIndex": 0,
+    "explanation": "If most queries filter by created_at, an index on created_at is the priority; status in a composite index would not improve the primary query.",
+    "difficulty": "Medium",
+    "tags": ["index-design", "query-analysis"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Indexing Techniques",
+    "question": "You run: SELECT * FROM products WHERE category_id IN (1, 2, 3, 4, 5);\n\nWhat index design is best for this query?",
+    "options": [
+      "Index on category_id; IN conditions can use B-tree indexes efficiently",
+      "Hash index on category_id is faster for IN clauses",
+      "No index helps with IN; full table scan is required",
+      "Create separate indexes for each category value"
+    ],
+    "correctIndex": 0,
+    "explanation": "B-tree indexes handle IN clauses by scanning multiple index ranges; it's efficient even with multiple values.",
+    "difficulty": "Medium",
+    "tags": ["in-clause", "btree-index"]
+  }
+]

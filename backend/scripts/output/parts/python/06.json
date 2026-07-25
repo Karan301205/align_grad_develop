@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Modules Packages",
+    "question": "What is the difference between import and from-import?\n```python\nimport os\nfrom os import path\n```",
+    "options": ["Same thing", "import imports module, from imports specific name", "from is faster", "import requires path"],
+    "correctIndex": 1,
+    "explanation": "import brings in the whole module as os, while from imports a specific attribute/name directly.",
+    "difficulty": "Medium",
+    "tags": ["import-statements", "modules", "namespaces"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Modules Packages",
+    "question": "What does __name__ == '__main__' detect?\n```python\nif __name__ == '__main__':\n    print('run directly')\nelse:\n    print('imported')\n```",
+    "options": ["Always true", "Whether module is executed directly vs imported", "Module name", "Python version"],
+    "correctIndex": 1,
+    "explanation": "__name__ is '__main__' when the script runs directly, not when imported as a module.",
+    "difficulty": "Medium",
+    "tags": ["__name__", "module-execution", "direct-vs-imported"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Modules Packages",
+    "question": "What does import with an alias do?\n```python\nimport numpy as np\narray = np.array([1, 2, 3])\n```",
+    "options": ["Creates a copy of numpy", "Renames the module reference", "Improves performance", "Loads a different version"],
+    "correctIndex": 1,
+    "explanation": "The as keyword creates an alias; np refers to numpy for shorter typing.",
+    "difficulty": "Medium",
+    "tags": ["import-alias", "modules", "naming"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Modules Packages",
+    "question": "What does from module import * do?\n```python\nfrom math import *\nprint(pi)\n```",
+    "options": ["Imports everything from math", "Syntax error", "Imports only public names", "ImportError"],
+    "correctIndex": 0,
+    "explanation": "Wildcard import brings all public names into the current namespace (not recommended for production).",
+    "difficulty": "Medium",
+    "tags": ["wildcard-import", "namespace-pollution", "best-practices"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Modules Packages",
+    "question": "What does a package's __init__.py file do?\n```python\n# mypackage/__init__.py\nprint('package initialized')\n```",
+    "options": ["Runs when package is imported", "Defines package metadata only", "Creates the package directory", "No effect"],
+    "correctIndex": 0,
+    "explanation": "__init__.py runs when the package is imported, allowing setup and exposing public APIs.",
+    "difficulty": "Medium",
+    "tags": ["packages", "__init__.py", "initialization"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Modules Packages",
+    "question": "What does sys.modules cache?\n```python\nimport sys\nprint('os' in sys.modules)\nimport os\nprint('os' in sys.modules)\n```",
+    "options": ["False then False", "False then True", "True then True", "KeyError"],
+    "correctIndex": 1,
+    "explanation": "sys.modules is a dict of loaded modules; after import, the module name is cached there.",
+    "difficulty": "Medium-Hard",
+    "tags": ["sys.modules", "module-cache", "imports"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Modules Packages",
+    "question": "What does __all__ control in a module?\n```python\n# mymodule.py\n__all__ = ['public_func']\ndef public_func(): pass\ndef private_func(): pass\n```",
+    "options": ["Prevents private access", "Defines what import * imports", "Lists all variables", "Runtime restriction"],
+    "correctIndex": 1,
+    "explanation": "__all__ specifies which names are exported by from module import *.",
+    "difficulty": "Medium",
+    "tags": ["__all__", "module-exports", "wildcard-import"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Modules Packages",
+    "question": "What does a relative import do?\n```python\n# mypackage/submodule.py\nfrom . import sibling\nfrom .. import parent_module\n```",
+    "options": ["Absolute path imports", "Imports relative to current package", "Syntax error", "Imports from root"],
+    "correctIndex": 1,
+    "explanation": "Dots indicate relative imports; . is current package, .. is parent package.",
+    "difficulty": "Medium-Hard",
+    "tags": ["relative-import", "packages", "dot-notation"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Modules Packages",
+    "question": "What does importlib.reload() accomplish?\n```python\nimport importlib\nimport mymodule\nimportlib.reload(mymodule)\n```",
+    "options": ["Re-executes module code", "Clears module cache", "Redownloads the module", "Has no effect"],
+    "correctIndex": 0,
+    "explanation": "reload() re-executes a module's code, reflecting changes made during development or testing.",
+    "difficulty": "Medium",
+    "tags": ["importlib", "reload", "dynamic-loading"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Modules Packages",
+    "question": "What does a circular import cause?\n```python\n# module_a.py\nimport module_b\n\n# module_b.py\nimport module_a\n```",
+    "options": ["Auto-resolves", "Raises ImportError", "One is not loaded completely", "Works fine"],
+    "correctIndex": 2,
+    "explanation": "Circular imports can cause issues if one module accesses names from the other before they're defined.",
+    "difficulty": "Hard",
+    "tags": ["circular-import", "import-order", "debugging"]
+  }
+]

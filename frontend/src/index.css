@@ -5,192 +5,202 @@
 
 :root {
   /* ─────────────────────────────────────────────────────────────
-     INDUSTRIAL SKEUOMORPHISM — light "workshop" chassis (Level 0)
-     Palette mimics matte ABS plastic under diffuse top-left light.
+     NEW BRAND PALETTE — Professional & Modern Theme Tokens
      ───────────────────────────────────────────────────────────── */
-  --c-brand-violet: #8750dc; /* legacy alias — now soft violet accent */
-  --c-brand-blue: #2d3436;   /* legacy alias — charcoal ink */
-  --c-grad-from: #c36edc;
-  --c-grad-to: #4678d2;
-  --brand-gradient: linear-gradient(135deg, rgba(195, 110, 220, 1) 0%, rgba(160, 95, 205, 1) 25%, rgba(135, 80, 220, 1) 48%, rgba(100, 90, 215, 1) 76%, rgba(70, 120, 210, 1) 100%);
+  --c-brand-violet: #2563EB;
+  --c-brand-blue: #0F172A;
+  --c-grad-from: #2563EB;
+  --c-grad-to: #1D4ED8;
+  --brand-gradient: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
 
-  /* Neumorphic light pair — the two halves of the lighting equation */
-  --neu-dark: #babecc;   /* shadow half (bottom-right) */
-  --neu-light: #ffffff;  /* highlight half (top-left)  */
+  /* High contrast line borders & neutral layering */
+  --neu-dark: #E2E8F0;
+  --neu-light: #FFFFFF;
 
-  /* Dual-shadow system (the core visual signature) */
-  --shadow-card: 8px 8px 16px var(--neu-dark), -8px -8px 16px var(--neu-light);
-  --shadow-floating: 12px 12px 24px var(--neu-dark), -12px -12px 24px var(--neu-light), inset 1px 1px 0 rgba(255,255,255,0.5);
-  --shadow-pressed: inset 6px 6px 12px var(--neu-dark), inset -6px -6px 12px var(--neu-light);
-  --shadow-recessed: inset 4px 4px 8px var(--neu-dark), inset -4px -4px 8px var(--neu-light);
-  --shadow-sharp: 4px 4px 8px rgba(0,0,0,0.15), -1px -1px 1px rgba(255,255,255,0.8);
-  --shadow-glow: 0 0 10px 2px rgba(135, 80, 220, 0.55);
-  --shadow-primary-btn: 5px 5px 10px rgba(135, 80, 220, 0.35), -5px -5px 10px rgba(255, 255, 255, 0.6);
+  /* Offset solid borders for elevation (Blueprint style) */
+  --shadow-card: 4px 4px 0px 0px #0F172A;
+  --shadow-floating: 8px 8px 0px 0px #0F172A;
+  --shadow-pressed: none;
+  --shadow-recessed: none;
+  --shadow-sharp: 2px 2px 0px 0px #0F172A;
+  --shadow-glow: 0 0 15px rgba(37, 99, 235, 0.25);
+  --shadow-primary-btn: 4px 4px 0px 0px #0F172A;
 
-  /* Surfaces — panels share the chassis tone and lift via shadow */
-  --c-background: #e0e5ec;             /* chassis (Level 0) */
-  --c-surface-container: #e4e9f0;      /* panel (Level +1)  */
-  --c-surface-container-low: #d1d9e6;  /* recessed well (Level -1) — inputs/screens */
-  --c-surface-container-high: #e9edf3;
-  --c-surface-container-highest: #f0f2f5;
+  /* Surfaces & Background */
+  --c-background: #F9F8F6;             /* Background: #F9F8F6 */
+  --c-surface: #FFFFFF;                /* Surface: #FFFFFF */
+  --c-surface-container: #FFFFFF;      
+  --c-surface-container-low: #F8FAFC;  
+  --c-surface-container-high: #F1F5F9;
+  --c-surface-container-highest: #E2E8F0;
+  --c-surface-container-lowest: #FFFFFF;
 
   /* Borders */
-  --c-outline: #babecc;
-  --c-outline-variant: #c9d0dd;
+  --c-outline: #CBD5E1;                /* Border: #CBD5E1 */
+  --c-outline-variant: #E2E8F0;        /* Border: #E2E8F0 */
 
-  /* Text — dark charcoal ink, softer than pure black */
-  --c-on-surface: #2d3436;
-  --c-on-surface-variant: #4a5568;
+  /* Text Roles */
+  --c-heading: #0F172A;                /* Heading: #0F172A */
+  --c-body: #334155;                   /* Body Text: #334155 */
+  --c-on-surface: #0F172A;
+  --c-on-surface-variant: #64748B;        /* Muted Text: #64748B */
 
-  /* Primary (VIOLET/BLUE — interactive triggers, active LEDs, alerts) */
-  --c-primary: #8750dc;
-  --c-on-primary: #ffffff;
-  --c-primary-container: #f0e6ff;
-  --c-on-primary-container: #3d1480;
+  /* Primary Blue (#2563EB) */
+  --c-primary: #2563EB;
+  --c-on-primary: #FFFFFF;
+  --c-primary-container: #DBEAFE;
+  --c-on-primary-container: #1E40AF;
 
-  /* Secondary (charcoal panels / dark technical strips) */
-  --c-secondary: #2d3436;
-  --c-on-secondary: #ffffff;
-  --c-secondary-container: #d1d9e6;
-  --c-on-secondary-container: #2d3436;
+  /* Secondary Green (#10B981) */
+  --c-secondary: #10B981;
+  --c-on-secondary: #FFFFFF;
+  --c-secondary-container: #D1FAE5;
+  --c-on-secondary-container: #065F46;
 
-  /* Tertiary (amber — certification / upgrade CTAs) */
-  --c-tertiary: #b45309;
-  --c-on-tertiary: #ffffff;
-  --c-tertiary-container: #fde6cb;
-  --c-on-tertiary-container: #7a4a00;
+  /* Accent Amber (#F59E0B) / Tertiary */
+  --c-accent: #F59E0B;
+  --c-tertiary: #F59E0B;
+  --c-on-tertiary: #FFFFFF;
+  --c-tertiary-container: #FEF3C7;
+  --c-on-tertiary-container: #92400E;
 
-  /* Error */
-  --c-error: #dc2626;
-  --c-on-error: #ffffff;
-  --c-error-container: #fbe3e3;
-  --c-on-error-container: #991b1b;
+  /* Feedback Colors */
+  --c-success: #22C55E;                /* Success: #22C55E */
+  --c-on-success: #FFFFFF;
+  --c-success-container: #DCFCE7;
+  --c-on-success-container: #15803D;
 
-  /* Success (online / operational LEDs) */
-  --c-success: #15803d;
-  --c-on-success: #ffffff;
-  --c-success-container: #dcefe1;
-  --c-on-success-container: #166534;
+  --c-warning: #F59E0B;                /* Warning: #F59E0B */
+  --c-on-warning: #FFFFFF;
+  --c-warning-container: #FEF3C7;
+
+  --c-error: #EF4444;                  /* Error: #EF4444 */
+  --c-on-error: #FFFFFF;
+  --c-error-container: #FEE2E2;
+  --c-on-error-container: #B91C1C;
+
+  --c-info: #3B82F6;                   /* Info: #3B82F6 */
+  --c-on-info: #FFFFFF;
+  --c-info-container: #DBEAFE;
 }
 
 .dark {
-  /* Dark-industrial: powder-coated charcoal steel chassis */
-  --c-grad-from: #c36edc;
-  --c-grad-to: #4678d2;
+  /* Dark mode variant adapted to specified palette tokens */
+  --c-grad-from: #2563EB;
+  --c-grad-to: #3B82F6;
+  --brand-gradient: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
 
-  --neu-dark: #23282a;
-  --neu-light: #383f42;
+  --neu-dark: #334155;
+  --neu-light: #0F172A;
 
-  --shadow-card: 8px 8px 16px var(--neu-dark), -8px -8px 16px var(--neu-light);
-  --shadow-floating: 12px 12px 24px var(--neu-dark), -12px -12px 24px var(--neu-light), inset 1px 1px 0 rgba(255,255,255,0.06);
-  --shadow-pressed: inset 6px 6px 12px var(--neu-dark), inset -6px -6px 12px var(--neu-light);
-  --shadow-recessed: inset 4px 4px 8px var(--neu-dark), inset -4px -4px 8px var(--neu-light);
-  --shadow-sharp: 4px 4px 8px rgba(0,0,0,0.45), -1px -1px 1px rgba(255,255,255,0.05);
-  --shadow-glow: 0 0 10px 2px rgba(135, 80, 220, 0.5);
-  --shadow-primary-btn: 5px 5px 10px rgba(0, 0, 0, 0.3), -5px -5px 10px rgba(255, 255, 255, 0.08);
+  --shadow-card: 4px 4px 0px 0px #E2E8F0;
+  --shadow-floating: 8px 8px 0px 0px #E2E8F0;
+  --shadow-pressed: none;
+  --shadow-recessed: none;
+  --shadow-sharp: 2px 2px 0px 0px #E2E8F0;
+  --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.3);
+  --shadow-primary-btn: 4px 4px 0px 0px #E2E8F0;
 
-  --c-background: #2d3436;
-  --c-surface-container: #313a3c;
-  --c-surface-container-low: #262d2f;
-  --c-surface-container-high: #384143;
-  --c-surface-container-highest: #414a4d;
+  --c-background: #0B0F19;
+  --c-surface: #0F172A;
+  --c-surface-container: #0F172A;
+  --c-surface-container-low: #0B0F19;
+  --c-surface-container-high: #1E293B;
+  --c-surface-container-highest: #334155;
+  --c-surface-container-lowest: #020617;
 
-  --c-outline: #1e2426;
-  --c-outline-variant: #3a4346;
+  --c-outline: #475569;
+  --c-outline-variant: #334155;
 
-  --c-on-surface: #e6ebf2;
-  --c-on-surface-variant: #a3adb2;
+  --c-heading: #F8FAFC;
+  --c-body: #CBD5E1;
+  --c-on-surface: #F8FAFC;
+  --c-on-surface-variant: #94A3B8;
 
-  --c-primary: #a375f0;
-  --c-on-primary: #270645;
-  --c-primary-container: #381273;
-  --c-on-primary-container: #f0e6ff;
+  --c-primary: #3B82F6;
+  --c-on-primary: #FFFFFF;
+  --c-primary-container: #1E3A8A;
+  --c-on-primary-container: #DBEAFE;
 
-  --c-secondary: #cdd4dc;
-  --c-on-secondary: #23282a;
-  --c-secondary-container: #384143;
-  --c-on-secondary-container: #e6ebf2;
+  --c-secondary: #10B981;
+  --c-on-secondary: #FFFFFF;
+  --c-secondary-container: #064E3B;
+  --c-on-secondary-container: #D1FAE5;
 
-  --c-tertiary: #f5a623;
-  --c-on-tertiary: #2e2000;
-  --c-tertiary-container: #4a3410;
-  --c-on-tertiary-container: #ffd97a;
+  --c-accent: #F59E0B;
+  --c-tertiary: #F59E0B;
+  --c-on-tertiary: #FFFFFF;
+  --c-tertiary-container: #78350F;
+  --c-on-tertiary-container: #FEF3C7;
 
-  --c-error: #f87171;
-  --c-on-error: #2a0a0a;
-  --c-error-container: #4a1c1c;
-  --c-on-error-container: #fecaca;
+  --c-success: #22C55E;
+  --c-on-success: #FFFFFF;
+  --c-success-container: #14532D;
+  --c-on-success-container: #DCFCE7;
 
-  --c-success: #4ade80;
-  --c-on-success: #052e16;
-  --c-success-container: #16362a;
-  --c-on-success-container: #bbf7d0;
+  --c-warning: #F59E0B;
+  --c-on-warning: #FFFFFF;
+  --c-warning-container: #78350F;
+
+  --c-error: #EF4444;
+  --c-on-error: #FFFFFF;
+  --c-error-container: #7F1D1D;
+  --c-on-error-container: #FEE2E2;
+
+  --c-info: #3B82F6;
+  --c-on-info: #FFFFFF;
+  --c-info-container: #1E3A8A;
 }
 
-/* ─── Scoped landing theme: "Dream Job Blue" (JobsPlanet-style) ───
-   Redefines the semantic tokens only inside .theme-jobsplanet so the
-   marketing landing page renders in the blue/white job-board palette
-   without touching the portal design system. */
+/* ─── Scoped landing theme ─── */
 .theme-jobsplanet {
-  --brand-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%);
-  --c-background: #f6f9fe;
-  --c-surface-container: #ffffff;
-  --c-surface-container-low: #eef3fb;
-  --c-surface-container-high: #ffffff;
-  --c-surface-container-highest: #ffffff;
+  --brand-gradient: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  --c-background: #F9F8F6;
+  --c-surface-container: #FFFFFF;
+  --c-surface-container-low: #F8FAFC;
+  --c-surface-container-high: #F1F5F9;
+  --c-surface-container-highest: #E2E8F0;
 
-  --c-outline: #d7e2f2;
-  --c-outline-variant: #e3eaf6;
+  --c-outline: #CBD5E1;
+  --c-outline-variant: #E2E8F0;
 
-  --c-on-surface: #16244b;
-  --c-on-surface-variant: #5a6a88;
+  --c-on-surface: #0F172A;
+  --c-on-surface-variant: #64748B;
 
-  --c-primary: #2563eb;
-  --c-on-primary: #ffffff;
-  --c-primary-container: #dbeafe;
-  --c-on-primary-container: #1e3a8a;
+  --c-primary: #2563EB;
+  --c-on-primary: #FFFFFF;
+  --c-primary-container: #DBEAFE;
+  --c-on-primary-container: #1E40AF;
 
-  --c-secondary: #16244b;
-  --c-on-secondary: #ffffff;
-  --c-secondary-container: #e3ecfa;
-  --c-on-secondary-container: #16244b;
-
-  --neu-dark: #dbe4f2;
-  --neu-light: #ffffff;
-  --shadow-glow: 0 0 10px 2px rgba(37, 99, 235, 0.35);
-  --shadow-primary-btn: 5px 5px 10px rgba(37, 99, 235, 0.25), -5px -5px 10px rgba(255, 255, 255, 0.7);
+  --c-secondary: #10B981;
+  --c-on-secondary: #FFFFFF;
+  --c-secondary-container: #D1FAE5;
+  --c-on-secondary-container: #065F46;
 }
 
 .dark .theme-jobsplanet {
-  --brand-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 55%, #2563eb 100%);
-  --c-background: #0d1526;
-  --c-surface-container: #131e33;
-  --c-surface-container-low: #0f1930;
-  --c-surface-container-high: #182742;
-  --c-surface-container-highest: #1d2e4d;
+  --brand-gradient: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+  --c-background: #0B0F19;
+  --c-surface-container: #0F172A;
+  --c-surface-container-low: #0B0F19;
+  --c-surface-container-high: #1E293B;
+  --c-surface-container-highest: #334155;
 
-  --c-outline: #1c2a47;
-  --c-outline-variant: #24345a;
+  --c-outline: #475569;
+  --c-outline-variant: #334155;
 
-  --c-on-surface: #e7eefb;
-  --c-on-surface-variant: #93a5c8;
+  --c-on-surface: #F8FAFC;
+  --c-on-surface-variant: #94A3B8;
 
-  --c-primary: #60a5fa;
-  --c-on-primary: #0b1c3d;
-  --c-primary-container: #1e3a8a;
-  --c-on-primary-container: #dbeafe;
-
-  --c-secondary: #cdd9ef;
-  --c-on-secondary: #101c36;
-  --c-secondary-container: #182742;
-  --c-on-secondary-container: #e7eefb;
-
-  --neu-dark: #0a111f;
-  --neu-light: #1a2845;
+  --c-primary: #3B82F6;
+  --c-on-primary: #FFFFFF;
+  --c-primary-container: #1E3A8A;
+  --c-on-primary-container: #DBEAFE;
 }
 
 @theme inline {
   --color-background: var(--c-background);
+  --color-surface: var(--c-surface);
   --color-surface-container: var(--c-surface-container);
   --color-surface-container-low: var(--c-surface-container-low);
   --color-surface-container-high: var(--c-surface-container-high);
@@ -199,6 +209,8 @@
   --color-outline: var(--c-outline);
   --color-outline-variant: var(--c-outline-variant);
 
+  --color-heading: var(--c-heading);
+  --color-body: var(--c-body);
   --color-on-surface: var(--c-on-surface);
   --color-on-surface-variant: var(--c-on-surface-variant);
 
@@ -212,6 +224,7 @@
   --color-secondary-container: var(--c-secondary-container);
   --color-on-secondary-container: var(--c-on-secondary-container);
 
+  --color-accent: var(--c-accent);
   --color-tertiary: var(--c-tertiary);
   --color-on-tertiary: var(--c-on-tertiary);
   --color-tertiary-container: var(--c-tertiary-container);
@@ -227,50 +240,136 @@
   --color-success-container: var(--c-success-container);
   --color-on-success-container: var(--c-on-success-container);
 
+  --color-warning: var(--c-warning);
+  --color-info: var(--c-info);
+
   --color-brand-violet: var(--c-brand-violet);
   --color-brand-blue: var(--c-brand-blue);
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-headline: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* TYPOGRAPHY FAMILY SYSTEM */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-headline: "Manrope", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* MODERN SMOOTH ROUNDED CORNERS GLOBALLY */
+  --radius-xs: 0.15rem;
+  --radius-sm: 0.275rem;
+  --radius-md: 0.4rem;
+  --radius-lg: 0.65rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.05rem;
+  --radius-3xl: 1.05rem;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
+    font-size: 16px;
   }
   body {
     position: relative;
     background-color: var(--c-background);
-    color: var(--c-on-surface);
-    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    color: var(--c-body);
+    font-family: var(--font-sans);
+    font-size: 1rem; /* 16px */
+    font-weight: 400; /* Body 16px / 400 */
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-  }
-  /* Matte-plastic micro-texture: fractal noise over the whole chassis */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.28;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
   #root {
     position: relative;
     z-index: 1;
   }
-  h1, h2, h3, h4 {
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--c-heading);
+    font-family: var(--font-headline);
     letter-spacing: -0.02em;
   }
-  /* Embossed ink — subtle white highlight beneath dark text */
-  h1, h2, h3 {
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  h1 {
+    font-size: 2.5rem; /* Page Heading 40px / 700 */
+    font-weight: 700;
+    line-height: 1.2;
   }
-  .dark h1, .dark h2, .dark h3 {
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+  h2 {
+    font-size: 1.875rem; /* Section Title 30px / 700 */
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  h3, h4 {
+    font-size: 1.375rem; /* Card Title 22px / 600 */
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-family: var(--font-sans) !important;
+    font-size: 0.875rem; /* Small text 14px / 400 default */
+  }
+  button {
+    font-family: var(--font-sans);
+    font-size: 0.9375rem; /* Button 15px / 600 */
+    font-weight: 600;
+  }
+}
+
+@layer utilities {
+  /* STRICT TYPOGRAPHY SCALE UTILITIES */
+  .hero-title {
+    font-family: var(--font-headline);
+    font-size: 3.5rem !important; /* 56px */
+    font-weight: 700 !important;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+  }
+  .page-heading {
+    font-family: var(--font-headline);
+    font-size: 2.5rem !important; /* 40px */
+    font-weight: 700 !important;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+  .section-title {
+    font-family: var(--font-headline);
+    font-size: 1.875rem !important; /* 30px */
+    font-weight: 700 !important;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+  .card-title {
+    font-family: var(--font-headline);
+    font-size: 1.375rem !important; /* 22px */
+    font-weight: 600 !important;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+  }
+  .text-body-spec {
+    font-family: var(--font-sans);
+    font-size: 1rem !important; /* 16px */
+    font-weight: 400 !important;
+    line-height: 1.5;
+  }
+  .text-small-spec {
+    font-family: var(--font-sans);
+    font-size: 0.875rem !important; /* 14px */
+    font-weight: 400 !important;
+    line-height: 1.45;
+  }
+  .text-caption-spec {
+    font-family: var(--font-sans);
+    font-size: 0.75rem !important; /* 12px */
+    font-weight: 400 !important;
+    line-height: 1.4;
+  }
+  .text-button-spec {
+    font-family: var(--font-sans);
+    font-size: 0.9375rem !important; /* 15px */
+    font-weight: 600 !important;
+    line-height: 1.35;
+  }
+  ::placeholder {
+    font-family: var(--font-sans) !important;
   }
 }
 
@@ -286,49 +385,49 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   NEUMORPHIC UTILITIES — reusable tactile primitives
+   ARCHITECTURAL/LINE-ART UTILITIES (Flat offset shadows & solid borders)
    ───────────────────────────────────────────────────────────── */
-.neu-raised   { box-shadow: var(--shadow-card); }
-.neu-floating { box-shadow: var(--shadow-floating); }
-.neu-pressed  { box-shadow: var(--shadow-pressed); }
-.neu-recessed { box-shadow: var(--shadow-recessed); }
+.neu-raised   { 
+  border: 1px solid var(--c-on-surface);
+  box-shadow: var(--shadow-card); 
+}
+.neu-floating { 
+  border: 2px solid var(--c-on-surface);
+  box-shadow: var(--shadow-floating); 
+}
+.neu-pressed  { 
+  border: 1px solid var(--c-on-surface);
+  transform: translate(1px, 1px);
+}
+.neu-recessed { 
+  border: 1px solid var(--c-outline);
+  background-color: var(--c-surface-container-low);
+}
 
-/* LED status indicator — solid fill + colored bloom */
+/* Flat square status indicator */
 .led {
   display: inline-block;
   width: 0.6rem;
   height: 0.6rem;
-  border-radius: 9999px;
   background: var(--c-primary);
-  box-shadow: 0 0 8px 1px var(--c-primary), inset 0 0 2px rgba(255,255,255,0.6);
+  border: 1px solid var(--c-on-surface);
 }
-.led-success { background: var(--c-success); box-shadow: 0 0 8px 1px var(--c-success), inset 0 0 2px rgba(255,255,255,0.6); }
-.led-tertiary { background: var(--c-tertiary); box-shadow: 0 0 8px 1px var(--c-tertiary), inset 0 0 2px rgba(255,255,255,0.6); }
+.led-success { background: var(--c-success); border: 1px solid var(--c-on-surface); }
+.led-tertiary { background: var(--c-tertiary); border: 1px solid var(--c-on-surface); }
 
-/* Corner screws — radial-gradient indentations at 12px from each edge */
+/* No-op corners detailing for skeuomorphic elements removal */
 .neu-screws {
   position: relative;
 }
 .neu-screws::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle at 14px 14px, rgba(0,0,0,0.14) 1.5px, transparent 3px),
-    radial-gradient(circle at calc(100% - 14px) 14px, rgba(0,0,0,0.14) 1.5px, transparent 3px),
-    radial-gradient(circle at 14px calc(100% - 14px), rgba(0,0,0,0.14) 1.5px, transparent 3px),
-    radial-gradient(circle at calc(100% - 14px) calc(100% - 14px), rgba(0,0,0,0.14) 1.5px, transparent 3px);
+  display: none !important;
 }
 
-/* Ventilation slots — three recessed pills */
+/* Ventilation slot re-skinned to flat indicator rule */
 .neu-vent {
   height: 1.5rem;
   width: 0.2rem;
-  border-radius: 9999px;
-  background: var(--c-surface-container-low);
-  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.18);
+  background: var(--c-outline);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -343,7 +442,6 @@
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--c-outline);
   opacity: 0.5;
-  border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -352,11 +450,11 @@
 
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.35s ease-out;
+  animation: fade-in 0.35s ease-out forwards;
 }
 
 @keyframes scale-up {
@@ -372,7 +470,7 @@
 .loader-card {
   background-color: var(--c-background);
   padding: 1rem 2rem;
-  border-radius: 1.25rem;
+  border: 1px solid var(--c-on-surface);
   box-shadow: var(--shadow-floating);
 }
 
@@ -386,7 +484,6 @@
   padding: 10px 10px;
   display: flex;
   align-items: center;
-  border-radius: 8px;
 }
 
 .loader-words {
@@ -444,41 +541,41 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   "Glass" class names retained for API stability, but re-skinned
-   as neumorphic surfaces — bolted plastic panels & physical keys.
+   ARCHITECTURAL professional container shapes
    ───────────────────────────────────────────────────────────── */
 .glass-card {
-  background-color: var(--c-background);
-  border: none;
-  box-shadow: var(--shadow-card);
+  background-color: var(--c-surface-container-lowest);
+  border: 1px solid var(--c-outline);
 }
 
-/* Secondary / chassis key — sits flush on the panel, lifts on the surface */
 .glass-button {
-  background-color: var(--c-background);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: var(--shadow-card);
+  background-color: var(--c-surface-container-lowest);
+  border: 1px solid var(--c-on-surface);
+  box-shadow: 2px 2px 0px 0px var(--c-on-surface);
+  transition: all 100ms ease-out;
 }
 
-/* Primary key — injection-moulded custom gradient control */
 .glass-button-primary {
-  background: var(--brand-gradient);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: var(--shadow-primary-btn);
+  background-color: var(--c-primary-container);
+  border: 1px solid var(--c-on-surface);
+  color: var(--c-on-primary);
+  box-shadow: 2px 2px 0px 0px var(--c-on-surface);
+  transition: all 100ms ease-out;
 }
 
-/* Tertiary key — amber certification control */
 .glass-button-secondary {
-  background-color: var(--c-tertiary);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  box-shadow: 5px 5px 10px rgba(120, 74, 0, 0.3), -5px -5px 10px rgba(240, 170, 60, 0.3);
+  background-color: var(--c-secondary-container);
+  border: 1px solid var(--c-on-surface);
+  color: var(--c-on-secondary-container);
+  box-shadow: 2px 2px 0px 0px var(--c-on-surface);
+  transition: all 100ms ease-out;
 }
 
-/* Pressed physics — any glass key inverts its shadow when active */
 .glass-button:active,
 .glass-button-primary:active,
 .glass-button-secondary:active {
-  box-shadow: var(--shadow-pressed);
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -498,7 +595,6 @@
 .typing-dot {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
   background-color: var(--c-on-surface-variant);
   display: inline-block;
   animation: dot-bounce 1.2s infinite ease-in-out;
@@ -515,3 +611,66 @@
 .typing-dot:nth-child(3) {
   animation-delay: 0.4s;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Stitch Design System Utilities & Material Symbols
+   ───────────────────────────────────────────────────────────── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+.ambient-card {
+  background: var(--c-surface-container-lowest);
+  border: 1px solid var(--c-outline-variant);
+  transition: all 0.2s ease;
+}
+
+.ambient-card:hover {
+  border-color: var(--c-outline);
+  box-shadow: var(--shadow-card);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--c-outline-variant);
+}
+
+/* Toast Notification Slide-In & Fade-Out Animations */
+@keyframes toastSlideIn {
+  0% {
+    transform: translateX(120%) scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes toastFadeOut {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(50%) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.animate-toast-slide-in {
+  animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-toast-fade-out {
+  animation: toastFadeOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+

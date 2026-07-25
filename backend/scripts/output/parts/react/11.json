@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "Performance Optimization",
+    "question": "Why does list.map((item, i) => <Item key={i} />) cause performance issues when the list is reordered? Why is a stable key better?",
+    "options": ["Index key breaks identity; reordering items makes React think they changed, state/focus misalign", "Index key is optimal for list performance", "Key doesn't affect list rendering", "Stable keys cause more re-renders"],
+    "correctIndex": 0,
+    "explanation": "Index keys tie component identity to position, not content; reordering shifts indices, making React think item A is now B, losing component state and focus.",
+    "difficulty": "Medium-Hard",
+    "tags": ["key", "list", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Performance Optimization",
+    "question": "Why does React batch multiple setState calls into one re-render in React 18? setState(1); setState(2); setState(3);",
+    "options": ["Batching reduces render work; all updates commit once, not three times", "No batching, each setState causes re-render", "Batching only works in event handlers", "Batching is automatic in React 16"],
+    "correctIndex": 0,
+    "explanation": "React 18 batches all updates in event handlers, effects, and microtasks; one re-render commits all queued state changes, reducing browser work.",
+    "difficulty": "Medium",
+    "tags": ["batch", "render", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Performance Optimization",
+    "question": "Given a component with expensive render, why might React.memo() not improve performance? const Memo = React.memo(Component); <Memo x={obj} />",
+    "options": ["memo's shallow equality fails if obj reference changed; new object every render = always re-render", "memo always skips re-renders", "memo has no performance benefit", "Component re-renders are unavoidable"],
+    "correctIndex": 0,
+    "explanation": "memo compares props with ===; if props.x is a new object every render (like { ... }), memo sees 'change' and re-renders anyway.",
+    "difficulty": "Medium-Hard",
+    "tags": ["memo", "equality", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Performance Optimization",
+    "question": "Why might useMemo(() => expensiveCompute(), [x, y]) cause stale results if dependencies are missing?",
+    "options": ["Missing dependencies mean memo doesn't re-compute; stale result persists even if dependency changed", "Dependencies are optional, memo always re-computes", "useMemo doesn't memoize", "stale results are impossible"],
+    "correctIndex": 0,
+    "explanation": "useMemo returns cached result if dependencies haven't changed; missing a dependency means the old result is returned even if inputs changed.",
+    "difficulty": "Medium",
+    "tags": ["usememo", "dependency", "stale"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Performance Optimization",
+    "question": "Given a large list with 1000 items, why is virtualization (rendering only visible items) more performant?",
+    "options": ["Rendering 1000 items creates 1000 DOM nodes; virtualizing renders only 20 visible, reducing work", "Virtualization is not faster", "Virtualization is only for mobile", "All items must be rendered for performance"],
+    "correctIndex": 0,
+    "explanation": "Virtualization renders only visible items; as user scrolls, old items unmount and new ones mount, keeping DOM small and fast.",
+    "difficulty": "Medium",
+    "tags": ["virtualization", "list", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Performance Optimization",
+    "question": "Why might breaking one large component into smaller components improve performance? const Big = () => { ... lots of state ... }",
+    "options": ["Smaller components re-render independently; one component's state change doesn't force all descendants to re-render", "Component size doesn't affect performance", "Large components are always faster", "Splitting components increases re-renders"],
+    "correctIndex": 0,
+    "explanation": "Splitting components creates independent re-render boundaries; child components only re-render if their own state/props change, not parent state.",
+    "difficulty": "Medium",
+    "tags": ["component", "split", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Performance Optimization",
+    "question": "Why does useCallback(() => { ... }, []) without dependencies create a stale-closure trap for performance?",
+    "options": ["Empty deps cache old closure forever; passing stale values to children defeats memo()", "useCallback auto-updates dependencies", "Empty deps always give current values", "useCallback doesn't affect performance"],
+    "correctIndex": 0,
+    "explanation": "Empty deps cache the callback with old closure values; even though the callback reference stays same (memo passes), it uses stale data.",
+    "difficulty": "Medium-Hard",
+    "tags": ["usecallback", "closure", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Performance Optimization",
+    "question": "Why might debouncing or throttling a fast onChange handler improve performance? const [search, setSearch] = useState('');",
+    "options": ["Debouncing delays updates, reducing re-renders from every keystroke", "All keystrokes must update state immediately", "Debouncing prevents state updates", "Keystroke speed doesn't affect performance"],
+    "correctIndex": 0,
+    "explanation": "Debouncing delays setState until typing stops; instead of re-rendering on every keystroke, it batches updates, reducing render work.",
+    "difficulty": "Medium",
+    "tags": ["debounce", "handler", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Performance Optimization",
+    "question": "Given Suspense with React.lazy, why does lazy loading improve performance? const Lazy = lazy(() => import('./Component'));",
+    "options": ["Lazy loading defers bundle download until component is used, reducing initial bundle size", "Lazy loading has no performance benefit", "lazy() requires network requests", "Suspense and lazy are unrelated"],
+    "correctIndex": 0,
+    "explanation": "lazy() uses dynamic import; the module is only bundled/downloaded when the component is first rendered, reducing initial page load time.",
+    "difficulty": "Medium",
+    "tags": ["lazy", "suspense", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Performance Optimization",
+    "question": "Why might code-splitting by route (instead of one large bundle) improve time-to-interactive? <Route path='/dashboard' component={lazy(() => import('./Dashboard'))} />",
+    "options": ["Smaller initial bundle loads faster, user sees app quicker; other routes load on demand", "Code-splitting has no impact on load time", "One large bundle is always better", "Routes must share a bundle"],
+    "correctIndex": 0,
+    "explanation": "Splitting by route means initial bundle contains only home/login; dashboard and other routes are loaded when navigated to, reducing time-to-interactive.",
+    "difficulty": "Medium",
+    "tags": ["split", "route", "performance"]
+  }
+]

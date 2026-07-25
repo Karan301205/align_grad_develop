@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Best Practices",
+    "question": "Why is the RAII pattern considered fundamental to C++ resource management?",
+    "options": ["RAII uses global variables for cleanup", "RAII ties resource lifetime to object scope, ensuring cleanup via destructors", "RAII is only for file handles", "RAII is deprecated in C++11"],
+    "correctIndex": 1,
+    "explanation": "RAII couples resource acquisition (constructor) with release (destructor), guaranteeing cleanup even on exceptions.",
+    "difficulty": "Medium",
+    "tags": ["raii", "resource-management", "best-practice"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Best Practices",
+    "question": "What is the Rule of Three/Five/Zero?",
+    "options": ["three rules that must be followed always", "either implement destructor/copy/move or none; if any, define all", "zero classes should use inheritance", "deprecated rule from C++98"],
+    "correctIndex": 1,
+    "explanation": "If a class needs a custom destructor (to free resources), it must also define copy constructor/assignment and move semantics.",
+    "difficulty": "Medium-Hard",
+    "tags": ["rule-of-five", "special-members", "resource-management"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Best Practices",
+    "question": "Why should you avoid naked pointers in modern C++?",
+    "options": ["pointers are slower than references", "smart pointers clarify ownership and prevent leaks", "pointers are not allowed in C++17", "naked pointers are necessary for efficiency"],
+    "correctIndex": 1,
+    "explanation": "Smart pointers make ownership explicit and automate cleanup, reducing bugs; prefer them to raw pointers.",
+    "difficulty": "Medium",
+    "tags": ["smart-pointers", "ownership", "best-practice"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Best Practices",
+    "question": "What does PIMPL (Pointer to Implementation) achieve?",
+    "options": ["improves performance by inlining", "hides implementation details behind a pointer, enabling binary compatibility", "makes code more readable", "prevents virtual function overhead"],
+    "correctIndex": 1,
+    "explanation": "PIMPL separates interface from implementation, allowing internal changes without recompiling clients.",
+    "difficulty": "Medium-Hard",
+    "tags": ["pimpl", "encapsulation", "binary-compatibility"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Best Practices",
+    "question": "Why is const-correctness important?",
+    "options": ["it prevents all bugs", "it documents intent and enables compiler-checked guarantees about immutability", "const is only for documentation", "const eliminates the need for testing"],
+    "correctIndex": 1,
+    "explanation": "const specifies what a function/object must not modify; the compiler enforces this, catching unintended mutations.",
+    "difficulty": "Medium",
+    "tags": ["const-correctness", "compiler-checking", "best-practice"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Best Practices",
+    "question": "What should you check for when performing integer division?",
+    "options": ["nothing; division by zero is handled automatically", "whether the divisor is zero to avoid undefined behavior", "whether the dividend is smaller than the divisor", "integer division never fails"],
+    "correctIndex": 1,
+    "explanation": "Division by zero is undefined behavior; check divisor is nonzero before dividing.",
+    "difficulty": "Medium",
+    "tags": ["division-by-zero", "undefined-behavior", "defensive-programming"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Best Practices",
+    "question": "Why is returning objects by const reference sometimes problematic?",
+    "options": ["it is always safe", "if the referenced object is local, it becomes a dangling reference", "const prevents optimization", "const references cannot be returned"],
+    "correctIndex": 1,
+    "explanation": "Returning a const reference to a temporary or local variable creates a dangling reference.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dangling-reference", "return-value", "const-reference"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Best Practices",
+    "question": "What is the benefit of using enums over magic numbers?",
+    "options": ["enums are faster", "enums provide type safety and readability", "enums eliminate the need for variables", "no real benefit"],
+    "correctIndex": 1,
+    "explanation": "Enums create named constants with type safety, making code self-documenting and enabling compiler checks.",
+    "difficulty": "Medium",
+    "tags": ["enums", "readability", "type-safety"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Best Practices",
+    "question": "Why should error handling avoid returning error codes in favor of exceptions?",
+    "options": ["exceptions are always slower", "exceptions ensure errors cannot be silently ignored", "error codes are more efficient", "C++ forbids error codes"],
+    "correctIndex": 1,
+    "explanation": "Callers can ignore error codes; exceptions force handling (catch or propagate), preventing silent failures.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "exceptions", "best-practice"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Best Practices",
+    "question": "What is the purpose of static analysis tools like clang-tidy?",
+    "options": ["they improve runtime performance", "they detect common bugs and style violations at compile time", "they prevent undefined behavior completely", "they are unnecessary for experienced programmers"],
+    "correctIndex": 1,
+    "explanation": "Static analyzers catch mistakes before runtime, improving code quality and catching subtle issues humans miss.",
+    "difficulty": "Medium",
+    "tags": ["static-analysis", "code-quality", "best-practice"]
+  }
+]

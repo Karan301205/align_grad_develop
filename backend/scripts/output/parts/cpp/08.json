@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Memory Management",
+    "question": "What is the result of `delete nullptr`?",
+    "options": ["undefined behavior", "compilation error", "no-op; safe to delete nullptr", "undefined until runtime"],
+    "correctIndex": 2,
+    "explanation": "Deleting a null pointer is explicitly allowed by the standard and does nothing; it is safe.",
+    "difficulty": "Medium",
+    "tags": ["delete-operator", "null-pointer", "memory-safety"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Memory Management",
+    "question": "What is a memory leak, and how does it occur?",
+    "options": ["allocated memory that is never freed", "freeing memory multiple times", "using memory after delete", "all of the above"],
+    "correctIndex": 0,
+    "explanation": "A leak is allocated memory that becomes unreachable and is never freed, wasting resources.",
+    "difficulty": "Medium",
+    "tags": ["memory-leak", "resource-management", "debugging"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Memory Management",
+    "question": "If new fails to allocate memory, what does it do?",
+    "options": ["returns nullptr", "throws std::bad_alloc", "returns an invalid pointer", "undefined behavior"],
+    "correctIndex": 1,
+    "explanation": "The default new throws std::bad_alloc on failure; nothrow new returns nullptr instead.",
+    "difficulty": "Medium",
+    "tags": ["new-operator", "allocation-failure", "exception-handling"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Memory Management",
+    "question": "Can you use delete on memory allocated with malloc?",
+    "options": ["yes; both are interchangeable", "no; must use free for malloc", "yes; but only in debug builds", "undefined behavior"],
+    "correctIndex": 1,
+    "explanation": "malloc and delete are incompatible; malloc requires free, new requires delete.",
+    "difficulty": "Medium",
+    "tags": ["malloc-free", "new-delete", "memory-mismatch"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Memory Management",
+    "question": "What is the difference between `delete p` and `delete[] p`?",
+    "options": ["delete[] is faster", "delete[] calls destructors for all array elements", "both are identical; [] is ignored", "delete[] is for arrays; delete for single objects"],
+    "correctIndex": 1,
+    "explanation": "delete[] invokes destructor for each element; delete assumes single object, causing undefined behavior if used on arrays.",
+    "difficulty": "Medium",
+    "tags": ["delete-operator", "array-deletion", "destructor-calls"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Memory Management",
+    "question": "What happens if you access memory after calling delete on it?",
+    "options": ["safe; the memory is still accessible", "undefined behavior; the memory may be reused", "always causes a crash", "platform-dependent"],
+    "correctIndex": 1,
+    "explanation": "Use-after-free is undefined behavior; the freed memory may be reused or inaccessible, causing crashes or data corruption.",
+    "difficulty": "Medium",
+    "tags": ["use-after-free", "undefined-behavior", "memory-safety"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Memory Management",
+    "question": "Does setting a pointer to nullptr after delete prevent use-after-free?",
+    "options": ["yes; nullptr check prevents access", "no; other pointers to the same memory exist", "partially; prevents accidental reuse by that pointer", "completely; nullptr is always safe"],
+    "correctIndex": 2,
+    "explanation": "Setting to nullptr prevents use via that specific pointer, but does not help if other pointers to the same memory exist.",
+    "difficulty": "Medium-Hard",
+    "tags": ["use-after-free", "nullptr", "pointer-safety"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Memory Management",
+    "question": "What is the purpose of placement new?",
+    "options": ["allocates memory at a specific address without calling new", "reserves memory in advance for performance", "allocates on the heap with a specific alignment", "allocates stack memory with delete compatibility"],
+    "correctIndex": 0,
+    "explanation": "Placement new constructs an object at a pre-allocated address, separating allocation from construction.",
+    "difficulty": "Hard",
+    "tags": ["placement-new", "construction", "memory-layout"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Memory Management",
+    "question": "Can global variables allocated with new be leaked if the program exits?",
+    "options": ["yes; memory is never freed", "no; OS reclaims all memory on exit", "depends on the operating system", "depends on whether they are referenced"],
+    "correctIndex": 1,
+    "explanation": "The OS reclaims all process memory on exit; leaked globals do not persist, but leaks in running programs still matter.",
+    "difficulty": "Medium-Hard",
+    "tags": ["global-variables", "memory-leak", "program-exit"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Memory Management",
+    "question": "What is double-delete, and why is it dangerous?",
+    "options": ["calling delete twice on the same pointer", "deleting two pointers in sequence", "a compiler optimization technique", "only dangerous in C++98"],
+    "correctIndex": 0,
+    "explanation": "Double-delete calls destructors twice and may corrupt memory management structures, causing undefined behavior.",
+    "difficulty": "Medium",
+    "tags": ["double-delete", "undefined-behavior", "memory-safety"]
+  }
+]

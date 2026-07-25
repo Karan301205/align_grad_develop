@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "Table Rendering",
+    "question": "A table has `<tbody><tr><td>Data</td></tr></tbody>` without a `<thead>`. Why might this break accessibility?",
+    "options": ["screen readers cannot identify which row is the header", "tables without thead are rendered without borders", "tbody requires a preceding thead or the table is invalid", "screen readers treat all rows as headers if thead is missing"],
+    "correctIndex": 0,
+    "explanation": "Without `<thead>`, there is no header row to associate with data cells, making it difficult for screen readers to establish the relationship between column headers and data.",
+    "difficulty": "Medium",
+    "tags": ["thead-element", "table-accessibility"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Table Rendering",
+    "question": "A table cell uses `<td scope='row'>` instead of `<th scope='row'>`. Why is this semantically incorrect?",
+    "options": ["scope attribute only works on th, not td", "td cells cannot be row headers", "the scope attribute indicates the cell is a header, but td is a data cell", "the combination creates a parsing error"],
+    "correctIndex": 2,
+    "explanation": "The `scope` attribute is a hint for assistive tech that the cell is a header; using it on `<td>` is semantically contradictory since `<td>` is for data, not headers.",
+    "difficulty": "Medium",
+    "tags": ["th-element", "td-element", "scope-attribute"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Table Rendering",
+    "question": "A table has `<tr><td colspan='3'>Merged Cell</td></tr>`. What happens if the next row has fewer cells?",
+    "options": ["the browser adds empty cells to maintain grid alignment", "the row is rendered incomplete without padding", "colspan creates a layout shift on the next row", "the table is invalid and rendering stops"],
+    "correctIndex": 0,
+    "explanation": "The browser's table layout algorithm ensures consistent column counts across rows; cells are added or merged to maintain grid structure.",
+    "difficulty": "Medium",
+    "tags": ["colspan", "table-layout"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Table Rendering",
+    "question": "A data table has a `<caption>` element before `<thead>`. Why is caption placement important?",
+    "options": ["caption must come first so screen readers announce it before table content", "caption placement is purely visual and does not affect semantics", "caption should come after tbody for correct semantic order", "caption location is browser-dependent"],
+    "correctIndex": 0,
+    "explanation": "The `<caption>` element should be the first child of `<table>` so screen readers announce it immediately when entering the table, providing context.",
+    "difficulty": "Medium",
+    "tags": ["caption-element", "table-structure"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Table Rendering",
+    "question": "A table header uses `<th>Month<br>2024</th>`. Why might a screen reader read this differently than expected?",
+    "options": ["br elements are read as pauses by screen readers", "the header text is split by br and read as separate announcements", "br is ignored and the text is read continuously", "screen readers cannot interpret headers with line breaks"],
+    "correctIndex": 1,
+    "explanation": "A `<br>` inside a header is read as a pause or treated as a line break by screen readers, potentially splitting the header text into multiple announcements.",
+    "difficulty": "Medium-Hard",
+    "tags": ["table-headers", "screen-readers"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Table Rendering",
+    "question": "A table uses `<th scope='colgroup'>` for a column group header. When `<colgroup>` is defined, what does this scope do?",
+    "options": ["colgroup scope applies the header to all columns in the colgroup", "colgroup scope is invalid and should be col or row", "colgroup scope has no effect if colgroup tag is present", "scope colgroup requires multiple th elements"],
+    "correctIndex": 0,
+    "explanation": "The `scope='colgroup'` value indicates the header applies to a column group; when used with `<colgroup>`, it associates the header with those grouped columns.",
+    "difficulty": "Hard",
+    "tags": ["scope-attribute", "colgroup", "table-accessibility"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Table Rendering",
+    "question": "A table has `<tr><td>Cell 1</td><td>Cell 2</td></tr>` followed by `<tr><td colspan='2'>Full Width</td></tr>`. Why might visual alignment differ from structure?",
+    "options": ["colspan causes the second row to span both columns visually", "the table layout algorithm may adjust column widths unpredictably", "css table-layout property affects how colspan interacts with row alignment", "colspan disrupts the table grid and rows may not align"],
+    "correctIndex": 2,
+    "explanation": "The CSS `table-layout` property (fixed or auto) changes how colspan affects column width calculations and overall table alignment.",
+    "difficulty": "Hard",
+    "tags": ["colspan", "table-layout", "css"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Table Rendering",
+    "question": "A table uses `<tr id='row1'><td aria-describedby='row1'>Data</td></tr>`. Why is this self-referential ARIA problematic?",
+    "options": ["cells cannot reference their own tr parent with aria-describedby", "aria-describedby should not point to the immediate parent", "the cell refers to itself, creating a circular reference", "aria-describedby on td requires a sibling reference, not parent"],
+    "correctIndex": 2,
+    "explanation": "Self-referential ARIA (a cell describing itself) is circular and provides no additional context; aria-describedby should point to supplementary text elsewhere.",
+    "difficulty": "Hard",
+    "tags": ["aria-describedby", "table-accessibility"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Table Rendering",
+    "question": "A table with fixed column widths has `<th scope='col' style='width:100px'>`. A user agent applies column expansion. What happens?",
+    "options": ["the inline style is ignored because th width is overridden by table-layout", "css width on th interacts with table-layout:fixed to constrain the column", "the th element ignores width and uses th{ display: block }", "the column expands beyond 100px due to content pressure"],
+    "correctIndex": 1,
+    "explanation": "With `table-layout:fixed`, the width on `<th>` sets the column width; with `table-layout:auto`, content can override the width causing expansion.",
+    "difficulty": "Hard",
+    "tags": ["table-layout", "width-property"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Table Rendering",
+    "question": "A table uses `<tfoot>` for totals. On a multi-page printed table, where does tfoot appear?",
+    "options": ["tfoot appears once at the end of the table", "tfoot repeats at the bottom of each printed page", "tfoot is ignored in print and does not repeat", "browser-dependent and may appear once or per page"],
+    "correctIndex": 1,
+    "explanation": "Print stylesheets often repeat `<tfoot>` on each page for clarity; this is browser-specific but common for long tables.",
+    "difficulty": "Medium-Hard",
+    "tags": ["tfoot-element", "print-styles"]
+  }
+]

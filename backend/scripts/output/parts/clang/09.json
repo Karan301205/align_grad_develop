@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "C",
+    "subtopic": "File Input Output",
+    "question": "FILE *f = fopen(\"file.txt\", \"r\");\nif (f == NULL) { printf(\"error\"); }\nWhy is the NULL check essential?",
+    "options": [
+      "fopen returns NULL if the file does not exist or cannot be opened; without checking, subsequent operations on f cause undefined behavior",
+      "fopen never fails; the check is unnecessary",
+      "Compiler error if fopen is not checked",
+      "NULL indicates success; non-NULL indicates failure"
+    ],
+    "correctIndex": 0,
+    "explanation": "fopen returns NULL on failure; operations like fread/fprintf on a NULL FILE* are undefined behavior.",
+    "difficulty": "Medium",
+    "tags": ["file operations", "error handling", "fopen"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "File Input Output",
+    "question": "FILE *f = fopen(\"file.txt\", \"w\");\nfprintf(f, \"hello\");\nfclose(f);\nLater, fopen(\"file.txt\", \"r\"); reads the file. What does it contain?",
+    "options": [
+      "hello (mode w truncates the file; fprintf writes the new content)",
+      "Compiler error: mode w cannot write",
+      "Garbage or old data (w mode does not actually write)",
+      "Nothing (w mode leaves the file empty)"
+    ],
+    "correctIndex": 0,
+    "explanation": "Mode w opens for writing and truncates the file; fprintf writes the content; close flushes buffers.",
+    "difficulty": "Medium",
+    "tags": ["file modes", "fprintf", "fclose"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "File Input Output",
+    "question": "FILE *f = fopen(\"file.txt\", \"r\");\nchar buffer[10];\nint n = fread(buffer, sizeof(char), 10, f);\nprintf(\"%d\", n);\nWhat does n represent?",
+    "options": [
+      "The number of bytes successfully read (0 to 10, or EOF if end of file reached)",
+      "The total size of the buffer (always 10)",
+      "The file size",
+      "Compiler error: fread returns void"
+    ],
+    "correctIndex": 0,
+    "explanation": "fread returns the number of items actually read; if fewer than 10 bytes are available, n is less than 10.",
+    "difficulty": "Medium",
+    "tags": ["fread", "file input", "return values"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "File Input Output",
+    "question": "FILE *f = fopen(\"file.txt\", \"r\");\nfseek(f, 10, SEEK_SET);\nint c = fgetc(f);\nWhat does fseek accomplish?",
+    "options": [
+      "Moves the file position 10 bytes from the start; fgetc reads the character at that position",
+      "Reads 10 characters",
+      "Seeks backward 10 bytes",
+      "Compiler error: fseek requires a specific mode"
+    ],
+    "correctIndex": 0,
+    "explanation": "fseek moves the file pointer; SEEK_SET is absolute from the start, SEEK_CUR is relative, SEEK_END is from the end.",
+    "difficulty": "Medium",
+    "tags": ["fseek", "file position", "random access"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "File Input Output",
+    "question": "FILE *f = fopen(\"file.txt\", \"a\");\nfprintf(f, \"appended\\n\");\nfclose(f);\nWhat is the difference between mode a and mode w?",
+    "options": [
+      "Mode a appends to the end; mode w truncates and overwrites",
+      "Mode a and w are identical",
+      "Mode a is faster than mode w",
+      "Mode w is for binary files; mode a is for text"
+    ],
+    "correctIndex": 0,
+    "explanation": "Mode a opens for appending; writes go to the end. Mode w truncates the existing file.",
+    "difficulty": "Medium",
+    "tags": ["file modes", "append", "overwrite"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "File Input Output",
+    "question": "FILE *f = fopen(\"file.txt\", \"r+\");\nfprintf(f, \"modified\");\nfread(buffer, 1, 100, f);\nWhy might this fail to read the modified data?",
+    "options": [
+      "fread reads from the current position (after fprintf's write); to read the modified data, fseek to the beginning or flush the buffer",
+      "Mode r+ is read-only; writing is not allowed",
+      "fprintf and fread cannot be mixed",
+      "Compiler error: mode r+ is invalid"
+    ],
+    "correctIndex": 0,
+    "explanation": "Interleaving reads and writes requires careful buffer management; fflush or fseek ensures data is written before reading.",
+    "difficulty": "Medium-Hard",
+    "tags": ["file modes", "buffer management", "r+ mode"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "File Input Output",
+    "question": "FILE *f = fopen(\"file.bin\", \"rb\");\nunsigned char data[100];\nfread(data, sizeof(unsigned char), 100, f);\nWhat is the purpose of mode b (binary)?",
+    "options": [
+      "Binary mode prevents text-mode line-ending conversions (\\r\\n on Windows); text mode may alter data",
+      "Binary mode is faster",
+      "Binary mode allows only unsigned data types",
+      "Text mode and binary mode are identical on most systems"
+    ],
+    "correctIndex": 0,
+    "explanation": "On systems like Windows, text mode converts line endings; binary mode reads/writes exactly what is in the file.",
+    "difficulty": "Medium-Hard",
+    "tags": ["binary mode", "text mode", "platform differences"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "File Input Output",
+    "question": "FILE *f = fopen(\"file.txt\", \"w\");\nfprintf(f, \"line 1\\n\");\nfprintf(f, \"line 2\\n\");\n/* file closed before fclose */\nWhat happens to the data?",
+    "options": [
+      "Undefined behavior / data loss: buffers may not be flushed; fclose ensures all buffered data is written",
+      "The data is automatically saved even without fclose",
+      "Only the second fprintf is written; the first is lost",
+      "Compiler error: fclose is missing"
+    ],
+    "correctIndex": 0,
+    "explanation": "fclose flushes and closes the file; omitting it may leave data in buffers, causing data loss or corruption.",
+    "difficulty": "Medium",
+    "tags": ["file buffering", "fclose", "data loss"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "File Input Output",
+    "question": "char buffer[100];\nFILE *f = fopen(\"file.txt\", \"r\");\nwhile (fgets(buffer, 100, f) != NULL) { printf(\"%s\", buffer); }\nfclose(f);\nWhy is fgets safer than gets?",
+    "options": [
+      "fgets takes a size parameter (100) to prevent buffer overflow; gets has no bounds check",
+      "gets and fgets are equivalent; naming differs",
+      "fgets is deprecated; scanf should be used instead",
+      "fgets can only read text files; gets reads any file"
+    ],
+    "correctIndex": 0,
+    "explanation": "gets is deprecated because it cannot prevent buffer overflow; fgets(buffer, 100, f) ensures at most 99 chars plus \\0.",
+    "difficulty": "Medium",
+    "tags": ["fgets", "gets", "buffer overflow"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "File Input Output",
+    "question": "FILE *f = fopen(\"file.txt\", \"r\");\nint status = feof(f);\nif (status) { printf(\"end of file\"); }\nWhy is this check after reading?",
+    "options": [
+      "feof returns true only after a read attempt reaches EOF; calling it before a failed read is a common mistake",
+      "feof can be called anytime to predict EOF",
+      "feof is required before every read",
+      "Compiler error: feof is not a standard function"
+    ],
+    "correctIndex": 0,
+    "explanation": "feof is a post-condition check; the typical pattern is to check fread's return value, not feof itself.",
+    "difficulty": "Medium-Hard",
+    "tags": ["feof", "file input", "error checking"]
+  }
+]

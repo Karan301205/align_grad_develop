@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "Express Framework",
+    "question": "What is the execution order of middleware?\n```javascript\napp.use((req, res, next) => {\n  console.log('first');\n  next();\n});\napp.use((req, res, next) => {\n  console.log('second');\n  next();\n});\napp.get('/', (req, res) => {\n  res.send('response');\n});\n```",
+    "options": ["response first, then first, then second", "first, second, response", "second, first, response", "first and second are skipped"],
+    "correctIndex": 1,
+    "explanation": "Middleware executes in registration order; each next() call passes control to the next middleware/route handler.",
+    "difficulty": "Medium",
+    "tags": ["express-middleware", "middleware-order"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Express Framework",
+    "question": "What happens if you forget to call next() in middleware?\n```javascript\napp.use((req, res, next) => {\n  console.log('middleware');\n  // missing next()\n});\napp.get('/', (req, res) => {\n  res.send('hello');\n});\n```",
+    "options": ["request hangs; route handler never runs", "route handler runs automatically", "Express throws an error", "middleware is skipped"],
+    "correctIndex": 0,
+    "explanation": "Without calling next(), the request chain stops; subsequent middleware and route handlers do not execute, causing the client to hang.",
+    "difficulty": "Medium",
+    "tags": ["express-middleware", "next-function", "common-mistake"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Express Framework",
+    "question": "How does Express match routes with path parameters?\n```javascript\napp.get('/users/:id/posts/:postId', (req, res) => {\n  console.log(req.params.id, req.params.postId);\n});\n// GET /users/123/posts/456\n```",
+    "options": ["prints undefined", "prints 123 456", "throws a 404 error", "prints string /123/456"],
+    "correctIndex": 1,
+    "explanation": "Express parses path parameters from the URL and stores them in req.params as an object.",
+    "difficulty": "Medium",
+    "tags": ["express-routing", "path-parameters"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Express Framework",
+    "question": "What is the difference between app.use and app.get?\n```javascript\napp.use('/api', (req, res, next) => console.log('use'));\napp.get('/api/data', (req, res) => console.log('get'));\n```",
+    "options": ["app.use only handles GET, app.get handles all methods", "app.use handles all methods and matches prefix, app.get handles GET only", "app.use is deprecated", "no difference in behavior"],
+    "correctIndex": 1,
+    "explanation": "app.use matches any method and treats the path as a prefix; app.get matches only GET method and exact path.",
+    "difficulty": "Medium",
+    "tags": ["express-middleware", "express-routing"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Express Framework",
+    "question": "How should you structure error handling in Express?\n```javascript\napp.get('/data', async (req, res) => {\n  const data = await fetchData();\n  res.json(data);\n});\n```",
+    "options": ["wrap async in try-catch and pass errors to next(err)", "errors in async handlers auto-catch", "Express handles all errors automatically", "need separate error handler middleware"],
+    "correctIndex": 0,
+    "explanation": "Async errors must be wrapped in try-catch; use next(err) to pass to Express error handler.",
+    "difficulty": "Medium-Hard",
+    "tags": ["express-error-handling", "async-middleware"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Express Framework",
+    "question": "What is the effect of res.status(201).json(data)?\n```javascript\nres.status(201).json({id: 1});\nconsole.log('after json');\n```",
+    "options": ["sends status and JSON, then prints after json", "json does not send response, must call send", "status sets header but json is not sent", "prints before sending response"],
+    "correctIndex": 0,
+    "explanation": "res.json sends the response with JSON content-type; subsequent code executes after the response is queued to send.",
+    "difficulty": "Medium",
+    "tags": ["express-response", "response-chaining"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Express Framework",
+    "question": "When should you use Express router?\n```javascript\nconst router = express.Router();\nrouter.get('/', (req, res) => res.send('home'));\nrouter.post('/', (req, res) => res.send('create'));\napp.use('/api', router);\n```",
+    "options": ["routers only group routes by HTTP method", "routers modularize code by mounting on a prefix path", "routers are optional and rarely used", "routers cannot be mounted"],
+    "correctIndex": 1,
+    "explanation": "Routers encapsulate routes and middleware; mounting a router on a prefix allows clean modularization of code.",
+    "difficulty": "Medium",
+    "tags": ["express-router", "code-organization"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Express Framework",
+    "question": "What does app.use(express.json()) do?\n```javascript\napp.use(express.json());\napp.post('/data', (req, res) => {\n  console.log(typeof req.body);\n});\n```",
+    "options": ["sends JSON in response", "parses JSON request body into req.body object", "requires JSON in response", "converts response to JSON"],
+    "correctIndex": 1,
+    "explanation": "express.json middleware parses incoming request bodies with Content-Type: application/json into req.body.",
+    "difficulty": "Medium",
+    "tags": ["express-middleware", "body-parsing"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Express Framework",
+    "question": "Which middleware order causes issues?\n```javascript\napp.get('/data', (req, res) => res.send('data'));\napp.use(express.json()); // registered after route\n```",
+    "options": ["no issue; middleware can be registered anytime", "middleware must be before routes", "express.json should be a route handler", "the order does not matter in Express"],
+    "correctIndex": 1,
+    "explanation": "Middleware must be registered before routes that use it; routes execute in registration order, and later middleware never run.",
+    "difficulty": "Medium",
+    "tags": ["express-middleware-order", "common-mistake"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Express Framework",
+    "question": "What is the correct way to send a file download?\n```javascript\napp.get('/download/:file', (req, res) => {\n  res.download('./files/' + req.params.file);\n});\n```",
+    "options": ["res.download sets Content-Disposition to attachment", "must use res.sendFile instead", "download is deprecated", "download requires manual Content-Type header"],
+    "correctIndex": 0,
+    "explanation": "res.download sends a file with Content-Disposition: attachment; the browser prompts for download instead of displaying.",
+    "difficulty": "Medium",
+    "tags": ["express-response", "file-download"]
+  }
+]

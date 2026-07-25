@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Code Review Best",
+    "question": "A pull request introduces a performance regression. As a reviewer, you notice the issue in the code before it reaches production. How should you document this finding in the review to make it actionable?",
+    "options": [
+      "Comment with a specific example (code snippet or benchmark), suggest a concrete fix, and mark it as a 'blocking issue' or 'changes requested' to prevent merge",
+      "Say 'I think this might be slow' without details",
+      "Approve anyway and file a separate issue to fix later",
+      "Reject the entire PR without explanation"
+    ],
+    "correctIndex": 0,
+    "explanation": "Specific, actionable comments with examples guide the developer to fix the issue immediately; marking as blocking ensures it is resolved before merge.",
+    "difficulty": "Medium",
+    "tags": ["code-review", "performance", "feedback"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Code Review Best",
+    "question": "During code review, you spot a subtle bug that the author likely introduced by accident. Before rejecting the PR, what is the best way to help them learn from the mistake?",
+    "options": [
+      "Explain why the bug occurs, provide a corrected example, and suggest testing strategies to catch similar issues in the future",
+      "Just say 'bug' and mark it blocking",
+      "Fix the bug in a follow-up commit yourself",
+      "Tell them to find the bug on their own"
+    ],
+    "correctIndex": 0,
+    "explanation": "Educational feedback fosters learning and trust; explaining root causes helps prevent similar issues in future code.",
+    "difficulty": "Medium",
+    "tags": ["code-review", "feedback", "mentoring"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Code Review Best",
+    "question": "A colleague asks you to review their PR, and you notice it mixes refactoring changes with feature changes. The code is correct, but the mix makes the PR hard to review. How should you handle this?",
+    "options": [
+      "Request they split the PR into separate ones (refactoring + feature) so each can be reviewed independently and reverted if needed",
+      "Approve both changes together",
+      "Reject the PR entirely",
+      "Approve if the code works"
+    ],
+    "correctIndex": 0,
+    "explanation": "Separating concerns makes reviews and debugging easier; refactoring PRs can be fast-tracked and feature PRs receive focused review.",
+    "difficulty": "Medium",
+    "tags": ["review-quality", "pr-organization", "separation-of-concerns"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Code Review Best",
+    "question": "You are reviewing a PR and notice the code follows a pattern that differs from the team's established conventions. The code is technically correct but inconsistent. Should you request changes?",
+    "options": [
+      "Yes, if the inconsistency impacts readability or maintainability; mention the convention and suggest aligning; document it in the team's style guide if missing",
+      "No, always approve correct code regardless of style",
+      "Reject the PR for style alone",
+      "Fix it yourself without feedback"
+    ],
+    "correctIndex": 0,
+    "explanation": "Consistency reduces cognitive load for future maintainers; reviewing for conventions enforces team standards while helping the author improve.",
+    "difficulty": "Medium",
+    "tags": ["code-style", "conventions", "consistency"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Code Review Best",
+    "question": "During review, you find a complex algorithm that is correct but difficult to understand. The author is confident it is optimal. How should you approach this as a reviewer?",
+    "options": [
+      "Request clarification with a comment asking them to add documentation or a simplified explanation; if still unclear after they clarify, suggest a more readable approach",
+      "Trust their judgment and approve",
+      "Require them to rewrite it immediately",
+      "Approve with a mental note to refactor later"
+    ],
+    "correctIndex": 0,
+    "explanation": "Asking for explanation serves dual purposes: you verify understanding and they document complexity for future maintainers.",
+    "difficulty": "Medium",
+    "tags": ["code-clarity", "documentation", "maintainability"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Code Review Best",
+    "question": "A pull request adds a new dependency to the project. As a reviewer, what concerns should you evaluate before approving?",
+    "options": [
+      "Evaluate necessity (does it solve a real problem), maintenance status (is it actively maintained), licensing (compatible with project), size/performance impact, and security (known vulnerabilities)",
+      "Approve if it works",
+      "Count the number of lines it adds",
+      "Check if it is popular on GitHub"
+    ],
+    "correctIndex": 0,
+    "explanation": "New dependencies introduce technical debt, attack surface, and maintenance burden; thorough evaluation prevents downstream issues.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dependencies", "security", "maintenance"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Code Review Best",
+    "question": "You are reviewing a PR and notice the author has not added tests for the new functionality. They claim the code 'is tested manually.' How should you respond?",
+    "options": [
+      "Request automated tests (unit, integration, or end-to-end) before approval; manual testing does not scale and misses regressions",
+      "Approve if manual testing passed",
+      "Write the tests yourself",
+      "Request test plan documentation instead of code"
+    ],
+    "correctIndex": 0,
+    "explanation": "Automated tests provide scalable verification, prevent regressions, and serve as documentation; manual testing alone is insufficient for production code.",
+    "difficulty": "Medium",
+    "tags": ["testing", "test-coverage", "quality"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Code Review Best",
+    "question": "You approve a pull request with a comment suggesting an optional improvement. The author implements it immediately and pushes a new commit. Should they expect you to re-review?",
+    "options": [
+      "Yes, you should re-review the new change to verify the implementation matches your suggestion and did not introduce issues",
+      "No, your approval is final and covers all future commits",
+      "They should request approval from someone else",
+      "Re-review is never necessary"
+    ],
+    "correctIndex": 0,
+    "explanation": "Optional suggestions still require verification when implemented; re-review ensures the implementation is correct and complete.",
+    "difficulty": "Medium",
+    "tags": ["approval", "review-refresh", "feedback-loop"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Code Review Best",
+    "question": "A pull request contains changes you are not qualified to review (e.g., complex ML algorithm, infrastructure code). How should you handle this as an assigned reviewer?",
+    "options": [
+      "Acknowledge the request, request a specialist reviewer, and step back; verify that the PR received expert review before approving",
+      "Approve without understanding",
+      "Reject because you cannot review",
+      "Ignore the PR"
+    ],
+    "correctIndex": 0,
+    "explanation": "Assigning specialist reviewers ensures domain expertise; this is a sign of a healthy review culture, not a failure.",
+    "difficulty": "Medium",
+    "tags": ["review-assignment", "expertise", "collaboration"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Code Review Best",
+    "question": "You review a PR and approve it, but later discover a critical bug in the approved code. What are your responsibilities?",
+    "options": [
+      "Report the issue immediately, take responsibility for the review miss, help create a fix, and discuss how to improve review practices to catch similar issues",
+      "Blame the author for writing buggy code",
+      "Hide the bug and hope no one notices",
+      "Ask the author to take full responsibility"
+    ],
+    "correctIndex": 0,
+    "explanation": "Code review is a shared responsibility; ownership of the miss strengthens team trust and leads to process improvements.",
+    "difficulty": "Medium",
+    "tags": ["accountability", "ownership", "team-culture"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "Concurrency Controls",
+    "question": "What is the output with race condition?\n```java\nint counter = 0;\nfor (int i = 0; i < 1000; i++) {\n  new Thread(() -> counter++).start();\n}\nThread.sleep(100);\nSystem.out.println(counter);\n```",
+    "options": ["1000", "Less than 1000", "Exactly 1000", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "counter++ is not atomic; multiple threads read-modify-write concurrently, causing lost updates and counter < 1000.",
+    "difficulty": "Medium-Hard",
+    "tags": ["race-condition", "atomicity", "non-atomic-operations"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Concurrency Controls",
+    "question": "What does synchronized guarantee?\n```java\nsynchronized (lock) {\n  counter++;\n}\n```",
+    "options": ["Only visibility", "Only atomicity", "Both atomicity and visibility", "Serialization"],
+    "correctIndex": 2,
+    "explanation": "synchronized provides mutual exclusion (atomicity) and memory barriers (visibility); changes by one thread are visible to others.",
+    "difficulty": "Medium",
+    "tags": ["synchronized", "atomicity", "memory-visibility"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Concurrency Controls",
+    "question": "Can this deadlock?\n```java\n// Thread 1\nsynchronized (A) {\n  synchronized (B) { }\n}\n// Thread 2\nsynchronized (B) {\n  synchronized (A) { }\n}\n```",
+    "options": ["No deadlock", "Yes, deadlock if timing is right", "Compilation error", "Always deadlock"],
+    "correctIndex": 1,
+    "explanation": "Thread 1 locks A then waits for B; Thread 2 locks B then waits for A; they deadlock indefinitely.",
+    "difficulty": "Medium-Hard",
+    "tags": ["deadlock", "lock-ordering", "synchronization"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Concurrency Controls",
+    "question": "What is the issue with this code?\n```java\nprivate int value = 0;\npublic void setValue(int v) { value = v; }\npublic int getValue() { return value; }\n```",
+    "options": ["Thread-safe", "Race condition on visibility", "Compilation error", "Deadlock"],
+    "correctIndex": 1,
+    "explanation": "Without synchronization or volatile, one thread's write may not be visible to another thread; getValue() may return stale data.",
+    "difficulty": "Medium",
+    "tags": ["visibility", "memory-barrier", "thread-safety"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Concurrency Controls",
+    "question": "What is volatile used for?\n```java\nvolatile boolean flag = false;\nwhile (!flag) {\n  // Loop\n}\n```",
+    "options": ["Prevents loop", "Ensures visibility of flag changes", "Compilation error", "Synchronizes methods"],
+    "correctIndex": 1,
+    "explanation": "volatile ensures that reads/writes of flag go to main memory; changes by one thread are immediately visible to others.",
+    "difficulty": "Medium",
+    "tags": ["volatile", "visibility", "memory-barrier"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Concurrency Controls",
+    "question": "What is the output?\n```java\nReentrantLock lock = new ReentrantLock();\nlock.lock();\nlock.lock(); // Can same thread lock twice?\ntry {\n  System.out.println(\"Locked\");\n} finally {\n  lock.unlock();\n  lock.unlock();\n}\n```",
+    "options": ["Deadlock", "Prints Locked", "Compilation error", "IllegalMonitorStateException"],
+    "correctIndex": 1,
+    "explanation": "ReentrantLock is reentrant; the same thread can acquire it multiple times and must release it equally.",
+    "difficulty": "Medium",
+    "tags": ["reentrant-lock", "reentrancy", "multiple-acquisition"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Concurrency Controls",
+    "question": "What does this class do?\n```java\nclass CountDownLatch {\n  void await() { } // Wait until count reaches 0\n  void countDown() { } // Decrement count\n}\n```",
+    "options": ["Prevents initialization", "Synchronizes threads at a barrier", "Compilation error", "Locks resources"],
+    "correctIndex": 1,
+    "explanation": "CountDownLatch allows threads to wait until other threads complete; useful for initialization or parallel task completion.",
+    "difficulty": "Medium",
+    "tags": ["countdown-latch", "synchronization", "barrier"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Concurrency Controls",
+    "question": "What is the output?\n```java\nCyclicBarrier barrier = new CyclicBarrier(2);\nThread t1 = new Thread(() -> {\n  System.out.println(\"T1 starts\");\n  barrier.await(); // Wait for other thread\n  System.out.println(\"T1 ends\");\n});\nThread t2 = new Thread(() -> {\n  System.out.println(\"T2 starts\");\n  barrier.await(); // Wait for other thread\n  System.out.println(\"T2 ends\");\n});\nt1.start(); t2.start();\n```",
+    "options": ["T1, T2, T1, T2", "T1 starts, T2 starts, T1 ends, T2 ends", "Deadlock", "T1 ends, T2 ends"],
+    "correctIndex": 1,
+    "explanation": "CyclicBarrier(2) waits for 2 threads; both print 'starts', then await until both reach barrier, then print 'ends'.",
+    "difficulty": "Medium",
+    "tags": ["cyclic-barrier", "synchronization", "thread-coordination"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Concurrency Controls",
+    "question": "What is a race condition in HashMap iteration?\n```java\nHashMap<String, Integer> map = new HashMap<>();\nmap.put(\"a\", 1);\nmap.put(\"b\", 2);\nfor (String key : map.keySet()) {\n  if (key.equals(\"a\")) map.put(\"c\", 3);\n}\n```",
+    "options": ["Safe operation", "ConcurrentModificationException", "Compilation error", "HashMap is thread-safe"],
+    "correctIndex": 1,
+    "explanation": "Modifying HashMap during iteration throws ConcurrentModificationException; the iterator detects the structural change.",
+    "difficulty": "Medium",
+    "tags": ["concurrent-modification", "iterator", "collection-safety"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Concurrency Controls",
+    "question": "What does Semaphore do?\n```java\nSemaphore sem = new Semaphore(1);\nsem.acquire(); // Decrements permit count\n// Critical section\nsem.release(); // Increments permit count\n```",
+    "options": ["Locks everything", "Controls access to a limited resource", "Compilation error", "Prevents threads"],
+    "correctIndex": 1,
+    "explanation": "Semaphore(1) is a binary semaphore (mutex); acquire() waits if permits=0, release() allows a waiting thread to proceed.",
+    "difficulty": "Medium",
+    "tags": ["semaphore", "resource-control", "permits"]
+  }
+]

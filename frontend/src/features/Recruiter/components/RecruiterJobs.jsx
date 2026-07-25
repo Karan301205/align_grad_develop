@@ -40,6 +40,12 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
       <PageHeader
         title="Enterprise Job Dashboard"
         subtitle="Manage posted roles and review candidate alignment scores"
+        action={
+          <span className="px-3 py-1.5 bg-surface-container-high border border-outline-variant rounded-lg text-[11px] font-mono text-primary flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[14px]">image</span>
+            need a recruiter dashboard image
+          </span>
+        }
       />
 
       {/* Metrics Row */}

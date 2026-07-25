@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "File Input Output",
+    "question": "What does File.WriteAllText() do?\nFile.WriteAllText(\"test.txt\", \"Hello\");",
+    "options": ["Creates/overwrites file with content", "Appends to file", "Reads file", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "WriteAllText creates a new file or overwrites an existing one with the given text content.",
+    "difficulty": "Medium",
+    "tags": ["file-io", "write", "file-operations"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "File Input Output",
+    "question": "What does File.AppendAllText() do vs WriteAllText()?\nFile.AppendAllText(\"test.txt\", \"World\");",
+    "options": ["Overwrites file", "Appends to end of file", "Reads file", "Deletes file"],
+    "correctIndex": 1,
+    "explanation": "AppendAllText adds text to the end of an existing file without overwriting its content.",
+    "difficulty": "Medium",
+    "tags": ["file-io", "append", "file-operations"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "File Input Output",
+    "question": "What is the output of reading?\nFile.WriteAllText(\"test.txt\", \"ABC\");\nstring content = File.ReadAllText(\"test.txt\");\nConsole.WriteLine(content.Length);",
+    "options": ["3", "0", "Compilation error", "FileNotFoundException"],
+    "correctIndex": 0,
+    "explanation": "ReadAllText reads entire file content; \"ABC\" has length 3.",
+    "difficulty": "Medium",
+    "tags": ["file-io", "read", "string-length"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "File Input Output",
+    "question": "What does File.Exists() return?\nif (File.Exists(\"nonexistent.txt\")) { } else { Console.WriteLine(\"No\"); }",
+    "options": ["Prints No", "FileNotFoundException", "Compilation error", "Exception"],
+    "correctIndex": 0,
+    "explanation": "File.Exists returns false for nonexistent files; else block executes.",
+    "difficulty": "Medium",
+    "tags": ["file-io", "file-existence", "validation"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "File Input Output",
+    "question": "What does File.Delete() do?\nFile.WriteAllText(\"temp.txt\", \"Data\");\nFile.Delete(\"temp.txt\");\nConsole.WriteLine(File.Exists(\"temp.txt\"));",
+    "options": ["False", "True", "Compilation error", "FileNotFoundException"],
+    "correctIndex": 0,
+    "explanation": "File.Delete removes the file; File.Exists returns false afterward.",
+    "difficulty": "Medium",
+    "tags": ["file-io", "delete", "file-operations"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "File Input Output",
+    "question": "What does StreamWriter do?\nusing (var writer = new StreamWriter(\"test.txt\")) {\n  writer.WriteLine(\"Line 1\");\n}",
+    "options": ["Writes text to file", "Reads from file", "Appends to file", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "StreamWriter writes text to a file; using statement ensures proper disposal.",
+    "difficulty": "Medium",
+    "tags": ["file-io", "streams", "using-statement"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "File Input Output",
+    "question": "What does StreamReader do?\nusing (var reader = new StreamReader(\"test.txt\")) {\n  string line = reader.ReadLine();\n}",
+    "options": ["Reads one line from file", "Reads entire file", "Writes to file", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "StreamReader.ReadLine() reads a single line; using ensures disposal.",
+    "difficulty": "Medium",
+    "tags": ["file-io", "streams", "reading"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "File Input Output",
+    "question": "What does File.ReadAllLines() return?\nFile.WriteAllText(\"test.txt\", \"A\\nB\\nC\");\nstring[] lines = File.ReadAllLines(\"test.txt\");\nConsole.WriteLine(lines.Length);",
+    "options": ["3", "1", "Compilation error", "FileNotFoundException"],
+    "correctIndex": 0,
+    "explanation": "ReadAllLines splits content by newlines, returning an array; 3 lines give length 3.",
+    "difficulty": "Medium",
+    "tags": ["file-io", "arrays", "line-splitting"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "File Input Output",
+    "question": "What does Directory.CreateDirectory() do?\nDirectory.CreateDirectory(\"folder\");\nConsole.WriteLine(Directory.Exists(\"folder\"));",
+    "options": ["True", "False", "Compilation error", "UnauthorizedAccessException"],
+    "correctIndex": 0,
+    "explanation": "CreateDirectory creates directory if it doesn't exist; Exists returns true.",
+    "difficulty": "Medium",
+    "tags": ["file-io", "directories", "directory-operations"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "File Input Output",
+    "question": "What does File.Copy() do?\nFile.WriteAllText(\"source.txt\", \"Data\");\nFile.Copy(\"source.txt\", \"dest.txt\");\nConsole.WriteLine(File.Exists(\"dest.txt\"));",
+    "options": ["True", "False", "Compilation error", "IOException"],
+    "correctIndex": 0,
+    "explanation": "File.Copy duplicates a file; destination exists after copy.",
+    "difficulty": "Medium",
+    "tags": ["file-io", "copy", "file-operations"]
+  }
+]

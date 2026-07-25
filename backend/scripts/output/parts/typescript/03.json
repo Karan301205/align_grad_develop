@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Classes",
+    "question": "You declare `class A { private x = 5; } const a = new A(); console.log(a.x);` — does this compile?",
+    "options": ["Yes, private is only for type-checking", "No, private prevents access outside the class", "Yes, private can be accessed with bracket notation", "No, x must be public"],
+    "correctIndex": 1,
+    "explanation": "TypeScript's private modifier prevents compile-time access; accessing a.x is a type error.",
+    "difficulty": "Medium",
+    "tags": ["access-modifiers", "encapsulation", "private-fields"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Classes",
+    "question": "Given `class A { constructor(public x: number) {} } new A(5).x = 10;` — does this work?",
+    "options": ["No, public parameters are read-only", "Yes, public properties are mutable", "Yes, but only in the constructor", "No, x must use private"],
+    "correctIndex": 1,
+    "explanation": "Public parameter properties are mutable after construction; reassignment is allowed.",
+    "difficulty": "Medium",
+    "tags": ["parameter-properties", "public-modifier", "mutability"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Classes",
+    "question": "Can you declare `class C extends A implements B {}` with incompatible method signatures?",
+    "options": ["Yes, extends takes precedence", "No, the class must satisfy both A and B", "Yes, if B is not a class", "Only if signatures are covariant"],
+    "correctIndex": 1,
+    "explanation": "A class extending A must also implement B; conflicts in method signatures cause compile errors.",
+    "difficulty": "Medium",
+    "tags": ["inheritance", "interface-implementation", "method-signatures"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Classes",
+    "question": "Given `class A { static x = 5; } class B extends A {} console.log(B.x);` — what is B.x?",
+    "options": ["undefined", "5", "error", "Any (from parent)"],
+    "correctIndex": 1,
+    "explanation": "Static properties are inherited; B inherits A's static member x.",
+    "difficulty": "Medium",
+    "tags": ["static-members", "inheritance", "class-properties"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Classes",
+    "question": "Can you use `super()` in a constructor without calling it first in a derived class?",
+    "options": ["Yes, it's optional", "No, super() is mandatory in derived constructors", "Yes, if no fields are defined", "No, but you can skip with protected"],
+    "correctIndex": 1,
+    "explanation": "Derived class constructors must invoke super() before accessing 'this'; it initializes the base class.",
+    "difficulty": "Medium",
+    "tags": ["inheritance", "constructor", "super"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Classes",
+    "question": "Does `class A { readonly x: number; constructor(x: number) { this.x = x; } }` work?",
+    "options": ["No, readonly cannot be assigned after declaration", "Yes, readonly assignment in constructor is allowed", "Yes, only if x is const", "No, readonly requires initialization at declaration"],
+    "correctIndex": 1,
+    "explanation": "Readonly properties can be assigned once in the constructor before object construction completes.",
+    "difficulty": "Medium",
+    "tags": ["readonly", "constructor", "initialization"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Classes",
+    "question": "Given `class A { get x() { return 5; } } new A().x = 10;` — does this work?",
+    "options": ["Yes, getters allow assignment", "No, getters are read-only unless a setter exists", "Yes, with Object.defineProperty", "No, getters require private fields"],
+    "correctIndex": 1,
+    "explanation": "A getter without a matching setter defines a read-only property; assignment fails at compile time.",
+    "difficulty": "Medium",
+    "tags": ["getters", "setters", "property-access"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Classes",
+    "question": "Can TypeScript enforce abstract methods in abstract classes at compile time?",
+    "options": ["No, abstract is only documentation", "Yes, non-abstract subclasses must implement all abstract methods", "Yes, but only with interfaces", "No, abstract methods are optional"],
+    "correctIndex": 1,
+    "explanation": "Abstract methods must be implemented in all concrete subclasses; failing to do so is a compile error.",
+    "difficulty": "Medium",
+    "tags": ["abstract-classes", "abstract-methods", "inheritance"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Classes",
+    "question": "Given `class A { #private = 5; } const a = new A(); console.log(a['#private']);` — does this work?",
+    "options": ["Yes, # private is bracket-accessible", "No, # fields are truly private in runtime", "Yes, but only as a string", "No, # requires special syntax"],
+    "correctIndex": 1,
+    "explanation": "The # private field syntax uses WeakMap under the hood; bracket notation cannot access it, even with the string key.",
+    "difficulty": "Medium-Hard",
+    "tags": ["private-fields", "weakmap", "runtime-privacy"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Classes",
+    "question": "Does `class A { constructor() { if (!new.target) throw new Error(); } }` prevent direct instantiation?",
+    "options": ["No, new.target only works with inheritance", "Yes, new.target is defined only when called with new", "Yes, but only in derived classes", "No, new.target is always truthy"],
+    "correctIndex": 1,
+    "explanation": "new.target reflects how the constructor was invoked; checking it guards against improper instantiation patterns.",
+    "difficulty": "Medium-Hard",
+    "tags": ["new.target", "constructor-patterns", "instantiation-guards"]
+  }
+]

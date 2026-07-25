@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "Security Best Practices",
+    "question": "You store an API key in .env.local and reference it in a client component: const key = process.env.REACT_APP_API_KEY. Is the key exposed?",
+    "options": ["No; env vars are injected server-side only", "Yes; process.env references are bundled into client code", "Only if REACT_APP_ prefix is used", "No; .env.local is never deployed"],
+    "correctIndex": 1,
+    "explanation": "Any process.env reference in client code is bundled as a string literal; server-only secrets must not reference process.env on the client.",
+    "difficulty": "Medium",
+    "tags": ["environment-variables", "security", "secrets"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Security Best Practices",
+    "question": "An API endpoint accepts user input and directly passes it to a database query without validation. What's the vulnerability?",
+    "options": ["SQL injection", "Cross-site scripting (XSS)", "Cross-site request forgery (CSRF)", "All of the above"],
+    "correctIndex": 0,
+    "explanation": "Unvalidated input passed to SQL queries enables SQL injection; parameterized queries or input validation prevent this.",
+    "difficulty": "Medium",
+    "tags": ["security", "input-validation", "sql-injection"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Security Best Practices",
+    "question": "You render user-generated content using dangerouslySetInnerHTML. What's the security risk?",
+    "options": ["Performance degrades", "Cross-site scripting (XSS) attacks", "Memory leaks", "No risk; Next.js sanitizes HTML"],
+    "correctIndex": 1,
+    "explanation": "dangerouslySetInnerHTML bypasses XSS protection; untrusted HTML can inject malicious scripts.",
+    "difficulty": "Medium",
+    "tags": ["xss", "dangerouslysetinnerhtml", "security"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Security Best Practices",
+    "question": "You set a JWT token as httpOnly and secure cookie. Can JavaScript access it?",
+    "options": ["Yes; document.cookie reveals all cookies", "No; httpOnly prevents JavaScript access", "Only in development; secure prevents access in production", "Depends on browser"],
+    "correctIndex": 1,
+    "explanation": "httpOnly cookies are inaccessible to JavaScript; secure flag ensures HTTPS-only transmission.",
+    "difficulty": "Medium",
+    "tags": ["cookies", "security", "jwt"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Security Best Practices",
+    "question": "You implement CSRF protection with a CSRF token. How should the token be transmitted in a form submission?",
+    "options": ["As a query parameter", "As a hidden form field or header", "In the Authorization header", "CSRF tokens are not needed in Next.js"],
+    "correctIndex": 1,
+    "explanation": "CSRF tokens must be in POST body (hidden field) or headers to prevent token leakage in URL logs.",
+    "difficulty": "Medium-Hard",
+    "tags": ["csrf", "security", "forms"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Security Best Practices",
+    "question": "You have an API endpoint that accepts credentials. Should it be cached?",
+    "options": ["Yes; cache improves performance", "No; set Cache-Control: no-store to prevent credential caching", "Cache only if encrypted", "Credentials endpoints don't need caching"],
+    "correctIndex": 1,
+    "explanation": "Sensitive endpoints must not be cached; Cache-Control: no-store prevents proxies or browsers from storing credentials.",
+    "difficulty": "Medium-Hard",
+    "tags": ["caching", "security", "credentials"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Security Best Practices",
+    "question": "You expose a public API endpoint without rate limiting. What's the consequence?",
+    "options": ["Performance is unaffected", "Brute-force or DDoS attacks become easier", "Only affects authenticated users", "Rate limiting is optional"],
+    "correctIndex": 1,
+    "explanation": "Unprotected public endpoints are vulnerable to brute-force and DDoS attacks; rate limiting is essential.",
+    "difficulty": "Medium",
+    "tags": ["rate-limiting", "security", "api-security"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Security Best Practices",
+    "question": "You pass user data directly to getStaticProps props without sanitization. Is this a security issue?",
+    "options": ["No; getStaticProps runs server-side only", "Yes; props are embedded in HTML and can execute scripts", "Only if the data is from an external API", "No; Next.js automatically sanitizes props"],
+    "correctIndex": 1,
+    "explanation": "Props are serialized into static HTML; XSS attacks are possible if user data contains scripts.",
+    "difficulty": "Medium-Hard",
+    "tags": ["getstaticprops", "xss", "security"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Security Best Practices",
+    "question": "You implement authentication with next-auth. Does it automatically prevent CSRF attacks?",
+    "options": ["Yes; next-auth handles CSRF protection", "No; you must implement CSRF tokens manually", "Only for sign-in routes", "Depends on adapter"],
+    "correctIndex": 0,
+    "explanation": "next-auth includes built-in CSRF protection via tokens; you don't need to implement it manually.",
+    "difficulty": "Medium",
+    "tags": ["next-auth", "csrf", "authentication"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Security Best Practices",
+    "question": "A user crafts a URL with JavaScript: /page?message=<script>alert('xss')</script>. If you render query.message as text, is there a risk?",
+    "options": ["Yes; inline script will execute", "No; text rendering escapes HTML", "Only in development", "Depends on component library"],
+    "correctIndex": 1,
+    "explanation": "React automatically escapes text content; JavaScript in {query.message} is safe if rendered as text, not HTML.",
+    "difficulty": "Medium-Hard",
+    "tags": ["xss", "react-escaping", "security"]
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Security Best Practices",
+    "question": "from fastapi import FastAPI, Depends\nfrom fastapi.security import HTTPBearer, HTTPAuthCredentials\nimport jwt\n\nsecurity = HTTPBearer()\napp = FastAPI()\n\n@app.get(\"/protected\")\ndef protected_route(credentials: HTTPAuthCredentials = Depends(security)):\n    payload = jwt.decode(credentials.credentials, \"secret\", algorithms=[\"HS256\"])\n    return {\"user\": payload[\"sub\"]}\n\nWhat vulnerability exists in this token verification?",
+    "options": [
+      "Secret hardcoded in source; no key rotation",
+      "No algorithm validation; accepts any supported algorithm",
+      "Missing token expiration check",
+      "All of above"
+    ],
+    "correctIndex": 3,
+    "explanation": "Hardcoded secrets, unchecked algorithms, and missing expiry all present security risks; use environment variables, specify algorithms, and check 'exp' claim.",
+    "difficulty": "Medium-Hard",
+    "tags": ["jwt", "authentication", "secret-management"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Security Best Practices",
+    "question": "from fastapi import FastAPI\nfrom fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm\nfrom passlib.context import CryptContext\n\npwd_context = CryptContext(schemes=[\"bcrypt\"], deprecated=\"auto\")\noauth2_scheme = OAuth2PasswordBearer(tokenUrl=\"token\")\n\n@app.post(\"/token\")\ndef login(form_data: OAuth2PasswordRequestForm = Depends()):\n    user = db.query(User).filter(User.username == form_data.username).first()\n    if not user:\n        raise HTTPException(status_code=401, detail=\"Wrong credentials\")\n    if not pwd_context.verify(form_data.password, user.password_hash):\n        raise HTTPException(status_code=401, detail=\"Wrong credentials\")\n    return {\"access_token\": create_jwt_token(user.id), \"token_type\": \"bearer\"}\n\nWhy is the error message a security risk?",
+    "options": [
+      "Reveals that username lookup exists",
+      "Allows attackers to enumerate valid usernames",
+      "Both — timing and message disclosure",
+      "Not a security risk; error messages are public"
+    ],
+    "correctIndex": 2,
+    "explanation": "Different error messages for 'user not found' vs 'wrong password' enable username enumeration; use generic message like 'Invalid credentials' for both.",
+    "difficulty": "Medium",
+    "tags": ["authentication", "enumeration", "error-messages"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Security Best Practices",
+    "question": "from fastapi import FastAPI\nfrom fastapi.middleware.cors import CORSMiddleware\n\napp = FastAPI()\n\napp.add_middleware(\n    CORSMiddleware,\n    allow_origins=[\"*\"],\n    allow_credentials=True,\n    allow_methods=[\"*\"],\n    allow_headers=[\"*\"]\n)\n\nWhat security issue results from this configuration?",
+    "options": [
+      "Any domain can send requests with credentials",
+      "Credentials not protected; credentials=True is redundant",
+      "Wildcard origins ignore allow_credentials setting",
+      "No issue; this is secure default configuration"
+    ],
+    "correctIndex": 0,
+    "explanation": "allow_origins=['*'] with allow_credentials=True is contradictory and insecure; browsers reject it and fall back to not sending credentials, or use specific origins.",
+    "difficulty": "Medium",
+    "tags": ["cors", "cross-origin", "credentials"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Security Best Practices",
+    "question": "from fastapi import FastAPI, Query\nfrom sqlalchemy.orm import Session\n\napp = FastAPI()\n\n@app.get(\"/filter\")\ndef filter_data(db: Session, filter_field: str = Query(...)):\n    return db.query(User).filter(\n        getattr(User, filter_field) == \"value\"\n    ).all()\n\nWhat vulnerability does getattr() introduce?",
+    "options": [
+      "Arbitrary attribute access allowing private field queries",
+      "SQL injection via filter_field",
+      "Both column enumeration and unintended data exposure",
+      "No vulnerability; getattr is database-safe"
+    ],
+    "correctIndex": 2,
+    "explanation": "Attackers can query hidden columns like password_hash or call __class__ methods; whitelist allowed fields instead of trusting user input.",
+    "difficulty": "Medium-Hard",
+    "tags": ["injection", "attribute-access", "data-exposure"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Security Best Practices",
+    "question": "from fastapi import FastAPI, UploadFile, File\nimport os\n\napp = FastAPI()\nUPLOAD_DIR = \"/uploads\"\n\n@app.post(\"/upload\")\nasync def upload_file(file: UploadFile = File(...)):\n    file_path = os.path.join(UPLOAD_DIR, file.filename)\n    with open(file_path, \"wb\") as f:\n        f.write(await file.read())\n    return {\"filename\": file.filename}\n\nWhat happens if file.filename is \"../../etc/passwd\"?",
+    "options": [
+      "Saved to /uploads/../../etc/passwd (outside upload dir)",
+      "Rejected; os.path.join() sanitizes paths",
+      "File path traversal attack possible",
+      "Only relative paths accepted; exploit blocked"
+    ],
+    "correctIndex": 2,
+    "explanation": "os.path.join() doesn't sanitize; '../' in filename escapes the upload directory; use secure naming (UUID) or pathlib.Path.resolve() validation.",
+    "difficulty": "Medium",
+    "tags": ["file-upload", "path-traversal", "input-validation"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Security Best Practices",
+    "question": "from fastapi import FastAPI, Header\nfrom typing import Optional\n\napp = FastAPI()\n\n@app.get(\"/user-data\")\ndef get_user_data(authorization: Optional[str] = Header(None)):\n    if authorization and authorization.startswith(\"Bearer \"):\n        token = authorization.split(\" \")[1]\n        payload = jwt.decode(token, \"secret\", algorithms=[\"HS256\"])\n        return {\"user_id\": payload.get(\"user_id\")}\n    return {\"error\": \"Unauthorized\"}\n\nWhat happens if a client sends 'Bearer' with no token?",
+    "options": [
+      "IndexError on split; returns 500",
+      "Validated safely; returns 'Unauthorized'",
+      "Malformed JWT causes decode error; returns 500",
+      "Empty string token rejected by jwt.decode()"
+    ],
+    "correctIndex": 0,
+    "explanation": "split(' ')[1] on 'Bearer ' (no second part) raises IndexError; use safer parsing or validation with fastapi.security.",
+    "difficulty": "Medium",
+    "tags": ["header-parsing", "error-handling", "input-validation"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Security Best Practices",
+    "question": "from fastapi import FastAPI\nfrom starlette.responses import FileResponse\nimport os\n\napp = FastAPI()\n\n@app.get(\"/download/{file_name}\")\ndef download_file(file_name: str):\n    file_path = os.path.join(\"/public\", file_name)\n    return FileResponse(file_path)\n\nIf file_name is \"../../.env\", what is downloaded?",
+    "options": [
+      ".env file from project root via path traversal",
+      "404 error; FileResponse checks bounds",
+      "Empty response; /public/../.. resolves to /",
+      "Blocked by OS permissions on .env"
+    ],
+    "correctIndex": 0,
+    "explanation": "FileResponse doesn't validate paths; ../../.env escapes /public and exposes sensitive environment variables; validate file_name against whitelist.",
+    "difficulty": "Medium-Hard",
+    "tags": ["path-traversal", "file-serving", "sensitive-data"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Security Best Practices",
+    "question": "from fastapi import FastAPI\nfrom sqlalchemy import text\n\napp = FastAPI()\n\n@app.post(\"/login\")\ndef login(username: str, password: str, db: Session = Depends(get_db)):\n    user = db.execute(\n        text(\"SELECT * FROM users WHERE username = '\" + username + \"' AND password = '\" + password + \"'\")\n    ).first()\n    if user:\n        return {\"status\": \"success\"}\n    return {\"status\": \"failed\"}\n\nCan an attacker log in as any user without knowing the password?",
+    "options": [
+      "No; SQL string concatenation is safe",
+      "Yes; SQL injection via ' OR '1'='1",
+      "No; password field requires hash match",
+      "Maybe; depends on database"
+    ],
+    "correctIndex": 1,
+    "explanation": "Unparameterized SQL string concatenation allows injection; username=admin' -- bypasses password check; always use parameterized queries.",
+    "difficulty": "Medium",
+    "tags": ["sql-injection", "authentication", "parameterized-queries"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Security Best Practices",
+    "question": "from fastapi import FastAPI, Depends\nfrom fastapi.security import HTTPBearer\nimport jwt\nfrom datetime import datetime, timedelta\n\napp = FastAPI()\n\ndef verify_token(credentials = Depends(HTTPBearer())):\n    payload = jwt.decode(credentials.credentials, \"secret\", algorithms=[\"HS256\"])\n    exp = payload.get(\"exp\")\n    if exp and datetime.fromtimestamp(exp) < datetime.now():\n        raise HTTPException(status_code=401)\n    return payload\n\n@app.get(\"/protected\")\ndef protected(payload = Depends(verify_token)):\n    return {\"data\": \"secret\"}\n\nIf a token expires exactly at now(), what happens?",
+    "options": [
+      "Accepted; exp <= now is valid",
+      "Rejected; expires < now() is treated as expired",
+      "Depends on clock precision",
+      "Accepted if created within last second"
+    ],
+    "correctIndex": 1,
+    "explanation": "The check `datetime.fromtimestamp(exp) < datetime.now()` rejects expired tokens correctly; a token with exp=now is just expired.",
+    "difficulty": "Medium",
+    "tags": ["jwt-expiry", "timestamp-validation", "authentication"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Security Best Practices",
+    "question": "from fastapi import FastAPI\nfrom pydantic import BaseModel, validator\n\napp = FastAPI()\n\nclass UserInput(BaseModel):\n    email: str\n    \n    @validator('email')\n    def validate_email(cls, v):\n        if '@' not in v:\n            raise ValueError('invalid email')\n        return v\n\n@app.post(\"/register\")\ndef register(user: UserInput):\n    existing = db.query(User).filter(User.email == user.email).first()\n    if existing:\n        return {\"error\": \"Email already registered\"}\n    db.add(User(email=user.email))\n    db.commit()\n    return {\"status\": \"registered\"}\n\nWhat race condition exists between two simultaneous registrations with the same email?",
+    "options": [
+      "Both queries execute; both find no existing user; both insert",
+      "Database unique constraint prevents duplicate",
+      "Both threads lock table; only first succeeds",
+      "No race condition; Pydantic validation is atomic"
+    ],
+    "correctIndex": 0,
+    "explanation": "Check-then-insert is not atomic; two concurrent requests both pass the check before either inserts; use database UNIQUE constraint as final defense.",
+    "difficulty": "Medium-Hard",
+    "tags": ["race-conditions", "concurrency", "data-integrity"]
+  }
+]

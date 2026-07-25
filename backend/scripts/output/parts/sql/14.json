@@ -1,0 +1,167 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Best Practices",
+    "question": "Which query follows best practices for readability and maintainability?\nA: SELECT u.id,u.name,u.email FROM users u WHERE u.status='active' AND u.created_at>NOW()-INTERVAL 30 DAY;\nB: SELECT user_id, user_name, user_email FROM users WHERE status = 'active' AND created_at > NOW() - INTERVAL 30 DAY;",
+    "options": [
+      "B is better; consistent spacing, readable WHERE logic, and full column names are preferred",
+      "A is better; aliases reduce typing",
+      "Both are equally maintainable",
+      "Readability is irrelevant in SQL"
+    ],
+    "correctIndex": 0,
+    "explanation": "Clear naming (avoid single-letter aliases unless necessary), consistent formatting, and explicit conditions improve maintainability.",
+    "difficulty": "Medium",
+    "tags": ["code-style", "readability"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Best Practices",
+    "question": "When should you use column aliases in a SELECT clause?\nA: Always use aliases for clarity\nB: Use aliases only for aggregates and complex expressions\nC: Never use aliases; use full table.column references",
+    "options": [
+      "B is best; aliases clarify computed values; existing columns are self-explanatory",
+      "Only A is correct",
+      "Only C is correct",
+      "Aliases don't affect performance or maintainability"
+    ],
+    "correctIndex": 0,
+    "explanation": "Aliases improve readability for computed columns (CASE, aggregate, expression) but are unnecessary for simple column selections.",
+    "difficulty": "Medium",
+    "tags": ["alias", "code-clarity"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Best Practices",
+    "question": "A query handles NULLs inconsistently:\nWHERE status = 'active' OR status = 'pending';\n\nWhat if status is NULL?",
+    "options": [
+      "NULL is neither 'active' nor 'pending'; rows with NULL status are excluded (explicit NULL handling is better)",
+      "NULL matches one of the conditions",
+      "An error occurs",
+      "NULLs are treated as 'active'"
+    ],
+    "correctIndex": 0,
+    "explanation": "NULL comparisons require explicit IS NULL checks; best practice: WHERE status IN ('active', 'pending') AND status IS NOT NULL.",
+    "difficulty": "Medium",
+    "tags": ["null-handling", "defensive-coding"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Best Practices",
+    "question": "A stored procedure updates 100k rows without progress feedback. What best practice is missing?\nUPDATE large_table SET status = 'processed' WHERE created_at < DATE_SUB(NOW(), INTERVAL 30 DAY);",
+    "options": [
+      "Batch updates into smaller chunks to reduce lock duration and allow progress tracking",
+      "No best practice is violated; updating all rows at once is fine",
+      "Always use a transaction for large updates",
+      "Best practices don't apply to updates"
+    ],
+    "correctIndex": 0,
+    "explanation": "Large bulk operations should be batched (UPDATE ... LIMIT 1000 in a loop) to reduce lock time and improve responsiveness.",
+    "difficulty": "Medium",
+    "tags": ["bulk-operation", "batching"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Best Practices",
+    "question": "Error handling in a transaction:\nBEGIN;\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\nCOMMIT;\n\nWhat if the second UPDATE fails?",
+    "options": [
+      "First UPDATE is rolled back (COMMIT doesn't happen); wrap in error handling and retry or log the error",
+      "First UPDATE is committed; second is rolled back",
+      "Both updates are committed",
+      "Errors are ignored"
+    ],
+    "correctIndex": 0,
+    "explanation": "Best practice: catch errors, rollback explicitly, and log/alert; don't assume automatic rollback on error.",
+    "difficulty": "Medium",
+    "tags": ["error-handling", "transaction"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Best Practices",
+    "question": "Naming conventions matter. Which is better?\nA: CREATE TABLE usr_acct (u_id INT, a_bal DECIMAL);\nB: CREATE TABLE user_accounts (user_id INT, account_balance DECIMAL);",
+    "options": [
+      "B uses clear, full names; abbreviations reduce readability and cause confusion",
+      "A is more concise and faster to type",
+      "Both are equivalent",
+      "Naming conventions don't affect queries"
+    ],
+    "correctIndex": 0,
+    "explanation": "Full, descriptive names (user_id not u_id) improve code maintainability and reduce bugs from misinterpretation.",
+    "difficulty": "Medium",
+    "tags": ["naming-convention", "readability"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Best Practices",
+    "question": "A developer runs:\nDELETE FROM users WHERE id > 0;\n\nWhat best practice prevents accidental deletion?",
+    "options": [
+      "Wrap DELETEs in a transaction with SELECT first: BEGIN; SELECT * FROM users WHERE id > 0; DELETE FROM users WHERE id > 0; COMMIT; (review before commit)",
+      "Just run the DELETE; deletion is reversible",
+      "No best practice helps",
+      "Delete operations should be avoided entirely"
+    ],
+    "correctIndex": 0,
+    "explanation": "Always preview the affected rows before DELETE; use transactions to allow rollback; maintain backups.",
+    "difficulty": "Medium",
+    "tags": ["delete-safety", "preview-before-delete"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Best Practices",
+    "question": "A query uses SELECT * for an application feature. Why is this not best practice?\nSELECT * FROM users;",
+    "options": [
+      "Fetches all columns including sensitive data (passwords, tokens) and future columns; explicitly list needed columns",
+      "SELECT * is optimized and preferred",
+      "Columns are never added; no risk",
+      "SELECT * is safer than explicit columns"
+    ],
+    "correctIndex": 0,
+    "explanation": "Explicit column selection ensures only needed data is fetched, prevents schema changes from breaking code, and improves security.",
+    "difficulty": "Medium",
+    "tags": ["explicit-columns", "security", "maintainability"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Best Practices",
+    "question": "A query is slow. Before adding indexes, what best practice should be applied?\nA: Run EXPLAIN to understand the query plan\nB: Profile query execution time\nC: Identify bottlenecks (full table scan, expensive JOIN) before optimizing",
+    "options": [
+      "All three; measure first, then optimize based on evidence",
+      "Only A",
+      "Only B",
+      "Skip analysis; add indexes randomly"
+    ],
+    "correctIndex": 0,
+    "explanation": "Best practice: measure and understand before optimizing; blind optimization (adding random indexes) wastes resources.",
+    "difficulty": "Medium",
+    "tags": ["profiling", "measure-first"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Best Practices",
+    "question": "A comment explains complex logic:\n-- Calculate average salary for each department, excluding contractors\nSELECT department_id, AVG(salary) FROM employees WHERE employee_type != 'contractor' GROUP BY department_id;",
+    "options": [
+      "Comments improve maintainability; they explain the 'why' not the 'what'",
+      "Comments are unnecessary; the code is self-explanatory",
+      "Comments make queries slower",
+      "SQL doesn't support comments"
+    ],
+    "correctIndex": 0,
+    "explanation": "Comments explain business logic (why contractors are excluded); the query itself shows the what (the code).",
+    "difficulty": "Medium",
+    "tags": ["documentation", "comments"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "SQL Best Practices",
+    "question": "A data warehouse query aggregates 1B rows into a report. What best practice improves performance?\nA: Use UNION ALL instead of multiple queries\nB: Materialized views or pre-aggregated tables\nC: Batch processing overnight, cache results",
+    "options": [
+      "B and C are best practices; don't re-aggregate from raw data on every query",
+      "Only A",
+      "Only B",
+      "No optimization is possible"
+    ],
+    "correctIndex": 0,
+    "explanation": "For large aggregations, pre-compute and cache (materialized view or summary table) rather than running fresh aggregations each time.",
+    "difficulty": "Medium",
+    "tags": ["aggregate-performance", "caching"]
+  }
+]

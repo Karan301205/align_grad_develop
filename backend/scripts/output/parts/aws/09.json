@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudFormation Template Design",
+    "question": "Your CloudFormation stack creates an S3 bucket. You manually added an additional bucket policy via AWS Console after stack creation. Three months later, you run a stack update. The manual policy is deleted. What happened?",
+    "options": [
+      "CloudFormation drift detection failed; manual changes should have been detected",
+      "CloudFormation replaced the stack; previous configuration was lost",
+      "Stack update synced the template state; manual changes outside template are not preserved",
+      "Manual policy deletion is a bug; report to AWS support"
+    ],
+    "correctIndex": 2,
+    "explanation": "CloudFormation is declarative; the template is the source of truth; manual changes are considered drift; updates sync to template state, overwriting manual changes; use --no-execute-rollback to detect drift.",
+    "difficulty": "Medium",
+    "tags": ["cloudformation", "drift", "state-management"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudFormation Template Design",
+    "question": "Your CloudFormation template creates 50 AWS resources (EC2, RDS, Lambda, VPC, etc.). Stack creation takes 25 minutes. You need to deploy frequently (3x daily). Should you split the template into nested stacks?",
+    "options": [
+      "Yes; nested stacks allow parallel creation of independent resources; reduces total time",
+      "No; nested stacks add complexity; keep monolithic for simplicity",
+      "Yes; but nested stacks slow down creation due to serialization",
+      "No; use CloudFormation change sets instead; they're faster than nested stacks"
+    ],
+    "correctIndex": 0,
+    "explanation": "Nested stacks can deploy independent resources in parallel; splitting into dev/data/compute stacks enables concurrent creation; reduces 25 minutes to 10-12 minutes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cloudformation", "nested-stacks", "performance"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudFormation Template Design",
+    "question": "Your CloudFormation template defines an RDS database with DeletionPolicy: Snapshot. You delete the stack to clean up a dev environment. A backup snapshot is created automatically. Six months later, you're charged for an orphaned snapshot ($20/month). How can you prevent this?",
+    "options": [
+      "Use DeletionPolicy: Delete to remove snapshots on stack deletion",
+      "Use DeletionPolicy: Retain; manually verify and delete snapshots",
+      "Snapshots can't be deleted via CloudFormation; this is a known AWS limitation",
+      "Schedule an S3 lifecycle rule to delete orphaned snapshots"
+    ],
+    "correctIndex": 0,
+    "explanation": "DeletionPolicy: Snapshot preserves backups after stack deletion (good for production); DeletionPolicy: Delete removes snapshots (good for dev); choose based on environment and retention needs.",
+    "difficulty": "Medium",
+    "tags": ["cloudformation", "deletion-policy", "cost-management"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudFormation Template Design",
+    "question": "You have three CloudFormation templates: VPC stack (created first), app stack (depends on VPC), and monitoring stack (independent). Stack creation order is: VPC -> app -> monitoring. You want to create all three simultaneously. How?",
+    "options": [
+      "Use stack dependencies; CloudFormation parallelizes based on dependencies",
+      "Export VPC outputs; app and monitoring import these exports; can be created in any order",
+      "Use nested stacks; wrap all three in a parent stack",
+      "Rewrite as a monolithic template; simultaneous creation isn't possible with multiple stacks"
+    ],
+    "correctIndex": 1,
+    "explanation": "Exports create dependencies visible to other stacks; stacks can be created in any order if they import required exports; CloudFormation creates templates without explicit dependency; nested stacks still serialize based on parent.",
+    "difficulty": "Hard",
+    "tags": ["cloudformation", "exports", "stack-dependencies"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudFormation Template Design",
+    "question": "Your CloudFormation template uses hardcoded resource names: BucketName: my-app-bucket-prod. You want to deploy the same template to dev, staging, and prod environments with different bucket names. What's the best approach?",
+    "options": [
+      "Create three separate templates (dev, staging, prod); hardcode names in each",
+      "Use CloudFormation Parameters with default values; pass environment name at creation time",
+      "Use mappings to map environment to resource names; reference in template",
+      "Store names in Systems Manager Parameter Store; reference in template"
+    ],
+    "correctIndex": 1,
+    "explanation": "Parameters allow user input at stack creation; reuse the same template across environments; mappings are static (requires template change); Parameter Store adds external dependency.",
+    "difficulty": "Medium",
+    "tags": ["cloudformation", "parameters", "reusability"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudFormation Template Design",
+    "question": "Your CloudFormation template has a Condition that creates a NAT Gateway only in production (condition: isProd: True). During a stack update, you change the condition from True to False to save costs. What happens to the NAT Gateway?",
+    "options": [
+      "NAT Gateway is retained; conditions don't affect existing resources",
+      "NAT Gateway is deleted; CloudFormation removes resources when conditions change to false",
+      "CloudFormation fails; you must manually delete the NAT Gateway first",
+      "NAT Gateway is retained if it's in use; deleted if unused"
+    ],
+    "correctIndex": 1,
+    "explanation": "Conditions control resource creation; changing condition to false removes the resource during update; CloudFormation treats this as resource deletion.",
+    "difficulty": "Medium",
+    "tags": ["cloudformation", "conditions", "resource-lifecycle"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudFormation Template Design",
+    "question": "You're updating a CloudFormation stack. During the update, the stack enters UPDATE_ROLLBACK_IN_PROGRESS and gets stuck. You need to resolve this without losing the existing infrastructure. What's the correct action?",
+    "options": [
+      "Use ContinueUpdateRollback API; resume the rollback process to completion",
+      "Delete the stack; create a new one with the corrected template",
+      "Wait 30 minutes; CloudFormation automatically completes rollback",
+      "Edit the template to revert changes; attempt update again"
+    ],
+    "correctIndex": 0,
+    "explanation": "ContinueUpdateRollback moves stack from stuck state to ROLLBACK_COMPLETE; preserves existing resources; allows retry; deleting the stack is destructive.",
+    "difficulty": "Hard",
+    "tags": ["cloudformation", "rollback", "troubleshooting"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudFormation Template Design",
+    "question": "Your template uses Ref to reference an EC2 instance ID and a Lambda function ARN. Both are created in the same stack. You want to pass these values to an SNS topic's DisplayName. What's the issue?",
+    "options": [
+      "Ref returns physical IDs; instance IDs are valid, but Lambda Ref returns ARN, not function name",
+      "Ref can't be used in string interpolation; use Fn::Join instead",
+      "Ref is correct; DisplayName accepts any string reference",
+      "Ref should be replaced with Fn::GetAtt for better practices"
+    ],
+    "correctIndex": 1,
+    "explanation": "Ref returns physical IDs (instance-id, function-arn); string interpolation in DisplayName requires Fn::Join or Fn::Sub to concatenate strings with Ref values.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cloudformation", "intrinsic-functions", "template-design"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudFormation Template Design",
+    "question": "You create a CloudFormation stack with an auto-scaling group (ASG). The ASG tags are controlled via CloudFormation's AWS::AutoScaling::LaunchConfiguration. You manually add a new tag via AWS Console. The tag disappears after the stack update. Why?",
+    "options": [
+      "Manual tags are lost during stack updates; CloudFormation overwrites all tags",
+      "Tags added outside the template are considered drift; use --no-execute-rollback to preserve them",
+      "ASG doesn't support manual tag updates; all tags must be in the template",
+      "The tag is retained but hidden; run describe-auto-scaling-groups to verify"
+    ],
+    "correctIndex": 0,
+    "explanation": "CloudFormation is declarative; template tags replace all tags during updates; manual tags are lost; all tags must be in the template for persistence.",
+    "difficulty": "Medium",
+    "tags": ["cloudformation", "tags", "drift"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudFormation Template Design",
+    "question": "You're designing a reusable CloudFormation template for a microservice (Lambda + DynamoDB + API Gateway). The same template needs to deploy 20 independent microservice instances. Should you use StackSets, multiple stacks with parameters, or a single stack with multiple resources?",
+    "options": [
+      "StackSets; deploy to multiple AWS accounts and regions from one template",
+      "Multiple stacks with unique names (service-1-stack, service-2-stack); reuse template with different parameters",
+      "Single stack with 20 sets of resources; maintains everything in one place",
+      "Use a Lambda-backed custom resource to deploy instances programmatically"
+    ],
+    "correctIndex": 1,
+    "explanation": "Multiple named stacks (one per service) enable independent lifecycle management; StackSets are for multi-account/region; single stack with 20 resources becomes unmanageable; Lambda isn't CloudFormation.",
+    "difficulty": "Hard",
+    "tags": ["cloudformation", "stack-design", "scalability"]
+  }
+]

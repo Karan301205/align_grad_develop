@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Pod Management",
+    "question": "Your pod enters CrashLoopBackOff with exit code 137. After investigating, you find the container is receiving SIGKILL from the system. What is the likely cause?",
+    "options": [
+      "The application received an error in its configuration file",
+      "The pod was terminated due to memory pressure; its memory usage exceeded the limit",
+      "The container's entrypoint script has a syntax error",
+      "Kubernetes is restarting the pod because the service is misconfigured"
+    ],
+    "correctIndex": 1,
+    "explanation": "Exit code 137 is 128 + 9 (SIGKILL); this indicates OOMKilled status where Kubernetes terminates the container for exceeding memory limits.",
+    "difficulty": "Medium-Hard",
+    "tags": ["crashloopbackoff", "oomkilled", "pod-termination"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Pod Management",
+    "question": "A pod's readiness probe fails consistently but the container is running and responding to HTTP requests normally. What is the most likely configuration issue?",
+    "options": [
+      "The probe is checking the wrong port or endpoint",
+      "The pod lacks CPU resources to respond quickly",
+      "The service is directing traffic to the wrong container",
+      "The pod needs a network policy to become ready"
+    ],
+    "correctIndex": 0,
+    "explanation": "Readiness probe failures usually indicate mismatched probe configuration (wrong port, path, or protocol) rather than container issues, especially when manual HTTP requests succeed.",
+    "difficulty": "Medium",
+    "tags": ["readiness-probe", "health-check", "debugging"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Pod Management",
+    "question": "You define an init container that retrieves configuration from an external API. If the API is down, what happens to the pod?",
+    "options": [
+      "The pod starts anyway and runs main containers without the configuration",
+      "The pod remains in Pending state until the init container succeeds",
+      "The pod is automatically deleted and rescheduled",
+      "Kubernetes skips the init container and continues"
+    ],
+    "correctIndex": 1,
+    "explanation": "Init containers must complete successfully before main containers start; if an init container fails, the pod loops in Pending and restarts the init container.",
+    "difficulty": "Medium",
+    "tags": ["init-container", "pod-startup", "initialization"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Pod Management",
+    "question": "A pod requests 500m CPU but the node has only 400m available. What does the scheduler do?",
+    "options": [
+      "Schedules the pod and lets it run until it exceeds the limit",
+      "Rejects the pod and leaves it in Pending state on any node without enough available CPU",
+      "Schedules the pod on a different node that has sufficient CPU",
+      "Terminates lower-priority pods to make room for this one"
+    ],
+    "correctIndex": 2,
+    "explanation": "The scheduler ensures requests are met before placement; it only schedules a pod to a node where allocatable capacity can satisfy its requests.",
+    "difficulty": "Medium",
+    "tags": ["scheduling", "resource-requests", "cpu-allocation"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Pod Management",
+    "question": "You run kubectl exec to access a pod's shell, but the container has no shell binary. How can you still troubleshoot the pod?",
+    "options": [
+      "Use kubectl debug to create a debugging sidecar or ephemeral container",
+      "Copy a shell binary from your host machine into the container",
+      "Delete the pod and redeploy with a shell installed",
+      "Restart the pod with a debug image to run the application"
+    ],
+    "correctIndex": 0,
+    "explanation": "kubectl debug creates an ephemeral container in the pod's namespace for troubleshooting without modifying the original container.",
+    "difficulty": "Medium",
+    "tags": ["debugging", "troubleshooting", "kubectl-debug"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Pod Management",
+    "question": "A pod has a liveness probe set to check HTTP on port 8080. The container listens only on port 9000. What happens?",
+    "options": [
+      "The pod starts normally because Kubernetes assumes the probe is optional",
+      "The pod fails the liveness probe repeatedly and enters CrashLoopBackOff",
+      "Kubernetes automatically redirects probe traffic to port 9000",
+      "The pod starts but logs a warning every 10 seconds"
+    ],
+    "correctIndex": 1,
+    "explanation": "When a liveness probe fails repeatedly (usually after 3 failures), Kubernetes kills the container, causing CrashLoopBackOff if restarted.",
+    "difficulty": "Medium",
+    "tags": ["liveness-probe", "health-check", "pod-restart"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Pod Management",
+    "question": "You set a pod's terminationGracePeriod to 5 seconds but the application needs 30 seconds to gracefully shut down. What is the consequence?",
+    "options": [
+      "Kubernetes waits 30 seconds before killing the pod",
+      "Kubernetes sends SIGTERM and waits 5 seconds; if the pod doesn't exit, it sends SIGKILL",
+      "The pod ignores SIGTERM and keeps running indefinitely",
+      "The application receives a custom shutdown signal after 30 seconds"
+    ],
+    "correctIndex": 1,
+    "explanation": "terminationGracePeriod defines the SIGTERM-to-SIGKILL window; if the application doesn't exit within this period, Kubernetes forcefully terminates it.",
+    "difficulty": "Medium",
+    "tags": ["termination", "graceful-shutdown", "sigterm"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Pod Management",
+    "question": "A pod is using a local volume (emptyDir) to cache data. If the pod is evicted and rescheduled to another node, what happens to the cache?",
+    "options": [
+      "The cache persists and follows the pod to the new node",
+      "The cache is lost because emptyDir only lives as long as the pod on that node",
+      "Kubernetes backs up the cache to the etcd database",
+      "The cache is copied to persistent storage automatically"
+    ],
+    "correctIndex": 1,
+    "explanation": "emptyDir is tied to the pod's lifecycle on a specific node; when the pod is evicted or recreated, the emptyDir volume is discarded.",
+    "difficulty": "Medium",
+    "tags": ["volumes", "emptydir", "pod-eviction"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Pod Management",
+    "question": "You define a startup probe that takes 60 seconds to pass, but the pod container exits after 30 seconds. Where does the pod end up?",
+    "options": [
+      "Running, because Kubernetes gives the container time to become ready",
+      "CrashLoopBackOff, because the startup probe fails before the container initializes",
+      "Pending, waiting for the next retry",
+      "Terminated, with a status of Failed"
+    ],
+    "correctIndex": 1,
+    "explanation": "If the container exits before the startup probe passes, Kubernetes treats it as a failure and restarts the container, entering CrashLoopBackOff.",
+    "difficulty": "Medium-Hard",
+    "tags": ["startup-probe", "probe-failure", "initialization"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Pod Management",
+    "question": "A pod is bound to a node via nodeSelector, but the node is cordoned (marked as unschedulable). The pod continues running. How do you remove it?",
+    "options": [
+      "The pod will drain automatically when the node is cordoned",
+      "Use kubectl drain to evict the pod gracefully",
+      "Delete the node to force pod termination",
+      "Manually scale down the pod's replica count"
+    ],
+    "correctIndex": 1,
+    "explanation": "kubectl drain performs graceful eviction of existing pods; cordoning alone prevents new scheduling but doesn't evict running pods.",
+    "difficulty": "Medium",
+    "tags": ["node-drain", "cordon", "pod-eviction"]
+  }
+]

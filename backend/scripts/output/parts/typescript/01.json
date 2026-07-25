@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Basics",
+    "question": "You assign a value `const x: string | number = 5; const y: string = x;` — does this compile?",
+    "options": ["Yes, because x can hold a string", "No, x could be a number at runtime", "Yes, TypeScript will auto-cast", "Only if x was declared with const"],
+    "correctIndex": 1,
+    "explanation": "Type narrowing is required; assigning a string|number to a string variable fails because the broader union type violates the stricter target type.",
+    "difficulty": "Medium",
+    "tags": ["union-types", "type-safety", "narrowing"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Basics",
+    "question": "Given `type A = { x: number }; type B = A & { y: string };` — what is the type of B?",
+    "options": ["{x: number}", "{y: string}", "{x: number, y: string}", "{x?: number, y?: string}"],
+    "correctIndex": 2,
+    "explanation": "Intersection types merge properties, creating an object with both x (number) and y (string) required.",
+    "difficulty": "Medium",
+    "tags": ["intersection-types", "type-composition"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Basics",
+    "question": "You declare `let data: unknown; let str: string = data as string;` — is this safe?",
+    "options": ["Yes, as-casting always works", "No, because unknown could be anything at runtime", "Yes, unknown has no type constraints", "Only if wrapped in try-catch"],
+    "correctIndex": 1,
+    "explanation": "Type assertions bypass compile checks; if data is not a string at runtime, calling string methods will fail regardless of the cast.",
+    "difficulty": "Medium-Hard",
+    "tags": ["type-assertion", "unknown", "runtime-safety"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Basics",
+    "question": "What does `type X = string & number;` resolve to in actual code?",
+    "options": ["A union of string and number", "A string with number methods", "The never type", "An error at compile time"],
+    "correctIndex": 2,
+    "explanation": "No value can simultaneously satisfy both string and number, so the intersection is the never type, representing impossible states.",
+    "difficulty": "Medium-Hard",
+    "tags": ["intersection-types", "never-type", "type-logic"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Basics",
+    "question": "You write `const arr: (string | number)[] = [1, 'a', 2];` — does this compile?",
+    "options": ["No, mixed types are not allowed", "Yes, the array can hold either type", "Yes, but only if cast", "No, number must be first"],
+    "correctIndex": 1,
+    "explanation": "An array typed with a union of primitives accepts elements of either type in any order.",
+    "difficulty": "Medium",
+    "tags": ["arrays", "union-types"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Basics",
+    "question": "Given `const x: null = null; const y: null | string = x;` — does y now have type null|string?",
+    "options": ["No, x has type null", "Yes, null is a subtype", "Yes, because x is assigned", "No, null cannot be assigned to unions"],
+    "correctIndex": 1,
+    "explanation": "x is narrowed to null at that point, and null is assignable to null|string, so y can safely receive x.",
+    "difficulty": "Medium",
+    "tags": ["null-type", "type-narrowing", "assignment"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Basics",
+    "question": "What is the inferred type of `const obj = { a: 1, b: 'x' };`?",
+    "options": ["{a: number, b: string}", "{a: 1, b: 'x'}", "{[key: string]: any}", "Record<string, number|string>"],
+    "correctIndex": 0,
+    "explanation": "Type inference widens literals to primitive types; 1 becomes number and 'x' becomes string in the object type.",
+    "difficulty": "Medium",
+    "tags": ["type-inference", "object-literals", "widening"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Basics",
+    "question": "You call `JSON.parse(text): unknown;` and then access `.prop` — does this compile?",
+    "options": ["Yes, JSON always returns objects", "No, unknown has no properties", "Yes, with a type guard", "Only if cast to any"],
+    "correctIndex": 1,
+    "explanation": "unknown disallows property access without type narrowing; you must assert or guard the type first.",
+    "difficulty": "Medium",
+    "tags": ["unknown-type", "type-safety", "narrowing"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Basics",
+    "question": "Does `const x: { readonly a: number } = { a: 5 }; x.a = 10;` compile?",
+    "options": ["Yes, readonly is only a hint", "No, readonly prevents reassignment", "Yes, only if cast", "No, number cannot be reassigned"],
+    "correctIndex": 1,
+    "explanation": "readonly properties are compile-time immutable; reassignment is caught by TypeScript, preventing accidental mutations.",
+    "difficulty": "Medium",
+    "tags": ["readonly", "immutability", "property-modifiers"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Type Basics",
+    "question": "Given `type T = { a: 1 | 2 | 3 };` — what type does `const x: T = { a: 2 };` have for x.a?",
+    "options": ["number", "1 | 2 | 3", "2", "1 | 2 | 3 (but TypeScript forgets the literal)"],
+    "correctIndex": 1,
+    "explanation": "x.a retains the declared type T's literal union 1|2|3, even though the assigned value is specifically 2.",
+    "difficulty": "Medium-Hard",
+    "tags": ["literal-types", "union-types", "type-inference"]
+  }
+]

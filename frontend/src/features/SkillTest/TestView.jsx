@@ -97,7 +97,12 @@ export default function TestView({ token, testSkill, setTestSkill, onPass }) {
         {/* Header */}
         <div className="flex justify-between items-center border-b border-outline-variant pb-4">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">AlignGrade Validation Lab</span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">AlignGrade Validation Lab</span>
+              <span className="px-2 py-0.5 bg-surface-container-high border border-outline-variant rounded text-[10px] font-mono text-primary">
+                need a skill assessment image
+              </span>
+            </div>
             <h2 className="text-2xl font-headline font-bold text-on-surface mt-1">{skillName} Certification Test</h2>
           </div>
           <button 

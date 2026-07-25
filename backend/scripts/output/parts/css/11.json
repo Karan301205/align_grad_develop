@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "CSS",
+    "subtopic": "Accessibility Guidelines",
+    "question": "What is the WCAG 2.1 color contrast requirement for normal text?\n```css\nbody { color: #666; background: #fff; }\n```",
+    "options": ["No minimum", "4.5:1 for AA, 7:1 for AAA", "3:1 always sufficient", "Depends on font size only"],
+    "correctIndex": 1,
+    "explanation": "WCAG AA requires 4.5:1 contrast for normal text, 3:1 for large text (18pt+); AAA requires 7:1.",
+    "difficulty": "Medium",
+    "tags": ["wcag", "color-contrast", "accessibility"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Accessibility Guidelines",
+    "question": "Why is the CSS outline property important for keyboard accessibility?\n```css\nbutton {\n  outline: none; /* bad practice */\n}\nbutton:focus {\n  outline: 2px solid blue; /* good practice */\n}\n```",
+    "options": ["Outline is purely decorative", "Outline shows focus for keyboard navigation", "Removing outline improves performance", "outline and border are identical"],
+    "correctIndex": 1,
+    "explanation": "outline shows keyboard focus; removing it without a visible alternative (like a border) breaks focus visibility for keyboard users.",
+    "difficulty": "Medium",
+    "tags": ["focus-indicator", "keyboard-navigation", "a11y"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Accessibility Guidelines",
+    "question": "How does prefers-reduced-motion support users with vestibular disorders?\n```css\n@media (prefers-reduced-motion: reduce) {\n  * { animation: none !important; transition: none !important; }\n}\n```",
+    "options": ["No effect", "Disables animations for users who prefer it", "Applies to all users", "Requires JavaScript"],
+    "correctIndex": 1,
+    "explanation": "Users can set OS preference for reduced motion; respecting this prevents motion sickness for sensitive users.",
+    "difficulty": "Medium",
+    "tags": ["prefers-reduced-motion", "vestibular", "a11y"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Accessibility Guidelines",
+    "question": "What accessibility issue does display: none create compared to visibility: hidden?\n```css\n.hidden-none { display: none; } /* removed from a11y tree */\n.hidden-visibility { visibility: hidden; } /* in tree but hidden */\n```",
+    "options": ["Both hide from screen readers", "display: none removed from accessibility tree", "visibility: hidden is inaccessible", "No difference"],
+    "correctIndex": 1,
+    "explanation": "display: none removes from DOM flow and accessibility tree; visibility: hidden hides visually but keeps in tree and announced.",
+    "difficulty": "Medium",
+    "tags": ["display-vs-visibility", "screen-readers", "a11y"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Accessibility Guidelines",
+    "question": "How should font size be set to respect user preferences?\n```css\n/* Flexible: respects browser font-size setting */\nbody { font-size: 1rem; }\n.large { font-size: 1.5rem; }\n\n/* Inflexible: ignores user preference */\nbody { font-size: 16px; }\n.large { font-size: 24px; }\n```",
+    "options": ["Pixel units only", "Rem/em units allow scaling with user preferences", "Both equivalent", "No user preferences possible"],
+    "correctIndex": 1,
+    "explanation": "rem units scale with root font-size; users can adjust browser font-size, making rem more accessible than px.",
+    "difficulty": "Medium",
+    "tags": ["font-sizing", "user-preferences", "a11y"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Accessibility Guidelines",
+    "question": "Why are focus styles critical and why should they never be removed?\n```css\nbutton:focus { outline: none; } /* bad */\nbutton:focus { outline: 2px solid blue; } /* good */\n```",
+    "options": ["Purely aesthetic", "Shows where keyboard user is; essential for navigation", "Only needed on mobile", "Visual indicators violate a11y"],
+    "correctIndex": 1,
+    "explanation": "Keyboard users rely on focus indicators to navigate; removing without replacement makes site unusable for keyboard-only users.",
+    "difficulty": "Medium",
+    "tags": ["focus-indicators", "keyboard-navigation"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Accessibility Guidelines",
+    "question": "What is the minimum touch target size recommended by WCAG?\n```css\nbutton { width: 40px; height: 40px; }\nlink { width: 44px; height: 44px; }\n```",
+    "options": ["20px minimum", "44x48px recommended", "Depends on device", "No standard"],
+    "correctIndex": 1,
+    "explanation": "WCAG 2.5.5 Level AAA recommends 44x44 CSS pixels for touch targets; 40px is acceptable but on the small side.",
+    "difficulty": "Medium",
+    "tags": ["touch-targets", "wcag", "mobile-a11y"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Accessibility Guidelines",
+    "question": "How should color be used accessibly when conveying information?\n```css\n/* Bad: color only */\n.error { color: red; }\n\n/* Good: color plus icon/text */\n.error { color: red; border-left: 4px solid red; }\n.error::before { content: '⚠ '; }\n```",
+    "options": ["Color alone is sufficient", "Never use color for meaning", "Combine color with text/icon/pattern", "Depends on browser"],
+    "correctIndex": 2,
+    "explanation": "Colorblind users cannot distinguish colors; combine with text labels, icons, or patterns to convey meaning.",
+    "difficulty": "Medium-Hard",
+    "tags": ["color-accessibility", "colorblind-users", "wcag"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Accessibility Guidelines",
+    "question": "Why might high contrast mode require CSS adjustments?\n```css\n/* May break in high contrast mode */\nborder: 1px solid transparent;\n\n/* Better for high contrast */\nborder: 1px solid currentColor;\n```",
+    "options": ["No issues in high contrast", "Transparent borders disappear; use currentColor", "High contrast affects JS only", "All borders work fine"],
+    "correctIndex": 1,
+    "explanation": "High contrast mode forces specific colors; transparent elements vanish; currentColor adapts to the mode.",
+    "difficulty": "Medium-Hard",
+    "tags": ["high-contrast-mode", "forced-colors", "wcag"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Accessibility Guidelines",
+    "question": "How does text decoration improve accessibility for links?\n```css\n/* Bad: color only */\na { color: blue; text-decoration: none; }\n\n/* Good: color + underline */\na { color: blue; text-decoration: underline; }\n```",
+    "options": ["Decoration is decorative only", "Underline makes links identifiable for colorblind users", "Decoration harms performance", "All links must be styled"],
+    "correctIndex": 1,
+    "explanation": "Underline (or other decoration) distinguishes links from regular text for colorblind users and users with visual impairment.",
+    "difficulty": "Medium",
+    "tags": ["link-styling", "text-decoration", "wcag"]
+  }
+]

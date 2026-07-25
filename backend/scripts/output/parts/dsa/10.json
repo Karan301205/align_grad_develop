@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Dynamic Programming",
+    "question": "Fibonacci can be computed recursively (exponential time) or with memoization (polynomial time). Why does memoization help?",
+    "options": ["it computes faster", "it avoids recomputing the same subproblems", "it uses less space", "it always finds the optimal solution"],
+    "correctIndex": 1,
+    "explanation": "Naive recursion recomputes fib(k) many times; memoization caches results so each subproblem is computed once, reducing exponential to linear.",
+    "difficulty": "Medium",
+    "tags": ["memoization", "overlapping-subproblems"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Dynamic Programming",
+    "question": "The coin change problem asks for the minimum coins to make an amount. Top-down DP (memoization) vs. bottom-up DP (tabulation): which uses more space?",
+    "options": ["memoization uses more space", "tabulation uses more space", "both use the same space", "depends on the amount"],
+    "correctIndex": 2,
+    "explanation": "Both use O(amount) space: memoization stores results for amounts 0 to n; tabulation fills a table of size n+1; space is equivalent.",
+    "difficulty": "Medium",
+    "tags": ["tabulation-vs-memoization", "space-complexity"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Dynamic Programming",
+    "question": "0/1 Knapsack problem: given n items with weight and value, fill a knapsack of capacity W. Standard DP uses a 2D table of size n x W. Can space be optimized?",
+    "options": ["no, 2D is required", "yes, to O(W) using a 1D array but only if items are processed in order", "yes, to O(log n)", "space cannot be improved"],
+    "correctIndex": 1,
+    "explanation": "Rolling over rows in a 1D array works because the ith row depends only on row i-1; process items sequentially to maintain correctness.",
+    "difficulty": "Medium-Hard",
+    "tags": ["space-optimization", "1D-rollover"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Dynamic Programming",
+    "question": "Longest common subsequence (LCS) of two strings of length m and n can be solved with a DP table of size (m+1) x (n+1). What is the time complexity?",
+    "options": ["linear time in m and n", "quadratic time in m times n", "logarithmic time", "exponential time"],
+    "correctIndex": 1,
+    "explanation": "Filling an (m+1) x (n+1) table with O(1) per cell takes O(m * n) quadratic time.",
+    "difficulty": "Medium",
+    "tags": ["LCS", "table-filling"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Dynamic Programming",
+    "question": "Matrix chain multiplication problem: given matrices A1, A2, ..., An, find the optimal order to minimize scalar multiplications. What is the recurrence relation structure?",
+    "options": ["linear recurrence", "quadratic recurrence with O(n) subproblems", "cubic recurrence because each split tries all positions", "no recurrence, greedy works"],
+    "correctIndex": 2,
+    "explanation": "For each subsequence, try all split points k; this creates O(n^2) subproblems with O(n) work each, totaling O(n^3) time.",
+    "difficulty": "Medium-Hard",
+    "tags": ["matrix-chain", "optimal-substructure"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Dynamic Programming",
+    "question": "Edit distance (Levenshtein distance) between two strings measures the minimum operations (insert, delete, replace) to transform one to the other. DP table size and time complexity is?",
+    "options": ["O(m) space and O(m) time", "O(m*n) space and O(m*n) time", "O(n^2) space always", "O(m+n) space and O(m*n) time"],
+    "correctIndex": 1,
+    "explanation": "DP table is (m+1) x (n+1) requiring O(m*n) space and time to fill with O(1) operations per cell.",
+    "difficulty": "Medium",
+    "tags": ["edit-distance", "string-transformation"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Dynamic Programming",
+    "question": "In maximum subarray problem (Kadane's algorithm), the optimal substructure is: max sum ending at i depends on max sum ending at i-1. What is the DP state?",
+    "options": ["dp[i] = best sum from index 0 to i", "dp[i] = maximum sum of any subarray", "dp[i] = maximum sum ending exactly at i", "dp[i] = number of subarrays"],
+    "correctIndex": 2,
+    "explanation": "Kadane's tracks max sum ending at each position; decision to extend or start fresh is based on whether including current element helps.",
+    "difficulty": "Medium-Hard",
+    "tags": ["Kadane-algorithm", "DP-state"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Dynamic Programming",
+    "question": "Word break problem: given a string and a word dictionary, determine if the string can be segmented into dictionary words. DP table of length n means time complexity is?",
+    "options": ["linear time", "quadratic time", "cubic time", "exponential time"],
+    "correctIndex": 1,
+    "explanation": "dp[i] depends on all j < i where s[j:i] is in the dictionary; checking O(n) splits for each of n positions gives O(n^2) quadratic time.",
+    "difficulty": "Medium",
+    "tags": ["word-break", "substring-check"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Dynamic Programming",
+    "question": "Counting the number of distinct paths in an m x n grid from top-left to bottom-right (only right and down moves): DP solution requires how much space?",
+    "options": ["constant space", "linear space in m plus n", "O of m times n space", "exponential space"],
+    "correctIndex": 2,
+    "explanation": "DP table is m x n to store paths at each cell; total space is O(m * n) quadratic.",
+    "difficulty": "Medium",
+    "tags": ["grid-paths", "2D-DP"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Dynamic Programming",
+    "question": "Coin change problem: minimum coins to make amount n, given coin denominations. If coin values range from 1 to 10 and amount is 1 million, what is the practical concern?",
+    "options": ["amount is too large for DP table", "O(n) space is acceptable", "the recurrence is exponential", "greedy always works"],
+    "correctIndex": 0,
+    "explanation": "DP table size is amount + 1 = 1 million + 1, which is large but manageable; concern is whether O(1 million) space is acceptable for the application.",
+    "difficulty": "Medium-Hard",
+    "tags": ["scalability", "space-constraints"]
+  }
+]

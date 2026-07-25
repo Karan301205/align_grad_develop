@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "File Input Output",
+    "question": "What is printed?\n```java\nFileWriter fw = new FileWriter(\"test.txt\");\nfw.write(\"Hello\");\nSystem.out.println(\"Written\");\nfw.close();\n```",
+    "options": ["Written (file has Hello)", "Written (file empty)", "Exception before Written", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "FileWriter.write() buffers data; close() flushes it to disk after the print statement, so 'Written' is printed.",
+    "difficulty": "Medium",
+    "tags": ["file-writer", "buffering", "flushing"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "File Input Output",
+    "question": "What is the best way to ensure a file is closed?\n```java\nFileInputStream fis = new FileInputStream(\"test.txt\");\nfis.read();\nfis.close();\n```",
+    "options": ["Manual close() call", "Try-with-resources statement", "Just rely on garbage collection", "None of the above"],
+    "correctIndex": 1,
+    "explanation": "Try-with-resources (try (FileInputStream fis = ...)) auto-closes resources even if exceptions occur, safer than manual close().",
+    "difficulty": "Medium",
+    "tags": ["resource-management", "try-with-resources", "auto-close"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "File Input Output",
+    "question": "What does this code do?\n```java\nBufferedReader br = new BufferedReader(new FileReader(\"test.txt\"));\nString line;\nwhile ((line = br.readLine()) != null) {\n  System.out.println(line);\n}\nbr.close();\n```",
+    "options": ["Reads file byte by byte", "Reads file line by line", "Reads entire file at once", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "BufferedReader with readLine() reads the file line by line; readLine() returns null at EOF.",
+    "difficulty": "Medium",
+    "tags": ["bufferedreader", "line-reading", "file-processing"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "File Input Output",
+    "question": "What is printed?\n```java\nFile f = new File(\"nonexistent.txt\");\nif (f.exists()) {\n  System.out.println(\"Exists\");\n} else {\n  System.out.println(\"Not found\");\n}\n```",
+    "options": ["Exists", "Not found", "Exception", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "f.exists() checks if the file exists on disk; nonexistent.txt does not, so 'Not found' is printed.",
+    "difficulty": "Medium",
+    "tags": ["file-api", "file-existence", "path-handling"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "File Input Output",
+    "question": "What is the difference between FileInputStream and BufferedInputStream?\n```java\nFileInputStream fis = new FileInputStream(\"test.txt\");\nBufferedInputStream bis = new BufferedInputStream(fis);\n```",
+    "options": ["No difference", "BufferedInputStream adds buffering for efficiency", "BufferedInputStream only works with text", "FileInputStream is faster"],
+    "correctIndex": 1,
+    "explanation": "BufferedInputStream wraps FileInputStream and adds an internal buffer, reducing system calls and improving performance.",
+    "difficulty": "Medium",
+    "tags": ["buffering", "input-streams", "performance"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "File Input Output",
+    "question": "What does this print?\n```java\ntry (PrintWriter pw = new PrintWriter(new FileWriter(\"test.txt\"))) {\n  pw.println(\"Line 1\");\n  pw.println(\"Line 2\");\n}\n```",
+    "options": ["Compilation error", "File empty", "File has both lines", "File has one line"],
+    "correctIndex": 2,
+    "explanation": "PrintWriter auto-flushes with println(); try-with-resources auto-closes; file ends up with both lines.",
+    "difficulty": "Medium",
+    "tags": ["print-writer", "auto-flush", "try-with-resources"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "File Input Output",
+    "question": "What is printed?\n```java\nInputStream is = new ByteArrayInputStream(new byte[]{65, 66, 67});\nint b;\nwhile ((b = is.read()) != -1) {\n  System.out.print((char) b + \" \");\n}\n```",
+    "options": ["65 66 67", "A B C", "ByteArrayInputStream error", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "InputStream.read() returns byte as int; read() returns -1 at EOF; casting to char gives 'A', 'B', 'C'.",
+    "difficulty": "Medium",
+    "tags": ["input-stream", "byte-reading", "casting"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "File Input Output",
+    "question": "What is the difference between FileOutputStream and ObjectOutputStream?\n```java\nFileOutputStream fos = new FileOutputStream(\"test.dat\");\nObjectOutputStream oos = new ObjectOutputStream(fos);\n```",
+    "options": ["Both write same format", "ObjectOutputStream serializes objects", "FileOutputStream is faster", "ObjectOutputStream only for files"],
+    "correctIndex": 1,
+    "explanation": "ObjectOutputStream wraps FileOutputStream and serializes Java objects to binary format; FileOutputStream only writes raw bytes.",
+    "difficulty": "Medium",
+    "tags": ["object-serialization", "output-streams", "serialization"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "File Input Output",
+    "question": "What happens here?\n```java\nFile f = new File(\"test.txt\");\nf.createNewFile();\nf.createNewFile();\n```",
+    "options": ["Creates file twice", "Creates file once, second call fails", "Compilation error", "First call succeeds, second returns false"],
+    "correctIndex": 3,
+    "explanation": "createNewFile() returns true if file is created, false if it already exists; second call returns false.",
+    "difficulty": "Medium",
+    "tags": ["file-creation", "file-api", "return-values"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "File Input Output",
+    "question": "What is printed?\n```java\nPath path = Paths.get(\"test.txt\");\nBytes.write(path, \"Hello\".getBytes());\nString content = new String(Files.readAllBytes(path));\nSystem.out.println(content);\n```",
+    "options": ["Hello", "Compilation error", "File not found", "NullPointerException"],
+    "correctIndex": 0,
+    "explanation": "Files.write() writes bytes to a file; Files.readAllBytes() reads all bytes back; result is 'Hello'.",
+    "difficulty": "Medium",
+    "tags": ["nio-files", "file-operations", "path-api"]
+  }
+]

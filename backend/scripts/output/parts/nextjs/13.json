@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "Serverless Architecture",
+    "question": "A Next.js app runs on AWS Lambda. The function times out after 5 seconds. The handler is slow due to a heavy getStaticProps query. How do you fix this?",
+    "options": ["Increase Lambda timeout limit", "Move heavy queries to getServerSideProps or a scheduled task", "Cache results with CloudFront", "Optimize the database query"],
+    "correctIndex": 3,
+    "explanation": "Timeouts indicate slow operations; caching or offloading to background jobs is better than raising timeout limits.",
+    "difficulty": "Medium-Hard",
+    "tags": ["aws-lambda", "serverless", "timeouts"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Serverless Architecture",
+    "question": "Your Next.js app on Lambda has a cold start of 2 seconds (no code execution). Users see a 2-second delay. How do you minimize cold starts?",
+    "options": ["Increase Lambda memory allocation", "Use provisioned concurrency to keep functions warm", "Move to self-hosted servers", "Reduce bundle size"],
+    "correctIndex": 1,
+    "explanation": "Provisioned concurrency keeps Lambda instances warm, eliminating cold starts; this is the primary solution for latency-sensitive apps.",
+    "difficulty": "Medium-Hard",
+    "tags": ["aws-lambda", "cold-start", "performance"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Serverless Architecture",
+    "question": "You store files on disk in a Lambda function (/tmp). After the function completes, can subsequent invocations access the files?",
+    "options": ["Yes; /tmp is persistent across invocations", "No; /tmp is ephemeral and cleared between invocations", "Only if provisioned concurrency is enabled", "Only for the same execution container"],
+    "correctIndex": 3,
+    "explanation": "Lambda instances are reused for warm starts; /tmp persists within the same container instance but is cleared on new instances.",
+    "difficulty": "Medium-Hard",
+    "tags": ["aws-lambda", "ephemeral-storage", "serverless"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Serverless Architecture",
+    "question": "Your Next.js app uses a global database connection in the Lambda handler. After deployment, connection errors occur. Why?",
+    "options": ["Lambda doesn't support persistent connections", "Each new Lambda instance creates a new connection; connection limits are exceeded", "Database connection timeout is too short", "Connections are stateless in Lambda"],
+    "correctIndex": 1,
+    "explanation": "Lambda auto-scaling creates many instances, each initiating connections; without pooling, connection limits are exceeded.",
+    "difficulty": "Medium-Hard",
+    "tags": ["aws-lambda", "database-connections", "scaling"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Serverless Architecture",
+    "question": "You deploy a Next.js app to AWS Lambda with API Gateway. The function URL is long and hard to remember. Can you customize it?",
+    "options": ["No; Lambda URLs are auto-generated", "Yes; use a custom domain with Route 53 and API Gateway", "Yes; Lambda provides an alias feature", "Only via CloudFront"],
+    "correctIndex": 1,
+    "explanation": "Custom domains are set up via Route 53 (DNS) + API Gateway custom domains; this provides a clean URL.",
+    "difficulty": "Medium",
+    "tags": ["aws-lambda", "api-gateway", "custom-domains"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Serverless Architecture",
+    "question": "Your Next.js app uses DynamoDB with on-demand billing. After a traffic spike, the bill doubles. How do you control costs?",
+    "options": ["Switch to provisioned capacity", "Optimize queries to reduce throughput usage", "Use TTL to delete old data", "All of the above"],
+    "correctIndex": 3,
+    "explanation": "Cost optimization involves provisioned capacity vs. on-demand, query efficiency, and data lifecycle management.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dynamodb", "serverless", "cost-optimization"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Serverless Architecture",
+    "question": "You store user uploads in S3. The bucket is private but your Lambda needs to read/write. How do you grant permissions?",
+    "options": ["Set bucket policy to public", "Attach an IAM role to the Lambda function with S3 permissions", "Use access keys hardcoded in the app", "Lambda automatically has S3 access"],
+    "correctIndex": 1,
+    "explanation": "Lambda functions assume an IAM role; attach S3 permissions to the role to grant access to private buckets.",
+    "difficulty": "Medium",
+    "tags": ["aws-lambda", "s3", "iam"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Serverless Architecture",
+    "question": "You want to run scheduled tasks (e.g., cleanup jobs) in a serverless environment. What's the best approach?",
+    "options": ["Use a cron job in the Lambda handler", "Use AWS EventBridge to trigger Lambda on a schedule", "Deploy a separate cron server", "Schedule events in the database"],
+    "correctIndex": 1,
+    "explanation": "AWS EventBridge (formerly CloudWatch Events) triggers Lambda functions on a schedule without a dedicated server.",
+    "difficulty": "Medium",
+    "tags": ["aws-lambda", "eventbridge", "scheduled-tasks"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Serverless Architecture",
+    "question": "Your Next.js API on Lambda returns a 413 Request Entity Too Large error. The client sends a 2MB JSON payload. What's the issue?",
+    "options": ["Lambda has a 1MB default payload limit", "API Gateway has a 10MB limit; increase it", "Lambda's 6MB ephemeral storage limit is exceeded", "Payload limits are enforced by the client"],
+    "correctIndex": 0,
+    "explanation": "AWS Lambda has default payload limits (1MB for sync, larger for async); API Gateway adds its own limits.",
+    "difficulty": "Medium-Hard",
+    "tags": ["aws-lambda", "api-gateway", "payload-limits"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Serverless Architecture",
+    "question": "You need to run a Next.js build process (statically generating thousands of pages) on a serverless platform. Is Lambda suitable?",
+    "options": ["Yes; Lambda is ideal for build processes", "No; Lambda has timeout and memory limits; use EC2 or a build service", "Only if you break builds into chunks", "Depends on the number of pages"],
+    "correctIndex": 1,
+    "explanation": "Serverless platforms are not ideal for long-running builds; use CI/CD services (GitHub Actions, CodeBuild) or dedicated compute.",
+    "difficulty": "Medium-Hard",
+    "tags": ["aws-lambda", "serverless", "build-process"]
+  }
+]

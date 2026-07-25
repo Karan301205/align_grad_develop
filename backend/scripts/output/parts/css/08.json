@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Frameworks",
+    "question": "What is the core philosophy difference between utility-first (Tailwind) and component-based (Bootstrap) frameworks?\n```html\n<!-- Tailwind: utility-first -->\n<button class=\"px-4 py-2 bg-blue-500 rounded\">Click</button>\n\n<!-- Bootstrap: components -->\n<button class=\"btn btn-primary\">Click</button>\n```",
+    "options": ["Both generate identical CSS", "Tailwind uses utilities, Bootstrap encapsulates components", "Bootstrap is purely HTML, Tailwind purely CSS", "No architectural difference"],
+    "correctIndex": 1,
+    "explanation": "Utility-first applies granular utility classes; component-based frameworks provide semantic component classes (btn, btn-primary).",
+    "difficulty": "Medium",
+    "tags": ["utility-first", "component-frameworks", "architecture"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Frameworks",
+    "question": "In Bootstrap's 12-column grid, how many columns does col-md-6 span?\n```html\n<div class=\"row\">\n  <div class=\"col-md-6\">Half width on medium+</div>\n  <div class=\"col-md-6\">Half width on medium+</div>\n</div>\n```",
+    "options": ["6 columns (half)", "6 pixels (incorrect)", "60% width", "Depends on viewport"],
+    "correctIndex": 0,
+    "explanation": "col-md-6 = 6 out of 12 columns = 50% width on medium breakpoints and up.",
+    "difficulty": "Medium",
+    "tags": ["bootstrap-grid", "column-system"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Frameworks",
+    "question": "How do Tailwind responsive prefixes control breakpoint styling?\n```html\n<div class=\"w-full md:w-1/2 lg:w-1/3\">Responsive widths</div>\n```",
+    "options": ["Applied to all breakpoints", "Applied only at specified breakpoints and up", "Mobile-first approach", "Both 2 and 3"],
+    "correctIndex": 3,
+    "explanation": "Tailwind uses mobile-first prefixes; md: applies from medium breakpoint and up, lg: from large and up.",
+    "difficulty": "Medium",
+    "tags": ["tailwind-responsive", "mobile-first", "breakpoint-prefixes"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Frameworks",
+    "question": "Why might framework CSS have high specificity, making overrides difficult?\n```css\n/* Framework rule */\n.btn.btn-primary { background: blue; } /* specificity 0,0,2,0 */\n\n/* User override */\n.btn-primary { background: red; } /* specificity 0,0,1,0 */\n```",
+    "options": ["Framework always wins", "User override requires !important", "Specificity controls precedence", "CSS order wins"],
+    "correctIndex": 2,
+    "explanation": "Framework specificity (0,0,2,0) beats user specificity (0,0,1,0); to override, match or exceed framework specificity.",
+    "difficulty": "Medium",
+    "tags": ["framework-specificity", "css-conflicts", "overrides"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Frameworks",
+    "question": "What does CSS-in-JS offer over traditional CSS frameworks?\n```javascript\nconst buttonStyle = css`\n  background: blue;\n  &:hover { background: darkblue; }\n`;\n```",
+    "options": ["Scoped styles, dynamic theming", "No performance benefits", "CSS frameworks obsolete", "Incompatible with CSS"],
+    "correctIndex": 0,
+    "explanation": "CSS-in-JS enables scoped, component-local styles and runtime variable control; complements or replaces CSS frameworks.",
+    "difficulty": "Medium-Hard",
+    "tags": ["css-in-js", "scoped-styles", "dynamic-theming"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Frameworks",
+    "question": "How does BEM naming prevent style conflicts in large projects?\n```css\n.card { border: 1px solid; }\n.card__title { font-size: 1.5rem; }\n.card__title--active { color: blue; }\n```",
+    "options": ["BEM is purely semantic naming", "Double/triple underscores create scoped namespaces", "Prevents cascade conflicts via naming", "Reduces CSS file size"],
+    "correctIndex": 2,
+    "explanation": "BEM (Block-Element-Modifier) naming convention creates explicit, non-cascading selectors; `.card__title--active` is self-contained, preventing accidental overrides.",
+    "difficulty": "Medium",
+    "tags": ["bem-naming", "style-isolation", "methodology"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Frameworks",
+    "question": "What is the primary risk of framework bloat in production?\n```html\n<button class=\"btn\">Single utility</button>\n<!-- Full framework loaded even if only this is used -->\n```",
+    "options": ["No performance impact", "Unnecessary CSS sent to client", "Tree-shaking solves all bloat", "Frameworks auto-optimize"],
+    "correctIndex": 1,
+    "explanation": "Frameworks include many utilities; if only a few are used, unused CSS bloats the file; PurgeCSS/tree-shaking helps but requires configuration.",
+    "difficulty": "Medium",
+    "tags": ["framework-bloat", "bundle-size", "tree-shaking"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Frameworks",
+    "question": "When customizing a framework, why is theming often preferred over overriding?\n```scss\n/* Override approach */\n.btn-primary { background: custom-color !important; }\n\n/* Theming approach */\n$primary-color: custom-color;\n```",
+    "options": ["Override is always better", "Theming centralizes changes, prevents specificity wars", "No difference in output", "Theming not supported"],
+    "correctIndex": 1,
+    "explanation": "Theming (via variables/tokens) updates all components consistently; overrides are fragile and lead to specificity escalation.",
+    "difficulty": "Medium-Hard",
+    "tags": ["framework-customization", "theming", "maintenance"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Frameworks",
+    "question": "How do utility classes in Tailwind improve developer velocity?\n```html\n<div class=\"flex justify-center items-center bg-blue-500 rounded-lg p-4\">\n  Content\n</div>\n```",
+    "options": ["Faster to write than custom CSS", "Reduces context-switching", "No CSS file editing needed", "All of the above"],
+    "correctIndex": 3,
+    "explanation": "Utilities eliminate separate CSS authoring, reduce mental overhead, and speed up prototyping.",
+    "difficulty": "Medium",
+    "tags": ["utility-classes", "developer-experience", "productivity"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Frameworks",
+    "question": "What trade-off does adopting a framework like Bootstrap introduce?\n```html\n<!-- Bootstrap opinionated design -->\n<div class=\"container\"><div class=\"row\"><div class=\"col-md-6\">...\n```",
+    "options": ["No trade-offs, only benefits", "Reduced CSS writing, increased HTML markup", "Framework forces component structure", "Prevents custom styling"],
+    "correctIndex": 1,
+    "explanation": "Frameworks shift complexity from CSS files to HTML markup; they reduce CSS but increase HTML boilerplate and HTML/CSS coupling.",
+    "difficulty": "Medium-Hard",
+    "tags": ["framework-tradeoffs", "markup-complexity", "abstraction"]
+  }
+]

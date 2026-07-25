@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Github Workflow",
+    "question": "You enable branch protection rules on main that require passing status checks before merge. A pull request is approved but the status check is failing on an unrelated third-party service (e.g., external monitoring). The check is known to be flaky. How do you proceed safely?",
+    "options": [
+      "Use the GitHub admin override to dismiss the check if you trust the code, or wait for the service to stabilize and re-run the check",
+      "Disable branch protection to unblock the PR",
+      "Force-merge the PR despite the failing check",
+      "Close the PR and wait indefinitely"
+    ],
+    "correctIndex": 0,
+    "explanation": "GitHub allows admins to dismiss stale checks and re-run them; dismissing documents that the failure is known; re-running confirms whether it is flaky or persistent.",
+    "difficulty": "Medium",
+    "tags": ["branch-protection", "status-checks", "override"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Github Workflow",
+    "question": "A collaborator forks your repository and makes changes. They want to contribute back by creating a pull request, but they fear their fork will diverge over time. Should they immediately sync their fork with your main repository, and if so, when?",
+    "options": [
+      "They should sync before creating the PR using 'Fetch upstream' or git fetch upstream, so their PR is based on the latest main and minimizes merge conflicts",
+      "They should never sync to avoid losing their work",
+      "They should sync after merging the PR to update their fork",
+      "Syncing is not necessary and makes no difference"
+    ],
+    "correctIndex": 0,
+    "explanation": "Syncing before PR creation ensures the feature branch is current with main, reducing conflicts and review lag; GitHub's UI and git fetch upstream both accomplish this.",
+    "difficulty": "Medium",
+    "tags": ["fork-sync", "upstream", "pull-request"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Github Workflow",
+    "question": "You create a pull request, but immediately realize you committed sensitive information (API key, password). The PR has not been merged yet. What is your remediation strategy?",
+    "options": [
+      "Close the PR without merging, use filter-branch/filter-repo to remove the sensitive data from the branch, rotate the credentials immediately, then push the corrected branch",
+      "Edit the file in GitHub's UI to remove the secret",
+      "Ask the reviewer to ignore the secret",
+      "Delete the PR and pretend it never existed"
+    ],
+    "correctIndex": 0,
+    "explanation": "Closing prevents merge; filter operations clean history; credential rotation is mandatory because the secret is in git history; pushing the cleaned branch enables a new PR.",
+    "difficulty": "Hard",
+    "tags": ["secrets", "remediation", "filter-branch"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Github Workflow",
+    "question": "You have a multi-commit pull request where the first commit has a bug and the last commit depends on it. A reviewer asks for the first commit to be fixed. After amending the first commit, what is the simplest way to update the PR?",
+    "options": [
+      "Use git rebase -i to amend the first commit, then force-push the branch; GitHub automatically updates the PR with the new history",
+      "Close the current PR and create a new one",
+      "Revert the first commit and add a new fix commit",
+      "Ask the reviewer to accept the buggy commit as-is"
+    ],
+    "correctIndex": 0,
+    "explanation": "force-push updates the remote branch; GitHub detects the push and refreshes the PR's commit list; reviewers see the updated commits.",
+    "difficulty": "Medium",
+    "tags": ["amend", "force-push", "pull-request-update"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Github Workflow",
+    "question": "You configure GitHub Actions to run tests on every pull request. A test fails in the PR but passes locally. The test is flaky (sometimes passes, sometimes fails). What is the best workflow to avoid false negatives blocking PRs?",
+    "options": [
+      "Mark flaky tests with a retry mechanism (e.g., pytest-rerunfailures) and allow a certain number of retries in CI, or manually re-run the workflow from GitHub UI",
+      "Disable the flaky test entirely",
+      "Force-merge PRs that have flaky test failures",
+      "Tell developers to ignore CI failures"
+    ],
+    "correctIndex": 0,
+    "explanation": "Retrying flaky tests reduces false negatives while catching real failures; GitHub UI allows manual re-run without code changes; this is safer than disabling tests.",
+    "difficulty": "Medium",
+    "tags": ["flaky-tests", "ci-cd", "workflow"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Github Workflow",
+    "question": "A pull request is open with changes that conflict with changes from another PR that was just merged. How does GitHub handle this conflict, and how should you resolve it?",
+    "options": [
+      "GitHub marks the PR as 'conflicted'; you must resolve conflicts locally by rebasing onto main, then force-push the branch",
+      "GitHub automatically merges both PRs",
+      "The conflicted PR is automatically closed",
+      "GitHub requests a manual override"
+    ],
+    "correctIndex": 0,
+    "explanation": "GitHub detects conflicts and blocks merge; rebasing onto the updated main resolves conflicts locally; force-push updates the PR with the resolved state.",
+    "difficulty": "Medium",
+    "tags": ["merge-conflict", "pull-request", "rebase"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Github Workflow",
+    "question": "You want to automate merging a pull request once all conditions are met (status checks pass, approvals received, no conflicts). GitHub has a feature for this. Which feature enables automatic merge?",
+    "options": [
+      "Enable 'auto-merge' on the PR, selecting the merge strategy (squash, rebase, or merge commit); GitHub merges automatically when conditions are satisfied",
+      "Configure a GitHub Action to run git merge",
+      "Use GitHub's webhook to trigger a script",
+      "Manually merge after each status check passes"
+    ],
+    "correctIndex": 0,
+    "explanation": "GitHub's auto-merge feature (available on some accounts) automatically merges PRs when all branch protection rules are satisfied.",
+    "difficulty": "Medium",
+    "tags": ["auto-merge", "automation", "branch-protection"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Github Workflow",
+    "question": "You create a draft pull request to gather early feedback without triggering automated workflows. When you are ready to open it for review, should workflows re-run, and how do you transition it?",
+    "options": [
+      "Mark the PR as 'ready for review' to transition from draft status; GitHub re-runs workflows when the status changes from draft to open",
+      "Close and recreate the PR to trigger workflows",
+      "Workflows run automatically on draft PRs regardless",
+      "Workflows never run on draft PRs"
+    ],
+    "correctIndex": 0,
+    "explanation": "GitHub workflows skip draft PRs by default (can be configured); changing from draft to ready re-runs them, allowing feedback before formal review.",
+    "difficulty": "Medium",
+    "tags": ["draft-pr", "workflow-automation", "review-workflow"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Github Workflow",
+    "question": "Your team policy requires that pull request commits be squashed before merge to maintain a clean main history. However, a PR contains logically separate commits that should remain distinct. What is the trade-off, and what alternative could you propose?",
+    "options": [
+      "Squashing loses individual commit history; propose using 'rebase and merge' to preserve commits while avoiding merge commits, or allow exceptions for logically distinct changes",
+      "Always squash and accept the loss",
+      "Use merge commits to preserve everything",
+      "Disable the policy for this PR"
+    ],
+    "correctIndex": 0,
+    "explanation": "Squash simplifies main but loses commit context; rebase preserves commits in linear history; policy exceptions can document intentional deviations.",
+    "difficulty": "Medium",
+    "tags": ["squash", "merge-strategy", "commit-hygiene"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Github Workflow",
+    "question": "A pull request references a GitHub Issue via 'Closes #123' in the PR description. After the PR is merged, what happens to the linked issue?",
+    "options": [
+      "GitHub automatically closes the issue; the issue page shows the PR merge commit as the closing event",
+      "The issue remains open until manually closed",
+      "The issue is deleted",
+      "GitHub creates a new issue for tracking"
+    ],
+    "correctIndex": 0,
+    "explanation": "GitHub detects closing keywords (Closes, Fixes, Resolves) and auto-closes linked issues on PR merge; this creates an audit trail linking issue to PR to commit.",
+    "difficulty": "Medium",
+    "tags": ["issue-linking", "auto-close", "workflow-automation"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "React Core Concepts",
+    "question": "A component renders before setState completes. Why doesn't the state update immediately in: this.setState({ count: 1 }); console.log(this.state.count);?",
+    "options": ["setState is asynchronous and batched, state updates after render", "setState is synchronous but logging happens before update", "console.log runs in a different execution context", "setState fails silently when called in constructor"],
+    "correctIndex": 0,
+    "explanation": "setState is asynchronous; React batches updates and re-renders, so this.state.count is still the old value during synchronous code.",
+    "difficulty": "Medium",
+    "tags": ["setstate", "async", "batching"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Core Concepts",
+    "question": "Why might rendering the same component instance multiple times with different props still show stale props in handlers? function Child({ count }) { return <button onClick={() => console.log(count)}>Click</button>; }",
+    "options": ["The handler closes over the current props, always fresh", "Props are captured at function creation time, click logs old value", "onClick handlers must use useCallback to see new props", "React re-binds handlers on every render automatically"],
+    "correctIndex": 1,
+    "explanation": "If Parent doesn't re-render Child, the component function doesn't run again, so the closure captures stale props; re-rendering fixes it.",
+    "difficulty": "Medium-Hard",
+    "tags": ["props", "closure", "stale"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Core Concepts",
+    "question": "A controlled component updates on every keystroke with onChange. Why might uncontrolled components be faster? <input defaultValue=\"text\" />",
+    "options": ["Uncontrolled skips state update, fewer re-renders of parent", "Controlled is actually faster, uncontrolled causes re-renders", "Uncontrolled manages its own DOM, avoiding React batching", "Both are identical in performance, choice is stylistic"],
+    "correctIndex": 0,
+    "explanation": "Uncontrolled input updates the DOM directly without state; no parent re-render needed, reducing work per keystroke.",
+    "difficulty": "Medium",
+    "tags": ["controlled", "uncontrolled", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Core Concepts",
+    "question": "Given a component that uses both state and props, which typically requires more re-renders? function Parent() { const [x, setX] = useState(0); return <Child x={x} z={x} />; }",
+    "options": ["Props cause fewer re-renders because state is internal", "State updates cause Parent to re-render, Child always re-renders", "Only Child re-renders, Parent state is isolated", "State and props are equivalent; re-renders are the same"],
+    "correctIndex": 1,
+    "explanation": "State update at Parent triggers Parent re-render, which re-renders Child with new props regardless of whether Child props changed.",
+    "difficulty": "Medium",
+    "tags": ["state", "props", "rerender"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Core Concepts",
+    "question": "Why is a React fragment used instead of a div wrapper? <>{children}</> vs <div>{children}</div>",
+    "options": ["Fragment is slightly faster but functionally identical", "Fragment doesn't add DOM nodes, avoiding layout thrashing", "div is always preferred, fragment is a legacy feature", "Fragment preserves CSS grid/flex parent-child relationships"],
+    "correctIndex": 1,
+    "explanation": "Fragment doesn't render a DOM element, so it avoids adding an extra node that could break CSS layout (especially grid/flex) or complicate selectors.",
+    "difficulty": "Medium",
+    "tags": ["fragment", "dom", "layout"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Core Concepts",
+    "question": "Why might React.memo(Component) prevent a child from updating even when its props change? const Memoized = React.memo(Child);",
+    "options": ["memo uses shallow equality by default, so nested objects appear unchanged", "memo caches props forever, new props are ignored", "memo only works with function components, breaks with class", "memo prevents all re-renders, defeating prop updates"],
+    "correctIndex": 0,
+    "explanation": "React.memo's default equality check compares props with ===; if an object reference didn't change, memo skips re-render even though the object contents changed.",
+    "difficulty": "Medium-Hard",
+    "tags": ["memo", "equality", "shallow"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Core Concepts",
+    "question": "Given multiple state setters called in sequence: setState(a); setState(b); setState(c);, how many re-renders occur in React 18+?",
+    "options": ["Three re-renders, one per setter", "One re-render, all updates batched into a single commit", "Two re-renders, async setters batch with a delay", "No re-render until the event handler completes"],
+    "correctIndex": 1,
+    "explanation": "React 18 batches all state updates in event handlers and effects, committing once; this reduces re-renders but requires understanding batching boundaries.",
+    "difficulty": "Medium",
+    "tags": ["batching", "setstate", "render"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Core Concepts",
+    "question": "Why does a key prop matter when rendering a list? Why might list.map(item => <Item key={item.id} />) fail if item.id is not stable?",
+    "options": ["key helps React identify which items changed, deleted, or added", "key is optional; React finds items by position automatically", "key enforces immutability, preventing accidental mutations", "Unstable keys cause re-renders, stable keys skip them"],
+    "correctIndex": 0,
+    "explanation": "Unstable keys (like array index or random) trick React into thinking items changed when they didn't, causing state loss and DOM thrashing.",
+    "difficulty": "Medium",
+    "tags": ["key", "list", "identity"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Core Concepts",
+    "question": "A component passes `null` or `undefined` as children: <Parent>{null}</Parent> vs <Parent>{undefined}</Parent>. What renders?",
+    "options": ["Both render nothing, null and undefined are ignored", "null renders nothing, undefined throws error", "Both render the strings 'null' and 'undefined'", "Only undefined is ignored, null renders empty text"],
+    "correctIndex": 0,
+    "explanation": "React treats null, undefined, true, and false as empty and renders nothing; this is useful for conditional rendering without empty text nodes.",
+    "difficulty": "Medium",
+    "tags": ["children", "null", "conditional"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Core Concepts",
+    "question": "Given class Component { render() { return <div>{this.props.children}</div>; } }, why might wrapping a function child cause issues? <Component>{() => <p>Text</p>}</Component>",
+    "options": ["Function is rendered as a string '[Function]' instead of being called", "Children as functions are valid and auto-executed by React", "Functions are ignored, only JSX children render", "This pattern requires render props and is never recommended"],
+    "correctIndex": 0,
+    "explanation": "React renders children directly; a function child becomes text '[Function]' unless the component explicitly calls the function (render props pattern).",
+    "difficulty": "Medium-Hard",
+    "tags": ["children", "function", "renderprop"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Concurrency Multithreading",
+    "question": "What does the GIL prevent in Python threading?\n```python\nimport threading\n\ndef increment(lock):\n    global counter\n    with lock:\n        counter += 1\n```",
+    "options": ["All parallelism", "Only CPU-bound true parallelism", "I/O operations", "Thread creation"],
+    "correctIndex": 1,
+    "explanation": "The Global Interpreter Lock (GIL) prevents multiple threads from executing Python bytecode simultaneously, only I/O-bound work benefits.",
+    "difficulty": "Hard",
+    "tags": ["gil", "threading", "parallelism"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Concurrency Multithreading",
+    "question": "What does threading.Lock protect against?\n```python\nimport threading\n\nlock = threading.Lock()\nwith lock:\n    shared_data = shared_data + 1\n```",
+    "options": ["Network errors", "Race conditions on shared data", "GIL release", "Exception handling"],
+    "correctIndex": 1,
+    "explanation": "A Lock ensures only one thread accesses shared data at a time, preventing race conditions.",
+    "difficulty": "Medium",
+    "tags": ["lock", "race-condition", "synchronization"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Concurrency Multithreading",
+    "question": "What does threading.Event provide?\n```python\nimport threading\n\nevent = threading.Event()\nevent.set()\nif event.is_set():\n    print('event fired')\n```",
+    "options": ["Task scheduling", "Signal passing between threads", "Lock mechanism", "Exception throwing"],
+    "correctIndex": 1,
+    "explanation": "Event allows threads to wait for a signal from another thread via set() and is_set().",
+    "difficulty": "Medium",
+    "tags": ["event", "threading", "signal"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Concurrency Multithreading",
+    "question": "What does queue.Queue ensure?\n```python\nimport queue\n\nq = queue.Queue()\nq.put(1)\nvalue = q.get()\n```",
+    "options": ["Thread safety", "Data ordering", "No blocking", "Exception free"],
+    "correctIndex": 0,
+    "explanation": "Queue is thread-safe; multiple threads can put/get without explicit locks.",
+    "difficulty": "Medium",
+    "tags": ["queue", "thread-safe", "synchronization"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Concurrency Multithreading",
+    "question": "What does threading.Condition provide over Lock?\n```python\nimport threading\n\ncondition = threading.Condition()\nwith condition:\n    while not ready:\n        condition.wait()\n    # process\n```",
+    "options": ["Faster locking", "Wait/notify mechanism", "Exception handling", "Automatic retries"],
+    "correctIndex": 1,
+    "explanation": "Condition combines a lock with wait/notify, allowing threads to wait for specific conditions.",
+    "difficulty": "Medium-Hard",
+    "tags": ["condition", "wait", "notify"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Concurrency Multithreading",
+    "question": "What does concurrent.futures.ThreadPoolExecutor provide?\n```python\nfrom concurrent.futures import ThreadPoolExecutor\n\nwith ThreadPoolExecutor(max_workers=3) as executor:\n    future = executor.submit(task, arg)\n    result = future.result()\n```",
+    "options": ["Manual thread management", "Managed pool of worker threads", "Locks and events", "Async syntax"],
+    "correctIndex": 1,
+    "explanation": "ThreadPoolExecutor manages a pool of threads, simplifying concurrent task execution.",
+    "difficulty": "Medium",
+    "tags": ["threadpoolexecutor", "concurrency", "thread-pool"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Concurrency Multithreading",
+    "question": "What does future.result() do?\n```python\nfrom concurrent.futures import ThreadPoolExecutor\n\nwith ThreadPoolExecutor() as executor:\n    future = executor.submit(lambda: 42)\n    value = future.result()\n```",
+    "options": ["Returns immediately", "Blocks until task completes, returns result", "Cancels the task", "Raises exception"],
+    "correctIndex": 1,
+    "explanation": "result() waits for the future to complete and returns its value or raises its exception.",
+    "difficulty": "Medium",
+    "tags": ["future", "result", "blocking"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Concurrency Multithreading",
+    "question": "What does asyncio provide instead of threading?\n```python\nimport asyncio\n\nasync def fetch(url):\n    await asyncio.sleep(1)\n    return 'data'\n```",
+    "options": ["Threads", "Cooperative multitasking in single thread", "Process pools", "Locks"],
+    "correctIndex": 1,
+    "explanation": "asyncio uses coroutines for lightweight concurrency without threading, avoiding GIL limitations.",
+    "difficulty": "Medium-Hard",
+    "tags": ["asyncio", "async-await", "cooperative-multitasking"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Concurrency Multithreading",
+    "question": "What happens with this deadlock scenario?\n```python\nimport threading\n\nlock1 = threading.Lock()\nlock2 = threading.Lock()\n\n# Thread 1: acquire lock1, then lock2\n# Thread 2: acquire lock2, then lock1\n```",
+    "options": ["Works fine", "Both threads wait forever", "One thread wins", "Automatic resolution"],
+    "correctIndex": 1,
+    "explanation": "Circular lock dependencies cause deadlock; each thread holds one lock while waiting for the other.",
+    "difficulty": "Hard",
+    "tags": ["deadlock", "synchronization", "lock-ordering"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Concurrency Multithreading",
+    "question": "What does semaphore.Semaphore control?\n```python\nimport threading\n\nsem = threading.Semaphore(3)\nwith sem:\n    # critical section\n    pass\n```",
+    "options": ["Binary lock", "Counter-based access control", "Event signaling", "Exception handling"],
+    "correctIndex": 1,
+    "explanation": "Semaphore(n) allows at most n threads to enter; each acquire decrements, release increments.",
+    "difficulty": "Medium-Hard",
+    "tags": ["semaphore", "counting-semaphore", "access-control"]
+  }
+]

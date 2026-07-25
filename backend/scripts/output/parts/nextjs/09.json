@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "Performance Optimization",
+    "question": "You use the next/image Image component with width=800, height=600. The user's device is 400px wide. How many image variants does Next.js generate?",
+    "options": ["1 (the original 800×600)", "Multiple variants (srcset optimization)", "Depends on device pixel ratio and browser", "Only 1; you must manually provide srcset"],
+    "correctIndex": 1,
+    "explanation": "next/image generates responsive variants (srcset) for different viewport sizes and pixel densities automatically.",
+    "difficulty": "Medium",
+    "tags": ["image-optimization", "responsive-images", "srcset"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Performance Optimization",
+    "question": "You have a large library (lodash, moment) used only on one page. How do you avoid bundling it in the main app bundle?",
+    "options": ["Use dynamic import with ssr: false", "Use dynamic import with explicit page-level code splitting", "Move the library to an API endpoint", "Import in a client component only"],
+    "correctIndex": 1,
+    "explanation": "dynamic() with SSR enabled (default) creates page-level chunks; the library is bundled only for pages using it.",
+    "difficulty": "Medium-Hard",
+    "tags": ["code-splitting", "dynamic-imports", "bundle-size"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Performance Optimization",
+    "question": "You import a font from Google Fonts with <link> in the <head>. On slow networks, the page renders before fonts load. What's the solution?",
+    "options": ["Use next/font to inline fonts and reduce network requests", "Add font-display: swap to prevent FOIT", "Increase CSS priority", "Defer font loading to after first paint"],
+    "correctIndex": 0,
+    "explanation": "next/font optimizes font loading: it preloads, inlines critical CSS, and prevents layout shift (FOUT/FOIT).",
+    "difficulty": "Medium",
+    "tags": ["fonts", "performance", "web-vitals"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Performance Optimization",
+    "question": "You add next/script with strategy='lazyOnload' to load analytics. On what condition does the script load?",
+    "options": ["On page load (blocking render)", "After page load is complete", "After user interaction", "Only when the component mounts"],
+    "correctIndex": 1,
+    "explanation": "lazyOnload injects the script after the page loads; it doesn't block rendering.",
+    "difficulty": "Medium",
+    "tags": ["next-script", "performance", "lazy-loading"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Performance Optimization",
+    "question": "You use getStaticProps with revalidate: 3600 to cache API responses. Does this reduce API calls during the cache window?",
+    "options": ["No; API is called on every request", "Yes; each visitor gets the cached version", "Only for the first visitor after ISR revalidates", "Yes; but only on the build server, not clients"],
+    "correctIndex": 1,
+    "explanation": "ISR caches HTML; during the revalidate window, all visitors see cached content without re-querying the API.",
+    "difficulty": "Medium",
+    "tags": ["isr", "caching", "api-calls"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Performance Optimization",
+    "question": "Your app loads 5 fonts, 10 stylesheets, and 20 scripts in the <head>. Users report slow first paint. What's the most impactful fix?",
+    "options": ["Defer all resources to after first paint", "Inline critical CSS and defer non-critical resources", "Use a CDN for all assets", "Reduce the number of components per page"],
+    "correctIndex": 1,
+    "explanation": "Critical rendering path optimization (inline critical CSS, defer non-critical) has the highest impact on first paint.",
+    "difficulty": "Medium-Hard",
+    "tags": ["performance", "critical-rendering-path", "optimization"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Performance Optimization",
+    "question": "You import a heavy component unconditionally in a page. It adds 500KB to the bundle. Should you use dynamic() to split it?",
+    "options": ["Only if the component is below the fold", "Yes; always split large components", "Only if the component is rarely used", "Only if getStaticProps is used"],
+    "correctIndex": 2,
+    "explanation": "Code splitting is beneficial for components not needed on every visit or below-the-fold content; always-visible heavy components still impact initial load.",
+    "difficulty": "Medium-Hard",
+    "tags": ["code-splitting", "bundle-size", "optimization"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Performance Optimization",
+    "question": "You run `npm run build` and see bundle size warnings: main chunk is 800KB. Is this a problem?",
+    "options": ["No; Next.js can handle large bundles", "Yes; 800KB main bundle increases first paint time", "Only on slow networks", "Depends on the device's CPU"],
+    "correctIndex": 1,
+    "explanation": "Large main bundles delay first paint and time-to-interactive; 800KB is excessive and should be optimized.",
+    "difficulty": "Medium",
+    "tags": ["bundle-size", "performance", "web-vitals"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Performance Optimization",
+    "question": "You prefetch a link with Link prefetch={true}. When does the prefetch occur?",
+    "options": ["On page load", "When the link is in the viewport", "When the user hovers over the link", "Immediately when the Link component mounts"],
+    "correctIndex": 1,
+    "explanation": "Link prefetch loads when the link enters the viewport; this is a performance optimization for anticipated navigation.",
+    "difficulty": "Medium",
+    "tags": ["link-prefetch", "performance", "navigation"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Performance Optimization",
+    "question": "You use next/script to load a third-party widget (500KB). It blocks rendering for 2 seconds. What strategy minimizes impact?",
+    "options": ["strategy='beforeInteractive'", "strategy='afterInteractive'", "strategy='lazyOnload' or defer the widget entirely", "Load via worker thread"],
+    "correctIndex": 2,
+    "explanation": "lazyOnload defers the widget until after page load; for non-critical widgets, this is ideal.",
+    "difficulty": "Medium-Hard",
+    "tags": ["next-script", "performance", "third-party-scripts"]
+  }
+]

@@ -22,11 +22,20 @@ import TextArea from '../../components/ui/TextArea';
 import Badge from '../../components/ui/Badge';
 import { formatAlertMessage } from '../../utils/errorFormatter';
 
-export default function GigsMarketplace({ user, token, theme, profile, onUpdateProfile }) {
+export default function GigsMarketplace({ user, token, theme, profile, onUpdateProfile, onOpenCompanyProfile, autoSelectOpportunity, setAutoSelectOpportunity }) {
   const [activeSubTab, setActiveSubTab] = useState('browse'); // 'browse', 'post', 'my-gigs'
   const [gigs, setGigs] = useState([]);
   const [myGigs, setMyGigs] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (autoSelectOpportunity && autoSelectOpportunity.type === 'gig') {
+      setSelectedGigId(autoSelectOpportunity.id);
+      fetchGigDetails(autoSelectOpportunity.id);
+      setAutoSelectOpportunity(null);
+    }
+  }, [autoSelectOpportunity, setAutoSelectOpportunity]);
+
   const [q, setQ] = useState('');
   const [selectedSkills, setSelectedSkills] = useState('');
   
@@ -750,6 +759,39 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                         }`}
                       >
                         <div className="space-y-2">
+                          {gig.company && (
+                            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-outline-variant/30">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onOpenCompanyProfile) onOpenCompanyProfile(gig.company.id);
+                                }}
+                                className="w-6 h-6 rounded-lg bg-surface-container-low border border-outline-variant flex items-center justify-center shrink-0 overflow-hidden hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                              >
+                                {gig.company.logoUrl ? (
+                                  <img src={gig.company.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                                ) : (
+                                  <span className="text-[10px] text-primary font-bold">{gig.company.name.charAt(0)}</span>
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onOpenCompanyProfile) onOpenCompanyProfile(gig.company.id);
+                                }}
+                                className="text-[10px] font-bold text-on-surface-variant hover:text-primary hover:underline transition-colors flex items-center gap-1 cursor-pointer"
+                              >
+                                {gig.company.name}
+                                {gig.company.verified && (
+                                  <span className="text-[8px] bg-success-container text-success px-1.5 py-0 rounded font-bold uppercase tracking-wider scale-90 font-mono">
+                                    ✓
+                                  </span>
+                                )}
+                              </button>
+                            </div>
+                          )}
                           <div className="flex justify-between items-start gap-2">
                             <h3 className="text-xs font-headline font-bold text-on-surface line-clamp-1">{gig.title}</h3>
                             <div className="flex items-center gap-1 bg-success-container/30 px-2 py-0.5 rounded border border-success/20 text-success text-[10px] font-mono font-extrabold shrink-0">
@@ -798,13 +840,51 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                         <div className="flex justify-between items-start gap-4">
                           <div>
                             <h2 className="text-base font-headline font-bold text-on-surface">{gigDetails.title}</h2>
-                            <p className="text-xs text-on-surface-variant mt-1 flex items-center gap-1.5">
-                              <User className="w-3.5 h-3.5 text-primary" />
-                              <span>Posted by {gigDetails.ownerName || 'Client'}</span>
-                              <span className="px-1.5 py-0.5 bg-surface-container-high text-[9px] font-mono uppercase rounded text-on-surface-variant">
-                                {gigDetails.ownerRole}
-                              </span>
-                            </p>
+                            {gigDetails.company ? (
+                              <div className="flex items-center gap-2 mt-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (onOpenCompanyProfile) onOpenCompanyProfile(gigDetails.company.id);
+                                  }}
+                                  className="w-7 h-7 rounded-xl bg-surface-container-low border border-outline-variant flex items-center justify-center shrink-0 overflow-hidden hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                >
+                                  {gigDetails.company.logoUrl ? (
+                                    <img src={gigDetails.company.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                                  ) : (
+                                    <span className="text-xs text-primary font-bold">{gigDetails.company.name.charAt(0)}</span>
+                                  )}
+                                </button>
+                                <div className="text-[11px] text-on-surface-variant flex items-center gap-1">
+                                  <span>Hiring:</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (onOpenCompanyProfile) onOpenCompanyProfile(gigDetails.company.id);
+                                    }}
+                                    className="font-bold text-on-surface hover:text-primary hover:underline transition-colors flex items-center gap-1 cursor-pointer"
+                                  >
+                                    {gigDetails.company.name}
+                                    {gigDetails.company.verified && (
+                                      <span className="text-[8px] bg-success-container text-success px-1.5 py-0.5 rounded font-bold uppercase tracking-wider font-mono">
+                                        ✓ Verified
+                                      </span>
+                                    )}
+                                  </button>
+                                  {gigDetails.company.companySize && (
+                                    <span className="opacity-60">&bull; {gigDetails.company.companySize}</span>
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-xs text-on-surface-variant mt-1 flex items-center gap-1.5">
+                                <User className="w-3.5 h-3.5 text-primary" />
+                                <span>Posted by {gigDetails.ownerName || 'Client'}</span>
+                                <span className="px-1.5 py-0.5 bg-surface-container-high text-[9px] font-mono uppercase rounded text-on-surface-variant">
+                                  {gigDetails.ownerRole}
+                                </span>
+                              </p>
+                            )}
                           </div>
                           <div className="text-right shrink-0">
                             <div className="text-lg font-bold text-emerald-500 font-mono">${gigDetails.budget}</div>
@@ -1471,13 +1551,9 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         </div>
       )}
 
-      {/* Floating Alert Modal Overlay */}
+      {/* Top-Right Sliding Toast Notification */}
       {alertConfig && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md shadow-2xl relative">
-            {formatAlertMessage(alertConfig.message, alertConfig.type, () => setAlertConfig(null))}
-          </div>
-        </div>
+        formatAlertMessage(alertConfig.message, alertConfig.type, () => setAlertConfig(null))
       )}
     </div>
   );

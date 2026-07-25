@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Debugging Techniques",
+    "question": "What does the pdb debugger step command do?\n```python\nimport pdb\n\ndef function():\n    pdb.set_trace()  # Breakpoint\n    x = 1\n    y = 2\n```",
+    "options": ["Skip execution", "Execute next line and stop", "Jump to end", "Continue to next breakpoint"],
+    "correctIndex": 1,
+    "explanation": "pdb 's' (step) executes the next line and halts, allowing inspection of each statement.",
+    "difficulty": "Medium",
+    "tags": ["pdb", "debugger", "step"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Debugging Techniques",
+    "question": "What does pdb next command do vs step?\n```python\nimport pdb\n\ndef helper():\n    return 42\n\ndef main():\n    pdb.set_trace()\n    result = helper()  # step vs next here\n```",
+    "options": ["Same thing", "step enters functions, next steps over them", "next enters, step skips", "Both enter functions"],
+    "correctIndex": 1,
+    "explanation": "next skips function calls, step enters them; both stop after the line executes.",
+    "difficulty": "Medium",
+    "tags": ["pdb", "next", "step"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Debugging Techniques",
+    "question": "What does pdb continue do?\n```python\nimport pdb\n\npdb.set_trace()\nprint('first')\nprint('second')\n```",
+    "options": ["Steps to next line", "Resumes execution until next breakpoint", "Exits debugger", "Stops the program"],
+    "correctIndex": 1,
+    "explanation": "continue 'c' resumes program execution until the next breakpoint or program end.",
+    "difficulty": "Medium",
+    "tags": ["pdb", "continue", "execution"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Debugging Techniques",
+    "question": "What does pdb print command show?\n```python\nimport pdb\n\ndef func():\n    x = 10\n    pdb.set_trace()\n    print(x)  # In pdb: print x or p x\n```",
+    "options": ["Prints x to console", "Shows x value in debugger", "Syntax error", "Skips to next line"],
+    "correctIndex": 1,
+    "explanation": "pdb 'p x' shows the value of x; pdb uses 'print' as a debugger command.",
+    "difficulty": "Medium",
+    "tags": ["pdb", "print", "inspection"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Debugging Techniques",
+    "question": "What does the traceback module help with?\n```python\nimport traceback\n\ntry:\n    1 / 0\nexcept:\n    traceback.print_exc()\n```",
+    "options": ["Prevents exceptions", "Prints formatted exception stack trace", "Logs to file", "Suppresses errors"],
+    "correctIndex": 1,
+    "explanation": "traceback.print_exc() prints a formatted exception traceback, useful for debugging in except blocks.",
+    "difficulty": "Medium",
+    "tags": ["traceback", "exception-debugging", "stack-trace"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Debugging Techniques",
+    "question": "What does logging.DEBUG show vs logging.INFO?\n```python\nimport logging\nlogging.basicConfig(level=logging.DEBUG)\nlogging.debug('detail')\nlogging.info('info')\nlogging.warning('warning')\n```",
+    "options": ["DEBUG only", "DEBUG and INFO but not WARNING", "All three levels", "WARNING only"],
+    "correctIndex": 2,
+    "explanation": "Setting level to DEBUG shows all messages at DEBUG and above; INFO > DEBUG > WARNING hierarchy.",
+    "difficulty": "Medium",
+    "tags": ["logging", "log-levels", "debugging"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Debugging Techniques",
+    "question": "What does warnings.warn() help with?\n```python\nimport warnings\n\ndef deprecated_function():\n    warnings.warn('Function is deprecated', DeprecationWarning)\n    pass\n```",
+    "options": ["Stops execution", "Issues a warning that can be filtered", "Raises an exception", "Logs to file"],
+    "correctIndex": 1,
+    "explanation": "warnings.warn() issues warnings that can be suppressed, filtered, or converted to errors.",
+    "difficulty": "Medium",
+    "tags": ["warnings", "deprecation", "warning-control"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Debugging Techniques",
+    "question": "What does inspect module provide?\n```python\nimport inspect\n\ndef func(a, b):\n    pass\n\nsig = inspect.signature(func)\n```",
+    "options": ["Monitors execution", "Introspects function signatures and source", "Modifies functions", "Creates breakpoints"],
+    "correctIndex": 1,
+    "explanation": "inspect lets you examine function signatures, source code, and call stack for debugging.",
+    "difficulty": "Medium-Hard",
+    "tags": ["inspect", "introspection", "metadata"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Debugging Techniques",
+    "question": "What does profiling with cProfile show?\n```python\nimport cProfile\n\ncProfile.run('function()')\n```",
+    "options": ["Memory usage", "Time spent in each function", "Code coverage", "Error locations"],
+    "correctIndex": 1,
+    "explanation": "cProfile shows function call counts and cumulative time, identifying performance bottlenecks.",
+    "difficulty": "Medium",
+    "tags": ["cprofile", "profiling", "performance"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Debugging Techniques",
+    "question": "What is the difference between breakpoint() and pdb.set_trace()?\n```python\n# Python 3.7+\nbreakpoint()  # vs\nimport pdb; pdb.set_trace()\n```",
+    "options": ["Same thing", "breakpoint() is simpler built-in", "breakpoint() is faster", "breakpoint() is older"],
+    "correctIndex": 1,
+    "explanation": "breakpoint() is a built-in that calls sys.breakpointhook (pdb.set_trace by default), more convenient.",
+    "difficulty": "Medium",
+    "tags": ["breakpoint", "pdb", "debugging"]
+  }
+]

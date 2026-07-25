@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "Context API",
+    "question": "Given const MyContext = React.createContext(); MyContext.Provider, why might a consumer outside the Provider not receive context value?",
+    "options": ["Context only provides value to children inside Provider, outside consumers get undefined", "Context broadcasts to all components globally", "Consumers always receive value if context exists", "Provider is optional for context"],
+    "correctIndex": 0,
+    "explanation": "useContext() returns undefined if called outside a Provider; context value is only available to descendants of the specific Provider tree.",
+    "difficulty": "Medium",
+    "tags": ["context", "provider", "scope"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Context API",
+    "question": "Why might useContext(MyContext) cause the entire component tree to re-render when the context value changes? const value = useMemo(() => ({ x }), [x]);",
+    "options": ["Context consumers subscribe to the entire value object; any change re-renders all consumers", "useContext is memoized, no re-renders", "Context changes are batched and optimized", "Only the changed property re-renders"],
+    "correctIndex": 0,
+    "explanation": "Context doesn't do fine-grained updates; changing any part of the context value re-renders all consumers, even if they don't use that part.",
+    "difficulty": "Medium-Hard",
+    "tags": ["context", "rerender", "provider"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Context API",
+    "question": "Given <Context.Provider value={{ x: 1, setX }}>, why might not memoizing the value cause children to re-render on every parent render?",
+    "options": ["New object on parent re-render, Context sees value changed, re-renders all consumers", "Object identity is irrelevant for context", "Context auto-memoizes values", "Parent re-renders don't affect context consumers"],
+    "correctIndex": 0,
+    "explanation": "{{ x: 1, setX }} creates a new object every render; Context compares with === and sees 'change', re-rendering all consumers even if x didn't change.",
+    "difficulty": "Medium-Hard",
+    "tags": ["context", "object", "memo"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Context API",
+    "question": "Why is creating multiple contexts better than one large context? const AuthContext = ...; const ThemeContext = ...;",
+    "options": ["Multiple contexts let consumers opt into only what they need, reducing unnecessary re-renders", "One large context is always faster", "Multiple contexts always cause more re-renders", "Number of contexts doesn't matter"],
+    "correctIndex": 0,
+    "explanation": "Multiple contexts allow components to subscribe to only relevant data; one large context causes all consumers to re-render when any part changes.",
+    "difficulty": "Medium",
+    "tags": ["context", "multiple", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Context API",
+    "question": "Given const value = useContext(MyContext); without a Provider, what does value become?",
+    "options": ["value is undefined (context has no default)", "value is the default value passed to createContext", "useContext throws an error", "value is null"],
+    "correctIndex": 1,
+    "explanation": "createContext(defaultValue) provides defaultValue if no Provider exists; useContext returns the default, not undefined (unless default is undefined).",
+    "difficulty": "Medium",
+    "tags": ["context", "default", "provider"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Context API",
+    "question": "Why might useContext not work inside a Provider of the same context? function Component() { const value = useContext(MyContext); return <MyContext.Provider value={value}> ... </MyContext.Provider>; }",
+    "options": ["Context nesting works; child Provider overrides parent value", "useContext always reads the nearest Provider", "Nested Providers cause errors", "Context doesn't support nesting"],
+    "correctIndex": 1,
+    "explanation": "Nested Providers work; useContext finds the nearest Provider in the component tree, so the child Provider overrides the parent for its descendants.",
+    "difficulty": "Medium-Hard",
+    "tags": ["context", "nesting", "provider"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Context API",
+    "question": "Given multiple useContext calls in one component: const x = useContext(Ctx1); const y = useContext(Ctx2);, why is this safe?",
+    "options": ["Multiple useContext calls are allowed, each subscribes to its context", "Only one useContext per component is allowed", "useContext calls must be in a specific order", "Multiple contexts cause state conflicts"],
+    "correctIndex": 0,
+    "explanation": "useContext can be called multiple times; each call subscribes to its own context independently, no conflicts or ordering issues.",
+    "difficulty": "Medium",
+    "tags": ["context", "multiple", "usecontext"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Context API",
+    "question": "Why might splitting context into separate files and consuming via hooks improve maintainability? export const useAuth = () => useContext(AuthContext);",
+    "options": ["Custom hook abstracts Provider location, allows easier refactoring", "Context import/export is simple enough", "Custom hooks add unnecessary complexity", "This pattern provides no benefits"],
+    "correctIndex": 0,
+    "explanation": "useAuth() hook encapsulates context access; if AuthContext moves or changes, only the hook needs updating, not every consumer component.",
+    "difficulty": "Medium",
+    "tags": ["context", "hook", "abstract"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Context API",
+    "question": "Given <Ctx.Provider value={value}><Child1 /><Child2 /></Ctx.Provider>, why might Child1 and Child2 have different context values after Parent re-render?",
+    "options": ["If value object is different, both children see the new value", "Context provides different values to different children", "Children always see the same context value", "Parent re-renders don't affect context"],
+    "correctIndex": 0,
+    "explanation": "Both children receive the same context value; if the value object is new (different reference), both re-render with the new value.",
+    "difficulty": "Medium",
+    "tags": ["context", "children", "value"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Context API",
+    "question": "Why is splitting a context into [value, setValue] patterns better than combining them? export const [AuthContext, useAuth] = createContextPair();",
+    "options": ["Separate contexts prevent consumers needing setter from re-rendering on value changes", "Single context is simpler", "Separate contexts have no performance benefit", "setValue should never be in context"],
+    "correctIndex": 0,
+    "explanation": "If value and setter are in one context, components using only the setter still re-render when value changes; separate contexts avoid this waste.",
+    "difficulty": "Medium-Hard",
+    "tags": ["context", "split", "performance"]
+  }
+]

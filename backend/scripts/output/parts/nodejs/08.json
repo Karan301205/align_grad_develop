@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "RESTful API Design",
+    "question": "Which resource endpoint design is RESTful?\n```javascript\n// Option A\napp.get('/getUser/:id', ...);\napp.post('/createUser', ...);\napp.delete('/deleteUser/:id', ...);\n\n// Option B\napp.get('/users/:id', ...);\napp.post('/users', ...);\napp.delete('/users/:id', ...);\n```",
+    "options": ["Option A follows REST conventions", "Option B follows REST conventions", "both are equally valid", "neither is RESTful"],
+    "correctIndex": 1,
+    "explanation": "REST uses nouns for resources and HTTP methods for actions; Option B is correct (GET/POST/DELETE on /users resource).",
+    "difficulty": "Medium",
+    "tags": ["rest-design", "resource-naming"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "RESTful API Design",
+    "question": "How should you design an endpoint to fetch related resources?\n```javascript\n// Option A\napp.get('/users/:id/posts', ...);\n\n// Option B\napp.get('/posts?userId=:id', ...);\n```",
+    "options": ["Option A; nested routes show resource hierarchy", "Option B; query params are cleaner", "both are equally RESTful", "neither is valid REST"],
+    "correctIndex": 0,
+    "explanation": "Nested resource endpoints show parent-child relationships and are more intuitive; /users/:id/posts is cleaner than query params.",
+    "difficulty": "Medium",
+    "tags": ["rest-design", "resource-hierarchy"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "RESTful API Design",
+    "question": "When should pagination be implemented?\n```javascript\napp.get('/items', (req, res) => {\n  // no pagination; returns all items\n});\n```",
+    "options": ["pagination is optional", "pagination should be used when data grows large", "pagination breaks REST", "pagination only for client-side display"],
+    "correctIndex": 1,
+    "explanation": "Pagination prevents memory issues and slow responses; use limit/offset or cursor-based pagination for large datasets.",
+    "difficulty": "Medium",
+    "tags": ["rest-design", "pagination", "scalability"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "RESTful API Design",
+    "question": "What is the correct error response format?\n```javascript\napp.get('/users/:id', (req, res) => {\n  const user = findUser(req.params.id);\n  if (!user) {\n    res.status(404).json({error: 'User not found'});\n  }\n});\n```",
+    "options": ["sends 404 with error message in body", "should send 204 instead of 404", "error should be in header", "no error format is standard"],
+    "correctIndex": 0,
+    "explanation": "404 with a structured error body (JSON) is the correct REST pattern; clients can parse error details.",
+    "difficulty": "Medium",
+    "tags": ["rest-error-handling", "http-status-codes"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "RESTful API Design",
+    "question": "Should an API support PUT and PATCH differently?\n```javascript\n// PUT: replace entire resource\nPUT /users/1 { name: 'Alice' }\n\n// PATCH: partial update\nPATCH /users/1 { name: 'Alice' }\n```",
+    "options": ["both methods are identical", "PUT replaces entire resource, PATCH applies partial changes", "only PUT is valid in REST", "PATCH is deprecated"],
+    "correctIndex": 1,
+    "explanation": "PUT replaces the entire resource (idempotent); PATCH applies partial updates; APIs should support both for flexibility.",
+    "difficulty": "Medium-Hard",
+    "tags": ["rest-methods", "put-vs-patch"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "RESTful API Design",
+    "question": "How should versioning be handled in REST APIs?\n```javascript\n// Option A\napp.get('/v1/users', ...);\napp.get('/v2/users', ...);\n\n// Option B\napp.get('/users', {\n  'Accept': 'application/vnd.api+json;version=2'\n});\n```",
+    "options": ["Option A (URL versioning) is cleaner", "Option B (header versioning) is cleaner", "versioning breaks REST principles", "both are equally valid"],
+    "correctIndex": 3,
+    "explanation": "Both approaches work; URL versioning (/v1, /v2) is simpler and more discoverable; header versioning is less visible but cleaner URLs.",
+    "difficulty": "Medium-Hard",
+    "tags": ["rest-versioning", "api-design"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "RESTful API Design",
+    "question": "What should be returned on successful POST to create a resource?\n```javascript\napp.post('/users', (req, res) => {\n  const user = createUser(req.body);\n  res.status(201).json(user);\n});\n```",
+    "options": ["201 with created resource (correct)", "200 without resource body", "202 Accepted indefinitely", "204 No Content"],
+    "correctIndex": 0,
+    "explanation": "201 Created with the resource in the body allows clients to use the new resource immediately, including its ID.",
+    "difficulty": "Medium",
+    "tags": ["rest-conventions", "http-status-codes"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "RESTful API Design",
+    "question": "Should DELETE endpoints return a response body?\n```javascript\napp.delete('/users/:id', (req, res) => {\n  deleteUser(req.params.id);\n  res.status(204).send();\n});\n```",
+    "options": ["always send confirmation body", "204 No Content is appropriate for DELETE", "must return deleted resource in body", "DELETE requires 200 OK"],
+    "correctIndex": 1,
+    "explanation": "204 No Content is the standard for successful DELETE; no body is needed since the resource no longer exists.",
+    "difficulty": "Medium",
+    "tags": ["rest-conventions", "delete-method"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "RESTful API Design",
+    "question": "How should you handle rate limiting in a REST API?\n```javascript\napp.use((req, res, next) => {\n  if (req.headers['x-rate-limit-remaining'] === '0') {\n    res.status(429).json({error: 'Rate limited'});\n  } else {\n    next();\n  }\n});\n```",
+    "options": ["429 Too Many Requests with Retry-After header", "always allow requests regardless of rate", "rate limiting violates REST", "400 Bad Request is for rate limiting"],
+    "correctIndex": 0,
+    "explanation": "429 Too Many Requests with Retry-After header tells clients when they can retry; it's the standard rate-limiting response.",
+    "difficulty": "Medium",
+    "tags": ["rest-design", "rate-limiting", "http-status-codes"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "RESTful API Design",
+    "question": "What is the benefit of using Content Negotiation?\n```javascript\nGET /users/1\nAccept: application/json\n\nGET /users/1\nAccept: application/xml\n```",
+    "options": ["same endpoint returns different formats based on Accept header", "API must support only one format", "Content Negotiation breaks REST", "application/xml is always required"],
+    "correctIndex": 0,
+    "explanation": "Content Negotiation via Accept header lets clients request formats; servers respond with the best available format.",
+    "difficulty": "Medium-Hard",
+    "tags": ["rest-design", "content-negotiation"]
+  }
+]

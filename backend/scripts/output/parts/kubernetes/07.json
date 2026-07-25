@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "ConfigMaps Secrets",
+    "question": "A ConfigMap is created with database connection details. After updating the ConfigMap, running pods still use the old values. How do you make the pods pick up the new configuration?",
+    "options": [
+      "ConfigMaps are immutable; you must create a new one and update the Pod spec",
+      "Restart the pods to force them to reload the ConfigMap",
+      "Wait 1 minute for kubelet to refresh cached ConfigMap data",
+      "Use kubectl set env to inject new values directly"
+    ],
+    "correctIndex": 1,
+    "explanation": "Kubelet caches ConfigMap data; existing pod mounts show stale values until the pod is restarted and the updated ConfigMap is fetched.",
+    "difficulty": "Medium",
+    "tags": ["configmap", "configuration", "pod-restart"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "ConfigMaps Secrets",
+    "question": "A Secret is stored in etcd. A user with read access to etcd can view the Secret's values in plaintext. Is this a security concern?",
+    "options": [
+      "No, because Secrets are always encrypted by Kubernetes",
+      "Yes; etcd access grants Secret access; enable encryption at rest for etcd to mitigate this",
+      "No, because Secrets are only accessible through the API server",
+      "Yes, but only if RBAC is misconfigured"
+    ],
+    "correctIndex": 1,
+    "explanation": "Secrets are stored as plaintext in etcd by default; encryption at rest (encryptionConfig) and etcd access control are necessary to protect sensitive data.",
+    "difficulty": "Hard",
+    "tags": ["secret", "security", "encryption", "etcd"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "ConfigMaps Secrets",
+    "question": "You mount a Secret as a file in a pod, setting fileMode: '0600'. The pod's init container tries to read the file but gets a permission denied error. Why?",
+    "options": [
+      "The init container is running as a different user than the app container",
+      "Kubernetes Secrets always default to 0644 permissions regardless of fileMode",
+      "The Secret doesn't have read permissions for group or others",
+      "The file mode is set on the mount, not the file itself"
+    ],
+    "correctIndex": 0,
+    "explanation": "File permissions are enforced per user; if the init container runs as a different user (e.g., root vs. app), file permissions may deny access.",
+    "difficulty": "Medium-Hard",
+    "tags": ["secret", "permissions", "file-mount"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "ConfigMaps Secrets",
+    "question": "A ConfigMap is created with immutable: true. A pod mounts it, and you update the ConfigMap. What happens?",
+    "options": [
+      "The update succeeds and pods pick up new values on restart",
+      "Kubernetes rejects the update and the ConfigMap remains immutable",
+      "The pod is automatically restarted to pick up the change",
+      "The ConfigMap reverts to its previous state after 24 hours"
+    ],
+    "correctIndex": 1,
+    "explanation": "Setting immutable: true prevents ConfigMap updates; you must create a new ConfigMap and update pod specs to reference it.",
+    "difficulty": "Medium",
+    "tags": ["configmap", "immutable", "configuration-management"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "ConfigMaps Secrets",
+    "question": "A pod uses a Secret mounted as environment variables. The Secret contains a key with 1MB of data (a large JSON blob). What is a potential issue?",
+    "options": [
+      "Environment variables have a practical size limit (usually 128KB-1MB total); injecting oversized Secrets can exceed this, causing pod startup to fail",
+      "Secrets larger than 1MB are automatically compressed by Kubernetes",
+      "The large Secret is silently truncated to fit in memory",
+      "Kubernetes raises a validation error when creating the Secret"
+    ],
+    "correctIndex": 0,
+    "explanation": "Environment variable size limits vary by OS/shell, but mounting large data as env vars can cause startup failures; using file mounts is safer for large Secrets.",
+    "difficulty": "Medium-Hard",
+    "tags": ["secret", "environment-variables", "size-limits"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "ConfigMaps Secrets",
+    "question": "You create a Secret with kubectl create secret generic using an ENV file with 1000 variables. The Secret is created successfully. A pod mounting it as environment variables starts but all variables are missing. Why?",
+    "options": [
+      "Kubernetes limits env var injection to 100 variables per Secret",
+      "The ENV file format is incorrect; Kubernetes silently ignores unparseable entries",
+      "The ulimit for the container restricts the number of environment variables",
+      "Large numbers of env vars can overwhelm the container runtime; some may be dropped"
+    ],
+    "correctIndex": 2,
+    "explanation": "Container runtimes and OS kernels have ulimits on environment variables; exceeding these limits can cause variables to be dropped or container startup to fail.",
+    "difficulty": "Hard",
+    "tags": ["secret", "environment-variables", "ulimit"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "ConfigMaps Secrets",
+    "question": "Two containers in the same pod share a ConfigMap. Container A modifies the mounted ConfigMap file. Does Container B see the change immediately?",
+    "options": [
+      "No, ConfigMap mounts are read-only by default",
+      "Yes, because both containers share the same emptyDir volume",
+      "No, ConfigMap updates are not reflected in already-mounted files until pod restart",
+      "Yes, ConfigMaps are live-synced to all mounts"
+    ],
+    "correctIndex": 2,
+    "explanation": "ConfigMaps mounted as files are synced by kubelet (usually every minute), not immediately; container modifications to ConfigMap mounts don't persist or propagate.",
+    "difficulty": "Medium-Hard",
+    "tags": ["configmap", "mount", "caching"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "ConfigMaps Secrets",
+    "question": "A Secret is used as an image pull secret for a private Docker registry. A pod is scheduled but ImagePullBackOff occurs. What might be wrong?",
+    "options": [
+      "The Secret doesn't exist or is in a different namespace",
+      "The Secret format is incorrect (not type: kubernetes.io/dockercfg)",
+      "The registry credentials in the Secret are expired or invalid",
+      "All of the above"
+    ],
+    "correctIndex": 3,
+    "explanation": "ImagePullBackOff can be caused by missing Secrets, incorrect type, wrong namespace, or invalid credentials; all must be verified.",
+    "difficulty": "Medium-Hard",
+    "tags": ["secret", "image-pull", "registry"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "ConfigMaps Secrets",
+    "question": "You store a TLS certificate in a Secret of type: kubernetes.io/tls. An Ingress references this Secret for HTTPS. If you update the certificate in the Secret, when do Ingress pods use the new certificate?",
+    "options": [
+      "Immediately; Kubernetes reloads certificates dynamically",
+      "After the Ingress controller restarts or reloads its configuration (varies by implementation)",
+      "Only after restarting all pods using the Secret",
+      "After 24 hours; Kubernetes refreshes certificates on a daily schedule"
+    ],
+    "correctIndex": 1,
+    "explanation": "TLS certificate updates depend on the Ingress controller's reload mechanism; most controllers detect Secret changes and reload within seconds to minutes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["secret", "tls", "ingress"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "ConfigMaps Secrets",
+    "question": "A ConfigMap contains sensitive connection strings. You restrict RBAC so only the kube-system namespace can read it. Pods in other namespaces reference the ConfigMap from kube-system. Can they access it?",
+    "options": [
+      "No, ConfigMaps are namespace-scoped and cannot be accessed from other namespaces",
+      "Yes, RBAC permissions are evaluated per namespace; Secrets and ConfigMaps are namespace-bound resources",
+      "Yes, but only if the pod has a cross-namespace role binding",
+      "No, and Kubernetes raises a validation error when the pod is created"
+    ],
+    "correctIndex": 0,
+    "explanation": "ConfigMaps and Secrets are namespace-scoped; pods can only reference them in the same namespace, regardless of RBAC.",
+    "difficulty": "Medium",
+    "tags": ["configmap", "rbac", "namespace", "scope"]
+  }
+]

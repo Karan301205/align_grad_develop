@@ -1,0 +1,167 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Security",
+    "question": "A web form takes user input and builds a query:\nquery = \"SELECT * FROM users WHERE name = '\" + userName + \"'\";\n\nIf userName = \"admin' OR '1'='1\", what is the result?",
+    "options": [
+      "SQL injection vulnerability; the query returns all users",
+      "The query is safe; the database rejects the invalid input",
+      "Only the admin user is returned",
+      "An error occurs due to syntax"
+    ],
+    "correctIndex": 0,
+    "explanation": "String concatenation allows attacker-controlled input to modify the query logic; '1'='1' always true bypasses the WHERE condition.",
+    "difficulty": "Medium",
+    "tags": ["sql-injection", "string-concatenation"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Security",
+    "question": "How do you prevent SQL injection attacks?",
+    "options": [
+      "Use parameterized queries/prepared statements where inputs are separated from query logic",
+      "Validate all user input before building the query",
+      "Use string escaping functions like mysql_real_escape_string()",
+      "Store queries in stored procedures without parameters"
+    ],
+    "correctIndex": 0,
+    "explanation": "Parameterized queries treat inputs as data, not code; validation and escaping are secondary layers but not sufficient alone.",
+    "difficulty": "Medium",
+    "tags": ["sql-injection", "prevention"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Security",
+    "question": "A password column in users table stores plaintext passwords. What is the security risk?",
+    "options": [
+      "Database breach exposes all passwords; users' credentials on other sites are compromised",
+      "Plaintext passwords are acceptable if the database is backed up",
+      "No risk; passwords are secure inside the database",
+      "Encryption in the database makes plaintext irrelevant"
+    ],
+    "correctIndex": 0,
+    "explanation": "Plaintext passwords in a breached database expose users across all services; passwords must be hashed with salt.",
+    "difficulty": "Medium",
+    "tags": ["password-security", "breach-risk"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Security",
+    "question": "Row-level security (RLS) is configured so users can only see their own records. How is this enforced?\nCREATE POLICY user_policy ON users USING (user_id = current_user_id);",
+    "options": [
+      "The database automatically filters rows; queries for user 5 only return records where user_id = 5",
+      "The application must implement RLS logic",
+      "RLS is only a suggestion; enforcement is optional",
+      "RLS requires application-side queries to be modified"
+    ],
+    "correctIndex": 0,
+    "explanation": "Row-level security is enforced at the database level; even admin queries are filtered unless RLS is explicitly disabled.",
+    "difficulty": "Medium-Hard",
+    "tags": ["row-level-security", "access-control"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Security",
+    "question": "A database user account is created with minimal privileges:\nCREATE USER app_user WITH PASSWORD 'password'; GRANT SELECT, INSERT, UPDATE ON app_tables TO app_user;",
+    "options": [
+      "Least privilege principle: app_user can only perform necessary operations, reducing compromise impact",
+      "The user has no privileges and cannot query",
+      "All database privileges are granted by default",
+      "Privilege restriction is ineffective"
+    ],
+    "correctIndex": 0,
+    "explanation": "Granting only required permissions (SELECT/INSERT/UPDATE, not DROP or ALTER) limits damage if the account is compromised.",
+    "difficulty": "Medium",
+    "tags": ["least-privilege", "access-control"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Security",
+    "question": "Sensitive data (SSN, credit card numbers) should be encrypted. Which approach is better?\nA: Encrypt at application layer before insertion\nB: Use transparent data encryption (TDE) at the database level",
+    "options": [
+      "A provides end-to-end security; only the application holds decryption keys",
+      "B is better; the database handles all encryption",
+      "Both are equivalent",
+      "Encryption is unnecessary if access control is strong"
+    ],
+    "correctIndex": 0,
+    "explanation": "Application-layer encryption keeps keys outside the database; if compromised, data remains encrypted; TDE protects data at rest but keys are on the server.",
+    "difficulty": "Medium-Hard",
+    "tags": ["encryption", "sensitive-data"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Security",
+    "question": "A DBA accidentally runs:\nDROP TABLE users;",
+    "options": [
+      "All user data is deleted; recovery depends on backups (no TRUNCATE with rollback option)",
+      "The command fails due to built-in protection",
+      "Only the table structure is removed; data is preserved",
+      "A confirmation prompt prevents accidental deletion"
+    ],
+    "correctIndex": 0,
+    "explanation": "DROP TABLE immediately deletes data and structure; recovery requires database backups; regular backups are critical.",
+    "difficulty": "Medium",
+    "tags": ["data-loss", "backup"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Security",
+    "question": "An audit log table records all changes to sensitive data:\nCREATE TABLE audit_log (id INT, table_name VARCHAR(50), action VARCHAR(10), old_value TEXT, new_value TEXT, timestamp DATETIME);\n\nHow is this implemented?",
+    "options": [
+      "Triggers on INSERT/UPDATE/DELETE log changes before they happen",
+      "The application manually logs each change",
+      "Audit logs are created automatically by the database",
+      "No implementation is needed; audit logs don't exist"
+    ],
+    "correctIndex": 0,
+    "explanation": "Triggers capture changes at the database level, ensuring no changes are missed even if the application is bypassed.",
+    "difficulty": "Medium",
+    "tags": ["audit-log", "trigger"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Security",
+    "question": "A query uses UNION to combine results from two tables. What injection risk exists?\nqueryA = \"SELECT name FROM tableA WHERE id = \" + userInput + \" UNION SELECT name FROM tableB WHERE id = \" + userInput;",
+    "options": [
+      "SQL injection; UNION allows attackers to inject completely different queries",
+      "UNION prevents injection by design",
+      "No risk; UNION queries are inherently safe",
+      "Only string concatenation is risky, not UNION"
+    ],
+    "correctIndex": 0,
+    "explanation": "UNION combined with string concatenation is dangerous; attackers can inject SELECT, DROP, or other statements via the second UNION part.",
+    "difficulty": "Medium-Hard",
+    "tags": ["sql-injection", "union"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Security",
+    "question": "A database stores session tokens for logged-in users. Tokens should expire after 1 hour. How is this enforced?\nSELECT * FROM sessions WHERE token = 'abc123' AND created_at > NOW() - INTERVAL 1 HOUR;",
+    "options": [
+      "The query checks token age; sessions older than 1 hour are excluded from results",
+      "Tokens are automatically deleted at 1 hour; no query check is needed",
+      "Expiration is only enforced if the application checks it",
+      "No expiration mechanism exists in SQL"
+    ],
+    "correctIndex": 0,
+    "explanation": "Query-side expiration checks ensure stale tokens are never used; server-side deletion (cleanup jobs) removes expired rows to save space.",
+    "difficulty": "Medium",
+    "tags": ["session-token", "expiration"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Database Security",
+    "question": "What is the risk of granting PUBLIC access to all tables?\nGRANT SELECT ON ALL TABLES IN SCHEMA public TO PUBLIC;",
+    "options": [
+      "Any authenticated user can read any table, including admin/config data",
+      "PUBLIC access is only read-only, so it is safe",
+      "No risk; PUBLIC grants are restricted by default",
+      "Only the database owner can see PUBLIC grants"
+    ],
+    "correctIndex": 0,
+    "explanation": "Granting PUBLIC (all users) SELECT access to all tables exposes sensitive data and violates least privilege principles.",
+    "difficulty": "Medium",
+    "tags": ["public-access", "access-control"]
+  }
+]

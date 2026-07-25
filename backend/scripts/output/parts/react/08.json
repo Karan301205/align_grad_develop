@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "React Hooks",
+    "question": "Why does this useEffect stale closure bug log old count? const [count, setCount] = useState(0); useEffect(() => { setTimeout(() => { console.log(count); }, 1000); }, []);",
+    "options": ["Dependency array [] captures count once; timeout logs 0 forever", "count updates before timeout fires", "Dependencies are ignored in this case", "useEffect doesn't create closures"],
+    "correctIndex": 0,
+    "explanation": "Empty dependency array [] means the effect (and its closure over count) runs once; count stays 0 in the closure while the real count increments.",
+    "difficulty": "Medium",
+    "tags": ["useeffect", "closure", "dependency"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Hooks",
+    "question": "Given useEffect(() => { const id = setInterval(fn, 1000); }, []), why is the interval never cleared on unmount?",
+    "options": ["No cleanup function returned; interval persists after unmount", "useEffect auto-clears intervals", "Return statement is not needed", "Intervals are always cleaned up"],
+    "correctIndex": 0,
+    "explanation": "useEffect must return a cleanup function to clear intervals/timers/subscriptions; without it, the interval runs forever even after the component unmounts.",
+    "difficulty": "Medium",
+    "tags": ["useeffect", "cleanup", "interval"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Hooks",
+    "question": "Why might useCallback(fn, [x]) cause a child component to re-render even though the callback dependency didn't change? const fn = useCallback(() => console.log(y), [x]);",
+    "options": ["y is stale in the callback, but x changing causes new reference", "useCallback prevents all re-renders", "y should be in dependencies, causing unnecessary new reference", "This pattern has no re-render issues"],
+    "correctIndex": 2,
+    "explanation": "y is used but not in dependencies; when y changes, useCallback doesn't know and doesn't create a new reference, so stale y is passed to child.",
+    "difficulty": "Medium-Hard",
+    "tags": ["usecallback", "dependency", "stale"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Hooks",
+    "question": "Given useMemo(() => { return obj; }, [obj]), when does the memoized value update and why?",
+    "options": ["Only when obj reference changes (shallow compare deps), even if obj.x changes", "Every render, useMemo doesn't actually memoize", "Only when useMemo dependency array is empty", "useMemo always creates new values"],
+    "correctIndex": 0,
+    "explanation": "useMemo compares dependencies with ===; obj reference matters, not contents, so obj.x change doesn't trigger recompute unless obj itself is new.",
+    "difficulty": "Medium",
+    "tags": ["usememo", "dependency", "reference"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Hooks",
+    "question": "Why might useRef(null) in a child prevent the parent from getting the DOM ref? const ref = useRef(null);",
+    "options": ["useRef doesn't forward refs automatically; parent needs forwardRef to access", "useRef exports refs automatically", "refs are always accessible to parents", "forwardRef is not related to useRef"],
+    "correctIndex": 0,
+    "explanation": "useRef creates a ref on the child component itself; the parent cannot access it unless the child explicitly forwards with React.forwardRef().",
+    "difficulty": "Medium",
+    "tags": ["useref", "ref", "forward"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Hooks",
+    "question": "Given useEffect(() => fetch(url), [url]), why might skipping this dependency cause stale data?",
+    "options": ["Omitting url means fetch runs once at mount, url changes don't re-fetch", "Dependencies are optional, effect runs every render anyway", "Fetch is cached automatically", "useEffect must have at least one dependency"],
+    "correctIndex": 0,
+    "explanation": "Without url in dependencies, the effect runs once; if url changes, the old fetch URL is cached, and new data is never fetched.",
+    "difficulty": "Medium",
+    "tags": ["useeffect", "dependency", "fetch"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Hooks",
+    "question": "Why does useCallback(() => setX(x + 1), []) create a stale-closure bug? const [x, setX] = useState(0);",
+    "options": ["Empty deps capture x=0; callbacks always increment by 1 even after multiple renders", "useCallback auto-updates dependencies", "x is not needed in dependencies", "This pattern has no stale-closure issues"],
+    "correctIndex": 0,
+    "explanation": "[] captures the closure with x=0 forever; setX(x + 1) always evaluates to setX(1), not the current value; use setX(prev => prev + 1) instead.",
+    "difficulty": "Medium-Hard",
+    "tags": ["usecallback", "closure", "setstate"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Hooks",
+    "question": "Given useLayoutEffect vs useEffect, why might useLayoutEffect block paint? useLayoutEffect(() => { ... }, []);",
+    "options": ["useLayoutEffect runs synchronously before browser paint, useEffect after", "Both run asynchronously", "useLayoutEffect is faster", "Paint always happens before both hooks"],
+    "correctIndex": 0,
+    "explanation": "useLayoutEffect blocks paint; if it's slow, the screen freezes; useEffect is safer for most cases, runs after paint and doesn't block visuals.",
+    "difficulty": "Medium-Hard",
+    "tags": ["uselayouteffect", "useeffect", "paint"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Hooks",
+    "question": "Why might useContext cause unnecessary re-renders when the context value is a new object? const value = { x: 1 }; return <Context.Provider value={value}>;",
+    "options": ["New object on every render triggers all consumers to re-render", "Context caches values, no re-renders", "Object identity doesn't matter for context", "useContext never re-renders"],
+    "correctIndex": 0,
+    "explanation": "Context uses === to detect changes; { x: 1 } is a new object every render, so all consumers re-render even if x didn't change.",
+    "difficulty": "Medium",
+    "tags": ["usecontext", "rerender", "object"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "React Hooks",
+    "question": "Given useReducer, why might it be preferred over useState for complex state logic? const [state, dispatch] = useReducer(reducer, initial);",
+    "options": ["Reducer centralizes logic, handles multiple updates predictably", "useState is simpler and always better", "useReducer is slower than useState", "Complex logic cannot be handled by either"],
+    "correctIndex": 0,
+    "explanation": "useReducer groups related state updates into actions, making complex state transformations more predictable and testable than multiple setStates.",
+    "difficulty": "Medium",
+    "tags": ["usereducer", "state", "logic"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\ntry {\n  int x = 1 / 0;\n} catch (DivideByZeroException) {\n  Console.WriteLine(\"Caught\");\n}",
+    "options": ["Caught", "Nothing", "Exception thrown", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "DivideByZeroException is caught and handled; outputs \"Caught\".",
+    "difficulty": "Medium",
+    "tags": ["exception-handling", "try-catch", "builtin-exceptions"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\ntry {\n  throw new ArgumentException(\"Invalid\");\n} catch (Exception e) {\n  Console.WriteLine(e.Message);\n}",
+    "options": ["Invalid", "ArgumentException", "Caught", "Nothing"],
+    "correctIndex": 0,
+    "explanation": "catch(Exception e) catches all exception types; e.Message contains the thrown message.",
+    "difficulty": "Medium",
+    "tags": ["exception-handling", "custom-exceptions", "message"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\ntry {\n  int x = int.Parse(\"abc\");\n} catch (FormatException) {\n  Console.WriteLine(\"Format\");\n} catch (OverflowException) {\n  Console.WriteLine(\"Overflow\");\n}",
+    "options": ["Format", "Overflow", "Nothing", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "int.Parse(\"abc\") throws FormatException, caught by the first matching handler.",
+    "difficulty": "Medium",
+    "tags": ["exception-handling", "multiple-catch", "parsing"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\ntry {\n  try {\n    throw new InvalidOperationException();\n  } catch (ArgumentException) {\n    Console.WriteLine(\"Inner\");\n  }\n} catch (InvalidOperationException) {\n  Console.WriteLine(\"Outer\");\n}",
+    "options": ["Inner", "Outer", "Both", "Exception thrown"],
+    "correctIndex": 1,
+    "explanation": "Inner catch doesn't match InvalidOperationException, so outer catch handles it.",
+    "difficulty": "Medium-Hard",
+    "tags": ["nested-try-catch", "exception-matching", "exception-hierarchy"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\ntry {\n  int x = 1;\n  throw new Exception(\"Error\");\n} catch (Exception e) {\n  Console.WriteLine(e.Message);\n  throw;\n}",
+    "options": ["Error", "Exception thrown", "Error then exception", "Compilation error"],
+    "correctIndex": 2,
+    "explanation": "re-throw (bare throw) prints message then re-throws the exception to outer scope.",
+    "difficulty": "Medium",
+    "tags": ["exception-handling", "re-throw", "propagation"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\ntry {\n  return 1;\n} finally {\n  Console.WriteLine(\"Finally\");\n}",
+    "options": ["Finally", "1", "Finally then 1", "Exception"],
+    "correctIndex": 2,
+    "explanation": "finally block always executes, even when try returns; prints \"Finally\" before returning 1.",
+    "difficulty": "Medium",
+    "tags": ["finally", "return-in-try", "guaranteed-execution"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\ntry {\n  object x = null;\n  x.ToString();\n} catch (NullReferenceException) {\n  Console.WriteLine(\"Null\");\n}",
+    "options": ["Null", "Nothing", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Calling a method on null throws NullReferenceException, caught and handled.",
+    "difficulty": "Medium",
+    "tags": ["null-reference", "exception-handling", "debugging"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\ntry {\n  int x = 1 / 0;\n} catch when (DateTime.Now.Year > 2000) {\n  Console.WriteLine(\"Caught\");\n}",
+    "options": ["Caught", "Exception", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Exception filter (when clause) catches only if condition is true; year 2025 > 2000, so caught.",
+    "difficulty": "Medium-Hard",
+    "tags": ["exception-filters", "when-clause", "conditional-catch"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\ntry {\n  var arr = new int[1];\n  int x = arr[5];\n} catch (IndexOutOfRangeException) {\n  Console.WriteLine(\"Index\");\n}",
+    "options": ["Index", "Nothing", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Array access with invalid index throws IndexOutOfRangeException, caught and handled.",
+    "difficulty": "Medium",
+    "tags": ["array-access", "exception-handling", "bounds-checking"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Exception Handling",
+    "question": "What is the output?\ntry {\n  throw new InvalidOperationException(\"Bad state\");\n} catch (Exception ex) when (ex.Message.Contains(\"Bad\")) {\n  Console.WriteLine(\"Filtered\");\n}",
+    "options": ["Filtered", "Exception", "Bad state", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Exception filter checks message; \"Bad state\" contains \"Bad\", so catch clause executes.",
+    "difficulty": "Medium",
+    "tags": ["exception-filters", "message-filtering", "pattern-matching"]
+  }
+]

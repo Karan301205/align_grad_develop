@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Event Handling",
+    "question": "What is logged?\n```javascript\nconst parent = document.querySelector('#parent');\nconst child = document.querySelector('#child');\nparent.addEventListener('click', () => console.log('parent'));\nchild.addEventListener('click', () => console.log('child'));\nchild.click();\n```",
+    "options": [
+      "child only because event does not bubble up",
+      "child parent because event bubbles to parent handler",
+      "parent child due to capturing phase",
+      "parent only because parent captures first"
+    ],
+    "correctIndex": 1,
+    "explanation": "By default, click events bubble from child up through parent; both handlers fire.",
+    "difficulty": "Medium",
+    "tags": ["event-bubbling", "event-propagation", "click-event"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Event Handling",
+    "question": "What is the output?\n```javascript\nconst elem = document.querySelector('button');\nelem.addEventListener('click', function() {\n  console.log(this.tagName);\n}, false);\nelem.click();\n```",
+    "options": [
+      "undefined because this is not bound in event handlers",
+      "BUTTON because this refers to the element in listener",
+      "Window due to this binding to global object",
+      "null because click simulation fails"
+    ],
+    "correctIndex": 1,
+    "explanation": "In event listeners, this refers to the element that triggered the event unless using arrow functions.",
+    "difficulty": "Medium",
+    "tags": ["this-binding", "event-listener", "function-context"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Event Handling",
+    "question": "What is logged?\n```javascript\nconst form = document.querySelector('form');\nform.addEventListener('submit', (e) => {\n  console.log('submit');\n});\nconst input = form.querySelector('input[type=submit]');\ninput.click();\n```",
+    "options": [
+      "submit because click triggers submit event",
+      "nothing because click does not automatically submit",
+      "nothing because preventDefault is missing",
+      "ReferenceError due to form reference"
+    ],
+    "correctIndex": 0,
+    "explanation": "Clicking a submit button within a form triggers the submit event; preventDefault() must be called to block it.",
+    "difficulty": "Medium",
+    "tags": ["submit-event", "form-submission", "event-propagation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Event Handling",
+    "question": "What is output?\n```javascript\nconst button = document.querySelector('button');\nbutton.onclick = () => console.log('onclick');\nbutton.addEventListener('click', () => console.log('listener'));\nbutton.click();\n```",
+    "options": [
+      "onclick listener because onclick runs first",
+      "listener onclick because addEventListener runs first",
+      "onclick only because property overrides listener",
+      "listener only because addEventListener is preferred"
+    ],
+    "correctIndex": 0,
+    "explanation": "Both inline property and addEventListener handlers execute; property runs before listeners.",
+    "difficulty": "Medium",
+    "tags": ["event-handlers", "addEventListener", "handler-order"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Event Handling",
+    "question": "What is logged?\n```javascript\nconst container = document.querySelector('#container');\ncontainer.addEventListener('click', (e) => {\n  if (e.target.classList.contains('item')) {\n    console.log('item clicked');\n  }\n});\nconst item = document.createElement('button');\nitem.classList.add('item');\ncontainer.appendChild(item);\nitem.click();\n```",
+    "options": [
+      "item clicked because event delegation catches dynamically added elements",
+      "undefined due to e.target not matching new element",
+      "item clicked but only for pre-existing elements",
+      "ReferenceError because dynamically added elements cannot fire events"
+    ],
+    "correctIndex": 0,
+    "explanation": "Event delegation works for dynamically added elements because the listener is on the container.",
+    "difficulty": "Medium-Hard",
+    "tags": ["event-delegation", "dynamic-elements", "event-bubbling"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Event Handling",
+    "question": "What is the output?\n```javascript\nconst input = document.querySelector('input');\ninput.addEventListener('keydown', (e) => {\n  if (e.key === 'Enter') {\n    e.preventDefault();\n    console.log('Enter prevented');\n  }\n});\ninput.value = 'test';\nconst event = new KeyboardEvent('keydown', { key: 'Enter' });\ninput.dispatchEvent(event);\n```",
+    "options": [
+      "Enter prevented because preventDefault works on dispatched events",
+      "Enter prevented but input still processes keystroke",
+      "ReferenceError due to KeyboardEvent constructor",
+      "nothing because dispatchEvent does not trigger handlers"
+    ],
+    "correctIndex": 0,
+    "explanation": "dispatchEvent() triggers listeners with full event handling; preventDefault() works as expected.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dispatchEvent", "KeyboardEvent", "preventDefault"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Event Handling",
+    "question": "What is logged?\n```javascript\nconst elem = document.querySelector('div');\nelem.addEventListener('click', () => {\n  console.log('click');\n}, { once: true });\nelem.click();\nelem.click();\n```",
+    "options": [
+      "click click because once applies to all handlers",
+      "click once because once option fires listener only once",
+      "click only because listener removes after first call",
+      "undefined due to invalid options parameter"
+    ],
+    "correctIndex": 2,
+    "explanation": "The { once: true } option automatically removes the listener after the first invocation.",
+    "difficulty": "Medium",
+    "tags": ["addEventListener-options", "once", "listener-removal"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Event Handling",
+    "question": "What is the output?\n```javascript\nconst parent = document.querySelector('#parent');\nconst child = document.querySelector('#child');\nparent.addEventListener('click', () => {\n  console.log('parent');\n}, true);\nchild.addEventListener('click', () => {\n  console.log('child');\n}, false);\nchild.click();\n```",
+    "options": [
+      "parent child because parent listener runs in capturing phase",
+      "child parent because child fires before parent",
+      "child only because capturing phase does not reach parent",
+      "parent only because capturing prevents bubbling"
+    ],
+    "correctIndex": 0,
+    "explanation": "Capturing (third parameter = true) fires during the descent phase; bubbling fires during the ascent phase.",
+    "difficulty": "Medium-Hard",
+    "tags": ["event-capturing", "event-phases", "propagation-order"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Event Handling",
+    "question": "What is logged?\n```javascript\nconst elem = document.querySelector('div');\nelem.addEventListener('click', function(e) {\n  console.log(e.currentTarget === this);\n});\nelem.click();\n```",
+    "options": [
+      "false because currentTarget and this differ",
+      "true because currentTarget is the same as this",
+      "undefined due to property access failure",
+      "ReferenceError because currentTarget is not defined"
+    ],
+    "correctIndex": 1,
+    "explanation": "e.currentTarget always refers to the element with the listener; this also refers to that element in regular functions.",
+    "difficulty": "Medium",
+    "tags": ["currentTarget", "this-binding", "event-object"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Event Handling",
+    "question": "What is the output?\n```javascript\nconst button = document.querySelector('button');\nconst handler = () => console.log('clicked');\nbutton.addEventListener('click', handler);\nbutton.removeEventListener('click', handler);\nbutton.click();\n```",
+    "options": [
+      "clicked because removeEventListener does not work",
+      "nothing because removeEventListener successfully removes handler",
+      "ReferenceError due to removeEventListener failure",
+      "clicked then nothing because listener fires before removal"
+    ],
+    "correctIndex": 1,
+    "explanation": "removeEventListener must reference the same function; if references match, listener is removed.",
+    "difficulty": "Medium",
+    "tags": ["removeEventListener", "handler-removal", "event-listener"]
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Performance Optimization",
+    "question": "What does this code optimize?\n```javascript\nfunction debounce(fn, delay) {\n  let timeoutId;\n  return function(...args) {\n    clearTimeout(timeoutId);\n    timeoutId = setTimeout(() => fn(...args), delay);\n  };\n}\nconst searchHandler = debounce((query) => {\n  console.log('search', query);\n}, 300);\n```",
+    "options": [
+      "Prevents multiple rapid function calls",
+      "Increases function execution speed",
+      "Reduces memory usage by sharing scope",
+      "Eliminates redundant computations"
+    ],
+    "correctIndex": 0,
+    "explanation": "Debounce delays execution; only the last call within the delay window runs.",
+    "difficulty": "Medium",
+    "tags": ["debounce", "performance", "optimization"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Performance Optimization",
+    "question": "What is the output?\n```javascript\nfunction throttle(fn, interval) {\n  let lastTime = 0;\n  return function(...args) {\n    const now = Date.now();\n    if (now - lastTime >= interval) {\n      fn(...args);\n      lastTime = now;\n    }\n  };\n}\nconst throttledLog = throttle(() => console.log('x'), 100);\nthrottledLog(); // runs\nthrottledLog(); // skipped\nthrottledLog(); // skipped\n```",
+    "options": [
+      "x x x because all calls execute",
+      "x only because throttle limits call rate",
+      "x x because second call runs",
+      "nothing because throttle blocks all calls"
+    ],
+    "correctIndex": 1,
+    "explanation": "Throttle enforces a minimum interval between executions; calls within interval are ignored.",
+    "difficulty": "Medium-Hard",
+    "tags": ["throttle", "performance", "rate-limiting"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Performance Optimization",
+    "question": "What is the risk?\n```javascript\nlet globalList = [];\nfunction addToList(item) {\n  globalList.push(item);\n}\nfor (let i = 0; i < 1000000; i++) {\n  addToList(i);\n}\n```",
+    "options": [
+      "Memory leak because globalList grows indefinitely",
+      "Stack overflow due to loop depth",
+      "Acceptable because the loop completes",
+      "TypeError because push fails on large arrays"
+    ],
+    "correctIndex": 0,
+    "explanation": "Holding references to growing data without cleanup prevents garbage collection.",
+    "difficulty": "Medium",
+    "tags": ["memory-leak", "garbage-collection", "reference-management"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Performance Optimization",
+    "question": "What optimizes this?\n```javascript\nfunction fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}\nfibonacci(40);\n```",
+    "options": [
+      "Loop implementation to reduce call stack",
+      "Memoization to cache repeated calculations",
+      "Promises to parallelize computation",
+      "Async/await to improve performance"
+    ],
+    "correctIndex": 1,
+    "explanation": "Memoization caches results of fib(n) to avoid recalculating the same values.",
+    "difficulty": "Medium",
+    "tags": ["memoization", "recursion", "optimization"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Performance Optimization",
+    "question": "What is the memory impact?\n```javascript\nfunction createListener() {\n  const heavyData = new Array(1000000).fill(0);\n  return function() {\n    console.log(heavyData[0]);\n  };\n}\nconst listeners = [];\nfor (let i = 0; i < 100; i++) {\n  listeners.push(createListener());\n}\n```",
+    "options": [
+      "No memory issue because closure is small",
+      "Memory leak because each closure captures heavyData",
+      "Negligible because arrays are shared",
+      "Acceptable because listeners are properly scoped"
+    ],
+    "correctIndex": 1,
+    "explanation": "Each closure captures its own heavyData; 100 listeners hold 100 copies in memory.",
+    "difficulty": "Medium-Hard",
+    "tags": ["closures", "memory-leak", "object-retention"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Performance Optimization",
+    "question": "What performance issue exists?\n```javascript\nconst obj = {};\nfor (let i = 0; i < 1000000; i++) {\n  obj['prop' + i] = i;\n}\n```",
+    "options": [
+      "Fast because object keys are optimized",
+      "Slow because dynamic properties prevent optimization",
+      "Memory intensive but acceptable",
+      "ReferenceError due to key limits"
+    ],
+    "correctIndex": 1,
+    "explanation": "Dynamic keys prevent hidden class optimization; engines cannot predict structure.",
+    "difficulty": "Medium-Hard",
+    "tags": ["object-structure", "hidden-classes", "V8-optimization"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Performance Optimization",
+    "question": "What is optimized by this pattern?\n```javascript\nconst memoized = (() => {\n  const cache = {};\n  return function fib(n) {\n    if (n in cache) return cache[n];\n    if (n <= 1) return n;\n    return cache[n] = fib(n - 1) + fib(n - 2);\n  };\n})();\n```",
+    "options": [
+      "Recursion depth by reducing calls",
+      "Computation time by caching results",
+      "Memory usage by sharing cache",
+      "Code readability through abstraction"
+    ],
+    "correctIndex": 1,
+    "explanation": "Memoization stores computed values in cache; duplicate calculations return cached results.",
+    "difficulty": "Medium",
+    "tags": ["memoization", "closure", "performance"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Performance Optimization",
+    "question": "What is the performance cost?\n```javascript\ndocument.querySelectorAll('div').forEach(div => {\n  const rect = div.getBoundingClientRect();\n  div.style.width = rect.width + 'px';\n});\n```",
+    "options": [
+      "Layout thrashing due to repeated layout queries",
+      "Acceptable because batching is efficient",
+      "Minimal because DOM access is fast",
+      "No cost because style updates are batched"
+    ],
+    "correctIndex": 0,
+    "explanation": "Alternating reads (getBoundingClientRect) and writes (style.width) causes layout thrashing.",
+    "difficulty": "Medium-Hard",
+    "tags": ["layout-thrashing", "DOM-performance", "reflow"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Performance Optimization",
+    "question": "What optimization is applied?\n```javascript\nconst largeArray = new Array(1000000).fill(0);\nconst filtered = largeArray.filter(x => x > 0);\nconst mapped = filtered.map(x => x * 2);\n```",
+    "options": [
+      "Single pass efficiency achieved",
+      "Separate iterations create overhead",
+      "Method chaining prevents optimization",
+      "Array copying wastes memory"
+    ],
+    "correctIndex": 1,
+    "explanation": "Each method creates intermediate arrays; combining operations reduces allocations.",
+    "difficulty": "Medium",
+    "tags": ["array-methods", "performance", "intermediate-arrays"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Performance Optimization",
+    "question": "What improves this function's performance?\n```javascript\nfunction processRequest(data) {\n  if (!data) return null;\n  const parsed = JSON.parse(data);\n  return parsed.value * 2;\n}\n```",
+    "options": [
+      "Add error handling for parse failures",
+      "Cache the parsed result if called frequently",
+      "Use template strings instead of multiplication",
+      "Add type checking before processing"
+    ],
+    "correctIndex": 1,
+    "explanation": "Memoizing the parse result avoids repeated JSON parsing of same input.",
+    "difficulty": "Medium",
+    "tags": ["caching", "optimization", "repeated-parsing"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "Channels",
+    "question": "package main\nfunc main() {\n  ch := make(chan int)\n  ch <- 1\n  v := <-ch\n  println(v)\n}",
+    "options": ["prints 1", "deadlock", "panics", "prints 0"],
+    "correctIndex": 1,
+    "explanation": "Unbuffered channels block on send until a receiver is ready; main thread sends before spawning a goroutine to receive, causing deadlock.",
+    "difficulty": "Medium",
+    "tags": ["deadlock", "unbuffered-channel", "blocking"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Channels",
+    "question": "package main\nfunc main() {\n  ch := make(chan int, 1)\n  ch <- 1\n  ch <- 2\n  println(<-ch)\n}",
+    "options": ["prints 1", "prints 2", "deadlock", "panics"],
+    "correctIndex": 2,
+    "explanation": "Buffered channel capacity is 1; two sends without receives cause the second send to block, deadlocking since no goroutine waits.",
+    "difficulty": "Medium",
+    "tags": ["buffered-channel", "capacity", "deadlock"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Channels",
+    "question": "package main\nfunc main() {\n  ch := make(chan int, 2)\n  ch <- 1\n  ch <- 2\n  close(ch)\n  for v := range ch {\n    println(v)\n  }\n}",
+    "options": ["prints 1 then 2", "panics on close", "prints 1 2 0", "deadlock"],
+    "correctIndex": 0,
+    "explanation": "Range over a closed buffered channel drains remaining values (1, 2) then exits; close is safe after sends complete.",
+    "difficulty": "Medium",
+    "tags": ["range-channel", "close", "buffered"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Channels",
+    "question": "package main\nfunc main() {\n  ch := make(chan int)\n  close(ch)\n  v, ok := <-ch\n  println(v, ok)\n}",
+    "options": ["0 false", "panics", "0 true", "empty false"],
+    "correctIndex": 0,
+    "explanation": "Receiving from a closed channel returns zero value and ok=false, allowing cleanup code without panic.",
+    "difficulty": "Medium",
+    "tags": ["close", "receive-ok", "channel-state"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Channels",
+    "question": "package main\nfunc main() {\n  ch := make(chan int)\n  v := <-ch\n  close(ch)\n  println(v)\n}",
+    "options": ["prints 0", "deadlock then panic", "panics", "prints nil"],
+    "correctIndex": 1,
+    "explanation": "Receive on unbuffered channel blocks waiting for a send; when nothing sends, deadlock occurs, and Go panics on goroutine exit.",
+    "difficulty": "Medium-Hard",
+    "tags": ["deadlock", "unbuffered", "panic"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Channels",
+    "question": "package main\nfunc main() {\n  ch := make(chan int, 5)\n  ch <- 1\n  ch <- 2\n  ch <- 3\n  len := len(ch)\n  cap := cap(ch)\n  println(len, cap)\n}",
+    "options": ["3 5", "5 3", "2 5", "3 3"],
+    "correctIndex": 0,
+    "explanation": "len(ch) returns buffered items count (3), cap(ch) returns channel capacity (5); buffered channel shows both.",
+    "difficulty": "Medium",
+    "tags": ["len-cap", "buffered-channel", "introspection"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Channels",
+    "question": "package main\nfunc sender(ch chan<- int) {\n  ch <- 1\n}\nfunc receiver(ch <-chan int) {\n  v := <-ch\n  println(v)\n}\nfunc main() {\n  ch := make(chan int)\n  go sender(ch)\n  receiver(ch)\n}",
+    "options": ["prints 1", "compilation error", "deadlock", "panics"],
+    "correctIndex": 0,
+    "explanation": "Directional channels (send-only, receive-only) enforce one-way communication; sender goroutine sends, receiver goroutine receives synchronously.",
+    "difficulty": "Medium",
+    "tags": ["directional-channel", "send-only", "receive-only"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Channels",
+    "question": "package main\nfunc main() {\n  ch1 := make(chan int)\n  ch2 := make(chan int, 1)\n  ch2 <- 42\n  select {\n  case v := <-ch1:\n    println(v)\n  case v := <-ch2:\n    println(v)\n  }\n}",
+    "options": ["prints 42", "deadlock", "panics", "prints 0"],
+    "correctIndex": 0,
+    "explanation": "Select picks a ready channel; ch1 blocks (no sender), but ch2 has buffered 42, so select receives from ch2.",
+    "difficulty": "Medium",
+    "tags": ["select", "ready-channel", "buffered"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Channels",
+    "question": "package main\nfunc main() {\n  ch := make(chan int)\n  close(ch)\n  ch <- 1\n}",
+    "options": ["panics", "compiles and runs", "compilation error", "deadlock"],
+    "correctIndex": 0,
+    "explanation": "Sending on a closed channel panics; close marks channel as finished and forbids further sends.",
+    "difficulty": "Medium",
+    "tags": ["close", "send-closed", "panic"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "Channels",
+    "question": "package main\nfunc main() {\n  ch := make(chan int, 3)\n  for i := 0; i < 5; i++ {\n    select {\n    case ch <- i:\n    default:\n      println(\"dropped\", i)\n    }\n  }\n}",
+    "options": ["prints dropped 3 then dropped 4", "panics", "prints nothing", "deadlock"],
+    "correctIndex": 0,
+    "explanation": "Select with default executes default when channel full; buffered channel capacity 3 accepts 0-2, then default catches 3-4.",
+    "difficulty": "Medium-Hard",
+    "tags": ["select-default", "non-blocking", "capacity"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "Microformats Usage",
+    "question": "A page uses microdata with `<div itemscope itemtype='https://schema.org/Person'><span itemprop='name'>John</span></div>`. Why does search engine not parse it correctly?",
+    "options": ["search engines do not support microdata and require json-ld", "the itemtype url must match the property names exactly", "the itemprop value must be a valid url, not plain text", "search engines parse this correctly; the structure is valid"],
+    "correctIndex": 3,
+    "explanation": "The microdata structure is valid; search engines like Google parse microdata with itemscope/itemtype/itemprop correctly to extract structured data.",
+    "difficulty": "Medium",
+    "tags": ["microdata", "schema.org", "structured-data"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Microformats Usage",
+    "question": "A recipe uses JSON-LD: `<script type='application/ld+json'>{\"@context\":\"https://schema.org\", \"@type\":\"Recipe\"}</script>`. Which format is this?",
+    "options": ["microdata markup", "json-ld is a json-based structured data format", "rdfa format", "hcalendar format"],
+    "correctIndex": 1,
+    "explanation": "JSON-LD (JSON for Linking Data) is a JSON-based format for structured data; it is embedded in `<script>` tags and is machine-parseable by search engines and crawlers.",
+    "difficulty": "Medium",
+    "tags": ["json-ld", "structured-data"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Microformats Usage",
+    "question": "A page uses `<div class='vcard'><span class='fn'>Jane Doe</span></div>`. What microformat is this?",
+    "options": ["hcalendar", "hcard is a microformat for contact information", "microdata format", "open graph markup"],
+    "correctIndex": 1,
+    "explanation": "hCard is a microformat using HTML classes (vcard, fn, etc.) to mark up contact details like names, addresses, and phone numbers in a machine-readable way.",
+    "difficulty": "Medium",
+    "tags": ["hcard", "microformats"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Microformats Usage",
+    "question": "A page uses `<meta property='og:image' content='image.jpg'>`. What does this enable?",
+    "options": ["search engines use it for image indexing", "social media platforms display a preview image when the page is shared", "schema.org parsers extract image metadata", "the og property is deprecated and ignored"],
+    "correctIndex": 1,
+    "explanation": "Open Graph (og:) meta tags control how social platforms (Facebook, Twitter, etc.) display previews when a link is shared, including title, image, and description.",
+    "difficulty": "Medium",
+    "tags": ["open-graph", "social-sharing"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Microformats Usage",
+    "question": "A page uses `<link rel='schema.org' href='https://schema.org/Article'>`. Why is this redundant?",
+    "options": ["schema.org is always available and the link is unnecessary", "the schema namespace should be declared via itemtype, not a link", "search engines know schema.org without explicit link declaration", "all three reasons above are correct"],
+    "correctIndex": 3,
+    "explanation": "Schema.org is a standard namespace that search engines recognize without explicit declaration; linking to the schema.org URL is redundant when using itemtype or @context.",
+    "difficulty": "Hard",
+    "tags": ["schema.org", "structured-data"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Microformats Usage",
+    "question": "A breadcrumb uses `<div itemscope itemtype='https://schema.org/BreadcrumbList'><span itemprop='itemListElement'>Home</span></div>`. Why might this fail validation?",
+    "options": ["breadcrumblist requires position properties on each item", "itemlistelements must be wrapped in separate itemscope divs", "the structure is valid and should validate correctly", "schema.org types must be in lowercase"],
+    "correctIndex": 1,
+    "explanation": "Schema.org BreadcrumbList requires each item to have position and url properties; a flat list of items without individual itemscope and properties is incomplete.",
+    "difficulty": "Hard",
+    "tags": ["breadcrumbs", "schema.org", "structured-data"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Microformats Usage",
+    "question": "A page uses `<meta name='twitter:card' content='summary_large_image'>`. What does this control?",
+    "options": ["how the page appears when shared on twitter", "twitter crawlers index the page differently", "the page is optimized for twitter's search algorithm", "twitter:card is not a real meta tag"],
+    "correctIndex": 0,
+    "explanation": "Twitter Card meta tags control how links appear when shared on Twitter, including card type (summary, image, player), title, description, and image preview.",
+    "difficulty": "Medium",
+    "tags": ["twitter-cards", "social-sharing"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Microformats Usage",
+    "question": "A page uses RDFa: `<div xmlns:schema='https://schema.org' typeof='schema:Article'><span property='schema:headline'>Title</span></div>`. Why is RDFa less common than JSON-LD?",
+    "options": ["rdfa is harder to write and maintain in html", "search engines do not support rdfa", "json-ld is easier to implement and separate from html markup", "rdfa is deprecated"],
+    "correctIndex": 2,
+    "explanation": "JSON-LD is easier to embed without polluting HTML markup, making it the preferred format for structured data; RDFa requires namespaces and attributes scattered through the DOM.",
+    "difficulty": "Hard",
+    "tags": ["rdfa", "json-ld", "structured-data"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Microformats Usage",
+    "question": "A product page uses `<meta property='og:price:amount' content='19.99'>`. Which social platforms use this metadata?",
+    "options": ["all social platforms support product pricing metadata", "only facebook and pinterest use commerce-related og tags", "og:price is not a standard open graph property", "search engines use it for shopping results, not social platforms"],
+    "correctIndex": 2,
+    "explanation": "Open Graph does not define og:price as a standard property; e-commerce metadata is better handled via schema.org markup (Product type) or platform-specific meta tags.",
+    "difficulty": "Hard",
+    "tags": ["open-graph", "product-markup"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Microformats Usage",
+    "question": "A page embeds `<script type='application/ld+json'>` twice with different @type values. How does the search engine interpret this?",
+    "options": ["only the first json-ld block is parsed", "both blocks are merged and parsed as a single entity", "each block is parsed separately as distinct entities", "duplicate json-ld blocks cause a parsing error"],
+    "correctIndex": 2,
+    "explanation": "Multiple JSON-LD blocks are parsed independently; each can describe different entities or add complementary data, allowing rich markup for multiple types on one page.",
+    "difficulty": "Medium-Hard",
+    "tags": ["json-ld", "structured-data"]
+  }
+]

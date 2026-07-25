@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "C",
+    "subtopic": "Memory Management",
+    "question": "int *p = malloc(sizeof(int) * 10);\nif (p == NULL) { printf(\"malloc failed\"); }\nWhy is this check necessary?",
+    "options": [
+      "malloc can fail (out of memory); checking for NULL prevents dereferencing invalid memory",
+      "malloc always succeeds; the check is unnecessary",
+      "Compiler error if malloc is not checked",
+      "NULL indicates a valid allocation; non-NULL would indicate failure"
+    ],
+    "correctIndex": 0,
+    "explanation": "malloc returns NULL on failure; proceeding without checking risks undefined behavior.",
+    "difficulty": "Medium",
+    "tags": ["memory allocation", "error checking", "malloc"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Memory Management",
+    "question": "int *p = malloc(sizeof(int));\nint *q = malloc(sizeof(int));\np = q;\nfree(q);\nWhat happens to the memory allocated for the original p?",
+    "options": [
+      "Memory leak: the first allocation is lost; p now points to q's memory, and freeing q leaves p as a dangling pointer",
+      "Both allocations are freed",
+      "The compiler prevents this reassignment",
+      "The first allocation is automatically freed when p is reassigned"
+    ],
+    "correctIndex": 0,
+    "explanation": "Reassigning p without freeing the first block causes a memory leak; the original pointer is lost.",
+    "difficulty": "Medium",
+    "tags": ["memory leaks", "malloc/free", "pointer management"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Memory Management",
+    "question": "int *p = malloc(sizeof(int) * 5);\nfree(p);\nfree(p);\nWhat happens on the second free()?",
+    "options": [
+      "Undefined behavior: double-free is illegal and may cause heap corruption or crash",
+      "The second free is a no-op; safely ignored",
+      "Compiler error: duplicate free is not allowed",
+      "The memory is reallocated"
+    ],
+    "correctIndex": 0,
+    "explanation": "Double-free corrupts the heap allocator's internal state; undefined behavior typically results in a crash.",
+    "difficulty": "Medium",
+    "tags": ["double-free", "heap corruption", "undefined behavior"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Memory Management",
+    "question": "int *p = malloc(sizeof(int));\n*p = 5;\nfree(p);\nprintf(\"%d\", *p);\nWhat is the issue here?",
+    "options": [
+      "Use-after-free: p is dereferenced after being freed; the memory may be reused or invalid",
+      "double-free; free is called twice",
+      "Compiler error: accessing freed memory is forbidden",
+      "p is reset to NULL after free, so *p is a null dereference"
+    ],
+    "correctIndex": 0,
+    "explanation": "Accessing a freed pointer is undefined behavior; the memory may have been reused or is inaccessible.",
+    "difficulty": "Medium-Hard",
+    "tags": ["use-after-free", "dangling pointers", "undefined behavior"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Memory Management",
+    "question": "int *p = calloc(10, sizeof(int));\nWhat is the difference between calloc and malloc?",
+    "options": [
+      "calloc allocates memory and initializes it to zero; malloc does not initialize",
+      "calloc is faster than malloc",
+      "malloc and calloc are identical; only the naming differs",
+      "calloc can only allocate arrays; malloc allocates single objects"
+    ],
+    "correctIndex": 0,
+    "explanation": "calloc(n, size) allocates n * size bytes initialized to zero; malloc(n * size) does not initialize.",
+    "difficulty": "Medium",
+    "tags": ["calloc", "malloc", "initialization"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Memory Management",
+    "question": "int *p = malloc(sizeof(int) * 5);\nint *q = realloc(p, sizeof(int) * 10);\nif (q == NULL) { free(p); }\nWhy is the NULL check important?",
+    "options": [
+      "If realloc fails, it returns NULL without freeing p; the old pointer is still valid and must be freed",
+      "realloc always succeeds; the check is unnecessary",
+      "If realloc fails, p is automatically freed",
+      "Compiler error if realloc fails"
+    ],
+    "correctIndex": 0,
+    "explanation": "On realloc failure, the original block is unchanged; assigning NULL to q without checking would leak the old block.",
+    "difficulty": "Medium-Hard",
+    "tags": ["realloc", "error handling", "memory leaks"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Memory Management",
+    "question": "int *p = malloc(sizeof(int) * 5);\nint *q = p;\nfree(p);\np = NULL;\nprintf(\"%d\", *q);\nWhy is this undefined behavior?",
+    "options": [
+      "q is a dangling pointer (points to freed memory); dereferencing it is undefined behavior (p being NULL does not invalidate q)",
+      "Both p and q are freed when p = NULL",
+      "Compiler error: q cannot be assigned from p after malloc",
+      "*q is valid because it was assigned before the free"
+    ],
+    "correctIndex": 0,
+    "explanation": "Setting p = NULL does not affect q; q still points to freed memory and is a dangling pointer.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dangling pointers", "multiple pointers", "undefined behavior"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Memory Management",
+    "question": "typedef struct {\nint data;\nint *next;\n} Node;\nNode *head = malloc(sizeof(Node));\nhead->data = 5;\nhead->next = malloc(sizeof(Node));\nHow should this linked list be freed?",
+    "options": [
+      "Traverse the list, free each node in reverse order: free the next pointers first, then free the head",
+      "free(head) automatically frees all allocated nodes",
+      "Call free on the entire structure once",
+      "Linked lists cannot be freed; they must be left in memory"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each malloc has a corresponding free; navigating and freeing in order prevents memory leaks and dangling pointers.",
+    "difficulty": "Medium-Hard",
+    "tags": ["linked lists", "recursive structures", "memory cleanup"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Memory Management",
+    "question": "int *arr[10];\nfor (int i = 0; i < 10; i++) {\narr[i] = malloc(sizeof(int) * 5);\n}\nWhy is cleanup code necessary here?",
+    "options": [
+      "Each malloc must have a corresponding free; a loop must free all 10 allocated blocks, then the array",
+      "The array is automatically freed when it goes out of scope",
+      "malloc never needs to be freed in arrays",
+      "free(arr) frees all sub-allocations"
+    ],
+    "correctIndex": 0,
+    "explanation": "arr is an array of pointers; each pointer points to dynamically allocated memory; each must be freed individually.",
+    "difficulty": "Medium",
+    "tags": ["dynamic arrays", "pointer arrays", "cleanup"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Memory Management",
+    "question": "char *str = malloc(10);\nstrcpy(str, \"hello world\");\nfree(str);\nWhy is this dangerous?",
+    "options": [
+      "Buffer overflow: \"hello world\" (12 chars with \\0) exceeds 10 bytes; strcpy writes past the allocated memory",
+      "strcpy is forbidden with malloc",
+      "free() is called too early",
+      "Compiler error: incompatible types"
+    ],
+    "correctIndex": 0,
+    "explanation": "strcpy does not check bounds; writing 12 bytes into 10 bytes corrupts the heap, causing undefined behavior.",
+    "difficulty": "Medium-Hard",
+    "tags": ["buffer overflow", "strcpy", "heap corruption"]
+  }
+]

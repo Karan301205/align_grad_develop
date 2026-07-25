@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Design Patterns",
+    "question": "What does the Singleton pattern ensure?\n```python\nclass Singleton:\n    _instance = None\n    \n    def __new__(cls):\n        if cls._instance is None:\n            cls._instance = super().__new__(cls)\n        return cls._instance\n```",
+    "options": ["Multiple instances", "Only one instance exists", "Thread safety", "Memory efficiency"],
+    "correctIndex": 1,
+    "explanation": "Singleton ensures only one instance of a class exists by returning the same instance from __new__.",
+    "difficulty": "Medium",
+    "tags": ["singleton", "design-pattern", "instance-control"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Design Patterns",
+    "question": "What does the Factory pattern provide?\n```python\nclass Factory:\n    @staticmethod\n    def create_object(obj_type):\n        if obj_type == 'A':\n            return ClassA()\n        elif obj_type == 'B':\n            return ClassB()\n```",
+    "options": ["Caching", "Encapsulates object creation logic", "Thread management", "Database access"],
+    "correctIndex": 1,
+    "explanation": "Factory pattern centralizes object creation, allowing flexible instantiation without exposing details.",
+    "difficulty": "Medium",
+    "tags": ["factory-pattern", "design-pattern", "object-creation"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Design Patterns",
+    "question": "What does the Observer pattern enable?\n```python\nclass Subject:\n    def __init__(self):\n        self._observers = []\n    \n    def notify(self):\n        for observer in self._observers:\n            observer.update()\n```",
+    "options": ["Logging", "Loose coupling between object changes and listeners", "Caching", "Serialization"],
+    "correctIndex": 1,
+    "explanation": "Observer decouples objects by allowing observers to register and be notified of state changes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["observer-pattern", "design-pattern", "event-handling"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Design Patterns",
+    "question": "What does the Strategy pattern accomplish?\n```python\nclass Context:\n    def __init__(self, strategy):\n        self.strategy = strategy\n    \n    def execute(self):\n        return self.strategy.do_something()\n```",
+    "options": ["Inheritance hierarchy", "Interchangeable algorithms via composition", "Caching", "Thread safety"],
+    "correctIndex": 1,
+    "explanation": "Strategy encapsulates interchangeable algorithms, allowing clients to choose at runtime.",
+    "difficulty": "Medium",
+    "tags": ["strategy-pattern", "design-pattern", "composition"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Design Patterns",
+    "question": "What does the Decorator pattern do (not Python @decorator)?\n```python\nclass Component:\n    def operation(self):\n        return 'base'\n\nclass Decorator(Component):\n    def __init__(self, component):\n        self.component = component\n    \n    def operation(self):\n        return self.component.operation() + ' decorated'\n```",
+    "options": ["Function wrapping only", "Adds behavior to objects dynamically", "Creates subclasses", "Caches results"],
+    "correctIndex": 1,
+    "explanation": "Decorator pattern wraps objects with additional responsibilities without modifying original classes.",
+    "difficulty": "Medium-Hard",
+    "tags": ["decorator-pattern", "design-pattern", "composition"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Design Patterns",
+    "question": "What does the Adapter pattern convert?\n```python\nclass OldAPI:\n    def old_method(self):\n        return 'old'\n\nclass Adapter(OldAPI):\n    def new_method(self):\n        return self.old_method()\n```",
+    "options": ["Data types", "Incompatible interfaces into compatible ones", "Database schemas", "Network protocols"],
+    "correctIndex": 1,
+    "explanation": "Adapter makes incompatible interfaces work together by wrapping or inheriting to translate calls.",
+    "difficulty": "Medium",
+    "tags": ["adapter-pattern", "design-pattern", "interface-compatibility"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Design Patterns",
+    "question": "What does the Command pattern encapsulate?\n```python\nclass Command:\n    def execute(self):\n        pass\n\nclass ConcreteCommand(Command):\n    def __init__(self, receiver):\n        self.receiver = receiver\n    \n    def execute(self):\n        self.receiver.action()\n```",
+    "options": ["Database queries", "Requests as objects with undo capability", "Function calls", "API responses"],
+    "correctIndex": 1,
+    "explanation": "Command encapsulates requests as objects, enabling queuing, logging, and undo operations.",
+    "difficulty": "Medium-Hard",
+    "tags": ["command-pattern", "design-pattern", "request-encapsulation"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Design Patterns",
+    "question": "What does the Template Method pattern provide?\n```python\nclass Template:\n    def process(self):\n        self.step1()\n        self.step2()\n        self.step3()\n    \n    def step1(self):\n        pass  # Override in subclass\n```",
+    "options": ["Data structure definition", "Algorithm skeleton with customizable steps", "Caching", "Synchronization"],
+    "correctIndex": 1,
+    "explanation": "Template Method defines algorithm structure in parent, letting subclasses override specific steps.",
+    "difficulty": "Medium",
+    "tags": ["template-method", "design-pattern", "inheritance"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Design Patterns",
+    "question": "What does the Iterator pattern provide?\n```python\nclass CustomCollection:\n    def __iter__(self):\n        return CustomIterator(self.data)\n    \n    def __next__(self):\n        pass\n```",
+    "options": ["Loops", "Sequential access without exposing structure", "Sorting", "Filtering"],
+    "correctIndex": 1,
+    "explanation": "Iterator pattern allows sequential access to elements while hiding the underlying collection structure.",
+    "difficulty": "Medium",
+    "tags": ["iterator-pattern", "design-pattern", "iteration"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Design Patterns",
+    "question": "What does the State pattern manage?\n```python\nclass Context:\n    def __init__(self, state):\n        self.state = state\n    \n    def handle(self):\n        self.state = self.state.handle(self)\n```",
+    "options": ["Variables", "Object behavior based on internal state", "Memory", "Threading"],
+    "correctIndex": 1,
+    "explanation": "State pattern allows objects to change behavior when internal state changes, via different state objects.",
+    "difficulty": "Medium-Hard",
+    "tags": ["state-pattern", "design-pattern", "behavior-changes"]
+  }
+]

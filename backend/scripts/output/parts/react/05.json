@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "State Management",
+    "question": "Given const [state, setState] = useState({ x: 1 }); setState({ x: 2 });, why might the old state.y disappear?",
+    "options": ["setState replaces the entire state object, not merging fields", "useState always merges new state with old", "setState is shallow-merged, y is preserved", "Old fields are stored in prevState"],
+    "correctIndex": 0,
+    "explanation": "Unlike this.setState in class components, useState's setState replaces the object entirely; you must manually merge: setState(prev => ({ ...prev, x: 2 })).",
+    "difficulty": "Medium",
+    "tags": ["usestate", "merge", "replace"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "State Management",
+    "question": "Why might useState with a complex initializer cause extra re-renders? const [state, setState] = useState(expensiveFunction());",
+    "options": ["expensiveFunction runs on every render, wasting computation", "Use lazy initialization: useState(() => expensiveFunction()) runs once", "expensiveFunction is cached, so it only runs during mount", "useState never re-runs initializers after mount"],
+    "correctIndex": 1,
+    "explanation": "Without a function, useState calls expensiveFunction on every render; wrapping it in a function (lazy init) runs it only once during mount.",
+    "difficulty": "Medium",
+    "tags": ["usestate", "lazy", "initializer"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "State Management",
+    "question": "Given multiple setState calls: setState(1); setState(2); setState(3);, what is the final state and when does it commit?",
+    "options": ["Final state is 3, all updates batched into single re-render", "Three separate re-renders, one per setState", "Final state is 1, later updates are ignored", "Updates apply in reverse order: 3, 2, 1"],
+    "correctIndex": 0,
+    "explanation": "React 18 batches all state updates in event handlers; all three setState calls merge and the component re-renders once with state = 3.",
+    "difficulty": "Medium",
+    "tags": ["usestate", "batch", "render"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "State Management",
+    "question": "Why does this.state.x++ in a class component not update the component? this.state.x++;",
+    "options": ["Direct mutation doesn't trigger re-render; use setState instead", "Mutation is valid but requires forceUpdate", "Direct mutation works and updates the component automatically", "Increment is synchronous but re-render is asynchronous"],
+    "correctIndex": 0,
+    "explanation": "React doesn't detect mutations; setState notifies React to re-render, so mutating state directly is a silent bug (no update happens).",
+    "difficulty": "Medium",
+    "tags": ["state", "mutation", "setstate"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "State Management",
+    "question": "Given const [items, setItems] = useState([1, 2, 3]); items.push(4);, why doesn't the component update?",
+    "options": ["Array mutation is not detected by React; use immutable patterns", "push is synchronous, update is asynchronous", "React tracks mutations automatically", "push returns undefined, state is not updated"],
+    "correctIndex": 0,
+    "explanation": "Mutating state arrays doesn't trigger re-renders; create a new array: setItems([...items, 4]) or setItems(items.concat(4)).",
+    "difficulty": "Medium",
+    "tags": ["state", "array", "immutable"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "State Management",
+    "question": "Why might sharing state between siblings require lifting state to the parent? Why is this inefficient for deeply nested components?",
+    "options": ["Parent re-renders all descendants when state changes, even unrelated ones", "State can be shared without lifting, no performance cost", "Siblings cannot share state at all", "Lifting state is always the optimal solution"],
+    "correctIndex": 0,
+    "explanation": "Lifting state to a parent causes the parent and all children to re-render when state changes; deeply nested trees waste renders on unrelated components.",
+    "difficulty": "Medium-Hard",
+    "tags": ["state", "lift", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "State Management",
+    "question": "Given const [x, setX] = useState(0); setTimeout(() => setX(x + 1), 1000);, why might x be stale after multiple calls?",
+    "options": ["setTimeout captures the current x, calling setX(x + 1) is stale", "Use setX(prev => prev + 1) to avoid stale closure", "x is updated before setTimeout executes", "This pattern is safe and will always increment by 1"],
+    "correctIndex": 1,
+    "explanation": "setTimeout captures x in a closure; if called multiple times, each timeout uses the x from when it was scheduled, not the current value.",
+    "difficulty": "Medium-Hard",
+    "tags": ["usestate", "closure", "stale"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "State Management",
+    "question": "Why might storing props in state cause sync issues? const [localProp, setLocalProp] = useState(props.data);",
+    "options": ["State is set once at mount; prop changes don't update state", "State and props auto-sync in React", "Storing props in state is safe and recommended", "Only derived state should be stored"],
+    "correctIndex": 0,
+    "explanation": "State is initialized with props.data at mount; if props.data changes later, state stays the same, causing drift (use props directly or sync with useEffect).",
+    "difficulty": "Medium",
+    "tags": ["state", "props", "sync"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "State Management",
+    "question": "Given const [state, setState] = useState(null); setState(undefined);, what is the state after setState?",
+    "options": ["State becomes undefined, update commits normally", "setState ignores undefined, state stays null", "Setting to undefined is not allowed", "State becomes null, undefined is coerced"],
+    "correctIndex": 0,
+    "explanation": "setState(undefined) is valid and updates state to undefined; only skipped if setState's argument is exactly the same reference as current state.",
+    "difficulty": "Medium",
+    "tags": ["usestate", "undefined", "update"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "State Management",
+    "question": "Why is const [state, setState] = useState(() => ...) different from const [state, setState] = useState(...)? When should each be used?",
+    "options": ["Lazy init runs only once, eager init runs every render", "Both run once, lazy is just syntax sugar", "Lazy init runs on every render, eager init runs once", "Lazy init is slower than eager init"],
+    "correctIndex": 0,
+    "explanation": "Lazy init (function) runs only during mount; eager init (value) runs on every render even if unused, wasting computation for expensive operations.",
+    "difficulty": "Medium",
+    "tags": ["usestate", "lazy", "performance"]
+  }
+]

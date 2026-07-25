@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "C",
+    "subtopic": "Basic Syntax",
+    "question": "#define MAX 100\nint arr[MAX];\nWhat value does MAX have after this code?",
+    "options": [
+      "A macro that expands to 100 everywhere",
+      "100 is stored in a const variable named MAX",
+      "MAX is a pointer to 100",
+      "MAX is a runtime variable"
+    ],
+    "correctIndex": 0,
+    "explanation": "Preprocessor directives like #define are textual substitutions at compile-time, not runtime variables.",
+    "difficulty": "Medium",
+    "tags": ["preprocessor", "macros", "compilation"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Basic Syntax",
+    "question": "#define SQUARE(x) x*x\nint result = SQUARE(2+3);\nWhat is the value of result?",
+    "options": [
+      "25",
+      "11",
+      "20",
+      "15"
+    ],
+    "correctIndex": 1,
+    "explanation": "SQUARE(2+3) expands to 2+3*2+3 due to lack of parentheses, evaluated as 2+(3*2)+3=11.",
+    "difficulty": "Medium-Hard",
+    "tags": ["macros", "operator precedence", "pitfalls"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Basic Syntax",
+    "question": "extern int x;\nint x;\nWhy does this declaration sequence work?",
+    "options": [
+      "extern promises the declaration will exist elsewhere; the second defines it",
+      "extern creates an alias; the second shadows it",
+      "Both statements do the same thing redundantly",
+      "extern prevents the second line from being executed"
+    ],
+    "correctIndex": 0,
+    "explanation": "extern declares a variable with external linkage that will be defined elsewhere (or later); the second line provides the definition.",
+    "difficulty": "Medium",
+    "tags": ["linkage", "extern", "declaration vs definition"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Basic Syntax",
+    "question": "#include \"header.h\"\n#include <stdio.h>\nWhat is the difference in how these are searched?",
+    "options": [
+      "Quoted includes search the current directory first; angle brackets search system paths",
+      "Angle brackets search current directory first; quoted includes search system paths",
+      "Both are identical; the syntax is just a style choice",
+      "Quoted includes are for functions; angle brackets are for constants"
+    ],
+    "correctIndex": 0,
+    "explanation": "Quoted includes prioritize the current directory; angle-bracket includes go directly to system include paths.",
+    "difficulty": "Medium",
+    "tags": ["preprocessor", "includes", "file paths"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Basic Syntax",
+    "question": "void func();\nvoid func() { }\nLater: void func() { printf(\"new\"); }\nWhat happens at link time?",
+    "options": [
+      "Linker error: multiple definitions of func",
+      "The second definition silently overwrites the first",
+      "The compiler error prevents reaching link time",
+      "Only the forward declaration is used"
+    ],
+    "correctIndex": 0,
+    "explanation": "Two function definitions with the same signature cause a linker error for multiple symbol definitions.",
+    "difficulty": "Medium",
+    "tags": ["linkage", "definitions", "linker"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Basic Syntax",
+    "question": "int x; {\nint x;\n}\nWhat is the scope of the inner x?",
+    "options": [
+      "The block scope; it shadows the outer x within braces",
+      "The file scope; both refer to the same variable",
+      "The inner x is invalid syntax",
+      "The outer x is deleted when the inner block starts"
+    ],
+    "correctIndex": 0,
+    "explanation": "Inner block declarations create block scope and shadow outer declarations of the same name.",
+    "difficulty": "Medium",
+    "tags": ["scope", "shadowing", "blocks"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Basic Syntax",
+    "question": "static int x = 0;\nvoid func() { x++; }\nCalling func twice yields x = 2. Why does x persist?",
+    "options": [
+      "static storage duration; x is allocated once and persists across calls",
+      "Global variables always retain their value between function calls",
+      "The compiler optimizes func to increment a global register",
+      "func allocates x on the heap, not the stack"
+    ],
+    "correctIndex": 0,
+    "explanation": "static storage duration means x is allocated once at program start and retains its value across function calls.",
+    "difficulty": "Medium",
+    "tags": ["static", "storage duration", "persistence"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Basic Syntax",
+    "question": "#define DEBUG 1\n#if DEBUG\nprintf(\"Debug\");\n#endif\nWhen is the printf evaluated?",
+    "options": [
+      "At compile-time; the preprocessor includes or excludes the code before compilation",
+      "At runtime; the #if is a conditional statement like if()",
+      "Never; #if is a compile-time constant that cannot contain side effects",
+      "Both at compile-time and runtime depending on DEBUG value"
+    ],
+    "correctIndex": 0,
+    "explanation": "Preprocessor conditionals like #if are evaluated at preprocessing, before actual compilation, controlling which code is even compiled.",
+    "difficulty": "Medium-Hard",
+    "tags": ["preprocessor", "conditional compilation", "compilation stages"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Basic Syntax",
+    "question": "char *str = \"hello\";\nstr[0] = 'H';\nWhat happens when this code runs?",
+    "options": [
+      "Undefined behavior: string literals are read-only",
+      "The character is successfully changed to uppercase",
+      "Compiler error: cannot assign to string literals",
+      "A new mutable copy is created and modified"
+    ],
+    "correctIndex": 0,
+    "explanation": "String literals have read-only storage; attempting to modify them causes undefined behavior (typically a segfault).",
+    "difficulty": "Medium",
+    "tags": ["string literals", "undefined behavior", "memory protection"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Basic Syntax",
+    "question": "typedef struct Node { int val; } Node;\nNode n;\nHow does typedef help here?",
+    "options": [
+      "Allows using Node directly without struct keyword",
+      "Creates an alias that is only valid in this scope",
+      "Reserves memory for n at typedef time",
+      "Makes the struct behave like a primitive type"
+    ],
+    "correctIndex": 0,
+    "explanation": "typedef creates an alias for the type, allowing Node to be used directly without the struct keyword prefix.",
+    "difficulty": "Medium",
+    "tags": ["typedef", "structs", "type aliasing"]
+  }
+]

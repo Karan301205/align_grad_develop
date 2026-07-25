@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "Multi Threading",
+    "question": "What is a race condition?\nint counter = 0;\nvar t1 = new Thread(() => counter++);\nvar t2 = new Thread(() => counter++);\nt1.Start(); t2.Start();\nt1.Join(); t2.Join();\nConsole.WriteLine(counter);",
+    "options": ["0 or 1 or 2", "Always 2", "Always 1", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Without synchronization, increment operations are not atomic; counter may end up as 0, 1, or 2.",
+    "difficulty": "Medium-Hard",
+    "tags": ["multithreading", "race-condition", "synchronization"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Multi Threading",
+    "question": "What does lock() do?\nobject lockObj = new object();\nint counter = 0;\nvar t1 = new Thread(() => { lock(lockObj) counter++; });\nvar t2 = new Thread(() => { lock(lockObj) counter++; });\nt1.Start(); t2.Start();\nt1.Join(); t2.Join();\nConsole.WriteLine(counter);",
+    "options": ["Always 2", "0 or 1 or 2", "1", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "lock ensures only one thread enters critical section; counter increments safely to 2.",
+    "difficulty": "Medium",
+    "tags": ["lock", "synchronization", "critical-section"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Multi Threading",
+    "question": "What does Thread.Join() do?\nvar t = new Thread(() => Console.WriteLine(\"A\"));\nt.Start();\nt.Join();\nConsole.WriteLine(\"B\");",
+    "options": ["A then B", "B then A", "B only", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Join() waits for thread to complete; A prints first, then B.",
+    "difficulty": "Medium",
+    "tags": ["threads", "join", "synchronization"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Multi Threading",
+    "question": "What does Interlocked.Increment() prevent?\nint counter = 0;\nvar t1 = new Thread(() => Interlocked.Increment(ref counter));\nvar t2 = new Thread(() => Interlocked.Increment(ref counter));\nt1.Start(); t2.Start();\nt1.Join(); t2.Join();\nConsole.WriteLine(counter);",
+    "options": ["Always 2", "0 or 1 or 2", "1", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Interlocked.Increment performs atomic increment; no race condition, always 2.",
+    "difficulty": "Medium",
+    "tags": ["interlocked", "atomic-operations", "synchronization"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Multi Threading",
+    "question": "What does ManualResetEvent do?\nvar resetEvent = new ManualResetEvent(false);\nvar t = new Thread(() => {\n  resetEvent.WaitOne();\n  Console.WriteLine(\"Go\");\n});\nt.Start();\nThread.Sleep(100);\nresetEvent.Set();\nt.Join();",
+    "options": ["Prints Go", "Nothing", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "WaitOne() blocks until Set() is called; prints Go after signal.",
+    "difficulty": "Medium-Hard",
+    "tags": ["signaling", "manualresetevent", "threading"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Multi Threading",
+    "question": "What is ThreadLocal<T> used for?\nvar tls = new ThreadLocal<int>(() => 0);\nvar t1 = new Thread(() => { tls.Value = 1; Console.WriteLine(tls.Value); });\nvar t2 = new Thread(() => { tls.Value = 2; Console.WriteLine(tls.Value); });\nt1.Start(); t2.Start();\nt1.Join(); t2.Join();",
+    "options": ["1 and 2", "2 and 2", "1 and 1", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "ThreadLocal<T> stores separate values per thread; each thread has its own value.",
+    "difficulty": "Medium",
+    "tags": ["threadlocal", "thread-storage", "multithreading"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Multi Threading",
+    "question": "What does Mutex do?\nvar mutex = new Mutex();\nint counter = 0;\nvar t1 = new Thread(() => { mutex.WaitOne(); counter++; mutex.ReleaseMutex(); });\nvar t2 = new Thread(() => { mutex.WaitOne(); counter++; mutex.ReleaseMutex(); });\nt1.Start(); t2.Start();\nt1.Join(); t2.Join();\nConsole.WriteLine(counter);",
+    "options": ["Always 2", "0 or 1 or 2", "1", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Mutex exclusive locking prevents race conditions; counter safely increments to 2.",
+    "difficulty": "Medium",
+    "tags": ["mutex", "exclusion", "synchronization"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Multi Threading",
+    "question": "What does Thread.Sleep() do?\nvar t = new Thread(() => {\n  Console.WriteLine(\"Start\");\n  Thread.Sleep(100);\n  Console.WriteLine(\"End\");\n});\nt.Start();\nt.Join();",
+    "options": ["Prints Start then End after 100ms", "Prints Start then End immediately", "Exception", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Sleep() pauses thread execution for specified milliseconds.",
+    "difficulty": "Medium",
+    "tags": ["sleep", "delays", "threading"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Multi Threading",
+    "question": "What is a deadlock scenario?\nobject lock1 = new object();\nobject lock2 = new object();\nvar t1 = new Thread(() => {\n  lock(lock1) { Thread.Sleep(100); lock(lock2) { } }\n});\nvar t2 = new Thread(() => {\n  lock(lock2) { Thread.Sleep(100); lock(lock1) { } }\n});\nt1.Start(); t2.Start();",
+    "options": ["Deadlock occurs", "Completes normally", "Exception thrown", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Circular lock dependency: t1 waits for lock2 while holding lock1, t2 waits for lock1 while holding lock2.",
+    "difficulty": "Medium-Hard",
+    "tags": ["deadlock", "circular-locking", "synchronization-issues"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "Multi Threading",
+    "question": "What does Semaphore do?\nvar semaphore = new Semaphore(2, 2);\nvar threads = new Thread[3];\nfor (int i = 0; i < 3; i++) {\n  threads[i] = new Thread(() => {\n    semaphore.WaitOne();\n    Console.WriteLine(\"Acquired\");\n    Thread.Sleep(50);\n    semaphore.Release();\n  });\n  threads[i].Start();\n}",
+    "options": ["Allows 2 threads to enter simultaneously", "Allows 1 thread", "Allows 3 threads", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Semaphore(2, 2) allows at most 2 threads to enter; third waits until one releases.",
+    "difficulty": "Medium",
+    "tags": ["semaphore", "counting", "resource-pooling"]
+  }
+]

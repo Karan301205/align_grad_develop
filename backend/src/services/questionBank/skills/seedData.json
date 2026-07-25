@@ -1,0 +1,1155 @@
+[
+  {
+    "canonicalName": ".Net",
+    "slug": "net",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "A2A",
+    "slug": "a2a",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Agile Methodologies",
+    "slug": "agile-methodologies",
+    "aliases": [
+      "Agile Principles & Scrum"
+    ],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Amazon Redshift",
+    "slug": "amazon-redshift",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Analytics",
+    "slug": "analytics",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "AngularJS",
+    "slug": "angularjs",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Ansible",
+    "slug": "ansible",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Apache Airflow",
+    "slug": "apache-airflow",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Apache Spark",
+    "slug": "apache-spark",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "API",
+    "slug": "api",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "API testing",
+    "slug": "api-testing",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "AWS",
+    "slug": "aws",
+    "aliases": [],
+    "category": "technical",
+    "tier": 1,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Azure",
+    "slug": "azure",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Bash Scripting",
+    "slug": "bash-scripting",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "BigQuery",
+    "slug": "bigquery",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Bootstrap",
+    "slug": "bootstrap",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "C",
+    "slug": "c",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "C#",
+    "slug": "c-sharp",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "C++",
+    "slug": "c-plus-plus",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Celery",
+    "slug": "celery",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Chart.js",
+    "slug": "chart-js",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Claude Code",
+    "slug": "claude-code",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Concurrency",
+    "slug": "concurrency",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Crew AI",
+    "slug": "crew-ai",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "CSS",
+    "slug": "css",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Cypress",
+    "slug": "cypress",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Data Structures & Algorithms",
+    "slug": "data-structures-algorithms",
+    "aliases": [
+      "Data Structure"
+    ],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Data Warehousing",
+    "slug": "data-warehousing",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Databricks",
+    "slug": "databricks",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "DAX",
+    "slug": "dax",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Deep Learning (DL)",
+    "slug": "deep-learning-dl",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Distributed Systems",
+    "slug": "distributed-systems",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Django",
+    "slug": "django",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Docker",
+    "slug": "docker",
+    "aliases": [],
+    "category": "technical",
+    "tier": 1,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Docker Compose",
+    "slug": "docker-compose",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Elasticsearch",
+    "slug": "elasticsearch",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "ELK Stack",
+    "slug": "elk-stack",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "ESLint",
+    "slug": "eslint",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "ETL",
+    "slug": "etl",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Event-Driven Architecture",
+    "slug": "event-driven-architecture",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Excel",
+    "slug": "excel",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Express JS",
+    "slug": "express-js",
+    "aliases": [],
+    "category": "technical",
+    "tier": 2,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "FastAPI",
+    "slug": "fastapi",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Figma",
+    "slug": "figma",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Firebase",
+    "slug": "firebase",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Framer Motion",
+    "slug": "framer-motion",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Gemini API",
+    "slug": "gemini-api",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Generative AI",
+    "slug": "generative-ai",
+    "aliases": [
+      "GenAI"
+    ],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Git and Github",
+    "slug": "git-and-github",
+    "aliases": [],
+    "category": "technical",
+    "tier": 1,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "GitHub Actions",
+    "slug": "github-actions",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Go",
+    "slug": "go",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Google Analytics",
+    "slug": "google-analytics",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Google Cloud Platform",
+    "slug": "google-cloud-platform",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "GraphQL",
+    "slug": "graphql",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Hadoop HDFS",
+    "slug": "hadoop-hdfs",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Haskell",
+    "slug": "haskell",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Helm",
+    "slug": "helm",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "HTML",
+    "slug": "html",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Hugging Face",
+    "slug": "hugging-face",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "J2EE",
+    "slug": "j2ee",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Jaeger",
+    "slug": "jaeger",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Java",
+    "slug": "java",
+    "aliases": [],
+    "category": "technical",
+    "tier": 1,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "JavaScript",
+    "slug": "javascript",
+    "aliases": [],
+    "category": "technical",
+    "tier": 1,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Jest",
+    "slug": "jest",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Jira",
+    "slug": "jira",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "JQuery",
+    "slug": "jquery",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Kafka",
+    "slug": "kafka",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Keras",
+    "slug": "keras",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Kubernetes",
+    "slug": "kubernetes",
+    "aliases": [],
+    "category": "technical",
+    "tier": 2,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "LangChain",
+    "slug": "langchain",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "LangGraph",
+    "slug": "langgraph",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "LangSmith",
+    "slug": "langsmith",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "LightGBM",
+    "slug": "lightgbm",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Linux",
+    "slug": "linux",
+    "aliases": [],
+    "category": "technical",
+    "tier": 2,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "LLM",
+    "slug": "llm",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Machine Learning",
+    "slug": "machine-learning",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Makefiles",
+    "slug": "makefiles",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Matplotlib & Seaborn",
+    "slug": "matplotlib-seaborn",
+    "aliases": [
+      "Matplotlib",
+      "Seaborn"
+    ],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "MCP",
+    "slug": "mcp",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "MLflow",
+    "slug": "mlflow",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "MongoDB",
+    "slug": "mongodb",
+    "aliases": [],
+    "category": "technical",
+    "tier": 2,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "MySQL",
+    "slug": "mysql",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "n8n",
+    "slug": "n8n",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Natural Language Processing",
+    "slug": "natural-language-processing",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Natural Language Toolkit (NLTK)",
+    "slug": "natural-language-toolkit-nltk",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Next.js",
+    "slug": "next-js",
+    "aliases": [],
+    "category": "technical",
+    "tier": 2,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Nginx",
+    "slug": "nginx",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Node.js",
+    "slug": "node-js",
+    "aliases": [],
+    "category": "technical",
+    "tier": 1,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "NoSQL",
+    "slug": "nosql",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "NumPy",
+    "slug": "numpy",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "OAuth 2.0",
+    "slug": "oauth-2-0",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "OpenAI API",
+    "slug": "openai-api",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "OpenCV",
+    "slug": "opencv",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Pandas",
+    "slug": "pandas",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Perl",
+    "slug": "perl",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "PHP",
+    "slug": "php",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Pinecone",
+    "slug": "pinecone",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Playwright",
+    "slug": "playwright",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "PostgreSQL",
+    "slug": "postgresql",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Postman",
+    "slug": "postman",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Power BI",
+    "slug": "power-bi",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Prisma ORM",
+    "slug": "prisma-orm",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Prometheus",
+    "slug": "prometheus",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Pyspark",
+    "slug": "pyspark",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Python",
+    "slug": "python",
+    "aliases": [],
+    "category": "technical",
+    "tier": 1,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "PyTorch",
+    "slug": "pytorch",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "RabbitMQ",
+    "slug": "rabbitmq",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "RAG",
+    "slug": "rag",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "React",
+    "slug": "react",
+    "aliases": [],
+    "category": "technical",
+    "tier": 1,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "React Native",
+    "slug": "react-native",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "React Testing Library",
+    "slug": "react-testing-library",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "RedHat Linux 7.5",
+    "slug": "redhat-linux-7-5",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Redis",
+    "slug": "redis",
+    "aliases": [],
+    "category": "technical",
+    "tier": 2,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Redux",
+    "slug": "redux",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Ruby",
+    "slug": "ruby",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Rust",
+    "slug": "rust",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Scikit-learn",
+    "slug": "scikit-learn",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "SciPy",
+    "slug": "scipy",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Sentry",
+    "slug": "sentry",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "ServiceNow",
+    "slug": "servicenow",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Snowflake",
+    "slug": "snowflake",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Spreadsheet",
+    "slug": "spreadsheet",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "SQL",
+    "slug": "sql",
+    "aliases": [],
+    "category": "technical",
+    "tier": 1,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Storybook",
+    "slug": "storybook",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Supabase",
+    "slug": "supabase",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Swagger",
+    "slug": "swagger",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Swift",
+    "slug": "swift",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Tailwind",
+    "slug": "tailwind",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "TensorFlow",
+    "slug": "tensorflow",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Terraform",
+    "slug": "terraform",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Three.js",
+    "slug": "three-js",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Transformers",
+    "slug": "transformers",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Turborepo",
+    "slug": "turborepo",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "TypeScript",
+    "slug": "typescript",
+    "aliases": [],
+    "category": "technical",
+    "tier": 2,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "UI/UX",
+    "slug": "ui-ux",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Unit Testing",
+    "slug": "unit-testing",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "UNIX",
+    "slug": "unix",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Vector Embeddings",
+    "slug": "vector-embeddings",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Virtualization",
+    "slug": "virtualization",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Vue.js",
+    "slug": "vue-js",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Windows",
+    "slug": "windows",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "YUM",
+    "slug": "yum",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  },
+  {
+    "canonicalName": "Zustand",
+    "slug": "zustand",
+    "aliases": [],
+    "category": "technical",
+    "tier": 3,
+    "targetQuestionCount": 300
+  }
+]

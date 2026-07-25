@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Express JS",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "A callback-based async operation chains three `.then()` handlers. The second handler throws an error. Which handlers execute?",
+    "options": [
+      "All three handlers execute sequentially",
+      "First handler executes, second throws and is skipped, third never executes",
+      "First and second execute, third catches the error",
+      "Second handler catches the error and prevents first handler from running"
+    ],
+    "correctIndex": 1,
+    "explanation": "Promise chains break on unhandled errors; handlers after the throw do not execute unless explicitly caught with `.catch()`.",
+    "difficulty": "Medium",
+    "tags": ["promises", "error-handling", "async-flow"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "An arrow function is declared inside a method: `const obj = { method: function() { const arrow = () => this; } };`. What does `this` refer to inside the arrow function?",
+    "options": [
+      "The obj object",
+      "The global object (or undefined in strict mode)",
+      "The function's own scope",
+      "The object that called method()"
+    ],
+    "correctIndex": 1,
+    "explanation": "Arrow functions inherit `this` from their lexical scope; here the enclosing function is not called in object context, so `this` is global or undefined.",
+    "difficulty": "Medium-Hard",
+    "tags": ["this-binding", "arrow-functions", "scope"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "const obj = { a: 1 }; const { a, b = 5 } = obj; console.log(b);  What prints?",
+    "options": [
+      "5",
+      "undefined",
+      "null",
+      "ReferenceError"
+    ],
+    "correctIndex": 0,
+    "explanation": "Destructuring with default values assigns the default when the property is undefined; `b` is not in obj, so `b = 5` applies.",
+    "difficulty": "Medium",
+    "tags": ["destructuring", "defaults", "es6"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "const arr = [1, 2, 3]; arr.forEach((v, i) => arr.splice(i, 1));  What is the final state of arr?",
+    "options": [
+      "[1, 2, 3] (unchanged)",
+      "[2, 3]",
+      "[1, 3]",
+      "[1]"
+    ],
+    "correctIndex": 3,
+    "explanation": "Mutating an array during iteration skips elements; splice removes each element as the iterator sees it, leaving only index 0 untouched.",
+    "difficulty": "Medium-Hard",
+    "tags": ["mutation", "iteration", "array-methods"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "A function uses both rest parameters and destructuring: const f = ({ a, ...rest }, ...args) => rest;  const result = f({ a: 1, b: 2, c: 3 }, 10, 20);  What is result?",
+    "options": [
+      "{ b: 2, c: 3 }",
+      "[10, 20]",
+      "{ b: 2, c: 3, args: [10, 20] }",
+      "undefined"
+    ],
+    "correctIndex": 0,
+    "explanation": "Object rest `...rest` collects unmatched properties after destructuring `a`; the function argument `...args` is separate and not returned.",
+    "difficulty": "Hard",
+    "tags": ["rest-parameters", "destructuring", "spread"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "const p = new Promise(resolve => setTimeout(() => resolve(10), 100)); await p; console.log(p);  What logs?",
+    "options": [
+      "Promise { 10 }",
+      "Promise { <pending> }",
+      "10",
+      "Promise { <fulfilled>: 10 }"
+    ],
+    "correctIndex": 3,
+    "explanation": "After `await` resolves, `p` is still the Promise object; only its [[PromiseState]] is `fulfilled` with value 10.",
+    "difficulty": "Medium",
+    "tags": ["promises", "async-await", "promise-state"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "Two functions: `const f = (x = 0) => x + 1; const g = (f) => f() + 1;`  What does `g(f)` return?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "NaN"
+    ],
+    "correctIndex": 2,
+    "explanation": "f() uses default x=0, returns 1; g adds 1 to that result, returning 2... wait, g() itself returns 2, not 1. Actually f() = 1, g(f) = 1 + 1 = 2... no, g receives f, calls f() which is 1, adds 1 to get 2. Let me recalculate: f(undefined) with default x=0 returns 0+1=1; g(f) calls f() which is 1, then adds 1, returning 2. So answer is 2.",
+    "difficulty": "Medium",
+    "tags": ["default-parameters", "function-scope", "closures"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "const obj = Object.freeze({ a: 1, b: { c: 2 } }); obj.b.c = 3;  What is obj.b.c?",
+    "options": [
+      "2",
+      "3",
+      "undefined",
+      "Error thrown"
+    ],
+    "correctIndex": 1,
+    "explanation": "Object.freeze only shallowly freezes the top level; nested objects are not frozen, so mutation of obj.b.c succeeds silently.",
+    "difficulty": "Medium-Hard",
+    "tags": ["object-freeze", "shallow-freeze", "immutability"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "A module exports `module.exports = { f: () => this.x };`. Another module imports it, stores it in a variable, and calls it. What is `this` inside f?",
+    "options": [
+      "The module's exports object",
+      "The global object",
+      "undefined (in strict mode)",
+      "The caller's context"
+    ],
+    "correctIndex": 1,
+    "explanation": "A function called without an explicit receiver (`obj.f()`) has `this` bound to global (or undefined in strict mode), not the exports object.",
+    "difficulty": "Medium",
+    "tags": ["this-binding", "module-exports", "context"]
+  },
+  {
+    "skillName": "Express JS",
+    "subtopic": "JavaScript Fundamentals",
+    "question": "const map = new Map([['a', 1], ['b', 2]]); for (const key in map) console.log(key);  What prints?",
+    "options": [
+      "a, b",
+      "Nothing",
+      "Enumerates all Map internal properties",
+      "0, 1"
+    ],
+    "correctIndex": 1,
+    "explanation": "for...in iterates over enumerable properties of an object; Map has no enumerable own properties, so nothing logs.",
+    "difficulty": "Medium",
+    "tags": ["map", "for-in", "iteration"]
+  }
+]

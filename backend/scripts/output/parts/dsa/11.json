@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Greedy Algorithms",
+    "question": "Greedy algorithms make locally optimal choices hoping to find a global optimum. For which problem is a greedy solution guaranteed to work: coin change or weighted job scheduling?",
+    "options": ["coin change with standard denominations", "weighted job scheduling", "both", "neither"],
+    "correctIndex": 0,
+    "explanation": "Coin change with standard denominations (1, 5, 10, 25) is greedy-optimal; weighted job scheduling requires DP for optimal solution.",
+    "difficulty": "Medium",
+    "tags": ["greedy-property", "problem-analysis"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Greedy Algorithms",
+    "question": "Activity selection problem: select the maximum number of non-overlapping activities. Greedy approach: always pick the activity finishing earliest. Why does this work?",
+    "options": ["it minimizes time used", "earliest finish allows the most room for future activities", "it minimizes count", "it works randomly"],
+    "correctIndex": 1,
+    "explanation": "Earliest finish leaves the maximum time interval for remaining activities, maximizing the count of non-overlapping selections.",
+    "difficulty": "Medium",
+    "tags": ["activity-selection", "greedy-correctness"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Greedy Algorithms",
+    "question": "Huffman coding assigns variable-length binary codes to characters based on frequency, using a greedy tree-building approach. What is the key property that ensures optimality?",
+    "options": ["always merge the two least-frequent nodes", "always process highest-frequency first", "codes are always powers of two", "greedy order does not matter"],
+    "correctIndex": 0,
+    "explanation": "Merging the two smallest-frequency subtrees greedily ensures that frequently-used characters get shorter codes, minimizing overall bit count.",
+    "difficulty": "Medium-Hard",
+    "tags": ["Huffman-coding", "frequency-based-greedy"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Greedy Algorithms",
+    "question": "Fractional knapsack problem allows taking fractions of items. Greedy by value-to-weight ratio fills the knapsack. Why does this work for fractional but not 0/1?",
+    "options": ["0/1 knapsack is easier", "fractional allows taking partial items, so ratio-based choices remain optimal", "0/1 requires DP for any solution", "greedy works for both"],
+    "correctIndex": 1,
+    "explanation": "Fractional knapsack: taking the highest-ratio items greedily is optimal because you can always fill remaining space with a fraction; 0/1 forces all-or-nothing.",
+    "difficulty": "Medium-Hard",
+    "tags": ["fractional-knapsack", "greedy-optimality"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Greedy Algorithms",
+    "question": "Minimum spanning tree (MST) problem: Kruskal's algorithm greedily selects edges in increasing weight order, avoiding cycles. Time complexity with a union-find structure?",
+    "options": ["linear time", "logarithmic time", "linearithmic time", "quadratic time"],
+    "correctIndex": 2,
+    "explanation": "Sorting edges is O(E log E); processing edges with union-find is O(E α(V)); total is O(E log E) linearithmic where E can be O(V^2).",
+    "difficulty": "Medium-Hard",
+    "tags": ["MST", "Kruskal-algorithm"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Greedy Algorithms",
+    "question": "Prim's algorithm for MST grows a single tree by always adding the cheapest edge from the tree to a new vertex. Compared to Kruskal's, which is better for dense graphs?",
+    "options": ["Kruskal's is always better", "Prim's is O((V+E) log V) with a heap and better for dense graphs", "both are identical", "neither works for dense graphs"],
+    "correctIndex": 1,
+    "explanation": "Prim's with a heap is O((V+E) log V); for dense graphs (E ≈ V^2), this is O(V^2 log V), better than Kruskal's O(E log E) = O(V^2 log V^2).",
+    "difficulty": "Medium-Hard",
+    "tags": ["Prim-algorithm", "dense-graph-optimization"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Greedy Algorithms",
+    "question": "Dijkstra's algorithm for shortest paths always selects the nearest unvisited vertex. Why can this greedy approach fail for graphs with negative edge weights?",
+    "options": ["greedy always works", "negative edges can create cheaper alternate paths after initial choice", "Dijkstra handles negative weights if relaxed multiple times", "the algorithm needs randomization"],
+    "correctIndex": 1,
+    "explanation": "Greedy selection of the nearest vertex can miss cheaper paths via negative-weight edges discovered later; Bellman-Ford relaxes repeatedly to handle negatives.",
+    "difficulty": "Medium-Hard",
+    "tags": ["Dijkstra-limitation", "negative-weights"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Greedy Algorithms",
+    "question": "Making change with coins of denominations 1, 3, 4: to make amount 6, greedy picks 4 first (leaving 2), then can't proceed optimally. Is greedy ever optimal for this problem?",
+    "options": ["yes, always", "no, only for standard denominations", "yes, if amount is even", "depends on picking strategy"],
+    "correctIndex": 1,
+    "explanation": "Greedy coin change fails for non-standard denominations; it works for real currencies due to their mathematical structure (1, 5, 10, 25, etc.).",
+    "difficulty": "Medium-Hard",
+    "tags": ["greedy-failure", "counterexample"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Greedy Algorithms",
+    "question": "Load balancing: assign n tasks to m machines minimizing max load. Greedy algorithm: always assign the next task to the least-loaded machine. Is this optimal?",
+    "options": ["yes, always optimal", "no, but gives a good approximation", "yes, only for equal-size tasks", "it fails completely"],
+    "correctIndex": 1,
+    "explanation": "Greedy load balancing is a 2-approximation (max load is at most twice optimal); optimal requires exponential-time assignment analysis.",
+    "difficulty": "Medium-Hard",
+    "tags": ["approximation-algorithm", "load-balancing"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Greedy Algorithms",
+    "question": "Interval scheduling maximization: select the most non-overlapping intervals. Greedy by earliest finish time works. Does greedy by earliest start time also work?",
+    "options": ["yes, both work equally", "no, earliest start can fail", "yes, but only for sorted intervals", "depends on interval lengths"],
+    "correctIndex": 1,
+    "explanation": "Earliest start time fails because choosing a long interval starting early can block many shorter intervals; earliest finish is optimal.",
+    "difficulty": "Medium",
+    "tags": ["interval-scheduling", "greedy-strategy-matters"]
+  }
+]

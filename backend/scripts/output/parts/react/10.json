@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "Error Handling",
+    "question": "Why don't try-catch blocks in render catch errors thrown by child components? try { return <Child />; } catch (e) { ... }",
+    "options": ["Event handlers and render methods cannot be caught by try-catch, only Error Boundary", "try-catch always works in render", "Child errors are always handled by Parent try-catch", "Error Boundary is the same as try-catch"],
+    "correctIndex": 0,
+    "explanation": "try-catch only catches synchronous errors in the try block; render errors from children happen during render phase, caught by Error Boundary, not try-catch.",
+    "difficulty": "Medium",
+    "tags": ["error", "try-catch", "boundary"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Error Handling",
+    "question": "Given a component that throws during render: function Comp() { throw new Error('fail'); }, where is the error caught?",
+    "options": ["Caught by nearest Error Boundary ancestor", "Caught by try-catch in parent component", "Error propagates to window.onerror", "Logged to console, no error boundary needed"],
+    "correctIndex": 0,
+    "explanation": "Render-phase errors are caught by Error Boundary using componentDidCatch, not try-catch; Error Boundary must wrap the throwing component.",
+    "difficulty": "Medium",
+    "tags": ["error", "boundary", "render"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Error Handling",
+    "question": "Why does an error in a click handler not get caught by Error Boundary? onClick={() => { throw new Error('fail'); }}",
+    "options": ["Event handlers run outside render phase; Error Boundary doesn't catch them", "Error Boundary catches all errors including events", "onClick errors are ignored silently", "Event errors require try-catch in handler"],
+    "correctIndex": 0,
+    "explanation": "Error Boundary only catches render-phase errors; event handlers run after render, so errors must be handled with try-catch or async error handlers.",
+    "difficulty": "Medium-Hard",
+    "tags": ["error", "handler", "boundary"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Error Handling",
+    "question": "Given componentDidCatch(error, errorInfo), why is errorInfo.componentStack useful?",
+    "options": ["componentStack shows which component threw, useful for debugging render hierarchy", "componentStack is a runtime check, no debugging value", "componentStack is for logging only", "componentStack doesn't provide useful information"],
+    "correctIndex": 0,
+    "explanation": "componentStack is a string showing the component tree where the error occurred; it helps identify which component in the hierarchy threw.",
+    "difficulty": "Medium",
+    "tags": ["error", "boundary", "componentstack"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Error Handling",
+    "question": "Why might an Error Boundary not catch an error thrown by a grandchild component?",
+    "options": ["Error Boundary catches all descendants in its tree", "Grandchild errors skip the parent Error Boundary", "Only immediate children are caught", "Error Boundary location doesn't matter"],
+    "correctIndex": 0,
+    "explanation": "Error Boundary catches errors from any descendant (child, grandchild, etc.) in its render tree; the closest Error Boundary up the tree handles the error.",
+    "difficulty": "Medium",
+    "tags": ["error", "boundary", "descendant"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Error Handling",
+    "question": "Given getDerivedStateFromError(error), why must it return new state instead of mutating? return { hasError: true };",
+    "options": ["Must return new state to trigger re-render, mutation doesn't notify React", "Mutation and return are equivalent", "getDerivedStateFromError doesn't need to return", "Only componentDidCatch can return state"],
+    "correctIndex": 0,
+    "explanation": "getDerivedStateFromError is pure and must return new state; React re-renders the component with the new state to show fallback UI.",
+    "difficulty": "Medium",
+    "tags": ["error", "getderivedstate", "pure"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Error Handling",
+    "question": "Why can't async errors in useEffect be caught by Error Boundary? useEffect(() => { throw new Error('fail'); }, []);",
+    "options": ["useEffect runs after render, errors are not re-render errors, must be caught manually", "Error Boundary catches all useEffect errors", "useEffect errors are ignored silently", "Errors in hooks trigger Error Boundary automatically"],
+    "correctIndex": 0,
+    "explanation": "useEffect errors happen after render phase; Error Boundary only catches render-phase errors, so useEffect errors need try-catch or external error handler.",
+    "difficulty": "Medium-Hard",
+    "tags": ["error", "useeffect", "boundary"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Error Handling",
+    "question": "Given a custom hook that throws: function useCustom() { if (!condition) throw new Error('fail'); }, where is the error caught?",
+    "options": ["Error Boundary catches errors from any function called during render, including hooks", "Hooks are not caught by Error Boundary", "Hook errors are caught by try-catch only", "Hooks have their own error handling"],
+    "correctIndex": 0,
+    "explanation": "Hooks run during render phase; errors thrown from hooks are caught by Error Boundary like any render-phase error.",
+    "difficulty": "Medium",
+    "tags": ["error", "hook", "boundary"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Error Handling",
+    "question": "Why might a server-side error in componentDidMount not be caught by Error Boundary?",
+    "options": ["Error Boundary catches render errors, not lifecycle method errors; use try-catch", "Error Boundary catches all lifecycle errors", "Server errors are global and bypass Error Boundary", "componentDidMount errors are always caught"],
+    "correctIndex": 0,
+    "explanation": "Error Boundary catches render-phase errors; componentDidMount runs after render, so errors there need try-catch or custom error handling.",
+    "difficulty": "Medium",
+    "tags": ["error", "lifecycle", "boundary"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Error Handling",
+    "question": "Given multiple Error Boundaries nested, which boundary catches the error? <ErrorBoundary1><ErrorBoundary2><Child /></ErrorBoundary2></ErrorBoundary1>",
+    "options": ["Nearest Error Boundary (ErrorBoundary2) catches, if it doesn't handle, ErrorBoundary1 catches", "ErrorBoundary1 always catches", "ErrorBoundary2 always catches", "Both catch simultaneously"],
+    "correctIndex": 0,
+    "explanation": "Errors are caught by the nearest Error Boundary ancestor; if that boundary doesn't handle it (or re-throws), the next boundary up catches it.",
+    "difficulty": "Medium",
+    "tags": ["error", "boundary", "nested"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Decorator Pattern",
+    "question": "Does `@deprecated class C {}` work without enabling experimentalDecorators?",
+    "options": ["Yes, decorators are built-in", "No, experimentalDecorators must be enabled", "Yes, but as a type-only hint", "No, @deprecated is invalid"],
+    "correctIndex": 1,
+    "explanation": "Decorators are experimental and require `experimentalDecorators: true` in tsconfig.json to compile.",
+    "difficulty": "Medium",
+    "tags": ["decorators", "experimental-features", "tsconfig"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Decorator Pattern",
+    "question": "Given `function log(target: any) { } @log class C {}` — what is the parameter target?",
+    "options": ["The instance", "The class constructor", "The class prototype", "undefined"],
+    "correctIndex": 1,
+    "explanation": "Class decorators receive the class constructor as the first parameter, allowing modification of the class definition.",
+    "difficulty": "Medium",
+    "tags": ["class-decorators", "decorator-parameters", "metaprogramming"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Decorator Pattern",
+    "question": "Can a method decorator access the method's return type?",
+    "options": ["No, decorators do not have type information", "Yes, via Reflect.getMetadata", "Yes, from the descriptor", "No, return types are erased"],
+    "correctIndex": 1,
+    "explanation": "With reflect-metadata, decorators can access metadata including return types; without it, type info is lost at runtime.",
+    "difficulty": "Medium-Hard",
+    "tags": ["method-decorators", "reflect-metadata", "metaprogramming"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Decorator Pattern",
+    "question": "Does `function log() { return (target: any) => {} } @log() class C {}` require calling the decorator?",
+    "options": ["No, @log works", "Yes, @log() wraps in a factory", "Yes, parentheses are required", "No, but @log() is preferred"],
+    "correctIndex": 1,
+    "explanation": "Decorator factories return the actual decorator; @log() calls the factory to get the decorator function.",
+    "difficulty": "Medium",
+    "tags": ["decorator-factories", "higher-order-decorators", "decorator-patterns"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Decorator Pattern",
+    "question": "Can you stack decorators on a single class or method?",
+    "options": ["No, only one decorator per target", "Yes, multiple decorators execute from bottom to top", "Yes, from top to bottom", "No, TypeScript syntax forbids it"],
+    "correctIndex": 1,
+    "explanation": "Decorators are composed; multiple decorators execute bottom-to-top (innermost first), chaining their effects.",
+    "difficulty": "Medium",
+    "tags": ["stacked-decorators", "decorator-order", "composition"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Decorator Pattern",
+    "question": "Given `@validate class C { @required x: string }` — does @required work on properties?",
+    "options": ["No, property decorators are not supported", "Yes, if experimentalDecorators is on", "Yes, but only at runtime", "No, decorators are class-only"],
+    "correctIndex": 1,
+    "explanation": "Property decorators are supported with experimentalDecorators; they receive the prototype and property name.",
+    "difficulty": "Medium",
+    "tags": ["property-decorators", "experimental-features", "validation"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Decorator Pattern",
+    "question": "Can a method decorator modify the return value of the decorated method?",
+    "options": ["No, decorators cannot alter execution", "Yes, by returning a new descriptor", "Yes, with a wrapper function", "No, return values are immutable"],
+    "correctIndex": 2,
+    "explanation": "Method decorators receive a PropertyDescriptor; returning a new descriptor with a wrapper function can intercept and modify behavior.",
+    "difficulty": "Medium-Hard",
+    "tags": ["method-decorators", "property-descriptors", "method-wrapping"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Decorator Pattern",
+    "question": "Does `@sealed class C {}` (sealing a class) prevent new properties?",
+    "options": ["No, @sealed is not a built-in", "Yes, decorators can call Object.seal", "Yes, TypeScript seals by default", "No, sealing is not enforced"],
+    "correctIndex": 1,
+    "explanation": "A @sealed decorator can call Object.seal(target) to make instances immutable; this is a custom decorator pattern.",
+    "difficulty": "Medium",
+    "tags": ["custom-decorators", "object-sealing", "immutability"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Decorator Pattern",
+    "question": "Can parameter decorators access the parameter's type?",
+    "options": ["Yes, always available", "No, type info is erased", "Yes, via Reflect.getMetadata if enabled", "No, parameters have no decorators"],
+    "correctIndex": 2,
+    "explanation": "Parameter decorators are reflected at runtime only with reflect-metadata; alone, they cannot access type information.",
+    "difficulty": "Medium-Hard",
+    "tags": ["parameter-decorators", "reflect-metadata", "type-erasure"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Decorator Pattern",
+    "question": "Given `function validate(target: any, key: string) {} class C { @validate x = 5; }` — what does @validate receive?",
+    "options": ["The instance and value", "The prototype and property name", "The class and field", "Nothing (syntax error)"],
+    "correctIndex": 1,
+    "explanation": "Property decorators receive the prototype object and the property name as parameters.",
+    "difficulty": "Medium",
+    "tags": ["property-decorators", "decorator-parameters", "metaprogramming"]
+  }
+]

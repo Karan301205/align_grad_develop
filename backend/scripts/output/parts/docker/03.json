@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Networking",
+    "question": "Two containers are created on the default bridge network: `docker run -d --name web app1` and `docker run -d --name db app2`. From web, `ping db` fails, but `ping 172.17.0.3` (db's IP) succeeds. Why does hostname resolution fail?",
+    "options": ["The default bridge network does not support DNS name resolution; use a custom network for hostname resolution", "Docker's embedded DNS server is disabled on the default bridge; you must manually edit /etc/hosts", "The hostname 'db' is not registered because the container was not created with `--link db:db`", "Bridge networks require explicit service discovery; custom networks provide automatic DNS out of the box"],
+    "correctIndex": 0,
+    "explanation": "The default `bridge` network does not have built-in DNS; hostname resolution works only on user-defined networks; `docker network create` followed by `--network` allows DNS by container name.",
+    "difficulty": "Medium",
+    "tags": ["bridge-network", "dns-resolution", "container-networking"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Networking",
+    "question": "You run `docker run -p 8080:80 nginx` on a host with two network interfaces (eth0: 10.0.0.5, eth1: 192.168.1.10). A client on the 10.0.0.0 network can reach the container via 10.0.0.5:8080, but a client on the 192.168.1.0 network cannot reach 192.168.1.10:8080. What is the issue?",
+    "options": ["Docker binds -p to all interfaces by default, but the host firewall blocks 192.168.1.10", "The -p flag binds only to the primary network interface (eth0); use `-p 192.168.1.10:8080:80` to bind to a specific interface", "Docker cannot bind to multiple interfaces simultaneously; you must choose one with -p", "The 192.168.1.0 network is not configured in Docker's network namespace"],
+    "correctIndex": 1,
+    "explanation": "By default, `-p 8080:80` binds to 0.0.0.0 (all interfaces), but `-p <IP>:8080:80` binds to a specific interface; to support both networks, either use `0.0.0.0` or publish on both addresses with multiple `-p` flags.",
+    "difficulty": "Medium-Hard",
+    "tags": ["port-binding", "network-interfaces", "container-networking"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Networking",
+    "question": "Two containers are on the same custom network but cannot communicate: `docker run --network mynet --name app1 nginx` and `docker run --network mynet --name app2 app`. A tcpdump inside app2 shows traffic reaching eth0, but the app does not receive it. What is most likely?",
+    "options": ["The app is bound to 127.0.0.1 and not listening on the eth0 interface", "Docker's network driver is dropping packets between containers on the same network", "The MAC address of app1 is not registered in app2's ARP table", "The network namespace for app2 is isolated from app1's namespace despite being on the same network"],
+    "correctIndex": 0,
+    "explanation": "If traffic reaches the interface but the application does not receive it, the app is likely listening only on localhost (127.0.0.1); check with `ss -tlnp` inside the container and ensure the app binds to 0.0.0.0 or the container's actual IP.",
+    "difficulty": "Medium-Hard",
+    "tags": ["container-communication", "binding-addresses", "debugging"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Networking",
+    "question": "You create an overlay network with `docker network create --driver overlay mynet` on a Swarm manager, then try to run a container with `docker run --network mynet nginx` on a non-Swarm host. It fails with 'network mynet not found'. Why?",
+    "options": ["Overlay networks are Swarm-only and do not work with standalone Docker; use bridge or host networks instead", "The overlay network was not published to all hosts; use `--publish-service` flag when creating the network", "Overlay networks require a key-value store (Consul, etcd) to be running; the KV store is not accessible", "The container must explicitly join the overlay network with `--join-network` before running"],
+    "correctIndex": 0,
+    "explanation": "Overlay networks are specific to Docker Swarm and require a Swarm cluster; standalone Docker instances can only use bridge, host, or none networks; to use overlay, join or initialize a Swarm.",
+    "difficulty": "Medium",
+    "tags": ["overlay-networks", "docker-swarm", "network-drivers"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Networking",
+    "question": "A container is created with `docker run --network host nginx`. Inside the container, `netstat -tlnp` shows nginx listening on 0.0.0.0:80. From outside, the host itself is also listening on the same port and both are serving. What is happening?",
+    "options": ["The container and host are sharing the same network namespace, so they both bind to port 80 on the same socket (port hijacking)", "Docker has created two separate sockets on port 80, one for the host and one for the container (socket reuse)", "This is impossible; two processes cannot bind to the same port on the same interface", "The container is binding to a virtual port that Docker maps back to the host's port 80"],
+    "correctIndex": 2,
+    "explanation": "With `--network host`, the container and host share the same network namespace and the same port space; two processes cannot bind to the same port on the same interface, so one would fail; if both are listening, the container is using `--network host` and binding to a different port or IP.",
+    "difficulty": "Medium-Hard",
+    "tags": ["host-network-mode", "namespace-sharing", "port-binding"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Networking",
+    "question": "You run `docker run -p 8080:80 app` and also `docker run -p 8080:3000 another-app`. The second run succeeds, but neither container is reachable on 8080. What went wrong?",
+    "options": ["Docker allows duplicate port bindings but routes traffic unpredictably between them", "The second command failed silently and exited; both containers cannot bind the same host port", "One container is reachable but Docker swaps the traffic between them randomly", "Docker queues requests on port 8080 and distributes them to both containers"],
+    "correctIndex": 1,
+    "explanation": "Two containers cannot bind the same host port (8080); the second `docker run` command fails with a 'port already allocated' error, so neither container is reachable on 8080.",
+    "difficulty": "Medium",
+    "tags": ["port-binding", "port-conflicts", "docker-run"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Networking",
+    "question": "A container runs a DNS server on 127.0.0.1:53. You want other containers on the same network to use this DNS server. The `--dns` flag is set to the container's IP address (e.g., 172.17.0.2), but lookups still fail. Why?",
+    "options": ["The DNS server is bound to 127.0.0.1 inside the container, which is not reachable from other containers; it must bind to 0.0.0.0 or the container's IP", "Docker does not support custom DNS servers on the same network; use an external DNS or Docker's embedded DNS", "The --dns flag applies only to the container receiving it, not to other containers querying it", "The port 53 is reserved and Docker blocks custom DNS servers for security reasons"],
+    "correctIndex": 0,
+    "explanation": "A service bound to 127.0.0.1 is local to the container only; other containers see it as the container's network IP (172.17.0.2 or similar), so the service must bind to 0.0.0.0 or the external IP to be reachable.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dns-server", "container-communication", "service-binding"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Networking",
+    "question": "Two containers on the same network are connected via a long-lived TCP connection. You then disconnect one container from the network with `docker network disconnect mynet app1`. The connection remains open inside app1 for 30 more seconds before timing out. Why?",
+    "options": ["The container's TCP stack is holding the connection open for a graceful close period", "Docker delays network disconnection to allow applications to clean up connections", "The kernel's TCP timeout (SO_LINGER or FIN_WAIT) is expiring; the OS is draining the connection", "The container is still connected to the bridge and DNS records are cached for 30 seconds"],
+    "correctIndex": 2,
+    "explanation": "TCP connections do not close immediately when the network interface is removed; the kernel waits for FIN packets or times out according to TCP state machine timers (FIN_WAIT_1/2, TIME_WAIT), which explains the 30-second delay.",
+    "difficulty": "Medium-Hard",
+    "tags": ["tcp-connections", "network-disconnection", "kernel-networking"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Networking",
+    "question": "You run `docker run -p 127.0.0.1:8080:80 nginx` to bind port 8080 only on localhost. Inside the container, `curl localhost:80` works. From a different machine on the network, attempting to reach 127.0.0.1:8080 times out. Is this expected behavior?",
+    "options": ["Yes, because 127.0.0.1 is the loopback interface and is not routable across networks", "No, because Docker should automatically make the port accessible on all interfaces when -p is used", "Yes, but you can use `--expose 8080` to make it network-accessible", "No, you must use `--publish-all` to make ports accessible from other machines"],
+    "correctIndex": 0,
+    "explanation": "127.0.0.1 (loopback) is only accessible on the local machine by design; to make a port accessible from other machines, bind to 0.0.0.0 (all interfaces) or a specific non-loopback IP with `-p 0.0.0.0:8080:80`.",
+    "difficulty": "Medium",
+    "tags": ["loopback-interface", "port-binding", "network-accessibility"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Container Networking",
+    "question": "A container's default gateway is unreachable (gateway IP exists but does not respond). The container can still reach IPs on its local subnet via ARP but cannot reach external networks. What is the problem?",
+    "options": ["The container's ARP table is stale and needs to be cleared with `ip -s neigh flush all`", "The gateway route is missing from the routing table; add it with `ip route add default via <gateway-ip>`", "Docker has isolated the container from non-local traffic; this is a security feature that cannot be disabled", "The gateway interface is down; check the host's network interfaces and restart Docker"],
+    "correctIndex": 1,
+    "explanation": "A missing default route means the container knows how to reach local subnets but has no route to external networks; adding the default gateway route with `ip route add default via <ip>` or through Docker configuration restores external connectivity.",
+    "difficulty": "Medium-Hard",
+    "tags": ["routing", "gateway", "container-networking"]
+  }
+]

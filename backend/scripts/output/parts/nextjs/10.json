@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Next.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "You create pages/404.js but users still see the default Next.js 404 page. What's wrong?",
+    "options": ["404.js only works with getStaticProps", "You must also create pages/500.js", "The file must export default without getServerSideProps", "404.js is generated automatically; delete it"],
+    "correctIndex": 2,
+    "explanation": "Custom error pages must export a default component without getServerSideProps/getStaticProps; data fetching prevents proper error handling.",
+    "difficulty": "Medium",
+    "tags": ["error-pages", "404", "custom-errors"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "In an API route, an unhandled promise rejection occurs. What response does the user receive?",
+    "options": ["200 OK with no body", "500 Internal Server Error", "Timeout error after 30 seconds", "Depends on deployment platform"],
+    "correctIndex": 1,
+    "explanation": "Unhandled errors in API routes result in a 500 error; always wrap async code in try-catch.",
+    "difficulty": "Medium",
+    "tags": ["api-routes", "error-handling", "promises"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "You throw an error in getServerSideProps. Does the error page (500.js) render?",
+    "options": ["No; page renders with error message visible", "Yes; the error page renders as the response", "Error is logged but the page renders with stale data", "Depends on error type"],
+    "correctIndex": 1,
+    "explanation": "Errors in getServerSideProps trigger the error page (500.js or built-in); the original page doesn't render.",
+    "difficulty": "Medium",
+    "tags": ["getserversideprops", "error-pages", "error-handling"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "You use React's error boundary to catch rendering errors. Does it catch errors in getServerSideProps?",
+    "options": ["Yes; error boundary catches all React errors", "No; getServerSideProps errors are server-side; error boundaries are client-only", "Only if the boundary wraps getServerSideProps", "Depends on Next.js version"],
+    "correctIndex": 1,
+    "explanation": "Error boundaries catch rendering errors in the component tree; server-side errors are handled separately.",
+    "difficulty": "Medium-Hard",
+    "tags": ["error-boundary", "getserversideprops", "error-handling"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "An API endpoint times out after 30 seconds without a response. The user sees a timeout error. How do you prevent this?",
+    "options": ["Set a shorter timeout in the handler", "Return a response within the timeout", "Implement request timeout handling and return early", "Use server-sent events instead"],
+    "correctIndex": 2,
+    "explanation": "Implement timeout logic in the handler: use AbortSignal or a timeout timer to return a response before the platform timeout.",
+    "difficulty": "Medium-Hard",
+    "tags": ["api-routes", "timeouts", "error-handling"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "You log an error in getServerSideProps using console.error(). Where does the log appear?",
+    "options": ["Client browser console", "Server logs (stderr or log file)", "Both client and server", "Depends on deployment environment"],
+    "correctIndex": 1,
+    "explanation": "getServerSideProps is server-only; console.error() writes to server logs, not the browser console.",
+    "difficulty": "Medium",
+    "tags": ["getserversideprops", "logging", "debugging"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "You want to show users a friendly error message if an API call fails. Where do you implement this?",
+    "options": ["In getServerSideProps with conditional rendering", "In the component using useEffect to catch fetch errors", "In an error boundary wrapping the component", "All of the above are valid"],
+    "correctIndex": 3,
+    "explanation": "Error handling depends on context: getServerSideProps for server errors, useEffect for client-side errors, error boundary for render errors.",
+    "difficulty": "Medium-Hard",
+    "tags": ["error-handling", "user-feedback", "ux"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "An API endpoint handler throws: throw new Error('Invalid input'). How do you send this error to the client as JSON?",
+    "options": ["res.status(400).json({ error: 'Invalid input' })", "The error is automatically serialized to JSON", "Use res.end() with a stringified error", "Errors cannot be returned as JSON"],
+    "correctIndex": 0,
+    "explanation": "Errors in API routes must be caught and manually returned via res.json(); they don't auto-serialize.",
+    "difficulty": "Medium",
+    "tags": ["api-routes", "error-handling", "json-response"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "You create a custom error page (pages/_error.js) that only renders on 500 errors. Static 404.js also exists. Which page handles a 404?",
+    "options": ["404.js handles 404; _error.js is skipped", "_error.js handles all errors including 404", "Both are rendered together", "404 is handled by getStaticProps fallback"],
+    "correctIndex": 0,
+    "explanation": "Custom 404.js takes precedence over _error.js; _error.js is a fallback for unhandled error types.",
+    "difficulty": "Medium",
+    "tags": ["error-pages", "404", "500"]
+  },
+  {
+    "skillName": "Next.js",
+    "subtopic": "Error Handling Mechanisms",
+    "question": "You have middleware that catches errors but doesn't re-throw them. Does the error reach the error page?",
+    "options": ["Yes; middleware errors always propagate", "No; middleware swallows the error", "Only if you manually call next() with error", "Depends on middleware execution order"],
+    "correctIndex": 1,
+    "explanation": "Middleware that doesn't throw or return an error response silently fails; the error is lost unless re-thrown.",
+    "difficulty": "Medium-Hard",
+    "tags": ["middleware", "error-handling", "error-propagation"]
+  }
+]

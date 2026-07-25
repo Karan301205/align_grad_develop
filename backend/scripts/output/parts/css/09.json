@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "CSS",
+    "subtopic": "Debugging Tools",
+    "question": "In browser DevTools, what is the difference between the Styles and Computed panels?\n```css\n.box { color: blue; }\n.box { color: red; } /* wins in cascade */\n```",
+    "options": ["Styles shows all rules, Computed shows final value", "Computed shows cascade order only", "Styles is read-only", "Identical panels"],
+    "correctIndex": 0,
+    "explanation": "Styles panel shows all applicable rules with strikethrough for overridden declarations; Computed shows the final calculated value.",
+    "difficulty": "Medium",
+    "tags": ["devtools-styles", "cascade-inspection"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Debugging Tools",
+    "question": "How does DevTools' element inspector reveal cascade and specificity conflicts?\n```html\n<p id=\"text\" class=\"info\">Content</p>\n```",
+    "options": ["Inspecting shows only final style", "Shows all matching rules with specificity", "Strikethrough indicates overridden rules", "Both 2 and 3"],
+    "correctIndex": 3,
+    "explanation": "DevTools Styles panel lists all matching rules sorted by cascade; overridden rules are struck through, revealing conflicts visually.",
+    "difficulty": "Medium",
+    "tags": ["devtools-inspection", "specificity-debugging"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Debugging Tools",
+    "question": "When debugging layout, what does DevTools' box model overlay reveal?\n```css\n.box {\n  width: 100px;\n  padding: 10px;\n  border: 2px solid;\n  margin: 20px;\n}\n```",
+    "options": ["Only final width", "Margin, border, padding, content layers visually", "Color coded margin/padding/border", "All of the above"],
+    "correctIndex": 3,
+    "explanation": "The box model inspector shows color-coded layers (margin=orange, border=gold, padding=green, content=blue) for each dimension.",
+    "difficulty": "Medium",
+    "tags": ["devtools-box-model", "layout-debugging"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Debugging Tools",
+    "question": "How do you locate CSS causing Cumulative Layout Shift (CLS) in DevTools?\n```css\nimg { margin-top: 20px; } /* added after load */\n```",
+    "options": ["Performance tab shows CLS metric", "Check Layout Shift Regions", "Can't debug CLS in DevTools", "Look for reflow in Console"],
+    "correctIndex": 1,
+    "explanation": "DevTools Performance tab highlights Layout Shift regions; red overlay shows elements that moved during layout thrashing.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cls-debugging", "performance-profiling"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Debugging Tools",
+    "question": "Why might an element appear unstyled despite matching CSS selectors?\n```css\n.button { color: blue; }\n/* Is color applied? */\n```",
+    "options": ["DevTools always shows applied styles", "Selector might be invalid or override exists", "Inspect element to verify matching rules", "Browser always applies first match"],
+    "correctIndex": 2,
+    "explanation": "Inspecting reveals if the selector matches and whether another rule overrides it; strikethrough shows which rules lost the cascade.",
+    "difficulty": "Medium",
+    "tags": ["selector-debugging", "cascade-tracing"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Debugging Tools",
+    "question": "In DevTools, how is the cascade order displayed in the Styles panel?\n```css\n.parent { color: red; }\nbody { color: green; }\n```",
+    "options": ["No order shown", "Most specific rule at top", "Least specific at top", "Matches file order"],
+    "correctIndex": 2,
+    "explanation": "DevTools displays rules from least to most specific (bottom up); lowest specificity is at top, highest at bottom (cascade winner).",
+    "difficulty": "Medium-Hard",
+    "tags": ["devtools-cascade-order", "specificity-visual"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Debugging Tools",
+    "question": "How do you isolate which CSS property causes unexpected element centering?\n```css\n.flex { display: flex; justify-content: center; align-items: center; }\n```",
+    "options": ["Disable all properties at once", "Toggle individual properties in DevTools", "Cannot debug property effects", "Requires separate test file"],
+    "correctIndex": 1,
+    "explanation": "Click properties in DevTools Styles to toggle them on/off; isolate which property causes the centering behavior.",
+    "difficulty": "Medium",
+    "tags": ["property-isolation", "devtools-debugging"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Debugging Tools",
+    "question": "Why might CSS Grid inspector reveal unexpected alignment issues?\n```css\n.grid { display: grid; grid-template-columns: repeat(3, 1fr); }\n```",
+    "options": ["Grid inspector unavailable in DevTools", "Shows grid lines and track sizing", "Reveals auto placement behavior", "Both 2 and 3"],
+    "correctIndex": 3,
+    "explanation": "DevTools Grid inspector overlays grid lines, column/row labels, and highlights auto-placed items; reveals layout unintended behavior.",
+    "difficulty": "Medium-Hard",
+    "tags": ["grid-inspector", "grid-debugging"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Debugging Tools",
+    "question": "How does DevTools show which pseudo-classes or pseudo-elements are active?\n```css\nbutton:hover { background: blue; }\nbutton::before { content: 'icon'; }\n```",
+    "options": ["Pseudo-classes cannot be debugged", "Can toggle :hover/:focus/:active states", "Pseudo-elements shown as separate nodes", "Both 2 and 3"],
+    "correctIndex": 3,
+    "explanation": "DevTools can simulate :hover/:focus/:active states via checkboxes; pseudo-elements appear as child nodes in the DOM tree.",
+    "difficulty": "Medium",
+    "tags": ["pseudo-class-debugging", "devtools-states"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Debugging Tools",
+    "question": "What does the Accessibility tree in DevTools reveal about CSS?\n```css\n.hidden { display: none; } /* vs */\n.hidden { visibility: hidden; } /* vs */\n.hidden { opacity: 0; }\n```",
+    "options": ["No accessibility information", "Shows which elements are hidden from screen readers", "Distinguishes visual vs semantic hiding", "All hide identically to a11y"],
+    "correctIndex": 2,
+    "explanation": "display: none removes from both visual and a11y tree; visibility: hidden hides visually but keeps in tree; opacity: 0 visible to screen readers.",
+    "difficulty": "Medium-Hard",
+    "tags": ["accessibility-tree", "a11y-debugging"]
+  }
+]

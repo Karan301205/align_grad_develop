@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "Data Types",
+    "question": "What is printed?\n```java\nbyte b = 128;\nSystem.out.println(b);\n```",
+    "options": ["128", "-128", "Compilation error", "0"],
+    "correctIndex": 1,
+    "explanation": "byte range is -128 to 127; 128 overflows to -128 in two's complement representation.",
+    "difficulty": "Medium",
+    "tags": ["primitives", "overflow", "byte"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Data Types",
+    "question": "What is the output?\n```java\nfloat f = 0.1f;\ndouble d = 0.1;\nSystem.out.println(f == d);\n```",
+    "options": ["true", "false", "Compilation error", "NaN"],
+    "correctIndex": 1,
+    "explanation": "f and d have different precision; 0.1 cannot be exactly represented in binary floating-point, causing inequality after type conversion.",
+    "difficulty": "Medium-Hard",
+    "tags": ["floating-point", "precision", "equality"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Data Types",
+    "question": "What does this output?\n```java\nlong x = 5000000000L;\nint y = (int) x;\nSystem.out.println(y);\n```",
+    "options": ["5000000000", "-1294967296", "Compilation error", "0"],
+    "correctIndex": 1,
+    "explanation": "Cast truncates the long to int range (-2^31 to 2^31-1); 5000000000 exceeds this and wraps to a negative value.",
+    "difficulty": "Medium",
+    "tags": ["type-casting", "overflow", "narrowing-conversion"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Data Types",
+    "question": "What is printed?\n```java\nchar c = 'A';\nint i = c + 1;\nchar c2 = (char) i;\nSystem.out.println(c2);\n```",
+    "options": ["A", "B", "Compilation error", "65"],
+    "correctIndex": 1,
+    "explanation": "char 'A' is ASCII 65; adding 1 gives 66, casting to char gives 'B'.",
+    "difficulty": "Medium",
+    "tags": ["char", "type-promotion", "ascii"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Data Types",
+    "question": "What is the result?\n```java\nboolean b1 = true;\nboolean b2 = false;\nSystem.out.println(b1 && (b2 = true));\nSystem.out.println(b2);\n```",
+    "options": ["false, false", "true, true", "false, true", "true, false"],
+    "correctIndex": 2,
+    "explanation": "b1 && (b2 = true) uses short-circuit AND; b1 is true so it evaluates the right side, assigning b2 to true, returning true; second print shows b2 is now true.",
+    "difficulty": "Medium-Hard",
+    "tags": ["boolean", "short-circuit", "assignment"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Data Types",
+    "question": "What does this print?\n```java\nString s = \"123\";\nint x = Integer.parseInt(s);\nString s2 = Integer.toString(x);\nSystem.out.println(s == s2);\n```",
+    "options": ["true", "false", "Compilation error", "NullPointerException"],
+    "correctIndex": 1,
+    "explanation": "Integer.toString creates a new String object, so reference equality (==) is false; content equality (.equals) would be true.",
+    "difficulty": "Medium",
+    "tags": ["string-conversion", "reference-equality", "parsing"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Data Types",
+    "question": "What is printed?\n```java\ndouble d = 1.0 / 0.0;\nSystem.out.println(d);\nSystem.out.println(d == Double.POSITIVE_INFINITY);\n```",
+    "options": ["Infinity, true", "NaN, true", "Exception, false", "Infinity, false"],
+    "correctIndex": 0,
+    "explanation": "1.0 / 0.0 returns Positive Infinity (IEEE 754 standard), and it equals Double.POSITIVE_INFINITY.",
+    "difficulty": "Medium",
+    "tags": ["floating-point", "special-values", "infinity"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Data Types",
+    "question": "What is the output?\n```java\nint x = 5;\nint y = x++;\nSystem.out.println(x + \", \" + y);\n```",
+    "options": ["5, 5", "6, 5", "6, 6", "5, 6"],
+    "correctIndex": 1,
+    "explanation": "x++ returns the original value (5) then increments x to 6, so y=5 and x=6.",
+    "difficulty": "Medium",
+    "tags": ["post-increment", "operator-semantics"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Data Types",
+    "question": "What does this code output?\n```java\nInteger a = new Integer(10);\nInteger b = new Integer(10);\nInteger c = 10;\nInteger d = 10;\nSystem.out.println((a == b) + \", \" + (c == d));\n```",
+    "options": ["false, false", "true, true", "false, true", "true, false"],
+    "correctIndex": 2,
+    "explanation": "new Integer() creates distinct objects (a == b is false), but 10 is in the integer cache (-128 to 127), so c and d reference the same object (c == d is true).",
+    "difficulty": "Medium-Hard",
+    "tags": ["integer-cache", "new-keyword", "autoboxing"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Data Types",
+    "question": "What is printed?\n```java\nString s = null;\nString t = s + \"x\";\nSystem.out.println(t);\n```",
+    "options": ["null", "nullx", "x", "NullPointerException"],
+    "correctIndex": 1,
+    "explanation": "String concatenation calls toString() on the null reference, which produces the string 'null', then appends 'x' to get 'nullx'.",
+    "difficulty": "Medium",
+    "tags": ["string-concatenation", "null-handling", "tostring"]
+  }
+]

@@ -24,6 +24,7 @@ const {
   updateApplicationRoundsSchema
 } = require('../validators/recruiter.validator');
 const { requestUploadUrlSchema } = require('../validators/upload.validator');
+const { updateCompanySchema } = require('../validators/recruiterCompany.validator');
 const {
   createGigSchema,
   applyGigSchema,
@@ -68,6 +69,8 @@ router.put('/upload/secure-put', authMiddleware, uploadController.securePut);
 
 // Recruiter routes (protected)
 router.get('/recruiter/company', authMiddleware, relaxedLimit, recruiterController.getCompany);
+router.put('/recruiter/company', authMiddleware, relaxedLimit, validate(updateCompanySchema), recruiterController.updateCompany);
+router.get('/recruiter/companies/:companyId', authMiddleware, relaxedLimit, recruiterController.getCompanyById);
 router.post('/recruiter/verify', authMiddleware, relaxedLimit, validate(verifyCompanySchema), recruiterController.verifyCompany);
 router.post('/recruiter/jobs', authMiddleware, relaxedLimit, validate(postJobSchema), recruiterController.postJob);
 router.put('/recruiter/jobs/:jobId', authMiddleware, relaxedLimit, validate(updateJobSchema), recruiterController.updateJob);
@@ -75,6 +78,18 @@ router.delete('/recruiter/jobs/:jobId', authMiddleware, relaxedLimit, validate(d
 router.get('/recruiter/jobs', authMiddleware, relaxedLimit, recruiterController.getCompanyJobs);
 router.get('/recruiter/candidates', authMiddleware, relaxedLimit, recruiterController.getCandidates);
 router.put('/recruiter/applications/:applicationId/rounds', authMiddleware, relaxedLimit, validate(updateApplicationRoundsSchema), recruiterController.updateApplicationRounds);
+
+const communityController = require('../controllers/community.controller');
+const {
+  createCommunitySchema,
+  joinCommunitySchema,
+  createInviteSchema,
+  createPostSchema,
+  editPostSchema,
+  reactPostSchema,
+  createCommentSchema,
+  requestMediaUrlSchema
+} = require('../validators/community.validator');
 
 // Gigs Marketplace routes (protected)
 router.get('/gigs', authMiddleware, relaxedLimit, gigController.getGigs);
@@ -90,5 +105,32 @@ router.post('/gigs/:gigId/messages', authMiddleware, relaxedLimit, validate(send
 router.post('/gigs/:gigId/submit', authMiddleware, relaxedLimit, validate(submitWorkSchema), gigController.submitWork);
 router.post('/gigs/:gigId/complete', authMiddleware, relaxedLimit, gigController.completeGig);
 router.post('/gigs/:gigId/review', authMiddleware, relaxedLimit, validate(reviewGigSchema), gigController.reviewGig);
+
+// Community System routes (protected)
+router.get('/community', authMiddleware, relaxedLimit, communityController.getCommunities);
+router.get('/community/search', authMiddleware, relaxedLimit, communityController.searchCommunities);
+router.post('/community', authMiddleware, relaxedLimit, validate(createCommunitySchema), communityController.createCommunity);
+router.post('/community/:id/join', authMiddleware, relaxedLimit, validate(joinCommunitySchema), communityController.joinCommunity);
+router.delete('/community/:id', authMiddleware, relaxedLimit, communityController.deleteCommunity);
+router.post('/community/:id/invite', authMiddleware, relaxedLimit, validate(createInviteSchema), communityController.createInviteLink);
+router.post('/community/invite/:token/join', authMiddleware, relaxedLimit, communityController.joinViaInvite);
+
+// Community Feed & Post routes
+router.get('/community/:id/feed', authMiddleware, relaxedLimit, communityController.getCommunityFeed);
+router.post('/community/:id/posts', authMiddleware, relaxedLimit, validate(createPostSchema), communityController.createPost);
+router.put('/community/posts/:postId', authMiddleware, relaxedLimit, validate(editPostSchema), communityController.editPost);
+router.delete('/community/posts/:postId', authMiddleware, relaxedLimit, communityController.deletePost);
+
+// Community Media presigned upload URL route
+router.post('/community/media/upload-url', authMiddleware, relaxedLimit, validate(requestMediaUrlSchema), communityController.requestMediaUploadUrl);
+
+// Community Engagement routes
+router.post('/community/posts/:postId/react', authMiddleware, relaxedLimit, validate(reactPostSchema), communityController.toggleReaction);
+router.get('/community/posts/:postId/comments', authMiddleware, relaxedLimit, communityController.getPostComments);
+router.post('/community/posts/:postId/comments', authMiddleware, relaxedLimit, validate(createCommentSchema), communityController.addComment);
+router.delete('/community/comments/:commentId', authMiddleware, relaxedLimit, communityController.deleteComment);
+router.post('/community/posts/:postId/bookmark', authMiddleware, relaxedLimit, communityController.toggleBookmark);
+router.get('/community/bookmarks', authMiddleware, relaxedLimit, communityController.getSavedPosts);
+router.post('/community/posts/:postId/view', authMiddleware, relaxedLimit, communityController.recordView);
 
 module.exports = router;

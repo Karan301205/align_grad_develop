@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "IAM Role Management",
+    "question": "Your EC2 instance needs to read from an S3 bucket and write logs to CloudWatch. Currently, you're storing AWS credentials in environment variables on the instance. Should you switch to an IAM role?",
+    "options": [
+      "No; environment variables are simpler and credentials can be rotated manually",
+      "Yes; IAM roles provide temporary credentials that auto-rotate; no credential storage needed",
+      "Only if you need MFA; otherwise environment variables are acceptable",
+      "Yes, but only for production; development can use environment variables"
+    ],
+    "correctIndex": 1,
+    "explanation": "IAM roles provide automatic temporary credential management (15-hour TTL), automatic rotation, and no storage risk; environment variables are vulnerable to compromise and require manual rotation.",
+    "difficulty": "Medium",
+    "tags": ["iam-roles", "credentials", "best-practices"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "IAM Role Management",
+    "question": "You're creating an IAM policy for a developer who needs to deploy Lambda functions and view CloudWatch logs. The developer should NOT be able to delete or modify existing functions. What principle should guide your policy design?",
+    "options": [
+      "Deny all actions; explicitly allow only what they need (deny-by-default)",
+      "Allow all Lambda and CloudWatch actions; restrict only dangerous ones like DeleteFunction",
+      "Create a wildcard policy allowing lambda:* and logs:* without restrictions",
+      "Use AWS managed policies; they follow least-privilege by default"
+    ],
+    "correctIndex": 0,
+    "explanation": "Least-privilege means deny by default, allow only specific actions needed (lambda:CreateFunction, lambda:UpdateFunctionCode, logs:DescribeLogGroups, logs:GetLogEvents); allow-dangerous-deny-worst is weaker.",
+    "difficulty": "Medium-Hard",
+    "tags": ["least-privilege", "iam-policy", "security"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "IAM Role Management",
+    "question": "Your production Lambda function has an IAM role allowing s3:GetObject on a specific bucket (least-privilege). During a deployment, the developer temporarily adds s3:* to the role to debug an issue. After 2 hours, they forget to remove it. How can you enforce least-privilege automatically?",
+    "options": [
+      "Use IAM Access Analyzer to detect overly-permissive policies and alert",
+      "Implement AWS Config rules to block policies with wildcards and enforce approval before changes",
+      "Use an AssumeRole MFA requirement; force developers to use MFA for permission changes",
+      "Implement temporary elevated access via AWS SSM Session Manager; revert permissions automatically after session"
+    ],
+    "correctIndex": 1,
+    "explanation": "AWS Config rules can enforce naming patterns and policy restrictions; Access Analyzer detects, but Config with automated remediation prevents drift; AssumeRole MFA doesn't restrict wildcard policies.",
+    "difficulty": "Hard",
+    "tags": ["least-privilege", "policy-enforcement", "automation"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "IAM Role Management",
+    "question": "You need a cross-account IAM role: Account A (prod) should allow Account B (dev) developers to assume a role for debugging. What should the trust policy on Account A's role include?",
+    "options": [
+      "Principal: \"*\" to allow anyone to assume the role",
+      "Principal: AWS account B's account ID; condition requires specific IAM users in Account B",
+      "Principal: root user of Account B; condition requires AssumeRole permission in Account B",
+      "No trust policy needed; IAM policies handle cross-account access"
+    ],
+    "correctIndex": 1,
+    "explanation": "Trust policy Principal should be Account B's account ID; conditions can further restrict to specific IAM users; this is least-privilege for cross-account access.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cross-account", "trust-policy", "least-privilege"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "IAM Role Management",
+    "question": "Your organization requires all AWS API calls to be tagged with a cost center code for billing. You want to enforce this via IAM policy. Developer attempts an untagged EC2 CreateInstance call. What should happen?",
+    "options": [
+      "The call succeeds; tags can be added retroactively via AWS Config",
+      "The call fails; IAM policy uses aws:PrincipalTag condition to require cost-center tag before allowing action",
+      "The call succeeds; the cost center is inferred from the IAM user's tags",
+      "The call fails at the EC2 API level; IAM cannot enforce tagging on resource creation"
+    ],
+    "correctIndex": 1,
+    "explanation": "IAM policies can use aws:TagKeys and aws:RequestTag conditions to enforce required tags on resource creation; this prevents untagged resources from being created.",
+    "difficulty": "Hard",
+    "tags": ["iam-policy", "tagging", "cost-allocation"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "IAM Role Management",
+    "question": "An IAM user has two attached policies: Policy A allows s3:GetObject on bucket-prod, Policy B denies s3:* on all resources. What happens when the user tries to read an object from bucket-prod?",
+    "options": [
+      "The GetObject action succeeds; explicit Allow overrides Deny",
+      "The GetObject action fails; explicit Deny overrides Allow",
+      "The action is undecided; IAM escalates to the account owner",
+      "The action succeeds; specific bucket policies are evaluated separately"
+    ],
+    "correctIndex": 1,
+    "explanation": "Deny always wins in IAM permission evaluation; if any policy explicitly denies an action, it's denied regardless of Allow statements; this is a core security principle.",
+    "difficulty": "Medium",
+    "tags": ["iam-evaluation", "permission-logic", "security"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "IAM Role Management",
+    "question": "You want to audit who is assuming IAM roles in your account. A developer assumed a role, deleted logs using the role, and you need to trace the original AWS account and IAM user. Where should you look?",
+    "options": [
+      "CloudTrail logs showing AssumeRole with sourceAccount and sourceUser in the request",
+      "IAM role's Trust Policy shows who can assume it",
+      "CloudWatch Logs from the CloudTrail integration",
+      "IAM Access Analyzer; it tracks all role assumptions"
+    ],
+    "correctIndex": 0,
+    "explanation": "CloudTrail records AssumeRole API calls with userIdentity.arn, accountId, and sourceIPAddress; subsequent API calls show the assumed role as the principal; this creates an audit trail.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cloudtrail", "auditing", "compliance"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "IAM Role Management",
+    "question": "Your EC2 instance assumes a role to access an S3 bucket in another AWS account. The cross-account role's trust policy allows your account's principal, but the S3 bucket policy denies access. What happens when the instance tries GetObject?",
+    "options": [
+      "The GetObject succeeds; EC2 role's permissions are sufficient",
+      "The GetObject fails; S3 bucket policy denial takes precedence",
+      "The GetObject succeeds if the bucket policy contains an Allow for the role's account",
+      "The GetObject attempt requires permission from both bucket policy AND role policy"
+    ],
+    "correctIndex": 3,
+    "explanation": "Cross-account access requires Allow in BOTH the trust policy (can assume) AND the resource policy (bucket policy allows); if either denies, access is denied.",
+    "difficulty": "Hard",
+    "tags": ["cross-account", "bucket-policy", "permission-evaluation"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "IAM Role Management",
+    "question": "You're implementing a blue-green deployment. Role-blue is used by the current production Lambda functions, role-green by the new version. During rollover, you need to update IAM policies from blue to green without downtime. What's the best approach?",
+    "options": [
+      "Attach the new policy to role-blue; update function environment variable to switch roles",
+      "Create role-green with identical policies; update Lambda function's execution role via alias",
+      "Attach the policy to both roles; Lambda auto-detects and uses the newer role",
+      "Use an IAM policy alias; policies can be swapped without changing role names"
+    ],
+    "correctIndex": 1,
+    "explanation": "Lambda's execution role is immutable during a function version; using Lambda aliases (blue-alias -> version-blue, green-alias -> version-green) with separate roles enables safe rollover; traffic shifts via alias routing.",
+    "difficulty": "Hard",
+    "tags": ["blue-green", "lambda", "iam-roles"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "IAM Role Management",
+    "question": "An IAM user has permissions to create and list IAM roles, but NOT to attach policies to roles. They create a role but cannot attach permissions, making it unusable. Should you grant them the AttachRolePolicy permission?",
+    "options": [
+      "Yes; without it, they cannot complete role creation; AttachRolePolicy is necessary",
+      "No; use an IAM policy boundary to limit the permissions they can attach; require approval for policy attachment",
+      "Yes; pair it with a condition restricting policies to least-privilege templates",
+      "No; only admins should attach policies; use role templates instead"
+    ],
+    "correctIndex": 1,
+    "explanation": "Permission boundaries prevent users from escalating their own privileges; if AttachRolePolicy is granted without boundary, they could attach admin policies to roles; boundaries + condition keys enforce guardrails.",
+    "difficulty": "Hard",
+    "tags": ["permission-boundaries", "privilege-escalation", "security"]
+  }
+]

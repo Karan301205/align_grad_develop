@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Multithreading",
+    "question": "What is a race condition, and how can it occur?",
+    "options": ["multiple threads access the same variable without synchronization", "threads execute in the wrong order", "a thread crashes before finishing", "threads are created too quickly"],
+    "correctIndex": 0,
+    "explanation": "Race conditions happen when multiple threads read/write shared data without synchronization, producing unpredictable results.",
+    "difficulty": "Medium",
+    "tags": ["race-condition", "synchronization", "multithreading"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Multithreading",
+    "question": "What does std::mutex do, and when should it be used?",
+    "options": ["prevents threads from starting", "serializes access to shared data via lock/unlock", "makes data immutable to all threads", "detects data races automatically"],
+    "correctIndex": 1,
+    "explanation": "mutex ensures only one thread accesses protected data at a time, preventing race conditions.",
+    "difficulty": "Medium",
+    "tags": ["mutex", "synchronization", "thread-safety"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Multithreading",
+    "question": "What is deadlock, and how can std::lock help prevent it?",
+    "options": ["thread waits forever for a resource", "two threads lock mutexes in opposite order; std::lock acquires all at once", "thread is prevented from modifying data", "deadlock is impossible in C++"],
+    "correctIndex": 1,
+    "explanation": "Deadlock occurs when threads wait for each other's locks; std::lock atomically acquires multiple mutexes in a safe order.",
+    "difficulty": "Hard",
+    "tags": ["deadlock", "mutex", "synchronization"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Multithreading",
+    "question": "What is RAII-based lock management, and why is it safer than manual unlock?",
+    "options": ["locks are created on the stack and destroyed automatically", "manual unlock is always called", "RAII prevents race conditions", "RAII is only for destructors"],
+    "correctIndex": 0,
+    "explanation": "std::lock_guard acquires the lock in constructor and releases in destructor, ensuring unlock even if an exception occurs.",
+    "difficulty": "Medium",
+    "tags": ["lock-guard", "raii", "exception-safety"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Multithreading",
+    "question": "What does std::atomic do compared to a mutex-protected variable?",
+    "options": ["atomic allows multiple threads to write simultaneously", "atomic provides lock-free atomic operations on single variables", "atomic is slower than mutex", "atomic prevents all multithreading issues"],
+    "correctIndex": 1,
+    "explanation": "atomic enables hardware-level indivisible operations without locks, suitable for simple flags and counters.",
+    "difficulty": "Medium-Hard",
+    "tags": ["atomic", "lock-free", "synchronization"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Multithreading",
+    "question": "What is the difference between std::thread::join and std::thread::detach?",
+    "options": ["join waits for thread to finish; detach lets it run independently", "both wait for completion; join is named differently", "detach stops the thread immediately", "only one can be called per thread"],
+    "correctIndex": 0,
+    "explanation": "join blocks until the thread finishes; detach releases it to run independently, losing synchronization.",
+    "difficulty": "Medium",
+    "tags": ["std-thread", "join-detach", "thread-lifecycle"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Multithreading",
+    "question": "What happens if a std::thread object is destroyed without calling join or detach?",
+    "options": ["the thread continues running", "std::terminate is called", "the thread is automatically joined", "behavior is undefined"],
+    "correctIndex": 1,
+    "explanation": "Destructing a joinable thread calls std::terminate to prevent accidental resource leaks.",
+    "difficulty": "Medium",
+    "tags": ["std-thread", "thread-lifecycle", "resource-management"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Multithreading",
+    "question": "What does std::condition_variable do?",
+    "options": ["it is a lock for multiple threads", "threads wait for a specific condition to be signaled", "it validates data types at compile time", "it prevents race conditions automatically"],
+    "correctIndex": 1,
+    "explanation": "condition_variable allows threads to efficiently wait for events and be notified when conditions change.",
+    "difficulty": "Medium-Hard",
+    "tags": ["condition-variable", "synchronization", "wait-notify"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Multithreading",
+    "question": "What is a data race, and how does it differ from a race condition?",
+    "options": ["data race is when threads access data concurrently; race condition is outdated term", "data race is undefined behavior; race condition is a logic bug", "they are identical terms", "data race only affects pointers"],
+    "correctIndex": 1,
+    "explanation": "Data race is a memory safety violation (UB) when threads access data without synchronization; race condition is a logic bug.",
+    "difficulty": "Hard",
+    "tags": ["data-race", "undefined-behavior", "thread-safety"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Multithreading",
+    "question": "Is it safe to call non-thread-safe functions from multiple threads without a mutex?",
+    "options": ["yes; the function handles concurrency internally", "no; undefined behavior without synchronization", "depends on whether the function is const", "only unsafe for functions that modify data"],
+    "correctIndex": 1,
+    "explanation": "Non-thread-safe functions must be synchronized externally; calling them concurrently without protection is undefined behavior.",
+    "difficulty": "Medium",
+    "tags": ["thread-safety", "synchronization", "undefined-behavior"]
+  }
+]

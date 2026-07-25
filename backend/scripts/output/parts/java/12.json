@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "Performance Optimization",
+    "question": "Which is more efficient?\n```java\n// Option A\nString s = \"a\" + \"b\" + \"c\";\n// Option B\nString s = new StringBuilder()\n  .append(\"a\").append(\"b\").append(\"c\")\n  .toString();\n```",
+    "options": ["Option A always", "Option B in loops, A in simple cases", "Both same", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "Modern compilers optimize simple concatenation (A), but StringBuilder (B) is faster in loops (avoids repeated String object creation).",
+    "difficulty": "Medium",
+    "tags": ["string-concatenation", "stringbuilder", "performance"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Performance Optimization",
+    "question": "What is the performance issue here?\n```java\nfor (int i = 0; i < list.size(); i++) {\n  System.out.println(list.get(i));\n}\n```",
+    "options": ["No issue", "O(n^2) for LinkedList due to get(i)", "Compilation error", "Memory leak"],
+    "correctIndex": 1,
+    "explanation": "ArrayList.get(i) is O(1), but LinkedList.get(i) is O(n); repeated calls in a loop make it O(n^2) for LinkedList.",
+    "difficulty": "Medium",
+    "tags": ["list-performance", "algorithm-complexity", "data-structure"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Performance Optimization",
+    "question": "Which lookup is faster?\n```java\n// Option A\nif (list.contains(item)) { }\n// Option B\nif (set.contains(item)) { }\n```",
+    "options": ["Option A", "Option B (O(1) vs O(n))", "Both same", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "HashSet.contains() is O(1) on average; ArrayList.contains() is O(n); for large collections, B is much faster.",
+    "difficulty": "Medium",
+    "tags": ["lookup-performance", "data-structure", "time-complexity"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Performance Optimization",
+    "question": "What is the performance impact?\n```java\nint[] array = new int[1000000];\nfor (int i = 0; i < array.length; i++) {\n  array[i]++;\n}\n```",
+    "options": ["Fast due to array locality", "Slow due to bounds checking", "Compilation error", "No performance difference"],
+    "correctIndex": 0,
+    "explanation": "Arrays have excellent cache locality; sequential access is CPU-cache-friendly and very fast.",
+    "difficulty": "Medium",
+    "tags": ["cache-locality", "cpu-optimization", "array-performance"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Performance Optimization",
+    "question": "Which avoids unnecessary object creation?\n```java\n// Option A\nInteger x = new Integer(10);\n// Option B\nInteger x = Integer.valueOf(10);\n```",
+    "options": ["Option A", "Option B (uses cache)", "Both same", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "Integer.valueOf() caches values -128 to 127; reuses objects instead of creating new ones, saving memory.",
+    "difficulty": "Medium",
+    "tags": ["object-pooling", "integer-cache", "memory-efficiency"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Performance Optimization",
+    "question": "What is the performance cost of this exception handling?\n```java\ntry {\n  int x = 10 / 0;\n} catch (Exception e) { }\n```",
+    "options": ["None", "Expensive stack trace generation", "Compilation error", "Loop slowdown"],
+    "correctIndex": 1,
+    "explanation": "Exception creation is expensive (stack trace generation); using exceptions for control flow is a performance anti-pattern.",
+    "difficulty": "Medium",
+    "tags": ["exception-performance", "control-flow", "anti-pattern"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Performance Optimization",
+    "question": "Which is more efficient for large collections?\n```java\n// Option A\nfor (Item item : list) { }\n// Option B\nfor (int i = 0; i < list.size(); i++) list.get(i);\n```",
+    "options": ["Option A for ArrayList", "Option B for ArrayList", "Both same", "Depends on JVM"],
+    "correctIndex": 0,
+    "explanation": "For ArrayList, enhanced for-loop (A) uses iterator which is optimized; for-i loop (B) calls get(i) repeatedly.",
+    "difficulty": "Medium",
+    "tags": ["iteration-performance", "iterator", "loop-optimization"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Performance Optimization",
+    "question": "What is the impact of auto-boxing?\n```java\nInteger counter = 0;\nfor (int i = 0; i < 1000000; i++) {\n  counter++; // Auto-unbox, increment, auto-box\n}\n```",
+    "options": ["No impact", "Creates 1M Integer objects (performance hit)", "Compilation error", "Memory leak"],
+    "correctIndex": 1,
+    "explanation": "Each ++ operation unboxes, increments, and boxes, creating new Integer objects repeatedly; use int primitive instead.",
+    "difficulty": "Medium",
+    "tags": ["autoboxing", "performance", "memory-allocation"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Performance Optimization",
+    "question": "What optimization does JIT compilation provide?\n```java\nfor (int i = 0; i < 10000; i++) {\n  expensiveMethod();\n}\n```",
+    "options": ["None", "JIT compiles hot code to native, optimizes", "Compilation error", "No improvement"],
+    "correctIndex": 1,
+    "explanation": "JIT (Just-In-Time) compilation detects hot code paths and compiles them to native machine code with optimizations.",
+    "difficulty": "Medium",
+    "tags": ["jit-compilation", "hotspot", "runtime-optimization"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Performance Optimization",
+    "question": "Which String operation is inefficient in a loop?\n```java\nString result = \"\";\nfor (int i = 0; i < 1000; i++) {\n  result += \"item\"; // Creates new String each iteration\n}\n```",
+    "options": ["Normal performance", "O(n^2) due to String immutability", "Compilation error", "No performance issue"],
+    "correctIndex": 1,
+    "explanation": "String += creates new String objects; 1000 iterations create 1000 intermediate strings (O(n^2) time complexity).",
+    "difficulty": "Medium",
+    "tags": ["string-immutability", "concatenation-loop", "performance-anti-pattern"]
+  }
+]

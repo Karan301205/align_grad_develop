@@ -1,0 +1,448 @@
+<!DOCTYPE html><html lang="en" class="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed-variant": "#444749",
+                    "inverse-on-surface": "#eef0ff",
+                    "on-secondary-fixed": "#111c2d",
+                    "tertiary-fixed": "#e0e3e5",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-error": "#ffffff",
+                    "on-primary-container": "#80bea6",
+                    "inverse-primary": "#95d3ba",
+                    "tertiary-container": "#424547",
+                    "outline-variant": "#bfc9c3",
+                    "on-primary-fixed-variant": "#0b513d",
+                    "on-surface": "#131b2e",
+                    "surface-container-high": "#e2e7ff",
+                    "primary-container": "#064e3b",
+                    "secondary": "#545f73",
+                    "on-primary-fixed": "#002117",
+                    "on-tertiary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "surface-tint": "#2b6954",
+                    "on-secondary-container": "#586377",
+                    "surface-container": "#eaedff",
+                    "on-error-container": "#93000a",
+                    "surface-container-low": "#f2f3ff",
+                    "error-container": "#ffdad6",
+                    "background": "#faf8ff",
+                    "outline": "#707974",
+                    "secondary-fixed-dim": "#bcc7de",
+                    "on-tertiary-fixed": "#191c1e",
+                    "surface-container-highest": "#dae2fd",
+                    "primary-fixed-dim": "#95d3ba",
+                    "secondary-container": "#d5e0f8",
+                    "primary": "#003527",
+                    "on-tertiary-container": "#afb2b4",
+                    "on-surface-variant": "#404944",
+                    "on-secondary-fixed-variant": "#3c475a",
+                    "surface-dim": "#d2d9f4",
+                    "secondary-fixed": "#d8e3fb",
+                    "primary-fixed": "#b0f0d6",
+                    "surface": "#faf8ff",
+                    "inverse-surface": "#283044",
+                    "on-background": "#131b2e",
+                    "surface-variant": "#dae2fd",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed-dim": "#c4c7c9",
+                    "surface-bright": "#faf8ff",
+                    "tertiary": "#2b2f30"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "column-count": "12",
+                    "unit": "4px",
+                    "margin-mobile": "16px",
+                    "margin-desktop": "64px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "headline-md": ["IBM Plex Sans"],
+                    "body-lg": ["Inter"],
+                    "display-lg-mobile": ["IBM Plex Sans"],
+                    "label-mono": ["JetBrains Mono"],
+                    "display-lg": ["IBM Plex Sans"],
+                    "cert-heading": ["IBM Plex Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-mono": ["13px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "cert-heading": ["14px", {"lineHeight": "20px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    }catch(_e){}</script><meta charset="utf-8"></head><body class="font-body-md text-body-md min-h-screen">
+<!-- SideNavBar (Fixed Anchor) -->
+<nav class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 bg-surface-container border-r border-outline py-unit gap-unit z-50">
+<div class="px-6 py-8">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-8 h-8 bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">domain</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">Recruitment Portal</h1>
+</div>
+<p class="font-label-mono text-label-mono uppercase text-on-surface-variant opacity-70">Enterprise Tier</p>
+</div>
+<div class="flex-grow flex flex-col gap-1 px-2">
+<a href="#" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-75 ease-in">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-mono text-label-mono uppercase">Analytics</span>
+</a>
+<a href="#" class="flex items-center gap-3 px-4 py-3 bg-primary text-on-primary border-l-4 border-primary-fixed transition-all duration-75 ease-in">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-label-mono text-label-mono uppercase">Assessed Talent</span>
+</a>
+<a href="#" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-75 ease-in">
+<span class="material-symbols-outlined">description</span>
+<span class="font-label-mono text-label-mono uppercase">Job Templates</span>
+</a>
+<a href="#" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-75 ease-in">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-mono text-label-mono uppercase">Skill Matrix</span>
+</a>
+<a href="#" class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-75 ease-in">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-mono text-label-mono uppercase">System Logs</span>
+</a>
+</div>
+<div class="px-4 py-4 mb-4">
+<button class="w-full bg-primary text-white font-bold py-3 px-4 flex items-center justify-center gap-2 hover:bg-[#064E3B] transition-colors">
+<span class="material-symbols-outlined">add</span>
+<span class="font-label-mono text-label-mono uppercase">New Assessment</span>
+</button>
+</div>
+<div class="border-t border-outline flex flex-col gap-1 px-2 py-4">
+<a href="#" class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-mono text-label-mono uppercase">Support</span>
+</a>
+<a href="#" class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-mono text-label-mono uppercase">Sign Out</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="md:ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar (Horizontal Anchor) -->
+<header class="w-full top-0 sticky bg-surface flex justify-between items-center h-16 px-margin-desktop max-w-full border-b border-outline z-40">
+<div class="flex items-center gap-8">
+<span class="font-display-lg text-display-lg font-black tracking-tighter text-on-surface">METRIC.CORP</span>
+<nav class="hidden lg:flex gap-6 h-full items-end pb-2">
+<a href="#" class="text-on-surface-variant hover:text-primary transition-colors duration-150 pb-2">Dashboard</a>
+<a href="#" class="text-on-surface-variant hover:text-primary transition-colors duration-150 pb-2">Job Board</a>
+<a href="#" class="text-primary border-b-2 border-primary font-bold pb-2">Assessments</a>
+<a href="#" class="text-on-surface-variant hover:text-primary transition-colors duration-150 pb-2">Candidates</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">settings</span>
+</div>
+<div class="h-8 w-[1px] bg-outline-variant"></div>
+<div class="flex items-center gap-3 cursor-pointer group">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface">Alex Mercer</p>
+<p class="text-[10px] text-on-surface-variant">Senior Recruiter</p>
+</div>
+<img class="w-10 h-10 border border-on-surface" data-alt="A professional headshot of a corporate HR manager with a serious yet approachable expression. The lighting is studio-quality with soft shadows, set against a neutral gray background. The subject is wearing a sharp, dark business blazer that matches the minimalist corporate aesthetic of the recruitment portal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkuhJE_gAFLrWp2hokNDm_v70LYEsqiQ2ZQ43_77iNbIMcEJ0tH8ONsyBHHxtgMBt1qUe-ioEqJpI-028pQpbUPcSXL78wD-w-ZWGYHFqNFH6sfC_Rc11awb0YeNt6Ytf5QALJBgyeqiEnCDL53YDx0A9u_75Qpx_FVVFlYkOzCZ85w7jdR_GDtZbbV5IZDcOxqTo9pH_DjAIrPj_5PSt886pm5YzOBVkBqlAkytH-fZQfA8DMjZbPZsFqD1Q_bumSwLdpKHcjJK-t">
+</div>
+<button class="bg-primary text-white font-bold py-2 px-6 hover:bg-[#064E3B] transition-colors ml-4">Post Job</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<section class="p-margin-desktop flex flex-col gap-gutter max-w-[1280px]">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<p class="font-label-mono text-label-mono text-primary-container mb-1">CANDIDATE DATABASE</p>
+<h2 class="font-display-lg text-4xl font-bold text-on-surface tracking-tight">Assessed Talent Pool</h2>
+</div>
+<div class="flex gap-4 items-center">
+<div class="px-4 py-2 border-l-4 border-primary bg-surface-container flex flex-col">
+<span class="text-[10px] font-bold uppercase text-on-surface-variant">Total Verified</span>
+<span class="text-xl font-bold">1,284</span>
+</div>
+<div class="px-4 py-2 border-l-4 border-secondary bg-surface-container flex flex-col">
+<span class="text-[10px] font-bold uppercase text-on-surface-variant">Avg. Score</span>
+<span class="text-xl font-bold">88.4%</span>
+</div>
+</div>
+</div>
+<!-- Filter Controls -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter p-6 bg-white border border-[#E2E8F0]">
+<div class="flex flex-col gap-1">
+<label class="font-label-mono text-label-mono uppercase text-on-surface-variant">Skill domain</label>
+<select class="w-full border border-[#94A3B8] p-2 font-body-md">
+<option>Fullstack Engineering</option>
+<option>Data Science</option>
+<option>DevOps Architecture</option>
+<option>Product Management</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-mono text-label-mono uppercase text-on-surface-variant">Minimum Score</label>
+<input class="w-full border border-[#94A3B8] p-2 font-body-md" placeholder="85" type="number">
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-mono text-label-mono uppercase text-on-surface-variant">Verification Status</label>
+<select class="w-full border border-[#94A3B8] p-2 font-body-md">
+<option>All Candidates</option>
+<option selected="">Verified Only</option>
+<option>Pending Review</option>
+</select>
+</div>
+<div class="flex items-end">
+<button class="w-full border-2 border-on-surface text-on-surface font-bold py-2.5 hover:bg-on-surface hover:text-white transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">filter_alt</span>
+<span>Apply Filters</span>
+</button>
+</div>
+</div>
+<!-- Data Table -->
+<div class="table-container w-full overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="table-header">
+<tr>
+<th class="p-4 font-label-mono text-xs uppercase tracking-widest border border-outline">Candidate</th>
+<th class="p-4 font-label-mono text-xs uppercase tracking-widest border border-outline">Primary Skill</th>
+<th class="p-4 font-label-mono text-xs uppercase tracking-widest border border-outline text-center">Score</th>
+<th class="p-4 font-label-mono text-xs uppercase tracking-widest border border-outline text-center">Status</th>
+<th class="p-4 font-label-mono text-xs uppercase tracking-widest border border-outline">Completion Date</th>
+<th class="p-4 font-label-mono text-xs uppercase tracking-widest border border-outline text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="bg-white">
+<!-- Row 1 -->
+<tr class="zebra-row hover:bg-surface-container transition-colors border-b border-outline">
+<td class="p-4 border-r border-outline">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional portrait of a tech candidate in their late 20s, featuring sharp focus and high contrast. The subject is wearing a simple neutral t-shirt, set against a clean industrial office background with deep shadows and architectural lines. Minimalist corporate portraiture style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvZuuCCQP5LANYhRSMOxIgXgo4-rztLydH473vOlwDlZPEnJEMt_xElzKWDrI5686X9FCadBWMO-3CJaJ51b3SMnIv1cF5qbgM6KHtfyGFDhneD06zWqCEDoR06K4UThN1VuyoxpbWwCiIXDXvyWqSuNjoS7X4xo9JOpklh17TCulv8Lhe3Uq_BgrRBuqvF7souK5QVNS3NhR1cMdYv_ymsL3rqrDp_yaxdayHwufwnp5LkBuJDdDxgu9Jj_a6Pcb2FtmlpRzzxuNa">
+</div>
+<div>
+<p class="font-bold text-on-surface">Elena Rodriguez</p>
+<p class="text-xs text-on-surface-variant font-label-mono">ID: 9823-ER</p>
+</div>
+</div>
+</td>
+<td class="p-4 border-r border-outline">
+<div class="flex flex-col">
+<span class="font-medium">React / Node.js Architecture</span>
+<span class="text-xs text-secondary italic">Verified by AWS Lambda Test</span>
+</div>
+</td>
+<td class="p-4 border-r border-outline text-center">
+<span class="font-label-mono text-lg font-bold text-primary">94.8%</span>
+</td>
+<td class="p-4 border-r border-outline text-center">
+<div class="inline-flex items-center gap-1 bg-[#064E3B] text-white px-2 py-1 text-[10px] font-bold uppercase">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                    Verified
+                                </div>
+</td>
+<td class="p-4 border-r border-outline text-sm">Oct 12, 2023</td>
+<td class="p-4 text-right">
+<button class="text-on-surface underline font-bold hover:text-primary transition-colors text-sm">View Report</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="zebra-row hover:bg-surface-container transition-colors border-b border-outline">
+<td class="p-4 border-r border-outline">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A high-contrast headshot of a senior software engineer in their 40s. The lighting is dramatic and precise, highlighting structural facial features. The background is a blurred server room with cool blue and slate tones, maintaining a professional and serious atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHkotiCZzZOvYNKn0ueM0gQ__ZrmoEXVc3rfxHpwhd_6AeTdE-QzXo4AK9ZcxYYK7YribWSD_QZTNoQd40xqg8tZ4V-PGEshPUpF2L-m-Dlc4l9d0b8F3xJjEcMdpN8rYnXwqRoDdKMTxoSQcrpfbrGC6jZlB8aSzEh7O4Egcc_RX1Ti05LbmcEzjvjioSAd3eorrj7F7W_Efhoq-mjIkP5sV1zDRdojjxYWUYUr66okpwTODcWyySlWX-_z7hxEGxTrcJ3QuGvphT">
+</div>
+<div>
+<p class="font-bold text-on-surface">Marcus Thorne</p>
+<p class="text-xs text-on-surface-variant font-label-mono">ID: 4410-MT</p>
+</div>
+</div>
+</td>
+<td class="p-4 border-r border-outline">
+<div class="flex flex-col">
+<span class="font-medium">PostgreSQL Optimization</span>
+<span class="text-xs text-secondary italic">Enterprise SQL Certificate</span>
+</div>
+</td>
+<td class="p-4 border-r border-outline text-center">
+<span class="font-label-mono text-lg font-bold text-primary">91.2%</span>
+</td>
+<td class="p-4 border-r border-outline text-center">
+<div class="inline-flex items-center gap-1 bg-[#064E3B] text-white px-2 py-1 text-[10px] font-bold uppercase">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                    Verified
+                                </div>
+</td>
+<td class="p-4 border-r border-outline text-sm">Oct 11, 2023</td>
+<td class="p-4 text-right">
+<button class="text-on-surface underline font-bold hover:text-primary transition-colors text-sm">View Report</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="zebra-row hover:bg-surface-container transition-colors border-b border-outline">
+<td class="p-4 border-r border-outline">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a woman in her 30s, portraying a specialist in technical data analysis. Sharp focus on the eyes, wearing modern glasses, with a bright high-key white background that matches the portal's clean and professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQIyDiXuMvrbEd_XZ2wRyKsXmiWHyxti4U1RISTvd_ttj7YkNNDlo7LatOKtjCRHbVn0y0hXQux7Vg5OwCzrgq6y2L9quG2ARYlTPDD3GiAihv7FhpuAGpodf5uhc4VAlgj2HQVIbw_9j1iIMtBOORLt5GIX5aVEyyMvVJaGL9a1dF7kx6UeWI1muSlHB1qmnOOxXH1ckxqMjA0Nf6DiqWsbxotwBCbBRBcIJkX7bw1kzhq1nZROkc0d7uXG4v2HvnsSnKamgLoNlo">
+</div>
+<div>
+<p class="font-bold text-on-surface">Sarah Jenkins</p>
+<p class="text-xs text-on-surface-variant font-label-mono">ID: 2289-SJ</p>
+</div>
+</div>
+</td>
+<td class="p-4 border-r border-outline">
+<div class="flex flex-col">
+<span class="font-medium">Python for Data Science</span>
+<span class="text-xs text-secondary italic">Pandas/NumPy Mastery</span>
+</div>
+</td>
+<td class="p-4 border-r border-outline text-center">
+<span class="font-label-mono text-lg font-bold text-primary">87.5%</span>
+</td>
+<td class="p-4 border-r border-outline text-center">
+<div class="inline-flex items-center gap-1 bg-slate-500 text-white px-2 py-1 text-[10px] font-bold uppercase">
+<span class="material-symbols-outlined text-[12px]">schedule</span>
+                                    Pending
+                                </div>
+</td>
+<td class="p-4 border-r border-outline text-sm">Oct 10, 2023</td>
+<td class="p-4 text-right">
+<button class="text-on-surface underline font-bold hover:text-primary transition-colors text-sm">Review Now</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="zebra-row hover:bg-surface-container transition-colors border-b border-outline">
+<td class="p-4 border-r border-outline">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-slate-200 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A striking minimalist headshot of a male engineering candidate. Clear skin, direct gaze, wearing a structured charcoal polo. The lighting is architectural, with sharp lines and high contrast, echoing the precision of the recruiting interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNbo0jKEo3xMwLhQcbpMPUCiku27mrieNAWZ56xt4n9dxFRW-9jMvQREzWXryVXt_t6bh1_F2bZyWpGivdQpOlC2lgyzasnRE6VkUn7Qa3aVwSyTBdmhh47oTygcDqeik-oWlqQzXpLc3UOXm94iqaDfTHnWHu85J3ieE7PyDx0f3D_u08iPIN2o1VUaNV_ASGcI7--rpp5xf-gkjTu9ZRIG587im_jGUivLTd18KoYjy9txcqwzO8YRBMMUE359_A8CUYSV9eFO_i">
+</div>
+<div>
+<p class="font-bold text-on-surface">David Chen</p>
+<p class="text-xs text-on-surface-variant font-label-mono">ID: 7731-DC</p>
+</div>
+</div>
+</td>
+<td class="p-4 border-r border-outline">
+<div class="flex flex-col">
+<span class="font-medium">Rust Systems Design</span>
+<span class="text-xs text-secondary italic">Memory Management Prof.</span>
+</div>
+</td>
+<td class="p-4 border-r border-outline text-center">
+<span class="font-label-mono text-lg font-bold text-primary">99.1%</span>
+</td>
+<td class="p-4 border-r border-outline text-center">
+<div class="inline-flex items-center gap-1 bg-[#064E3B] text-white px-2 py-1 text-[10px] font-bold uppercase">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                    Verified
+                                </div>
+</td>
+<td class="p-4 border-r border-outline text-sm">Oct 09, 2023</td>
+<td class="p-4 text-right">
+<button class="text-on-surface underline font-bold hover:text-primary transition-colors text-sm">View Report</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Bento Highlights (Bottom section) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mt-8">
+<div class="architectural-border p-6 bg-[#F1F5F9]">
+<div class="flex justify-between items-start mb-6">
+<span class="material-symbols-outlined text-3xl text-[#064E3B]">verified_user</span>
+<div class="text-right">
+<p class="font-label-mono text-[10px] uppercase text-on-surface-variant">Top Cert.</p>
+<p class="font-bold text-sm">AWS Architect</p>
+</div>
+</div>
+<h3 class="font-headline-md text-xl mb-2">Certification Integrity</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                        All verified candidates have passed a multi-stage proctoring session ensuring 99.9% meritocracy compliance.
+                    </p>
+</div>
+<div class="architectural-border p-6 bg-white border-primary">
+<div class="flex justify-between items-start mb-6">
+<span class="material-symbols-outlined text-3xl text-primary">monitoring</span>
+<div class="text-right">
+<p class="font-label-mono text-[10px] uppercase text-on-surface-variant">New Data</p>
+<p class="font-bold text-sm">+24 Today</p>
+</div>
+</div>
+<h3 class="font-headline-md text-xl mb-2">Live Skill Trends</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                        Assessments for "Systems Engineering" have seen an 18% increase in average score this quarter.
+                    </p>
+</div>
+<div class="architectural-border p-6 bg-[#0F172A] text-white">
+<div class="flex justify-between items-start mb-6">
+<span class="material-symbols-outlined text-3xl text-white">bolt</span>
+<div class="text-right">
+<p class="font-label-mono text-[10px] uppercase text-slate-400">Response</p>
+<p class="font-bold text-sm">Fast Track</p>
+</div>
+</div>
+<h3 class="font-headline-md text-xl mb-2">Quick Selection</h3>
+<p class="text-sm text-slate-300 leading-relaxed mb-4">
+                        Enable AI-driven shortlisting for the Top 5% of candidates in the current view.
+                    </p>
+<button class="w-full bg-white text-[#0F172A] font-bold py-2 text-sm uppercase font-label-mono">Activate AI Agent</button>
+</div>
+</div>
+<!-- Footer Pagination -->
+<div class="flex justify-between items-center py-8 border-t border-outline-variant">
+<span class="text-sm text-on-surface-variant">Showing <span class="font-bold">1 - 4</span> of 1,284 results</span>
+<div class="flex gap-2">
+<button class="w-10 h-10 border border-outline flex items-center justify-center hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 border-2 border-on-surface flex items-center justify-center font-bold">1</button>
+<button class="w-10 h-10 border border-outline flex items-center justify-center hover:bg-surface-container transition-colors">2</button>
+<button class="w-10 h-10 border border-outline flex items-center justify-center hover:bg-surface-container transition-colors">3</button>
+<button class="w-10 h-10 border border-outline flex items-center justify-center hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<script>
+        // Simple micro-interaction for table rows
+        document.querySelectorAll('.zebra-row').forEach(row => {
+            row.addEventListener('click', () => {
+                row.classList.toggle('bg-primary-fixed');
+                row.classList.toggle('text-on-primary-fixed');
+            });
+        });
+
+        // Search bar interaction
+        const searchInput = document.querySelector('input[type="number"]');
+        if (searchInput) {
+            searchInput.addEventListener('focus', () => {
+                searchInput.parentElement.classList.add('scale-[1.02]');
+                searchInput.parentElement.style.transition = 'transform 0.2s ease-out';
+            });
+            searchInput.addEventListener('blur', () => {
+                searchInput.parentElement.classList.remove('scale-[1.02]');
+            });
+        }
+    </script>
+</body></html>

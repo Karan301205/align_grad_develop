@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Closures",
+    "question": "What is logged?\n```javascript\nfor (var i = 0; i < 3; i++) {\n  setTimeout(() => console.log(i), 0);\n}\n```",
+    "options": [
+      "0 1 2 because each iteration captures separate value",
+      "3 3 3 because var is function-scoped and shared",
+      "undefined undefined undefined due to closure failure",
+      "0 0 0 because setTimeout preserves first value"
+    ],
+    "correctIndex": 1,
+    "explanation": "var is function-scoped; all callbacks reference the same i, which equals 3 after the loop.",
+    "difficulty": "Medium-Hard",
+    "tags": ["closure-in-loop", "var-scope", "callback-timing"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Closures",
+    "question": "What is the output?\n```javascript\nfor (let i = 0; i < 3; i++) {\n  setTimeout(() => console.log(i), 0);\n}\n```",
+    "options": [
+      "3 3 3 because let is block-scoped but shared",
+      "0 1 2 because let creates fresh binding per iteration",
+      "undefined undefined undefined due to let scope",
+      "ReferenceError because let prevents setTimeout use"
+    ],
+    "correctIndex": 1,
+    "explanation": "let is block-scoped; each iteration gets a fresh binding, so each callback captures distinct i.",
+    "difficulty": "Medium-Hard",
+    "tags": ["closure-in-loop", "let-scope", "block-scope"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Closures",
+    "question": "What is logged?\n```javascript\nconst funcs = [];\nfor (var i = 0; i < 3; i++) {\n  funcs.push(() => i);\n}\nconsole.log(funcs[0](), funcs[1](), funcs[2]());\n```",
+    "options": [
+      "0 1 2 because each captures separate closure",
+      "3 3 3 because all reference the same i",
+      "undefined undefined undefined due to closure break",
+      "null null null because funcs is empty"
+    ],
+    "correctIndex": 1,
+    "explanation": "All functions close over the same i variable (function-scoped); it is 3 after the loop.",
+    "difficulty": "Medium-Hard",
+    "tags": ["closure-in-loop", "var-scope", "shared-closure"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Closures",
+    "question": "What is the output?\n```javascript\nfunction outer() {\n  let x = 10;\n  function inner() {\n    let x = 20;\n    return x;\n  }\n  return inner();\n}\nconsole.log(outer());\n```",
+    "options": [
+      "10 because outer scope takes precedence",
+      "20 because inner scope shadows outer x",
+      "undefined due to shadowing error",
+      "null because closure chain is broken"
+    ],
+    "correctIndex": 1,
+    "explanation": "inner's x shadows outer's x; the local x is returned, not the parent scope's.",
+    "difficulty": "Medium",
+    "tags": ["variable-shadowing", "scope-chain", "closures"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Closures",
+    "question": "What is logged?\n```javascript\nfunction makeAdder(x) {\n  return function(y) {\n    return x + y;\n  };\n}\nconst add5 = makeAdder(5);\nconst add10 = makeAdder(10);\nconsole.log(add5(3), add10(3));\n```",
+    "options": [
+      "8 13 because each closure captures its own x",
+      "13 13 due to shared x variable",
+      "8 8 because closures share same function",
+      "undefined because nested functions cannot access x"
+    ],
+    "correctIndex": 0,
+    "explanation": "Each call to makeAdder creates a new closure capturing a different x value.",
+    "difficulty": "Medium",
+    "tags": ["closures", "partial-application", "factory-pattern"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Closures",
+    "question": "What is the output?\n```javascript\nconst x = 'global';\nfunction outer() {\n  console.log(x);\n  const x = 'local';\n}\nouter();\n```",
+    "options": [
+      "global because outer accesses global x",
+      "ReferenceError because x is in temporal dead zone",
+      "undefined due to var hoisting to undefined",
+      "local because const is hoisted"
+    ],
+    "correctIndex": 1,
+    "explanation": "const x is hoisted but not initialized; accessing it before assignment throws ReferenceError.",
+    "difficulty": "Medium-Hard",
+    "tags": ["temporal-dead-zone", "const-hoisting", "scope-chain"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Closures",
+    "question": "What is logged?\n```javascript\nfunction createCounter() {\n  let count = 0;\n  return function() {\n    return ++count;\n  };\n}\nconst c1 = createCounter();\nconst c2 = createCounter();\nconsole.log(c1(), c1(), c2());\n```",
+    "options": [
+      "1 2 1 because each counter has its own count",
+      "1 2 2 due to shared count variable",
+      "1 1 1 because closures reset state",
+      "undefined due to closure chain failure"
+    ],
+    "correctIndex": 0,
+    "explanation": "c1 and c2 are separate closures; each captures its own count variable instance.",
+    "difficulty": "Medium",
+    "tags": ["closures", "independent-state", "closure-factory"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Closures",
+    "question": "What is the output?\n```javascript\nfunction outer() {\n  let x = 1;\n  return {\n    get: () => x,\n    set: (val) => { x = val; }\n  };\n}\nconst obj = outer();\nobj.set(10);\nconsole.log(obj.get());\n```",
+    "options": [
+      "1 because getter ignores setter",
+      "10 because both methods share closure over x",
+      "undefined due to setter not updating",
+      "null because methods cannot share state"
+    ],
+    "correctIndex": 1,
+    "explanation": "get and set both close over the same x variable; set updates it for get to retrieve.",
+    "difficulty": "Medium",
+    "tags": ["closures", "getters-setters", "shared-state"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Closures",
+    "question": "What is logged?\n```javascript\nfunction outer(x) {\n  return function inner() {\n    return function final() {\n      return x;\n    };\n  };\n}\nconst f = outer(42)()();\nconsole.log(f);\n```",
+    "options": [
+      "42 because triple nesting creates closure chain",
+      "undefined because nested closures break",
+      "function because final is returned",
+      "null due to multiple nesting levels"
+    ],
+    "correctIndex": 0,
+    "explanation": "Multiple levels of nesting create a closure chain; final closes over x from outer.",
+    "difficulty": "Medium-Hard",
+    "tags": ["nested-closures", "closure-chain", "scope-chain"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Closures",
+    "question": "What is the output?\n```javascript\nfunction test() {\n  const arr = [];\n  for (let i = 0; i < 3; i++) {\n    arr.push(() => i);\n  }\n  return arr;\n}\nconst funcs = test();\nconsole.log(funcs[0](), funcs[1](), funcs[2]());\n```",
+    "options": [
+      "0 1 2 because let creates binding per iteration",
+      "3 3 3 due to shared loop variable",
+      "undefined undefined undefined because closures fail",
+      "0 0 0 because first binding is captured"
+    ],
+    "correctIndex": 0,
+    "explanation": "let in for loops creates a fresh binding each iteration; each function captures distinct i.",
+    "difficulty": "Medium-Hard",
+    "tags": ["closure-in-loop", "let-scope", "per-iteration-binding"]
+  }
+]

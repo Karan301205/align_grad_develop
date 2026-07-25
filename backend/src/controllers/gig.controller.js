@@ -32,7 +32,12 @@ exports.getGigs = async (req, res) => {
       );
     }
 
-    res.status(200).json(filteredGigs);
+    const companies = await prisma.company.findMany();
+    const gigsWithCompany = filteredGigs.map(g => {
+      const company = companies.find(c => c.userId === g.ownerId || c.id === g.ownerId) || null;
+      return { ...g, company };
+    });
+    res.status(200).json(gigsWithCompany);
   } catch (err) {
     console.error('Error fetching gigs:', err);
     res.status(500).json({ error: 'Failed to fetch gigs from marketplace' });
@@ -82,7 +87,12 @@ exports.getMyGigs = async (req, res) => {
       }
     });
     
-    res.status(200).json(gigs);
+    const companies = await prisma.company.findMany();
+    const gigsWithCompany = gigs.map(g => {
+      const company = companies.find(c => c.userId === g.ownerId || c.id === g.ownerId) || null;
+      return { ...g, company };
+    });
+    res.status(200).json(gigsWithCompany);
   } catch (err) {
     console.error('Error fetching user gigs:', err);
     res.status(500).json({ error: 'Failed to fetch your gigs list' });
@@ -116,6 +126,9 @@ exports.getGigDetails = async (req, res) => {
     
     if (!isOwner && !isCandidate && !isApplicant && req.user.role !== 'RECRUITER') {
       // Allow general browsing of details but mask sensitive sections like applications/messages
+      const company = await prisma.company.findFirst({
+        where: { OR: [{ userId: gig.ownerId }, { id: gig.ownerId }] }
+      });
       return res.status(200).json({
         id: gig.id,
         title: gig.title,
@@ -127,11 +140,15 @@ exports.getGigDetails = async (req, res) => {
         createdAt: gig.createdAt,
         ownerId: gig.ownerId,
         ownerName: gig.ownerName,
-        ownerRole: gig.ownerRole
+        ownerRole: gig.ownerRole,
+        company
       });
     }
     
-    res.status(200).json(gig);
+    const company = await prisma.company.findFirst({
+      where: { OR: [{ userId: gig.ownerId }, { id: gig.ownerId }] }
+    });
+    res.status(200).json({ ...gig, company });
   } catch (err) {
     console.error('Error fetching gig details:', err);
     res.status(500).json({ error: 'Failed to fetch gig details' });

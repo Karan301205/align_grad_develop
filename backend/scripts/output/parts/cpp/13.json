@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C++",
+    "subtopic": "Performance Optimization",
+    "question": "What is the difference between pass-by-value and pass-by-reference in terms of performance?",
+    "options": ["both have identical performance", "pass-by-value copies the object; pass-by-reference passes an address", "pass-by-value is faster for large objects", "pass-by-reference requires manual memory management"],
+    "correctIndex": 1,
+    "explanation": "pass-by-value copies (expensive for large objects); pass-by-reference passes an address pointer (cheaper).",
+    "difficulty": "Medium",
+    "tags": ["pass-by-reference", "pass-by-value", "performance"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Performance Optimization",
+    "question": "Why is cache locality important for performance?",
+    "options": ["it reduces memory allocation overhead", "CPUs fetch memory in cache lines; sequential access is faster than random", "it eliminates the need for synchronization", "cache locality is irrelevant to modern CPUs"],
+    "correctIndex": 1,
+    "explanation": "Cache lines fetch adjacent memory; sequential access within a cache line is orders of magnitude faster than cache misses.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cache-locality", "performance", "cpu-optimization"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Performance Optimization",
+    "question": "When is inlining beneficial, and when might it harm performance?",
+    "options": ["inlining is always beneficial", "beneficial for small functions; harmful if code bloat exceeds cache capacity", "inlining only helps in debug builds", "inlining has no effect on performance"],
+    "correctIndex": 1,
+    "explanation": "Inlining small functions saves call overhead; inlining large functions causes code bloat and cache misses.",
+    "difficulty": "Medium-Hard",
+    "tags": ["inlining", "code-bloat", "performance-tradeoff"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Performance Optimization",
+    "question": "What is branch prediction, and why does it matter?",
+    "options": ["branches are predicted at compile time", "CPUs predict which branch will execute; mispredictions cause pipeline flushes", "branch prediction is only relevant for interpreters", "all branches have identical performance"],
+    "correctIndex": 1,
+    "explanation": "Modern CPUs speculate on branches; mispredictions cause expensive pipeline flushes, degrading performance.",
+    "difficulty": "Hard",
+    "tags": ["branch-prediction", "pipeline", "performance"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Performance Optimization",
+    "question": "Is it faster to use std::move on objects in performance-critical code?",
+    "options": ["always yes; move is free", "yes for large objects; move avoids copying", "no; move has same cost as copy", "depends on compiler flags"],
+    "correctIndex": 1,
+    "explanation": "Move transfers ownership without copying; crucial for large objects, but negligible for small POD types.",
+    "difficulty": "Medium",
+    "tags": ["move-semantics", "performance", "optimization"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Performance Optimization",
+    "question": "What is the purpose of link-time optimization (LTO)?",
+    "options": ["prevents linker errors", "enables optimization across translation units at link time", "makes executable files smaller", "only available in C++20"],
+    "correctIndex": 1,
+    "explanation": "LTO allows the compiler to inline and optimize across module boundaries, improving performance at the cost of link time.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lto", "optimization", "compiler-flags"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Performance Optimization",
+    "question": "Why might iterating over a std::vector be faster than iterating over a std::list?",
+    "options": ["vector iteration has fewer branches", "vector uses contiguous memory; better cache locality than list's scattered nodes", "list is intentionally slow", "both have identical performance"],
+    "correctIndex": 1,
+    "explanation": "Vector's contiguous layout fits cache lines; list's node pointers cause cache misses, even with similar algorithmic cost.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cache-locality", "vector", "list", "performance"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Performance Optimization",
+    "question": "What is false sharing, and how can it degrade multithreaded performance?",
+    "options": ["threads share code sections", "multiple threads' variables fit in one cache line, causing unnecessary invalidations", "sharing data across threads is always false", "false sharing is prevented by mutexes"],
+    "correctIndex": 1,
+    "explanation": "If two threads modify unrelated variables on the same cache line, each modification invalidates the other's cache, causing stalls.",
+    "difficulty": "Hard",
+    "tags": ["false-sharing", "cache-coherency", "multithreading"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Performance Optimization",
+    "question": "Is using smart pointers slower than raw pointers?",
+    "options": ["yes; smart pointers always add overhead", "no; modern compilers optimize smart pointers to raw pointer performance", "yes, but only for unique_ptr", "depends on the optimization level"],
+    "correctIndex": 1,
+    "explanation": "Compiler optimizations eliminate smart pointer abstraction overhead; modern code sees no performance difference.",
+    "difficulty": "Medium",
+    "tags": ["smart-pointers", "performance", "compiler-optimization"]
+  },
+  {
+    "skillName": "C++",
+    "subtopic": "Performance Optimization",
+    "question": "Why might const references be preferred to const pass-by-value for large objects?",
+    "options": ["const prevents optimization", "const reference avoids copying; pass-by-value copies the entire object", "they have identical performance", "only matters for very large objects"],
+    "correctIndex": 1,
+    "explanation": "const reference eliminates a copy; for large objects like vectors or strings, this difference is significant.",
+    "difficulty": "Medium",
+    "tags": ["const-reference", "pass-by-reference", "performance"]
+  }
+]

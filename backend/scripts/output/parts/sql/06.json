@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Optimization",
+    "question": "EXPLAIN PLAN shows this query does a full table scan on a 1M-row table:\nSELECT id FROM users WHERE UPPER(name) = 'ALICE';\n\nHow would you optimize?",
+    "options": [
+      "Use WHERE name = 'Alice' if the table stores names consistently cased, or create a functional index on UPPER(name)",
+      "Use a hash index instead of B-tree",
+      "Rewrite as WHERE name LIKE 'ALICE%'",
+      "No optimization is possible for this query"
+    ],
+    "correctIndex": 0,
+    "explanation": "Function calls in WHERE prevent index use unless a functional index exists; if names are stored in a standard case, the function call is unnecessary.",
+    "difficulty": "Medium",
+    "tags": ["query-plan", "function-index"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Optimization",
+    "question": "A slow query: SELECT * FROM orders o JOIN customers c ON o.customer_id = c.id WHERE o.created_at > '2024-01-01';\n\nIndexes exist on orders(created_at) and customers(id). What optimization reduces rows early?",
+    "options": [
+      "Filter orders by created_at first using the index, then join only the matching rows",
+      "Join first, then filter by created_at",
+      "Use a LEFT JOIN instead of INNER JOIN",
+      "Remove the JOIN and query separately"
+    ],
+    "correctIndex": 0,
+    "explanation": "Filtering early (using the created_at index) reduces the number of rows in the join, improving join performance.",
+    "difficulty": "Medium",
+    "tags": ["join-optimization", "filter-early"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Optimization",
+    "question": "This query is slow:\nSELECT * FROM orders WHERE customer_id NOT IN (SELECT id FROM customers WHERE status = 'inactive');\n\nWhy might it be slow, and how would you rewrite it?",
+    "options": [
+      "NOT IN with a subquery is slow; rewrite as NOT EXISTS or LEFT JOIN WHERE is NULL",
+      "NOT IN is the fastest SQL operator",
+      "The subquery is unnecessary; remove it",
+      "Use EXCEPT instead of NOT IN"
+    ],
+    "correctIndex": 0,
+    "explanation": "NOT IN with subqueries can be slow (full scan of subquery); NOT EXISTS or LEFT JOIN are often more efficient.",
+    "difficulty": "Medium-Hard",
+    "tags": ["subquery-optimization", "not-in"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Optimization",
+    "question": "A query retrieves 100k rows from a 1M-row table:\nSELECT id, name, email FROM users WHERE status != 'deleted';\n\nWhy might an index on status not help?",
+    "options": [
+      "Negative conditions (!=) have low selectivity; most rows match, so full table scan is chosen",
+      "Indexes never help with inequality operators",
+      "The table is too large for indexes",
+      "You must use a stored procedure to optimize this"
+    ],
+    "correctIndex": 0,
+    "explanation": "!= filters out only 1% of rows (deleted); the query planner chooses full scan over index scan since 99% of rows are returned.",
+    "difficulty": "Medium",
+    "tags": ["selectivity", "negative-condition"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Optimization",
+    "question": "Two execution plans for the same query:\nPlan A: Seq Scan (full table scan) on users, cost 10000\nPlan B: Index Scan on idx_status, cost 5000\n\nBut Plan A is chosen. Why?",
+    "options": [
+      "The planner's cost estimates can be inaccurate; update statistics or reindex",
+      "Full table scans are always slower",
+      "The index is corrupt",
+      "Plan A is always better for large tables"
+    ],
+    "correctIndex": 0,
+    "explanation": "Query planners use statistics; stale statistics can cause suboptimal plan selection; ANALYZE or VACUUM can help.",
+    "difficulty": "Medium",
+    "tags": ["query-plan", "statistics"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Optimization",
+    "question": "This query is slow:\nSELECT DISTINCT customer_id FROM orders ORDER BY customer_id;\n\nA covering index on (customer_id, order_date) exists. Does it help?",
+    "options": [
+      "Yes, the index scan satisfies DISTINCT and ORDER BY without touching the table",
+      "No, covering indexes don't help with DISTINCT",
+      "Only if the index is UNIQUE",
+      "No, the index needs order_date first"
+    ],
+    "correctIndex": 0,
+    "explanation": "A covering index provides DISTINCT values in index order; no table lookup is needed, improving performance significantly.",
+    "difficulty": "Medium",
+    "tags": ["covering-index", "distinct"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Optimization",
+    "question": "A JOIN query uses 100MB memory:\nSELECT o.id, c.name FROM orders o JOIN customers c ON o.customer_id = c.id;\n\nLarge result set. How can you reduce memory?",
+    "options": [
+      "Add a LIMIT clause or aggregate the result (e.g., GROUP BY) to reduce output rows",
+      "Use a nested loop join instead of hash join",
+      "Remove the JOIN",
+      "Memory usage cannot be reduced"
+    ],
+    "correctIndex": 0,
+    "explanation": "Reducing output rows (via LIMIT or GROUP BY) lowers memory usage; the join algorithm choice is secondary.",
+    "difficulty": "Medium",
+    "tags": ["memory-usage", "output-reduction"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Optimization",
+    "question": "This query returns 50k rows in 5 seconds:\nSELECT * FROM large_table WHERE date >= '2024-01-01' AND status = 'active';\n\nIndexes: (date) and (status). How would you speed this up?",
+    "options": [
+      "Replace with a composite index (date, status) to avoid two separate index scans",
+      "Remove one of the indexes to reduce maintenance overhead",
+      "Use OR instead of AND to broaden the query",
+      "No optimization is possible"
+    ],
+    "correctIndex": 0,
+    "explanation": "A composite index (date, status) can satisfy both conditions in a single scan, faster than combining two separate index scans.",
+    "difficulty": "Medium",
+    "tags": ["composite-index", "query-optimization"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Optimization",
+    "question": "EXPLAIN shows:\nSELECT * FROM users u LEFT JOIN orders o ON u.id = o.user_id WHERE o.user_id IS NOT NULL;\n\nThis query is functionally equivalent to which INNER JOIN version?",
+    "options": [
+      "SELECT * FROM users u INNER JOIN orders o ON u.id = o.user_id",
+      "SELECT * FROM users u LEFT JOIN orders o ON u.id = o.user_id",
+      "SELECT * FROM orders o RIGHT JOIN users u ON u.id = o.user_id",
+      "The queries are not equivalent"
+    ],
+    "correctIndex": 0,
+    "explanation": "WHERE o.user_id IS NOT NULL removes all NULL rows from the LEFT JOIN, making it functionally equivalent to INNER JOIN.",
+    "difficulty": "Medium-Hard",
+    "tags": ["join-type", "optimization"]
+  },
+  {
+    "skillName": "SQL",
+    "subtopic": "Query Optimization",
+    "question": "A slow query does a full table scan on a 100M-row table. Statistics show 1% of rows match. Why is the full scan still chosen?",
+    "options": [
+      "If no index exists on the filter columns, full scan is the only option",
+      "Full scans are always faster for large tables",
+      "The query planner is broken",
+      "The filter is applied after the scan"
+    ],
+    "correctIndex": 0,
+    "explanation": "Without an index on filter columns, the full table scan is the only available plan; adding an index enables more efficient access.",
+    "difficulty": "Medium",
+    "tags": ["index-coverage", "full-scan"]
+  }
+]

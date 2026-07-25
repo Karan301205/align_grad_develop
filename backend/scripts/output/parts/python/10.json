@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Performance Optimization",
+    "question": "What is the performance cost of this loop vs list comprehension?\n```python\n# Loop approach\nresult = []\nfor i in range(1000):\n    result.append(i * 2)\n\n# Comprehension approach\nresult = [i * 2 for i in range(1000)]\n```",
+    "options": ["Same speed", "List comprehension is faster", "Loop is faster", "Loop uses less memory"],
+    "correctIndex": 1,
+    "explanation": "List comprehensions are implemented in C and are 2-3x faster than building lists with append loops.",
+    "difficulty": "Medium",
+    "tags": ["performance", "list-comprehension", "optimization"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Performance Optimization",
+    "question": "What does this generator save compared to returning a list?\n```python\ndef generator_version():\n    for i in range(1000000):\n        yield i\n\ndef list_version():\n    result = []\n    for i in range(1000000):\n        result.append(i)\n    return result\n```",
+    "options": ["Execution speed", "Memory via lazy evaluation", "CPU cycles", "Nothing"],
+    "correctIndex": 1,
+    "explanation": "Generators yield values one at a time, using minimal memory; list builds all values upfront.",
+    "difficulty": "Medium",
+    "tags": ["generator", "memory-efficiency", "lazy-evaluation"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Performance Optimization",
+    "question": "What does caching with functools.lru_cache do?\n```python\nfrom functools import lru_cache\n\n@lru_cache(maxsize=128)\ndef expensive_function(n):\n    return n ** n\n```",
+    "options": ["Speeds up repeated calls", "Speeds up first call", "Reduces memory", "Prevents recursion"],
+    "correctIndex": 0,
+    "explanation": "LRU cache stores results of function calls; repeated calls with same args return cached results instantly.",
+    "difficulty": "Medium",
+    "tags": ["lru-cache", "memoization", "performance"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Performance Optimization",
+    "question": "What is the time complexity of list.append() vs list.insert(0, x)?\n```python\nlst = [1, 2, 3]\nlst.append(4)  # O(?)\nlst.insert(0, 0)  # O(?)\n```",
+    "options": ["Both O(1)", "append O(1), insert O(n)", "Both O(n)", "append O(n), insert O(1)"],
+    "correctIndex": 1,
+    "explanation": "append() is amortized O(1), but insert(0) shifts all elements right, making it O(n).",
+    "difficulty": "Medium",
+    "tags": ["time-complexity", "list-operations", "performance"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Performance Optimization",
+    "question": "What does using collections.deque optimize?\n```python\nfrom collections import deque\n\nq = deque()\nq.append(1)  # O(1)\nq.popleft()  # O(1)\n```",
+    "options": ["Pop from end", "Pop from front efficiently", "Iteration", "Memory usage"],
+    "correctIndex": 1,
+    "explanation": "deque provides O(1) operations on both ends; list.pop(0) is O(n) but deque.popleft() is O(1).",
+    "difficulty": "Medium",
+    "tags": ["deque", "time-complexity", "performance"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Performance Optimization",
+    "question": "What does dis.dis() help analyze?\n```python\nimport dis\n\ndef simple_function():\n    x = 1 + 2\n    return x\n\ndis.dis(simple_function)\n```",
+    "options": ["Function logic", "Bytecode instructions", "Execution speed", "Memory layout"],
+    "correctIndex": 1,
+    "explanation": "dis module disassembles bytecode, showing low-level operations and helping identify performance bottlenecks.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dis", "bytecode", "profiling"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Performance Optimization",
+    "question": "What does timeit module measure?\n```python\nimport timeit\n\ntime = timeit.timeit(lambda: 1 + 1, number=1000000)\n```",
+    "options": ["Wall clock time", "Execution time of small code snippets", "Memory usage", "CPU cycles"],
+    "correctIndex": 1,
+    "explanation": "timeit repeats code execution and measures total time, useful for micro-benchmarking.",
+    "difficulty": "Medium",
+    "tags": ["timeit", "benchmarking", "performance-testing"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Performance Optimization",
+    "question": "What does this string concatenation issue show?\n```python\nresult = ''\nfor i in range(1000):\n    result += 'x'  # O(?) per iteration\n\nresult = ''.join(['x'] * 1000)  # O(?)\n```",
+    "options": ["Both O(n)", "Both O(1)", "+= is O(n), join is O(n)", "+= is O(n^2), join is O(n)"],
+    "correctIndex": 3,
+    "explanation": "String += creates a new string each iteration (O(n)), making the loop O(n^2); join() is O(n).",
+    "difficulty": "Medium-Hard",
+    "tags": ["string-concatenation", "time-complexity", "performance"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Performance Optimization",
+    "question": "What does numpy offer over pure Python lists?\n```python\nimport numpy as np\n\narr = np.array([1, 2, 3, 4, 5])\nresult = arr * 2\n```",
+    "options": ["Better syntax", "Vectorized operations in C", "Automatic caching", "Type safety"],
+    "correctIndex": 1,
+    "explanation": "NumPy arrays are implemented in C and provide vectorized operations that are orders of magnitude faster.",
+    "difficulty": "Medium",
+    "tags": ["numpy", "vectorization", "performance"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Performance Optimization",
+    "question": "What is the memory footprint of different collection types?\n```python\nimport sys\nlst = [1, 2, 3]\ntpl = (1, 2, 3)\nst = {1, 2, 3}\n```",
+    "options": ["All equal", "tuple uses less memory than list", "set uses less than tuple", "list uses least"],
+    "correctIndex": 1,
+    "explanation": "Tuples are immutable and consume less memory than lists; sets are more memory-intensive.",
+    "difficulty": "Medium-Hard",
+    "tags": ["memory-usage", "sys.getsizeof", "optimization"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "C#",
+    "subtopic": "LINQ Queries",
+    "question": "What does this LINQ query return?\nvar nums = new[] { 1, 2, 3, 4, 5 };\nvar result = nums.Where(x => x > 2);\nConsole.WriteLine(result.Count());",
+    "options": ["3", "2", "5", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Where filters elements greater than 2; returns 3, 4, 5 (count = 3).",
+    "difficulty": "Medium",
+    "tags": ["linq", "where", "filtering"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "LINQ Queries",
+    "question": "What is deferred execution in LINQ?\nvar nums = new[] { 1, 2, 3 };\nvar query = nums.Where(x => {\n  Console.WriteLine(x);\n  return x > 1;\n});\nvar result = query.ToList();",
+    "options": ["Prints 1 2 3", "Prints 2 3", "Prints nothing", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "Where is lazy; predicate only executes when ToList() materializes the query.",
+    "difficulty": "Medium-Hard",
+    "tags": ["linq", "deferred-execution", "lazy-evaluation"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "LINQ Queries",
+    "question": "What does this Select query do?\nvar nums = new[] { 1, 2, 3 };\nvar result = nums.Select(x => x * 2).ToList();\nConsole.WriteLine(result[0]);",
+    "options": ["2", "1", "3", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Select transforms each element; 1 * 2 = 2, result is [2, 4, 6].",
+    "difficulty": "Medium",
+    "tags": ["linq", "select", "transformation"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "LINQ Queries",
+    "question": "What does OrderBy return?\nvar nums = new[] { 3, 1, 4, 1, 5 };\nvar result = nums.OrderBy(x => x).ToList();\nConsole.WriteLine(result[0]);",
+    "options": ["1", "3", "4", "5"],
+    "correctIndex": 0,
+    "explanation": "OrderBy sorts ascending; smallest element 1 is first.",
+    "difficulty": "Medium",
+    "tags": ["linq", "orderby", "sorting"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "LINQ Queries",
+    "question": "What does First() return?\nvar nums = new[] { 1, 2, 3 };\nvar result = nums.First(x => x > 2);\nConsole.WriteLine(result);",
+    "options": ["3", "1", "2", "InvalidOperationException"],
+    "correctIndex": 0,
+    "explanation": "First with predicate returns first element matching condition; 3 > 2.",
+    "difficulty": "Medium",
+    "tags": ["linq", "first", "sequence-operators"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "LINQ Queries",
+    "question": "What does Any() return?\nvar nums = new[] { 1, 2, 3 };\nConsole.WriteLine(nums.Any(x => x > 5));",
+    "options": ["False", "True", "Compilation error", "Cannot determine"],
+    "correctIndex": 0,
+    "explanation": "Any returns true if any element matches; no element > 5, so false.",
+    "difficulty": "Medium",
+    "tags": ["linq", "any", "existence-check"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "LINQ Queries",
+    "question": "What does Distinct() do?\nvar nums = new[] { 1, 2, 2, 3, 3, 3 };\nvar result = nums.Distinct().Count();\nConsole.WriteLine(result);",
+    "options": ["3", "6", "2", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Distinct removes duplicates; unique elements are 1, 2, 3 (count = 3).",
+    "difficulty": "Medium",
+    "tags": ["linq", "distinct", "deduplication"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "LINQ Queries",
+    "question": "What does GroupBy return?\nvar nums = new[] { 1, 2, 2, 3, 3, 3 };\nvar groups = nums.GroupBy(x => x).Count();\nConsole.WriteLine(groups);",
+    "options": ["3", "6", "2", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "GroupBy groups by key; three distinct keys (1, 2, 3) create three groups.",
+    "difficulty": "Medium",
+    "tags": ["linq", "groupby", "grouping"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "LINQ Queries",
+    "question": "What does Join do?\nvar nums1 = new[] { 1, 2, 3 };\nvar nums2 = new[] { 2, 3, 4 };\nvar result = nums1.Join(nums2, x => x, y => y, (x, y) => x).Count();\nConsole.WriteLine(result);",
+    "options": ["2", "3", "5", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Join finds matching elements; 2 and 3 appear in both, returning pairs count.",
+    "difficulty": "Medium-Hard",
+    "tags": ["linq", "join", "set-operations"]
+  },
+  {
+    "skillName": "C#",
+    "subtopic": "LINQ Queries",
+    "question": "What does Sum return?\nvar nums = new[] { 1, 2, 3, 4 };\nConsole.WriteLine(nums.Sum());",
+    "options": ["10", "4", "1", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "Sum adds all elements; 1 + 2 + 3 + 4 = 10.",
+    "difficulty": "Medium",
+    "tags": ["linq", "sum", "aggregation"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Java",
+    "subtopic": "Multithreading",
+    "question": "What is printed in a multi-threaded environment?\n```java\nint x = 0;\nfor (int i = 0; i < 1000; i++) {\n  new Thread(() -> { x++; }).start();\n}\nThread.sleep(100);\nSystem.out.println(x);\n```",
+    "options": ["1000", "Less than 1000", "Compilation error", "0"],
+    "correctIndex": 1,
+    "explanation": "x++ is not atomic; multiple threads read-modify-write concurrently, causing a race condition and x often ends up < 1000.",
+    "difficulty": "Medium-Hard",
+    "tags": ["race-condition", "thread-safety", "atomic-operations"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Multithreading",
+    "question": "What does this code do?\n```java\nsynchronized void increment() {\n  x++;\n}\n```",
+    "options": ["Guarantees atomic increment", "Guarantees visibility", "Both atomic and visibility", "None of the above"],
+    "correctIndex": 2,
+    "explanation": "synchronized provides both atomicity (mutual exclusion) and visibility (memory barrier), ensuring x++ is safe under concurrent access.",
+    "difficulty": "Medium",
+    "tags": ["synchronized", "atomicity", "memory-visibility"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Multithreading",
+    "question": "What is the output?\n```java\nThread t1 = new Thread(() -> System.out.println(\"A\"));\nThread t2 = new Thread(() -> System.out.println(\"B\"));\nt1.start();\nt2.start();\n```",
+    "options": ["A, B always", "B, A always", "A or B, then the other", "Compilation error"],
+    "correctIndex": 2,
+    "explanation": "Threads execute concurrently with no guaranteed order; output can be 'A, B' or 'B, A' depending on thread scheduler.",
+    "difficulty": "Medium",
+    "tags": ["thread-scheduling", "concurrency", "non-determinism"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Multithreading",
+    "question": "What happens if you call start() twice on the same Thread?\n```java\nThread t = new Thread(() -> System.out.println(\"Test\"));\nt.start();\nt.start();\n```",
+    "options": ["Runs twice", "Throws IllegalThreadStateException", "Compilation error", "Runs once"],
+    "correctIndex": 1,
+    "explanation": "Once a thread finishes, it cannot be restarted; calling start() on a non-new thread throws IllegalThreadStateException.",
+    "difficulty": "Medium",
+    "tags": ["thread-lifecycle", "thread-state", "error-handling"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Multithreading",
+    "question": "What does this code achieve?\n```java\nObject lock = new Object();\nsynchronized (lock) {\n  // Critical section\n}\n```",
+    "options": ["Ensures thread safety for lock object only", "Ensures thread safety for code inside block", "Guarantees no thread runs anywhere", "Compilation error"],
+    "correctIndex": 1,
+    "explanation": "synchronized block ensures only one thread enters the critical section at a time; other synchronized blocks on the same lock are serialized.",
+    "difficulty": "Medium",
+    "tags": ["synchronized-block", "mutual-exclusion", "locks"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Multithreading",
+    "question": "What is printed?\n```java\nvolatile int x = 0;\nThread t1 = new Thread(() -> { x = 1; });\nThread t2 = new Thread(() -> { System.out.println(x); });\nt1.start();\nt2.start();\n```",
+    "options": ["0", "1", "Depends on timing", "Compilation error"],
+    "correctIndex": 2,
+    "explanation": "volatile ensures visibility, but does not guarantee ordering; t2 may run before t1 assigns x, or may see x=1 depending on thread scheduling.",
+    "difficulty": "Medium-Hard",
+    "tags": ["volatile", "visibility", "happens-before"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Multithreading",
+    "question": "What is the purpose of wait() and notify()?\n```java\nsynchronized void waitForSignal() {\n  wait(); // Releases lock, waits for notify()\n}\n```",
+    "options": ["Stops all threads", "Pauses current thread until notify() is called", "Compilation error", "Kills the thread"],
+    "correctIndex": 1,
+    "explanation": "wait() releases the lock and pauses the thread until notify() is called by another thread on the same lock.",
+    "difficulty": "Medium",
+    "tags": ["wait-notify", "producer-consumer", "thread-communication"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Multithreading",
+    "question": "What is printed?\n```java\nExecutorService executor = Executors.newFixedThreadPool(2);\nfor (int i = 0; i < 5; i++) {\n  executor.submit(() -> System.out.println(Thread.currentThread().getName()));\n}\nexecutor.shutdown();\n```",
+    "options": ["5 different thread names", "2 thread names repeated", "Compilation error", "No output"],
+    "correctIndex": 1,
+    "explanation": "FixedThreadPool(2) reuses 2 threads for all 5 tasks; thread names repeat (pool-1-thread-1, pool-1-thread-2).",
+    "difficulty": "Medium",
+    "tags": ["executor-service", "thread-pools", "task-submission"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Multithreading",
+    "question": "What is a deadlock?\n```java\n// Thread 1: synchronized(A) { synchronized(B) { } }\n// Thread 2: synchronized(B) { synchronized(A) { } }\n```",
+    "options": ["Normal behavior", "Both threads block waiting for each other's locks", "Compilation error", "Automatic recovery"],
+    "correctIndex": 1,
+    "explanation": "Thread 1 holds A, waits for B; Thread 2 holds B, waits for A; they deadlock indefinitely.",
+    "difficulty": "Medium",
+    "tags": ["deadlock", "synchronization", "lock-ordering"]
+  },
+  {
+    "skillName": "Java",
+    "subtopic": "Multithreading",
+    "question": "What does this guarantee?\n```java\nAtomicInteger counter = new AtomicInteger(0);\ncounter.incrementAndGet();\n```",
+    "options": ["Thread-safe increment and visibility", "Only atomicity, no visibility", "Only visibility, no atomicity", "Compilation error"],
+    "correctIndex": 0,
+    "explanation": "AtomicInteger provides both atomicity (increment is indivisible) and visibility (volatile semantics), making it thread-safe.",
+    "difficulty": "Medium",
+    "tags": ["atomic-classes", "thread-safety", "lock-free"]
+  }
+]

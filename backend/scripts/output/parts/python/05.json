@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Python",
+    "subtopic": "Error Handling",
+    "question": "What is the output of this try-except block?\n```python\ntry:\n    result = 10 / 0\nexcept ZeroDivisionError:\n    print('caught')\nelse:\n    print('no error')\n```",
+    "options": ["caught", "no error", "caught then no error", "ZeroDivisionError"],
+    "correctIndex": 0,
+    "explanation": "The except block catches ZeroDivisionError; the else block only runs if no exception occurred.",
+    "difficulty": "Medium",
+    "tags": ["try-except-else", "exception-handling", "control-flow"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Error Handling",
+    "question": "What happens with finally in this scenario?\n```python\ndef test():\n    try:\n        return 'try'\n    finally:\n        print('finally')\n\nresult = test()\nprint(result)\n```",
+    "options": ["try", "finally then try", "finally only", "finally then nothing"],
+    "correctIndex": 1,
+    "explanation": "The finally block always executes before the return, even when returning from try.",
+    "difficulty": "Medium",
+    "tags": ["try-finally", "return-statement", "exception-handling"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Error Handling",
+    "question": "What does this exception chaining show?\n```python\ntry:\n    try:\n        1 / 0\n    except ZeroDivisionError:\n        raise ValueError('invalid')\nexcept ValueError as e:\n    print(e)\n```",
+    "options": ["ZeroDivisionError", "ValueError: invalid", "Both exceptions", "NameError"],
+    "correctIndex": 1,
+    "explanation": "Raising ValueError inside except catches it in the outer except, printing the ValueError message.",
+    "difficulty": "Medium-Hard",
+    "tags": ["exception-chaining", "nested-try", "re-raising"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Error Handling",
+    "question": "What is caught by this generic except?\n```python\ntry:\n    1 / 0\nexcept Exception as e:\n    print(type(e).__name__)\n```",
+    "options": ["Exception", "ZeroDivisionError", "BaseException", "Error"],
+    "correctIndex": 1,
+    "explanation": "Exception catches all standard exceptions; ZeroDivisionError is caught and its type name is printed.",
+    "difficulty": "Medium",
+    "tags": ["exception-hierarchy", "exception-types", "type-name"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Error Handling",
+    "question": "What does this except clause match?\n```python\ntry:\n    raise TypeError('type')\nexcept (ValueError, KeyError) as e:\n    print('caught')\nexcept TypeError as e:\n    print('type error')\n```",
+    "options": ["caught", "type error", "TypeError unhandled", "Both except blocks"],
+    "correctIndex": 1,
+    "explanation": "First except block checks ValueError/KeyError; TypeError is not matched, so the second except handles it.",
+    "difficulty": "Medium",
+    "tags": ["multiple-except", "exception-matching", "clause-order"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Error Handling",
+    "question": "What does raise with no argument do?\n```python\ntry:\n    1 / 0\nexcept ZeroDivisionError:\n    raise\n```",
+    "options": ["Raises None", "Re-raises the caught exception", "Syntax error", "Does nothing"],
+    "correctIndex": 1,
+    "explanation": "Bare raise re-raises the current exception, preserving the traceback.",
+    "difficulty": "Medium",
+    "tags": ["re-raising", "raise-statement", "exception-propagation"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Error Handling",
+    "question": "What is the result of this custom exception?\n```python\nclass CustomError(Exception):\n    def __init__(self, message, code):\n        self.message = message\n        self.code = code\n\ntry:\n    raise CustomError('error msg', 500)\nexcept CustomError as e:\n    print(e.code)\n```",
+    "options": ["error msg", "500", "CustomError", "AttributeError"],
+    "correctIndex": 1,
+    "explanation": "Custom exception stores code; accessing e.code returns 500.",
+    "difficulty": "Medium",
+    "tags": ["custom-exception", "exception-class", "attributes"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Error Handling",
+    "question": "What does context manager handle in this code?\n```python\nwith open('file.txt') as f:\n    1 / 0\nprint('after')\n```",
+    "options": ["Prevents the exception", "File is closed before propagating", "Exception is ignored", "Prevents printing after"],
+    "correctIndex": 1,
+    "explanation": "The context manager (__exit__) closes the file even when an exception occurs, then the exception propagates.",
+    "difficulty": "Medium-Hard",
+    "tags": ["context-manager", "exception-handling", "resource-cleanup"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Error Handling",
+    "question": "What happens with this assert statement?\n```python\nassert 5 > 10, 'assertion failed'\nprint('continued')\n```",
+    "options": ["continued", "assertion failed raised", "AssertionError raised", "5 > 10 evaluated"],
+    "correctIndex": 2,
+    "explanation": "assert checks a condition; if false, raises AssertionError with the provided message.",
+    "difficulty": "Medium",
+    "tags": ["assert", "assertions", "debugging"]
+  },
+  {
+    "skillName": "Python",
+    "subtopic": "Error Handling",
+    "question": "What does except with a tuple of exceptions match?\n```python\ntry:\n    d = {'a': 1}\n    print(d['b'])\nexcept (KeyError, ValueError):\n    print('error caught')\n```",
+    "options": ["ValueError only", "KeyError only", "Both KeyError and ValueError", "TypeError"],
+    "correctIndex": 2,
+    "explanation": "A tuple of exceptions in except matches any of them; KeyError is caught here.",
+    "difficulty": "Medium",
+    "tags": ["multiple-exceptions", "exception-tuple", "error-handling"]
+  }
+]

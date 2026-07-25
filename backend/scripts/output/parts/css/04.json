@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "CSS",
+    "subtopic": "Layout Systems",
+    "question": "What is the key difference between display: flex and display: grid for laying out child elements?\n```css\n.flex-container { display: flex; }\n.grid-container { display: grid; grid-template-columns: 1fr 1fr; }\n```",
+    "options": ["Flex is 1D, Grid is 2D layout", "Grid requires media queries, flex doesn't", "Flex wraps automatically, grid doesn't", "Grid is older, flex is newer"],
+    "correctIndex": 0,
+    "explanation": "Flexbox is a 1D layout system (axis-based); CSS Grid is a 2D system with rows and columns.",
+    "difficulty": "Medium",
+    "tags": ["flexbox", "grid", "layout-dimensions"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Layout Systems",
+    "question": "Given this absolutely positioned element, what determines its containing block?\n```css\n.parent { position: relative; }\n.child { position: absolute; top: 0; left: 0; }\n```",
+    "options": ["The viewport always", "The nearest positioned ancestor", "The static parent", "The document root"],
+    "correctIndex": 1,
+    "explanation": "An absolutely positioned element is positioned relative to its nearest ancestor with position != static; here, .parent (position: relative) is the containing block.",
+    "difficulty": "Medium",
+    "tags": ["position-absolute", "containing-block", "stacking"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Layout Systems",
+    "question": "What is the most reliable modern method to clear floats and prevent layout collapse?\n```css\n.container::after { content: ''; display: table; clear: both; }\n.float-item { float: left; }\n```",
+    "options": ["Using ::after pseudo-element", "Adding overflow: hidden to parent", "Using display: flex on parent", "Setting position: relative on parent"],
+    "correctIndex": 2,
+    "explanation": "Modern flexbox (display: flex on parent) is more reliable than float clearing; if stuck with floats, overflow: hidden or ::after work.",
+    "difficulty": "Medium-Hard",
+    "tags": ["floats", "clearfix", "modern-layouts"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Layout Systems",
+    "question": "When will a z-index declaration have no effect?\n```css\n.box { z-index: 100; }\n```",
+    "options": ["When position is static", "When element is display: none", "When no color is set", "When parent has z-index"],
+    "correctIndex": 0,
+    "explanation": "z-index only works on positioned elements (position != static); z-index: 100 is ignored if position is not set.",
+    "difficulty": "Medium",
+    "tags": ["z-index", "position", "stacking-context"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Layout Systems",
+    "question": "What CSS rule creates a new stacking context without changing position or z-index?\n```css\n.layer { position: static; opacity: 0.99; }\n```",
+    "options": ["opacity < 1 creates stacking context", "Requires position to create context", "overflow: hidden always creates context", "Will-change alone creates context"],
+    "correctIndex": 0,
+    "explanation": "opacity with a value less than 1 creates a new stacking context, isolating the element's z-index from siblings.",
+    "difficulty": "Medium-Hard",
+    "tags": ["stacking-context", "opacity", "layering"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Layout Systems",
+    "question": "How does position: relative differ from position: absolute in space consumption?\n```css\n.relative { position: relative; top: 50px; }\n.absolute { position: absolute; top: 50px; }\n```",
+    "options": ["Both remove from document flow", "Relative stays in flow, absolute doesn't", "Absolute is always below relative", "Top property works differently"],
+    "correctIndex": 1,
+    "explanation": "position: relative keeps the element in document flow (still takes up space); position: absolute removes it, and top/left position relative to containing block.",
+    "difficulty": "Medium",
+    "tags": ["position-relative", "position-absolute", "document-flow"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Layout Systems",
+    "question": "What happens to horizontal centering when this CSS is applied?\n```css\n.box {\n  position: absolute;\n  left: 0;\n  right: 0;\n  margin: 0 auto;\n}\n```",
+    "options": ["Centers horizontally", "No centering (right conflicts with auto)", "Stretches to full width", "Requires width: 100%"],
+    "correctIndex": 0,
+    "explanation": "For absolutely positioned elements, left: 0 and right: 0 with margin: 0 auto centers horizontally within the containing block.",
+    "difficulty": "Medium-Hard",
+    "tags": ["position-absolute", "centering", "margin-auto"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Layout Systems",
+    "question": "Why might position: fixed behave unexpectedly inside a transformed parent?\n```css\n.parent { transform: scale(1); }\n.fixed { position: fixed; }\n```",
+    "options": ["Fixed positioning ignores transform", "Transform creates containing block", "Fixed still positions to viewport", "Browser bug in all versions"],
+    "correctIndex": 1,
+    "explanation": "A transform on a parent creates a containing block for fixed children; they position relative to the transformed parent, not the viewport.",
+    "difficulty": "Medium-Hard",
+    "tags": ["position-fixed", "transform", "containing-block"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Layout Systems",
+    "question": "In a flexbox container, what does display: table do to children?\n```css\n.flex-parent { display: flex; }\n.table-child { display: table; }\n```",
+    "options": ["Children render as table cells", "Display table is ignored in flex", "Children behave as flex items (block)", "Creates nested table layout"],
+    "correctIndex": 2,
+    "explanation": "Children of flex containers become flex items; their display value determines internal layout, but they still flex as items in the parent.",
+    "difficulty": "Medium-Hard",
+    "tags": ["flexbox", "display-table", "flex-items"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Layout Systems",
+    "question": "When will position: sticky fail to stick to the viewport?\n```css\n.sticky { position: sticky; top: 0; }\n.container { overflow: hidden; }\n```",
+    "options": ["When top is 0", "When parent has overflow: hidden", "When positioned inside scrolling container", "When height exceeds viewport"],
+    "correctIndex": 1,
+    "explanation": "position: sticky only sticks within its scrolling ancestor; if parent has overflow: hidden and doesn't scroll, sticky has no effect.",
+    "difficulty": "Medium-Hard",
+    "tags": ["position-sticky", "overflow", "scroll-behavior"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Dependency Injection",
+    "question": "Given `class Logger {} class Service { constructor(log: Logger) {} }` — is dependency injection happening here?",
+    "options": ["No, dependencies are hard-coded", "Yes, Logger is injected as a parameter", "Yes, if Service is registered", "No, requires a container"],
+    "correctIndex": 1,
+    "explanation": "Dependency injection via constructor is when dependencies are passed in rather than instantiated internally.",
+    "difficulty": "Medium",
+    "tags": ["dependency-injection", "constructor-injection", "loose-coupling"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Dependency Injection",
+    "question": "Can TypeScript decorators (with `@Inject`) simplify dependency injection?",
+    "options": ["No, decorators are runtime-only", "Yes, if experimentalDecorators is enabled", "Yes, but require a DI container", "No, TypeScript forbids it"],
+    "correctIndex": 2,
+    "explanation": "Decorators like @Inject work with a DI container (e.g., InversifyJS) to wire dependencies at runtime using metadata.",
+    "difficulty": "Medium-Hard",
+    "tags": ["decorators", "dependency-injection", "DI-containers"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Dependency Injection",
+    "question": "Given `interface Logger { log(msg: string): void; }` — can you inject any object implementing Logger?",
+    "options": ["No, objects must be exact matches", "Yes, structural typing allows any implementation", "Yes, if class extends Logger", "No, without explicit registration"],
+    "correctIndex": 1,
+    "explanation": "TypeScript's structural typing means any object with a log method is assignable to Logger, enabling flexible injection.",
+    "difficulty": "Medium",
+    "tags": ["interface-injection", "structural-typing", "loose-coupling"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Dependency Injection",
+    "question": "Can you use factory functions to inject dependencies?",
+    "options": ["No, injection requires class constructors", "Yes, factories can create and provide instances", "Yes, but less type-safe", "No, factories bypass DI"],
+    "correctIndex": 1,
+    "explanation": "Factory functions are a common DI pattern; a container can call factories to lazily create or customize instances.",
+    "difficulty": "Medium",
+    "tags": ["factory-pattern", "dependency-injection", "lazy-loading"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Dependency Injection",
+    "question": "Does `const service = new Service(logger)` constitute dependency injection?",
+    "options": ["No, manual instantiation is not injection", "Yes, dependencies are injected by caller", "Yes, if logger is a singleton", "No, requires a container"],
+    "correctIndex": 1,
+    "explanation": "Manual dependency passing (dependency inversion) is a form of DI; the caller controls and injects dependencies.",
+    "difficulty": "Medium",
+    "tags": ["manual-injection", "dependency-inversion", "loose-coupling"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Dependency Injection",
+    "question": "Can TypeScript's type system help with DI container type-safety?",
+    "options": ["No, containers are untyped", "Yes, generic containers can track registered types", "Yes, if using strict any", "No, runtime instantiation loses types"],
+    "correctIndex": 1,
+    "explanation": "Generic DI containers (e.g., with `register<T>` and `get<T>`) can maintain type safety across dependency resolution.",
+    "difficulty": "Medium-Hard",
+    "tags": ["generic-containers", "type-safety", "DI-patterns"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Dependency Injection",
+    "question": "Does using `private` constructors enforce DI by preventing direct instantiation?",
+    "options": ["Yes, private constructors block new", "No, private only affects compile-time", "Yes, but instanceof still works", "No, private does not prevent instantiation"],
+    "correctIndex": 0,
+    "explanation": "Private constructors prevent direct instantiation; callers must use a factory or static method, enforcing DI patterns.",
+    "difficulty": "Medium",
+    "tags": ["private-constructors", "factory-pattern", "enforcing-DI"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Dependency Injection",
+    "question": "Can InversifyJS or similar frameworks leverage TypeScript's reflection capabilities?",
+    "options": ["No, frameworks are unaware of types", "Yes, with reflect-metadata decorators", "Yes, but only at compile time", "No, reflection is not available"],
+    "correctIndex": 1,
+    "explanation": "DI frameworks use reflect-metadata to store type information from decorators, enabling automatic type-based resolution.",
+    "difficulty": "Medium-Hard",
+    "tags": ["reflect-metadata", "decorators", "DI-frameworks"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Dependency Injection",
+    "question": "Given `class A { constructor(b: B) {} }` with `@injectable` — does TypeScript auto-resolve B?",
+    "options": ["No, TypeScript does not resolve", "Yes, if a DI container is running", "Yes, but only with manual registration", "No, requires explicit binding"],
+    "correctIndex": 1,
+    "explanation": "Decorators and containers work together; the container must be configured to resolve B when A is instantiated.",
+    "difficulty": "Medium",
+    "tags": ["decorators", "DI-containers", "auto-resolution"]
+  },
+  {
+    "skillName": "TypeScript",
+    "subtopic": "Dependency Injection",
+    "question": "Can you inject a dependency based on its type without a DI container?",
+    "options": ["No, you need a container", "Yes, with generic factory functions", "Yes, via manual instantiation", "No, types are erased at runtime"],
+    "correctIndex": 1,
+    "explanation": "Without a container, you can use factory functions with type-safe signatures to select and create dependencies manually.",
+    "difficulty": "Medium-Hard",
+    "tags": ["factory-functions", "manual-DI", "type-safety"]
+  }
+]

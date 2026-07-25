@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Architecture Patterns",
+    "question": "In BEM naming, how do you represent a button in different states?\n```css\n.btn { }\n.btn__icon { }\n.btn--active { }\n.btn__icon--small { }\n```",
+    "options": ["Block-Element-Modifier naming prevents cascade", "Double underscore = element, double dash = modifier", "Naming alone doesn't prevent specificity issues", "Both 1 and 2"],
+    "correctIndex": 3,
+    "explanation": "BEM uses double underscore (__) for sub-elements and double dash (--) for modifiers; creates flat specificity and prevents cascade.",
+    "difficulty": "Medium",
+    "tags": ["bem-naming", "methodology", "scoping"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Architecture Patterns",
+    "question": "Why does OOCSS (Object-Oriented CSS) advocate reusable components?\n```css\n/* OOCSS: separate structure from skin */\n.box { width: 200px; padding: 10px; } /* structure */\n.box--highlight { background: yellow; } /* skin */\n```",
+    "options": ["Reduces CSS file size", "Enables reuse across components", "Forces BEM naming", "No architectural benefit"],
+    "correctIndex": 1,
+    "explanation": "OOCSS separates layout/structure from presentation; reusable objects reduce code duplication.",
+    "difficulty": "Medium",
+    "tags": ["oocss", "object-oriented", "reusability"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Architecture Patterns",
+    "question": "In SMACSS, what are the 5 categories of CSS?\n```css\n/* Base: element defaults */\nbody { margin: 0; }\n/* Layout: structure */\n.header { } /* Module: reusable components */\n.btn { }\n/* State: temporary changes */\n.is-active { }\n/* Theme: visual variations */\n.btn--dark { }\n```",
+    "options": ["3 categories", "Base, Layout, Module, State, Theme", "Arbitrary", "Depends on project"],
+    "correctIndex": 1,
+    "explanation": "SMACSS organizes CSS into 5 categories: Base, Layout, Module, State (is-), Theme; aids maintainability.",
+    "difficulty": "Medium-Hard",
+    "tags": ["smacss", "methodology", "organization"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Architecture Patterns",
+    "question": "How should utility classes and component classes coexist without conflicts?\n```html\n<!-- Tailwind utility + component -->\\n<button class=\"btn bg-blue-500 hover:bg-blue-600\">Button</button>\n```",
+    "options": ["Never mix utilities and components", "Use component as base, utilities as overrides", "Utilities override components due to specificity", "Both 2 and 3"],
+    "correctIndex": 2,
+    "explanation": "Utilities typically have lower specificity; they can override components or extend them, depending on CSS order.",
+    "difficulty": "Medium-Hard",
+    "tags": ["utility-classes", "component-architecture"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Architecture Patterns",
+    "question": "How do CSS naming conventions prevent style pollution across components?\n```css\n.component-name { } /* BEM: .component-name__element--modifier */\n.c-name { } /* abbreviation */\n._component { } /* underscore prefix */\n```",
+    "options": ["Naming alone prevents pollution", "Scoped CSS (CSS Modules) prevents collision", "Namespace conventions reduce accidental overrides", "2 and 3"],
+    "correctIndex": 3,
+    "explanation": "Naming conventions (BEM, prefixes) reduce accidental overrides; scoped CSS (Modules, Shadow DOM) prevents them entirely.",
+    "difficulty": "Medium-Hard",
+    "tags": ["naming-conventions", "style-isolation"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Architecture Patterns",
+    "question": "How should state changes (active, disabled, loading) be handled scalably?\n```css\n.btn.is-disabled { opacity: 0.5; }\n.btn.is-loading { pointer-events: none; }\n.btn.is-active { background: blue; }\n```",
+    "options": ["Create separate classes for each state", "Use is- or has- prefix convention", "State classes mixed with component rules", "Both 1 and 2"],
+    "correctIndex": 3,
+    "explanation": "Use is-/has- prefixes for state classes; separate from component definition for clarity and scalability.",
+    "difficulty": "Medium",
+    "tags": ["state-management", "naming-conventions"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Architecture Patterns",
+    "question": "How does CSS Grid vs Flexbox choice affect architecture decisions?\n```css\n/* Flexbox: 1D, linear layout */\n.flex-container { display: flex; }\n\n/* Grid: 2D, complex layouts */\n.grid-container { display: grid; grid-template-columns: repeat(3, 1fr); }\n```",
+    "options": ["No architectural difference", "Grid enables 2D components; flexbox for 1D", "Architecture independent of layout tool", "Choice forces component refactoring"],
+    "correctIndex": 1,
+    "explanation": "Grid enables component-level 2D layouts; flexbox for simple linear layouts; choice affects component design.",
+    "difficulty": "Medium-Hard",
+    "tags": ["layout-architecture", "grid-vs-flexbox"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Architecture Patterns",
+    "question": "When should you create a new component class vs extending an existing one?\n```css\n/* Extend existing */\n.btn { }\n.btn--secondary { }\n\n/* New component */\n.link-button { }\n```",
+    "options": ["Always extend existing classes", "Create new if behavior/purpose differs", "Extend if 20%+ of styles shared", "Component count doesn't matter"],
+    "correctIndex": 1,
+    "explanation": "Extend if element serves the same purpose (buttons with variants); create new if purpose differs (link that looks like button).",
+    "difficulty": "Medium-Hard",
+    "tags": ["component-design", "reuse-strategy"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Architecture Patterns",
+    "question": "How should CSS file organization scale with project size?\n```\nsmall: single style.css\nmedium: components/, layout/, utilities/\nlarge: component-based (each component owns its CSS)\n```",
+    "options": ["Single file always", "Separate by type (layout, components)", "Separate by feature or component", "All work equally"],
+    "correctIndex": 2,
+    "explanation": "Large projects benefit from component-based CSS organization; small projects can use single file or type-based structure.",
+    "difficulty": "Medium-Hard",
+    "tags": ["file-organization", "scalability", "project-structure"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Architecture Patterns",
+    "question": "How does cascading conflict resolution scale with codebase size, and what strategies prevent it?\n```css\n/* Problem: deep cascade hard to override */\n.header .nav .item { } /* 0,0,3,1 */\n\n/* Solution: flatter selectors */\n.nav-item { } /* 0,0,1,0 */\n```",
+    "options": ["Cascade always works", "Specificity creep causes override wars; keep selectors shallow", "Deep nesting necessary", "Framework handles conflicts"],
+    "correctIndex": 1,
+    "explanation": "Deep cascades create specificity conflicts; keep selectors flat and use methodology (BEM, OOCSS) to prevent creep.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cascade-management", "specificity-control", "scalability"]
+  }
+]

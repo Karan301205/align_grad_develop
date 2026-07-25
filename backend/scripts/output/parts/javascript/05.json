@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "JSON Parsing",
+    "question": "What is logged?\n```javascript\nconst obj = { a: 1, b: 2 };\nconst json = JSON.stringify(obj);\nconst parsed = JSON.parse(json);\nconsole.log(obj === parsed);\n```",
+    "options": [
+      "true because JSON.parse returns original object",
+      "false because JSON.parse creates new object",
+      "undefined due to parse failure",
+      "null because parsed object is empty"
+    ],
+    "correctIndex": 1,
+    "explanation": "JSON.parse creates a new object with the same data; it is not the same reference.",
+    "difficulty": "Medium",
+    "tags": ["JSON.parse", "JSON.stringify", "object-comparison"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "JSON Parsing",
+    "question": "What is the output?\n```javascript\nconst obj = { a: 1, b: undefined, c: 3 };\nconst json = JSON.stringify(obj);\nconsole.log(json);\n```",
+    "options": [
+      "{\"a\":1,\"b\":undefined,\"c\":3} with undefined included",
+      "{\"a\":1,\"c\":3} because undefined is not JSON serializable",
+      "null because object contains non-serializable value",
+      "ReferenceError due to stringify failure"
+    ],
+    "correctIndex": 1,
+    "explanation": "JSON.stringify omits undefined values and properties with undefined values entirely.",
+    "difficulty": "Medium",
+    "tags": ["JSON.stringify", "undefined", "serialization"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "JSON Parsing",
+    "question": "What is logged?\n```javascript\nconst json = '{\"a\":1}';\nconst obj = JSON.parse(json);\nconsole.log(obj.a);\n```",
+    "options": [
+      "1 because JSON.parse converts string to object",
+      "undefined due to parse failure",
+      "\"a\":1 due to literal string return",
+      "null because JSON format is invalid"
+    ],
+    "correctIndex": 0,
+    "explanation": "JSON.parse converts valid JSON string to JavaScript object; property access works normally.",
+    "difficulty": "Medium",
+    "tags": ["JSON.parse", "string-parsing", "type-conversion"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "JSON Parsing",
+    "question": "What is the output?\n```javascript\nconst obj = { a: 1, b: function() {} };\nconst json = JSON.stringify(obj);\nconst parsed = JSON.parse(json);\nconsole.log(parsed.b);\n```",
+    "options": [
+      "undefined because functions cannot be serialized",
+      "function() {} because stringify preserves functions",
+      "null due to serialization failure",
+      "ReferenceError because b is missing"
+    ],
+    "correctIndex": 0,
+    "explanation": "JSON.stringify ignores function properties; they are omitted from the string.",
+    "difficulty": "Medium-Hard",
+    "tags": ["JSON.stringify", "functions", "serialization-limits"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "JSON Parsing",
+    "question": "What is logged?\n```javascript\nconst json = '{\"a\":1,}';\ntry {\n  JSON.parse(json);\n  console.log('valid');\n} catch (e) {\n  console.log('invalid');\n}\n```",
+    "options": [
+      "valid because trailing commas are allowed",
+      "invalid because trailing commas violate JSON spec",
+      "undefined due to incomplete error handling",
+      "null because parse skips invalid syntax"
+    ],
+    "correctIndex": 1,
+    "explanation": "JSON does not allow trailing commas; the parse will throw a SyntaxError.",
+    "difficulty": "Medium",
+    "tags": ["JSON-spec", "trailing-commas", "error-handling"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "JSON Parsing",
+    "question": "What is the output?\n```javascript\nconst obj = { a: 1, b: 2, c: 3 };\nconst json = JSON.stringify(obj, ['a', 'c']);\nconsole.log(json);\n```",
+    "options": [
+      "{\"a\":1,\"b\":2,\"c\":3} with all properties included",
+      "{\"a\":1,\"c\":3} because replacer array filters properties",
+      "undefined due to invalid replacer parameter",
+      "null because replacer syntax is incorrect"
+    ],
+    "correctIndex": 1,
+    "explanation": "The replacer array parameter acts as a whitelist; only listed properties are serialized.",
+    "difficulty": "Medium-Hard",
+    "tags": ["JSON.stringify-replacer", "filtering", "selective-serialization"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "JSON Parsing",
+    "question": "What is logged?\n```javascript\nconst json = '[1,2,3]';\nconst arr = JSON.parse(json);\nconsole.log(Array.isArray(arr));\n```",
+    "options": [
+      "false because JSON arrays become objects",
+      "true because JSON.parse returns actual array",
+      "undefined due to isArray method missing",
+      "null because parse fails on arrays"
+    ],
+    "correctIndex": 1,
+    "explanation": "JSON.parse correctly deserializes arrays as JavaScript array instances.",
+    "difficulty": "Medium",
+    "tags": ["JSON.parse", "arrays", "type-preservation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "JSON Parsing",
+    "question": "What is the output?\n```javascript\nconst obj = { a: 1 };\nconst json = JSON.stringify(obj, (key, value) => {\n  if (typeof value === 'number') return value * 2;\n  return value;\n});\nconsole.log(json);\n```",
+    "options": [
+      "{\"a\":1} because replacer function does not work",
+      "{\"a\":2} because replacer multiplies numeric values",
+      "undefined due to invalid replacer syntax",
+      "null because function replacer is not allowed"
+    ],
+    "correctIndex": 1,
+    "explanation": "The replacer function transforms values during serialization; the number 1 becomes 2.",
+    "difficulty": "Medium-Hard",
+    "tags": ["JSON.stringify-replacer", "transformation", "value-mapping"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "JSON Parsing",
+    "question": "What is logged?\n```javascript\nconst json = '{\"a\":\"2024-01-01T00:00:00Z\"}';\nconst obj = JSON.parse(json, (key, value) => {\n  if (typeof value === 'string' && /\\d{4}-\\d{2}-\\d{2}/.test(value)) {\n    return new Date(value);\n  }\n  return value;\n});\nconsole.log(obj.a instanceof Date);\n```",
+    "options": [
+      "false because Date objects cannot be restored",
+      "true because reviver function converts to Date",
+      "undefined due to reviver syntax error",
+      "null because Date conversion fails"
+    ],
+    "correctIndex": 1,
+    "explanation": "The reviver function parameter in JSON.parse transforms deserialized values during reconstruction.",
+    "difficulty": "Medium-Hard",
+    "tags": ["JSON.parse-reviver", "Date-parsing", "transformation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "JSON Parsing",
+    "question": "What is the output?\n```javascript\nconst obj = { a: Infinity, b: NaN };\nconst json = JSON.stringify(obj);\nconsole.log(json);\n```",
+    "options": [
+      "{\"a\":Infinity,\"b\":NaN} preserving special values",
+      "{\"a\":null,\"b\":null} because special numbers convert to null",
+      "undefined due to stringify failure",
+      "null because object contains non-serializable values"
+    ],
+    "correctIndex": 1,
+    "explanation": "JSON.stringify converts Infinity and NaN to null since they are not valid JSON values.",
+    "difficulty": "Medium-Hard",
+    "tags": ["JSON.stringify", "special-numbers", "null-conversion"]
+  }
+]

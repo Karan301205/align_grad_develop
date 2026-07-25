@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML Syntax",
+    "question": "A browser parser encounters `<br clear=\"left\">`. Why does this fail to clear in modern HTML?",
+    "options": ["the clear attribute is deprecated and deprecated attributes are ignored", "br is a void element and cannot accept non-boolean attributes", "html5 deprecated clear in favor of css floats", "the value left is invalid for non-block elements"],
+    "correctIndex": 2,
+    "explanation": "HTML5 removed the clear attribute as a presentation concern; clearing floats is now purely a CSS responsibility.",
+    "difficulty": "Medium-Hard",
+    "tags": ["deprecated", "br-element", "rendering"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML Syntax",
+    "question": "A form field is defined as `<input name='password' disabled>`. Which statement is true about form submission?",
+    "options": ["the field is submitted with an empty string value", "the field is omitted from submission entirely", "the field is submitted with the name attribute only", "submission is prevented by the disabled attribute"],
+    "correctIndex": 1,
+    "explanation": "Disabled form controls are excluded from form submission regardless of whether they have a value.",
+    "difficulty": "Medium",
+    "tags": ["form-submission", "disabled-attribute"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML Syntax",
+    "question": "Given `<meta charset=\"UTF-8\">` placed after `<title>`, a page displays mojibake (garbled characters). What is the root cause?",
+    "options": ["utf-8 encoding is incompatible with the title element", "charset meta must appear before any content including title", "the server sent an incorrect content-type header", "the browser has cached incorrect encoding detection"],
+    "correctIndex": 1,
+    "explanation": "The charset meta tag must appear in the first 1024 bytes of the document head before any content to ensure the parser uses correct encoding from the start.",
+    "difficulty": "Medium-Hard",
+    "tags": ["charset", "meta-tag", "encoding"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML Syntax",
+    "question": "Why does `<input type='email' value='test@example.com' readonly>` differ from `<input type='email' value='test@example.com' disabled>`?",
+    "options": ["readonly still allows javascript to modify the value, disabled does not", "readonly is submitted in forms, disabled is excluded", "readonly allows keyboard focus, disabled does not", "readonly appears as editable to screen readers, disabled does not"],
+    "correctIndex": 1,
+    "explanation": "Readonly fields are included in form submission (readonly data is sent), but disabled fields are completely excluded.",
+    "difficulty": "Medium",
+    "tags": ["form-submission", "readonly", "disabled"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML Syntax",
+    "question": "A single page has `<h1>Product</h1>` twice and uses entity-encoded `&lt;h2&gt;Subtitle&lt;/h2&gt;` for display. Which breaks accessibility?",
+    "options": ["entity-encoded tags are parsed as text and assistive tech sees them", "two h1 elements confuse screen readers into skipping the second one", "entities are always parsed visually so markup intent is lost", "headings encoded as entities bypass outline algorithms"],
+    "correctIndex": 3,
+    "explanation": "Entity-encoded HTML markup (`&lt;h1&gt;`) is rendered as literal text, not parsed as an element, so it is invisible to accessibility tree algorithms and SEO parsers.",
+    "difficulty": "Hard",
+    "tags": ["entity-encoding", "accessibility", "semantic-structure"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML Syntax",
+    "question": "An SVG is embedded as `<svg><defs><style>circle{fill:red}</style></defs><circle cx='50' cy='50' r='40'/></svg>`. The circle appears green, not red. Why?",
+    "options": ["svg does not support inline styles inside defs", "the circle element is defined before the style rule applies", "external css is overriding the embedded style", "svgs require xlink namespace for style application"],
+    "correctIndex": 2,
+    "explanation": "External CSS rules (from the page's stylesheets) have higher specificity than styles defined inside SVG `<defs>`, so page-level styles override embedded SVG styles.",
+    "difficulty": "Hard",
+    "tags": ["svg", "css-specificity", "embedded-content"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML Syntax",
+    "question": "Which void element must NOT have a closing tag in HTML5?",
+    "options": ["img", "br", "hr", "all of the above are valid void elements"],
+    "correctIndex": 3,
+    "explanation": "All three (img, br, hr) are void elements in HTML5; they never have closing tags and never wrap content.",
+    "difficulty": "Medium",
+    "tags": ["void-elements", "element-syntax"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML Syntax",
+    "question": "A developer writes `<div data-count='5'>` and later reads `element.getAttribute('data-count')` returning `'5'`, but `element.dataset.count` returns `5`. Which statement is true?",
+    "options": ["getattribute returns a number, dataset returns a string", "dataset auto-converts numeric strings to numbers", "getattribute reads the raw html, dataset applies type coercion", "this is browser-dependent and will fail in some environments"],
+    "correctIndex": 2,
+    "explanation": "getAttribute() returns the raw HTML string value; the dataset API parses data-* attributes and may coerce types, but both ultimately return strings in conformant implementations.",
+    "difficulty": "Medium-Hard",
+    "tags": ["data-attributes", "dom-api"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML Syntax",
+    "question": "An HTML5 document has `<!DOCTYPE html>` but the page serves as `application/xhtml+xml`. Which parsing mode activates?",
+    "options": ["html5 mode because doctype always determines parsing", "xhtml strict mode because content-type overrides doctype", "html5 mode unless the content-type is explicitly set", "parser defaults to quirks mode due to conflicting signals"],
+    "correctIndex": 1,
+    "explanation": "When the Content-Type header explicitly specifies `application/xhtml+xml`, the browser uses XML parsing mode regardless of the HTML5 DOCTYPE, requiring valid XML structure.",
+    "difficulty": "Hard",
+    "tags": ["doctype", "parsing-modes", "content-type"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "HTML Syntax",
+    "question": "Why might `<a href='#section' id='section'>` create a navigation loop issue on some browsers?",
+    "options": ["the id matches the href, causing infinite history entries when clicked", "anchor ids must be unique, and href references create duplicate ids", "browsers treat self-referential anchors as page reloads", "focus management directs to the element, then immediately back to the link"],
+    "correctIndex": 0,
+    "explanation": "Clicking an anchor that links to itself can cause browsers to add redundant history entries or create navigation loops in some implementations.",
+    "difficulty": "Medium-Hard",
+    "tags": ["anchor-navigation", "history-api"]
+  }
+]

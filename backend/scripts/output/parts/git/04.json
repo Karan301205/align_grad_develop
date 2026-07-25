@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Branch Management",
+    "question": "You have a feature branch that was created from main three weeks ago. You want to update it with the latest changes from main, but you need to preserve the feature branch's commit sequence without interleaving main commits. Which approach is correct?",
+    "options": [
+      "Use git rebase main to replay feature commits on top of the updated main",
+      "Use git merge main --squash to combine all changes into a single commit",
+      "Use git pull origin main to fetch and merge in one step",
+      "Use git fetch origin && git reset --hard origin/main to match remote exactly"
+    ],
+    "correctIndex": 0,
+    "explanation": "Rebase replays the feature branch's commits one by one on top of main's tip, creating a linear history; merge would create a merge commit interleaving the histories.",
+    "difficulty": "Medium",
+    "tags": ["rebase", "feature-branch", "linear-history"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Branch Management",
+    "question": "You accidentally committed changes to the production branch instead of a feature branch. The commit has not been pushed yet. You want to move the commit to a new branch and reset production to its previous state. What is the safest sequence?",
+    "options": [
+      "Create a new branch from the current HEAD, then reset production to HEAD~1 using git reset --hard",
+      "Use git revert to undo the commit on production",
+      "Delete the production branch and recreate it from origin",
+      "Rebase production onto origin/production to remove the commit"
+    ],
+    "correctIndex": 0,
+    "explanation": "Create a new branch at the commit to preserve it, then reset production; the commit is now safely on the feature branch and production is restored.",
+    "difficulty": "Medium",
+    "tags": ["branch-safety", "reset", "commit-recovery"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Branch Management",
+    "question": "Your repository has a branch naming convention: feature/*, bugfix/*, and hotfix/*. You want to prevent developers from pushing directly to main and require a pull request. Which Git configuration or server-side mechanism enforces this?",
+    "options": [
+      "Configure branch protection rules on GitHub/GitLab to require pull request reviews and block direct pushes to main",
+      "Set core.protectBranches to true in .gitconfig",
+      "Create a pre-push hook that blocks commits to main",
+      "Configure push.default to upstream to enforce upstream tracking"
+    ],
+    "correctIndex": 0,
+    "explanation": "Branch protection is a server-side feature provided by GitHub, GitLab, or similar platforms; it prevents pushes regardless of local configuration.",
+    "difficulty": "Medium",
+    "tags": ["branch-protection", "server-rules", "pull-request"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Branch Management",
+    "question": "You have a branch that was based on main, but you realize it should have been based on a different branch (develop). The branch has ten commits. How do you rebase it onto develop without losing work?",
+    "options": [
+      "Use git rebase --onto develop main to replay commits from main..HEAD onto develop",
+      "Delete the branch and recreate it from develop",
+      "Use git merge develop to merge develop into the feature branch",
+      "Manually cherry-pick each commit onto develop"
+    ],
+    "correctIndex": 0,
+    "explanation": "rebase --onto <newbase> <oldbase> replays commits from oldbase..HEAD onto newbase; this correctly transfers all ten commits to the new base.",
+    "difficulty": "Medium-Hard",
+    "tags": ["rebase-onto", "branch-rebase", "history-rewriting"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Branch Management",
+    "question": "You want to delete a local branch, but Git refuses with the error 'branch not fully merged into HEAD'. Your feature is complete and you are sure you want to delete it. What is the safest verification before using force-delete?",
+    "options": [
+      "Run git log main..branch-name to check if there are any unique commits; if empty, it is safe to force-delete with -D",
+      "Use git branch -d to confirm the deletion",
+      "Check the branch's remote tracking status with git branch -vv",
+      "Run git merge --ff-only to ensure the branch is fully merged"
+    ],
+    "correctIndex": 0,
+    "explanation": "git log main..branch-name shows commits unique to the branch; if empty, all work is already in main and force-delete (-D) is safe.",
+    "difficulty": "Medium",
+    "tags": ["branch-deletion", "verification", "unmerged-commits"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Branch Management",
+    "question": "You have a feature branch with many small commits (work-in-progress). Before merging to main, you want to clean up the history into logical commits. Which operation accomplishes this without losing any work?",
+    "options": [
+      "Use git rebase -i to interactively squash, reorder, and edit commits before merge",
+      "Use git merge --squash to combine everything into one commit",
+      "Use git reset --soft HEAD~N to stage all changes and commit once",
+      "Cherry-pick individual commits onto a new branch"
+    ],
+    "correctIndex": 0,
+    "explanation": "Interactive rebase (-i) allows fine-grained control over commits (squash, reorder, reword); merge --squash loses the commit sequence and must be redone after merge.",
+    "difficulty": "Medium-Hard",
+    "tags": ["interactive-rebase", "squash", "commit-cleanup"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Branch Management",
+    "question": "You push a feature branch to remote and a colleague starts working on it. Later, you realize the commits have mistakes and you want to force-push the corrected history. What must you communicate to your colleague to avoid losing their work?",
+    "options": [
+      "Tell them to save their work locally, then pull and merge the corrected history after the force-push",
+      "Force-push immediately; Git will detect and reject conflicting work automatically",
+      "Ask them to delete their local copy and re-clone",
+      "Revert commits instead of rewriting history to preserve their branch state"
+    ],
+    "correctIndex": 0,
+    "explanation": "Force-push rewrites remote history; collaborators must save local work, reset to the new remote, and re-apply their changes or merge them in.",
+    "difficulty": "Medium",
+    "tags": ["force-push", "collaboration", "history-rewriting"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Branch Management",
+    "question": "Your repository has both main and develop branches. A feature branch created from develop needs a critical fix from main. You want to avoid merging all of main into develop. What approach is most precise?",
+    "options": [
+      "Use git cherry-pick to apply the specific critical commit(s) from main onto develop and the feature branch",
+      "Merge all of main into develop",
+      "Rebase develop onto main",
+      "Create a new branch from main for the feature"
+    ],
+    "correctIndex": 0,
+    "explanation": "cherry-pick selects individual commits; this avoids pulling in unrelated changes and keeps the develop branch's intended scope.",
+    "difficulty": "Medium",
+    "tags": ["cherry-pick", "selective-merge", "feature-branch"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Branch Management",
+    "question": "You track a remote branch with git branch --set-upstream, but the remote branch is deleted. Your local branch becomes stale. How do you update your local tracking references to reflect the deleted remote branch?",
+    "options": [
+      "Run git fetch --prune to remove stale remote tracking branches",
+      "Manually delete the remote tracking branch with git branch -dr origin/branch-name",
+      "Run git branch --unset-upstream to remove the tracking reference",
+      "Pull from the remote to refresh the tracking references"
+    ],
+    "correctIndex": 0,
+    "explanation": "git fetch --prune automatically deletes local remote-tracking branches (refs/remotes/origin/*) if they no longer exist on the remote.",
+    "difficulty": "Medium",
+    "tags": ["remote-tracking", "prune", "stale-branches"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Branch Management",
+    "question": "You have a branch with a detached HEAD after rebasing. You want to reconnect the detached HEAD to a branch reference. What is the correct command?",
+    "options": [
+      "Use git branch branch-name or git checkout -b branch-name to create a branch reference at the current HEAD",
+      "Use git merge to combine the detached HEAD with an existing branch",
+      "Run git attach-head to reattach the detached HEAD",
+      "Use git reset --hard to reset to the branch state"
+    ],
+    "correctIndex": 0,
+    "explanation": "git branch branch-name creates a new branch reference pointing to the current detached HEAD; git checkout -b does the same and switches to it immediately.",
+    "difficulty": "Medium",
+    "tags": ["detached-head", "branch-reference", "recovery"]
+  }
+]

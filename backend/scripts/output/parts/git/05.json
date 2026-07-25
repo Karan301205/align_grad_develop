@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Commit History",
+    "question": "You run git log and see a commit that breaks the build, but git bisect repeatedly identifies an earlier commit as the culprit. The issue is intermittent and depends on file system state. What does this suggest about the commits?",
+    "options": [
+      "The culprit commit introduced a non-deterministic bug that is masked by ordering or timing; the later commit may expose it, but the root cause is earlier",
+      "git bisect is faulty and cannot be trusted",
+      "The build system is broken and needs reconfiguration",
+      "The commits are corrupted and should be reset"
+    ],
+    "correctIndex": 0,
+    "explanation": "Bisect finds the first commit where a test fails; if failures are non-deterministic (race conditions, file system state), the identified commit may expose a latent bug from earlier.",
+    "difficulty": "Hard",
+    "tags": ["bisect", "debugging", "intermittent-failures"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Commit History",
+    "question": "You want to find all commits that modified a specific file but were later reverted or deleted. Running git log on the file shows only current commits. How do you discover deleted commits?",
+    "options": [
+      "Use git log --diff-filter=D to find deletion commits, or git log -S<string> to find commits that changed specific code",
+      "Run git reflog to view all branch movements",
+      "Use git log --all to include unreachable commits",
+      "Check the backup branch from before the deletion"
+    ],
+    "correctIndex": 0,
+    "explanation": "git log --diff-filter=D finds commits that deleted files; git log -S searches for commits that introduced/removed specific code strings.",
+    "difficulty": "Medium-Hard",
+    "tags": ["log-filtering", "deleted-commits", "code-search"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Commit History",
+    "question": "You want to extract all commits that touch a specific directory and apply them to another repository. Using git format-patch and git am, you generate patches, but one patch fails to apply. The failure is in the middle of the series. What is your strategy?",
+    "options": [
+      "Use git am --continue after fixing the conflict, or use git am --abort to skip the problematic patch and resume",
+      "Regenerate all patches and start over",
+      "Manually merge the problematic commit",
+      "Use git apply with force flag to bypass conflict checks"
+    ],
+    "correctIndex": 0,
+    "explanation": "git am --continue resumes after you resolve conflicts in the working directory; git am --abort cancels the current patch and skips to the next.",
+    "difficulty": "Medium-Hard",
+    "tags": ["format-patch", "git-am", "patch-application"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Commit History",
+    "question": "You use git reflog to see that HEAD was at commit X three commits ago, but that commit is not in git log. What does this indicate about commit X?",
+    "options": [
+      "Commit X is not reachable from the current branch (orphaned or on a deleted branch), but still exists in the object database and can be recovered",
+      "Commit X was corrupted and deleted",
+      "Commit X is on a different remote branch",
+      "Commit X never existed and reflog is showing a false entry"
+    ],
+    "correctIndex": 0,
+    "explanation": "Reflog shows all HEAD movements regardless of reachability; unreachable commits persist until garbage collection and can be recovered via reflog.",
+    "difficulty": "Medium-Hard",
+    "tags": ["reflog", "orphaned-commits", "recovery"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Commit History",
+    "question": "You need to find the first commit that introduced a bug in a specific function. Running git log -S to search for the function name returns hundreds of commits across many branches. How do you narrow the search to just the commits where the function was added (not modified)?",
+    "options": [
+      "Use git log -S<function> --diff-filter=A to find only the commit that Added the function",
+      "Run git log --all to search all branches",
+      "Use git log -p to view full diffs of each commit",
+      "Filter manually by reviewing each commit's changes"
+    ],
+    "correctIndex": 0,
+    "explanation": "--diff-filter=A returns only commits that added files or hunks; combined with -S, this finds the exact commit where code was introduced.",
+    "difficulty": "Medium",
+    "tags": ["log-filtering", "diff-filter", "code-origin"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Commit History",
+    "question": "You run git log --oneline and notice that a commit message is truncated to one line, but the commit has a multi-line message with a long body. You want to view the full message without seeing the diff. Which command shows the full commit message?",
+    "options": [
+      "Use git log --format=fuller or git show <commit> to display the complete message with headers",
+      "Use git log -p to include the patch",
+      "Increase the terminal width to show more text",
+      "Use git log --all to load more message content"
+    ],
+    "correctIndex": 0,
+    "explanation": "git log --format=fuller displays full author/commit metadata and full messages; git show commits full details without diff (unless -p is added).",
+    "difficulty": "Medium",
+    "tags": ["log-format", "commit-messages", "metadata"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Commit History",
+    "question": "Your repository has a very long history (100k commits) and git log runs slowly. You want to speed it up while still viewing recent commits. Which optimization should you apply?",
+    "options": [
+      "Use git log --oneline -n 100 to limit results, or git log --simplify-by-decoration to show only tagged commits",
+      "Run git gc --aggressive to repack objects",
+      "Delete old commits using git filter-branch",
+      "Clone the repository with --depth to create a shallow copy"
+    ],
+    "correctIndex": 0,
+    "explanation": "Limiting output (-n) or filtering (--simplify-by-decoration) reduces work without modifying history; gc optimizes storage but doesn't speed up this query.",
+    "difficulty": "Medium",
+    "tags": ["performance", "large-repo", "git-log"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Commit History",
+    "question": "You want to see all commits across all branches and tags, including unreachable commits from the past three days. Which git log options or reflog strategy gives you this view?",
+    "options": [
+      "Use git log --all --reflog --since='3 days ago' to show all reachable commits plus recent reflog entries",
+      "Use git log --oneline to see the current branch",
+      "Run git fsck --lost-found to find dangling objects",
+      "Use git remote -v to list all remote commits"
+    ],
+    "correctIndex": 0,
+    "explanation": "--all includes all branches and tags; --reflog adds recent HEAD movements; --since filters by timestamp to focus on the three-day window.",
+    "difficulty": "Medium-Hard",
+    "tags": ["log-options", "reflog", "reachability"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Commit History",
+    "question": "You use git blame to find who made a change, and it shows a commit from a different developer than expected. The change was supposed to come from a rebase or merge. How do you determine if this is a rebase/merge artifact or an actual change by that developer?",
+    "options": [
+      "Use git log -p <commit> to review the full commit message and context; check if the commit message indicates a rebase or merge operation",
+      "Ask the developer directly",
+      "Use git show to view the commit's author",
+      "Run git log --oneline to see the commit sequence"
+    ],
+    "correctIndex": 0,
+    "explanation": "Rebase and merge operations create new commits with the current author; reviewing the commit message and surrounding context reveals whether the change was rebased/merged.",
+    "difficulty": "Medium-Hard",
+    "tags": ["blame", "authorship", "rebase-artifacts"]
+  },
+  {
+    "skillName": "Git and Github",
+    "subtopic": "Commit History",
+    "question": "After running git rebase -i to squash multiple commits, you realize you made a mistake in the interactive editor and exited without saving. The rebase is in progress but not yet applied. What is your recovery option?",
+    "options": [
+      "Use git rebase --abort to cancel the rebase and restore the branch to its pre-rebase state",
+      "Run git rebase --continue to force the rebase to complete",
+      "Use git reset --hard to discard changes",
+      "Delete and recreate the branch"
+    ],
+    "correctIndex": 0,
+    "explanation": "git rebase --abort cancels the operation and restores the branch; the original commits remain intact and nothing is lost.",
+    "difficulty": "Medium",
+    "tags": ["interactive-rebase", "abort", "recovery"]
+  }
+]

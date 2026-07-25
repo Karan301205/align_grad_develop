@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "C",
+    "subtopic": "Error Handling",
+    "question": "int result = open(\"file.txt\", O_RDONLY);\nif (result == -1) { perror(\"open\"); }\nWhat does perror accomplish?",
+    "options": [
+      "perror prints a human-readable error message based on errno (the global error code)",
+      "perror repeats the function call to retry on error",
+      "perror clears the error state",
+      "Compiler error: perror is not a standard function"
+    ],
+    "correctIndex": 0,
+    "explanation": "perror(prefix) prints prefix followed by the string describing the value of errno.",
+    "difficulty": "Medium",
+    "tags": ["errno", "perror", "error messages"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Error Handling",
+    "question": "errno = 0;\nint result = atoi(\"123abc\");\nif (errno != 0) { printf(\"error\"); }\nWhy might this check fail?",
+    "options": [
+      "atoi does not set errno on invalid input; it returns 0 for invalid strings, indistinguishable from a valid 0",
+      "errno is always nonzero after atoi",
+      "Compiler error: errno cannot be checked manually",
+      "atoi throws an exception on invalid input"
+    ],
+    "correctIndex": 0,
+    "explanation": "atoi is error-prone (no error indication); strtol with error checking is preferred.",
+    "difficulty": "Medium-Hard",
+    "tags": ["errno", "atoi", "error detection"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Error Handling",
+    "question": "FILE *f = fopen(\"file.txt\", \"r\");\nif (f == NULL) {\nperror(\"fopen\");\nreturn -1;\n}\nWhy is the early return important?",
+    "options": [
+      "It exits the function without proceeding to fread/fwrite on a NULL pointer, preventing undefined behavior",
+      "Early return is a style choice; no functional difference",
+      "fopen always succeeds; the return is unnecessary",
+      "Compiler error: cannot return from error handler"
+    ],
+    "correctIndex": 0,
+    "explanation": "Checking and returning early (guard clause) prevents passing NULL to subsequent file operations.",
+    "difficulty": "Medium",
+    "tags": ["error handling", "guard clauses", "early return"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Error Handling",
+    "question": "int x = 10, y = 0;\nint result = x / y;\nWhat happens?",
+    "options": [
+      "Undefined behavior: division by zero causes undefined behavior (typically a SIGFPE signal, crash, or garbage result)",
+      "result is set to 0",
+      "Compiler error: division by zero is detected",
+      "result is infinity"
+    ],
+    "correctIndex": 0,
+    "explanation": "C does not check for division by zero; the result is undefined behavior and platform-dependent.",
+    "difficulty": "Medium",
+    "tags": ["division by zero", "undefined behavior", "runtime errors"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Error Handling",
+    "question": "char *p = malloc(sizeof(char) * 10);\nif (p == NULL) {\nfprintf(stderr, \"memory allocation failed\\n\");\nexit(EXIT_FAILURE);\n}\nWhy use stderr instead of stdout?",
+    "options": [
+      "stderr is unbuffered and used for error messages; stdout is buffered and used for normal output, allowing separation of errors from regular output",
+      "stderr is faster than stdout",
+      "stdout cannot be used in error handlers",
+      "They are identical; choice is arbitrary"
+    ],
+    "correctIndex": 0,
+    "explanation": "stderr and stdout can be redirected independently; error messages go to stderr so they appear even if stdout is redirected.",
+    "difficulty": "Medium",
+    "tags": ["stderr", "stdout", "error reporting"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Error Handling",
+    "question": "int *arr = malloc(sizeof(int) * 100);\nif (arr == NULL) {\nprintf(\"error\");\n/* continue without initializing arr */\narr[0] = 5;\n}\nWhy is this dangerous?",
+    "options": [
+      "If malloc fails, arr is NULL; accessing arr[0] dereferences NULL, causing undefined behavior (segfault)",
+      "The error message prevents the subsequent access",
+      "malloc failure is handled correctly here",
+      "Compiler error: cannot access NULL"
+    ],
+    "correctIndex": 0,
+    "explanation": "Error handling must prevent using invalid pointers; the code should return or exit after error detection.",
+    "difficulty": "Medium",
+    "tags": ["error handling", "null pointers", "undefined behavior"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Error Handling",
+    "question": "int x = 5, y = 0;\nassert(y != 0);\nint result = x / y;\nWhat is the purpose of assert?",
+    "options": [
+      "assert terminates the program with an error message if the condition is false; useful for catching programmer errors in development",
+      "assert prevents division by zero at runtime",
+      "assert is a substitute for error handling",
+      "assert has no runtime effect in release builds"
+    ],
+    "correctIndex": 0,
+    "explanation": "assert(condition) is a debugging tool; if condition is false, it prints an error and aborts (if NDEBUG is not defined).",
+    "difficulty": "Medium",
+    "tags": ["assert", "debugging", "development vs release"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Error Handling",
+    "question": "int func() {\nif (some_error_condition) { return -1; }\nreturn 0;\n}\nint x = func();\nif (x == -1) { printf(\"error\"); }\nWhy is this pattern limited?",
+    "options": [
+      "Using special return values mixes success/error semantics; -1 might be a valid result for some functions, and multiple error states are hard to encode",
+      "Return values always indicate success/failure",
+      "Functions can return multiple error codes",
+      "Compiler error: special values are forbidden"
+    ],
+    "correctIndex": 0,
+    "explanation": "Better patterns: use errno, output parameters, or dedicated error types (structs) instead of return values.",
+    "difficulty": "Medium-Hard",
+    "tags": ["error handling patterns", "return values", "design"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Error Handling",
+    "question": "void handler(int sig) { printf(\"signal received\"); }\nsignal(SIGINT, handler);\n/* Ctrl+C pressed */\nWhy might this handler not run?",
+    "options": [
+      "Signal handlers have complex interactions with system calls and buffering; async-safety is hard; handler may not run immediately or at all if the signal is blocked",
+      "signal handlers are guaranteed to run on every signal",
+      "SIGINT cannot be caught",
+      "Compiler error: signal handlers require specific syntax"
+    ],
+    "correctIndex": 0,
+    "explanation": "Signal handling in C is complex; only async-signal-safe functions can be called; many operations are not safe.",
+    "difficulty": "Hard",
+    "tags": ["signal handlers", "POSIX signals", "async safety"]
+  },
+  {
+    "skillName": "C",
+    "subtopic": "Error Handling",
+    "question": "FILE *f = fopen(\"file.txt\", \"r\");\nif (f != NULL) {\n/* read from file */\nfclose(f);\n} else {\nperror(\"fopen\");\n}\nWhat is a problem with this error handling?",
+    "options": [
+      "Resource cleanup is not guaranteed if an error occurs during reading (the fclose is inside the if block); using goto, try-finally, or a cleanup function is safer",
+      "The error message is printed after fclose",
+      "Resource cleanup is unnecessary",
+      "Compiler error: fclose is missing"
+    ],
+    "correctIndex": 0,
+    "explanation": "Proper error handling requires careful management of resource cleanup; avoid nested if blocks when possible.",
+    "difficulty": "Medium-Hard",
+    "tags": ["resource cleanup", "error handling patterns", "RAII"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Node.js",
+    "subtopic": "Async Programming",
+    "question": "What is printed to the console?\n```javascript\nfunction asyncOp(callback) {\n  setTimeout(() => callback(null, 'result'), 0);\n}\n\nasyncOp((err, data) => {\n  console.log(data);\n});\nconsole.log('start');\n```",
+    "options": ["result start", "start result", "start (no result printed)", "Error: callback is undefined"],
+    "correctIndex": 1,
+    "explanation": "setTimeout schedules the callback for later, so console.log('start') executes first, then the callback runs.",
+    "difficulty": "Medium",
+    "tags": ["callbacks", "setTimeout", "event-loop"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Async Programming",
+    "question": "A Promise is created but never settled. What is the outcome?\n```javascript\nconst p = new Promise((resolve, reject) => {\n  // never calls resolve or reject\n});\np.then(() => console.log('resolved'));\nconsole.log('done');\n```",
+    "options": ["prints 'resolved' then 'done'", "prints 'done', 'resolved' never prints", "prints 'done' then throws an error", "Promise constructor throws an error"],
+    "correctIndex": 1,
+    "explanation": "If resolve/reject are never called, the Promise hangs indefinitely; 'done' prints immediately, and the then handler never fires.",
+    "difficulty": "Medium",
+    "tags": ["promises", "unresolved-promises"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Async Programming",
+    "question": "What is the output of this Promise chain?\n```javascript\nPromise.resolve(1)\n  .then(x => x + 1)\n  .then(x => {\n    throw new Error('oops');\n  })\n  .then(x => console.log('success:', x))\n  .catch(e => console.log('caught:', e.message));\n```",
+    "options": ["success: 2", "caught: oops", "success: undefined caught: oops", "ReferenceError: x is undefined"],
+    "correctIndex": 1,
+    "explanation": "The second then throws an error, which is caught by the catch handler, skipping the third then.",
+    "difficulty": "Medium",
+    "tags": ["promise-chains", "error-handling", "catch"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Async Programming",
+    "question": "What does this async/await code do?\n```javascript\nasync function fetchData() {\n  try {\n    const data = await fetch('/api');\n    return data.json();\n  } catch (e) {\n    console.error('error:', e);\n  }\n}\nawait fetchData();\n```",
+    "options": ["returns undefined if fetch fails due to the catch", "returns parsed JSON only on success", "returns parsed JSON or undefined", "throws error instead of catching"],
+    "correctIndex": 2,
+    "explanation": "If fetch fails, catch logs the error but doesn't return anything (implicitly returns undefined); on success, it returns data.json().",
+    "difficulty": "Medium-Hard",
+    "tags": ["async-await", "error-handling", "return-values"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Async Programming",
+    "question": "What is the execution order?\n```javascript\nasync function process() {\n  console.log('start');\n  await Promise.resolve();\n  console.log('after await');\n}\nprocess();\nconsole.log('end');\n```",
+    "options": ["start, after await, end", "start, end, after await", "start, end (after await never prints)", "after await, end, start"],
+    "correctIndex": 1,
+    "explanation": "process() is called, prints 'start', then await yields control back to the event loop; 'end' prints, then microtask queue runs 'after await'.",
+    "difficulty": "Medium",
+    "tags": ["async-await", "event-loop", "microtasks"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Async Programming",
+    "question": "Given a generator function, what does yield do?\n```javascript\nfunction* gen() {\n  const x = yield 1;\n  console.log(x);\n  yield x + 1;\n}\nconst g = gen();\nconsole.log(g.next());\nconsole.log(g.next(10));\n```",
+    "options": ["prints undefined then 11", "prints 1 then 2", "prints 10 then 11", "prints undefined then 10"],
+    "correctIndex": 3,
+    "explanation": "First next() yields 1 and pauses; second next(10) resumes with x=10 (passed to yield), but console.log has no output shown, then yields 11.",
+    "difficulty": "Medium-Hard",
+    "tags": ["generators", "yield", "iterator-protocol"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Async Programming",
+    "question": "What happens when Promise.all has a rejected promise?\n```javascript\nPromise.all([\n  Promise.resolve(1),\n  Promise.reject(new Error('fail')),\n  Promise.resolve(3)\n]).catch(e => console.log('caught:', e.message));\n```",
+    "options": ["prints [1, undefined, 3]", "prints caught: fail", "waits for all promises then rejects", "throws uncaught error"],
+    "correctIndex": 1,
+    "explanation": "Promise.all rejects immediately when any promise rejects, ignoring remaining promises.",
+    "difficulty": "Medium",
+    "tags": ["promise-all", "rejection-handling"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Async Programming",
+    "question": "What is the behavior of Promise.race?\n```javascript\nPromise.race([\n  new Promise(resolve => setTimeout(() => resolve('slow'), 100)),\n  new Promise(resolve => resolve('fast'))\n]).then(result => console.log(result));\n```",
+    "options": ["prints slow after 100ms", "prints fast immediately", "prints both slow and fast", "race is not a valid method"],
+    "correctIndex": 1,
+    "explanation": "Promise.race returns the first settled promise; the synchronous resolve('fast') settles first.",
+    "difficulty": "Medium",
+    "tags": ["promise-race", "concurrent-promises"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Async Programming",
+    "question": "A function chains multiple async calls. Which pattern avoids pyramid of doom?\n```javascript\n// Callback pyramid:\ncallAsync1((err, data1) => {\n  callAsync2(data1, (err, data2) => {\n    callAsync3(data2, (err, data3) => {\n      console.log(data3);\n    });\n  });\n});\n```",
+    "options": ["switch to Promises or async/await", "use callbackify to convert", "nest callbacks deeper", "callbacks cannot be improved"],
+    "correctIndex": 0,
+    "explanation": "Promises or async/await flatten nested callback structures, improving readability and error handling.",
+    "difficulty": "Medium",
+    "tags": ["callback-hell", "promises", "async-await"]
+  },
+  {
+    "skillName": "Node.js",
+    "subtopic": "Async Programming",
+    "question": "In async/await, what happens if you forget await?\n```javascript\nasync function getData() {\n  return {id: 1};\n}\nconst result = getData();\nconsole.log(result.id);\n```",
+    "options": ["prints 1", "prints Promise object (no .id)", "TypeError: Cannot read property id of Promise", "waits for promise automatically"],
+    "correctIndex": 2,
+    "explanation": "Without await, getData() returns a Promise, not the resolved value; accessing .id on a Promise causes a TypeError.",
+    "difficulty": "Medium",
+    "tags": ["async-await", "common-mistake"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Preprocessors",
+    "question": "In SCSS, what is the computed specificity of this nested rule?\n```scss\n.parent {\n  .child { color: blue; }\n}\n```",
+    "options": ["0,0,1,0 (.child alone)", "0,0,2,0 (.parent .child)", "0,0,1,1 (element .child)", "0,0,1,2"],
+    "correctIndex": 1,
+    "explanation": "SCSS nesting compiles to descendant selector (.parent .child); specificity = 2 classes = 0,0,2,0.",
+    "difficulty": "Medium",
+    "tags": ["scss-nesting", "specificity", "compilation"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Preprocessors",
+    "question": "How do mixins and functions differ in SCSS?\n```scss\n@mixin border-radius($radius) { border-radius: $radius; }\n@function calc-width($base) { @return $base * 2; }\n```",
+    "options": ["Mixins generate CSS, functions return values", "Functions generate CSS, mixins return values", "Both are identical", "Mixins are deprecated"],
+    "correctIndex": 0,
+    "explanation": "Mixins output CSS rules directly; functions compute and return values for use in properties.",
+    "difficulty": "Medium",
+    "tags": ["mixins-vs-functions", "scss-features"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Preprocessors",
+    "question": "What is the variable scope in this SCSS?\n```scss\n.parent {\n  $color: blue;\n  .child { color: $color; }\n}\n.sibling { color: $color; } /* error? */\n```",
+    "options": ["Global scope", "Scope limited to .parent block", "Child inherits from parent scope", ".sibling causes error"],
+    "correctIndex": 3,
+    "explanation": "SCSS variables have block scope; $color is only available inside .parent block, so .sibling reference causes an undefined error.",
+    "difficulty": "Medium-Hard",
+    "tags": ["variable-scope", "scss", "scoping-rules"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Preprocessors",
+    "question": "When should @extend be avoided in favor of mixins?\n```scss\n.base { color: blue; margin: 10px; }\n.derived { @extend .base; padding: 5px; }\n```",
+    "options": ["Always prefer extend", "Extend increases specificity issues", "Extend creates unintended selector coupling", "Both have same CSS output"],
+    "correctIndex": 2,
+    "explanation": "@extend couples selectors tightly; changes to .base affect .derived unexpectedly; mixins provide explicit reuse without coupling.",
+    "difficulty": "Medium-Hard",
+    "tags": ["extend-vs-mixin", "specificity", "maintainability"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Preprocessors",
+    "question": "What will this SCSS map iteration compile to?\n```scss\n$colors: (primary: blue, secondary: gray);\n@each $name, $value in $colors {\n  .btn-#{$name} { color: $value; }\n}\n```",
+    "options": [".btn-primary { color: blue; } .btn-secondary { color: gray; }", "Syntax error (invalid)", "Loop doesn't execute", "Outputs variables only"],
+    "correctIndex": 0,
+    "explanation": "@each iterates over map entries; #{} interpolates variable names into selectors, generating separate rules for each color.",
+    "difficulty": "Medium-Hard",
+    "tags": ["map-iteration", "interpolation", "scss-loops"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Preprocessors",
+    "question": "How does the parent selector (&) work in nested pseudo-classes?\n```scss\nbutton {\n  &:hover { color: red; }\n  &::before { content: 'icon'; }\n}\n```",
+    "options": ["& is not needed", "& replaces parent selector (button)", "& creates new selectors", "Syntax error"],
+    "correctIndex": 1,
+    "explanation": "& represents the parent selector; &:hover becomes button:hover, &::before becomes button::before.",
+    "difficulty": "Medium",
+    "tags": ["parent-selector", "nested-pseudo-class"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Preprocessors",
+    "question": "What does this preprocessor compilation reveal about file organization?\n```scss\n@import 'variables';\n@import 'mixins';\n@import 'components';\n```",
+    "options": ["Creates 3 CSS files", "Concatenates into single file", "Imports are kept in output", "Requires minification"],
+    "correctIndex": 1,
+    "explanation": "Preprocessor @import merges all imports into a single compiled CSS file; browser import() is different (creates HTTP requests).",
+    "difficulty": "Medium",
+    "tags": ["import-merging", "file-organization"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Preprocessors",
+    "question": "Why might deep nesting in SCSS cause specificity creep?\n```scss\n.outer {\n  .middle {\n    .inner {\n      p { color: blue; }\n    }\n  }\n}\n```",
+    "options": ["Nesting doesn't affect specificity", "Compiles to .outer .middle .inner p = 0,0,3,1", "p selector loses specificity", "Browser ignores depth"],
+    "correctIndex": 1,
+    "explanation": "Each nested level adds a selector to the compiled rule; deep nesting creates overly specific selectors (0,0,3,1) that are hard to override.",
+    "difficulty": "Medium-Hard",
+    "tags": ["nesting-depth", "specificity-creep", "scss-best-practices"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Preprocessors",
+    "question": "What is the output when using a preprocessor function in a property?\n```scss\n$base-size: 16px;\n.text { font-size: calc($base-size * 1.5); }\n```",
+    "options": ["Compiles to CSS calc()", "Error (can't use function)", "Computes 24px inline", "Outputs variable name"],
+    "correctIndex": 2,
+    "explanation": "Preprocessor functions run at compile time; $base-size * 1.5 = 24px is computed and inlined into CSS.",
+    "difficulty": "Medium",
+    "tags": ["preprocessor-functions", "compile-time"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "CSS Preprocessors",
+    "question": "When should CSS custom properties (variables) be preferred over preprocessor variables?\n```css\n:root { --color: blue; }\n@media (dark) { --color: darkblue; }\n```",
+    "options": ["Never, preprocessor variables only", "Custom properties update at runtime", "Preprocessor variables are faster", "Both equivalent in output"],
+    "correctIndex": 1,
+    "explanation": "CSS custom properties are runtime-mutable (in media queries, JS); preprocessor variables are compile-time only.",
+    "difficulty": "Medium-Hard",
+    "tags": ["css-variables", "runtime-vs-compile", "modern-css"]
+  }
+]

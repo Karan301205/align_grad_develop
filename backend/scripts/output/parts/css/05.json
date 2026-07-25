@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "CSS",
+    "subtopic": "Media Queries",
+    "question": "In mobile-first design, where are tablet/desktop styles defined?\n```css\n/* Base mobile styles */\n.container { width: 100%; }\n\n@media (min-width: 768px) {\n  .container { width: 80%; }\n}\n```",
+    "options": ["Inside media query breakpoints", "Before any media queries", "Mobile-first requires separate files", "Mixed approach fails"],
+    "correctIndex": 0,
+    "explanation": "Mobile-first starts with mobile styles, then uses min-width media queries to progressively enhance for larger screens.",
+    "difficulty": "Medium",
+    "tags": ["mobile-first", "responsive-design", "media-queries"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Media Queries",
+    "question": "What will this media query match?\n```css\n@media (min-width: 600px) and (max-width: 900px) {\n  .box { width: 50%; }\n}\n```",
+    "options": ["Viewports exactly 600-900px", "Viewports 600px or wider", "Viewports between 600-900px", "Viewports 900px or narrower"],
+    "correctIndex": 2,
+    "explanation": "Both min-width and max-width conditions must be true; matches viewports 600px <= width <= 900px.",
+    "difficulty": "Medium",
+    "tags": ["media-query-logic", "min-max-width"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Media Queries",
+    "question": "How will a device with pixel ratio 2 (retina) match this?\n```css\n@media (min-device-pixel-ratio: 2) {\n  .icon { background-image: url('icon-2x.png'); }\n}\n```",
+    "options": ["Ignored on retina displays", "Matches high-DPI devices", "Applies to all screen sizes", "Requires viewport meta tag"],
+    "correctIndex": 1,
+    "explanation": "min-device-pixel-ratio: 2 targets high-DPI displays (retina, 2x, 3x); useful for serving high-resolution images.",
+    "difficulty": "Medium",
+    "tags": ["device-pixel-ratio", "retina-displays", "media-features"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Media Queries",
+    "question": "Why is the viewport meta tag critical for media queries?\n```html\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n```",
+    "options": ["Media queries ignore it", "Sets viewport width to device width for proper breakpoints", "Only needed on mobile", "Deprecated in modern browsers"],
+    "correctIndex": 1,
+    "explanation": "Without this meta tag, mobile browsers default to a wide viewport (often 980px), making min-width breakpoints match incorrectly.",
+    "difficulty": "Medium",
+    "tags": ["viewport-meta", "mobile-viewports"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Media Queries",
+    "question": "When would prefers-color-scheme be applied?\n```css\n@media (prefers-color-scheme: dark) {\n  body { background: #1a1a1a; color: #fff; }\n}\n```",
+    "options": ["Only on dark wallpapers", "When OS or browser prefers dark mode", "Always on mobile", "Browser must have dark-mode toggle"],
+    "correctIndex": 1,
+    "explanation": "prefers-color-scheme respects the operating system's dark/light preference; users set this in OS settings or browser.",
+    "difficulty": "Medium",
+    "tags": ["prefers-color-scheme", "dark-mode", "accessibility"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Media Queries",
+    "question": "Which is the correct syntax for multiple conditions with OR logic?\n```css\n@media (max-width: 600px), (max-width: 900px) { }\n@media (max-width: 600px) or (max-width: 900px) { }\n@media (max-width: 600px) | (max-width: 900px) { }\n```",
+    "options": ["First (comma)", "Second (or keyword)", "Third (pipe)", "All are valid"],
+    "correctIndex": 0,
+    "explanation": "Comma (,) is the OR operator in media queries; each comma-separated condition is evaluated separately.",
+    "difficulty": "Medium-Hard",
+    "tags": ["media-query-logic", "or-operator"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Media Queries",
+    "question": "What is the difference between width and device-width in media queries?\n```css\n@media (min-width: 768px) { } /* viewport width */\n@media (min-device-width: 768px) { } /* device screen width */\n```",
+    "options": ["Both are identical", "device-width is always larger", "width respects zoom, device-width doesn't", "device-width is deprecated"],
+    "correctIndex": 2,
+    "explanation": "width is the actual viewport width (affected by zoom); device-width is the physical screen size (ignored zoom).",
+    "difficulty": "Medium-Hard",
+    "tags": ["viewport-width", "device-width", "media-features"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Media Queries",
+    "question": "In this media query range, what viewport widths will match?\n```css\n@media (width: 768px) { .box { width: 50%; } }\n```",
+    "options": ["768px exactly", "768px and above", "768px and below", "Any viewport (matches all)"],
+    "correctIndex": 0,
+    "explanation": "The width property without min/max is an exact match; only viewports precisely 768px wide match.",
+    "difficulty": "Medium",
+    "tags": ["exact-width-match", "media-features"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Media Queries",
+    "question": "How do feature queries differ from media queries?\n```css\n@supports (display: grid) { .container { display: grid; } }\n```",
+    "options": ["Feature queries check CSS support", "Media queries check CSS support", "Both do the same thing", "Feature queries are deprecated"],
+    "correctIndex": 0,
+    "explanation": "@supports checks browser CSS feature support; media queries check device/viewport characteristics; use both for robust layouts.",
+    "difficulty": "Medium-Hard",
+    "tags": ["feature-queries", "supports-rule", "progressive-enhancement"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Media Queries",
+    "question": "Given a 375px phone and 1920px desktop, what breakpoints should separate them?\n```css\n/* optimal mobile-first breakpoints? */\n@media (min-width: 640px) { }\n@media (min-width: 1024px) { }\n@media (min-width: 1280px) { }\n```",
+    "options": ["Exact numbers depend on design", "Tablet usually 600-900px range", "Desktop starts 1024px+", "All sizes work equally"],
+    "correctIndex": 0,
+    "explanation": "Breakpoints should align with design intent, not device names; common patterns are 640px (tablet), 1024px (desktop), but always test and adjust.",
+    "difficulty": "Medium-Hard",
+    "tags": ["breakpoint-strategy", "responsive-design"]
+  }
+]

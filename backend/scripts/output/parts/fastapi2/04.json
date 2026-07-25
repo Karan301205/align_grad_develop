@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Performance Optimization",
+    "question": "from fastapi import FastAPI\nfrom pydantic import BaseModel\nfrom datetime import datetime\n\napp = FastAPI()\n\nclass User(BaseModel):\n    id: int\n    name: str\n    email: str\n    created_at: datetime\n    password_hash: str\n    internal_notes: str\n\n@app.get(\"/users/{user_id}\", response_model=User)\ndef get_user(user_id: int, db: Session = Depends(get_db)):\n    return db.query(User).filter(User.id == user_id).first()\n\nA client requests a user; the response includes password_hash and internal_notes unnecessarily. What happens?",
+    "options": [
+      "Sensitive fields returned; security & bandwidth waste",
+      "Pydantic filters sensitive fields automatically",
+      "Response size doubled; network latency increased",
+      "Client can't use password_hash field"
+    ],
+    "correctIndex": 0,
+    "explanation": "Response model should use a separate Pydantic model excluding sensitive fields; return response_model=UserPublic to control output.",
+    "difficulty": "Medium",
+    "tags": ["response-models", "data-exposure", "bandwidth"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Performance Optimization",
+    "question": "from fastapi import FastAPI\nfrom functools import lru_cache\nimport time\n\napp = FastAPI()\n\n@lru_cache(maxsize=100)\ndef get_config():\n    print(\"Loading config from disk...\")\n    return {\"timeout\": 30, \"retries\": 3}\n\n@app.get(\"/config\")\ndef config():\n    return get_config()\n\nIf the config file on disk changes, when is the new config visible?",
+    "options": [
+      "Immediately; lru_cache invalidates on file changes",
+      "After server restart or manual cache clear",
+      "After 5 minutes (cache expiry)",
+      "Never; cache is permanent"
+    ],
+    "correctIndex": 1,
+    "explanation": "lru_cache has no TTL; changes aren't reflected until cache is cleared or server restarts; use external cache with TTL or reload on demand.",
+    "difficulty": "Medium",
+    "tags": ["caching", "cache-invalidation", "stale-data"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Performance Optimization",
+    "question": "from fastapi import FastAPI\nfrom sqlalchemy.orm import Session\nfrom sqlalchemy import select\n\napp = FastAPI()\n\n@app.get(\"/users\")\ndef list_users(db: Session = Depends(get_db), skip: int = 0, limit: int = 10):\n    return db.query(User).offset(skip).limit(limit).all()\n\nA table has 1 million users. A client requests skip=999990, limit=10. How many rows does the database scan?",
+    "options": [
+      "10 rows (only returned rows)",
+      "999990 rows (skip requires scanning)",
+      "All 1M rows (database full scan)",
+      "1M rows (count required before offset)"
+    ],
+    "correctIndex": 1,
+    "explanation": "OFFSET requires scanning past 999990 rows before reading the 10 requested; use keyset pagination (WHERE id > last_id) for better performance on large offsets.",
+    "difficulty": "Medium-Hard",
+    "tags": ["pagination", "offset-inefficiency", "keyset-pagination"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Performance Optimization",
+    "question": "from fastapi import FastAPI\nfrom fastapi.responses import StreamingResponse\nimport asyncio\n\napp = FastAPI()\n\nasync def generate_data():\n    for i in range(1000000):\n        yield f'{i}\\n'\n\n@app.get(\"/stream\")\ndef stream_data():\n    return StreamingResponse(generate_data(), media_type=\"text/plain\")\n\nCompared to returning a list, what advantage does streaming provide?",
+    "options": [
+      "Data generated on-demand; reduces initial response time",
+      "Compresses response automatically",
+      "Prevents buffering; client receives data as generated",
+      "Reduces memory usage server-side"
+    ],
+    "correctIndex": 0,
+    "explanation": "StreamingResponse allows partial data to reach client immediately; client starts processing while server generates rest, reducing time-to-first-byte.",
+    "difficulty": "Medium",
+    "tags": ["streaming", "response-time", "memory-efficiency"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Performance Optimization",
+    "question": "from fastapi import FastAPI\nfrom sqlalchemy.orm import Session\nfrom sqlalchemy import func\n\napp = FastAPI()\n\n@app.get(\"/users/stats\")\ndef user_stats(db: Session = Depends(get_db)):\n    total = len(db.query(User).all())\n    active = len(db.query(User).filter(User.is_active == True).all())\n    return {\"total\": total, \"active\": active}\n\nWhat is the performance issue with this endpoint?",
+    "options": [
+      "Loads all users into memory; counts in Python",
+      "Makes N database queries where N is user count",
+      "Uses correct SQL count() function efficiently",
+      "Both memory and query inefficiency"
+    ],
+    "correctIndex": 3,
+    "explanation": "loads all user rows into ORM objects, then counts in Python; use db.query(func.count(User.id)).scalar() instead for single COUNT query.",
+    "difficulty": "Medium",
+    "tags": ["aggregation", "memory-efficiency", "query-optimization"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Performance Optimization",
+    "question": "from fastapi import FastAPI\nfrom aiocache import cached\nimport asyncio\n\napp = FastAPI()\n\n@cached(ttl=300)\nasync def get_user_from_db(user_id: int):\n    await asyncio.sleep(1)\n    return {\"id\": user_id, \"name\": f\"User{user_id}\"}\n\n@app.get(\"/users/{user_id}\")\nasync def get_user(user_id: int):\n    return await get_user_from_db(user_id)\n\nTwo concurrent requests for user_id=1 arrive. How many database calls occur?",
+    "options": [
+      "1 (cached result)",
+      "2 (concurrent calls bypass cache)",
+      "1 (cache hit on second request after first completes)",
+      "Depends on aiocache backend"
+    ],
+    "correctIndex": 1,
+    "explanation": "Without cache locks, both concurrent requests see cache miss simultaneously and both execute the function; use aiocache's lock support.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cache-stampede", "concurrency", "caching"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Performance Optimization",
+    "question": "from fastapi import FastAPI\nimport gzip\n\napp = FastAPI()\n\n@app.get(\"/large-data\")\ndef get_large_data():\n    data = {\"items\": [{\"id\": i, \"data\": \"x\" * 1000} for i in range(10000)]}\n    return data\n\nThe response is 10MB JSON. With compression middleware, what happens to response size?",
+    "options": [
+      "10MB (compression not applied by default)",
+      "~500KB (gzip typically achieves 95% reduction)",
+      "~1-2MB (gzip achieves ~80-90% reduction for text)",
+      "Varies by client Accept-Encoding header"
+    ],
+    "correctIndex": 2,
+    "explanation": "GZipMiddleware compresses text responses; JSON with repeated data compresses ~80-90%; client needs Accept-Encoding: gzip header.",
+    "difficulty": "Medium",
+    "tags": ["compression", "bandwidth", "middleware"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Performance Optimization",
+    "question": "from fastapi import FastAPI\nfrom sqlalchemy.orm import joinedload\nfrom sqlalchemy import select\n\napp = FastAPI()\n\n@app.get(\"/authors/{author_id}/books\")\ndef get_author_books(author_id: int, db: Session = Depends(get_db)):\n    author = db.query(Author).options(\n        joinedload(Author.books)\n    ).filter(Author.id == author_id).first()\n    return author\n\nCompared to loading Author then separately loading books, what improvement is this?",
+    "options": [
+      "1 JOIN query instead of 2 separate queries",
+      "No improvement; joinedload is slower",
+      "Eliminates N+1 query problem",
+      "Reduces memory usage"
+    ],
+    "correctIndex": 2,
+    "explanation": "joinedload() performs one JOIN query instead of N+1 (1 for author + 1 per book); eliminates lazy-load queries triggered when accessing author.books.",
+    "difficulty": "Medium",
+    "tags": ["eager-loading", "n-plus-one", "join-optimization"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Performance Optimization",
+    "question": "from fastapi import FastAPI\nfrom fastapi.staticfiles import StaticFiles\n\napp = FastAPI()\napp.mount(\"/static\", StaticFiles(directory=\"static\"), name=\"static\")\n\n@app.get(\"/\")\ndef index():\n    return {\"message\": \"home\"}\n\nA client requests /static/image.png (5MB file). What is the performance issue?",
+    "options": [
+      "FastAPI serves static files slowly; use CDN",
+      "File served from memory buffer; no streaming",
+      "FastAPI processes request through full middleware chain",
+      "5MB response blocks event loop"
+    ],
+    "correctIndex": 2,
+    "explanation": "Static files still go through FastAPI middleware (auth, logging, etc.); for production, use web server (Nginx) or CDN to serve static files bypassing FastAPI.",
+    "difficulty": "Medium-Hard",
+    "tags": ["static-files", "cdn", "deployment"]
+  },
+  {
+    "skillName": "FastAPI",
+    "subtopic": "Performance Optimization",
+    "question": "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\nclass LargeModel(BaseModel):\n    items: list[dict]\n    metadata: dict\n    config: dict\n\n@app.post(\"/process\")\ndef process(data: LargeModel):\n    return {\"status\": \"processed\"}\n\nA 50MB JSON payload is POST'd. What happens during request parsing?",
+    "options": [
+      "Entire payload buffered in memory before validation",
+      "Pydantic streams validation; memory-efficient",
+      "Request body discarded after route matching",
+      "Depends on max_size configuration"
+    ],
+    "correctIndex": 0,
+    "explanation": "Pydantic must validate full model tree before returning; large payloads are buffered entirely in memory; use streaming or chunk processing for huge requests.",
+    "difficulty": "Medium",
+    "tags": ["request-parsing", "memory", "large-payloads"]
+  }
+]

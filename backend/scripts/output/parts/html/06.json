@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "Image Optimization",
+    "question": "An image uses `<img src='photo.jpg' alt=''>`. Why might this pass WCAG without describing the image?",
+    "options": ["empty alt text is invalid and will fail all accessibility checks", "alt='' marks the image as decorative and is skipped by screen readers", "empty alt requires a figure element with figcaption instead", "screen readers substitute the filename when alt is empty"],
+    "correctIndex": 1,
+    "explanation": "Empty `alt=''` is a valid technique to mark an image as decorative; screen readers skip it, which is correct if the image is purely visual and not informative.",
+    "difficulty": "Medium",
+    "tags": ["alt-text", "decorative-images", "accessibility"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Image Optimization",
+    "question": "A responsive image uses `<img srcset='small.jpg 480w, large.jpg 1024w' sizes='100vw'>`. Which is downloaded on a 768px viewport?",
+    "options": ["small.jpg because the viewport is between 480w and 1024w", "large.jpg because the image is 100vw", "the browser selects based on device pixel ratio and connection speed", "both small and large are downloaded and the browser chooses"],
+    "correctIndex": 1,
+    "explanation": "The `sizes='100vw'` attribute tells the browser the image will be 100% of viewport width; on a 768px viewport, the browser selects the smallest source that is at least 768w, which is large.jpg.",
+    "difficulty": "Hard",
+    "tags": ["srcset", "sizes", "responsive-images"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Image Optimization",
+    "question": "Why might `<img src='photo.webp' alt='Photo'>` fail on older browsers?",
+    "options": ["webp format is not supported in older browsers and the image will not load", "older browsers require a fallback image using picture element", "webp requires a specific doctype or mime type", "webp images need javascript to display"],
+    "correctIndex": 0,
+    "explanation": "WebP is a modern image format; browsers that don't support it will fail to load the image, so fallbacks via `<picture>` element or server-side negotiation are necessary.",
+    "difficulty": "Medium",
+    "tags": ["image-formats", "webp", "browser-support"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Image Optimization",
+    "question": "A `<picture>` element has `<source srcset='dark.jpg' media='(prefers-color-scheme:dark)'>` followed by `<img src='light.jpg'>`. On a dark-mode device, which image loads?",
+    "options": ["light.jpg because img is the fallback and always loads", "dark.jpg because the media query matches", "both images load and javascript chooses which to display", "the media query is evaluated and only dark.jpg loads"],
+    "correctIndex": 1,
+    "explanation": "The `<picture>` element selects the best `<source>` based on media queries and srcset; only the selected source (dark.jpg in this case) is downloaded.",
+    "difficulty": "Medium",
+    "tags": ["picture-element", "media-queries", "responsive-images"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Image Optimization",
+    "question": "An image has `<img src='photo.jpg' loading='lazy' alt='Photo'>`. What is a risk of lazy loading?",
+    "options": ["lazy loaded images are not indexed by search engines", "the image may not load if javascript is disabled", "lazy loading reduces initial page load but images appear late on scroll", "images are cached differently, reducing browser storage"],
+    "correctIndex": 2,
+    "explanation": "Lazy-loaded images are fetched only when needed, improving initial load time but potentially delaying image appearance when users scroll to them.",
+    "difficulty": "Medium",
+    "tags": ["lazy-loading", "performance"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Image Optimization",
+    "question": "Why might an image with `<img src='chart.svg' alt='sales data'>` not be styled by page CSS?",
+    "options": ["svg images loaded via img tag are in their own document context and css does not cross-apply", "svg requires a special namespace to accept css", "img element cannot load svg files", "svg css requires style tags inside the svg file"],
+    "correctIndex": 0,
+    "explanation": "SVGs loaded via `<img>` tag run in a restricted mode; external page CSS does not apply to them, so styling must be done inside the SVG file or via inline styles.",
+    "difficulty": "Hard",
+    "tags": ["svg", "css-scoping"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Image Optimization",
+    "question": "An image uses `<img src='photo.jpg' height='200' width='200' alt='Photo'>`. A responsive site changes width to 50% via CSS. Why might the image aspect ratio distort?",
+    "options": ["html height and width attributes lock the aspect ratio, overriding css", "css width changes the aspect ratio even if height is specified", "the browser maintains the original aspect ratio if both dimensions are set", "aspect ratio distortion is prevented when both html attributes are set"],
+    "correctIndex": 1,
+    "explanation": "HTML attributes set the intrinsic aspect ratio, but CSS dimensions override rendering size independently; if CSS changes width without proportional height, distortion occurs.",
+    "difficulty": "Medium-Hard",
+    "tags": ["aspect-ratio", "responsive-images", "css-override"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Image Optimization",
+    "question": "An image uses `<img src='photo.jpg' alt='John Doe' title='John Doe'>`. Why is duplicate alt and title redundant?",
+    "options": ["alt and title serve the same purpose and only alt is needed", "title is shown on hover and alt on missing images", "alt is for accessibility, title is for user hover tooltips; both are useful but not necessary duplicates", "having both creates performance overhead"],
+    "correctIndex": 2,
+    "explanation": "While `alt` is for accessibility and `title` for hover tooltips, duplicating the same text is redundant; `title` should provide additional context not in `alt`.",
+    "difficulty": "Medium",
+    "tags": ["alt-text", "title-attribute"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Image Optimization",
+    "question": "Why might `<img src='large.jpg' alt='Photo' decoding='async'>` improve page performance?",
+    "options": ["async decoding allows other content to render while the image is decoded", "images are decoded on a separate thread faster than normal decoding", "async decoding prevents layout shift from image loading", "browser prioritizes other resources while async decoding proceeds"],
+    "correctIndex": 0,
+    "explanation": "The `decoding='async'` attribute hints to the browser that image decoding can happen asynchronously, allowing page rendering to continue without waiting for the image to decode.",
+    "difficulty": "Medium-Hard",
+    "tags": ["decoding-attribute", "performance"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Image Optimization",
+    "question": "A map image uses `<img src='map.jpg' usemap='#locations'>` with `<map name='locations'><area href='/city1'>`. What does the area element do?",
+    "options": ["it defines a clickable region within the image that links to a url", "it creates an overlay on the image", "it requires javascript to function", "map and area are deprecated and canvas should be used instead"],
+    "correctIndex": 0,
+    "explanation": "The `<map>` and `<area>` elements define clickable regions (hotspots) on an image, allowing different parts to link to different URLs.",
+    "difficulty": "Medium",
+    "tags": ["image-maps", "area-element", "usemap"]
+  }
+]

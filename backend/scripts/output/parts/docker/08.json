@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Performance Optimization",
+    "question": "A Dockerfile builds a large application with `RUN npm install` then `RUN npm run build`. The image is 800 MB. On the first rebuild after adding a single dependency to package.json, the build takes 15 minutes (npm install runs again). On the third rebuild without package changes, it takes 2 minutes. Why does the timing change?",
+    "options": ["Docker build cache is working; the first rebuild invalidates the npm install layer due to package.json change, but the second rebuild hits the cache", "The npm install is I/O bound; repeated builds benefit from disk caching on the host", "Docker gradually optimizes the build process as layers are cached", "The build time depends on network conditions for npm registry access"],
+    "correctIndex": 0,
+    "explanation": "Layer caching is based on the Dockerfile instruction and input files; changing package.json invalidates the RUN npm install layer, but subsequent unchanged builds reuse the cached layer, reducing build time from 15 minutes to 2 minutes.",
+    "difficulty": "Medium",
+    "tags": ["docker-build-cache", "layer-caching", "npm-install"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Performance Optimization",
+    "question": "A container runs a Java application with `-Xmx1g` (1 GB heap limit). The container is allocated 2 GB memory. After 30 minutes, the application becomes unresponsive and is OOMKilled despite having available memory. What is the issue?",
+    "options": ["The Java process is using off-heap memory (buffers, caches, sockets) beyond the heap limit, exceeding the container's 2 GB total", "Docker incorrectly reports available memory; the actual limit is lower", "The Java GC is pausing for long periods as heap fills up, causing unresponsiveness", "The container's cgroup limit is not being enforced; restart with explicit `--memory 2g`"],
+    "correctIndex": 0,
+    "explanation": "Java's `-Xmx` limits only the heap; off-heap memory (JVM internals, JIT buffers, mapped files, etc.) can consume additional memory; the total process memory (heap + off-heap) hitting the 2 GB container limit causes OOMKill; set a lower `-Xmx` or increase container memory.",
+    "difficulty": "Medium-Hard",
+    "tags": ["java-memory", "off-heap-memory", "oomkilled"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Performance Optimization",
+    "question": "A multi-stage Dockerfile copies a 500 MB file from stage 1 to stage 2: `COPY --from=builder /app/dist /dist`. The final image is 600 MB. After rewriting the Dockerfile to avoid copying (using a smaller base), the final image is 200 MB but the build time increased from 2 minutes to 8 minutes. Why?",
+    "options": ["The smaller base image requires more rebuilds of earlier layers due to invalidated cache", "Building a smaller image requires more optimization passes; this is expected and cannot be avoided", "The 500 MB copy was previously cached; the new build does not benefit from this cache, so compilation takes longer", "Smaller images require additional layer deduplication, which increases build time"],
+    "correctIndex": 2,
+    "explanation": "If the builder stage output was previously cached, the copy operation was fast; rebuilding from scratch or with a different base invalidates cache, forcing recompilation (6 minutes longer), which explains the 2 to 8 minute increase despite a smaller final image.",
+    "difficulty": "Medium-Hard",
+    "tags": ["multi-stage-builds", "build-time", "layer-caching"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Performance Optimization",
+    "question": "A container runs a web server on the host network with `docker run --network host app`. Latency is 1 ms. Running the same container on the default bridge network increases latency to 5 ms. Where is the overhead?",
+    "options": ["Bridge network packets are processed by the Docker daemon, adding latency", "The bridge network includes a NAT layer that adds latency compared to direct host network access", "The loopback network on the bridge driver is slower than the host's kernel networking stack", "All of the above contribute to the latency difference"],
+    "correctIndex": 1,
+    "explanation": "Bridge networks use NAT (network address translation) and iptables rules to route traffic between the container and host, adding kernel overhead; `--network host` bypasses this by sharing the host's network namespace, reducing latency and overhead but sacrificing isolation.",
+    "difficulty": "Medium",
+    "tags": ["network-performance", "host-network", "bridge-network"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Performance Optimization",
+    "question": "A Dockerfile contains `COPY . /app`, copying a 2 GB directory. After adding `.dockerignore` to exclude large files, the build context is reduced to 200 MB. The build time decreased from 20 seconds to 5 seconds. Where was the time spent?",
+    "options": ["Docker is compressing the context; smaller context compresses faster", "The bind mount of the build context was the bottleneck, not the COPY instruction itself", "COPY performance depends on the build context size; fewer files means faster copying", "The Docker daemon processes the context before building; a smaller context reduces processing overhead"],
+    "correctIndex": 3,
+    "explanation": "The Docker daemon builds a context tarball before sending it to the build environment; a larger context takes longer to tar, serialize, and transmit; .dockerignore reduces this overhead by excluding unnecessary files from the context.",
+    "difficulty": "Medium",
+    "tags": ["dockerignore", "build-context", "build-performance"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Performance Optimization",
+    "question": "A container's storage driver is `overlay2` with a backing filesystem of `/var/lib/docker` on a slow HDD (5400 RPM). After migrating `/var/lib/docker` to an SSD, container I/O performance improved by 50% but did not double. What is limiting the performance gain?",
+    "options": ["Overlay2 has inherent overhead that prevents full SSD performance; use `devicemapper` instead for better performance", "The container's application code may be the bottleneck, not storage; I/O optimization has diminishing returns", "The network layer is now the bottleneck; the SSD is too fast for the current network configuration", "The Docker daemon's I/O scheduler limits the SSD's performance; tune `/sys/block/sda/queue/scheduler`"],
+    "correctIndex": 1,
+    "explanation": "Storage performance is only one bottleneck; if application code, CPU, or network is also limiting, improving storage alone will not double performance; a 50% improvement suggests storage was partially responsible, but other factors (application logic, CPU usage) are also involved.",
+    "difficulty": "Medium-Hard",
+    "tags": ["storage-performance", "overlay2-driver", "bottleneck-analysis"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Performance Optimization",
+    "question": "A container is created with `docker run --cpus='0.5' app`. The host has 4 CPUs and the container can use at most 0.5 CPUs. After running a single-threaded application that maxes out the 0.5 CPU allocation, you try to run two containers with `--cpus='0.5'` each. Both are limited to 0.5 CPUs but can share time on the same physical CPU. Will the total host CPU usage exceed 50%?",
+    "options": ["No, each container is limited to 0.5 CPUs, so the total cannot exceed 100%, and across 4 CPUs, the limit is 50% if they share CPU 0", "Yes, if both containers run simultaneously on the same physical core, they will time-slice and collectively use close to 100% of that core", "No, Docker prevents over-subscription and will not allow both containers to run simultaneously if they exceed the host's capacity", "It depends on the CPU scheduling; the kernel decides how to distribute the workload"],
+    "correctIndex": 1,
+    "explanation": "Each container's `--cpus='0.5'` limit is enforced via cgroups; if both run simultaneously on the same physical core, they time-slice and collectively use that core at 100%; across 4 CPUs, the total host usage depends on which cores they land on (they could collectively use 25-100% depending on placement).",
+    "difficulty": "Medium-Hard",
+    "tags": ["cpu-limits", "cpu-scheduling", "cgroup-limits"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Performance Optimization",
+    "question": "A Dockerfile has `RUN apt-get update && apt-get install -y pkg1 pkg2 pkg3 && apt-get clean`. After splitting into separate RUN commands to improve caching (`RUN apt-get update`, `RUN apt-get install -y pkg1`, etc.), the rebuild time increased. Which split is optimal?",
+    "options": ["Combine all into one RUN to minimize layers; each RUN creates a layer and increases image size", "Split apt-get update from install so updates can be cached separately from package additions", "Split each package into its own RUN command to isolate failures", "The single combined RUN is optimal; splitting increases layer overhead"],
+    "correctIndex": 0,
+    "explanation": "Each RUN creates a layer; combining into one RUN minimizes layers and image size; splitting for cache granularity (update separate from install) is a common pattern, but splitting each package is wasteful; balance between cache reuse and layer count.",
+    "difficulty": "Medium",
+    "tags": ["dockerfile-optimization", "layer-count", "build-cache"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Performance Optimization",
+    "question": "A container is created with `docker run -d app` and CPU usage is measured at 50%. Adding `--cpus='1.0'` (limiting to 1 CPU out of 4) and restarting, the container now shows 25% host CPU usage. Is the container performing worse?",
+    "options": ["Yes, the limit is reducing performance; remove the limit to restore full CPU access", "No, the percentage refers to different baselines (50% of 4 CPUs vs 25% of 1 CPU allocation); the container is doing the same work", "Yes, the 1 CPU limit is too low; increase to 2 CPUs for optimal performance", "It depends on whether the workload is CPU-bound or I/O-bound"],
+    "correctIndex": 1,
+    "explanation": "CPU percentage on a 4-CPU host: 50% of total = 2 CPUs. After limiting to 1 CPU: 25% of 1 CPU = 0.25 CPUs (same absolute work); the percentage changes because the denominator changes, but the container is still doing the same amount of work.",
+    "difficulty": "Medium",
+    "tags": ["cpu-limits", "cpu-percentage", "performance-measurement"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Performance Optimization",
+    "question": "A Dockerfile installs 100 packages with `RUN apt-get install -y pkg1 pkg2 ... pkg100`. You want to optimize cache reuse when new packages are added. Splitting into multiple RUN commands with logical grouping (e.g., `RUN apt-get install -y pkg1 pkg2 pkg3`) requires rebuilding all layers if a package is added. What is the best optimization?",
+    "options": ["Combine all into one RUN to minimize layers and cache invalidation points", "Use BuildKit with `--cache-mounts` to cache package metadata between builds", "Split packages into separate RUN commands, one per package, so only new packages invalidate their layer", "Rearrange packages so frequently-changing packages are in the last RUN command"],
+    "correctIndex": 3,
+    "explanation": "Layer caching is sequential; if a frequently-changing package is in the first RUN, all subsequent layers invalidate; moving changing packages to later RUN commands preserves cache for earlier, stable layers; this is a balance between layer count and cache efficiency.",
+    "difficulty": "Medium-Hard",
+    "tags": ["dockerfile-optimization", "layer-ordering", "cache-strategy"]
+  }
+]

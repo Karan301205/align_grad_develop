@@ -14,7 +14,21 @@ const mockDb = {
   gigApplicants: [],
   gigMessages: [],
   gigSubmissions: [],
-  gigReviews: []
+  gigReviews: [],
+  skillDefinitions: [],
+  questions: [],
+  testSessions: [],
+  assessmentRecords: [],
+  skillRoadmaps: [],
+  communities: [],
+  communityMembers: [],
+  communityInvites: [],
+  posts: [],
+  medias: [],
+  postReactions: [],
+  postComments: [],
+  savedPosts: [],
+  postViews: []
 };
 
 // Seed initial jobs in mock db to make it instantly usable
@@ -67,6 +81,68 @@ mockDb.jobs.push({
   activeDays: 30,
   company: { name: "Vertex AI", verified: false },
   createdAt: new Date()
+});
+
+// Seed initial companies matching jobs
+mockDb.companies.push({
+  id: "company_aether",
+  userId: "recruiter_aether",
+  name: "Aether Corp",
+  logoUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80",
+  description: "Aether Corp builds state of the art aerospace guidance software and premium web portals.",
+  industry: "Aerospace & Software",
+  companySize: "51-200 employees",
+  website: "https://aether.example.com",
+  location: "San Francisco, CA",
+  foundedYear: "2018",
+  officialEmail: "hr@aether.example.com",
+  recruiterName: "Sarah Jenkins",
+  recruiterDesignation: "Lead Talent Partner",
+  socialLinks: { linkedin: "https://linkedin.com/company/aether", twitter: "https://twitter.com/aether" },
+  photos: [
+    "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&auto=format&fit=crop&q=80"
+  ],
+  verified: true
+});
+
+mockDb.companies.push({
+  id: "company_nebula",
+  userId: "recruiter_nebula",
+  name: "Nebula Systems",
+  logoUrl: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=150&auto=format&fit=crop&q=80",
+  description: "Nebula Systems develops decentralized and secure storage solutions using WebAssembly.",
+  industry: "Decentralized Infrastructure",
+  companySize: "11-50 employees",
+  website: "https://nebula.example.com",
+  location: "Seattle, WA",
+  foundedYear: "2021",
+  officialEmail: "careers@nebula.example.com",
+  recruiterName: "David Miller",
+  recruiterDesignation: "Chief Technical Recruiter",
+  socialLinks: { linkedin: "https://linkedin.com/company/nebula" },
+  photos: [
+    "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=600&auto=format&fit=crop&q=80"
+  ],
+  verified: true
+});
+
+mockDb.companies.push({
+  id: "company_vertex",
+  userId: "recruiter_vertex",
+  name: "Vertex AI",
+  logoUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80",
+  description: "Vertex AI focuses on deploying optimized machine learning models for low latency applications.",
+  industry: "Artificial Intelligence",
+  companySize: "1-10 employees",
+  website: "https://vertex.example.com",
+  location: "Austin, TX (Remote)",
+  foundedYear: "2024",
+  officialEmail: "jobs@vertex.example.com",
+  recruiterName: "Elena Rostova",
+  recruiterDesignation: "Co-Founder",
+  socialLinks: { linkedin: "https://linkedin.com/company/vertex" },
+  photos: [],
+  verified: false
 });
 
 // Seed initial student candidate to make recruiter searches instantly testable

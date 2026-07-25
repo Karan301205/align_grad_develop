@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Swarm",
+    "question": "A Docker Swarm cluster has 5 manager nodes. Two managers become unavailable simultaneously. Swarm can no longer make scheduling decisions. What is the quorum requirement that failed?",
+    "options": ["Swarm requires all managers to be available; if any manager is down, the cluster fails", "Swarm requires a strict majority (>50%) of managers; with 3 out of 5 down, quorum is lost", "Swarm requires 3 managers minimum; 2 remaining managers cannot form quorum", "Swarm continues with 3 out of 5 managers because it has a majority"],
+    "correctIndex": 1,
+    "explanation": "Swarm requires a strict majority (>50%) of managers; with 5 managers, at least 3 must be up; if 2 are down, only 3 remain (>50% of 5), so quorum is still maintained; if 3 are down, only 2 remain (<50%), causing quorum loss.",
+    "difficulty": "Medium",
+    "tags": ["docker-swarm-quorum", "manager-nodes", "cluster-resilience"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Swarm",
+    "question": "After `docker swarm init` on node A, you promote node B to a manager with `docker node promote nodeB`. Later, node A crashes and never recovers. The cluster has only 1 manager (node B). Can you add a third manager?",
+    "options": ["Yes, use `docker node promote nodeC` on the remaining manager to restore quorum with 2 managers", "No, the cluster has lost quorum and cannot accept new commands until node A recovers", "Yes, but only after waiting 30 minutes for the raft state to expire and node A to be auto-removed", "No, a single manager can only manage workers, not other managers"],
+    "correctIndex": 1,
+    "explanation": "With 1 manager remaining out of 2, quorum is lost (need >50%); Swarm refuses all commands, including promoting new managers, until quorum is restored; you must recover node A or force a new cluster.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker-swarm-quorum", "manager-recovery", "cluster-consensus"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Swarm",
+    "question": "A Docker Swarm service is created with `docker service create --replicas=3 --mode replicated app`. One replica fails and is immediately rescheduled to a different node. After 10 seconds, the failed replica exits on the new node as well. What is the issue?",
+    "options": ["The service has a resource constraint that the new node does not meet; use `docker node update --resource-limit` to adjust", "The application has a startup failure (e.g., missing config, permission denied) that causes it to exit; fix the application", "Swarm is repeatedly rescheduling the replica; check `docker service ps app` to see the restart count", "The node the replica was rescheduled to is out of resources; add memory with `docker node update`"],
+    "correctIndex": 1,
+    "explanation": "If a replica fails on one node and immediately fails on another node, the issue is likely in the application itself (missing files, bad config, permission error), not the infrastructure; check the service logs with `docker service logs app` to diagnose the startup failure.",
+    "difficulty": "Medium",
+    "tags": ["docker-swarm-services", "replica-scheduling", "service-debugging"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Swarm",
+    "question": "A Swarm service uses `update_config: {parallelism: 2, delay: 10s}` for updates. With 10 replicas, how long does a full rolling update take at minimum?",
+    "options": ["10 seconds (delay between 2 parallel updates)", "50 seconds (5 parallel groups of 2, each with 10s delay)", "90 seconds (2 updated every 10s for 5 iterations)", "It depends on how long each update takes to complete"],
+    "correctIndex": 2,
+    "explanation": "With parallelism=2 and 10 replicas, there are 5 iterations (10/2=5); each iteration waits 10s before starting the next; total time = (5-1) * 10 + time for final iteration = 40s minimum + update time; if updates are instant, approximately 40s.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker-swarm-updates", "rolling-deployment", "update-strategy"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Swarm",
+    "question": "A service is created with `docker service create --constraint node.role==manager app`. No replicas are scheduled. There are 3 manager nodes and 10 worker nodes. What is the issue?",
+    "options": ["Constraints are evaluated at service creation time; if no node matches, the service is created but no replicas are scheduled", "The constraint syntax is invalid; use `node.labels.role==manager` instead", "Manager nodes are reserved for orchestration and cannot run user services", "The service was successfully created but is waiting for a manager node to become available"],
+    "correctIndex": 0,
+    "explanation": "The constraint is valid but the intent is probably wrong; manager nodes are available for scheduling unless explicitly restricted; use worker nodes instead with `--constraint node.role==worker`, or remove the constraint to allow scheduling on any node.",
+    "difficulty": "Medium",
+    "tags": ["docker-swarm-constraints", "node-selection", "service-scheduling"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Swarm",
+    "question": "After removing a node from a Swarm cluster with `docker node rm --force nodeX`, the service replicas on that node are lost and not rescheduled. What is the correct way to drain a node before removal?",
+    "options": ["Use `docker node update --availability=drain nodeX` to gracefully move replicas before removing", "Remove the node with `docker node rm --drain` flag", "Manually migrate each replica with `docker service update --node-id nodeY service`", "Drain with `docker swarm leave --force` on the node itself, then remove from the manager"],
+    "correctIndex": 0,
+    "explanation": "`docker node update --availability=drain nodeX` sets the node to drain mode, preventing new replicas from being scheduled and gracefully rescheduling existing replicas to other nodes; after draining, `docker node rm nodeX` removes it cleanly without data loss.",
+    "difficulty": "Medium",
+    "tags": ["docker-swarm-node-removal", "graceful-shutdown", "replica-migration"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Swarm",
+    "question": "A Swarm service has `docker service create --env DB_PASS=mysecret app`. The secret is visible in `docker service inspect app`. After updating with `docker service update --env-add SECRET_KEY=newsecret app`, both DB_PASS and SECRET_KEY are visible. Is this a security issue?",
+    "options": ["Yes, environment variables in services are plaintext and visible to anyone with Swarm access; use Docker Secrets instead", "No, environment variables are encrypted in the Swarm database", "Yes, but only managers can see them; workers see only encrypted values", "No, Docker Secrets are just for sensitive configuration; regular env vars are fine for non-sensitive data"],
+    "correctIndex": 0,
+    "explanation": "Environment variables in services are stored and transmitted in plaintext; use `docker secret create` to create a secret, then `docker service create --secret DB_PASS` to mount it into the container as a file; this encrypts the value in transit and at rest.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker-swarm-secrets", "environment-variables", "security"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Swarm",
+    "question": "A service is updated with `docker service update --image newimage:v2 app`. The update completes successfully. Later, an operator notices a bug and wants to rollback to the previous image. Is there a built-in rollback command?",
+    "options": ["Yes, use `docker service rollback app` to revert to the previous image", "No, Docker Swarm does not support automatic rollback; re-run the previous `docker service update` command manually", "Yes, use `docker service update --rollback app` to revert", "No, but you can use `docker service update --image oldimage:v1 app` to manually revert"],
+    "correctIndex": 3,
+    "explanation": "Docker Swarm does not have a built-in `docker service rollback` command; manually re-run the update with the previous image; for automated rollback, use orchestration tools (Kubernetes) or CI/CD pipelines that track version history.",
+    "difficulty": "Medium",
+    "tags": ["docker-swarm-updates", "rollback-strategy", "deployment-management"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Swarm",
+    "question": "Two Swarm clusters (dev and prod) are running independently. A service definition from dev needs to be migrated to prod. Using `docker service create` on prod with the same args (image, replicas, networks) will create an identical service. Is this a good practice?",
+    "options": ["Yes, manually recreating the service definition ensures consistency between environments", "No, Docker Swarm does not support exporting/importing services; this is a limitation of Swarm compared to Kubernetes", "Yes, but it is error-prone; use Infrastructure as Code (IaC) tools (Terraform, Ansible) to define and deploy services", "No, services must be unique per cluster; deployment to prod requires code review and approval"],
+    "correctIndex": 2,
+    "explanation": "Manual recreation is error-prone; use IaC tools (Terraform, Ansible, or custom scripts) to define services declaratively and deploy them consistently across environments, reducing human error and improving traceability.",
+    "difficulty": "Medium-Hard",
+    "tags": ["docker-swarm-deployment", "infrastructure-as-code", "environment-consistency"]
+  },
+  {
+    "skillName": "Docker",
+    "subtopic": "Docker Swarm",
+    "question": "A Swarm service uses a global scheduling mode with `docker service create --mode global app`. After adding 10 new worker nodes to the cluster, the service still shows `10/10 running` replicas (unchanged count). Do you need to take any action?",
+    "options": ["No, global mode automatically schedules one replica per node; the 10 new nodes will have replicas scheduled within seconds", "Yes, use `docker service update --mode replicated app` to force rescheduling on new nodes", "Yes, use `docker service scale app=20` to add replicas for the new nodes", "No, but the service will not use the new nodes; they must be explicitly added with `docker service pin`"],
+    "correctIndex": 0,
+    "explanation": "Global mode automatically runs one replica per node; when new nodes join, Swarm immediately schedules replicas on them; no manual action is needed.",
+    "difficulty": "Medium",
+    "tags": ["docker-swarm-global-mode", "auto-scaling", "scheduling"]
+  }
+]

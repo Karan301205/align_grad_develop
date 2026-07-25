@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "HTML",
+    "subtopic": "Form Handling",
+    "question": "A form has `<input type='email' name='email'>` but the field is not submitted. Why might the name attribute be missing?",
+    "options": ["input without name is not submitted because the form has no reference to it", "input without name is submitted with a default name", "the type email prevents submission", "missing name causes a form validation error"],
+    "correctIndex": 0,
+    "explanation": "Form controls without a `name` attribute are excluded from form submission; the browser pairs `name` with the value to create the form data.",
+    "difficulty": "Medium",
+    "tags": ["form-submission", "name-attribute"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Form Handling",
+    "question": "A form uses `<input type='submit' value='Send'>` and `<input type='reset'>`. The reset button appears blank. Why?",
+    "options": ["reset type does not support value attribute", "reset requires an explicit value to display text", "the value is set via label instead of the value attribute", "reset input is not rendered"],
+    "correctIndex": 1,
+    "explanation": "The `<input type='reset'>` without a `value` attribute displays a default localized label (e.g., 'Reset'); to customize, set an explicit `value`.",
+    "difficulty": "Medium",
+    "tags": ["input-types", "reset-button"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Form Handling",
+    "question": "A form field is defined as `<input type='text' value='placeholder'><label>Enter name</label>`. Why is this an accessibility issue?",
+    "options": ["value and placeholder should not both be used", "label must come before input in the html", "the value is confused with user input; placeholder should be used instead", "label is not associated with the input via for and id"],
+    "correctIndex": 3,
+    "explanation": "A label without an explicit association (via `for` and `id`) is not semantically linked to the input, breaking accessibility for screen readers.",
+    "difficulty": "Medium",
+    "tags": ["form-labels", "accessibility"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Form Handling",
+    "question": "A form has `<form method='GET'><input type='password' name='pwd'></form>`. Why is this a security issue?",
+    "options": ["get method sends data in the url query string, exposing the password", "password fields cannot be used with get", "the form is invalid without a submit button", "password data is always encrypted regardless of method"],
+    "correctIndex": 0,
+    "explanation": "GET method appends form data to the URL, making passwords visible in browser history, logs, and referrer headers; POST with HTTPS is required for sensitive data.",
+    "difficulty": "Medium",
+    "tags": ["form-methods", "password-field", "security"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Form Handling",
+    "question": "A form has `<fieldset disabled><input type='text' name='field'></fieldset>`. When submitted, what value is sent?",
+    "options": ["the field value is sent normally", "disabled fieldset disables all children, so no value is sent", "an empty string is sent for the disabled field", "the form submission is blocked entirely"],
+    "correctIndex": 1,
+    "explanation": "A disabled `<fieldset>` disables all form controls within it; disabled controls are excluded from form submission.",
+    "difficulty": "Medium",
+    "tags": ["fieldset-disabled", "form-submission"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Form Handling",
+    "question": "A form uses `<input type='checkbox' name='agree' value='yes'>`. If unchecked and submitted, what is sent?",
+    "options": ["value='yes' is sent because the input has a value", "nothing is sent because unchecked checkboxes are excluded", "an empty value is sent for the checkbox", "name='agree' is sent with no value"],
+    "correctIndex": 1,
+    "explanation": "Unchecked checkboxes are not included in form submission at all; only checked checkboxes send their `name` and `value` pair.",
+    "difficulty": "Medium",
+    "tags": ["checkbox-input", "form-submission"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Form Handling",
+    "question": "A form has two submit buttons: `<button type='submit' name='action' value='save'>Save</button>` and `<button type='submit' name='action' value='draft'>Draft</button>`. Which button's value is submitted?",
+    "options": ["both button values are submitted", "only the first button's value is submitted", "the button that was clicked submits its value", "buttons without value attribute are not submitted"],
+    "correctIndex": 2,
+    "explanation": "When a form has multiple submit buttons, only the clicked button's `name` and `value` are included in form submission.",
+    "difficulty": "Medium",
+    "tags": ["submit-button", "multiple-buttons"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Form Handling",
+    "question": "A form uses `<input type='email' required>`. The user submits empty. What happens?",
+    "options": ["the form is submitted with an empty email field", "the browser blocks submission and shows a validation message", "javascript validation is triggered", "the server receives the submission and validates"],
+    "correctIndex": 1,
+    "explanation": "HTML5 form validation (`required`, `type`, etc.) is enforced by the browser; empty required fields trigger a validation error before submission.",
+    "difficulty": "Medium",
+    "tags": ["form-validation", "required-attribute"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Form Handling",
+    "question": "A form uses `<input type='text' inputmode='numeric'>`. Why might this not enforce numeric-only input?",
+    "options": ["inputmode is a hint for on-screen keyboards and does not prevent non-numeric input", "inputmode is deprecated", "type='text' overrides inputmode", "browsers ignore inputmode on desktop"],
+    "correctIndex": 0,
+    "explanation": "The `inputmode` attribute hints to mobile keyboards to show a numeric layout, but does not prevent non-numeric characters; `type='number'` enforces numeric validation.",
+    "difficulty": "Medium",
+    "tags": ["inputmode", "input-types", "validation"]
+  },
+  {
+    "skillName": "HTML",
+    "subtopic": "Form Handling",
+    "question": "A form field uses `<input type='text' maxlength='5'>`. A user pastes '123456'. What is submitted?",
+    "options": ["the entire pasted text '123456' is submitted because maxlength does not apply to paste", "only the first 5 characters '12345' are submitted", "the paste is rejected and the original field value is preserved", "behavior varies by browser"],
+    "correctIndex": 1,
+    "explanation": "The `maxlength` attribute limits input length regardless of paste operations; pasted text is truncated to the maximum length.",
+    "difficulty": "Medium",
+    "tags": ["maxlength", "form-input"]
+  }
+]

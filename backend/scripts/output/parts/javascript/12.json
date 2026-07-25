@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Module Patterns",
+    "question": "What does this IIFE pattern achieve?\n```javascript\nconst counter = (function() {\n  let count = 0;\n  return {\n    increment: () => ++count,\n    get: () => count\n  };\n})();\nconsole.log(counter.increment());\n```",
+    "options": [
+      "Creates a global namespace pollution",
+      "Encapsulates count as private state",
+      "Executes the function multiple times",
+      "Exposes internal function directly"
+    ],
+    "correctIndex": 1,
+    "explanation": "IIFE (Immediately Invoked Function Expression) creates closure; count is private.",
+    "difficulty": "Medium",
+    "tags": ["IIFE", "module-pattern", "encapsulation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Module Patterns",
+    "question": "What is the output?\n```javascript\nconst myModule = (() => {\n  const privateVar = 'secret';\n  function privateFunc() { return privateVar; }\n  return {\n    public: () => privateFunc()\n  };\n})();\nconsole.log(myModule.privateVar);\nconsole.log(myModule.public());\n```",
+    "options": [
+      "secret secret because all properties exposed",
+      "undefined secret because privateVar is not exported",
+      "ReferenceError due to private property access",
+      "null undefined because module syntax fails"
+    ],
+    "correctIndex": 1,
+    "explanation": "Only returned properties are public; privateVar remains inaccessible outside the closure.",
+    "difficulty": "Medium",
+    "tags": ["module-pattern", "public-private", "encapsulation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Module Patterns",
+    "question": "How does this reveal pattern work?\n```javascript\nconst calc = (() => {\n  const add = (a, b) => a + b;\n  const subtract = (a, b) => a - b;\n  return { add, subtract };\n})();\nconsole.log(calc.add(5, 3));\n```",
+    "options": [
+      "Exposes all functions directly without privacy",
+      "Selectively reveals add and subtract publicly",
+      "Hides add and subtract from access",
+      "Creates separate modules for each function"
+    ],
+    "correctIndex": 1,
+    "explanation": "Revealing module pattern explicitly returns chosen methods; others remain private.",
+    "difficulty": "Medium",
+    "tags": ["revealing-module-pattern", "selective-export", "encapsulation"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Module Patterns",
+    "question": "What is the difference?\n```javascript\n// CommonJS (Node.js)\nmodule.exports = { name: 'test' };\n\n// ES6 Modules\nexport const name = 'test';\n```",
+    "options": [
+      "Both are identical in functionality",
+      "CommonJS uses module.exports; ES6 uses export",
+      "CommonJS is asynchronous; ES6 is synchronous",
+      "ES6 is deprecated in favor of CommonJS"
+    ],
+    "correctIndex": 1,
+    "explanation": "CommonJS uses module.exports; ES6 modules use export/import statements.",
+    "difficulty": "Medium",
+    "tags": ["CommonJS", "ES6-modules", "module-systems"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Module Patterns",
+    "question": "What does this do?\n```javascript\nconst myModule = {};\n(function(mod) {\n  mod.greet = function() { return 'hello'; };\n})(myModule);\nconsole.log(myModule.greet());\n```",
+    "options": [
+      "Creates a new object inside myModule",
+      "Adds greet method to passed myModule object",
+      "Returns myModule without modification",
+      "Throws error due to parameter mismatch"
+    ],
+    "correctIndex": 1,
+    "explanation": "IIFE receives myModule; augments it with greet method; modifications persist.",
+    "difficulty": "Medium",
+    "tags": ["IIFE", "augmenting-modules", "parameter-passing"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Module Patterns",
+    "question": "What is the issue with this pattern?\n```javascript\nconst modules = {};\nfunction define(name, deps, factory) {\n  modules[name] = factory(...deps.map(d => modules[d]));\n}\ndefine('math', [], () => ({ add: (a, b) => a + b }));\nconsole.log(modules.math.add(2, 3));\n```",
+    "options": [
+      "This is invalid module pattern syntax",
+      "This is a simple AMD module loader",
+      "Dependencies are not properly resolved",
+      "Factory function has incorrect signature"
+    ],
+    "correctIndex": 1,
+    "explanation": "This implements a basic AMD (Asynchronous Module Definition) module system.",
+    "difficulty": "Medium-Hard",
+    "tags": ["AMD", "module-loader", "dependency-injection"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Module Patterns",
+    "question": "What is logged?\n```javascript\nconst logger = (() => {\n  const log = (msg) => console.log(msg);\n  return { log };\n})();\nlogger.log('test');\nconsole.log(typeof logger.log);\n```",
+    "options": [
+      "test function because log is exposed",
+      "test undefined because log is private",
+      "undefined function due to IIFE failure",
+      "null object because module is empty"
+    ],
+    "correctIndex": 0,
+    "explanation": "Module exposes log function; console.log prints 'test' first, then 'function'.",
+    "difficulty": "Medium",
+    "tags": ["IIFE", "module-pattern", "function-exposure"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Module Patterns",
+    "question": "What is the benefit of this pattern?\n```javascript\nconst counter = (() => {\n  let _count = 0;\n  return {\n    increment() { return ++this._count; },\n    getCount() { return this._count; }\n  };\n})();\n```",
+    "options": [
+      "No benefit because underscore is just naming",
+      "Encapsulation; _count is not directly accessible",
+      "Performance improvement through optimization",
+      "Prevents all external access to count"
+    ],
+    "correctIndex": 1,
+    "explanation": "Underscore convention signals private intent; closure prevents direct access outside.",
+    "difficulty": "Medium",
+    "tags": ["naming-conventions", "encapsulation", "module-pattern"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Module Patterns",
+    "question": "What is the output?\n```javascript\nconst utils = (() => {\n  const version = '1.0';\n  return {\n    getVersion: () => version,\n    setVersion: (v) => { version = v; }\n  };\n})();\nutils.setVersion('2.0');\nconsole.log(utils.getVersion());\n```",
+    "options": [
+      "1.0 because version is immutable",
+      "2.0 because setVersion updates closure variable",
+      "undefined due to invalid setVersion call",
+      "null because version cannot be modified"
+    ],
+    "correctIndex": 1,
+    "explanation": "Both methods access same closure variable; setVersion updates it for getVersion.",
+    "difficulty": "Medium",
+    "tags": ["closures", "module-pattern", "state-management"]
+  },
+  {
+    "skillName": "JavaScript",
+    "subtopic": "Module Patterns",
+    "question": "How does this singleton pattern work?\n```javascript\nconst Singleton = (() => {\n  let instance;\n  return {\n    getInstance() {\n      if (!instance) {\n        instance = { data: 'unique' };\n      }\n      return instance;\n    }\n  };\n})();\nconst s1 = Singleton.getInstance();\nconst s2 = Singleton.getInstance();\nconsole.log(s1 === s2);\n```",
+    "options": [
+      "false because each call creates new instance",
+      "true because instance is cached in closure",
+      "undefined due to singleton pattern failure",
+      "null because getInstance returns null"
+    ],
+    "correctIndex": 1,
+    "explanation": "Singleton ensures only one instance; closure caches and reuses it.",
+    "difficulty": "Medium-Hard",
+    "tags": ["singleton-pattern", "closure", "instance-caching"]
+  }
+]

@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Persistent Volumes",
+    "question": "A PersistentVolume is created with accessMode: ReadWriteOnce. Two pods try to mount it simultaneously in the same namespace. What happens?",
+    "options": [
+      "Both pods mount successfully and share the volume",
+      "The first pod succeeds; the second pod's PVC remains Pending until the first pod releases the volume",
+      "Both pods mount but only the first has write access",
+      "An error occurs and the PV is marked as Failed"
+    ],
+    "correctIndex": 1,
+    "explanation": "ReadWriteOnce means only one pod can claim the PV at a time; the second PVC remains Pending until the first pod unmounts.",
+    "difficulty": "Medium",
+    "tags": ["pv", "pvc", "accessmode", "volumemount"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Persistent Volumes",
+    "question": "You delete a PersistentVolumeClaim but the PersistentVolume it was bound to remains. The PV status shows 'Released'. What should you do to reclaim it?",
+    "options": [
+      "The PV will automatically become Available after a few seconds",
+      "Set the PV's persistentVolumeReclaimPolicy appropriately; if set to Retain, you must manually delete the PV to reclaim its storage",
+      "Wait for the cluster to garbage collect the PV",
+      "Create a new PVC with the same selector as the deleted one"
+    ],
+    "correctIndex": 1,
+    "explanation": "The reclaimPolicy determines what happens to the PV after the PVC is deleted (Delete auto-removes, Retain keeps it manually recoverable).",
+    "difficulty": "Medium-Hard",
+    "tags": ["pv", "pvc", "reclaimpolicy"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Persistent Volumes",
+    "question": "A PVC requests 10Gi of storage, but all available PVs have only 5Gi. The PVC remains Pending indefinitely. How do you resolve this?",
+    "options": [
+      "Create a larger PV and the PVC will automatically bind",
+      "Scale down the application to use less storage",
+      "Use a storageClassName that dynamically provisions PVs of the required size",
+      "Manually delete smaller PVs to make room"
+    ],
+    "correctIndex": 2,
+    "explanation": "Static PVs can't satisfy mismatched requests; dynamic provisioning via StorageClass creates PVs on-demand with the correct size.",
+    "difficulty": "Medium",
+    "tags": ["pvc", "pv", "storageclass", "dynamic-provisioning"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Persistent Volumes",
+    "question": "A Deployment uses a PVC with accessMode: ReadWriteOnce. You scale the Deployment to 3 replicas. What happens to the PVC?",
+    "options": [
+      "All three pods share the same PVC",
+      "Pods 2 and 3 fail to mount the PVC because it's already bound to pod 1",
+      "Kubernetes automatically creates two additional PVCs for pods 2 and 3",
+      "The Deployment is rejected before being created"
+    ],
+    "correctIndex": 1,
+    "explanation": "A single PVC with ReadWriteOnce can only be mounted by one pod; additional pod replicas cannot mount the same volume and remain Pending.",
+    "difficulty": "Medium",
+    "tags": ["deployment", "pvc", "accessmode", "scaling"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Persistent Volumes",
+    "question": "You create a StorageClass that sets provisioner: 'kubernetes.io/aws-ebs'. A PVC is created using this class. Why does the pod using the PVC fail to start?",
+    "options": [
+      "The AWS EBS provisioner is not installed in the cluster",
+      "The cluster nodes do not have AWS IAM permissions to create EBS volumes",
+      "The pod's security policy forbids volume mounts",
+      "The PVC is waiting for AWS to acknowledge the volume creation"
+    ],
+    "correctIndex": 1,
+    "explanation": "StorageClass provisioners require cloud credentials and permissions; without proper AWS IAM permissions, volume provisioning fails and the PVC remains Pending.",
+    "difficulty": "Medium-Hard",
+    "tags": ["storageclass", "provisioner", "cloud-permissions"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Persistent Volumes",
+    "question": "A PVC is bound to a PV, and a pod is using the mounted volume. You delete the PV with kubectl delete pv. What happens to the pod and its data?",
+    "options": [
+      "The pod is immediately terminated and data is lost",
+      "The pod continues running; data remains accessible until the PVC is deleted",
+      "The pod's I/O operations begin failing, but the pod continues running",
+      "An error occurs and the PV deletion is prevented"
+    ],
+    "correctIndex": 2,
+    "explanation": "Deleting a PV doesn't immediately disconnect active mounts; I/O operations fail when accessing the deleted underlying storage, but the pod remains running.",
+    "difficulty": "Hard",
+    "tags": ["pv", "deletion", "data-safety"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Persistent Volumes",
+    "question": "A PVC is created with a label selector to bind to a PV with matching labels. But the PVC remains Unbound even though a matching PV exists. What might be wrong?",
+    "options": [
+      "Label selectors are not supported for PVC-to-PV binding",
+      "The PV's accessMode or storage capacity doesn't match the PVC's request",
+      "The PVC and PV are in different namespaces",
+      "Kubernetes requires manual binding; use kubectl bind command"
+    ],
+    "correctIndex": 1,
+    "explanation": "PV-to-PVC binding requires matching accessMode, storageClassName (if specified), and capacity in addition to label selectors.",
+    "difficulty": "Medium-Hard",
+    "tags": ["pv", "pvc", "binding", "labelselector"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Persistent Volumes",
+    "question": "You mount a PVC in a Deployment with subPath: 'config/app.conf'. When the pod starts, it sees only that file mounted at the mount point, not the entire volume. Is this the expected behavior?",
+    "options": [
+      "No, subPath should mount the entire directory tree",
+      "Yes, subPath mounts a specific file or directory, hiding the rest of the volume",
+      "subPath is only for Read-only volumes, so it shouldn't hide anything",
+      "No, this is a bug in the cluster"
+    ],
+    "correctIndex": 1,
+    "explanation": "subPath mounts a specific file or subdirectory within the volume, effectively masking other contents at that mount point.",
+    "difficulty": "Medium",
+    "tags": ["pvc", "subpath", "volume-mount"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Persistent Volumes",
+    "question": "A snapshot of a PVC is created for backup, but the cluster loses the PVC and the underlying PV. Can you restore the data using the snapshot?",
+    "options": [
+      "Yes, if the VolumeSnapshotClass provisioner supports restore operations",
+      "No, snapshots only capture metadata, not actual data",
+      "Yes, but only if the PV type supports snapshots",
+      "No, snapshots are lost when the PVC is deleted"
+    ],
+    "correctIndex": 0,
+    "explanation": "VolumeSnapshot stores point-in-time copies of PVC data; the provisioner can restore data to a new PVC as long as the snapshot still exists.",
+    "difficulty": "Medium-Hard",
+    "tags": ["snapshot", "backup", "restore", "pvc"]
+  },
+  {
+    "skillName": "Kubernetes",
+    "subtopic": "Persistent Volumes",
+    "question": "A local PersistentVolume is created on a single node. The pod using it is evicted from that node and reschedules to another node. What happens to the pod?",
+    "options": [
+      "The pod is rescheduled and continues running on the new node with the same data",
+      "The pod's PVC remains Pending on the new node because the local PV is tied to the original node",
+      "Kubernetes automatically replicates the local volume to the new node",
+      "The pod is scheduled but cannot mount the volume"
+    ],
+    "correctIndex": 1,
+    "explanation": "Local PVs are bound to specific nodes; when a pod moves to a different node, the local PV is unreachable, keeping the PVC Pending.",
+    "difficulty": "Medium-Hard",
+    "tags": ["local-pv", "pod-affinity", "eviction"]
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Hash Tables",
+    "question": "In a hash table with n elements and table size m, average-case lookup requires O(1) time. What assumption must hold about the hash function?",
+    "options": ["the hash function must be fast", "the hash function must distribute keys uniformly across m slots", "the hash function must be deterministic", "the hash function must use prime numbers"],
+    "correctIndex": 1,
+    "explanation": "O(1) average-case lookup assumes a good hash function that distributes keys evenly; poor distribution causes collisions and degrades to O(n).",
+    "difficulty": "Medium",
+    "tags": ["hash-function-properties", "uniform-distribution"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Hash Tables",
+    "question": "A hash table uses open addressing (probing) instead of separate chaining. If collisions occur, probing must find an empty slot. What is the worst-case lookup time if the table is nearly full?",
+    "options": ["constant time", "logarithmic time", "linear time", "quadratic time"],
+    "correctIndex": 2,
+    "explanation": "In worst case, nearly-full table forces probing through most slots; lookup is O(n) linear time when load factor approaches 1.",
+    "difficulty": "Medium-Hard",
+    "tags": ["open-addressing", "load-factor"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Hash Tables",
+    "question": "A hash table dynamically resizes when load factor (n/m) exceeds a threshold (e.g., 0.75). Resizing from m to 2m requires rehashing all n elements. What is the time complexity of one resize operation?",
+    "options": ["constant time", "linear time in n", "linear time in m", "quadratic time"],
+    "correctIndex": 1,
+    "explanation": "Rehashing n elements into a new table of size 2m requires computing hash for each element and inserting, giving O(n) time.",
+    "difficulty": "Medium",
+    "tags": ["dynamic-resizing", "rehashing"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Hash Tables",
+    "question": "A hash table uses separate chaining for collision resolution. If all n keys hash to the same slot, what is the lookup time?",
+    "options": ["constant time", "logarithmic time", "linear time", "quadratic time"],
+    "correctIndex": 2,
+    "explanation": "If all n keys collide into one chain, searching that chain is O(n) linear time in worst case.",
+    "difficulty": "Medium",
+    "tags": ["separate-chaining", "collision-worst-case"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Hash Tables",
+    "question": "Double hashing uses two hash functions h1 and h2 to probe: h(k, i) = (h1(k) + i * h2(k)) mod m. Why is this better than linear probing for clustering?",
+    "options": ["double hashing is always faster", "double hashing spreads probes better and reduces primary clustering", "double hashing uses less space", "both are equally good"],
+    "correctIndex": 1,
+    "explanation": "Linear probing clusters keys together; double hashing uses a second hash function to spread probe sequences, reducing clustering.",
+    "difficulty": "Medium-Hard",
+    "tags": ["double-hashing", "clustering-prevention"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Hash Tables",
+    "question": "Implementing a hash map for a spell-checker that maps misspellings to suggestions: if n misspellings are stored and k suggestions per misspelling are stored, what is space complexity?",
+    "options": ["linear in n", "linear in n times k", "quadratic in n", "logarithmic in n and k"],
+    "correctIndex": 1,
+    "explanation": "Each of n misspellings maps to k suggestions; total space is O(n * k) for storing all suggestions.",
+    "difficulty": "Medium",
+    "tags": ["hash-map-design", "space-usage"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Hash Tables",
+    "question": "A rolling hash computes a hash of a substring and updates it efficiently as the window slides. What is the time complexity of hashing all n-k+1 substrings of length k?",
+    "options": ["quadratic time", "linear time", "linearithmic time", "logarithmic time"],
+    "correctIndex": 1,
+    "explanation": "First substring hash is O(k); updating hash for each new substring is O(1); total for n-k+1 windows is O(k + (n - k)) = O(n) linear.",
+    "difficulty": "Medium-Hard",
+    "tags": ["rolling-hash", "substring-matching"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Hash Tables",
+    "question": "A hash table stores n elements using linear probing with table size m = 2n. What is the expected number of probes for a successful search?",
+    "options": ["1 probe on average", "approximately 1.5 probes", "approximately log n probes", "depends on the hash function"],
+    "correctIndex": 1,
+    "explanation": "With load factor α = n/(2n) = 0.5, expected probes for successful search is (1 + 1/(1 - α))/2 ≈ 1.5 for linear probing.",
+    "difficulty": "Medium-Hard",
+    "tags": ["load-factor", "probe-analysis"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Hash Tables",
+    "question": "Chaining with a sorted list at each slot allows binary search within chains. Compared to unsorted chains, what is the time complexity trade-off?",
+    "options": ["insertion becomes O(n)", "lookup becomes O(log n) per chain but insertion becomes O(n)", "deletion becomes O(1)", "no trade-off"],
+    "correctIndex": 1,
+    "explanation": "Sorted chains allow binary search (O(log chain_length)) but require maintaining sort order during insertion, which is O(chain_length) = O(n) worst case.",
+    "difficulty": "Medium-Hard",
+    "tags": ["sorted-chains", "binary-search"]
+  },
+  {
+    "skillName": "Data Structures & Algorithms",
+    "subtopic": "Hash Tables",
+    "question": "A cryptographic hash function outputs fixed-size digests (e.g., 256 bits) and is collision-resistant. What is the time complexity of verifying a file using a hash?",
+    "options": ["constant time", "logarithmic time", "linear time in file size", "quadratic time"],
+    "correctIndex": 2,
+    "explanation": "Hashing a file requires reading and processing all bytes; complexity is O(file_size) linear, not O(1), even though hash is constant-size.",
+    "difficulty": "Medium",
+    "tags": ["cryptographic-hash", "file-verification"]
+  }
+]

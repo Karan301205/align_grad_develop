@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "Go",
+    "subtopic": "System Programming",
+    "question": "package main\nimport (\n  \"os\"\n  \"syscall\"\n)\nfunc main() {\n  f, _ := os.Open(\"/tmp/test.txt\")\n  defer f.Close()\n  data := make([]byte, 100)\n  n, err := f.Read(data)\n  if err != nil {\n    println(\"error\")\n  }\n}",
+    "options": ["might error if file is unreadable or EOF", "always succeeds", "always errors", "panics"],
+    "correctIndex": 0,
+    "explanation": "os.Open may fail if file doesn't exist; Read errors on I/O issues or EOF; both must be checked for robustness.",
+    "difficulty": "Medium",
+    "tags": ["file-io", "error-handling", "os-api"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "System Programming",
+    "question": "package main\nimport (\n  \"os\"\n  \"syscall\"\n)\nfunc main() {\n  syscall.Umask(0077)\n  f, _ := os.Create(\"/tmp/secret.txt\")\n  defer f.Close()\n  f.WriteString(\"data\")\n}",
+    "options": ["file created with mode 0600", "file created with mode 0644", "panics", "permission denied"],
+    "correctIndex": 0,
+    "explanation": "Umask(0077) restricts file creation to owner-only permissions; os.Create with default mode 0666 masked by 0077 yields 0600.",
+    "difficulty": "Medium-Hard",
+    "tags": ["umask", "file-permissions", "syscall"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "System Programming",
+    "question": "package main\nimport (\n  \"os\"\n  \"os/exec\"\n)\nfunc main() {\n  cmd := exec.Command(\"ls\", \"-la\")\n  cmd.Stdout = os.Stdout\n  err := cmd.Run()\n  if err != nil {\n    println(\"error\")\n  }\n}",
+    "options": ["prints ls output to stdout", "panics", "silent failure", "compilation error"],
+    "correctIndex": 0,
+    "explanation": "exec.Command prepares a subprocess; setting Stdout to os.Stdout directs output there; Run() executes and waits for exit.",
+    "difficulty": "Medium",
+    "tags": ["subprocess", "exec", "stdout"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "System Programming",
+    "question": "package main\nimport (\n  \"os\"\n  \"os/signal\"\n  \"syscall\"\n)\nfunc main() {\n  sigCh := make(chan os.Signal, 1)\n  signal.Notify(sigCh, syscall.SIGINT)\n  <-sigCh\n  println(\"interrupted\")\n}",
+    "options": ["prints interrupted on Ctrl+C", "ignores Ctrl+C", "panics on signal", "prints interrupted immediately"],
+    "correctIndex": 0,
+    "explanation": "signal.Notify sends SIGINT to channel; receive blocks until signal arrives, then resumes execution.",
+    "difficulty": "Medium",
+    "tags": ["signals", "sigint", "notification"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "System Programming",
+    "question": "package main\nimport (\n  \"os\"\n)\nfunc main() {\n  val := os.Getenv(\"MISSING_VAR\")\n  if val == \"\" {\n    println(\"not found\")\n  } else {\n    println(val)\n  }\n}",
+    "options": ["prints not found", "panics", "prints empty string", "returns error"],
+    "correctIndex": 0,
+    "explanation": "Getenv returns empty string if variable unset; to distinguish unset from empty, use Getenv with ok check.",
+    "difficulty": "Medium",
+    "tags": ["environment", "getenv", "zero-value"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "System Programming",
+    "question": "package main\nimport (\n  \"os\"\n)\nfunc main() {\n  val, ok := os.LookupEnv(\"PATH\")\n  if ok {\n    println(\"found\")\n  } else {\n    println(\"missing\")\n  }\n}",
+    "options": ["prints found", "prints missing", "panics", "prints empty"],
+    "correctIndex": 0,
+    "explanation": "LookupEnv returns (value, bool); second return is true if variable set, false if unset, distinguishing empty from missing.",
+    "difficulty": "Medium",
+    "tags": ["environment", "lookupenv", "ok-pattern"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "System Programming",
+    "question": "package main\nimport (\n  \"os\"\n  \"path/filepath\"\n)\nfunc main() {\n  wd, _ := os.Getwd()\n  p := filepath.Join(wd, \"file.txt\")\n  println(p)\n}",
+    "options": ["prints absolute path to file.txt in current directory", "prints relative path", "panics", "prints wd only"],
+    "correctIndex": 0,
+    "explanation": "Getwd returns absolute working directory; filepath.Join concatenates safely with OS separators, yielding absolute path.",
+    "difficulty": "Medium",
+    "tags": ["working-directory", "filepath", "absolute-path"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "System Programming",
+    "question": "package main\nimport (\n  \"os\"\n  \"syscall\"\n)\nfunc main() {\n  stat, _ := os.Stat(\"/tmp\")\n  if stat.IsDir() {\n    println(\"directory\")\n  } else {\n    println(\"file\")\n  }\n}",
+    "options": ["prints directory", "prints file", "panics", "compilation error"],
+    "correctIndex": 0,
+    "explanation": "os.Stat returns FileInfo; IsDir() checks file mode bits and returns true for directories.",
+    "difficulty": "Medium",
+    "tags": ["file-info", "stat", "directory-check"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "System Programming",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"os/exec\"\n)\nfunc main() {\n  cmd := exec.Command(\"sh\", \"-c\", \"echo hello && exit 1\")\n  err := cmd.Run()\n  if err != nil {\n    fmt.Println(\"exit code:\", err)\n  }\n}",
+    "options": ["prints exit code with exit status", "panics", "prints nothing", "prints hello then error"],
+    "correctIndex": 0,
+    "explanation": "cmd.Run() returns error with exit code; non-zero exit is treated as error, containing exit status in stderr or error message.",
+    "difficulty": "Medium-Hard",
+    "tags": ["subprocess", "exit-code", "error-handling"]
+  },
+  {
+    "skillName": "Go",
+    "subtopic": "System Programming",
+    "question": "package main\nimport (\n  \"fmt\"\n  \"os\"\n  \"syscall\"\n)\nfunc main() {\n  err := os.Chmod(\"/etc/passwd\", 0777)\n  if err != nil {\n    fmt.Println(\"permission denied\")\n  }\n}",
+    "options": ["prints permission denied on most systems", "succeeds", "panics", "no output"],
+    "correctIndex": 0,
+    "explanation": "os.Chmod requires owner privileges; non-root cannot chmod /etc/passwd, returning permission error.",
+    "difficulty": "Medium",
+    "tags": ["chmod", "permissions", "error-handling"]
+  }
+]

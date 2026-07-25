@@ -1,0 +1,152 @@
+[
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudWatch Monitoring Tools",
+    "question": "You create a CloudWatch alarm: if Lambda Duration > 5 seconds for 2 consecutive data points (1-minute period), trigger SNS notification. Your function runs 1000 times/minute with average 4 seconds. Occasionally, 10% of invocations exceed 5 seconds. How often does the alarm fire?",
+    "options": [
+      "Approximately every 6 minutes; 10% * 1000 calls/min will exceed threshold",
+      "Every minute; some calls exceed threshold every minute",
+      "Every 2 minutes; alarm requires 2 consecutive breaches",
+      "Rarely; alarms aggregate to single datapoint before evaluating threshold"
+    ],
+    "correctIndex": 2,
+    "explanation": "CloudWatch evaluates the metric at period end (1-minute window); if 10% exceed 5s, the metric (e.g., Maximum, Average) likely exceeds threshold; 2-minute duration means 2 consecutive periods breach = 2-minute minimum between alarms.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cloudwatch", "alarms", "metric-evaluation"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudWatch Monitoring Tools",
+    "question": "Your application logs 1 million events/day to CloudWatch Logs. Each log entry is ~500 bytes. Monthly cost is $800. You want to reduce this. What's the most cost-effective approach?",
+    "options": [
+      "Use S3 export instead of CloudWatch Logs; query with Athena",
+      "Implement log sampling; send 10% of logs to CloudWatch, 90% to S3",
+      "Enable CloudWatch Logs compression; reduces storage by 50%",
+      "Delete logs older than 7 days; retention policy reduces cost"
+    ],
+    "correctIndex": 1,
+    "explanation": "Sampling: 10% to CloudWatch (~$80/month) for real-time monitoring, 90% to S3 (~$5/month for storage); Athena queries are cheap; total ~$85/month vs. $800; compression only saves 50% ($400).",
+    "difficulty": "Hard",
+    "tags": ["cloudwatch-logs", "cost-optimization", "sampling"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudWatch Monitoring Tools",
+    "question": "You're monitoring an API's response time. CloudWatch shows Average latency 200ms, but users report frequent timeouts. You check Percentile metrics: P99 latency is 8 seconds. Why is Average misleading?",
+    "options": [
+      "Average is calculated incorrectly; there's a bug in CloudWatch metrics",
+      "Average includes successful fast requests (200ms); P99 shows worst-case outliers affecting users",
+      "Percentiles are unreliable; use only Average for latency",
+      "P99 is outdated; use P95 instead for accurate representation"
+    ],
+    "correctIndex": 1,
+    "explanation": "Average can be dominated by volume of fast requests (e.g., 1000 requests at 200ms, 10 at 8s: avg=~200ms); P99 (99% of users) experience <8s; monitoring P99/P95 is essential for user-centric SLOs.",
+    "difficulty": "Medium",
+    "tags": ["cloudwatch", "metrics", "percentiles"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudWatch Monitoring Tools",
+    "question": "You create a custom CloudWatch metric by pushing data via PutMetricData. You push a single value every minute. How should you set the StatisticValue to report both count and sum?",
+    "options": [
+      "PutMetricData doesn't support StatisticValue; use Value parameter only",
+      "StatisticValue is a complex structure with SampleCount, Sum, Minimum, Maximum; set all for comprehensive metric",
+      "Set StatisticValue to an array of values; CloudWatch aggregates them",
+      "StatisticValue isn't necessary; CloudWatch infers statistics from historical data"
+    ],
+    "correctIndex": 1,
+    "explanation": "StatisticValue allows pushing pre-computed statistics (count, sum, min, max); useful when aggregating client-side before sending to CloudWatch; improves accuracy for distributed systems.",
+    "difficulty": "Medium",
+    "tags": ["cloudwatch", "custom-metrics", "statistics"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudWatch Monitoring Tools",
+    "question": "Your RDS database alarm triggers when CPU > 80% for 3 minutes. During a legitimate spike, CPU reaches 85% for 2 minutes, then drops to 60%. The alarm doesn't trigger. Is this the correct behavior?",
+    "options": [
+      "No; the alarm should have triggered because CPU exceeded 80%",
+      "Yes; alarm requires sustained breach for 3 consecutive 1-minute periods; 2 minutes doesn't meet criteria",
+      "Depends on alarm action; SNS alarms are more sensitive than EC2 auto-scaling alarms",
+      "Alarm should have triggered after 2 minutes; 3-minute duration is too conservative"
+    ],
+    "correctIndex": 1,
+    "explanation": "Alarm threshold: CPU > 80% for 3 consecutive data points (1-minute periods). If CPU is 85%, 85%, 60%, only 2 breaches occur; doesn't meet the 3-point threshold.",
+    "difficulty": "Medium",
+    "tags": ["cloudwatch", "alarms", "threshold-evaluation"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudWatch Monitoring Tools",
+    "question": "You're troubleshooting a Lambda function. CloudWatch Logs show errors, but CloudWatch Metrics (duration, errors) are empty. The Lambda function is configured with IAM permissions for logging. What's the issue?",
+    "options": [
+      "Lambda doesn't have CloudWatch permissions; it can write logs but not metrics",
+      "Custom metrics require explicit PutMetricData calls; CloudWatch doesn't auto-generate duration/error metrics for Lambda",
+      "Lambda logs to CloudWatch Logs by default, but metrics must be enabled in the Lambda console",
+      "Metrics are delayed by 5 minutes; wait and check again"
+    ],
+    "correctIndex": 2,
+    "explanation": "Lambda automatically logs to CloudWatch Logs, but Duration and Errors are opt-in; enable detailed monitoring (paid) or use CloudWatch Insights to parse logs for custom metrics.",
+    "difficulty": "Medium-Hard",
+    "tags": ["lambda", "cloudwatch", "monitoring"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudWatch Monitoring Tools",
+    "question": "You create a composite alarm: ALARM if (A OR B) AND NOT C. Alarm A is in ALARM state, C is in OK state. What's the composite state?",
+    "options": [
+      "ALARM; (A OR B) is TRUE, NOT C is TRUE, so TRUE AND TRUE = ALARM",
+      "INSUFFICIENT_DATA; alarm B's state is unknown",
+      "ALARM only if B is also in ALARM state",
+      "OK; composite alarms ignore missing data points"
+    ],
+    "correctIndex": 0,
+    "explanation": "Composite alarm evaluates: (ALARM OR ?) AND NOT OK = (TRUE OR ?) AND TRUE = TRUE; alarm fires even if B is unknown; NOT C evaluates to TRUE when C is OK.",
+    "difficulty": "Hard",
+    "tags": ["cloudwatch", "composite-alarms", "boolean-logic"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudWatch Monitoring Tools",
+    "question": "Your CloudWatch Logs group has 10 GB of logs per day. You've set retention to 30 days (300 GB total). Monthly cost is $150. If you export logs to S3 after 7 days and delete from CloudWatch, what's the new monthly cost?",
+    "options": [
+      "S3 storage costs $10-20/month; total cost drops to ~$130/month",
+      "Export is free; total cost drops to $50/month (7 days only: 70 GB)",
+      "S3 is more expensive; stick with CloudWatch retention",
+      "Cost is the same; CloudWatch storage and S3 have similar pricing"
+    ],
+    "correctIndex": 1,
+    "explanation": "CloudWatch: 7 days * 10 GB = 70 GB; $0.50/GB = $35/month; S3: $0.023/GB/month, plus retrieval costs for queries; exporting to S3 after 7 days saves 2/3 of CloudWatch cost.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cloudwatch-logs", "s3-export", "cost-optimization"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudWatch Monitoring Tools",
+    "question": "You want to alert if an API's error rate exceeds 5% for 5 minutes. You create a metric math alarm: Errors / Requests * 100 > 5. The alarm remains OK even when errors spike. What's the issue?",
+    "options": [
+      "Metric math doesn't support division; use CloudWatch Insights instead",
+      "Division by zero when Requests is 0; alarm can't evaluate; use IF statement",
+      "Metric math is asynchronous; alarms evaluate synchronously; use a custom metric instead",
+      "The alarm threshold is set to 5000, not 5; the calculation is correct"
+    ],
+    "correctIndex": 1,
+    "explanation": "If Requests = 0, division by zero produces NaN or undefined; alarm can't evaluate; use Fn::If to handle zero case or set Requests minimum to 1.",
+    "difficulty": "Hard",
+    "tags": ["cloudwatch", "metric-math", "error-rate"]
+  },
+  {
+    "skillName": "AWS",
+    "subtopic": "CloudWatch Monitoring Tools",
+    "question": "You're monitoring an auto-scaling group. You create an alarm based on Average CPU across all instances. During scale-up, new instances (low CPU) join. Average CPU drops despite existing instances still at high utilization. How should you fix the alarm?",
+    "options": [
+      "Use Maximum CPU instead of Average; detects when any instance is overloaded",
+      "Use Statistics: Average, but add dimensions to filter out new instances",
+      "Use SampleCount to count instances; alert if capacity changes unexpectedly",
+      "Disable alarms during scaling events; they're unreliable during changes"
+    ],
+    "correctIndex": 0,
+    "explanation": "Average CPU is diluted by new instances; Maximum detects when any instance is struggling, which is the true bottleneck; P99 CPU would also work better than Average.",
+    "difficulty": "Medium-Hard",
+    "tags": ["cloudwatch", "auto-scaling", "metrics"]
+  }
+]

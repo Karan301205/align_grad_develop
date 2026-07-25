@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "CSS",
+    "subtopic": "Responsive Design",
+    "question": "What is the primary difference between em and rem units in responsive design?\n```css\n.parent { font-size: 20px; }\n.child { font-size: 1.5em; margin: 1.5rem; }\n```",
+    "options": ["em and rem are identical", "em is relative to parent, rem to root", "rem is relative to parent, em to root", "Both ignore root context"],
+    "correctIndex": 1,
+    "explanation": "em scales relative to parent font-size (1.5em = 30px); rem always scales relative to root (html) font-size.",
+    "difficulty": "Medium",
+    "tags": ["relative-units", "em-vs-rem", "scalability"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Responsive Design",
+    "question": "Why might using viewport width units (vw) cause horizontal scroll on narrow screens?\n```css\n.box { width: 100vw; }\n```",
+    "options": ["100vw equals 100% width", "100vw includes scrollbar width", "vw is not supported", "Always correct on mobile"],
+    "correctIndex": 1,
+    "explanation": "100vw includes the scrollbar width; on small screens, it's wider than the viewport, causing overflow and horizontal scroll.",
+    "difficulty": "Medium-Hard",
+    "tags": ["viewport-units", "vw-issues", "responsive-pitfalls"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Responsive Design",
+    "question": "How should this aspect ratio be maintained responsively?\n```css\n.video {\n  width: 100%;\n  height: auto;\n}\n```",
+    "options": ["Height auto maintains aspect ratio", "Requires padding-bottom hack", "aspect-ratio property handles it", "Video element ignores CSS"],
+    "correctIndex": 2,
+    "explanation": "The modern aspect-ratio CSS property (aspect-ratio: 16 / 9) maintains aspect ratio; legacy approach used padding-bottom hack.",
+    "difficulty": "Medium",
+    "tags": ["aspect-ratio", "responsive-media", "modern-css"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Responsive Design",
+    "question": "In a fluid grid, why might max-width prevent content from scaling infinitely?\n```css\n.container {\n  width: 90%;\n  max-width: 1200px;\n  margin: 0 auto;\n}\n```",
+    "options": ["max-width is ignored on small screens", "max-width caps width at 1200px", "Requires media queries to work", "Overrides width property"],
+    "correctIndex": 1,
+    "explanation": "max-width sets an upper limit; on large screens, width stays at max-width; on small screens, 90% applies (whichever is smaller).",
+    "difficulty": "Medium",
+    "tags": ["max-width", "fluid-layouts", "content-constraint"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Responsive Design",
+    "question": "What does the clamp() function do for responsive typography?\n```css\nfont-size: clamp(1rem, 2vw, 2rem);\n```",
+    "options": ["Sets exact font size", "Scales between 1rem and 2rem, preferring 2vw", "Always uses minimum value", "Requires fallback font-size"],
+    "correctIndex": 1,
+    "explanation": "clamp(min, preferred, max) uses preferred value if it falls between min/max; otherwise uses min or max.",
+    "difficulty": "Medium-Hard",
+    "tags": ["clamp-function", "fluid-typography", "responsive-sizing"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Responsive Design",
+    "question": "How should flexible images be sized to prevent layout shift?\n```css\nimg {\n  width: 100%;\n  height: auto;\n}\n```",
+    "options": ["This approach always works", "height: auto prevents reflow", "Requires explicit aspect-ratio", "Set max-width to prevent oversizing"],
+    "correctIndex": 2,
+    "explanation": "width: 100% with height: auto can cause layout shift if height isn't known; aspect-ratio or explicit dimensions prevent shift.",
+    "difficulty": "Medium-Hard",
+    "tags": ["flexible-images", "responsive-images", "layout-shift"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Responsive Design",
+    "question": "Why is container queries more flexible than media queries for component styles?\n```css\n@container (min-width: 400px) {\n  .card { display: grid; }\n}\n```",
+    "options": ["Container queries check parent width", "Media queries check viewport only", "Components can adapt independently of viewport", "All are equivalent"],
+    "correctIndex": 2,
+    "explanation": "Container queries adapt based on container width, not viewport; same component renders differently in different containers.",
+    "difficulty": "Medium-Hard",
+    "tags": ["container-queries", "component-adaptation", "modern-responsive"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Responsive Design",
+    "question": "What is the minimum touch target size for accessibility on mobile?\n```css\nbutton {\n  width: 40px;\n  height: 40px;\n}\n```",
+    "options": ["20px minimum", "44-48px recommended", "Depends on device", "No standard size"],
+    "correctIndex": 1,
+    "explanation": "WCAG 2.5.5 recommends 44x44 CSS pixels minimum for touch targets; 40px is slightly below but often acceptable.",
+    "difficulty": "Medium",
+    "tags": ["touch-targets", "mobile-accessibility"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Responsive Design",
+    "question": "When should padding percentage values be used for responsive layouts?\n```css\n.ratio-box {\n  padding-bottom: 66.66%; /* for 3:2 aspect ratio */\n  position: relative;\n}\n```",
+    "options": ["Always use padding percentages", "Legacy technique; use aspect-ratio now", "Padding is unrelated to layout", "Only for mobile"],
+    "correctIndex": 1,
+    "explanation": "The padding-bottom percentage hack maintained aspect ratio before aspect-ratio property; modern approach is simpler and cleaner.",
+    "difficulty": "Medium-Hard",
+    "tags": ["aspect-ratio-hack", "legacy-technique", "responsive-patterns"]
+  },
+  {
+    "skillName": "CSS",
+    "subtopic": "Responsive Design",
+    "question": "How do percentage widths behave in nested flex containers?\n```css\n.outer { display: flex; width: 100%; }\n.inner { flex: 1; width: 50%; }\n```",
+    "options": ["width: 50% overrides flex", "flex: 1 distributes space, width is ignored", "width: 50% sets minimum", "Both properties conflict"],
+    "correctIndex": 1,
+    "explanation": "In flex containers, flex property controls size distribution; width is treated as initial size hint or min-width depending on context.",
+    "difficulty": "Medium-Hard",
+    "tags": ["flexbox", "flex-property", "width-behavior"]
+  }
+]

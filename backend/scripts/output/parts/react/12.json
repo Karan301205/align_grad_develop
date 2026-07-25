@@ -1,0 +1,102 @@
+[
+  {
+    "skillName": "React",
+    "subtopic": "Server Side Rendering",
+    "question": "Why might useEffect run twice during SSR, once on server and once on client? useEffect(() => { ... }, []);",
+    "options": ["Server renders once, client hydrates and re-runs effects (data fetching, etc.)", "useEffect only runs on server", "useEffect only runs on client", "SSR doesn't use useEffect"],
+    "correctIndex": 0,
+    "explanation": "Server renders HTML and sends to client; client hydrates and re-runs effects to set up event listeners, fetch data, and sync state.",
+    "difficulty": "Medium",
+    "tags": ["ssr", "useeffect", "hydration"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Server Side Rendering",
+    "question": "Why can't useEffect run on the server? Why must async operations use different patterns for SSR?",
+    "options": ["useEffect runs after render; server can't wait for callbacks, must use getInitialProps or async data loading", "useEffect works on server", "Server always waits for effects", "Effects are ignored during SSR"],
+    "correctIndex": 0,
+    "explanation": "useEffect is client-only; server needs data before render, so frameworks like Next.js use getStaticProps/getServerSideProps for SSR data fetching.",
+    "difficulty": "Medium-Hard",
+    "tags": ["ssr", "useeffect", "async"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Server Side Rendering",
+    "question": "Why might a component hydrate differently on server vs. client, causing a mismatch? const random = Math.random();",
+    "options": ["Server and client generate different values, HTML mismatch causes React error", "Hydration always matches", "Random values are seeded", "Mismatches are ignored"],
+    "correctIndex": 0,
+    "explanation": "Server renders Math.random() once; client renders again, getting a different value; mismatched HTML causes React to warn or fail hydration.",
+    "difficulty": "Medium-Hard",
+    "tags": ["ssr", "hydration", "mismatch"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Server Side Rendering",
+    "question": "Why is suppressHydrationWarning needed for certain components in SSR?",
+    "options": ["Some state is intentionally different on server vs. client; this suppresses React's mismatch warning", "Always use suppressHydrationWarning", "Mismatches should never be suppressed", "suppressHydrationWarning is not a real prop"],
+    "correctIndex": 0,
+    "explanation": "suppressHydrationWarning tells React to ignore mismatch for that element; useful for timestamps, random IDs, or browser-only features that differ on server.",
+    "difficulty": "Medium",
+    "tags": ["ssr", "suppress", "warning"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Server Side Rendering",
+    "question": "Why might localStorage access throw an error on server? const token = localStorage.getItem('token');",
+    "options": ["localStorage is browser-only; server doesn't have it, throws ReferenceError", "localStorage works on server", "Server uses a different API", "localStorage is global everywhere"],
+    "correctIndex": 0,
+    "explanation": "localStorage is a browser API; running on server crashes unless guarded with typeof window !== 'undefined' check.",
+    "difficulty": "Medium",
+    "tags": ["ssr", "browser", "api"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Server Side Rendering",
+    "question": "Given ReactDOMServer.renderToString(), why might it be slower than renderToStaticMarkup()?",
+    "options": ["renderToString adds React event listeners; renderToStaticMarkup is plain HTML", "renderToStaticMarkup is slower", "Both are identical in performance", "renderToString never blocks"],
+    "correctIndex": 0,
+    "explanation": "renderToString produces HTML ready for hydration (includes event data); renderToStaticMarkup is faster but can't hydrate, only for static content.",
+    "difficulty": "Medium",
+    "tags": ["ssr", "render", "performance"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Server Side Rendering",
+    "question": "Why is hydration important in SSR? What does hydration attach to the server-rendered HTML?",
+    "options": ["Hydration attaches event listeners and re-creates component state on client", "Hydration downloads JavaScript", "Hydration is not needed for SSR", "Hydration replaces server HTML with new DOM"],
+    "correctIndex": 0,
+    "explanation": "Server sends HTML for fast first paint; hydration runs React on the client, attaching listeners and making the page interactive.",
+    "difficulty": "Medium",
+    "tags": ["ssr", "hydration", "interactive"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Server Side Rendering",
+    "question": "Given getServerSideProps in Next.js, why might it run on every request instead of caching?",
+    "options": ["getServerSideProps fetches fresh data on every request; use getStaticProps for caching", "getServerSideProps caches by default", "Next.js has no caching option", "Caching is handled automatically"],
+    "correctIndex": 0,
+    "explanation": "getServerSideProps runs server-side on every request, ensuring fresh data; getStaticProps is for static content that regenerates at intervals.",
+    "difficulty": "Medium",
+    "tags": ["ssr", "nextjs", "cache"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Server Side Rendering",
+    "question": "Why might CSS-in-JS libraries have issues with SSR? Why is extracting styles necessary?",
+    "options": ["Styles generated at runtime on client don't exist on server; must extract during render to include in HTML", "CSS-in-JS works fine on SSR", "Styles are always included", "Style extraction is optional"],
+    "correctIndex": 0,
+    "explanation": "Runtime style generation happens on the client after hydration; server render produces unstyled content until client JS loads, causing flash of unstyled content (FOUC).",
+    "difficulty": "Medium-Hard",
+    "tags": ["ssr", "css", "extract"]
+  },
+  {
+    "skillName": "React",
+    "subtopic": "Server Side Rendering",
+    "question": "Why is initializing state from server data in getInitialProps different from fetching in useEffect?",
+    "options": ["getInitialProps provides data before render for SSR; useEffect is post-render on client, causing blank initial state", "Both are equivalent", "useEffect provides data faster", "getInitialProps is deprecated"],
+    "correctIndex": 0,
+    "explanation": "getInitialProps (or getServerSideProps) runs before render, providing data in initial HTML; useEffect on client misses SSR opportunity.",
+    "difficulty": "Medium",
+    "tags": ["ssr", "data", "render"]
+  }
+]
