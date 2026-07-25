@@ -1551,13 +1551,9 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         </div>
       )}
 
-      {/* Floating Alert Modal Overlay */}
+      {/* Top-Right Sliding Toast Notification */}
       {alertConfig && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md shadow-2xl relative">
-            {formatAlertMessage(alertConfig.message, alertConfig.type, () => setAlertConfig(null))}
-          </div>
-        </div>
+        formatAlertMessage(alertConfig.message, alertConfig.type, () => setAlertConfig(null))
       )}
     </div>
   );

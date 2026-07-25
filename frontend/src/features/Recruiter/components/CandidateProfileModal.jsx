@@ -98,6 +98,64 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                   )}
                 </div>
               </div>
+
+              {/* Work Preferences Section */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-mono uppercase text-primary tracking-wider flex items-center gap-1.5">
+                  <Briefcase className="w-4 h-4" /> Work Preferences
+                </h4>
+                <div className="bg-surface-container-low/60 border border-outline-variant p-4 rounded-xl space-y-3 text-xs">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase text-on-surface-variant block mb-1">Work Mode:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {candidate.preferredWorkModes && candidate.preferredWorkModes.length > 0 ? (
+                        candidate.preferredWorkModes.map(m => (
+                          <span key={m} className="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded font-mono font-bold text-[10px]">
+                            {m}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-on-surface-variant italic">Not specified</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-mono uppercase text-on-surface-variant block mb-1">Target Position Type:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {candidate.preferredWorkTypes && candidate.preferredWorkTypes.length > 0 ? (
+                        candidate.preferredWorkTypes.map(t => (
+                          <span key={t} className="px-2 py-0.5 bg-secondary/10 text-secondary border border-secondary/20 rounded font-mono font-bold text-[10px]">
+                            {t}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-on-surface-variant italic">Not specified</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-mono uppercase text-on-surface-variant block mb-1">Preferred Locations:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {candidate.openToAnyLocation && (
+                        <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded font-mono font-bold text-[10px]">
+                          ✓ Open to Any Location / Relocate
+                        </span>
+                      )}
+                      {candidate.preferredLocations && candidate.preferredLocations.length > 0 ? (
+                        candidate.preferredLocations.map(l => (
+                          <span key={l} className="px-2 py-0.5 bg-surface-container-high border border-outline-variant rounded font-mono text-[10px] text-on-surface">
+                            📍 {l}
+                          </span>
+                        ))
+                      ) : (
+                        !candidate.openToAnyLocation && <span className="text-on-surface-variant italic">Not specified</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Right Column: Skills, Education, Experience, Projects, Certificates */}

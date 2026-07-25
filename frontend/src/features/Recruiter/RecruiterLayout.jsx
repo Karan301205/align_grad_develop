@@ -8,7 +8,9 @@ import {
   RefreshCw,
   Menu,
   X,
-  DollarSign
+  DollarSign,
+  LayoutDashboard,
+  Users
 } from 'lucide-react';
 import { apiFetch } from '../../services/apiClient';
 import { putFileToS3 } from '../../services/uploadService';
@@ -17,11 +19,13 @@ import ThemeToggle from '../../components/ui/ThemeToggle';
 import { formatAlertMessage } from '../../utils/errorFormatter';
 
 // Import subcomponents
+import RecruiterDashboard from './components/RecruiterDashboard';
 import RecruiterJobs from './components/RecruiterJobs';
 import RecruiterCandidates from './components/RecruiterCandidates';
 import RecruiterPostJob from './components/RecruiterPostJob';
 import RecruiterCompany from './components/RecruiterCompany';
 import GigsMarketplace from '../Gigs/GigsMarketplace';
+import CommunityLayout from '../Community/CommunityLayout';
 
 export default function RecruiterLayout({ user, token, activeTab, setActiveTab, handleLogout, theme, toggleTheme }) {
   const [company, setCompany] = useState(null);
@@ -121,16 +125,14 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
         setAlertConfig({ message: jobData.opportunityType === 'GIG' ? 'Gig posted successfully in Marketplace!' : 'Job posted successfully!', type: 'success' });
         fetchRecruiterData();
         setActiveTab(jobData.opportunityType === 'GIG' ? 'gigs' : 'dashboard');
-        return true;
+        return { success: true };
       } else {
         const d = await res.json();
-        setAlertConfig({ message: d.error || 'Failed to post opportunity', type: 'error' });
-        return false;
+        return { success: false, error: d.error || 'Failed to post opportunity' };
       }
     } catch (err) {
       console.error('Error posting opportunity:', err);
-      setAlertConfig({ message: 'Error posting opportunity', type: 'error' });
-      return false;
+      return { success: false, error: err.message || 'Error posting opportunity' };
     } finally {
       setSubmittingJob(false);
     }
@@ -257,8 +259,10 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
   };
 
   const navItems = [
-    { id: 'dashboard', icon: Briefcase, label: 'Job Dashboard' },
-    { id: 'candidates', icon: User, label: 'Search Candidates' },
+    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { id: 'jobs', icon: Briefcase, label: 'Active Jobs' },
+    { id: 'candidates', icon: User, label: 'Candidates' },
+    { id: 'community', icon: Users, label: 'Community Hub' },
     { id: 'post-job', icon: Plus, label: 'Post New Job' },
     { id: 'gigs', icon: DollarSign, label: 'Gigs Marketplace' },
     { id: 'verification', icon: ShieldCheck, label: 'Company Profile' },
@@ -348,10 +352,6 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
             </nav>
 
             <div className="mt-auto pt-6 border-t border-outline-variant space-y-4 px-1">
-              <div className="flex items-center justify-between px-2.5">
-                {isExpanded && <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant animate-fade-in">Theme</span>}
-                <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-              </div>
               <div className="flex items-center gap-3 px-2.5">
                 <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold shrink-0 overflow-hidden">
                   {company?.name?.charAt(0) || 'R'}
@@ -377,14 +377,23 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       })()}
 
       {/* Main stage */}
-      <main ref={mainRef} className="md:ml-20 flex-1 min-h-screen pt-24 md:pt-10 p-6 md:p-10 bg-background overflow-y-auto custom-scrollbar scroll-smooth">
+      <main ref={mainRef} className="md:ml-20 flex-1 h-screen pt-24 md:pt-10 p-6 md:p-10 bg-background overflow-y-auto custom-scrollbar scroll-smooth">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <RefreshCw className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div key={activeTab} className="animate-fade-in">
+          <div key={activeTab}>
             {activeTab === 'dashboard' && (
+              <RecruiterDashboard
+                company={company}
+                jobs={jobs}
+                candidates={candidates}
+                goToTab={goToTab}
+              />
+            )}
+
+            {activeTab === 'jobs' && (
               <RecruiterJobs 
                 jobs={jobs} 
                 company={company} 
@@ -399,10 +408,19 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
               <RecruiterCandidates candidates={candidates} />
             )}
 
+            {activeTab === 'community' && (
+              <CommunityLayout
+                user={user}
+                token={token}
+              />
+            )}
+
             {activeTab === 'post-job' && (
               <RecruiterPostJob 
                 submittingJob={submittingJob}
                 handlePostJob={handlePostJob}
+                recentJobs={jobs}
+                goToTab={goToTab}
               />
             )}
 
@@ -431,13 +449,9 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
         )}
       </main>
 
-      {/* Floating Alert Modal Overlay */}
+      {/* Top-Right Sliding Toast Notification */}
       {alertConfig && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md shadow-2xl relative">
-            {formatAlertMessage(alertConfig.message, alertConfig.type, () => setAlertConfig(null))}
-          </div>
-        </div>
+        formatAlertMessage(alertConfig.message, alertConfig.type, () => setAlertConfig(null))
       )}
     </>
   );

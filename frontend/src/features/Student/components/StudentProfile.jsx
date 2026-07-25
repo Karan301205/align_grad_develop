@@ -9,6 +9,8 @@ import PageHeader from '../../../components/ui/PageHeader';
 import { formatErrorMessage } from '../../../utils/errorFormatter';
 
 
+import { INDIAN_STATES } from '../../../constants/indianStates';
+
 export default function StudentProfile({
   profile,
   setProfile,
@@ -33,6 +35,14 @@ export default function StudentProfile({
   setDob,
   phone,
   setPhone,
+  preferredWorkModes = [],
+  setPreferredWorkModes,
+  preferredWorkTypes = [],
+  setPreferredWorkTypes,
+  preferredLocations = [],
+  setPreferredLocations,
+  openToAnyLocation = false,
+  setOpenToAnyLocation,
   resumeUrl,
   setResumeUrl,
   socialLinks,
@@ -78,6 +88,37 @@ export default function StudentProfile({
   const [isSkillDropdownOpen, setIsSkillDropdownOpen] = React.useState(false);
   const [usernameStatus, setUsernameStatus] = React.useState(''); // 'loading', 'available', 'taken', 'invalid', ''
   const [usernameMsg, setUsernameMsg] = React.useState('');
+
+  const [locationSearchQuery, setLocationSearchQuery] = React.useState('');
+  const [isLocationDropdownOpen, setIsLocationDropdownOpen] = React.useState(false);
+
+  const toggleWorkMode = (mode) => {
+    if (preferredWorkModes.includes(mode)) {
+      setPreferredWorkModes(preferredWorkModes.filter(m => m !== mode));
+    } else {
+      setPreferredWorkModes([...preferredWorkModes, mode]);
+    }
+  };
+
+  const toggleWorkType = (type) => {
+    if (preferredWorkTypes.includes(type)) {
+      setPreferredWorkTypes(preferredWorkTypes.filter(t => t !== type));
+    } else {
+      setPreferredWorkTypes([...preferredWorkTypes, type]);
+    }
+  };
+
+  const addLocation = (loc) => {
+    if (!preferredLocations.includes(loc)) {
+      setPreferredLocations([...preferredLocations, loc]);
+    }
+    setLocationSearchQuery('');
+    setIsLocationDropdownOpen(false);
+  };
+
+  const removeLocation = (loc) => {
+    setPreferredLocations(preferredLocations.filter(l => l !== loc));
+  };
 
   const gigExperienceItems = (experienceList || []).filter(exp => exp.expType === 'Gig');
   const completedGigsCount = gigExperienceItems.length;
@@ -835,6 +876,163 @@ export default function StudentProfile({
                     onChange={e => setResumeUrl(e.target.value)}
                     placeholder="https://drive.google.com/your-resume.pdf"
                   />
+                </div>
+
+                {/* Work Preferences & Location Block inside General Tab */}
+                <div className="pt-4 border-t border-outline-variant space-y-6">
+                  <div>
+                    <h3 className="text-sm font-headline font-bold text-primary uppercase font-mono tracking-wider">Work Preferences & Location</h3>
+                    <p className="text-xs text-on-surface-variant">Specify your desired work modes, position types, and preferred locations across India.</p>
+                  </div>
+
+                  {/* Mode of Work */}
+                  <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl space-y-2.5">
+                    <label className="block text-xs font-mono uppercase tracking-wider text-primary font-bold">
+                      Mode of Work
+                    </label>
+                    <p className="text-[11px] text-on-surface-variant">Select all work modes you are open to:</p>
+                    <div className="flex flex-wrap gap-2.5">
+                      {['Remote', 'On-Site', 'Hybrid'].map(mode => {
+                        const isSelected = preferredWorkModes.includes(mode);
+                        return (
+                          <button
+                            key={mode}
+                            type="button"
+                            onClick={() => toggleWorkMode(mode)}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono transition-all border cursor-pointer flex items-center gap-2 ${
+                              isSelected
+                                ? 'bg-primary text-on-primary border-primary shadow-sm'
+                                : 'bg-surface-container border-outline-variant text-on-surface hover:bg-surface-container-high'
+                            }`}
+                          >
+                            <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[9px] ${
+                              isSelected ? 'bg-on-primary text-primary border-on-primary' : 'border-outline-variant'
+                            }`}>
+                              {isSelected && '✓'}
+                            </span>
+                            {mode}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Type of Work */}
+                  <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl space-y-2.5">
+                    <label className="block text-xs font-mono uppercase tracking-wider text-primary font-bold">
+                      Type of Work Looking For
+                    </label>
+                    <p className="text-[11px] text-on-surface-variant">Select target position types:</p>
+                    <div className="flex flex-wrap gap-2.5">
+                      {['Internship', 'Part-Time', 'Full-Time'].map(type => {
+                        const isSelected = preferredWorkTypes.includes(type);
+                        return (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => toggleWorkType(type)}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono transition-all border cursor-pointer flex items-center gap-2 ${
+                              isSelected
+                                ? 'bg-secondary text-on-secondary border-secondary shadow-sm'
+                                : 'bg-surface-container border-outline-variant text-on-surface hover:bg-surface-container-high'
+                            }`}
+                          >
+                            <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[9px] ${
+                              isSelected ? 'bg-on-secondary text-secondary border-on-secondary' : 'border-outline-variant'
+                            }`}>
+                              {isSelected && '✓'}
+                            </span>
+                            {type}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Preferred Location in India */}
+                  <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl space-y-3.5">
+                    <div className="flex justify-between items-center flex-wrap gap-2">
+                      <div>
+                        <label className="block text-xs font-mono uppercase tracking-wider text-primary font-bold">
+                          Preferred Location(s) in India
+                        </label>
+                        <p className="text-[11px] text-on-surface-variant">Search and select preferred states/UTs or opt for open relocation.</p>
+                      </div>
+
+                      {/* Any Location Checkbox */}
+                      <label className="flex items-center gap-2 px-3 py-1.5 bg-surface-container border border-outline-variant rounded-xl cursor-pointer hover:border-primary/50 transition-all select-none">
+                        <input
+                          type="checkbox"
+                          checked={openToAnyLocation}
+                          onChange={e => setOpenToAnyLocation(e.target.checked)}
+                          className="rounded border-outline-variant text-primary focus:ring-0 w-4 h-4"
+                        />
+                        <span className="text-xs font-bold font-mono text-on-surface">Any Location / Open to Relocate</span>
+                      </label>
+                    </div>
+
+                    {/* Search bar & dropdown for states */}
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Search Indian state or Union Territory..."
+                        className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-2.5 text-xs text-on-surface focus:outline-none focus:border-primary transition-all font-mono"
+                        value={locationSearchQuery}
+                        onChange={e => {
+                          setLocationSearchQuery(e.target.value);
+                          setIsLocationDropdownOpen(true);
+                        }}
+                        onFocus={() => setIsLocationDropdownOpen(true)}
+                      />
+
+                      {isLocationDropdownOpen && (
+                        <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-surface-container-high border border-outline-variant rounded-xl shadow-xl z-30 custom-scrollbar divide-y divide-outline-variant/30">
+                          {INDIAN_STATES.filter(state => state.toLowerCase().includes(locationSearchQuery.toLowerCase())).length === 0 ? (
+                            <div className="p-3 text-xs text-on-surface-variant text-center font-mono">No matching states found</div>
+                          ) : (
+                            INDIAN_STATES.filter(state => state.toLowerCase().includes(locationSearchQuery.toLowerCase())).map(state => {
+                              const isAdded = preferredLocations.includes(state);
+                              return (
+                                <div
+                                  key={state}
+                                  onClick={() => addLocation(state)}
+                                  className={`px-4 py-2.5 text-xs font-mono flex justify-between items-center cursor-pointer transition-colors ${
+                                    isAdded ? 'bg-primary/10 text-primary font-bold' : 'hover:bg-surface-container-highest text-on-surface'
+                                  }`}
+                                >
+                                  <span>{state}</span>
+                                  {isAdded && <span className="text-[10px] bg-primary text-on-primary px-1.5 py-0.5 rounded font-sans">Added</span>}
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Selected Locations Badges */}
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">Selected Locations ({preferredLocations.length}):</p>
+                      <div className="flex flex-wrap gap-2">
+                        {preferredLocations.length === 0 ? (
+                          <span className="text-xs text-on-surface-variant font-mono italic">No specific locations selected yet.</span>
+                        ) : (
+                          preferredLocations.map(loc => (
+                            <span key={loc} className="px-3 py-1 bg-surface-container border border-outline-variant rounded-xl text-xs font-mono text-on-surface flex items-center gap-1.5 shadow-2xs">
+                              <span>📍 {loc}</span>
+                              <button
+                                type="button"
+                                onClick={() => removeLocation(loc)}
+                                className="text-on-surface-variant hover:text-error transition-colors text-xs font-bold px-1 cursor-pointer"
+                              >
+                                ✕
+                              </button>
+                            </span>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

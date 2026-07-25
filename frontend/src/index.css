@@ -5,178 +5,202 @@
 
 :root {
   /* ─────────────────────────────────────────────────────────────
-     ARCHITECTURAL PROFESSIONALISM — Corporate Minimalist Design System
+     NEW BRAND PALETTE — Professional & Modern Theme Tokens
      ───────────────────────────────────────────────────────────── */
-  --c-brand-violet: #0057c2; /* legacy alias — now vibrant primary blue */
-  --c-brand-blue: #0f172a;   /* legacy alias — deep charcoal */
-  --c-grad-from: #003527;
-  --c-grad-to: #064e3b;
-  --brand-gradient: linear-gradient(135deg, #003527 0%, #064e3b 100%);
+  --c-brand-violet: #2563EB;
+  --c-brand-blue: #0F172A;
+  --c-grad-from: #2563EB;
+  --c-grad-to: #1D4ED8;
+  --brand-gradient: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
 
   /* High contrast line borders & neutral layering */
-  --neu-dark: #bfc9c3;   /* outline-variant */
-  --neu-light: #ffffff;
+  --neu-dark: #E2E8F0;
+  --neu-light: #FFFFFF;
 
   /* Offset solid borders for elevation (Blueprint style) */
-  --shadow-card: 4px 4px 0px 0px #0f172a;
-  --shadow-floating: 8px 8px 0px 0px #0f172a;
+  --shadow-card: 4px 4px 0px 0px #0F172A;
+  --shadow-floating: 8px 8px 0px 0px #0F172A;
   --shadow-pressed: none;
   --shadow-recessed: none;
-  --shadow-sharp: 2px 2px 0px 0px #0f172a;
-  --shadow-glow: none;
-  --shadow-primary-btn: 4px 4px 0px 0px #0f172a;
+  --shadow-sharp: 2px 2px 0px 0px #0F172A;
+  --shadow-glow: 0 0 15px rgba(37, 99, 235, 0.25);
+  --shadow-primary-btn: 4px 4px 0px 0px #0F172A;
 
-  /* Surfaces — stark documents feel with architectural gray highlights */
-  --c-background: #faf8ff;             /* stark base */
-  --c-surface-container: #eaedff;      
-  --c-surface-container-low: #f2f3ff;  
-  --c-surface-container-high: #e2e7ff;
-  --c-surface-container-highest: #dae2fd;
-  --c-surface-container-lowest: #ffffff;
+  /* Surfaces & Background */
+  --c-background: #F9F8F6;             /* Background: #F9F8F6 */
+  --c-surface: #FFFFFF;                /* Surface: #FFFFFF */
+  --c-surface-container: #FFFFFF;      
+  --c-surface-container-low: #F8FAFC;  
+  --c-surface-container-high: #F1F5F9;
+  --c-surface-container-highest: #E2E8F0;
+  --c-surface-container-lowest: #FFFFFF;
 
   /* Borders */
-  --c-outline: #707974;
-  --c-outline-variant: #bfc9c3;
+  --c-outline: #CBD5E1;                /* Border: #CBD5E1 */
+  --c-outline-variant: #E2E8F0;        /* Border: #E2E8F0 */
 
-  /* Text — deep charcoal/ink */
-  --c-on-surface: #0f172a;
-  --c-on-surface-variant: #404944;
+  /* Text Roles */
+  --c-heading: #0F172A;                /* Heading: #0F172A */
+  --c-body: #334155;                   /* Body Text: #334155 */
+  --c-on-surface: #0F172A;
+  --c-on-surface-variant: #64748B;        /* Muted Text: #64748B */
 
-  /* Primary (Emerald Green) */
-  --c-primary: #003527;
-  --c-on-primary: #ffffff;
-  --c-primary-container: #064e3b;
-  --c-on-primary-container: #80bea6;
+  /* Primary Blue (#2563EB) */
+  --c-primary: #2563EB;
+  --c-on-primary: #FFFFFF;
+  --c-primary-container: #DBEAFE;
+  --c-on-primary-container: #1E40AF;
 
-  /* Secondary (Slate Gray) */
-  --c-secondary: #545f73;
-  --c-on-secondary: #ffffff;
-  --c-secondary-container: #d5e0f8;
-  --c-on-secondary-container: #586377;
+  /* Secondary Green (#10B981) */
+  --c-secondary: #10B981;
+  --c-on-secondary: #FFFFFF;
+  --c-secondary-container: #D1FAE5;
+  --c-on-secondary-container: #065F46;
 
-  /* Tertiary (Charcoal/Slate) */
-  --c-tertiary: #2b2f30;
-  --c-on-tertiary: #ffffff;
-  --c-tertiary-container: #424547;
-  --c-on-tertiary-container: #afb2b4;
+  /* Accent Amber (#F59E0B) / Tertiary */
+  --c-accent: #F59E0B;
+  --c-tertiary: #F59E0B;
+  --c-on-tertiary: #FFFFFF;
+  --c-tertiary-container: #FEF3C7;
+  --c-on-tertiary-container: #92400E;
 
-  /* Error */
-  --c-error: #ba1a1a;
-  --c-on-error: #ffffff;
-  --c-error-container: #ffdad6;
-  --c-on-error-container: #93000a;
+  /* Feedback Colors */
+  --c-success: #22C55E;                /* Success: #22C55E */
+  --c-on-success: #FFFFFF;
+  --c-success-container: #DCFCE7;
+  --c-on-success-container: #15803D;
 
-  /* Success */
-  --c-success: #064e3b;
-  --c-on-success: #ffffff;
-  --c-success-container: #b0f0d6;
-  --c-on-success-container: #002117;
+  --c-warning: #F59E0B;                /* Warning: #F59E0B */
+  --c-on-warning: #FFFFFF;
+  --c-warning-container: #FEF3C7;
+
+  --c-error: #EF4444;                  /* Error: #EF4444 */
+  --c-on-error: #FFFFFF;
+  --c-error-container: #FEE2E2;
+  --c-on-error-container: #B91C1C;
+
+  --c-info: #3B82F6;                   /* Info: #3B82F6 */
+  --c-on-info: #FFFFFF;
+  --c-info-container: #DBEAFE;
 }
 
 .dark {
-  /* Dark mode variant for Corporate Minimalist theme */
-  --c-grad-from: #0059c7;
-  --c-grad-to: #006ef2;
-  --brand-gradient: linear-gradient(135deg, #0059c7 0%, #006ef2 100%);
+  /* Dark mode variant adapted to specified palette tokens */
+  --c-grad-from: #2563EB;
+  --c-grad-to: #3B82F6;
+  --brand-gradient: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
 
-  --neu-dark: #3a4346;
-  --neu-light: #1e2426;
+  --neu-dark: #334155;
+  --neu-light: #0F172A;
 
-  --shadow-card: 4px 4px 0px 0px #ffffff;
-  --shadow-floating: 8px 8px 0px 0px #ffffff;
+  --shadow-card: 4px 4px 0px 0px #E2E8F0;
+  --shadow-floating: 8px 8px 0px 0px #E2E8F0;
   --shadow-pressed: none;
   --shadow-recessed: none;
-  --shadow-sharp: 2px 2px 0px 0px #ffffff;
-  --shadow-glow: none;
-  --shadow-primary-btn: 4px 4px 0px 0px #ffffff;
+  --shadow-sharp: 2px 2px 0px 0px #E2E8F0;
+  --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.3);
+  --shadow-primary-btn: 4px 4px 0px 0px #E2E8F0;
 
-  --c-background: #0d1526;
-  --c-surface-container: #131e33;
-  --c-surface-container-low: #0f1930;
-  --c-surface-container-high: #182742;
-  --c-surface-container-highest: #1d2e4d;
-  --c-surface-container-lowest: #0a111f;
+  --c-background: #0B0F19;
+  --c-surface: #0F172A;
+  --c-surface-container: #0F172A;
+  --c-surface-container-low: #0B0F19;
+  --c-surface-container-high: #1E293B;
+  --c-surface-container-highest: #334155;
+  --c-surface-container-lowest: #020617;
 
-  --c-outline: #5d6676;
-  --c-outline-variant: #3d4452;
+  --c-outline: #475569;
+  --c-outline-variant: #334155;
 
-  --c-on-surface: #eaedf7;
-  --c-on-surface-variant: #a0aabf;
+  --c-heading: #F8FAFC;
+  --c-body: #CBD5E1;
+  --c-on-surface: #F8FAFC;
+  --c-on-surface-variant: #94A3B8;
 
-  --c-primary: #95d3ba;
-  --c-on-primary: #002117;
-  --c-primary-container: #004d39;
-  --c-on-primary-container: #b0f0d6;
+  --c-primary: #3B82F6;
+  --c-on-primary: #FFFFFF;
+  --c-primary-container: #1E3A8A;
+  --c-on-primary-container: #DBEAFE;
 
-  --c-secondary: #cdd9ef;
-  --c-on-secondary: #101c36;
-  --c-secondary-container: #182742;
-  --c-on-secondary-container: #e7eefb;
+  --c-secondary: #10B981;
+  --c-on-secondary: #FFFFFF;
+  --c-secondary-container: #064E3B;
+  --c-on-secondary-container: #D1FAE5;
 
-  --c-tertiary: #c4c7c9;
-  --c-on-tertiary: #191c1e;
-  --c-tertiary-container: #444749;
-  --c-on-tertiary-container: #e0e3e5;
+  --c-accent: #F59E0B;
+  --c-tertiary: #F59E0B;
+  --c-on-tertiary: #FFFFFF;
+  --c-tertiary-container: #78350F;
+  --c-on-tertiary-container: #FEF3C7;
 
-  --c-error: #ffb4ab;
-  --c-on-error: #690005;
-  --c-error-container: #93000a;
-  --c-on-error-container: #ffdad6;
+  --c-success: #22C55E;
+  --c-on-success: #FFFFFF;
+  --c-success-container: #14532D;
+  --c-on-success-container: #DCFCE7;
 
-  --c-success: #b0f0d6;
-  --c-on-success: #003527;
-  --c-success-container: #064e3b;
-  --c-on-success-container: #b0f0d6;
+  --c-warning: #F59E0B;
+  --c-on-warning: #FFFFFF;
+  --c-warning-container: #78350F;
+
+  --c-error: #EF4444;
+  --c-on-error: #FFFFFF;
+  --c-error-container: #7F1D1D;
+  --c-on-error-container: #FEE2E2;
+
+  --c-info: #3B82F6;
+  --c-on-info: #FFFFFF;
+  --c-info-container: #1E3A8A;
 }
 
-/* ─── Scoped landing theme: "Dream Job Blue" (JobsPlanet-style) ─── */
+/* ─── Scoped landing theme ─── */
 .theme-jobsplanet {
-  --brand-gradient: linear-gradient(135deg, #003527 0%, #064e3b 100%);
-  --c-background: #faf8ff;
-  --c-surface-container: #ffffff;
-  --c-surface-container-low: #f2f3ff;
-  --c-surface-container-high: #ffffff;
-  --c-surface-container-highest: #ffffff;
+  --brand-gradient: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  --c-background: #F9F8F6;
+  --c-surface-container: #FFFFFF;
+  --c-surface-container-low: #F8FAFC;
+  --c-surface-container-high: #F1F5F9;
+  --c-surface-container-highest: #E2E8F0;
 
-  --c-outline: #707974;
-  --c-outline-variant: #bfc9c3;
+  --c-outline: #CBD5E1;
+  --c-outline-variant: #E2E8F0;
 
-  --c-on-surface: #0f172a;
-  --c-on-surface-variant: #404944;
+  --c-on-surface: #0F172A;
+  --c-on-surface-variant: #64748B;
 
-  --c-primary: #003527;
-  --c-on-primary: #ffffff;
-  --c-primary-container: #064e3b;
-  --c-on-primary-container: #80bea6;
+  --c-primary: #2563EB;
+  --c-on-primary: #FFFFFF;
+  --c-primary-container: #DBEAFE;
+  --c-on-primary-container: #1E40AF;
 
-  --c-secondary: #545f73;
-  --c-on-secondary: #ffffff;
-  --c-secondary-container: #d5e0f8;
-  --c-on-secondary-container: #586377;
+  --c-secondary: #10B981;
+  --c-on-secondary: #FFFFFF;
+  --c-secondary-container: #D1FAE5;
+  --c-on-secondary-container: #065F46;
 }
 
 .dark .theme-jobsplanet {
-  --brand-gradient: linear-gradient(135deg, #0059c7 0%, #006ef2 100%);
-  --c-background: #0d1526;
-  --c-surface-container: #131e33;
-  --c-surface-container-low: #0f1930;
-  --c-surface-container-high: #182742;
-  --c-surface-container-highest: #1d2e4d;
+  --brand-gradient: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+  --c-background: #0B0F19;
+  --c-surface-container: #0F172A;
+  --c-surface-container-low: #0B0F19;
+  --c-surface-container-high: #1E293B;
+  --c-surface-container-highest: #334155;
 
-  --c-outline: #5d6676;
-  --c-outline-variant: #3d4452;
+  --c-outline: #475569;
+  --c-outline-variant: #334155;
 
-  --c-on-surface: #eaedf7;
-  --c-on-surface-variant: #a0aabf;
+  --c-on-surface: #F8FAFC;
+  --c-on-surface-variant: #94A3B8;
 
-  --c-primary: #95d3ba;
-  --c-on-primary: #002117;
-  --c-primary-container: #004d39;
-  --c-on-primary-container: #b0f0d6;
+  --c-primary: #3B82F6;
+  --c-on-primary: #FFFFFF;
+  --c-primary-container: #1E3A8A;
+  --c-on-primary-container: #DBEAFE;
 }
 
 @theme inline {
   --color-background: var(--c-background);
+  --color-surface: var(--c-surface);
   --color-surface-container: var(--c-surface-container);
   --color-surface-container-low: var(--c-surface-container-low);
   --color-surface-container-high: var(--c-surface-container-high);
@@ -185,6 +209,8 @@
   --color-outline: var(--c-outline);
   --color-outline-variant: var(--c-outline-variant);
 
+  --color-heading: var(--c-heading);
+  --color-body: var(--c-body);
   --color-on-surface: var(--c-on-surface);
   --color-on-surface-variant: var(--c-on-surface-variant);
 
@@ -198,6 +224,7 @@
   --color-secondary-container: var(--c-secondary-container);
   --color-on-secondary-container: var(--c-on-secondary-container);
 
+  --color-accent: var(--c-accent);
   --color-tertiary: var(--c-tertiary);
   --color-on-tertiary: var(--c-on-tertiary);
   --color-tertiary-container: var(--c-tertiary-container);
@@ -213,32 +240,40 @@
   --color-success-container: var(--c-success-container);
   --color-on-success-container: var(--c-on-success-container);
 
+  --color-warning: var(--c-warning);
+  --color-info: var(--c-info);
+
   --color-brand-violet: var(--c-brand-violet);
   --color-brand-blue: var(--c-brand-blue);
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-headline: "IBM Plex Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* TYPOGRAPHY FAMILY SYSTEM */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-headline: "Manrope", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  /* ENFORCE RECTILINEAR (SHARP CORNERS) GLOBALLY */
-  --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
-  --radius-3xl: 0px;
+  /* MODERN SMOOTH ROUNDED CORNERS GLOBALLY */
+  --radius-xs: 0.15rem;
+  --radius-sm: 0.275rem;
+  --radius-md: 0.4rem;
+  --radius-lg: 0.65rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.05rem;
+  --radius-3xl: 1.05rem;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
+    font-size: 16px;
   }
   body {
     position: relative;
     background-color: var(--c-background);
-    color: var(--c-on-surface);
-    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    color: var(--c-body);
+    font-family: var(--font-sans);
+    font-size: 1rem; /* 16px */
+    font-weight: 400; /* Body 16px / 400 */
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -246,8 +281,95 @@
     position: relative;
     z-index: 1;
   }
-  h1, h2, h3, h4 {
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--c-heading);
+    font-family: var(--font-headline);
     letter-spacing: -0.02em;
+  }
+  h1 {
+    font-size: 2.5rem; /* Page Heading 40px / 700 */
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  h2 {
+    font-size: 1.875rem; /* Section Title 30px / 700 */
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  h3, h4 {
+    font-size: 1.375rem; /* Card Title 22px / 600 */
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-family: var(--font-sans) !important;
+    font-size: 0.875rem; /* Small text 14px / 400 default */
+  }
+  button {
+    font-family: var(--font-sans);
+    font-size: 0.9375rem; /* Button 15px / 600 */
+    font-weight: 600;
+  }
+}
+
+@layer utilities {
+  /* STRICT TYPOGRAPHY SCALE UTILITIES */
+  .hero-title {
+    font-family: var(--font-headline);
+    font-size: 3.5rem !important; /* 56px */
+    font-weight: 700 !important;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+  }
+  .page-heading {
+    font-family: var(--font-headline);
+    font-size: 2.5rem !important; /* 40px */
+    font-weight: 700 !important;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+  .section-title {
+    font-family: var(--font-headline);
+    font-size: 1.875rem !important; /* 30px */
+    font-weight: 700 !important;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+  .card-title {
+    font-family: var(--font-headline);
+    font-size: 1.375rem !important; /* 22px */
+    font-weight: 600 !important;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+  }
+  .text-body-spec {
+    font-family: var(--font-sans);
+    font-size: 1rem !important; /* 16px */
+    font-weight: 400 !important;
+    line-height: 1.5;
+  }
+  .text-small-spec {
+    font-family: var(--font-sans);
+    font-size: 0.875rem !important; /* 14px */
+    font-weight: 400 !important;
+    line-height: 1.45;
+  }
+  .text-caption-spec {
+    font-family: var(--font-sans);
+    font-size: 0.75rem !important; /* 12px */
+    font-weight: 400 !important;
+    line-height: 1.4;
+  }
+  .text-button-spec {
+    font-family: var(--font-sans);
+    font-size: 0.9375rem !important; /* 15px */
+    font-weight: 600 !important;
+    line-height: 1.35;
+  }
+  ::placeholder {
+    font-family: var(--font-sans) !important;
   }
 }
 
@@ -328,11 +450,11 @@
 
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.35s ease-out;
+  animation: fade-in 0.35s ease-out forwards;
 }
 
 @keyframes scale-up {
@@ -489,3 +611,66 @@
 .typing-dot:nth-child(3) {
   animation-delay: 0.4s;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Stitch Design System Utilities & Material Symbols
+   ───────────────────────────────────────────────────────────── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+.ambient-card {
+  background: var(--c-surface-container-lowest);
+  border: 1px solid var(--c-outline-variant);
+  transition: all 0.2s ease;
+}
+
+.ambient-card:hover {
+  border-color: var(--c-outline);
+  box-shadow: var(--shadow-card);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--c-outline-variant);
+}
+
+/* Toast Notification Slide-In & Fade-Out Animations */
+@keyframes toastSlideIn {
+  0% {
+    transform: translateX(120%) scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes toastFadeOut {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(50%) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.animate-toast-slide-in {
+  animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-toast-fade-out {
+  animation: toastFadeOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+

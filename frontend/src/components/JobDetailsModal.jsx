@@ -186,12 +186,12 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
               }}
               title={job.company?.id ? "View Company Profile" : ""}
               disabled={!job.company?.id}
-              className={`w-12 h-12 rounded-2xl bg-surface-container-low border border-outline-variant flex items-center justify-center text-primary font-bold text-lg shrink-0 overflow-hidden transition-all ${job.company?.id ? 'hover:border-primary/40 hover:scale-105 active:scale-95 cursor-pointer' : ''} shadow-sm`}
+              className={`w-16 h-16 rounded-2xl bg-surface-container-low border border-outline-variant flex items-center justify-center text-primary font-bold text-xl shrink-0 overflow-hidden transition-all ${job.company?.id ? 'hover:border-primary/40 hover:scale-105 active:scale-95 cursor-pointer' : ''} shadow-md`}
             >
-              {job.company?.logoUrl ? (
-                <img src={job.company.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+              {(job.company?.logoUrl || job.logoUrl || job.companyLogo) ? (
+                <img src={job.company?.logoUrl || job.logoUrl || job.companyLogo} alt="Logo" className="w-full h-full object-cover" />
               ) : (
-                <span>{job.companyName?.charAt(0) || job.company?.name?.charAt(0) || 'J'}</span>
+                <span>{(job.companyName || job.company?.name || 'J').replace(/^c_/i, '').charAt(0).toUpperCase()}</span>
               )}
             </button>
             <div className="min-w-0">
@@ -205,7 +205,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                     }}
                     className="font-bold text-on-surface hover:text-primary hover:underline transition-colors flex items-center gap-1 cursor-pointer"
                   >
-                    {job.company?.name || job.companyName || 'Aether Corp'}
+                    {(job.company?.name || job.companyName || 'Aether Corp').replace(/^c_/i, '')}
                     {job.company?.verified && (
                       <span className="text-[9px] bg-success-container border border-success/30 text-success px-1.5 py-0.5 rounded font-bold uppercase tracking-wide flex items-center select-none scale-90">
                         ✓ Verified
@@ -214,7 +214,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                   </button>
                 ) : (
                   <span className="font-bold text-on-surface">
-                    {job.companyName || job.company?.name || 'Aether Corp'}
+                    {(job.companyName || job.company?.name || 'Aether Corp').replace(/^c_/i, '')}
                   </span>
                 )}
                 {job.company?.companySize && (

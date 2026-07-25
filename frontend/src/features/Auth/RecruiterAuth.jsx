@@ -37,7 +37,7 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
 
     const path = isLogin ? '/auth/login' : '/auth/signup';
     const payload = isLogin 
-      ? { email, password } 
+      ? { email, password, role: 'RECRUITER' } 
       : { email, password, role: 'RECRUITER', name };
 
     try {
@@ -48,6 +48,9 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'Authentication failed');
+      }
+      if (data.user && data.user.role !== 'RECRUITER') {
+        throw new Error('Access denied. This account is registered as a candidate. Please sign in through the Candidate portal.');
       }
       setToken(data.token);
       setUser(data.user);
@@ -87,6 +90,8 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
         sparkCount={8}
         duration={400}
       >
+        {error && formatErrorMessage(error, () => setError(''))}
+
         {/* Dynamic Background DotGrid */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 opacity-[0.25]" style={{ minHeight: '100vh' }}>
           <DotGrid
@@ -140,8 +145,8 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
                 <div className="absolute bottom-2 right-2 w-1.5 h-1.5 rounded-full bg-outline-variant/60 shadow-[inset_1px_1px_1px_rgba(0,0,0,0.3)]"></div>
 
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/15 border border-outline-variant text-on-surface text-[10px] font-mono font-bold uppercase tracking-wider mb-3">
-                    <Briefcase className="w-3.5 h-3.5 text-primary" />
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/15 border border-outline-variant text-on-surface text-[10px] font-mono font-bold uppercase tracking-wider mb-3">
+                    {/* <Briefcase className="w-3.5 h-3.5 text-primary" /> */}
                     <span>Recruiter Workspace</span>
                   </div>
                   <h1 className="font-headline text-2xl font-bold tracking-tight text-on-surface">
@@ -153,12 +158,6 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
                       : 'Set up your company workspace and hire certified technical students.'}
                   </p>
                 </div>
-
-                {error && (
-                  <div className="mb-5">
-                    {formatErrorMessage(error, () => setError(''))}
-                  </div>
-                )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {!isLogin && (
