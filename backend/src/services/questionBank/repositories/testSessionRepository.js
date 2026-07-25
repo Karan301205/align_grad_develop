@@ -4,9 +4,9 @@ const { prisma } = require('../../../config/db');
 // fake in-memory client. A session is valid only if it exists, belongs to the
 // requesting user, is unused, and has not expired.
 
-async function create({ userId, skillName, answerKey, expiresAt }, client = prisma) {
+async function create({ userId, skillName, answerKey, questionIds = [], expiresAt }, client = prisma) {
   return client.testSession.create({
-    data: { userId, skillName, answerKey, expiresAt, used: false },
+    data: { userId, skillName, answerKey, questionIds, expiresAt, used: false },
   });
 }
 

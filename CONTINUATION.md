@@ -1,336 +1,204 @@
-# CONTINUATION — Question Bank Spine
+# CONTINUATION — Question Bank (pre-generated bank architecture)
 
-**Session date:** 2026-07-18
-**Branch:** `feat/question-bank-spine` (12 commits ahead of `main`, not merged, no PR opened)
-**Read order for the next session:** this file → `task.md` → `MEMORY.md` §19 → the spec.
-
-You do **not** need to re-read the repository. Everything needed to resume is below.
-
----
-
-## 1. What this session did
-
-Took a large "build an Enterprise Question Bank Management System" request and turned it into
-executable work:
-
-1. **Decomposed** the request into seven pieces (it was ~10 subsystems, not one feature) and scoped
-   pieces 1–4 as "the spine."
-2. **Wrote and committed a design spec** through a structured brainstorm — seven binding decisions,
-   each with recorded rationale.
-3. **Wrote and committed Plan 1** (skill registry foundation), 8 tasks with full code.
-4. **Executed Tasks 1–5** via fresh subagents with a review gate after each.
-
-**Every one of Tasks 1–4 had a real defect caught by review.** Three were bugs in my own plan's
-code. This is the single most important context for the next session: **the plan's code blocks are
-not trustworthy as written — verify against the actual repo before copying them.**
-
-### Plan bugs found and corrected (all fixed in the plan document)
-
-| Bug | Impact if uncaught |
-|---|---|
-| `node --test tests/` fails on Node 24 — treats `tests` as a test file | Test infra broken from task 1 |
-| Test script glob `tests/**.test.js` isn't recursive without `globstar` | **Every later task's tests silently skipped while reporting green** |
-| Seed parser regex matched `//`-commented frontend entries | Deliberately-disabled skills resurrected into the registry |
-| `config/db.js` exports `{ prisma, isMock }`, not the client | Compiles and passes a module-load check, throws on first real query |
-| Plan's registry model named `Skill` | `type Skill` already exists on `Profile.skills` — duplicate declaration, client generation fails |
-| Migration filtered `Profile` on `deletedAt` | `Profile` has no such field; Prisma rejects with `Unknown argument` |
-| Tier list casing (`Git and GitHub`, `Express js`) | Silently mis-tiered two skills |
+**Last updated:** 2026-07-23
+**Branch:** `feat/question-bank-spine` (ahead of `main`, not merged, no PR)
+**Read order:** this file → `task.md` → `MEMORY.md` §19 → spec
+(`docs/superpowers/specs/2026-07-21-question-bank-architecture-design.md`).
 
 ---
 
-## 2. Architectural decisions (binding)
+## 0. Current status (2026-07-23) — Phases 3–6 complete & DEPLOYED to production Atlas
 
-Full table in `MEMORY.md` §19. The seven that constrain everything downstream:
+**DEPLOYED (2026-07-23, user-authorized one-time override of the never-write-prod rule):** seeded 143
+SkillDefinitions, 36 SkillRoadmaps, and 4,770 questions to live Atlas; `npm run bank:verify` → ALL
+INTEGRITY CHECKS PASSED. Prod totals: 4,785 questions (4,770 ACTIVE + 15 legacy interim rows RETIRED).
+During seeding, fixed a latent prod bug: 15 legacy questions had `updatedAt: null` (broke full
+`findMany`, would have failed runtime `findActiveBySkill`) — repaired + retired; seed/verify now `select`
+only needed fields. NOT pushed to GitHub (per instruction). Read-only smoke test passed for 5 skills.
 
-1. **Prisma models in `backend/`; generation runs as a separate worker; `admin_ws` triggers work by writing `GenerationJob` documents.** The queue document is the contract between the two backends — no HTTP coupling, one schema owner. `admin_ws` never imports Prisma.
-2. **DB-backed `SkillDefinition` registry** is the source of truth for skill identity, with aliases consolidated. Tier and publish status are mutable state, not constants.
-3. **Bank-first with runtime LLM fallback** behind a config flag. Ships on Tier 1 with no student-facing regression; coverage becomes a dial, not a launch gate.
-4. **AI drafts blueprints, human approves via CLI**, generation blocked until approved. A bad blueprint silently poisons ~300 questions.
-5. **Dedup = hash pre-filter + Titan embeddings + in-process cosine**, behind a swappable interface, scoped **within a skill** (never global — a closure question in JS and Python are legitimately different).
-6. **Batched reviewer pass**; disagreements flagged for humans, never auto-discarded.
-7. **`COMPLETED` ≠ `PUBLISHED`.** Publishing is an explicit operator action.
 
-### Enforced boundaries
+**Phase 3 (question bank):** ~4,770 MCQs across 36 skills, every subtopic 10/10, strict interview bar.
+Lives in `backend/scripts/output/questionBank.json` (+ `.backup.json`). 107 skills (ranks 37–143)
+unstarted — need roadmap subtopics rebuilt (names in `backend/src/services/questionBank/skills/seedData.json`;
+subtopics were lost with `roadmaps.json` and are NOT in any transcript). Tooling recreated after an
+accidental `rm -rf scripts`: `scripts/haikuMerge.js`, `scripts/haikuAuthoringSpec.md`,
+`scripts/output/roadmaps.json` (36 skills).
 
-- Repositories are the **only** place Prisma is touched. Nothing else under `services/questionBank/` may import the client.
-- `similarity/` exposes exactly one interface: `findSimilar(skillId, embedding, threshold)`.
-- `services/mcq/` stays and becomes the fallback path only.
+**Phase 4 (assessment integration & usage tracking) — DONE:**
+- **Question selection workflow:** request skill → `questionRepo.findActiveBySkill(skill)` (ACTIVE only,
+  case-insensitive) → `selection.selectQuestions(pool,{count:10,seed})`. Selection is a pure, seeded
+  (deterministic/testable) engine that groups by subtopic, round-robins for spread, targets a balanced
+  difficulty mix (`DEFAULT_DIFFICULTY_MIX`), and never repeats a question. Config-driven → extensible.
+- **Usage tracking:** on serve, `generateSkillTest` stores `answerKey`+`questionIds` in the `TestSession`
+  and calls `questionRepo.recordServed(ids)` → atomic `usageCount +1` + `lastUsed`. On submit,
+  `submitSkillTest` classifies each served question from the SERVER-SIDE key (never trusts the client)
+  into correct/wrong/skip and calls `recordOutcomes` → atomic `correctCount`/`wrongCount`/`skipCount`.
+- **Counter update strategy:** all writes are Mongo atomic `$inc` (Prisma `{ increment }`) via
+  `question.updateMany`, batched per bucket (≤1 query for serve, ≤3 for outcomes) → race-safe + few
+  queries. Mock parity added in `mockClient.js`.
+- **Assessment integration:** bank is the ONLY source; the live `mcqService.generate` fallback was
+  removed. If a skill has <10 ACTIVE questions, `generateSkillTest` returns 502 (no dynamic generation).
+- **Security:** client serve payload is only `{id,question,options}` with an ordinal id; submit returns
+  `results:[{correct}]` — answer key, explanations, tracking metadata, usage stats, and DB ids are never
+  exposed. Session is single-use, expiring, owner-checked (Plan 2, unchanged).
+- **Tests:** 77/77 pass (12 new in `tests/questionBank/selection.test.js` + `questionRepository.test.js`).
+
+**⚠️ Prod deploy prerequisite:** the bank is currently only in `questionBank.json` and the mock. For a
+real Atlas DB, a human must seed `prisma.question` from `questionBank.json` (the `seedQuestionBank.js`
+script was deleted in the incident and must be recreated — dry-run default, `--commit` human-only, never
+run from an agent; Atlas is production). Until then `prisma.question.findMany` is empty on real DB.
+
+**Phase 5 (Question Bank intelligence & maintenance) — DONE:**
+- **Usage-aware selection strategy:** `selection.orderByUsage` orders each subtopic's queue least-used
+  first with a seeded random tiebreak, so under-served questions are picked first while subtopic spread,
+  difficulty balance, no-dupes, and ACTIVE-only are preserved → traffic distributes across the whole bank.
+- **Question health evaluation:** `services/questionBank/health.js` (`evaluateHealth`/`classify`, pure)
+  reads usage/correct/wrong/skip/lastReviewed and returns Healthy | Needs Review | Replacement Candidate |
+  Retired. Rate-based rules are gated by `minAnswersForRates`/`minUsageForRates` to avoid tiny-sample
+  false positives.
+- **Configuration strategy:** all thresholds live in `services/questionBank/healthConfig.js`
+  (`DEFAULT_HEALTH_CONFIG`); callers may pass a partial override — no code change needed to retune.
+- **Replacement workflow:** `services/questionBank/maintenance.js` `runHealthReview({apply})`, exposed via
+  CLI `npm run bank -- health-review [--commit]` (dry-run default). FLAG ONLY — sets `Question.reviewState`
+  (`NEEDS_REVIEW` / `REPLACEMENT_CANDIDATE`) + `lastReviewed`, atomically, one `updateMany` per state.
+  Never regenerates, never deletes, never mutates counters; flagged questions stay `ACTIVE` and served
+  until a replacement is approved (a later phase retires the old one + activates the new).
+- **Assessment analytics model:** `AssessmentRecord` (candidateId, skill, questionIds[], startedAt/endedAt,
+  totalQuestions, correct/wrong/skipped, finalScore, passed). `submitSkillTest` appends one per assessment
+  via `assessmentRepository.record` (best-effort, non-blocking). Append-only; history never removed. Data
+  collection only — no dashboard.
+- **Schema:** `Question.reviewState` (+ index), new `AssessmentRecord` model. `npx prisma generate` run —
+  client only, no DB push.
+- **Security:** unchanged from Phase 4 — serve payload is `{id,question,options}` only; submit returns
+  `results:[{correct}]`; answer key / explanations / usage stats / metadata never exposed. Analytics rows
+  hold internal ids but are server-side only (no client endpoint added this phase).
+- **Tests:** 93/93 pass (16 new: `health.test.js`, `maintenance.test.js`, `assessmentRepository.test.js`,
+  usage-aware selection). E2E (mock) drives real generate→submit: serve/outcome tracking, analytics
+  persistence, usage-aware spread, and a full 4,770-question health review all verified.
+
+**Phase 6 (production readiness & operational hardening) — DONE:**
+- **Database seeding procedure:** `scripts/seedQuestionBank.js` (`npm run bank:seed [-- --commit]`) —
+  dry-run default; validates every record first; idempotent + resumable (dedup by
+  skillName+subtopic+normalized question text → skips existing); batched inserts with detailed per-skill
+  logs; graceful rollback of the current run on unrecoverable error. HUMAN runs `--commit` against prod.
+- **Validation utilities:** `scripts/verifyQuestionBank.js` (`npm run bank:verify [-- --file]`) — integrity
+  report over the DB or the JSON file: canonical-skill existence, roadmap existence, subtopic∈roadmap,
+  orphans, duplicate ids, duplicate-within-subtopic, missing metadata, invalid difficulty, invalid
+  reviewState. Exits non-zero on any failure. Verified clean on the real 4,770-question bank.
+- **Performance:** `@@index([skillName, status])` added for the assessment selection hot path; per-skill
+  pools are ~120–140 rows so latency stays low. Load test (`scripts/loadTestQuestionBank.js`, mock, 300
+  assessments @ concurrency 30): 0 errors, generate avg ~7ms / submit ~8ms, exact atomic counters,
+  0 duplicate-within-assessment, 300 analytics rows.
+- **Production safety (verified):** serve payload = `{id,question,options}` only; submit returns
+  `results:[{correct}]` (no answer key/explanations/metadata); `AssessmentRecord` is append-only (no
+  update/delete API); health/maintenance flags never mutate counters; counters use atomic `$inc`.
+- **Logging:** standardized non-sensitive prefixes — `[assessment]`, `[health-review]`, `[qbank-seed]`,
+  `[qbank-verify]` (ids/counts only; never answer keys or question text).
+- **Tests:** 94/94 pass. Full Phase 6 E2E (mock) covers seed dry→commit→idempotent, DB integrity,
+  assessment generate/submit, usage tracking, analytics, health review, and safety assertions.
+
+### Production deployment process (operational checklist)
+1. Set `DATABASE_URL` to the target Mongo/Atlas (replicaSet for Prisma transactions). Keep `JWT_SECRET`,
+   `SUPABASE_*`, etc. per `.env`.
+2. `npx prisma generate` (schema already has reviewState, AssessmentRecord, and all indexes).
+3. `npm run bank -- seed-skills --commit` (canonical registry) and seed roadmaps.
+4. `npm run bank:seed` (dry-run) → review the per-skill counts.
+5. `npm run bank:seed -- --commit` (HUMAN) — idempotent; safe to re-run/resume; self-rolls-back on error.
+6. `npm run bank:verify` → expect **ALL INTEGRITY CHECKS PASSED**.
+7. Smoke-test one assessment (generate → submit) on staging.
+8. Ongoing: `npm run bank -- health-review` (dry-run) then `--commit` to flag review candidates.
+
+### Recovery process
+- Source of truth for the bank is `backend/scripts/output/questionBank.json` (+ `questionBank.backup.json`).
+- Re-seeding is idempotent, so recovery = re-run `bank:seed --commit` (skips what exists, resumes the rest).
+- A failed `--commit` deletes only its own inserts (rollback); nothing pre-existing is touched.
+- If `questionBank.json` itself is lost, it is reconstructable from subagent transcripts (see the Phase 3
+  incident note) — 15 skills were recovered that way before.
+
+**Next:** Question Bank architecture is COMPLETE (Phases 0–6). Only remaining step is the human-run
+`bank:seed --commit` against production Atlas. Stop for approval before any new work.
 
 ---
 
-## 3. Database decisions
+## 1. What the recent work did
 
-### Created (in `schema.prisma`, client generated, **collection not yet pushed to Atlas**)
+1. **Phase 0 — architecture migration (2026-07-21).** Deprecated the *Enterprise Question Generation
+   Pipeline*. Investigation confirmed it was **never built** (no blueprint engine, worker,
+   `GenerationJob` queue, dedup/`similarity`, or reviewer code in `backend/` or `admin_ws/`; no queue
+   or embedding dependency). So the migration was **documentation-only** — the registry, interim
+   question bank, Plan 2 security, and mcq providers are all kept. New spec written; enterprise spec
+   archived (`docs/superpowers/archive/2026-07-18-question-bank-spine-design.md`).
+2. **Phase 1 — roadmap storage.** Added the `SkillRoadmap` model, mock support, a pure validator
+   (`roadmap/validate.js`), an idempotent seed (`seedRoadmaps.js`), and a mock-only verify harness
+   (`verifyRoadmapFlow.js`).
+3. **Phase 2 — roadmap generation (DONE).** Ranked the 143 canonical skills and generated a 10-15
+   subtopic interview roadmap for **all 143**, persisted immediately + resumably, verified.
 
-```prisma
-model SkillDefinition {
-  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
-  canonicalName       String
-  slug                String   @unique
-  aliases             String[]
-  category            String   @default("technical")
-  tier                Int      @default(3)
-  status              String   @default("WAITING")
-  targetQuestionCount Int      @default(300)
-  counters            SkillCounters?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  deletedAt           DateTime?
-  @@index([tier, status])
-}
+**No MCQs/questions were generated.** Phase 3 (question generation) has not started.
 
-type SkillCounters {
-  totalQuestions Int @default(0)
-  validated      Int @default(0)
-  topicsReady    Int @default(0)
-  topicsTotal    Int @default(0)
-}
+---
+
+## 2. Current verified state
+
+- **143/143 canonical skills have a roadmap.** Subtopics 12–14 (avg 13.3). All Phase 2 verification
+  checks PASS (exactly one roadmap per skill; 10–15 deduped subtopics; contiguous 1..N ranks; full
+  coverage; real mock seed→read roundtrip 143/143).
+- **Test suite: 56/56** (`cd backend && npm test`).
+- **Nothing written to the database.** `SkillRoadmap` (and the other new collections) are not pushed
+  to Atlas. Roadmap data lives in `backend/scripts/output/roadmaps.json` (git-ignored) + a curated
+  order in `backend/scripts/skillRanking.json`.
+- Generation ran on **Groq `llama-3.3-70b-versatile`** (Bedrock/Claude is 403 billing-blocked).
+- **Uncommitted** on `feat/question-bank-spine` (standing policy). Recovery checkpoint: commit
+  `e397af1` ("WIP checkpoint before question-bank architecture migration").
+
+---
+
+## 3. Files (Phases 1–2)
+
+**Created**
 ```
-
-**The model is `SkillDefinition`, never `Skill`** — `type Skill { name, rating, verifiedRating }`
-already exists as the embedded type on `Profile.skills`.
-
-Status values are plain strings (`WAITING | GENERATING | PAUSED | REVIEWING | COMPLETED | PUBLISHED`),
-matching the existing `User.role` convention rather than a Prisma enum.
-
-### Planned (not yet written)
-
-| Model | Plan | Purpose |
-|---|---|---|
-| `TestSession` | 2 | `profileId, skillId, questionIds[], correctKey[], status, servedAt, expiresAt` — closes both security findings |
-| `SkillBlueprint` | 3 | Versioned; embedded `topics[]` with `weight`, `plannedCount`, `difficultyMix`. Never edited in place — re-drafting supersedes. |
-| `TopicProgress` | 3 | Separate from the blueprint because it is high-churn worker state; embedding it would mean rewriting an approved document every batch |
-| `Question` | 4 | Includes `embedding Float[]`, `textHash`, and a `stats` subdocument that is **written now and unused** — adding fields to millions of documents later is the expensive migration |
-| `GenerationJob` | 4 | The queue; also the audit trail of generation |
-| `QuestionReviewFlag` | 4 | Human review queue for reviewer disagreements |
-
-### Migration obligation (Task 7, not yet run)
-
-Alias consolidation requires rewriting existing data. Exact leaf fields:
-**`Profile.skills[].name`** and **`Job.requirements[].skillName`**. Every stored `"next js"` must
-become `"next.js"` or matching silently breaks for real users.
+docs/superpowers/specs/2026-07-21-question-bank-architecture-design.md
+backend/src/services/questionBank/roadmap/validate.js
+backend/src/services/questionBank/roadmap/prompts.js
+backend/src/services/questionBank/roadmap/roadmapService.js
+backend/src/services/questionBank/roadmap/providers/bedrockProvider.js
+backend/src/services/questionBank/roadmap/providers/groqProvider.js
+backend/scripts/generateRoadmaps.js
+backend/scripts/seedRoadmaps.js
+backend/scripts/verifyRoadmapFlow.js
+backend/scripts/skillRanking.json
+backend/scripts/output/roadmaps.json            # 143 roadmaps (git-ignored)
+backend/tests/questionBank/roadmapValidate.test.js
+```
+**Modified**
+```
+backend/prisma/schema.prisma      # + SkillRoadmap model (npx prisma generate run — client regenerated)
+backend/src/config/mock/mockClient.js + seed.js   # + skillRoadmap mock model
+MEMORY.md · task.md · CONTINUATION.md             # architecture migration + Phase 2
+```
+**Not touched:** all frontend, `admin_ws/`, existing controllers/routes/auth, the registry, the
+interim question bank, Plan 2 security, the mcq providers.
 
 ---
 
-## 4. Security findings — NOT fixed, highest priority in the program
+## 4. Standing safety policy (carry forward)
 
-Both in spec §3. Both closed by `TestSession` (Plan 2), which is **independently shippable** ahead
-of Plans 3–5.
-
-### 4.1 Skill verification can be bypassed entirely
-
-`backend/src/controllers/student.controller.js:354`
-
-```js
-const { skillName, score } = req.body;
-const testScore = parseInt(score, 10);
-const passed = true;              // hardcoded
-updatedSkills[skillIdx].verifiedRating = testScore;
-updatedSkills[skillIdx].rating = Math.max(updatedSkills[skillIdx].rating, testScore);
-```
-
-`POST /api/student/tests/submit` with `{skillName: "Kubernetes", score: 10}` yields a verified 10
-without loading a question. No threshold is applied. Because `rating` is also raised, this
-propagates into `skillMatching.service.js` and unlocks ineligible job applications. Recruiters
-trust `verifiedRating` — this is the platform's core value proposition.
-
-### 4.2 The answer key is sent to the client
-
-`services/mcq/prompts.js:4` instructs the model to emit an `answer` field per question;
-`student.controller.js:346` returns the model output unmodified.
-
-### Doc error
-
-`CLAUDE.md` claims `submitSkillTest` has a `score >= 7` pass threshold. **It does not.** Correcting
-this is part of Task 8.
+`DATABASE_URL` points at a **live production Atlas cluster with real user data.** **No agent writes.**
+Forbidden without a human: `seedRoadmaps.js --commit`, `seedQuestions.js --commit`,
+`bank -- *-skills --commit`, `npx prisma db push`. Safe: `npx prisma generate`, dry runs, read-only
+queries, `npm test`, mock-mode scripts. Standalone DB scripts must set `process.env.DATABASE_URL=''`
+as their first line and hard-abort unless `isMock()===true` (a bad guard once wrote 15 rows to prod).
 
 ---
 
-## 5. APIs
+## 5. EXACT next step
 
-**None created this session.** No routes were added or changed.
+**Stop and wait for human approval before Phase 3 (roadmap-driven question generation).**
 
-Planned:
+When approved, Phase 3 = generate MCQs per (skill, subtopic) using the roadmaps as the syllabus,
+reusing the interim generator + providers (Bedrock→Groq), storing into the `Question` model with the
+same immediate-persist + resumable + verify pattern as Phase 2. Backend only. Human runs any prod
+`--commit`/`db push`.
 
-| Endpoint | Plan | Notes |
-|---|---|---|
-| `POST /api/student/tests/generate` (rework) | 2, 5 | Creates a `TestSession`, returns questions with `correctIndex` stripped |
-| `POST /api/student/tests/submit` (rework) | 2 | Takes `sessionId` + answers, **never a score**; scores server-side; single-use expiring session |
-
-Operator surface is a CLI, not HTTP: `npm run bank -- <command>`. Currently `seed-skills`; Plan 3
-adds blueprint draft/approve, Plan 4 adds enqueue/status.
-
----
-
-## 6. Files created and modified
-
-### Created
-
-```
-docs/superpowers/specs/2026-07-18-question-bank-spine-design.md
-docs/superpowers/plans/2026-07-18-skill-registry-foundation.md
-backend/scripts/generateSkillSeed.js
-backend/src/services/questionBank/skills/normalize.js
-backend/src/services/questionBank/skills/seedData.json          # 143 definitions, generated + committed
-backend/src/services/questionBank/repositories/skillDefinitionRepository.js
-backend/src/cli/bank.js
-backend/src/cli/commands/seedSkills.js
-backend/tests/smoke.test.js
-backend/tests/questionBank/normalize.test.js
-backend/tests/questionBank/skillDefinitionRepository.test.js
-task.md
-CONTINUATION.md
-```
-
-### Modified
-
-```
-backend/prisma/schema.prisma      # + SkillDefinition, + SkillCounters
-backend/package.json              # + "test", + "bank" scripts
-MEMORY.md                         # + §20, folder tree, SkillDefinition, removed phantom root package.json
-```
-
-### Modified 2026-07-19 (Tasks 5-fix and 6)
-
-```
-backend/src/cli/bank.js                       # fix: loader() moved inside try (4949b53)
-backend/src/services/questionBank/skills/registryCache.js   # created (48ce2cc)
-backend/tests/questionBank/registryCache.test.js            # created (48ce2cc)
-backend/src/services/skillMatching.service.js # rewritten: both sides resolve through registry
-backend/src/index.js                          # non-fatal registryCache.load() at boot
-```
-
-### NOT modified (deliberately)
-
-`student.controller.js`, `mockClient.js`, `CLAUDE.md` (Task 8), anything under `frontend/`,
-anything under `admin_ws/`.
-
----
-
-## 7. Current verified state (updated 2026-07-19)
-
-- **Tasks 1–6 complete and review-approved.** Five of six tasks had real defects caught by review
-  (Task 6 was the first clean one). Task 5's defect: `loader()` outside `try` in `bank.js`.
-- **Test suite: 21/21 passing.** `cd backend && npm test`
-- Boot verified against live Atlas (read-only): `[skill-registry] loaded 0 skill spellings` —
-  the registry collection is unseeded, and the cache correctly degrades to identity matching.
-- `npm run bank -- --help` works and lists both subcommands.
-- `npx prisma generate` succeeds — no duplicate-`Skill` collision.
-- Seed data: **143 definitions**, Tier 1 = 9, Tier 2 = 7, Tier 3 = 127.
-- `C`, `C++`, `C#` verified as three distinct rows (`c`, `c-plus-plus`, `c-sharp`).
-- Working tree clean except one unrelated untracked file: `frontend/public/Karan Rawat_Generated_Resume.pdf`.
-- **Nothing has been written to the database. The `SkillDefinition` collection does not exist in Atlas.**
-
----
-
-## 8. Standing safety policy — carry this forward
-
-`DATABASE_URL` points at a **live production Atlas cluster with real user data.** Agreed this
-session: **no agent runs writes against it.**
-
-Forbidden without a human at the keyboard:
-- `npm run bank -- seed-skills --commit`
-- `npm run bank -- normalize-skills --commit` ← rewrites real candidate profiles and job requirements
-- `npx prisma db push`
-
-Safe: `npx prisma generate`, dry runs, read-only queries, `npm test` (stubs `config/db` via
-`require.cache` so `db.js`'s startup probe never fires at the live cluster).
-
----
-
-## 9. EXACT next task (updated 2026-07-20, session 2)
-
-### SESSION 3 (2026-07-20) — DONE: Decision 1 + Plan 2 (server-side scoring) + 20 more skills.
-
-**Everything uncommitted** (standing instruction). Suite 46/46. Two independent verifiers pass:
-`node scripts/verifyScoringFlow.js` (7 adversarial checks) and a live HTTP E2E (routes+validators).
-
-**1. Decision 1 — skill ratings are now server-owned (enforced backend):**
-- `updateProfile` runs incoming skills through `reconcileSkills()` — a newly declared skill starts at
-  **rating 1**, existing skills keep their server-side rating/verifiedRating, and any client-supplied
-  rating/verifiedRating is IGNORED. (`student.controller.js`)
-- The ONLY way a rating rises is a **passing** server-scored assessment (`submitSkillTest`).
-- Legacy `POST /student/tests` (`submitTest`) — the old client-score hole — now returns **410 Gone**.
-
-**2. Plan 2 — TestSession + server-side scoring (both security holes CLOSED):**
-- `TestSession` model (schema + mock + `testSessionRepository` + 6 tests). Stores the answer key
-  server-side; single-use; 30-min expiry.
-- `generateSkillTest` → `buildSkillTest()` builds 10 Qs (bank-first, live fallback), stores the
-  answer key in a session, returns `{ sessionId, skillName, questions:[{id,question,options}] }` —
-  **no answer key to the client**.
-- `submitSkillTest` → takes `{ sessionId, answers[] }`, scores server-side via pure
-  `scoring.js scoreAnswers()` (5 tests, 70% pass), burns the session, and raises `verifiedRating`
-  **only on pass**. Returns `{ score(%), rating(1-10), passed, correctAnswers, skills }`
-  (correctAnswers is safe post-submission for the review UI).
-- `submitSkillTestSchema` now validates `{ sessionId, answers:int[0-3] }` (no score field).
-
-**3. Frontend (quiz component only — user approved this exception to "don't touch frontend"):**
-The ACTIVE quiz lives in `StudentLayout.jsx` + `components/StudentSkillTests.jsx` (NOT the legacy
-`SkillTest/TestView.jsx`, which is dead static-question code). Changed ONLY:
-- `StudentLayout.jsx`: added `testSessionId` state; `handleStartSkillTest` captures `sessionId`;
-  `handleSubmitSkillTest` submits `{sessionId, answers}` (no client scoring) and uses the server
-  result. `StudentSkillTests.jsx`: result block now honors pass/fail (was always "Congratulations").
-- Nothing else in the frontend touched (landing page / `index.html` / `index.css` / stitch design left
-  as the user's Antigravity work). Frontend `npm run build` passes.
-
-**4. Generation — 20 more popular skills** added to `generateQuestions.js` (C++, C#, C, Go, Rust,
-HTML, CSS, MongoDB, PostgreSQL, MySQL, Kubernetes, Express JS, Django, FastAPI, Machine Learning,
-TensorFlow, PyTorch, Pandas, NumPy, Linux — 5 subtopics each). Run via `--fill` (idempotent, merges).
-🔴 **Bedrock STILL blocked** (`403 INVALID_PAYMENT_INSTRUMENT` — AWS payment instrument, human fix);
-generation used **Groq** `llama-3.3-70b-versatile`. Rate-limited pairs are topped up by re-running
-`GEN_CONCURRENCY=2 node scripts/generateQuestions.js --fill`.
-
-### EXACT next steps
-1. **Finish the 20-skill generation top-up:** re-run `GEN_CONCURRENCY=2 node scripts/generateQuestions.js --fill`
-   until `questions.json` has 30 skills × 50 = 1500 (some pairs 429'd on the first pass).
-2. **Continue the enterprise pipeline:** Plan 3 (`SkillBlueprint` + `TopicProgress` + CLI approval)
-   then Plan 4 (generation worker) — write each via `superpowers:writing-plans` first. Backend only.
-3. **Merge decision** for `feat/question-bank-spine` (unpushed) via `finishing-a-development-branch`.
-4. Prod seed of the bank + `TestSession`/`Question` collections is HUMAN-only (BLOCKER 1).
-
-Everything below this line is history.
-
-### (History) Task 7: build the normalization migration script — BUILD ONLY, never run `--commit`.
-
-Tasks 5 and 6 are done and review-approved; the original Step 1/Step 2 guidance below is retained
-only as history. Task 7's full code is in the plan (Task 7 section) with the corrected
-`const { prisma } = require(...)` import and NO `deletedAt` filter on Profile (it has no such
-field). The script must dry-run by default, print a from→to tally, write a rollback JSON under
-`backend/.rollback/`, and refuse to run against an empty registry. Verification is: module loads,
-`npm run bank -- normalize-skills` fails cleanly with "Registry is empty" (a read-only check —
-registry is unseeded), and the suite stays green. The `--commit` path is executed by a human only,
-after `seed-skills --commit` and a backup (BLOCKER 1 in `task.md`). After Task 7 comes Task 8
-(mock + doc corrections), then the final whole-branch review.
-
-### (History) Review Task 5, then implement Task 6.
-
-**Step 1 — close the Task 5 review gap (do this first, it is small).**
-
-Task 5's CLI is committed at `3f0a6f8` but never passed the review gate — the reviewer dispatch was
-cancelled. Tasks 1–4 each had a real defect caught by review; do not assume this one is clean.
-
-Read `docs/superpowers/plans/2026-07-18-skill-registry-foundation.md` Task 5, then review
-`backend/src/cli/bank.js` and `backend/src/cli/commands/seedSkills.js` against it. Specifically verify:
-
-- The dry-run path genuinely writes nothing — trace it; `seedSkills.run({commit: false})` must return before `repo.upsertMany`.
-- `buildAliasIndex(seedData)` is called **before** any database access, so bad seed data fails loudly rather than half-writing.
-- The `normalize-skills` entry in the dispatcher is **lazily** `require`d — the command file does not exist until Task 7, and an eager require would crash the whole CLI today.
-- Unknown command exits non-zero.
-
-**Step 2 — implement Task 6** (registry cache + `skillMatching` integration). Full code is in the
-plan. Three things the plan calls out that are easy to get wrong:
-
-- Resolution must happen on **both** the map keys in `buildStudentSkillMap` **and** the lookup key in `getMissingRequirements`. Resolving one side makes a canonical name fail to match its own alias.
-- When the cache is unloaded, `resolve()` must return **its input unchanged**, never `null`. Returning `null` would make every job match fail if the registry hasn't been seeded — a silent, total outage of job matching.
-- `missingRequirements` must keep reporting the **original** `reqSkill.skillName`, not the canonical one. The recruiter's own wording belongs in the UI.
-
-Task 6 also adds a non-fatal `registryCache.load()` at startup in `backend/src/index.js`.
-
-**Method:** this plan was being executed with `superpowers:subagent-driven-development` — fresh
-implementer subagent per task, review gate after each. The progress ledger is at
-`.superpowers/sdd/progress.md` and task briefs/reports are alongside it. Resuming that flow is
-recommended; the review gate has caught a genuine defect in every task so far.
-
-**Do NOT start Task 7** until Task 6 is reviewed and approved — the migration's correctness depends
-on the same `buildAliasIndex` resolution the cache uses. If resolution is wrong, the migration
-corrupts live data with it.
+Also pending (human, BLOCKER 1): `npx prisma db push` + `seedRoadmaps.js --commit` to persist the 143
+roadmaps to Atlas (see `task.md` → "Human go-live for roadmaps").

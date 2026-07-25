@@ -17,7 +17,8 @@ import {
   CheckCircle2,
   ClipboardList,
   Lock,
-  DollarSign
+  DollarSign,
+  Users
 } from 'lucide-react';
 import { apiFetch } from '../../services/apiClient';
 import { putFileToS3 } from '../../services/uploadService';
@@ -42,6 +43,7 @@ import StudentProgress from './components/StudentProgress';
 import ParsedResumeReviewModal from './components/ParsedResumeReviewModal';
 import OnboardingModal from './components/OnboardingModal';
 import GigsMarketplace from '../Gigs/GigsMarketplace';
+import CommunityLayout from '../Community/CommunityLayout';
 
 
 export default function StudentLayout({ user, token, activeTab, setActiveTab, testSkill, setTestSkill, handleLogout, theme, toggleTheme, onOpenCompanyProfile, autoSelectOpportunity, setAutoSelectOpportunity }) {
@@ -69,6 +71,10 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const [profileEmail, setProfileEmail] = useState('');
   const [dob, setDob] = useState('');
   const [phone, setPhone] = useState('');
+  const [preferredWorkModes, setPreferredWorkModes] = useState([]);
+  const [preferredWorkTypes, setPreferredWorkTypes] = useState([]);
+  const [preferredLocations, setPreferredLocations] = useState([]);
+  const [openToAnyLocation, setOpenToAnyLocation] = useState(false);
 
   // Social Links
   const [socialLinks, setSocialLinks] = useState({
@@ -174,6 +180,10 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         setProfileEmail(profData.email || '');
         setDob(profData.dob || '');
         setPhone(profData.phone || '');
+        setPreferredWorkModes(profData.preferredWorkModes || []);
+        setPreferredWorkTypes(profData.preferredWorkTypes || []);
+        setPreferredLocations(profData.preferredLocations || []);
+        setOpenToAnyLocation(Boolean(profData.openToAnyLocation));
         setSocialLinks(profData.socialLinks || {
           linkedin: '',
           github: '',
@@ -336,7 +346,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           rating: data.rating,   // 1-10 level (applied to profile only when passed)
           percent: data.score,   // 0-100
           passed: data.passed,
-          correctAnswers: data.correctAnswers
+          results: data.results // [{ correct: boolean }] per served question; answer key is never sent
         });
         if (data.skills) {
           setSkillsList(data.skills);
@@ -379,7 +389,11 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           experience: experienceList,
           certificates: certificatesList,
           projects: projectsList,
-          cocurricular
+          cocurricular,
+          preferredWorkModes,
+          preferredWorkTypes,
+          preferredLocations,
+          openToAnyLocation
         }
       });
       if (res.ok) {
@@ -796,6 +810,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const navItems = [
     { id: 'dashboard', icon: Briefcase, label: 'Opportunities', locked: !isComplete },
     { id: 'profile', icon: User, label: 'Profile & Ratings', locked: false },
+    { id: 'community', icon: Users, label: 'Community Hub', locked: false },
     { id: 'resume', icon: FileText, label: 'Resume', locked: !isComplete },
     { id: 'gigs', icon: DollarSign, label: 'Gigs Marketplace', locked: !isComplete },
     { id: 'tests', icon: BookOpen, label: 'Your Tests', locked: !isComplete },
@@ -888,10 +903,6 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
             </nav>
 
             <div className="mt-auto pt-6 border-t border-outline-variant space-y-4 px-1">
-              <div className="flex items-center justify-between px-2.5">
-                {isExpanded && <span className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant animate-fade-in">Theme</span>}
-                <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-              </div>
               <div className="flex items-center gap-3 px-2.5">
                 <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold shrink-0 overflow-hidden">
                   {profilePic ? (
@@ -948,15 +959,22 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
 
             {activeTab === 'dashboard' && (
               <StudentDashboard
+                profile={profile}
+                user={user}
                 jobs={jobs}
+                applications={applications}
                 skillCount={skillCount}
                 appliedCount={appliedCount}
                 handleApply={handleApply}
                 setTestSkill={setTestSkill}
-                onRefresh={fetchProfileAndJobs}
+                onRefresh={async () => {
+                  await fetchProfileAndJobs();
+                  await fetchStudentApplications();
+                }}
                 onOpenCompanyProfile={onOpenCompanyProfile}
                 autoSelectOpportunity={autoSelectOpportunity}
                 setAutoSelectOpportunity={setAutoSelectOpportunity}
+                goToTab={goToTab}
               />
             )}
 
@@ -985,6 +1003,14 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 setDob={setDob}
                 phone={phone}
                 setPhone={setPhone}
+                preferredWorkModes={preferredWorkModes}
+                setPreferredWorkModes={setPreferredWorkModes}
+                preferredWorkTypes={preferredWorkTypes}
+                setPreferredWorkTypes={setPreferredWorkTypes}
+                preferredLocations={preferredLocations}
+                setPreferredLocations={setPreferredLocations}
+                openToAnyLocation={openToAnyLocation}
+                setOpenToAnyLocation={setOpenToAnyLocation}
                 resumeUrl={resumeUrl}
                 setResumeUrl={setResumeUrl}
                 socialLinks={socialLinks}
@@ -1077,6 +1103,13 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
               />
             )}
 
+            {activeTab === 'community' && (
+              <CommunityLayout
+                user={user}
+                token={token}
+              />
+            )}
+
             {activeTab === 'progress' && (
               <StudentProgress
                 applications={applications}
@@ -1102,13 +1135,9 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         isUploading={isParsingOnboarding}
       />
 
-      {/* Floating Alert Modal Overlay */}
+      {/* Top-Right Sliding Toast Notification */}
       {alertConfig && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md shadow-2xl relative">
-            {formatAlertMessage(alertConfig.message, alertConfig.type, () => setAlertConfig(null))}
-          </div>
-        </div>
+        formatAlertMessage(alertConfig.message, alertConfig.type, () => setAlertConfig(null))
       )}
     </>
   );

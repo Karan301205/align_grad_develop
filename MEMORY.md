@@ -9,7 +9,7 @@ This document is the single source of truth for the AlignGrade repository. It de
 * **Purpose**: A premium, full-stack recruitment & skill verification platform.
 * **Business Objective**: Align candidate self-rated proficiencies with recruiter requirements using automated skill matching. Candidates falling below requirements are locked out from applying but can take interactive certification tests to verify their skills and unlock opportunities.
 * **High-Level Architecture**: 
-  - **Frontend**: Single Page React Application (Vite + Tailwind CSS v4). Design system: **Architectural Professionalism** (Corporate Minimalist with subtle architectural influences) driven by semantic CSS-variable tokens in `src/index.css` (light + class-based dark mode). Light = stark white surface `#ffffff` with slate-blue accents; dark = deep slate-blue chassis `#0d1526`. Accent (`--c-primary`) is **emerald green `#003527`** (overridden from design system primary blue for active branding), representing institutional success and authorization. Depth is achieved entirely through flat line work, solid offset borders, and tonal layering (shadows and gradients are rejected). Signature elements: 0px border-radius (rectilinear shapes globally), sharp 1px/2px solid borders (`#0f172a`), flat offset shadow configurations (e.g. `.neu-raised`/`.neu-floating` using solid box-shadow offsets). The `.glass-card` / `.glass-button*` class names are retained (for API stability) but re-skinned as flat solid containers with active translate micro-interactions. Typography: IBM Plex Sans (headlines via `font-headline`), Inter (body), JetBrains Mono (labels/numeric readouts). Cards/inputs restyled centrally in `src/components/ui/` — feature views inherit the style through those primitives + tokens (no per-feature restyling).
+  - **Frontend**: Single Page React Application (Vite + Tailwind CSS v4). Design system: **Architectural Professionalism** (Corporate Minimalist with subtle architectural influences) driven by semantic CSS-variable tokens in `src/index.css` (light + class-based dark mode). Includes Stitch design system tokens (`.ambient-card`, `.material-symbols-outlined`, `surface-container-*`). Light = primary background `#F9F8F6` with stark white surface `#ffffff` layering; dark = deep slate-blue chassis `#0d1526`. Accent (`--c-primary`) is **emerald green `#003527`** (overridden from design system primary blue for active branding), representing institutional success and authorization. Depth is achieved through clean line work, solid offset borders, and tonal layering. Signature elements: smooth modern rounded corners globally (`--radius-*`), sharp 1px/2px solid borders (`#0f172a`), flat offset shadow configurations. Typography: Manrope (headlines via `font-headline`), Inter (body & input typed text via `font-sans`), Instrument Sans (input placeholders), JetBrains Mono (labels/numeric readouts). Cards/inputs restyled centrally in `src/components/ui/` — feature views inherit the style through those primitives + tokens (no per-feature restyling).
   - **Backend**: Express.js REST API using CommonJS (`require` syntax).
   - **Database & ORM**: MongoDB + Prisma ORM. Auto-configures an in-memory mock database store for seamless offline execution if no MongoDB connection is configured.
 
@@ -35,10 +35,12 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │
 ├── docs/superpowers/
 │   ├── specs/
-│   │   └── 2026-07-18-question-bank-spine-design.md  # Question bank spine design (phases 1-4)
+│   │   └── 2026-07-21-question-bank-architecture-design.md  # CURRENT architecture (pre-generated bank)
+│   ├── archive/
+│   │   └── 2026-07-18-question-bank-spine-design.md  # SUPERSEDED — deprecated enterprise pipeline design
 │   └── plans/
-│       ├── 2026-07-18-skill-registry-foundation.md   # Plan 1: skill registry implementation
-│       └── 2026-07-20-testsession-security.md        # Plan 2: TestSession security fixes implementation plan
+│       ├── 2026-07-18-skill-registry-foundation.md   # Plan 1: skill registry (kept, shipped)
+│       └── 2026-07-20-testsession-security.md        # Plan 2: TestSession security (kept, shipped)
 │
 ├── backend/                      # --- Main Express.js API Workspace (Port 5001) ---
 │   ├── prisma/
@@ -77,7 +79,8 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   ├── recruiter.controller.js # Verification, candidate search, job postings
 │   │   │   ├── student.controller.js # Profile updates, job listings, quiz scoring
 │   │   │   ├── upload.controller.js # Presigned S3 url generator and binary magic-bytes checking
-│   │   │   └── gig.controller.js # Gigs marketplace controller workflow
+│   │   │   ├── gig.controller.js # Gigs marketplace controller workflow
+│   │   │   └── community.controller.js # LinkedIn-style community, feeds, media, and engagement controller
 │   │   ├── middleware/           # HTTP Interceptors and guards
 │   │   │   ├── auth.js           # Decodes and validates JWT bearer token signatures
 │   │   │   ├── errorHandler.js   # Catches errors, formatting 500s with masked prod warnings
@@ -89,6 +92,17 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   ├── fileCleanup.service.js # Removes outdated files/media from AWS S3 storage
 │   │   │   ├── jobLifecycle.service.js # Checks and deactivates expired job postings
 │   │   │   ├── skillMatching.service.js # Computes requirements overlap between students and jobs
+│   │   │   ├── community/        # LinkedIn-style community subsystem
+│   │   │   │   ├── permission.engine.js # Scalable role-to-permission mapping engine
+│   │   │   │   ├── community.service.js # Community lifecycle, startup global init, password validation
+│   │   │   │   ├── invite.service.js # Tokenized invitation links with expiration & max usage limits
+│   │   │   │   ├── post.service.js # Post creation with linked Media records, edit, soft delete
+│   │   │   │   ├── feed.service.js # Chronological feed queries with enriched reactions & comments
+│   │   │   │   ├── media.service.js # S3 presigned URL generation with strict size & MIME checks
+│   │   │   │   ├── reaction.service.js # 6 reaction types (Like, Love, Celebrate, Insightful, Support, Funny)
+│   │   │   │   ├── comment.service.js # Nested comment replies supporting unlimited depth
+│   │   │   │   ├── bookmark.service.js # User post bookmarking & saved post retrieval
+│   │   │   │   └── view.service.js # Unique post view tracking enforcing (postId, userId) uniqueness
 │   │   │   └── mcq/              # LLM-powered multiple choice question generator
 │   │   │       ├── mcqService.js # Main orchestrator coordinating provider sequences
 │   │   │       ├── prompts.js    # AI prompt string templates formatting questions JSON
@@ -103,7 +117,8 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   ├── recruiterCompany.validator.js # Zod schemas for company settings
 │   │   │   ├── student.validator.js
 │   │   │   ├── upload.validator.js
-│   │   │   └── gig.validator.js
+│   │   │   ├── gig.validator.js
+│   │   │   └── community.validator.js # Zod schemas for community, posts, comments, media, and reactions
 │   │   └── index.js              # Application entrypoint setting up middleware, DB, and ports
 │   ├── package.json
 │   ├── package-lock.json
@@ -149,6 +164,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   ├── constants/            # Client lookup options and barrel interfaces
 │   │   │   ├── index.js          # Backward compatible barrel exporting constant subsets
 │   │   │   ├── domains.js        # Option list of candidate specialization focus areas
+│   │   │   ├── indianStates.js   # Option list of 28 states & 8 Union Territories in India
 │   │   │   ├── skills.js         # Complete set of skills recognized by the frontend
 │   │   │   └── testQuestions.js  # Static fallback questions for offline skill certifications
 │   │   ├── features/             # Business modules organizing specific portal workspaces
@@ -163,14 +179,14 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   │   └── components/
 │   │   │   │       ├── CandidateProfileModal.jsx # Reusable candidate profile dossier drawer modal
 │   │   │   │       ├── EditJobModal.jsx # Recruiter drawer to update postings and requirements
-│   │   │   │       ├── RecruiterCandidates.jsx # Search directory exploring profiles with filters
+│   │   │   │       ├── RecruiterCandidates.jsx # Candidate search directory with 3 filters (Work Mode, Work Type, Preferred Locations) & 10-profile pagination
 │   │   │   │       ├── RecruiterCompany.jsx # Company details and document uploading check
+│   │   │   │       ├── RecruiterDashboard.jsx # Executive Recruiter Dashboard (KPI Bento cards, Top Verified Talent Carousel, Recent Applications audit table)
 │   │   │   │       ├── RecruiterJobs.jsx # Posted positions list with matching applicant cards
 │   │   │   │       └── RecruiterPostJob.jsx # Multi-step form setup to post new jobs
 │   │   │   └── Student/
 │   │   │       ├── StudentLayout.jsx # Student portal navigation, layout drawers, and view routes
-│   │   │       └── components/
-│   │   │           ├── StudentDashboard.jsx # Match opportunities matching candidate profile skills
+│   │   │           ├── StudentDashboard.jsx # Stitch bento grid candidate hub (Profile Integrity, Verification Center, Application Timeline, Recommended Matches & Career Insights)
 │   │   │           ├── StudentProfile.jsx # Complex profiles layout (experience, projects, info)
 │   │   │           ├── StudentProgress.jsx # Tracker displaying selection rounds progress stats
 │   │   │           ├── StudentResume.jsx # Resume builder compiling details and exporting PDF
@@ -178,6 +194,16 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │           └── StudentSkillTests.jsx # Interactive dashboard to verify and upgrade skills
 │   │   │   ├── Gigs/
 │   │   │   │   └── GigsMarketplace.jsx # Dashboard managing gigs browse, posts, chats, reviews
+│   │   │   └── Community/
+│   │   │       ├── CommunityLayout.jsx # Main container layout wrapping community sidebar & feed
+│   │   │       └── components/
+│   │   │           ├── CommunitySidebar.jsx # Sidebar listing Global/Private networks, search, and action triggers
+│   │   │           ├── CommunityFeed.jsx # Chronological feed stream with header details & post list
+│   │   │           ├── PostComposer.jsx # Rich post composer supporting Text, Image grid, Video player, PDF document
+│   │   │           ├── PostCard.jsx # LinkedIn-style card with multi-media, 6 reactions, comment drawer, views, and save
+│   │   │           ├── CommentSection.jsx # Infinite nested comment thread supporting inline replies
+│   │   │           ├── CreateCommunityModal.jsx # Modal to set up private communities (Name, Description, Logo, Password)
+│   │   │           └── JoinCommunityModal.jsx # Modal to join private communities via Password or Invite Link token
 │   │   ├── services/             # Client-side utility abstractions
 │   │   │   ├── apiClient.js      # Unified wrapper managing fetches, endpoints, and headers
 │   │   │   ├── resumePdf.js      # Generates a PDF resume from student profile DOM structures
@@ -258,11 +284,13 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 ### Backend Files (`backend/`)
 
 #### [backend/prisma/schema.prisma](file:///Users/karanrawat/Desktop/a_g/backend/prisma/schema.prisma)
-* **Purpose**: Prisma ORM schema definitions for MongoDB structures. Sets up data collections (User, Profile, Company, Job, Application, TestAttempt, **SkillDefinition**, **Question**, **TestSession**) and their relationships.
-* **`SkillDefinition` (added 2026-07-18)**: canonical registry for skill identity — `canonicalName`, `slug` (unique), `aliases[]`, `category`, `tier` (1|2|3), `status`, `targetQuestionCount`, `counters` (embedded `SkillCounters`), `createdAt/updatedAt/deletedAt`. Indexed on `[tier, status]`. Status values are plain strings (`WAITING | GENERATING | PAUSED | REVIEWING | COMPLETED | PUBLISHED`), matching the existing `User.role` convention rather than a Prisma enum.
+* **Purpose**: Prisma ORM schema definitions for MongoDB structures. Sets up data collections (User, Profile, Company, Job, Application, TestAttempt, **SkillDefinition**, **Question**, **TestSession**, **AssessmentRecord**, **SkillRoadmap**) and their relationships.
+* **`SkillDefinition` (added 2026-07-18)**: canonical registry for skill identity — `canonicalName`, `slug` (unique), `aliases[]`, `category`, `tier` (1|2|3), `status`, `targetQuestionCount`, `counters` (embedded `SkillCounters`), `createdAt/updatedAt/deletedAt`. Indexed on `[tier, status]`. Status values are plain strings (`WAITING | GENERATING | PAUSED | REVIEWING | COMPLETED | PUBLISHED`), matching the existing `User.role` convention rather than a Prisma enum. **(The `status` lifecycle values, `counters`/`SkillCounters`, and `targetQuestionCount` are legacy from the deprecated enterprise pipeline — see §19; only `canonicalName`/`slug`/`aliases`/`category`/`tier` are actively used.)**
 * **CRITICAL naming constraint**: the model is `SkillDefinition`, **never `Skill`**. `type Skill { name, rating, verifiedRating }` already exists as the embedded type on `Profile.skills`; declaring `model Skill` is a duplicate declaration and fails client generation.
-* **`Question` (added 2026-07-20, interim question bank)**: pre-generated MCQ store — `skillName`, `subtopic`, `question`, `options[]`, `correctIndex` (0-3 server-side answer key, aligned with Plan 2's `TestSession`), `source`, `createdAt`; indexed on `[skillName]`. Seeded offline by `scripts/seedQuestions.js` from `scripts/generateQuestions.js` (Groq `llama-3.3-70b-versatile`) output at `scripts/output/questions.json` (500 Qs, 10 skills × 50). **`generateSkillTest` now serves bank-first**: 10 random questions when a skill has ≥10 in the bank (converting `correctIndex`→A–D letter, keeping the exact legacy `{questions:[{id,question,options,answer}]}` contract), else falls back to live `mcqService.generate`. Local dev auto-loads the bank into the mock via `config/mock/loadQuestionBankMock.js` at boot (`npm run dev:mock`). Full run-book: `HANDOFF_TEMP_QUESTION_BANK.md`.
-* **`TestSession` (added 2026-07-20, Plan 2 — security fix)**: server-side assessment session — `userId`, `skillName`, `answerKey Int[]` (correct option index per served question), `used Bool`, `score Int?`, `passed Bool?`, `expiresAt`; indexed on `[userId]`. Sole Prisma access: `services/questionBank/repositories/testSessionRepository.js` (`create`/`findValidForUser`/`markUsed`). **This closes both skill-verification holes:** `generateSkillTest` now stores the answer key in a session and returns `{sessionId, questions:[{id,question,options}]}` with NO answers; `submitSkillTest` takes `{sessionId, answers[]}`, scores server-side via pure `services/questionBank/scoring.js` (`scoreAnswers`, 70% pass), burns the single-use session, and raises `verifiedRating` ONLY on pass. The client never sends a score. **Decision 1 (2026-07-20):** candidates cannot self-set ratings — `updateProfile` runs skills through `reconcileSkills` (new skill → rating 1; existing rating/verifiedRating server-owned; client values ignored); the ONLY rating-raise path is a passing assessment; legacy `POST /student/tests` (`submitTest`) is disabled (410).
+* **`Question` (added 2026-07-20, interim question bank)**: pre-generated MCQ store — `skillName`, `subtopic`, `question`, `options[]`, `correctIndex` (0-3 server-side answer key, aligned with Plan 2's `TestSession`), `source`, `createdAt`; indexed on `[skillName]`. Seeded offline by `scripts/seedQuestions.js` from `scripts/generateQuestions.js` (Groq `llama-3.3-70b-versatile`) output at `scripts/output/questions.json` (500 Qs, 10 skills × 50). **Phase 4 (2026-07-23) — assessment integration & usage tracking:** `generateSkillTest` now serves **strictly from the bank** (no live fallback — the `mcqService.generate` path was removed). Selection goes through `services/questionBank/selection.js` (pure, seeded → deterministic/testable): ACTIVE-only, distributed across subtopics (round-robin), balanced difficulty per config (`DEFAULT_DIFFICULTY_MIX`), no duplicates. `services/questionBank/repositories/questionRepository.js` is the sole assessment-path Question access — `findActiveBySkill`, `recordServed` (atomic `usageCount +1` + `lastUsed`), `recordOutcomes` (atomic `correctCount`/`wrongCount`/`skipCount`). All counter writes use Mongo atomic `$inc` (Prisma `{ increment }`) so concurrent assessments never overwrite. The bank auto-loads into the mock from `scripts/output/questionBank.json` via `config/mock/loadQuestionBankMock.js` at boot (`npm run dev:mock`). **Prod prerequisite:** the ~4,770-question bank must be seeded into Atlas (human step; see CONTINUATION) before real-DB assessments work — `prisma.question.findMany` returns empty otherwise. **Phase 5 (2026-07-23) — intelligence & maintenance:** selection is now **usage-aware** (`selection.orderByUsage`: least-used first, seeded tiebreak) so traffic spreads across the bank. Health is evaluated by `services/questionBank/health.js` (pure `evaluateHealth`/`classify`) against configurable rules in `healthConfig.js` → categories Healthy | Needs Review | Replacement Candidate | Retired. `services/questionBank/maintenance.js` `runHealthReview` (CLI `npm run bank -- health-review [--commit]`) FLAGS questions via `Question.reviewState` (`NONE | NEEDS_REVIEW | REPLACEMENT_CANDIDATE`) + `lastReviewed` — flag-only, never regenerates/deletes/alters counters; a flagged question stays `status=ACTIVE` and served until a replacement is approved (later phase). New `Question.reviewState` field + index. **Phase 6 (2026-07-23) — production readiness:** `scripts/seedQuestionBank.js` (`npm run bank:seed [-- --commit]`) seeds the bank into the DB — dry-run default, validates every record, idempotent/resumable (dedup by skillName+subtopic+normalized text), batched, graceful per-run rollback; HUMAN-run for prod, never from an agent. `scripts/verifyQuestionBank.js` (`npm run bank:verify`) produces an integrity report (canonical skill/roadmap/subtopic/orphan/dup-id/dup-in-subtopic/metadata/difficulty/reviewState) — verified clean on all 4,770. `scripts/loadTestQuestionBank.js` (`npm run bank:loadtest`) load-tests concurrency (300 assessments: 0 errors, exact atomic counters, gen ~7ms/submit ~8ms). Added `@@index([skillName, status])` for the selection hot path. Standardized non-sensitive logs (`[assessment]`, `[health-review]`, `[qbank-seed]`, `[qbank-verify]`). Added `@@index([skillName, status])`. **DEPLOYED TO PRODUCTION ATLAS 2026-07-23 (one-time, user-authorized override of the never-write-prod rule):** 143 SkillDefinitions, 36 SkillRoadmaps, and 4,770 bank questions seeded; integrity verify = ALL CHECKS PASSED. Fixed a latent prod bug found during seeding — 15 legacy interim-bank questions (12 Python + 3 Java) had `updatedAt: null` which broke every full `prisma.question.findMany()` (would have failed `findActiveBySkill` at runtime); they were repaired (timestamp set) then RETIRED (off-roadmap "Fixtures" subtopics), so the servable bank is exactly 4,770 ACTIVE. `seedQuestionBank.js`/`verifyQuestionBank.js` now use `select` on reads (efficient + robust to null-timestamp legacy rows). Prod totals: 4,785 questions (4,770 ACTIVE + 15 RETIRED).
+* **`TestSession` (added 2026-07-20, Plan 2 — security fix; `questionIds` added Phase 4)**: server-side assessment session — `userId`, `skillName`, `answerKey Int[]` (correct option index per served question), `questionIds String[]` (served Question ids, parallel to `answerKey` — lets `submitSkillTest` attribute per-question correct/wrong/skip), `used Bool`, `score Int?`, `passed Bool?`, `expiresAt`; indexed on `[userId]`. **Phase 4 integrity:** `submitSkillTest` no longer returns the answer key — it returns `results: [{correct}]` (per-question booleans only); explanations, usage stats, metadata, and internal ids are never exposed. Skip is detected server-side (missing answer or `-1` sentinel); the current UI defaults unanswered to `0`, so `skipCount` stays unexercised until the UI sends the sentinel.
+* **`AssessmentRecord` (added 2026-07-23, Phase 5 analytics)**: one immutable row per completed assessment, written by `submitSkillTest` — `candidateId`, `skill`, `questionIds[]`, `startedAt` (= session createdAt), `endedAt`, `totalQuestions`, `correctAnswers`, `wrongAnswers`, `skippedQuestions`, `finalScore`, `passed`; indexed on `[candidateId]` and `[skill]`. Append-only, never deleted (preserves assessment history); the older `TestAttempt` is kept alongside. Sole access: `services/questionBank/repositories/assessmentRepository.js` (`record`/`findByCandidate`). Feeds future recruiter reporting — no dashboard built yet. Sole Prisma access: `services/questionBank/repositories/testSessionRepository.js` (`create`/`findValidForUser`/`markUsed`). **This closes both skill-verification holes:** `generateSkillTest` now stores the answer key in a session and returns `{sessionId, questions:[{id,question,options}]}` with NO answers; `submitSkillTest` takes `{sessionId, answers[]}`, scores server-side via pure `services/questionBank/scoring.js` (`scoreAnswers`, 70% pass), burns the single-use session, and raises `verifiedRating` ONLY on pass. The client never sends a score. **Decision 1 (2026-07-20):** candidates cannot self-set ratings — `updateProfile` runs skills through `reconcileSkills` (new skill → rating 1; existing rating/verifiedRating server-owned; client values ignored); the ONLY rating-raise path is a passing assessment; legacy `POST /student/tests` (`submitTest`) is disabled (410).
+* **`SkillRoadmap` (added 2026-07-21, Phase 2)**: per-skill interview roadmap — `skillName` (unique, canonical), `popularityRank` (1 = highest hiring demand), `subtopics[]` (ordered foundational→advanced, 10-15), `createdAt`, `updatedAt`; indexed on `[popularityRank]`. One row per canonical registry skill (aliases excluded). Generated offline by `scripts/generateRoadmaps.js` (provider chain Claude/Bedrock → Groq) in the order set by `scripts/skillRanking.json`, persisted immediately + resumably to `scripts/output/roadmaps.json`, seeded via `scripts/seedRoadmaps.js` (dry-run default, `--commit` human-only, idempotent upsert by `skillName`). Mock support in `mockClient.js`/`seed.js`. **Status: 143/143 generated + verified (avg 13.3 subtopics).** This is the blueprint that will drive Phase 3 question generation. **No MCQs are stored here.**
 * **`Profile` has no `deletedAt` field.** Do not add `where: { deletedAt: null }` to Profile queries — Prisma rejects it with `Unknown argument`.
 * **Used By**: Prisma client generator command.
 * **Dependencies**: MongoDB server (connection specified in env).
@@ -529,6 +557,19 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Risk**: Low.
 
 ---
+
+#### [backend/scripts/generateRoadmaps.js](file:///Users/karanrawat/Desktop/a_g/backend/scripts/generateRoadmaps.js)
+* **Purpose**: Offline generator for `SkillRoadmap` data (Phase 2). Ranks the 143 canonical skills via `scripts/skillRanking.json`, then generates a 10-15 subtopic interview syllabus per skill through `services/questionBank/roadmap/roadmapService.js` (Claude on Bedrock → Groq fallback). Persists each roadmap immediately to `scripts/output/roadmaps.json` (**resumable**: skips skills already valid; flags `--smoke=N`/`--only=Skill`/`--force`; `GEN_CONCURRENCY` + 429 retry). Prints a verification summary.
+* **Risk**: Makes live LLM API calls. **Safe re: DB** — never requires `config/db`, writes only the output file; DB persistence is `seedRoadmaps.js`.
+
+#### [backend/scripts/seedRoadmaps.js](file:///Users/karanrawat/Desktop/a_g/backend/scripts/seedRoadmaps.js)
+* **Purpose**: Seeds `scripts/output/roadmaps.json` into the `SkillRoadmap` collection. Dry-run default; `--commit` upserts by `skillName` (idempotent). Exports `run()`. **`--commit` against prod is human-only (BLOCKER 1).**
+
+#### [backend/scripts/verifyRoadmapFlow.js](file:///Users/karanrawat/Desktop/a_g/backend/scripts/verifyRoadmapFlow.js)
+* **Purpose**: Mock-only e2e check of the roadmap seed/store flow. Forces `DATABASE_URL=''` before any require and hard-aborts unless `isMock()===true`; asserts dry-run writes nothing, commit upserts, re-seed is idempotent (in-place update), stored set validates.
+
+#### backend/src/services/questionBank/roadmap/ + scripts/skillRanking.json
+* **Purpose**: Roadmap generation module. `validate.js` (pure `validateRoadmap`/`validateRoadmapSet`), `prompts.js` (system/user prompts encoding the 10-15 foundational→advanced requirements), `roadmapService.js` (**provider-agnostic orchestrator**, Bedrock→Groq, short-circuits Bedrock after a 403), `providers/{bedrockProvider,groqProvider}.js`. No file here imports Prisma. `scripts/skillRanking.json` is the curated 1..143 popularity order.
 
 ### Frontend Files (`frontend/`)
 
@@ -937,8 +978,8 @@ src/index.js
   - **Purpose**: Creates Student Profile or Recruiter Company structure.
   - **Files**: `auth.controller.js`, `api.js`
 * **`POST /api/auth/login`**
-  - **Purpose**: Validates email/password credentials and issues token.
-  - **Files**: `auth.controller.js`, `api.js`
+  - **Purpose**: Validates email/password credentials and issues token. Accepts optional `role` parameter ('STUDENT' or 'RECRUITER') to enforce portal-specific login access and prevent cross-role authentication.
+  - **Files**: `auth.controller.js`, `auth.validator.js`, `api.js`
 
 ### Student Endpoints (Bearer JWT Required)
 * **`GET /api/student/profile`**
@@ -1359,45 +1400,86 @@ A structural refactoring separated concerns per SOLID without altering any route
 
 ---
 
-## 19. Question Bank Subsystem — Architecture Decisions (2026-07-18)
+## 19. Question Bank Subsystem — Architecture (pre-generated bank)
 
-Design spec: `docs/superpowers/specs/2026-07-18-question-bank-spine-design.md`
-Implementation plan (phase 1): `docs/superpowers/plans/2026-07-18-skill-registry-foundation.md`
+Design spec: `docs/superpowers/specs/2026-07-21-question-bank-architecture-design.md`
+(supersedes the archived enterprise spec `docs/superpowers/archive/2026-07-18-question-bank-spine-design.md`)
+Kept implementation records: `plans/2026-07-18-skill-registry-foundation.md` (registry),
+`plans/2026-07-20-testsession-security.md` (assessment security).
 Session handoff: `CONTINUATION.md` · Roadmap: `task.md`
 
 ### Goal
 
-Move MCQ generation **offline**. Students are served pre-generated, validated questions from
-MongoDB. Zero AI calls on the assessment path once coverage is complete. This replaces the current
-runtime path (`services/mcq/mcqService.js`, Bedrock → Groq fallback, called per assessment).
+Serve candidates pre-generated, validated MCQs from MongoDB — **no LLM on the assessment hot path**
+(with a runtime fallback for uncovered skills). Generation, roadmaps, lifecycle, and replacement are
+offline/administrative concerns, decoupled from the candidate request path.
 
-### Scope decomposition
+### The enterprise pipeline is deprecated (2026-07-21)
 
-The original request was decomposed into seven pieces. Pieces 1–4 are "the spine":
+An earlier design (2026-07-18) specced an *Enterprise Question Bank Management System*: a blueprint
+engine, an offline generation **worker** driven by a `GenerationJob` queue, embedding-based dedup
+(Bedrock Titan + cosine), a batched reviewer pass with human review flags, and three admin
+dashboards. **That program was deprecated and never built** — no such models, workers, queues, or
+`similarity/` code ever entered the codebase (verified: none in `backend/` or `admin_ws/`, no queue
+or embedding dependency in `package.json`). It is replaced by the simpler architecture below.
+`admin_ws/` is a standalone admin portal with no generation-pipeline code.
 
-1. Question bank data model + skill registry ← **in progress**
-2. Blueprint engine
-3. Offline generation pipeline
-4. Assessment engine cutover
-5. Admin question bank UI · 6. Generation dashboard · 7. Analytics
+### Architecture (7 parts)
 
-### Binding decisions
+1. **Skill catalog** — the 143 canonical skills in the `SkillDefinition` registry (source of truth;
+   `seedData.json` is its seed data). Roadmaps/questions are generated for canonical skills only, never aliases.
+2. **AI-assisted skill roadmap** — per skill, an ordered 10-15 subtopic interview syllabus generated
+   via the provider chain (Claude on Bedrock → Groq fallback), stored in `SkillRoadmap`. **DONE (Phase 2): 143/143.**
+3. **AI-assisted question generation** — per (skill, subtopic), MCQs via the same providers, stored
+   in `Question`. (Interim bank exists; roadmap-driven generation is Phase 3, not yet built.)
+4. **Question lifecycle** — simple `status` (ACTIVE/RETIRED/FLAGGED); only ACTIVE is served. Design only.
+5. **Usage tracking** — per-question serve/answer counters. Design only.
+6. **Intelligent replacement** — regenerate + retire overused/flagged questions. Design only.
+7. **Assessment serve/score** — `TestSession` (Plan 2): server-side scoring, answer key never sent,
+   70% pass, single-use expiring sessions. Built + kept.
 
-| # | Decision | Rationale |
-|---|---|---|
-| 1 | Prisma models live in `backend/`; generation runs as a **separate worker process**; `admin_ws` triggers work by writing `GenerationJob` documents | One schema owner. Reuses the existing Bedrock provider. The queue document is the contract between the two backends — no HTTP coupling. `admin_ws` stays read-only over these collections and never imports Prisma. |
-| 2 | **DB-backed `SkillDefinition` registry** is the source of truth for skill identity, with aliases consolidated | Tier and publish status are mutable state, not constants. Splitting identity from state would create a join on a fragile string. |
-| 3 | **Bank-first with runtime LLM fallback** behind a config flag | Ships on Tier 1 with no student-facing regression; coverage becomes a dial, not a launch gate. Flag is turned off once Tier 1+2 coverage is sufficient. |
-| 4 | AI drafts blueprints, **human approves via CLI**, generation blocked until approved | A bad blueprint silently poisons ~300 questions. Review costs minutes; regeneration costs money. |
-| 5 | Dedup = normalized-hash pre-filter + **Bedrock Titan embeddings** + in-process cosine, behind a swappable interface | Semantic paraphrase is the dominant LLM duplicate mode. ~300 vectors/skill fits in memory. Atlas Vector Search swaps in later without data migration. Dedup scope is **within a skill**, never global. |
-| 6 | **Batched reviewer pass**; disagreements flagged for humans, never auto-discarded | Wrong answer keys are the defect class that destroys trust. The reviewer is sometimes the one in error. |
-| 7 | `COMPLETED` ≠ `PUBLISHED` | Publishing is an explicit operator action. A finished bank is not automatically serving students. |
+### Kept decisions (still binding)
 
-### Architectural boundaries (enforce when editing)
+| Decision | Rationale |
+|---|---|
+| **DB-backed `SkillDefinition` registry** is the source of truth for skill identity (aliases consolidated) | Canonical names + alias resolution feed both job matching and roadmap/question generation. Wired into `skillMatching.service.js`. |
+| **Bank-first serve with runtime LLM fallback** | No student-facing regression; coverage is a dial, not a launch gate. |
+| **Provider-agnostic generation** via an orchestrator (Claude on Bedrock → Groq) | Switching providers is a one-module change; no HTTP coupling; **no new providers introduced**. |
+| **Repositories are the only place Prisma is touched** under `services/questionBank/` | Keeps generation/validation logic pure and unit-testable. |
 
-- **Repositories are the only place Prisma is touched.** No other file under `services/questionBank/` may import the Prisma client. Pipeline stages take and return plain objects so they are unit-testable without a database.
-- **`similarity/` exposes one interface** — `findSimilar(skillId, embedding, threshold)`.
-- **`services/mcq/` stays in place** and becomes the fallback path only.
+### Phases
+
+- **Phase 0 (migration, 2026-07-21):** deprecate the enterprise pipeline (docs only — no pipeline code existed); keep the registry, interim bank, Plan 2 security, and the mcq providers.
+- **Phase 1 (roadmap storage):** `SkillRoadmap` model + mock support + validator + seed + verify harness. **DONE.**
+- **Phase 2 (roadmap generation):** rank 143 canonical skills, generate 10-15 subtopics each, persist immediately, resumable, verify. **DONE — 143/143** (workflow below).
+- **Phase 3 (question generation):** roadmap-driven MCQ generation. **NOT STARTED (awaiting approval).**
+
+### Skill roadmap generation workflow (Phase 2, DONE)
+
+- **Ranking:** `backend/scripts/skillRanking.json` — curated 1..143 popularity order (Python #1 …),
+  reconciled against the canonical set (missing skills appended by tier→name). Determines generation
+  order and each roadmap's `popularityRank`.
+- **Generation:** `scripts/generateRoadmaps.js` → `services/questionBank/roadmap/roadmapService.js`
+  (orchestrator) → `roadmap/providers/{bedrockProvider,groqProvider}.js`; prompts in
+  `roadmap/prompts.js`. Bedrock (Claude Haiku) is primary but **403 billing-blocked**, so the run
+  fell back to Groq `llama-3.3-70b-versatile`. Concurrency (`GEN_CONCURRENCY`, default 3) + 429 retry.
+- **Persistence (immediate + resumable):** every valid roadmap is written to
+  `scripts/output/roadmaps.json` the instant it is generated; a rerun **skips any skill that already
+  has a valid roadmap** (`--force` to regenerate). Progress is never lost on interruption — the run
+  that rate-limited on Pinecone was completed by a plain rerun. DB persistence is the human-run
+  `seedRoadmaps.js --commit` (mock-verified by the agent; prod is human-only, BLOCKER 1).
+- **Validation:** `roadmap/validate.js` (`validateRoadmap`/`validateRoadmapSet`) enforces 10-15
+  deduped subtopics, unique contiguous 1..N ranks, and full canonical coverage. 10 unit tests +
+  `scripts/verifyRoadmapFlow.js` (mock seed→read roundtrip).
+- **Result:** 143/143 roadmaps, subtopics 12-14 (avg 13.3), all verification checks PASS.
+
+### Legacy registry fields (unused)
+
+`SkillDefinition.counters` (`SkillCounters`), the generation-lifecycle `status` values
+(`GENERATING/PAUSED/REVIEWING/COMPLETED/PUBLISHED`), and `targetQuestionCount` were part of the
+deprecated pipeline. They remain on the model (harmless — unwritten except `targetQuestionCount` at
+seed time, unread) and may be simplified/repurposed when the Phase 4+ lifecycle is built. `tier`
+still informs the ranking tiebreak.
 
 ### Skill registry specifics
 

@@ -42,6 +42,10 @@ model Profile {
   cocurricular Cocurricular[]
   introVideoUrl String?
   isOnboarded   Boolean?      @default(false)
+  preferredWorkModes String[] @default([])
+  preferredWorkTypes String[] @default([])
+  preferredLocations String[] @default([])
+  openToAnyLocation  Boolean? @default(false)
 }
 
 type Cocurricular {
@@ -303,21 +307,43 @@ type SkillCounters {
   topicsTotal    Int @default(0)
 }
 
-// Pre-generated MCQ bank. Seeded offline by scripts/seedQuestions.js.
-// `correctIndex` (0-3) is the server-side answer key — Plan 2's TestSession will
-// score against it and strip it from the client payload. The interim serve path
-// (generateSkillTest) still converts it to an A-D letter for the current frontend.
+// Pre-generated MCQ Question Bank. Interim rows seeded by scripts/seedQuestions.js;
+// the production bank (Phase 3) is generated per (skill, subtopic) from the roadmaps
+// by scripts/generateQuestionBank.js and seeded by scripts/seedQuestionBank.js.
+// `correctIndex` (0-3) is the server-side answer key — TestSession scores against it
+// and strips it from the client payload; generateSkillTest converts it to an A-D
+// letter for the current frontend. The usage/review counters are INITIALIZED here
+// (Phase 3) and updated later by the assessment system (Phase 4+) — no update logic
+// exists yet.
 model Question {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  skillName    String
-  subtopic     String
-  question     String
-  options      String[]
-  correctIndex Int
-  source       String   @default("temp-bank-groq")
-  createdAt    DateTime @default(now())
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  skillName       String
+  subtopic        String
+  difficulty      String    @default("Medium") // Medium | Medium-Hard | Hard
+  question        String
+  options         String[]
+  correctIndex    Int
+  explanation     String    @default("")
+  tags            String[]  @default([])
+  version         Int       @default(1)
+  status          String    @default("ACTIVE") // ACTIVE | RETIRED | FLAGGED (service inclusion; only ACTIVE is served)
+  reviewState     String    @default("NONE")   // NONE | NEEDS_REVIEW | REPLACEMENT_CANDIDATE (Phase 5 maintenance flag; the question stays ACTIVE & servable until a replacement is approved)
+  source          String    @default("temp-bank-groq")
+  usageCount      Int       @default(0)
+  correctCount    Int       @default(0)
+  wrongCount      Int       @default(0)
+  skipCount       Int       @default(0)
+  lastUsed        DateTime?
+  lastReviewed    DateTime?
+  lastRegenerated DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([skillName])
+  @@index([skillName, subtopic])
+  @@index([skillName, status]) // hot path: assessment selection (findActiveBySkill) filters skillName + status=ACTIVE
+  @@index([status])
+  @@index([reviewState])
 }
 
 // Server-side assessment session. Holds the answer key so the client is never
@@ -326,15 +352,184 @@ model Question {
 // submitted answers against `answerKey`, then marks it used. `answerKey[i]` is
 // the correct option index (0-3) for served question i.
 model TestSession {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
-  skillName String
-  answerKey Int[]
-  used      Boolean  @default(false)
-  score     Int?
-  passed    Boolean?
-  createdAt DateTime @default(now())
-  expiresAt DateTime
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  skillName   String
+  answerKey   Int[]
+  questionIds String[] @default([]) // served Question ids, parallel to answerKey; drives per-question usage tracking in submitSkillTest (Phase 4)
+  used        Boolean  @default(false)
+  score       Int?
+  passed      Boolean?
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
 
   @@index([userId])
+}
+
+// Assessment-level analytics (Phase 5). One immutable record per completed
+// assessment, written by submitSkillTest. Feeds future recruiter reporting /
+// dashboards (built in a later phase). Never deleted — historical data is
+// preserved. `questionIds` records exactly which bank questions were served.
+model AssessmentRecord {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  candidateId       String   @db.ObjectId
+  skill             String
+  questionIds       String[]
+  startedAt         DateTime
+  endedAt           DateTime
+  totalQuestions    Int
+  correctAnswers    Int
+  wrongAnswers      Int
+  skippedQuestions  Int
+  finalScore        Int      // percentage 0-100
+  passed            Boolean
+  createdAt         DateTime @default(now())
+
+  @@index([candidateId])
+  @@index([skill])
+}
+
+// Interview roadmap ("blueprint") for a technical skill: the ordered syllabus of
+// subtopics that later drives question generation (Phase 2). One record per
+// canonical skill from the registry. `popularityRank` (1 = highest hiring demand)
+// sets the order skills are generated in; `subtopics` are ordered foundational ->
+// advanced. Generated offline (Bedrock Claude -> Groq fallback), seeded by
+// scripts/seedRoadmaps.js. No MCQs are stored here.
+model SkillRoadmap {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  skillName      String   @unique
+  popularityRank Int
+  subtopics      String[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([popularityRank])
+}
+
+// --- Community System Models ---
+
+model Community {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  description  String?
+  logo         String?
+  banner       String?
+  type         String   @default("PRIVATE") // "GLOBAL" | "PRIVATE"
+  passwordHash String?
+  ownerId      String   @db.ObjectId
+  deleted      Boolean  @default(false)
+  deletedAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([type])
+  @@index([deleted])
+}
+
+model CommunityMember {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  communityId String   @db.ObjectId
+  userId      String   @db.ObjectId
+  role        String   @default("MEMBER") // "OWNER" | "ADMIN" | "MEMBER" | "MODERATOR"
+  joinedAt    DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([communityId, userId])
+  @@index([communityId])
+  @@index([userId])
+}
+
+model CommunityInvite {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  communityId    String    @db.ObjectId
+  token          String    @unique
+  expirationDate DateTime?
+  maxUses        Int?
+  useCount       Int       @default(0)
+  isActive       Boolean   @default(true)
+  createdById    String    @db.ObjectId
+  createdAt      DateTime  @default(now())
+
+  @@index([communityId])
+}
+
+model Post {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  authorId    String    @db.ObjectId
+  authorRole  String    // "STUDENT" | "RECRUITER"
+  communityId String    @db.ObjectId
+  content     String
+  postType    String    @default("TEXT") // "TEXT" | "IMAGE" | "MULTI_IMAGE" | "VIDEO" | "PDF"
+  edited      Boolean   @default(false)
+  deleted     Boolean   @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([communityId, createdAt])
+  @@index([authorId])
+  @@index([deleted])
+}
+
+model Media {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId          String   @db.ObjectId
+  s3Key           String
+  url             String
+  mediaType       String   // "IMAGE" | "VIDEO" | "PDF" | "THUMBNAIL"
+  mimeType        String
+  sizeBytes       Int
+  durationSeconds Int?
+  width           Int?
+  height          Int?
+  createdAt       DateTime @default(now())
+
+  @@index([postId])
+}
+
+model PostReaction {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @db.ObjectId
+  userId    String   @db.ObjectId
+  type      String   // "LIKE" | "LOVE" | "CELEBRATE" | "INSIGHTFUL" | "SUPPORT" | "FUNNY"
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+model PostComment {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  postId          String    @db.ObjectId
+  authorId        String    @db.ObjectId
+  authorRole      String    // "STUDENT" | "RECRUITER"
+  parentCommentId String?   @db.ObjectId
+  content         String
+  deleted         Boolean   @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@index([postId, createdAt])
+  @@index([parentCommentId])
+}
+
+model SavedPost {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  postId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@index([userId])
+}
+
+model PostView {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @db.ObjectId
+  userId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([postId])
 }

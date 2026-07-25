@@ -3,11 +3,40 @@
 // Extracted verbatim from config/db.js; operates on the seeded `mockDb` store.
 const { mockDb } = require('./seed');
 
+// Apply a Prisma-style `data` object to a mock row in place, emulating atomic
+// `{ increment: n }` operators (used by Question counter updates in Phase 4).
+function applyData(row, data = {}) {
+  for (const [k, v] of Object.entries(data)) {
+    if (v && typeof v === 'object' && 'increment' in v) row[k] = (row[k] || 0) + v.increment;
+    else row[k] = v;
+  }
+  row.updatedAt = new Date();
+  return row;
+}
+
 const mockClient = {
   user: {
     findUnique: async ({ where }) => {
       const field = Object.keys(where)[0];
       return mockDb.users.find(u => u[field] === where[field]) || null;
+    },
+    findFirst: async ({ where = {} } = {}) => {
+      if (!where || Object.keys(where).length === 0) return mockDb.users[0] || null;
+      return mockDb.users.find(u => {
+        for (const k of Object.keys(where)) {
+          if (u[k] !== where[k]) return false;
+        }
+        return true;
+      }) || null;
+    },
+    findMany: async ({ where = {} } = {}) => {
+      if (!where || Object.keys(where).length === 0) return mockDb.users;
+      return mockDb.users.filter(u => {
+        for (const k of Object.keys(where)) {
+          if (u[k] !== where[k]) return false;
+        }
+        return true;
+      });
     },
     create: async ({ data }) => {
       const newUser = { id: `u_${Date.now()}`, ...data, createdAt: new Date() };
@@ -474,11 +503,27 @@ const mockClient = {
           rows = rows.filter(q => q.skillName === spec);
         }
       }
+      if (where.status !== undefined) {
+        const spec = where.status;
+        if (spec && typeof spec === 'object' && 'not' in spec) rows = rows.filter(q => q.status !== spec.not);
+        else rows = rows.filter(q => q.status === spec);
+      }
+      if (where.reviewState !== undefined) {
+        rows = rows.filter(q => q.reviewState === where.reviewState);
+      }
       return rows;
     },
+    findUnique: async ({ where }) => mockDb.questions.find(q => q.id === where.id) || null,
     count: async (args = {}) => (await mockClient.question.findMany(args)).length,
     create: async ({ data }) => {
-      const row = { id: `q_${Date.now()}_${mockDb.questions.length}`, source: 'temp-bank-groq', createdAt: new Date(), ...data };
+      const row = {
+        id: `q_${Date.now()}_${mockDb.questions.length}`,
+        difficulty: 'Medium', explanation: '', tags: [], version: 1, status: 'ACTIVE', reviewState: 'NONE',
+        source: 'temp-bank-groq', usageCount: 0, correctCount: 0, wrongCount: 0, skipCount: 0,
+        lastUsed: null, lastReviewed: null, lastRegenerated: null,
+        createdAt: new Date(), updatedAt: new Date(),
+        ...data,
+      };
       mockDb.questions.push(row);
       return row;
     },
@@ -486,6 +531,23 @@ const mockClient = {
       const rows = Array.isArray(data) ? data : [data];
       for (const d of rows) await mockClient.question.create({ data: d });
       return { count: rows.length };
+    },
+    update: async ({ where, data }) => {
+      const row = mockDb.questions.find(q => q.id === where.id);
+      if (!row) return null;
+      return applyData(row, data);
+    },
+    updateMany: async ({ where = {}, data = {} }) => {
+      const idIn = where.id && Array.isArray(where.id.in) ? new Set(where.id.in) : null;
+      let count = 0;
+      for (const q of mockDb.questions) {
+        if (idIn && !idIn.has(q.id)) continue;
+        if (where.skillName !== undefined && q.skillName !== where.skillName) continue;
+        if (where.status !== undefined && q.status !== where.status) continue;
+        applyData(q, data);
+        count++;
+      }
+      return { count };
     },
     deleteMany: async (args = {}) => {
       const before = mockDb.questions.length;
@@ -511,6 +573,293 @@ const mockClient = {
       mockDb.testSessions[idx] = { ...mockDb.testSessions[idx], ...data };
       return mockDb.testSessions[idx];
     },
+  },
+  assessmentRecord: {
+    create: async ({ data }) => {
+      const row = { id: `ar_${Date.now()}_${mockDb.assessmentRecords.length}`, createdAt: new Date(), ...data };
+      mockDb.assessmentRecords.push(row);
+      return row;
+    },
+    findMany: async ({ where = {} } = {}) => {
+      let rows = mockDb.assessmentRecords;
+      if (where.candidateId !== undefined) rows = rows.filter(r => r.candidateId === where.candidateId);
+      if (where.skill !== undefined) rows = rows.filter(r => r.skill === where.skill);
+      return rows;
+    },
+    count: async (args = {}) => (await mockClient.assessmentRecord.findMany(args)).length,
+  },
+  skillRoadmap: {
+    findMany: async (args = {}) => {
+      let rows = mockDb.skillRoadmaps;
+      const where = args.where || {};
+      if (where.skillName !== undefined) rows = rows.filter(r => r.skillName === where.skillName);
+      if (args.orderBy && args.orderBy.popularityRank) {
+        const dir = args.orderBy.popularityRank === 'desc' ? -1 : 1;
+        rows = [...rows].sort((a, b) => (a.popularityRank - b.popularityRank) * dir);
+      }
+      return rows;
+    },
+    findUnique: async ({ where }) => {
+      const field = Object.keys(where)[0];
+      return mockDb.skillRoadmaps.find(r => r[field] === where[field]) || null;
+    },
+    count: async (args = {}) => (await mockClient.skillRoadmap.findMany(args)).length,
+    create: async ({ data }) => {
+      const row = { id: `sr_${Date.now()}_${mockDb.skillRoadmaps.length}`, createdAt: new Date(), updatedAt: new Date(), ...data };
+      mockDb.skillRoadmaps.push(row);
+      return row;
+    },
+    upsert: async ({ where, create, update }) => {
+      const idx = mockDb.skillRoadmaps.findIndex(r => r.skillName === where.skillName || r.id === where.id);
+      if (idx === -1) return mockClient.skillRoadmap.create({ data: create });
+      mockDb.skillRoadmaps[idx] = { ...mockDb.skillRoadmaps[idx], ...update, updatedAt: new Date() };
+      return mockDb.skillRoadmaps[idx];
+    },
+    deleteMany: async (args = {}) => {
+      const before = mockDb.skillRoadmaps.length;
+      const where = args.where || {};
+      if (where.skillName !== undefined) {
+        mockDb.skillRoadmaps = mockDb.skillRoadmaps.filter(r => r.skillName !== where.skillName);
+      } else {
+        mockDb.skillRoadmaps = [];
+      }
+      return { count: before - mockDb.skillRoadmaps.length };
+    },
+  },
+  community: {
+    findFirst: async ({ where = {} }) => {
+      return mockDb.communities.find(c => {
+        if (where.type && c.type !== where.type) return false;
+        if (where.deleted !== undefined && c.deleted !== where.deleted) return false;
+        return true;
+      }) || null;
+    },
+    findUnique: async ({ where }) => mockDb.communities.find(c => c.id === where.id) || null,
+    findMany: async (args = {}) => {
+      let items = mockDb.communities;
+      const where = args.where || {};
+      if (where.deleted !== undefined) items = items.filter(c => c.deleted === where.deleted);
+      if (where.id && where.id.in) items = items.filter(c => where.id.in.includes(c.id));
+      if (where.type) items = items.filter(c => c.type === where.type);
+      if (where.OR) {
+        items = items.filter(c => {
+          return where.OR.some(cond => {
+            if (cond.name && cond.name.contains) {
+              return (c.name || '').toLowerCase().includes(cond.name.contains.toLowerCase());
+            }
+            if (cond.description && cond.description.contains) {
+              return (c.description || '').toLowerCase().includes(cond.description.contains.toLowerCase());
+            }
+            return false;
+          });
+        });
+      }
+      if (args.skip !== undefined || args.take !== undefined) {
+        const start = args.skip || 0;
+        const end = args.take ? start + args.take : items.length;
+        items = items.slice(start, end);
+      }
+      return items;
+    },
+    count: async (args = {}) => (await mockClient.community.findMany(args)).length,
+    create: async ({ data }) => {
+      const comm = { id: data.id || `comm_${Date.now()}_${mockDb.communities.length}`, createdAt: new Date(), updatedAt: new Date(), deleted: false, ...data };
+      mockDb.communities.push(comm);
+      return comm;
+    },
+    update: async ({ where, data }) => {
+      const idx = mockDb.communities.findIndex(c => c.id === where.id);
+      if (idx === -1) return null;
+      mockDb.communities[idx] = { ...mockDb.communities[idx], ...data, updatedAt: new Date() };
+      return mockDb.communities[idx];
+    }
+  },
+  communityMember: {
+    findUnique: async ({ where }) => {
+      if (where.communityId_userId) {
+        const { communityId, userId } = where.communityId_userId;
+        return mockDb.communityMembers.find(m => m.communityId === communityId && m.userId === userId) || null;
+      }
+      return mockDb.communityMembers.find(m => m.id === where.id) || null;
+    },
+    findMany: async ({ where = {} }) => {
+      let items = mockDb.communityMembers;
+      if (where.userId) items = items.filter(m => m.userId === where.userId);
+      if (where.communityId) items = items.filter(m => m.communityId === where.communityId);
+      return items;
+    },
+    create: async ({ data }) => {
+      const mem = { id: `cm_${Date.now()}_${mockDb.communityMembers.length}`, joinedAt: new Date(), updatedAt: new Date(), ...data };
+      mockDb.communityMembers.push(mem);
+      return mem;
+    }
+  },
+  communityInvite: {
+    findUnique: async ({ where }) => mockDb.communityInvites.find(i => i.token === where.token || i.id === where.id) || null,
+    create: async ({ data }) => {
+      const inv = { id: `ci_${Date.now()}_${mockDb.communityInvites.length}`, createdAt: new Date(), ...data };
+      mockDb.communityInvites.push(inv);
+      return inv;
+    },
+    update: async ({ where, data }) => {
+      const idx = mockDb.communityInvites.findIndex(i => i.id === where.id);
+      if (idx === -1) return null;
+      mockDb.communityInvites[idx] = { ...mockDb.communityInvites[idx], ...data };
+      return mockDb.communityInvites[idx];
+    }
+  },
+  post: {
+    findUnique: async ({ where }) => mockDb.posts.find(p => p.id === where.id) || null,
+    findMany: async (args = {}) => {
+      let items = mockDb.posts;
+      const where = args.where || {};
+      if (where.deleted !== undefined) items = items.filter(p => p.deleted === where.deleted);
+      if (where.communityId) items = items.filter(p => p.communityId === where.communityId);
+      if (where.id && where.id.in) items = items.filter(p => where.id.in.includes(p.id));
+      if (where.authorId) items = items.filter(p => p.authorId === where.authorId);
+      if (args.orderBy && args.orderBy.createdAt === 'desc') {
+        items = [...items].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      }
+      if (args.skip !== undefined || args.take !== undefined) {
+        const start = args.skip || 0;
+        const end = args.take ? start + args.take : items.length;
+        items = items.slice(start, end);
+      }
+      return items;
+    },
+    count: async (args = {}) => (await mockClient.post.findMany(args)).length,
+    create: async ({ data }) => {
+      const post = { id: `post_${Date.now()}_${mockDb.posts.length}`, edited: false, deleted: false, createdAt: new Date(), updatedAt: new Date(), ...data };
+      mockDb.posts.push(post);
+      return post;
+    },
+    update: async ({ where, data }) => {
+      const idx = mockDb.posts.findIndex(p => p.id === where.id);
+      if (idx === -1) return null;
+      mockDb.posts[idx] = { ...mockDb.posts[idx], ...data, updatedAt: new Date() };
+      return mockDb.posts[idx];
+    }
+  },
+  media: {
+    findMany: async ({ where = {} }) => {
+      let items = mockDb.medias;
+      if (where.postId && where.postId.in) items = items.filter(m => where.postId.in.includes(m.postId));
+      else if (where.postId) items = items.filter(m => m.postId === where.postId);
+      return items;
+    },
+    create: async ({ data }) => {
+      const item = { id: `med_${Date.now()}_${mockDb.medias.length}`, createdAt: new Date(), ...data };
+      mockDb.medias.push(item);
+      return item;
+    }
+  },
+  postReaction: {
+    findUnique: async ({ where }) => {
+      if (where.postId_userId) {
+        const { postId, userId } = where.postId_userId;
+        return mockDb.postReactions.find(r => r.postId === postId && r.userId === userId) || null;
+      }
+      return mockDb.postReactions.find(r => r.id === where.id) || null;
+    },
+    findMany: async ({ where = {} }) => {
+      let items = mockDb.postReactions;
+      if (where.postId && where.postId.in) items = items.filter(r => where.postId.in.includes(r.postId));
+      else if (where.postId) items = items.filter(r => r.postId === where.postId);
+      return items;
+    },
+    create: async ({ data }) => {
+      const r = { id: `react_${Date.now()}_${mockDb.postReactions.length}`, createdAt: new Date(), ...data };
+      mockDb.postReactions.push(r);
+      return r;
+    },
+    update: async ({ where, data }) => {
+      const idx = mockDb.postReactions.findIndex(r => r.id === where.id);
+      if (idx === -1) return null;
+      mockDb.postReactions[idx] = { ...mockDb.postReactions[idx], ...data };
+      return mockDb.postReactions[idx];
+    },
+    delete: async ({ where }) => {
+      const idx = mockDb.postReactions.findIndex(r => r.id === where.id);
+      if (idx !== -1) mockDb.postReactions.splice(idx, 1);
+      return { count: 1 };
+    }
+  },
+  postComment: {
+    findUnique: async ({ where }) => mockDb.postComments.find(c => c.id === where.id) || null,
+    findMany: async ({ where = {}, orderBy }) => {
+      let items = mockDb.postComments;
+      if (where.deleted !== undefined) items = items.filter(c => c.deleted === where.deleted);
+      if (where.postId && where.postId.in) items = items.filter(c => where.postId.in.includes(c.postId));
+      else if (where.postId) items = items.filter(c => c.postId === where.postId);
+      if (orderBy && orderBy.createdAt === 'asc') {
+        items = [...items].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      }
+      return items;
+    },
+    count: async ({ where = {} }) => (await mockClient.postComment.findMany({ where })).length,
+    create: async ({ data }) => {
+      const comm = { id: `cmt_${Date.now()}_${mockDb.postComments.length}`, deleted: false, createdAt: new Date(), ...data };
+      mockDb.postComments.push(comm);
+      return comm;
+    },
+    update: async ({ where, data }) => {
+      const idx = mockDb.postComments.findIndex(c => c.id === where.id);
+      if (idx === -1) return null;
+      mockDb.postComments[idx] = { ...mockDb.postComments[idx], ...data };
+      return mockDb.postComments[idx];
+    }
+  },
+  savedPost: {
+    findUnique: async ({ where }) => {
+      if (where.userId_postId) {
+        const { userId, postId } = where.userId_postId;
+        return mockDb.savedPosts.find(s => s.userId === userId && s.postId === postId) || null;
+      }
+      return mockDb.savedPosts.find(s => s.id === where.id) || null;
+    },
+    findMany: async (args = {}) => {
+      let items = mockDb.savedPosts;
+      const where = args.where || {};
+      if (where.userId) items = items.filter(s => s.userId === where.userId);
+      if (where.postId && where.postId.in) items = items.filter(s => where.postId.in.includes(s.postId));
+      if (args.skip !== undefined || args.take !== undefined) {
+        const start = args.skip || 0;
+        const end = args.take ? start + args.take : items.length;
+        items = items.slice(start, end);
+      }
+      return items;
+    },
+    count: async (args = {}) => (await mockClient.savedPost.findMany(args)).length,
+    create: async ({ data }) => {
+      const sp = { id: `sp_${Date.now()}_${mockDb.savedPosts.length}`, createdAt: new Date(), ...data };
+      mockDb.savedPosts.push(sp);
+      return sp;
+    },
+    delete: async ({ where }) => {
+      const idx = mockDb.savedPosts.findIndex(s => s.id === where.id);
+      if (idx !== -1) mockDb.savedPosts.splice(idx, 1);
+      return { count: 1 };
+    }
+  },
+  postView: {
+    findUnique: async ({ where }) => {
+      if (where.postId_userId) {
+        const { postId, userId } = where.postId_userId;
+        return mockDb.postViews.find(v => v.postId === postId && v.userId === userId) || null;
+      }
+      return mockDb.postViews.find(v => v.id === where.id) || null;
+    },
+    findMany: async ({ where = {} }) => {
+      let items = mockDb.postViews;
+      if (where.postId && where.postId.in) items = items.filter(v => where.postId.in.includes(v.postId));
+      else if (where.postId) items = items.filter(v => v.postId === where.postId);
+      return items;
+    },
+    create: async ({ data }) => {
+      const pv = { id: `pv_${Date.now()}_${mockDb.postViews.length}`, createdAt: new Date(), ...data };
+      mockDb.postViews.push(pv);
+      return pv;
+    }
   }
 };
 

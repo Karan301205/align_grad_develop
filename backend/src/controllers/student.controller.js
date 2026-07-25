@@ -3,8 +3,10 @@ const { TECHNICAL_SKILLS } = require('../constants/technicalSkills');
 const { buildStudentSkillMap, getMissingRequirements } = require('../services/skillMatching.service');
 const { purgeExpiredJobs } = require('../services/jobLifecycle.service');
 const { deleteS3ObjectFromUrl } = require('../services/fileCleanup.service');
-const mcqService = require('../services/mcq/mcqService');
 const testSessionRepo = require('../services/questionBank/repositories/testSessionRepository');
+const questionRepo = require('../services/questionBank/repositories/questionRepository');
+const assessmentRepo = require('../services/questionBank/repositories/assessmentRepository');
+const { selectQuestions } = require('../services/questionBank/selection');
 const { scoreAnswers } = require('../services/questionBank/scoring');
 
 exports.getProfile = async (req, res) => {
@@ -62,7 +64,11 @@ exports.updateProfile = async (req, res) => {
     projects,
     cocurricular,
     introVideoUrl,
-    isOnboarded
+    isOnboarded,
+    preferredWorkModes,
+    preferredWorkTypes,
+    preferredLocations,
+    openToAnyLocation
   } = req.body;
   try {
     const existingProfile = await prisma.profile.findUnique({
@@ -129,7 +135,11 @@ exports.updateProfile = async (req, res) => {
           projects,
           cocurricular,
           introVideoUrl,
-          isOnboarded: isOnboarded !== undefined ? isOnboarded : undefined
+          isOnboarded: isOnboarded !== undefined ? isOnboarded : undefined,
+          preferredWorkModes: preferredWorkModes !== undefined ? preferredWorkModes : undefined,
+          preferredWorkTypes: preferredWorkTypes !== undefined ? preferredWorkTypes : undefined,
+          preferredLocations: preferredLocations !== undefined ? preferredLocations : undefined,
+          openToAnyLocation: openToAnyLocation !== undefined ? openToAnyLocation : undefined
         }
       });
     } else {
@@ -311,30 +321,24 @@ exports.getTechnicalSkills = async (req, res) => {
   }
 };
 
-// Build a 10-question test from the pre-generated bank (>=10 available for the
-// skill) or, failing that, live LLM generation. Returns the client-safe questions
-// AND the answer key separately — the answer key is NEVER placed in `questions`;
-// it goes only into the server-side TestSession. answerKey[i] is the correct
-// option index (0-3) for questions[i].
-async function buildSkillTest(skillName) {
-  const rows = await prisma.question.findMany({
-    where: { skillName: { equals: skillName, mode: 'insensitive' } },
-  });
-
-  let picked;
-  if (rows && rows.length >= 10) {
-    picked = [...rows].sort(() => Math.random() - 0.5).slice(0, 10)
-      .map((q) => ({ question: q.question, options: q.options, idx: q.correctIndex }));
-  } else {
-    // Live fallback returns { questions:[{ question, options, answer:'A'-'D' }] }.
-    const live = await mcqService.generate(skillName);
-    picked = (live.questions || []).slice(0, 10)
-      .map((q) => ({ question: q.question, options: q.options, idx: 'ABCD'.indexOf(String(q.answer).toUpperCase()) }));
-  }
+// Build a 10-question test STRICTLY from the pre-generated Question Bank (Phase 4).
+// The selection engine draws ACTIVE questions spread across subtopics with a
+// balanced difficulty mix and no repeats. No live/dynamic generation happens here.
+//
+// Returns three parallel arrays for the same 10 questions:
+//   - questions: client-safe { id, question, options } only (id is a 1-based
+//     ordinal, NOT the DB id — no internal identifier is exposed)
+//   - answerKey: correct option index (0-3), stored only in the TestSession
+//   - questionIds: DB Question ids, stored only in the TestSession, used to
+//     attribute usage/outcome counters on serve and submit.
+async function buildSkillTest(skillName, opts = {}) {
+  const pool = await questionRepo.findActiveBySkill(skillName);
+  const picked = selectQuestions(pool, { count: 10, seed: opts.seed });
 
   return {
     questions: picked.map((q, i) => ({ id: i + 1, question: q.question, options: q.options })),
-    answerKey: picked.map((q) => q.idx),
+    answerKey: picked.map((q) => q.correctIndex),
+    questionIds: picked.map((q) => q.id),
   };
 }
 exports._buildSkillTest = buildSkillTest;
@@ -346,19 +350,30 @@ exports.generateSkillTest = async (req, res) => {
   }
 
   try {
-    const { questions, answerKey } = await buildSkillTest(skillName);
+    const { questions, answerKey, questionIds } = await buildSkillTest(skillName);
+    // Bank-only (Phase 4): if the bank cannot supply a full test, fail rather than
+    // generate dynamically.
     if (questions.length < 10 || answerKey.some((i) => i < 0 || i > 3)) {
-      return res.status(502).json({ error: 'Could not build a complete test for this skill' });
+      console.warn('[assessment] insufficient bank questions', { skillName, available: questions.length });
+      return res.status(502).json({ error: 'Not enough questions in the bank for this skill' });
     }
 
-    // Store the answer key server-side; it is never sent to the client.
+    // Store the answer key AND the served question ids server-side; neither is
+    // ever sent to the client.
     const session = await testSessionRepo.create({
       userId: req.user.id,
       skillName,
       answerKey,
+      questionIds,
       expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
     });
 
+    // A question is "served" now: atomically bump usageCount + lastUsed. Best-effort
+    // — a tracking failure must not break the candidate's assessment.
+    questionRepo.recordServed(questionIds).catch((e) => console.error('recordServed failed:', e.message));
+
+    // Only client-safe fields leave the server: id (ordinal), question, options.
+    console.log('[assessment] generated', { skillName, sessionId: session.id, served: questions.length });
     res.json({ sessionId: session.id, skillName, questions });
   } catch (err) {
     console.error(err);
@@ -383,8 +398,46 @@ exports.submitSkillTest = async (req, res) => {
     // Server-side scoring against the stored answer key.
     const { score, passed, rating } = scoreAnswers(session.answerKey, answers);
 
+    // Classify every served question from the SERVER-SIDE key (frontend values are
+    // never trusted). A missing answer or the -1 sentinel counts as a skip.
+    const key = session.answerKey || [];
+    const ids = session.questionIds || [];
+    const correctIds = [], wrongIds = [], skipIds = [], results = [];
+    for (let i = 0; i < key.length; i++) {
+      const given = answers[i];
+      const isSkip = given == null || Number(given) === -1;
+      const isCorrect = !isSkip && Number(given) === key[i];
+      results.push({ correct: isCorrect }); // per-question result only — no answer key exposed
+      if (!ids[i]) continue; // legacy session without question ids → cannot attribute
+      if (isSkip) skipIds.push(ids[i]);
+      else if (isCorrect) correctIds.push(ids[i]);
+      else wrongIds.push(ids[i]);
+    }
+
     // Burn the session before mutating anything so it can never be replayed.
     await testSessionRepo.markUsed(session.id, { score, passed });
+
+    // Atomically fold this attempt into the per-question counters. Best-effort:
+    // a tracking failure must not fail the candidate's submission.
+    questionRepo.recordOutcomes({ correctIds, wrongIds, skipIds })
+      .catch((e) => console.error('recordOutcomes failed:', e.message));
+
+    // Phase 5 analytics: append an immutable assessment-level record for future
+    // reporting. Best-effort — never blocks or fails the submission. `startedAt`
+    // is when the session (assessment) was created; `endedAt` is now.
+    assessmentRepo.record({
+      candidateId: req.user.id,
+      skill: session.skillName,
+      questionIds: ids,
+      startedAt: session.createdAt || new Date(),
+      endedAt: new Date(),
+      totalQuestions: key.length,
+      correctAnswers: correctIds.length,
+      wrongAnswers: wrongIds.length,
+      skippedQuestions: skipIds.length,
+      finalScore: score,
+      passed,
+    }).catch((e) => console.error('assessment analytics record failed:', e.message));
 
     const profile = await prisma.profile.findUnique({ where: { userId: req.user.id } });
     if (!profile) {
@@ -414,15 +467,20 @@ exports.submitSkillTest = async (req, res) => {
       });
     }
 
-    // Correct answers are safe to return now: the session is already scored and
-    // burned, so revealing them enables no cheating and drives the review UI.
+    console.log('[assessment] submitted', {
+      skillName: session.skillName, candidateId: req.user.id, score, passed,
+      correct: correctIds.length, wrong: wrongIds.length, skip: skipIds.length,
+    });
+
+    // Phase 4 integrity: never expose the answer key, explanations, or metadata.
+    // `results` is only per-question correctness so the candidate sees their outcome.
     res.json({
       score,                 // percentage 0-100
       rating,                // 1-10 level (only applied to the profile when passed)
       total: session.answerKey.length,
       passed,
       skillName: session.skillName,
-      correctAnswers: session.answerKey,
+      results,               // [{ correct: boolean }] aligned to served question order
       skills: updatedSkills,
     });
   } catch (err) {

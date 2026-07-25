@@ -8,9 +8,13 @@
     "dev": "nodemon src/index.js",
     "dev:mock": "DATABASE_URL='' nodemon src/index.js",
     "test": "node --test \"tests/**/*.test.js\"",
-    "bank": "node src/cli/bank.js"
+    "bank": "node src/cli/bank.js",
+    "bank:seed": "node scripts/seedQuestionBank.js",
+    "bank:verify": "node scripts/verifyQuestionBank.js",
+    "bank:loadtest": "DATABASE_URL='' node scripts/loadTestQuestionBank.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.112.4",
     "@aws-sdk/client-s3": "^3.1081.0",
     "@aws-sdk/client-sns": "^3.1086.0",
     "@aws-sdk/s3-request-presigner": "^3.1081.0",

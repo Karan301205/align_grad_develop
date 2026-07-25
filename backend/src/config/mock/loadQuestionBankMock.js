@@ -9,9 +9,9 @@ const { prisma, isMock } = require('../db');
 async function loadQuestionBankIntoMock() {
   if (typeof isMock !== 'function' || isMock() !== true) return; // mock only — never a real DB
 
-  const file = path.join(__dirname, '../../../scripts/output/questions.json');
+  const file = path.join(__dirname, '../../../scripts/output/questionBank.json');
   if (!fs.existsSync(file)) {
-    console.warn('[question-bank] no scripts/output/questions.json — run: node scripts/generateQuestions.js');
+    console.warn('[question-bank] no scripts/output/questionBank.json — generate the bank first');
     return;
   }
 
@@ -19,7 +19,7 @@ async function loadQuestionBankIntoMock() {
   try {
     rows = JSON.parse(fs.readFileSync(file, 'utf8'));
   } catch (err) {
-    console.warn('[question-bank] could not parse questions.json:', err.message);
+    console.warn('[question-bank] could not parse questionBank.json:', err.message);
     return;
   }
   if (!Array.isArray(rows) || rows.length === 0) return;
