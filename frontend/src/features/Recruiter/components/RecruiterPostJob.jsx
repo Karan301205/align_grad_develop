@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
   Trash2, 
@@ -64,9 +64,6 @@ function mapErrorMessageToField(errMsg) {
   if (lower.includes('skill') || lower.includes('stack')) {
     return { field: 'reqs', msg: errMsg };
   }
-  if (lower.includes('joining') || lower.includes('date')) {
-    return { field: 'joiningMonth', msg: errMsg };
-  }
   if (lower.includes('duration')) {
     return { field: 'duration', msg: errMsg };
   }
@@ -93,7 +90,7 @@ function scrollToField(fieldKey) {
   }, 80);
 }
 
-export default function RecruiterPostJob({ submittingJob, handlePostJob, recentJobs = [], goToTab }) {
+export default function RecruiterPostJob({ company, user, submittingJob, handlePostJob, recentJobs = [], goToTab }) {
   const todayString = new Date().toISOString().split('T')[0];
 
   // Hiring Option Type
@@ -101,7 +98,13 @@ export default function RecruiterPostJob({ submittingJob, handlePostJob, recentJ
 
   // Form states
   const [designation, setDesignation] = useState('');
-  const [companyName, setCompanyName] = useState('');
+  const [companyName, setCompanyName] = useState(company?.name || user?.name || '');
+
+  useEffect(() => {
+    if (!companyName && (company?.name || user?.name)) {
+      setCompanyName(company?.name || user?.name || '');
+    }
+  }, [company, user]);
   const [officialWebsite, setOfficialWebsite] = useState('');
   const [preferredEducation, setPreferredEducation] = useState('');
   const [desiredExperience, setDesiredExperience] = useState('0-1 Years');
@@ -131,7 +134,6 @@ export default function RecruiterPostJob({ submittingJob, handlePostJob, recentJ
 
   const [locationUrl, setLocationUrl] = useState('');
   const [activeDays, setActiveDays] = useState(30);
-  const [joiningMonth, setJoiningMonth] = useState('');
   const [openings, setOpenings] = useState('');
   const [jobDesc, setJobDesc] = useState('');
   const [roleResponsibilities, setRoleResponsibilities] = useState('');
@@ -214,9 +216,6 @@ export default function RecruiterPostJob({ submittingJob, handlePostJob, recentJ
       if (opportunityType === 'INTERNSHIP' && !duration.trim()) {
         newErrors.duration = 'Duration is required.';
       }
-      if (!joiningMonth) {
-        newErrors.joiningMonth = 'Joining Date is required.';
-      }
       if (!jobDesc.trim()) {
         newErrors.jobDesc = 'Job / Internship Summary is required.';
       } else if (jobDesc.trim().length < 10) {
@@ -274,7 +273,6 @@ export default function RecruiterPostJob({ submittingJob, handlePostJob, recentJ
         location,
         locationUrl,
         activeDays: activeDays ? parseInt(activeDays, 10) : 30,
-        joiningMonth,
         openings: openings ? parseInt(openings, 10) : null,
         selectionProcess: rounds,
         requirements: reqs
@@ -295,7 +293,6 @@ export default function RecruiterPostJob({ submittingJob, handlePostJob, recentJ
       setLocation('');
       setLocationUrl('');
       setActiveDays(30);
-      setJoiningMonth('');
       setOpenings('');
       setJobDesc('');
       setRoleResponsibilities('');
@@ -332,10 +329,11 @@ export default function RecruiterPostJob({ submittingJob, handlePostJob, recentJ
               <span className="text-[10px] font-mono text-on-surface-variant/70 uppercase">STEP 1 OF 5</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
               {[
                 { id: 'JOB', label: 'Full-Time / Part-Time Job', desc: 'Permanent career roles with competitive packages' },
                 { id: 'INTERNSHIP', label: 'Internship', desc: 'Fixed-duration positions with monthly stipends' },
+                // { id: 'GIG', label: 'Gig (Short-Term Task)', desc: 'Contract task-based milestone deliverables' },
               ].map((opt) => {
                 const isSelected = opportunityType === opt.id;
                 return (
@@ -462,7 +460,7 @@ export default function RecruiterPostJob({ submittingJob, handlePostJob, recentJ
 
               {/* Location Field */}
               <div id="field-container-location" className="relative space-y-1.5">
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Location *</label>
+                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">headquarters location</label>
                 <div className="relative">
                   <input
                     id="input-location"
@@ -930,37 +928,6 @@ export default function RecruiterPostJob({ submittingJob, handlePostJob, recentJ
                   </div>
                 )}
 
-                {/* Joining Date Field */}
-                <div id="field-container-joiningMonth" className="space-y-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Joining Date *</label>
-                  <div className="relative">
-                    <input
-                      id="input-joiningMonth"
-                      type="date"
-                      min={todayString}
-                      className={`w-full bg-surface-container-low border rounded-xl px-4 py-2.5 text-sm font-sans focus:outline-none transition-all text-on-surface [color-scheme:light] dark:[color-scheme:dark] ${
-                        errors.joiningMonth
-                          ? 'border-error ring-2 ring-error/20 bg-error/5 text-error font-medium'
-                          : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20'
-                      }`}
-                      value={joiningMonth}
-                      onChange={e => {
-                        setJoiningMonth(e.target.value);
-                        if (errors.joiningMonth) setErrors(prev => ({ ...prev, joiningMonth: null }));
-                      }}
-                    />
-                    {errors.joiningMonth && (
-                      <div className="absolute right-8 top-1/2 -translate-y-1/2 text-error pointer-events-none">
-                        <AlertCircle className="w-5 h-5 fill-error/20 text-error" />
-                      </div>
-                    )}
-                  </div>
-                  {errors.joiningMonth && (
-                    <p className="text-xs text-error font-medium flex items-center gap-1.5 mt-1 animate-fade-in font-sans">
-                      <span>{errors.joiningMonth}</span>
-                    </p>
-                  )}
-                </div>
               </div>
             </div>
           )}

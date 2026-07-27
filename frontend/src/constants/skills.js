@@ -135,7 +135,7 @@ export const ALL_SKILLS = [
   { skill: "PyTorch", type: "technical" },
   { skill: "RabbitMQ", type: "technical" },
   { skill: "RAG", type: "technical" },
-  // { skill: "React", type: "technical" },
+  { skill: "React", type: "technical" },
   { skill: "React Native", type: "technical" },
   { skill: "React Testing Library", type: "technical" },
   { skill: "RedHat Linux 7.5", type: "technical" },

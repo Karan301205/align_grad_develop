@@ -10,7 +10,8 @@ import {
   X,
   DollarSign,
   LayoutDashboard,
-  Users
+  Users,
+  Zap
 } from 'lucide-react';
 import { apiFetch } from '../../services/apiClient';
 import { putFileToS3 } from '../../services/uploadService';
@@ -263,6 +264,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     { id: 'jobs', icon: Briefcase, label: 'Active Jobs' },
     { id: 'candidates', icon: User, label: 'Candidates' },
     { id: 'post-job', icon: Plus, label: 'Post New Job' },
+    // { id: 'gigs', icon: Zap, label: 'Gigs Marketplace' },
     { id: 'verification', icon: ShieldCheck, label: 'Company Profile' },
   ];
 
@@ -408,10 +410,22 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
 
             {activeTab === 'post-job' && (
               <RecruiterPostJob 
+                company={company}
+                user={user}
                 submittingJob={submittingJob}
                 handlePostJob={handlePostJob}
                 recentJobs={jobs}
                 goToTab={goToTab}
+              />
+            )}
+
+            {activeTab === 'gigs' && (
+              <GigsMarketplace
+                user={user}
+                token={token}
+                theme={theme}
+                profile={null}
+                onUpdateProfile={fetchRecruiterData}
               />
             )}
 

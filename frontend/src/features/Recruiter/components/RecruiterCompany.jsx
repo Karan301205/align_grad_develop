@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, UploadCloud, Globe, MapPin, Building, Calendar, Mail, User, Shield, Briefcase, Plus, Trash2, Link } from 'lucide-react';
+import { CheckCircle, UploadCloud, Globe, MapPin, Building, Calendar, Mail, User, Shield, Briefcase, Plus, Trash2, Link, Check } from 'lucide-react';
 import PageHeader from '../../../components/ui/PageHeader';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
 import { apiFetch } from '../../../services/apiClient';
 import { putFileToS3 } from '../../../services/uploadService';
+import { MAJOR_INDUSTRIES } from '../../../constants/industries';
+import { INDIAN_STATES } from '../../../constants/indianStates';
 
 export default function RecruiterCompany({ company, token, docLink, setDocLink, submittingDoc, handleVerification, handleUpdateCompany }) {
   // Profile form states
@@ -13,9 +15,11 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
   const [logoUrl, setLogoUrl] = useState('');
   const [description, setDescription] = useState('');
   const [industry, setIndustry] = useState('');
+  const [isIndustryDropdownOpen, setIsIndustryDropdownOpen] = useState(false);
   const [companySize, setCompanySize] = useState('1-10 employees');
   const [website, setWebsite] = useState('');
   const [location, setLocation] = useState('');
+  const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
   const [foundedYear, setFoundedYear] = useState('');
   const [officialEmail, setOfficialEmail] = useState('');
   const [recruiterName, setRecruiterName] = useState('');
@@ -23,7 +27,6 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
   
   // Social links states
   const [linkedin, setLinkedin] = useState('');
-  const [twitter, setTwitter] = useState('');
   const [github, setGithub] = useState('');
   
   // Photos gallery
@@ -52,7 +55,6 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
 
       const socials = company.socialLinks || {};
       setLinkedin(socials.linkedin || '');
-      setTwitter(socials.twitter || '');
       setGithub(socials.github || '');
     }
   }, [company]);
@@ -141,7 +143,6 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
       recruiterDesignation: recruiterDesignation || null,
       socialLinks: {
         linkedin: linkedin || null,
-        twitter: twitter || null,
         github: github || null
       },
       photos
@@ -214,16 +215,54 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
                 />
               </div>
 
-              <div>
+              <div className="relative">
                 <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Industry *</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Technology / FinTech"
-                  className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:border-primary focus:outline-none transition-all shadow-inner"
+                  placeholder="Search or select industry..."
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:border-primary focus:outline-none transition-all shadow-inner font-sans"
                   value={industry}
-                  onChange={e => setIndustry(e.target.value)}
+                  onChange={e => {
+                    setIndustry(e.target.value);
+                    setIsIndustryDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsIndustryDropdownOpen(true)}
                 />
+
+                {isIndustryDropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-20" onClick={() => setIsIndustryDropdownOpen(false)} />
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-surface-container border border-outline-variant rounded-xl shadow-xl max-h-56 overflow-y-auto custom-scrollbar z-30 p-1 divide-y divide-outline-variant/30">
+                      {MAJOR_INDUSTRIES.filter(ind =>
+                        ind.toLowerCase().includes((industry || '').toLowerCase())
+                      ).length === 0 ? (
+                        <div className="p-3 text-xs text-on-surface-variant font-mono text-center">Type custom industry or select from list</div>
+                      ) : (
+                        MAJOR_INDUSTRIES.filter(ind =>
+                          ind.toLowerCase().includes((industry || '').toLowerCase())
+                        ).map((indName) => (
+                          <button
+                            key={indName}
+                            type="button"
+                            onClick={() => {
+                              setIndustry(indName);
+                              setIsIndustryDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-3.5 py-2 text-xs rounded-lg transition-colors cursor-pointer flex items-center justify-between font-sans ${
+                              industry === indName
+                                ? 'bg-primary text-on-primary font-bold'
+                                : 'hover:bg-surface-container-high text-on-surface'
+                            }`}
+                          >
+                            <span>{indName}</span>
+                            {industry === indName && <Check className="w-3.5 h-3.5" />}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
 
               <div>
@@ -242,16 +281,56 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
                 </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Location *</label>
+              <div className="relative">
+                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Headquarters Location</label>
                 <input
                   type="text"
-                  required
-                  placeholder="e.g. San Francisco, CA"
+                  placeholder="Search & select location (e.g. Bengaluru, Karnataka)..."
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:border-primary focus:outline-none transition-all shadow-inner"
                   value={location}
-                  onChange={e => setLocation(e.target.value)}
+                  onChange={e => {
+                    setLocation(e.target.value);
+                    setIsLocationDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsLocationDropdownOpen(true)}
                 />
+
+                {isLocationDropdownOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setIsLocationDropdownOpen(false)} 
+                    />
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-surface-container-high border border-outline-variant rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto p-1.5 space-y-1 custom-scrollbar">
+                      {INDIAN_STATES.filter(loc =>
+                        loc.toLowerCase().includes((location || '').toLowerCase())
+                      ).length === 0 ? (
+                        <div className="px-3.5 py-2.5 text-xs text-on-surface-variant font-mono">No matching locations found</div>
+                      ) : (
+                        INDIAN_STATES.filter(loc =>
+                          loc.toLowerCase().includes((location || '').toLowerCase())
+                        ).map((locName) => (
+                          <button
+                            key={locName}
+                            type="button"
+                            onClick={() => {
+                              setLocation(locName);
+                              setIsLocationDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-3.5 py-2 text-xs rounded-lg transition-colors cursor-pointer flex items-center justify-between font-sans ${
+                              location === locName
+                                ? 'bg-primary text-on-primary font-bold'
+                                : 'hover:bg-surface-container-high text-on-surface'
+                            }`}
+                          >
+                            <span>{locName}</span>
+                            {location === locName && <Check className="w-3.5 h-3.5" />}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
 
               <div>
@@ -341,28 +420,15 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               <Link className="w-4 h-4" /> Social Profile Links
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">LinkedIn Page</label>
-                <input
-                  type="url"
-                  placeholder="https://linkedin.com/company/..."
-                  className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:border-primary focus:outline-none transition-all shadow-inner"
-                  value={linkedin}
-                  onChange={e => setLinkedin(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Twitter/X Profile</label>
-                <input
-                  type="url"
-                  placeholder="https://twitter.com/..."
-                  className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:border-primary focus:outline-none transition-all shadow-inner"
-                  value={twitter}
-                  onChange={e => setTwitter(e.target.value)}
-                />
-              </div>
+            <div>
+              <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company LinkedIn Page</label>
+              <input
+                type="url"
+                placeholder="https://linkedin.com/company/..."
+                className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:border-primary focus:outline-none transition-all shadow-inner"
+                value={linkedin}
+                onChange={e => setLinkedin(e.target.value)}
+              />
             </div>
           </div>
 

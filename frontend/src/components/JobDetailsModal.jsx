@@ -66,8 +66,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
     doc.setTextColor(80, 80, 80);
     doc.text(`Company: ${job.companyName || job.company?.name || 'Aether Corp'}`, 20, 35);
     doc.text(`Location: ${job.location || 'Not specified'}`, 20, 42);
-    doc.text(`Joining Date: ${formatJoiningDate(job.joiningMonth)}`, 20, 49);
-    doc.text(`Desired Experience: ${job.desiredExperience || 'Fresher'}`, 20, 56);
+    doc.text(`Desired Experience: ${job.desiredExperience || 'Fresher'}`, 20, 49);
 
     // Draw line separator
     doc.setDrawColor(200, 200, 200);
@@ -252,7 +251,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
         <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar bg-background">
 
           {/* Metadata Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-surface-container-low border border-outline-variant p-4 rounded-xl text-xs">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-surface-container-low border border-outline-variant p-4 rounded-xl text-xs">
             <div className="space-y-1">
               <span className="text-on-surface-variant font-mono uppercase tracking-wider text-[9px] block">Location</span>
               <div className="flex items-center gap-1.5 text-on-surface font-semibold">
@@ -269,13 +268,6 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                 ) : (
                   <span>{job.location || 'Not specified'}</span>
                 )}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <span className="text-on-surface-variant font-mono uppercase tracking-wider text-[9px] block">Joining Date</span>
-              <div className="flex items-center gap-1.5 text-on-surface font-semibold">
-                <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
-                <span>{formatJoiningDate(job.joiningMonth)}</span>
               </div>
             </div>
             <div className="space-y-1">
@@ -354,6 +346,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                   job.requirements.map((req, i) => {
                     const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === req.skillName.toLowerCase());
                     const isTech = skillObj ? skillObj.type === 'technical' : true;
+                    const missing = job.missingRequirements?.find(m => m.skillName.toLowerCase() === req.skillName.toLowerCase());
                     const reqStatus = job.requirementStatuses?.find(s => s.skillName.toLowerCase() === req.skillName.toLowerCase());
                     const isAutoVerified = reqStatus ? reqStatus.status === 'AUTO_VERIFIED_NO_QUIZ' : false;
 

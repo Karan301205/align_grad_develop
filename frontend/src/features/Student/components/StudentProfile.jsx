@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, ChevronRight, Plus, ChevronDown, Star, Award, Briefcase, DollarSign } from 'lucide-react';
+import { CheckCircle, ChevronRight, Plus, ChevronDown, Star, Award, Briefcase, DollarSign, X } from 'lucide-react';
 import { ALL_SKILLS } from '../../../constants';
 import { apiFetch } from '../../../services/apiClient';
 import { putFileToS3 } from '../../../services/uploadService';
@@ -10,6 +10,7 @@ import { formatErrorMessage } from '../../../utils/errorFormatter';
 
 
 import { INDIAN_STATES } from '../../../constants/indianStates';
+import StudentShowcase from './StudentShowcase';
 
 export default function StudentProfile({
   profile,
@@ -76,6 +77,7 @@ export default function StudentProfile({
 }) {
   const tabsList = [
     { id: 'general', label: 'General' },
+    { id: 'showcase', label: 'Video Showcase' },
     { id: 'socials', label: 'Social Links' },
     { id: 'education', label: 'Education' },
     { id: 'experience', label: 'Experience' },
@@ -563,7 +565,7 @@ export default function StudentProfile({
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
+    <div className="w-full max-w-[1400px] mx-auto space-y-8 animate-fade-in">
       <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-success-container border border-success/30 text-on-success-container rounded-xl shadow-[var(--shadow-floating)] transition-all duration-500 ease-in-out ${showUploadSuccess
           ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
           : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
@@ -579,47 +581,40 @@ export default function StudentProfile({
         subtitle="Update your professional details, social portfolios, academic history, and self-rate your proficiencies"
       />
 
-      {feedbackMsg && (
-        <div className={`p-4 rounded-xl border text-sm flex items-start gap-3 w-full ${feedbackMsg.includes('success')
-            ? 'bg-success-container border-success/30 text-on-success-container items-center'
-            : 'bg-error-container border-error/30 text-on-error-container'
+      {feedbackMsg && (() => {
+        const isErr = /failed|error|invalid|denied/i.test(feedbackMsg);
+        return (
+          <div className={`p-4 rounded-xl border text-sm flex items-center gap-3 w-full ${
+            isErr
+              ? 'border-rose-500/30 bg-rose-500/10 text-rose-800 dark:text-rose-300'
+              : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
           }`}>
-          {feedbackMsg.includes('success') ? (
-            <>
-              <CheckCircle className="w-5 h-5 shrink-0 text-success" />
-              <span className="font-medium">{feedbackMsg}</span>
-            </>
-          ) : (
-            formatErrorMessage(feedbackMsg)
-          )}
-        </div>
-      )}
+            {isErr ? (
+              <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
+            ) : (
+              <CheckCircle className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            )}
+            <span className="font-medium text-xs sm:text-sm">{feedbackMsg}</span>
+          </div>
+        );
+      })()}
 
       <form onSubmit={handleSubmit} className="bg-surface-container border border-outline-variant rounded-2xl overflow-hidden grid grid-cols-12 min-h-[650px]">
 
         {/* Left Side: Sub-tabs Sidebar */}
-        <div className="col-span-12 md:col-span-4 bg-surface-container-low border-r border-outline-variant p-6 flex flex-col gap-1">
-          {[
-            { id: 'general', label: 'General' },
-            { id: 'socials', label: 'Social Links' },
-            { id: 'education', label: 'Education' },
-            { id: 'experience', label: 'Experience' },
-            { id: 'certificates', label: 'Certificates' },
-            { id: 'projects', label: 'Projects' },
-            { id: 'skills', label: 'Skills' },
-            { id: 'cocurricular', label: 'Co-curricular' }
-          ].map(tab => (
+        <div className="col-span-12 md:col-span-3 bg-surface-container-low border-r border-outline-variant p-4 flex flex-col gap-1">
+          {tabsList.map(tab => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setProfileTab(tab.id)}
-              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all text-xs flex items-center justify-between ${profileTab === tab.id
+              className={`w-full text-left px-3 py-2.5 rounded-xl font-medium transition-all text-xs flex items-center justify-between ${profileTab === tab.id
                   ? 'bg-primary/10 text-primary border-l-4 border-primary font-bold'
                   : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
                 }`}
             >
-              <span>{tab.label}</span>
-              <ChevronRight className="w-3.5 h-3.5 opacity-50" />
+              <span className="truncate">{tab.label}</span>
+              <ChevronRight className="w-3.5 h-3.5 opacity-50 shrink-0" />
             </button>
           ))}
 
@@ -636,7 +631,7 @@ export default function StudentProfile({
         </div>
 
         {/* Right Side: Tab Form Panel */}
-        <div className="col-span-12 md:col-span-8 p-8 flex flex-col justify-between space-y-6">
+        <div className="col-span-12 md:col-span-9 p-6 md:p-8 flex flex-col justify-between space-y-6">
           {(() => {
             const currentTabIdx = tabsList.findIndex(t => t.id === profileTab);
             const prevTab = currentTabIdx > 0 ? tabsList[currentTabIdx - 1] : null;
@@ -868,7 +863,7 @@ export default function StudentProfile({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Resume / Portfolio Link</label>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Resume</label>
                   <input
                     type="url"
                     className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
@@ -956,7 +951,7 @@ export default function StudentProfile({
                         <label className="block text-xs font-mono uppercase tracking-wider text-primary font-bold">
                           Preferred Location(s) in India
                         </label>
-                        <p className="text-[11px] text-on-surface-variant">Search and select preferred states/UTs or opt for open relocation.</p>
+                        <p className="text-[11px] text-on-surface-variant">Search and select preferred districts, tech hubs, states/UTs or opt for open relocation.</p>
                       </div>
 
                       {/* Any Location Checkbox */}
@@ -975,7 +970,7 @@ export default function StudentProfile({
                     <div className="relative">
                       <input
                         type="text"
-                        placeholder="Search Indian state or Union Territory..."
+                        placeholder="Search district, city or state (e.g. Hyderabad, Telangana)..."
                         className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-2.5 text-xs text-on-surface focus:outline-none focus:border-primary transition-all font-mono"
                         value={locationSearchQuery}
                         onChange={e => {
@@ -988,7 +983,7 @@ export default function StudentProfile({
                       {isLocationDropdownOpen && (
                         <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-surface-container-high border border-outline-variant rounded-xl shadow-xl z-30 custom-scrollbar divide-y divide-outline-variant/30">
                           {INDIAN_STATES.filter(state => state.toLowerCase().includes(locationSearchQuery.toLowerCase())).length === 0 ? (
-                            <div className="p-3 text-xs text-on-surface-variant text-center font-mono">No matching states found</div>
+                            <div className="p-3 text-xs text-on-surface-variant text-center font-mono">No matching districts or states found</div>
                           ) : (
                             INDIAN_STATES.filter(state => state.toLowerCase().includes(locationSearchQuery.toLowerCase())).map(state => {
                               const isAdded = preferredLocations.includes(state);
@@ -1037,7 +1032,18 @@ export default function StudentProfile({
               </div>
             )}
 
-            {/* Panel 2: Social Links */}
+            {/* Panel 2: Video Showcase */}
+            {profileTab === 'showcase' && (
+              <div className="space-y-4">
+                <StudentShowcase
+                  profile={profile}
+                  token={token}
+                  onVideoSaved={(url) => setProfile(prev => ({ ...prev, introVideoUrl: url }))}
+                />
+              </div>
+            )}
+
+            {/* Panel 3: Social Links */}
             {profileTab === 'socials' && (
               <div className="space-y-4">
                 <h3 className="text-lg font-headline font-bold text-on-surface mb-2">Social Profiles</h3>
@@ -1048,6 +1054,11 @@ export default function StudentProfile({
                     label: 'LinkedIn Profile Link',
                     placeholder: 'https://linkedin.com/in/username',
                     logo: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAABW0lEQVR4nO2ZvUoDQRRGjyh2/oC2goW+ge+g4C5aikI6S1/BRgJ5EJ/BThP1QewUfxB0U6W5sjCNYXZnZi32jtwDXxPuzH6HzWazCRiG0ZUjYAJMAek5U2AMlKkSIwXlpSHDlDMhylPEiEwUFJVA7mJEKgVFJZDvGBHJJEH6LigmMkfb4hfgBNhwOQPechTZV/RxHaRt8apnfi1HkdIzX+Qo8g4MgE2X+hp5zVFEFCVI3wXFRObosjhl5tHdi7aAZWAF2AMugY8cROob50Hg2OvAjXaRnZiDA0vAg2aRFLaBWQ4iixEz15pFLoBnN/cEnLfMnmoVOU58/t7VKnLfsGf9GwEdvoz2JvLZsGf9uo8FrSJ/3VdMBBPxYiKYCCYiJuJHTIT2xZoS5N+IVApKSiBfMSJjBUUlkNsYkVJBUQnkkEiGCspKQ65IpHD/nmq4Zir3doo+E4Zh8IsfFdRDh8Z3YCsAAAAASUVORK5CYII=" alt="linkedin" className="w-4.5 h-4.5 object-contain shrink-0" />
+                  },{
+                    key: 'portfolio',
+                    label: 'Personal Portfolio Link',
+                    placeholder: 'https://myportfolio.com',
+                    logo: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAAByElEQVR4nO2YzStEURiHn/JR2LCQKWQUkRUlHzsr/gUslLUFZWNlZaZs5Z/QZEmxVaSoYW2hFOUrxqyUObp13MY0M/frXPe9uk/9ms095/09zZ3TnQsJ/5MeIAcUAOUy1rX7wCCCJF48CFTGWtuNAHK60IGWcot17aFeu4cACrqMF4kfevXaNwSgdKJab4xEJGyRFJAF8kAxwGlkOkXdKQN0OUksCCuvauQDmK8lsQiUBJRULlOqJpPSllGXUz6+mV+3WVZAKb/ZKhe5ElDIb6wDwCaOt5XSsbrbhDnoC3jVn2HNsDG98QOwCYwCTXrGLvAZJ5FjoIPqtOhj/km6yC3QijP9hmVsTG24invWJIuMeRDpkyyS9iDSLFlkyoNIt2SRDQ8iS5JFpj2IjEgWGfYg0ilZZAdocCmSkSyigEkXEmnDM21MbrqNM+txECkCQ3UkBgK+YlV/JWLlpo7IRQjzbFSYm1dwHyeRxzoi13EReQZm64hMAHeSRfLACtCOM23AMnAqSSQPzOCfceAkapFL/fc1KI3AUZQic5gjyENkYBHrwc8k71H+RiTEJuoiiQiJCCJjE3WRRIQKkXMBZfzmrFwkASF8AwtIav6AvpvW" alt="portfolio" className="w-4.5 h-4.5 object-contain shrink-0" />
                   },
                   {
                     key: 'github',
@@ -1095,12 +1106,6 @@ export default function StudentProfile({
                     label: 'Kaggle Profile Link',
                     placeholder: 'https://kaggle.com/username',
                     logo: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAA1UlEQVR4nO3WMQrCQBCF4T9WVnoJG/EA9h5AULDIEewtlYAgqGBn7xns7FLYiq3WXkBQEKtEFlIM4yIGJ2CRgWlml/exU4SAv3ZAmnWPAioWQFgCviqB/wcCYA4cRHesgABYi3PXK8sXLFT4Mm/4J2Cmwt2asAKmVuE+YKTCJ7+Ea2Cvwh2GJZCKToBBkUAK3IGWJZAAY+AiZmegbgVE2awNPMV8C1QsgFDMh2pdkTXgaqPW18cYqAJHcX4DmpaAqwZwFXdOQC0P8M1vSxd4iHvuC/tWL9T+il5MsxLWAAAAAElFTkSuQmCC" alt="kaggle" className="w-4.5 h-4.5 object-contain shrink-0" />
-                  },
-                  {
-                    key: 'portfolio',
-                    label: 'Personal Portfolio Link',
-                    placeholder: 'https://myportfolio.com',
-                    logo: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAAByElEQVR4nO2YzStEURiHn/JR2LCQKWQUkRUlHzsr/gUslLUFZWNlZaZs5Z/QZEmxVaSoYW2hFOUrxqyUObp13MY0M/frXPe9uk/9ms095/09zZ3TnQsJ/5MeIAcUAOUy1rX7wCCCJF48CFTGWtuNAHK60IGWcot17aFeu4cACrqMF4kfevXaNwSgdKJab4xEJGyRFJAF8kAxwGlkOkXdKQN0OUksCCuvauQDmK8lsQiUBJRULlOqJpPSllGXUz6+mV+3WVZAKb/ZKhe5ElDIb6wDwCaOt5XSsbrbhDnoC3jVn2HNsDG98QOwCYwCTXrGLvAZJ5FjoIPqtOhj/km6yC3QijP9hmVsTG24invWJIuMeRDpkyyS9iDSLFlkyoNIt2SRDQ8iS5JFpj2IjEgWGfYg0ilZZAdocCmSkSyigEkXEmnDM21MbrqNM+txECkCQ3UkBgK+YlV/JWLlpo7IRQjzbFSYm1dwHyeRxzoi13EReQZm64hMAHeSRfLACtCOM23AMnAqSSQPzOCfceAkapFL/fc1KI3AUZQic5gjyENkYBHrwc8k71H+RiTEJuoiiQiJCCJjE3WRRIQKkXMBZfzmrFwkASF8AwtIav6AvpvW" alt="portfolio" className="w-4.5 h-4.5 object-contain shrink-0" />
                   }
                 ].map(link => {
                   const showKey = `show${link.key.charAt(0).toUpperCase()}${link.key.slice(1)}`;
@@ -2148,9 +2153,9 @@ export default function StudentProfile({
                 </div>
 
                 <div className="bg-surface-container-low border border-outline-variant rounded-xl p-6 space-y-5">
-                  {/* Searchable input & dropdown to add a skill */}
-                  <div className="flex gap-3 pb-3 border-b border-outline-variant">
-                    <div className="relative flex-1">
+                  {/* Searchable input & dropdown to add a skill directly on click */}
+                  <div className="pb-3 border-b border-outline-variant">
+                    <div className="relative w-full">
                       <input
                         type="text"
                         placeholder="Search and select a skill..."
@@ -2162,6 +2167,20 @@ export default function StudentProfile({
                         onFocus={() => setIsSkillDropdownOpen(true)}
                         onBlur={() => {
                           setTimeout(() => setIsSkillDropdownOpen(false), 200);
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const matches = ALL_SKILLS.filter(
+                              s => s.skill.toLowerCase().includes(selectedNewSkill.toLowerCase()) &&
+                                !skillsList.some(exist => exist.name.toLowerCase() === s.skill.toLowerCase())
+                            );
+                            if (matches.length > 0) {
+                              setSkillsList(prev => [...prev, { name: matches[0].skill, rating: 1 }]);
+                              setSelectedNewSkill('');
+                              setIsSkillDropdownOpen(false);
+                            }
+                          }
                         }}
                         className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs text-on-surface focus:border-primary focus:outline-none transition-all"
                       />
@@ -2182,10 +2201,13 @@ export default function StudentProfile({
                                 key={s.skill}
                                 type="button"
                                 onClick={() => {
-                                  setSelectedNewSkill(s.skill);
+                                  if (!skillsList.some(exist => exist.name.toLowerCase() === s.skill.toLowerCase())) {
+                                    setSkillsList(prev => [...prev, { name: s.skill, rating: 1 }]);
+                                  }
+                                  setSelectedNewSkill('');
                                   setIsSkillDropdownOpen(false);
                                 }}
-                                className="w-full text-left px-4 py-2.5 text-xs text-on-surface hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between group"
+                                className="w-full text-left px-4 py-2.5 text-xs text-on-surface hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between group cursor-pointer"
                               >
                                 <span>{s.skill}</span>
                                 <span className="text-[10px] opacity-60 group-hover:opacity-100 font-mono capitalize px-1.5 py-0.5 rounded bg-surface-container-low border border-outline-variant text-on-surface-variant group-hover:border-primary/20 group-hover:text-primary transition-all">
@@ -2197,74 +2219,54 @@ export default function StudentProfile({
                         </div>
                       )}
                     </div>
-                    <button
-                      type="button"
-                      id="student-add-skill-btn"
-                      onClick={() => {
-                        const trimmed = selectedNewSkill.trim();
-                        if (!trimmed) return;
-                        const match = ALL_SKILLS.find(
-                          s => s.skill.toLowerCase() === trimmed.toLowerCase()
-                        );
-                        if (!match) {
-                          alert("Please select a valid skill from the matching suggestions list.");
-                          return;
-                        }
-                        if (skillsList.some(exist => exist.name.toLowerCase() === match.skill.toLowerCase())) {
-                          alert("This skill has already been added.");
-                          return;
-                        }
-                        setSkillsList(prev => [...prev, { name: match.skill, rating: 1 }]);
-                        setSelectedNewSkill('');
-                      }}
-                      className="px-4 py-3 bg-secondary text-on-secondary font-bold rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
-                    >
-                      <Plus className="w-4 h-4" /> Add Skill
-                    </button>
                   </div>
 
                   {skillsList.length === 0 ? (
                     <p className="text-xs text-on-surface-variant font-mono">No skills added yet. Select a skill above.</p>
                   ) : (
-                    skillsList.map(skill => {
-                      const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === skill.name.toLowerCase());
-                      const isTech = skillObj ? skillObj.type === 'technical' : true;
-                      return (
-                        <div key={skill.name} className="space-y-2 pb-3 border-b border-outline-variant last:border-b-0">
-                          <div className="flex justify-between items-center text-sm">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-on-surface">{skill.name}</span>
-                              {!isTech && (
-                                <span className="text-[9px] opacity-60 font-mono capitalize px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant text-on-surface-variant">
-                                  Non-Technical
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-4">
-                              {isTech && (
-                                <div className="flex items-center gap-2">
-                                  <span className="text-secondary font-mono text-xs">
-                                    Rating: {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? `${skill.verifiedRating} / 10` : `${skill.rating} / 10`}
-                                  </span>
-                                  {skill.verifiedRating !== null && skill.verifiedRating !== undefined && (
-                                    <span className="text-[9px] bg-success-container border border-success/30 text-success px-1.5 py-0.5 rounded font-bold uppercase tracking-wide flex items-center gap-1 select-none">
-                                      <span className="text-[8px]">✓</span> Verified
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => setSkillsList(prev => prev.filter(s => s.name !== skill.name))}
-                                className="text-error hover:text-error/70 text-xs font-mono transition-colors"
-                              >
-                                Remove
-                              </button>
-                            </div>
+                    <div className="flex flex-wrap gap-2.5 pt-1">
+                      {skillsList.map(skill => {
+                        const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === skill.name.toLowerCase());
+                        const isTech = skillObj ? skillObj.type === 'technical' : true;
+                        const displayRating = skill.verifiedRating !== null && skill.verifiedRating !== undefined ? skill.verifiedRating : skill.rating;
+
+                        return (
+                          <div 
+                            key={skill.name}
+                            className="inline-flex items-center gap-2 px-3.5 py-2 bg-surface-container border border-outline-variant hover:border-outline rounded-xl text-xs font-medium text-on-surface transition-all shadow-sm group select-none"
+                          >
+                            <span className="font-semibold text-on-surface">{skill.name}</span>
+                            
+                            {isTech && displayRating > 0 && (
+                              <span className="text-[10px] font-mono text-secondary font-bold bg-secondary/10 px-1.5 py-0.5 rounded-md border border-secondary/20">
+                                {displayRating}/10
+                              </span>
+                            )}
+
+                            {skill.verifiedRating !== null && skill.verifiedRating !== undefined && (
+                              <span className="text-[9px] bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide flex items-center gap-0.5" title="Verified Skill Rating">
+                                ✓
+                              </span>
+                            )}
+
+                            {!isTech && (
+                              <span className="text-[9px] opacity-60 font-mono capitalize px-1 py-0.5 rounded bg-surface-container-high text-on-surface-variant">
+                                soft
+                              </span>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => setSkillsList(prev => prev.filter(s => s.name !== skill.name))}
+                              className="text-on-surface-variant hover:text-error transition-colors ml-0.5 p-0.5 rounded-md hover:bg-error/10 cursor-pointer"
+                              title="Remove skill"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
                           </div>
-                        </div>
-                      );
-                    })
+                        );
+                      })}
+                    </div>
                   )}
                 </div>
               </div>

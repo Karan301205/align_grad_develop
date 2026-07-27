@@ -162,16 +162,6 @@ export default function CompanyProfileModal({ companyId, isOpen, onClose, token,
                       <LinkIcon className="w-3.5 h-3.5 text-primary" /> LinkedIn
                     </a>
                   )}
-                  {company.socialLinks?.twitter && (
-                    <a
-                      href={company.socialLinks.twitter}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1.5 bg-surface-container border border-outline-variant hover:bg-surface-container-high text-xs rounded-xl font-mono text-on-surface flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
-                    >
-                      <LinkIcon className="w-3.5 h-3.5 text-primary" /> Twitter
-                    </a>
-                  )}
                   {company.socialLinks?.github && (
                     <a
                       href={company.socialLinks.github}
@@ -182,7 +172,7 @@ export default function CompanyProfileModal({ companyId, isOpen, onClose, token,
                       <LinkIcon className="w-3.5 h-3.5 text-primary" /> GitHub
                     </a>
                   )}
-                  {!company.socialLinks?.linkedin && !company.socialLinks?.twitter && !company.socialLinks?.github && (
+                  {!company.socialLinks?.linkedin && !company.socialLinks?.github && (
                     <span className="text-xs text-on-surface-variant font-mono">No social profiles linked.</span>
                   )}
                 </div>

@@ -23,6 +23,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
   
   // Recording states
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState(null);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [stream, setStream] = useState(null);
@@ -35,6 +36,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
   const mediaRecorderRef = useRef(null);
   const timerIntervalRef = useRef(null);
   const chunksRef = useRef([]);
+  const recordingSecondsRef = useRef(0);
 
   // Cleanup stream and timers on unmount
   useEffect(() => {
@@ -58,6 +60,9 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
     setRecordedBlob(null);
     setRecordedUrl('');
     chunksRef.current = [];
+    recordingSecondsRef.current = 0;
+    setRecordingSeconds(0);
+    setIsPaused(false);
     
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -89,8 +94,11 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
     if (!stream) return;
     
     setIsRecording(true);
+    setIsPaused(false);
     setRecordingSeconds(0);
+    recordingSecondsRef.current = 0;
     chunksRef.current = [];
+    setErrorMsg('');
 
     // Choose preferred MIME type
     let options = { mimeType: 'video/webm;codecs=vp9,opus' };
@@ -112,10 +120,18 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
-        setRecordedBlob(blob);
-        setRecordedUrl(URL.createObjectURL(blob));
+        const duration = recordingSecondsRef.current;
+        if (duration < 40) {
+          setErrorMsg(`Video recording must be at least 40 seconds long. You recorded ${duration} second${duration === 1 ? '' : 's'}. Please record for at least 40 seconds.`);
+          setRecordedBlob(null);
+          setRecordedUrl('');
+        } else {
+          const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+          setRecordedBlob(blob);
+          setRecordedUrl(URL.createObjectURL(blob));
+        }
         setIsRecording(false);
+        setIsPaused(false);
         stopCameraStream();
       };
 
@@ -125,11 +141,13 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
       // Start 60-second countdown timer
       timerIntervalRef.current = setInterval(() => {
         setRecordingSeconds(prev => {
-          if (prev >= 59) {
+          const nextSec = prev + 1;
+          recordingSecondsRef.current = nextSec;
+          if (nextSec >= 60) {
             stopRecording();
             return 60;
           }
-          return prev + 1;
+          return nextSec;
         });
       }, 1000);
 
@@ -137,17 +155,69 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
       console.error('Recording initialization failed:', err);
       setErrorMsg('Failed to initialize recording with your browser.');
       setIsRecording(false);
+      setIsPaused(false);
       stopCameraStream();
     }
+  };
+
+  // Pause recording video
+  const pauseRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      try {
+        mediaRecorderRef.current.pause();
+      } catch (e) {
+        console.error('Pause recording error:', e);
+      }
+    }
+    clearInterval(timerIntervalRef.current);
+    setIsPaused(true);
+  };
+
+  // Resume recording video
+  const resumeRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'paused') {
+      try {
+        mediaRecorderRef.current.resume();
+      } catch (e) {
+        console.error('Resume recording error:', e);
+      }
+    }
+    setIsPaused(false);
+
+    timerIntervalRef.current = setInterval(() => {
+      setRecordingSeconds(prev => {
+        const nextSec = prev + 1;
+        recordingSecondsRef.current = nextSec;
+        if (nextSec >= 60) {
+          stopRecording();
+          return 60;
+        }
+        return nextSec;
+      });
+    }, 1000);
+  };
+
+  // Publish directly from pause state (if duration >= 40s)
+  const publishFromPause = () => {
+    if (recordingSecondsRef.current < 40) {
+      setErrorMsg(`Video recording must be at least 40 seconds long. You recorded ${recordingSecondsRef.current} seconds.`);
+      return;
+    }
+    stopRecording();
   };
 
   // Stop recording video
   const stopRecording = () => {
     clearInterval(timerIntervalRef.current);
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (e) {
+        console.error('Stop recording error:', e);
+      }
     }
     setIsRecording(false);
+    setIsPaused(false);
   };
 
   // Handle uploaded file validation
@@ -173,8 +243,12 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
     videoElement.src = URL.createObjectURL(file);
     videoElement.onloadedmetadata = () => {
       URL.revokeObjectURL(videoElement.src);
+      if (videoElement.duration < 39.5) { // 0.5 second rounding tolerance
+        setErrorMsg(`Video must be at least 40 seconds long. Selected video duration: ${Math.round(videoElement.duration)} seconds.`);
+        return;
+      }
       if (videoElement.duration > 61) { // 1 second buffer
-        setErrorMsg('Video exceeds 1 minute limit. Please shorten your video intro.');
+        setErrorMsg('Video exceeds 1 minute limit. Please select a video between 40 and 60 seconds.');
         return;
       }
       setRecordedBlob(file);
@@ -316,11 +390,13 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
-      <PageHeader
-        title="Showcase Yourself"
-        subtitle="Make a striking first impression. Record or upload a short 1-minute video explaining your skills, experience, and why you are a great fit for opportunities."
-      />
+    <div className="w-full space-y-6 animate-fade-in">
+      {/* <div className="space-y-1 mb-2">
+        <h3 className="text-xl font-headline font-bold text-on-surface">Showcase Yourself</h3>
+        <p className="text-xs text-on-surface-variant leading-relaxed">
+          Make a striking first impression. Record or upload a short video (between 40 and 60 seconds) explaining your skills, experience, and why you are a great fit for opportunities.
+        </p>
+      </div> */}
 
       {errorMsg && (
         <div className="p-4 bg-error-container border border-error/30 text-on-error-container rounded-xl flex items-start gap-3">
@@ -336,10 +412,10 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Column: Recording and Upload zone */}
-        <div className="lg:col-span-2 bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-6 flex flex-col justify-between min-h-[480px]">
+        <div className="lg:col-span-8 bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-6 flex flex-col justify-between min-h-[480px]">
           
           {/* Choose Mode screen */}
           {activeMode === 'choose' && !recordedUrl && (
@@ -351,12 +427,13 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
               <div className="space-y-2 max-w-md">
                 <h3 className="text-lg font-bold text-on-surface">Choose how to add your video</h3>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Record directly using your webcam, or select a pre-recorded video file. Videos must be at most 1 minute long (under 50MB, ideal resolution is 720p).
+                  Record directly using your webcam, or select a pre-recorded video file. Videos must be <strong className="text-primary font-semibold">at least 40 seconds</strong> and up to 1 minute long (under 50MB, ideal resolution is 720p).
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm justify-center">
                 <button
+                  type="button"
                   onClick={startCamera}
                   className="px-6 py-3 bg-primary text-on-primary rounded-xl text-sm font-bold hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
@@ -383,13 +460,19 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
           {activeMode === 'record' && !recordedUrl && (
             <div className="flex-1 flex flex-col space-y-4">
               <div className="flex items-center justify-between border-b border-outline-variant pb-4">
-                <h3 className="text-sm font-mono uppercase text-primary tracking-wider flex items-center gap-1.5">
+                {/* <h3 className="text-sm font-mono uppercase text-primary tracking-wider flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Live Camera Stream (720p)
-                </h3>
+                </h3> */}
                 {isRecording && (
-                  <span className="px-3 py-1 bg-error-container/20 text-error border border-error/30 rounded-lg text-xs font-mono flex items-center gap-1.5 animate-pulse">
-                    <span className="w-2 h-2 rounded-full bg-error"></span>
-                    {recordingSeconds}s / 60s
+                  <span className={`px-3 py-1 border rounded-lg text-xs font-mono flex items-center gap-1.5 ${
+                    isPaused
+                      ? 'bg-amber-500/20 text-amber-500 border-amber-500/30 font-bold'
+                      : recordingSeconds >= 40 
+                      ? 'bg-success-container/20 text-success border-success/30 animate-pulse' 
+                      : 'bg-error-container/20 text-error border-error/30 animate-pulse'
+                  }`}>
+                    <span className={`w-2 h-2 rounded-full ${isPaused ? 'bg-amber-500' : recordingSeconds >= 40 ? 'bg-success' : 'bg-error'}`}></span>
+                    {isPaused ? `Paused at ${recordingSeconds}s` : `${recordingSeconds}s / 60s`} {recordingSeconds < 40 ? `(Min 40s - ${40 - recordingSeconds}s left)` : '(Min length reached!)'}
                   </span>
                 )}
               </div>
@@ -413,18 +496,18 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                         style={{ width: `${recordingSeconds >= 30 ? 100 : (recordingSeconds < 20 ? 0 : ((recordingSeconds - 20) / 10) * 100)}%` }}
                       />
                     </div>
-                    {/* Segment 3: Experience & Projects (20s - 2/6 width) */}
+                    {/* Segment 3: Experience & Projects (10s - 1/6 width - reaches 40s min requirement) */}
+                    <div className="col-span-1 bg-surface-container-highest rounded-full h-full relative overflow-hidden border-r-2 border-dashed border-primary/60">
+                      <div 
+                        className="bg-primary h-full transition-all duration-300"
+                        style={{ width: `${recordingSeconds >= 40 ? 100 : (recordingSeconds < 30 ? 0 : ((recordingSeconds - 30) / 10) * 100)}%` }}
+                      />
+                    </div>
+                    {/* Segment 4: Why Hire You (20s - 2/6 width) */}
                     <div className="col-span-2 bg-surface-container-highest rounded-full h-full relative overflow-hidden">
                       <div 
                         className="bg-primary h-full transition-all duration-300"
-                        style={{ width: `${recordingSeconds >= 50 ? 100 : (recordingSeconds < 30 ? 0 : ((recordingSeconds - 30) / 20) * 100)}%` }}
-                      />
-                    </div>
-                    {/* Segment 4: Why Hire You (10s - 1/6 width) */}
-                    <div className="col-span-1 bg-surface-container-highest rounded-full h-full relative overflow-hidden">
-                      <div 
-                        className="bg-primary h-full transition-all duration-300"
-                        style={{ width: `${recordingSeconds >= 60 ? 100 : (recordingSeconds < 50 ? 0 : ((recordingSeconds - 50) / 10) * 100)}%` }}
+                        style={{ width: `${recordingSeconds >= 60 ? 100 : (recordingSeconds < 40 ? 0 : ((recordingSeconds - 40) / 20) * 100)}%` }}
                       />
                     </div>
                   </div>
@@ -433,8 +516,8 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                   <div className="grid grid-cols-6 gap-2 text-[10px] font-mono text-on-surface-variant text-center select-none">
                     <span className={`col-span-2 truncate ${recordingSeconds < 20 ? 'text-primary font-bold' : ''}`}>Self & Edu (20s)</span>
                     <span className={`col-span-1 truncate ${recordingSeconds >= 20 && recordingSeconds < 30 ? 'text-primary font-bold' : ''}`}>Skills (10s)</span>
-                    <span className={`col-span-2 truncate ${recordingSeconds >= 30 && recordingSeconds < 50 ? 'text-primary font-bold' : ''}`}>Experience (20s)</span>
-                    <span className={`col-span-1 truncate ${recordingSeconds >= 50 ? 'text-primary font-bold' : ''}`}>Why Hire (10s)</span>
+                    <span className={`col-span-1 truncate ${recordingSeconds >= 30 && recordingSeconds < 40 ? 'text-primary font-bold' : ''}`}>Exp (10s) <span className="text-amber-500 font-bold">*40s Min</span></span>
+                    <span className={`col-span-2 truncate ${recordingSeconds >= 40 ? 'text-primary font-bold' : ''}`}>Why Hire (20s)</span>
                   </div>
 
                   {/* Current Active Guide prompt card */}
@@ -444,8 +527,8 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                       <p className="text-xs font-semibold text-on-surface leading-relaxed">
                         {recordingSeconds < 20 && "🎓 Tell us about yourself and your educational background"}
                         {recordingSeconds >= 20 && recordingSeconds < 30 && "⚡ Talk about the skills and technologies you know"}
-                        {recordingSeconds >= 30 && recordingSeconds < 50 && "💼 Describe your work experience or projects you have worked on"}
-                        {recordingSeconds >= 50 && "🚀 Explain why we should hire you"}
+                        {recordingSeconds >= 30 && recordingSeconds < 40 && "💼 Describe your work experience or projects you have worked on (Reaching 40s Min)"}
+                        {recordingSeconds >= 40 && "🚀 Explain why we should hire you"}
                       </p>
                     </div>
                     <div className="shrink-0 text-center bg-secondary/15 border border-secondary/20 px-3 py-1 rounded-lg min-w-[70px]">
@@ -453,8 +536,8 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                       <span className="text-xs font-bold font-mono text-on-surface">
                         {recordingSeconds < 20 && `${20 - recordingSeconds}s`}
                         {recordingSeconds >= 20 && recordingSeconds < 30 && `${30 - recordingSeconds}s`}
-                        {recordingSeconds >= 30 && recordingSeconds < 50 && `${50 - recordingSeconds}s`}
-                        {recordingSeconds >= 50 && `${60 - recordingSeconds}s`}
+                        {recordingSeconds >= 30 && recordingSeconds < 40 && `${40 - recordingSeconds}s`}
+                        {recordingSeconds >= 40 && `${60 - recordingSeconds}s`}
                       </span>
                     </div>
                   </div>
@@ -471,37 +554,85 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                 />
                 {!isRecording && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-center p-6">
-                    <p className="text-xs text-white max-w-sm">Press the Record button below. The recording will stop automatically after 60 seconds.</p>
+                    <p className="text-xs text-white max-w-sm">Press the Record button below. Recording must be <strong>at least 40 seconds</strong> (max 60 seconds). It will stop automatically after 60 seconds.</p>
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-center gap-4 pt-2">
+              {/* Dynamic Recording Action Controls */}
+              <div className="flex items-center justify-center gap-3 flex-wrap pt-2">
                 {!isRecording ? (
-                  <button
-                    onClick={startRecording}
-                    className="px-6 py-2.5 bg-error text-on-error rounded-xl text-sm font-bold hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                  >
-                    <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-                    Start Recording
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={startRecording}
+                      className="px-6 py-2.5 bg-error text-on-error rounded-xl text-sm font-bold hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
+                    >
+                      <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
+                      Start Recording
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCancelRecording}
+                      className="px-4 py-2.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant rounded-xl text-sm font-semibold text-on-surface-variant transition-all"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : isPaused ? (
+                  <>
+                    {/* Paused State Controls */}
+                    <button
+                      type="button"
+                      onClick={resumeRecording}
+                      className="px-5 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-bold hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
+                    >
+                      <Play className="w-4 h-4 fill-current" />
+                      Resume Recording ({recordingSeconds}s)
+                    </button>
+
+                    {recordingSeconds >= 40 && (
+                      <button
+                        type="button"
+                        onClick={publishFromPause}
+                        className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-500 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        <Upload className="w-4 h-4" />
+                        Publish Video
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleCancelRecording}
+                      className="px-4 py-2.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant rounded-xl text-sm font-semibold text-on-surface-variant transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <Trash2 className="w-4 h-4 text-error" />
+                      Cancel Recording
+                    </button>
+                  </>
                 ) : (
-                  <button
-                    onClick={stopRecording}
-                    className="px-6 py-2.5 bg-white text-zinc-950 rounded-xl text-sm font-bold hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                  >
-                    <StopCircle className="w-4 h-4 text-error" />
-                    Stop Recording
-                  </button>
+                  <>
+                    {/* Active Recording Controls */}
+                    <button
+                      type="button"
+                      onClick={pauseRecording}
+                      className="px-6 py-2.5 bg-amber-500 text-zinc-950 rounded-xl text-sm font-bold hover:bg-amber-400 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
+                    >
+                      <Pause className="w-4 h-4 fill-current" />
+                      Pause Recording
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleCancelRecording}
+                      className="px-4 py-2.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant rounded-xl text-sm font-semibold text-on-surface-variant transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <Trash2 className="w-4 h-4 text-error" />
+                      Cancel Recording
+                    </button>
+                  </>
                 )}
-                
-                <button
-                  onClick={handleCancelRecording}
-                  disabled={isRecording}
-                  className="px-4 py-2.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant rounded-xl text-sm font-semibold text-on-surface-variant transition-all disabled:opacity-50"
-                >
-                  Cancel
-                </button>
               </div>
             </div>
           )}
@@ -544,6 +675,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
 
               <div className="flex justify-center gap-4 pt-2">
                 <button
+                  type="button"
                   onClick={handleUpload}
                   disabled={loading}
                   className="px-6 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-bold hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
@@ -552,6 +684,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                   {loading ? 'Uploading...' : 'Publish Video'}
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
                     setRecordedBlob(null);
                     setRecordedUrl('');
@@ -568,6 +701,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                   Record/Select Again
                 </button>
                 <button
+                  type="button"
                   onClick={handleCancelRecording}
                   disabled={loading}
                   className="px-4 py-2.5 bg-transparent border border-outline-variant rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high transition-all disabled:opacity-50"
@@ -581,7 +715,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
         </div>
 
         {/* Right Column: Status & Current published Video showcase */}
-        <div className="space-y-6">
+        <div className="lg:col-span-4 space-y-6">
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-4">
             <h4 className="text-md font-bold text-on-surface border-b border-outline-variant pb-2">Showcase Status</h4>
             
@@ -601,6 +735,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                 </div>
 
                 <button
+                  type="button"
                   onClick={handleDeleteVideo}
                   disabled={loading}
                   className="w-full py-2.5 bg-error-container text-on-error-container hover:brightness-105 border border-error/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
@@ -624,16 +759,16 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
             )}
           </div>
 
-          <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-3.5">
+          {/* <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-3.5">
             <h4 className="text-xs font-mono uppercase text-on-surface-variant tracking-wider">Tips for an Excellent Intro</h4>
             <ul className="text-xs text-on-surface-variant space-y-2.5 list-disc list-inside">
-              <li>Keep it brief (30 to 60 seconds is the sweet spot).</li>
+              <li><strong>Duration:</strong> 40 to 60 seconds is mandatory.</li>
               <li>State your name, key stacks, and recent achievements.</li>
               <li>Ensure good lighting on your face.</li>
               <li>Check your microphone volume and minimize background noise.</li>
               <li>Record in <strong>720p (1280x720)</strong> resolution for optimal loading times.</li>
             </ul>
-          </div>
+          </div> */}
         </div>
 
       </div>

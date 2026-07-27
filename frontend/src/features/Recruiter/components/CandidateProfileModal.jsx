@@ -1,7 +1,26 @@
-import { X, Video, Mail, Phone, Globe, Calendar, Briefcase, FolderGit2, GraduationCap, Award, FileText, Star } from 'lucide-react';
+import { X, Video, Mail, Phone, Globe, Calendar, Briefcase, FolderGit2, GraduationCap, Award, FileText, Star, Link } from 'lucide-react';
+
+const SOCIAL_PLATFORMS = [
+  { key: 'linkedin', showKey: 'showLinkedin', label: 'LinkedIn', icon: Link, color: 'text-blue-500' },
+  { key: 'github', showKey: 'showGithub', label: 'GitHub', icon: FolderGit2, color: 'text-purple-500' },
+  { key: 'portfolio', showKey: 'showPortfolio', label: 'Personal Portfolio', icon: Globe, color: 'text-emerald-500' },
+  { key: 'hackerEarth', showKey: 'showHackerEarth', label: 'HackerEarth', icon: Globe, color: 'text-cyan-500' },
+  { key: 'hackerRank', showKey: 'showHackerRank', label: 'HackerRank', icon: Globe, color: 'text-green-500' },
+  { key: 'codechef', showKey: 'showCodechef', label: 'CodeChef', icon: Globe, color: 'text-amber-500' },
+  { key: 'leetcode', showKey: 'showLeetcode', label: 'LeetCode', icon: Globe, color: 'text-orange-500' },
+  { key: 'codeforces', showKey: 'showCodeforces', label: 'CodeForces', icon: Globe, color: 'text-rose-500' },
+  { key: 'kaggle', showKey: 'showKaggle', label: 'Kaggle', icon: Globe, color: 'text-sky-500' },
+];
 
 export default function CandidateProfileModal({ candidate, onClose }) {
   if (!candidate) return null;
+
+  const socialLinks = candidate.socialLinks || {};
+  const activeSocialLinks = SOCIAL_PLATFORMS.filter(platform => {
+    const url = socialLinks[platform.key];
+    const isChecked = Boolean(socialLinks[platform.showKey]);
+    return url && typeof url === 'string' && url.trim() !== '' && isChecked;
+  });
 
   return (
     <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -22,7 +41,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
               {candidate.username && (
                 <p className="text-xs text-primary font-mono">@{candidate.username}</p>
               )}
-              <p className="text-xs text-on-surface-variant font-mono">Detailed Candidate Dossier</p>
+              {/* <p className="text-xs text-on-surface-variant font-mono">Detailed Candidate Dossier</p> */}
             </div>
           </div>
           <button 
@@ -97,6 +116,45 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Social Profiles Section */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-mono uppercase text-primary tracking-wider flex items-center gap-1.5">
+                  <Link className="w-4 h-4" /> Social Profiles
+                </h4>
+                {activeSocialLinks.length > 0 ? (
+                  <div className="bg-surface-container-low/60 border border-outline-variant p-4 rounded-xl space-y-2">
+                    {activeSocialLinks.map(platform => {
+                      let url = String(socialLinks[platform.key]).trim();
+                      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        url = `https://${url}`;
+                      }
+                      const PlatformIcon = platform.icon;
+                      return (
+                        <a
+                          key={platform.key}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-high/60 hover:bg-surface-container-high border border-outline-variant/60 text-xs font-semibold text-on-surface hover:text-primary transition-all group cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <PlatformIcon className={`w-4 h-4 ${platform.color} shrink-0`} />
+                            <span className="truncate">{platform.label}</span>
+                          </div>
+                          <span className="text-[10px] font-mono text-primary group-hover:underline flex items-center gap-1 shrink-0">
+                            View &rarr;
+                          </span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-xl bg-surface-container-low/40 border border-outline-variant text-center">
+                    <p className="text-xs text-on-surface-variant italic">No social links shared by this candidate.</p>
+                  </div>
+                )}
               </div>
 
               {/* Work Preferences Section */}
@@ -204,8 +262,8 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
                   return (
                     <>
-                      {/* Gigs Stats Summary */}
-                      {gigExperienceItems.length > 0 && (
+                      {/* Gigs Stats Summary - Hidden for now */}
+                      {/* {gigExperienceItems.length > 0 && (
                         <div className="grid grid-cols-2 gap-4 bg-surface-container-high/40 p-3.5 rounded-xl border border-outline-variant/50">
                           <div className="flex items-center gap-2">
                             <Award className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -222,7 +280,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                             </div>
                           </div>
                         </div>
-                      )}
+                      )} */}
 
                       {candidate.experience && candidate.experience.length > 0 ? (
                         <div className="space-y-3">
@@ -231,11 +289,11 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                               <div className="flex justify-between font-bold text-on-surface flex-wrap gap-1">
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                   <span>{exp.designation}</span>
-                                  {exp.expType === 'Gig' && (
+                                  {/* {exp.expType === 'Gig' && (
                                     <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[8px] font-mono font-bold border border-emerald-500/10">
                                       ✓ Verified Gig
                                     </span>
-                                  )}
+                                  )} */}
                                 </div>
                                 <span className="text-on-surface-variant font-mono text-[10px]">{exp.startDate} - {exp.currentlyWorking ? 'Present' : exp.endDate}</span>
                               </div>
@@ -331,6 +389,51 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                 ) : (
                   <p className="text-xs text-on-surface-variant">No certifications listed.</p>
                 )}
+              </div>
+
+              {/* Extra-Curricular & Co-Curricular Activities */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-mono uppercase text-on-surface-variant tracking-wider flex items-center gap-1.5">
+                  <Award className="w-4 h-4 text-secondary" /> Extra-Curricular & Co-Curricular Activities
+                </h4>
+                {(() => {
+                  let cocurList = [];
+                  if (Array.isArray(candidate.cocurricular)) {
+                    cocurList = candidate.cocurricular;
+                  } else if (candidate.cocurricular && typeof candidate.cocurricular === 'string') {
+                    cocurList = [{ activity: candidate.cocurricular, link: '', description: '' }];
+                  }
+
+                  if (cocurList && cocurList.length > 0) {
+                    return (
+                      <div className="space-y-3">
+                        {cocurList.map((item, idx) => {
+                          const title = typeof item === 'string' ? item : (item.activity || 'Activity');
+                          const desc = typeof item === 'object' ? item.description : '';
+                          const link = typeof item === 'object' ? item.link : '';
+
+                          return (
+                            <div key={idx} className="p-3 bg-surface-container-low border border-outline-variant rounded-xl text-xs space-y-1">
+                              <div className="flex justify-between font-bold text-on-surface">
+                                <span>{title}</span>
+                              </div>
+                              {desc && (
+                                <p className="text-on-surface-variant text-[11px] leading-relaxed whitespace-pre-line">{desc}</p>
+                              )}
+                              {link && (
+                                <a href={link.startsWith('http') ? link : `https://${link}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-[10px] block pt-1">
+                                  Proof / Certificate Link &rarr;
+                                </a>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  }
+
+                  return <p className="text-xs text-on-surface-variant">No extra-curricular activities listed.</p>;
+                })()}
               </div>
 
             </div>

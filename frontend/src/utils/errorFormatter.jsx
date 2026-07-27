@@ -1,6 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Check, X, AlertCircle } from 'lucide-react';
 
+export function cleanHumanErrorMessage(rawMsg) {
+  if (!rawMsg) return '';
+  let str = typeof rawMsg === 'string' ? rawMsg : JSON.stringify(rawMsg);
+
+  if (str.startsWith('[') || str.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(str);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const item = parsed[0];
+        if (item && item.message) return item.message;
+        if (item && item.field && item.message) return `${item.field}: ${item.message}`;
+      } else if (parsed && typeof parsed === 'object') {
+        if (parsed.error && typeof parsed.error === 'string' && !parsed.error.startsWith('[') && !parsed.error.startsWith('{')) {
+          return parsed.error;
+        }
+        if (parsed.message) return parsed.message;
+      }
+    } catch (_) {}
+  }
+
+  return str;
+}
+
 /**
  * Top-Right Sliding Toast Notification Card (Screenshot 2 design)
  */
@@ -24,7 +47,8 @@ export const ToastNotification = ({ msg, type = 'error', onClose, duration = 400
 
   if (!msg) return null;
 
-  const isSuccess = type === 'success';
+  const displayMsg = cleanHumanErrorMessage(msg);
+  const isSuccess = type === 'success' || type === 'info';
   const isError = type === 'error';
 
   return (
@@ -49,13 +73,41 @@ export const ToastNotification = ({ msg, type = 'error', onClose, duration = 400
       </div>
 
       {/* Message Content */}
-      <div className="flex-1 min-w-0 text-left">
+      <div className="flex-1 min-w-0 text-left space-y-1">
         <h4 className="font-headline font-bold text-sm text-slate-900 dark:text-white leading-tight">
-          {isSuccess ? 'Congratulations!' : 'Alert'}
+          {type === 'info' ? 'Notification' : isSuccess ? 'Success' : 'Alert'}
         </h4>
-        <p className="text-xs text-slate-600 dark:text-slate-200 mt-0.5 leading-relaxed font-sans truncate">
-          {String(msg)}
+        <p className="text-xs text-slate-600 dark:text-slate-200 mt-0.5 leading-relaxed font-sans break-words">
+          {displayMsg}
         </p>
+
+        {/* Actionable Switch Portal CTA */}
+        {displayMsg.includes('Recruiter portal') && (
+          <button
+            type="button"
+            onClick={() => {
+              window.history.pushState({}, '', '/recruiter/login');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+              if (onClose) onClose();
+            }}
+            className="inline-flex items-center gap-1 mt-1 px-2.5 py-1 bg-primary text-on-primary rounded-lg text-[11px] font-bold shadow hover:opacity-90 transition-all cursor-pointer"
+          >
+            Go to Recruiter Portal &rarr;
+          </button>
+        )}
+        {displayMsg.includes('Candidate portal') && (
+          <button
+            type="button"
+            onClick={() => {
+              window.history.pushState({}, '', '/candidate/login');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+              if (onClose) onClose();
+            }}
+            className="inline-flex items-center gap-1 mt-1 px-2.5 py-1 bg-primary text-on-primary rounded-lg text-[11px] font-bold shadow hover:opacity-90 transition-all cursor-pointer"
+          >
+            Go to Candidate Portal &rarr;
+          </button>
+        )}
       </div>
 
       {/* Dismiss Button */}

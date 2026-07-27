@@ -18,8 +18,10 @@ import {
   ClipboardList,
   Lock,
   DollarSign,
-  Users
+  Users,
+  Zap
 } from 'lucide-react';
+import GigsMarketplace from '../Gigs/GigsMarketplace';
 import { apiFetch } from '../../services/apiClient';
 import { putFileToS3 } from '../../services/uploadService';
 import { generateResumePdf } from '../../services/resumePdf';
@@ -40,10 +42,6 @@ import StudentResume from './components/StudentResume';
 import StudentSkillTests from './components/StudentSkillTests';
 import StudentShowcase from './components/StudentShowcase';
 import StudentProgress from './components/StudentProgress';
-import ParsedResumeReviewModal from './components/ParsedResumeReviewModal';
-import OnboardingModal from './components/OnboardingModal';
-import GigsMarketplace from '../Gigs/GigsMarketplace';
-import CommunityLayout from '../Community/CommunityLayout';
 
 
 export default function StudentLayout({ user, token, activeTab, setActiveTab, testSkill, setTestSkill, handleLogout, theme, toggleTheme, onOpenCompanyProfile, autoSelectOpportunity, setAutoSelectOpportunity }) {
@@ -68,7 +66,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const [profilePic, setProfilePic] = useState('');
   const [nationality, setNationality] = useState('');
   const [gender, setGender] = useState('');
-  const [profileEmail, setProfileEmail] = useState('');
+  const [profileEmail, setProfileEmail] = useState(user?.email || '');
   const [dob, setDob] = useState('');
   const [phone, setPhone] = useState('');
   const [preferredWorkModes, setPreferredWorkModes] = useState([]);
@@ -127,11 +125,6 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const [submittingTest, setSubmittingTest] = useState(false);
   const [testResult, setTestResult] = useState(null);
 
-  const [parsedResumeData, setParsedResumeData] = useState(null);
-  const [showReviewScreen, setShowReviewScreen] = useState(false);
-  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
-  const [isParsingOnboarding, setIsParsingOnboarding] = useState(false);
-
   const [applications, setApplications] = useState([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
 
@@ -177,7 +170,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         setProfilePic(profData.profilePic || '');
         setNationality(profData.nationality || '');
         setGender(profData.gender || '');
-        setProfileEmail(profData.email || '');
+        setProfileEmail(profData.email || user?.email || '');
         setDob(profData.dob || '');
         setPhone(profData.phone || '');
         setPreferredWorkModes(profData.preferredWorkModes || []);
@@ -215,10 +208,6 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           cocurArr = [{ activity: 'Co-curricular Activity', link: profData.cocurricular, description: '' }];
         }
         setCocurricular(cocurArr);
-
-        if (!profData.isOnboarded) {
-          setShowOnboardingModal(true);
-        }
       }
 
       // Fetch Jobs
@@ -237,6 +226,12 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   useEffect(() => {
     fetchProfileAndJobs();
   }, [token]);
+
+  useEffect(() => {
+    if (user?.email && !profileEmail) {
+      setProfileEmail(user.email);
+    }
+  }, [user?.email, profileEmail]);
 
   useEffect(() => {
     if (!loading && profile) {
@@ -410,73 +405,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     }
   };
 
-  const executeResumeUploadAndParse = async (file, isOnboarding = false) => {
-    try {
-      if (isOnboarding) {
-        setIsParsingOnboarding(true);
-      } else {
-        setSubmittingProfile(true);
-      }
 
-      // 1. Request S3 pre-signed upload URL from backend
-      const urlRes = await apiFetch('/upload/request-url', {
-        token,
-        method: 'POST',
-        json: {
-          fileType: 'resume',
-          fileName: file.name,
-          contentType: file.type
-        }
-      });
-
-      if (!urlRes.ok) {
-        throw new Error('Failed to request S3 upload URL from server.');
-      }
-
-      const { uploadUrl, publicUrl } = await urlRes.json();
-
-      // 2. Upload file directly to S3 via pre-signed PUT URL
-      const s3Res = await putFileToS3(uploadUrl, file, file.type, token);
-
-      if (!s3Res.ok) {
-        throw new Error('Failed to upload file directly to S3.');
-      }
-
-      // 3. Request resume parsing from backend
-      const parseRes = await apiFetch('/student/resume/parse', {
-        token,
-        method: 'POST',
-        json: {
-          resumeUrl: publicUrl
-        }
-      });
-
-      if (!parseRes.ok) {
-        const errorData = await parseRes.json();
-        throw new Error(errorData.error || 'Failed to parse resume details.');
-      }
-
-      const parsedData = await parseRes.json();
-
-      // Save S3 resumeUrl temporarily
-      setResumeUrl(publicUrl);
-      setParsedResumeData(parsedData);
-      setShowReviewScreen(true);
-      if (isOnboarding) {
-        setShowOnboardingModal(false);
-      }
-      setFeedbackMsg('Resume parsed successfully! Please review the details below.');
-    } catch (err) {
-      console.error(err);
-      throw err;
-    } finally {
-      if (isOnboarding) {
-        setIsParsingOnboarding(false);
-      } else {
-        setSubmittingProfile(false);
-      }
-    }
-  };
 
   const handleResumeUpload = async (e) => {
     const file = e.target.files[0];
@@ -503,219 +432,13 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     }
   };
 
-  const handleSkipOnboarding = async () => {
-    try {
-      setSubmittingProfile(true);
-      const res = await apiFetch('/student/profile', {
-        token,
-        method: 'PUT',
-        json: {
-          isOnboarded: true
-        }
-      });
-      if (res.ok) {
-        const d = await res.json();
-        setProfile(d);
-        setShowOnboardingModal(false);
-        setActiveTab('profile');
-        setFeedbackMsg('Onboarding skipped. You can complete your profile manually.');
-      } else {
-        setAlertConfig({ message: 'Failed to skip onboarding on the server.', type: 'error' });
-      }
-    } catch (err) {
-      console.error('Error skipping onboarding:', err);
-      setAlertConfig({ message: 'Error updating onboarding status.', type: 'error' });
-    } finally {
-      setSubmittingProfile(false);
-    }
-  };
 
-  const handleDiscardParsedResume = async () => {
-    try {
-      setSubmittingProfile(true);
-      const res = await apiFetch('/student/profile', {
-        token,
-        method: 'PUT',
-        json: {
-          isOnboarded: true
-        }
-      });
-      if (res.ok) {
-        const d = await res.json();
-        setProfile(d);
-        setShowReviewScreen(false);
-        setActiveTab('profile');
-        setFeedbackMsg('Import cancelled. Resume uploaded but profile not populated.');
-      } else {
-        setAlertConfig({ message: 'Failed to update onboarding status on the server.', type: 'error' });
-      }
-    } catch (err) {
-      console.error(err);
-      setAlertConfig({ message: 'Error canceling profile import.', type: 'error' });
-    } finally {
-      setSubmittingProfile(false);
-    }
-  };
 
-  const saveProfileFromResume = async (updatedData) => {
-    setSubmittingProfile(true);
-    try {
-      const ensureUrlProtocol = (url) => {
-        if (!url) return '';
-        const trimmed = url.trim();
-        if (!trimmed) return '';
-        if (trimmed.includes(' ') || !trimmed.includes('.')) return '';
-        if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
-        return `https://${trimmed}`;
-      };
 
-      // 1. Compute merged profile parameters (never overwrite existing values with null/empty)
-      const mergedName = updatedData.basicInfo.name || profile?.name || 'Student';
-      const mergedBio = updatedData.basicInfo.bio || bio;
-      const mergedNationality = updatedData.basicInfo.location || nationality;
-      const mergedEmail = updatedData.basicInfo.email || profileEmail;
-      const mergedPhone = updatedData.basicInfo.phone || phone;
-      const mergedDob = updatedData.basicInfo.dob || dob;
 
-      const mergedSocialLinks = {
-        ...socialLinks,
-        linkedin: ensureUrlProtocol(updatedData.basicInfo.linkedin) || socialLinks.linkedin,
-        showLinkedin: updatedData.basicInfo.linkedin ? true : socialLinks.showLinkedin,
-        github: ensureUrlProtocol(updatedData.basicInfo.github) || socialLinks.github,
-        showGithub: updatedData.basicInfo.github ? true : socialLinks.showGithub,
-        portfolio: ensureUrlProtocol(updatedData.basicInfo.portfolio) || socialLinks.portfolio,
-        showPortfolio: updatedData.basicInfo.portfolio ? true : socialLinks.showPortfolio
-      };
 
-      const mergedEducation = [...educationList];
-      for (const edu of updatedData.education) {
-        if (!mergedEducation.some(e => e.degree?.toLowerCase() === edu.degree?.toLowerCase() && e.institute?.toLowerCase() === edu.institute?.toLowerCase())) {
-          mergedEducation.push(edu);
-        }
-      }
 
-      const mergedExperience = [...experienceList];
-      for (const exp of updatedData.experience) {
-        if (!mergedExperience.some(e => e.designation?.toLowerCase() === exp.designation?.toLowerCase() && e.companyName?.toLowerCase() === exp.companyName?.toLowerCase())) {
-          mergedExperience.push(exp);
-        }
-      }
 
-      const mergedProjects = [...projectsList];
-      for (const proj of updatedData.projects) {
-        if (!mergedProjects.some(p => p.title?.toLowerCase() === proj.title?.toLowerCase())) {
-          mergedProjects.push({
-            ...proj,
-            codeUrl: ensureUrlProtocol(proj.codeUrl),
-            hostedUrl: ensureUrlProtocol(proj.hostedUrl)
-          });
-        }
-      }
-
-      const mergedCertifications = [...certificatesList];
-      for (const cert of updatedData.certifications) {
-        if (!mergedCertifications.some(c => c.title?.toLowerCase() === cert.title?.toLowerCase())) {
-          mergedCertifications.push({
-            ...cert,
-            link: ensureUrlProtocol(cert.link)
-          });
-        }
-      }
-
-      const mergedSkills = [...skillsList];
-      for (const skill of updatedData.skills) {
-        if (!mergedSkills.some(s => s.name?.toLowerCase() === skill.name?.toLowerCase())) {
-          mergedSkills.push({ name: skill.name, rating: skill.rating || 1 });
-        }
-      }
-
-      // 2. Put profile data to database
-      const res = await apiFetch('/student/profile', {
-        token,
-        method: 'PUT',
-        json: {
-          name: mergedName,
-          username: username ? username : null,
-          profilePic,
-          resumeUrl,
-          skills: mergedSkills,
-          bio: mergedBio,
-          nationality: mergedNationality,
-          gender,
-          email: mergedEmail,
-          dob: mergedDob,
-          phone: mergedPhone,
-          socialLinks: mergedSocialLinks,
-          education: mergedEducation,
-          experience: mergedExperience,
-          certificates: mergedCertifications,
-          projects: mergedProjects,
-          cocurricular,
-          isOnboarded: true
-        }
-      });
-
-      if (res.ok) {
-        const d = await res.json();
-        // Update all local states
-        setProfile(d);
-        setBio(mergedBio);
-        setNationality(mergedNationality);
-        setProfileEmail(mergedEmail);
-        setPhone(mergedPhone);
-        setDob(mergedDob);
-        setSocialLinks(mergedSocialLinks);
-        setEducationList(mergedEducation);
-        setExperienceList(mergedExperience);
-        setProjectsList(mergedProjects);
-        setCertificatesList(mergedCertifications);
-        setSkillsList(mergedSkills);
-
-        const meaningfulDataExtracted = 
-          updatedData.basicInfo.name || 
-          updatedData.basicInfo.email || 
-          updatedData.basicInfo.phone || 
-          updatedData.basicInfo.bio || 
-          updatedData.education.length > 0 || 
-          updatedData.experience.length > 0 || 
-          updatedData.skills.length > 0 || 
-          updatedData.projects.length > 0 || 
-          updatedData.certifications.length > 0;
-
-        if (meaningfulDataExtracted) {
-          setFeedbackMsg('Your profile has been updated using the uploaded resume. We imported all the information that could be identified automatically. Any remaining sections can be completed manually from your profile.');
-        } else {
-          setFeedbackMsg("We couldn't identify enough information from your resume. Please complete your profile manually.");
-        }
-        
-        setShowReviewScreen(false);
-        setActiveTab('profile');
-      } else {
-        const errorData = await res.json().catch(() => ({}));
-        console.error('Save profile error details:', errorData);
-        if (errorData.details && Array.isArray(errorData.details)) {
-          const formattedDetails = errorData.details.map(d => ({
-            path: d.field.split('.'),
-            message: d.message
-          }));
-          setAlertConfig({
-            message: JSON.stringify(formattedDetails),
-            type: 'error'
-          });
-        } else {
-          setAlertConfig({
-            message: errorData.error || 'Failed to save imported details on the server.',
-            type: 'error'
-          });
-        }
-      }
-    } catch (err) {
-      console.error(err);
-      setAlertConfig({ message: 'Error updating profile from resume.', type: 'error' });
-    } finally {
-      setSubmittingProfile(false);
-    }
-  };
 
   const handleDownloadUploadedResume = () => {
     if (!resumeUrl) return;
@@ -812,8 +535,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     { id: 'profile', icon: User, label: 'Profile & Ratings', locked: false },
     { id: 'resume', icon: FileText, label: 'Resume', locked: !isComplete },
     { id: 'tests', icon: BookOpen, label: 'Your Tests', locked: !isComplete },
-    { id: 'showcase', icon: Video, label: 'Showcase Yourself', locked: false },
     { id: 'progress', icon: ClipboardList, label: 'Your Job Progress', locked: !isComplete },
+    // { id: 'gigs', icon: Zap, label: 'Gigs Marketplace', locked: !isComplete },
   ];
 
   const goToTab = (tabId) => {
@@ -948,9 +671,9 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                   To unlock Job Opportunities, Resume Builder, and Skill Tests, please complete the following sections:
                 </p>
                 <ul className="list-disc pl-5 space-y-1 font-semibold">
-                  {!hasGeneralInfo && <li>Fill in all fields in Profile & Ratings &rarr; General tab (Bio, Nationality, Gender, Email, DOB, Phone)</li>}
+                  {!hasGeneralInfo && <li>Fill in all fields in Profile & Ratings &rarr; General tab (Describe Yourself, Nationality, Gender, Email, DOB, Phone)</li>}
                   {!hasSkills && <li>Add at least one skill in Profile & Ratings &rarr; Skills tab</li>}
-                  {!hasIntroVideo && <li>Upload an intro video in the Showcase Yourself tab</li>}
+                  {!hasIntroVideo && <li>Upload an intro video in Profile & Ratings &rarr; Video Showcase tab</li>}
                 </ul>
               </div>
             )}
@@ -1080,38 +803,25 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
               />
             )}
 
-            {activeTab === 'showcase' && (
-              <StudentShowcase
-                profile={profile}
-                token={token}
-                onVideoSaved={(url) => setProfile(prev => ({ ...prev, introVideoUrl: url }))}
-              />
-            )}
-
             {activeTab === 'progress' && (
               <StudentProgress
                 applications={applications}
                 loading={loadingApplications}
               />
             )}
+
+            {activeTab === 'gigs' && (
+              <GigsMarketplace
+                user={{ id: profile?.id, name: profile?.name, email: profileEmail, role: 'STUDENT' }}
+                token={token}
+                theme={theme}
+                profile={profile}
+                onUpdateProfile={fetchProfileAndJobs}
+              />
+            )}
           </div>
         )}
       </main>
-      {showReviewScreen && (
-        <ParsedResumeReviewModal
-          isOpen={showReviewScreen}
-          parsedData={parsedResumeData}
-          onConfirm={saveProfileFromResume}
-          onClose={handleDiscardParsedResume}
-        />
-      )}
-
-      <OnboardingModal
-        isOpen={showOnboardingModal}
-        onUpload={(file) => executeResumeUploadAndParse(file, true)}
-        onSkip={handleSkipOnboarding}
-        isUploading={isParsingOnboarding}
-      />
 
       {/* Top-Right Sliding Toast Notification */}
       {alertConfig && (

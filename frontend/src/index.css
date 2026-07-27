@@ -466,77 +466,94 @@
   animation: scale-up 0.2s ease-out;
 }
 
-/* Connection Loader Custom Word Spinning Styles */
-.loader-card {
-  background-color: var(--c-background);
-  padding: 1rem 2rem;
-  border: 1px solid var(--c-on-surface);
-  box-shadow: var(--shadow-floating);
-}
-
-.loader-container {
-  color: var(--c-on-surface-variant);
-  font-family: "Inter", "Geist", sans-serif;
-  font-weight: 500;
-  font-size: 25px;
-  box-sizing: content-box;
-  height: 40px;
-  padding: 10px 10px;
-  display: flex;
-  align-items: center;
-}
-
-.loader-words {
-  overflow: hidden;
-  position: relative;
-  height: 40px;
-}
-
-.loader-words::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    var(--c-background) 10%,
-    transparent 30%,
-    transparent 70%,
-    var(--c-background) 90%
-  );
-  z-index: 20;
-}
-
-.loader-word {
+/* Connection Loader Custom Animated SVG Styles */
+.pl1 {
   display: block;
-  height: 100%;
-  padding-left: 8px;
-  color: var(--c-primary);
-  animation: spin_4991 4s infinite;
+  width: 14em;
+  height: 14em;
 }
 
-@keyframes spin_4991 {
-  10% {
-    transform: translateY(-102%);
+.pl1__g,
+.pl1__rect {
+  animation: pl1-a 1.5s cubic-bezier(0.65,0,0.35,1) infinite;
+}
+
+.pl1__g {
+  transform-origin: 64px 64px;
+}
+
+.pl1__rect:first-child {
+  animation-name: pl1-b;
+}
+
+.pl1__rect:nth-child(2) {
+  animation-name: pl1-c;
+}
+
+@keyframes pl1-a {
+  from {
+    transform: rotate(0);
   }
-  25% {
-    transform: translateY(-100%);
+  80%,
+  to {
+    animation-timing-function: steps(1,start);
+    transform: rotate(90deg);
   }
-  35% {
-    transform: translateY(-202%);
+}
+
+@keyframes pl1-b {
+  from {
+    animation-timing-function: cubic-bezier(0.33,0,0.67,0);
+    width: 40px;
+    height: 40px;
   }
-  50% {
-    transform: translateY(-200%);
+  20% {
+    animation-timing-function: steps(1,start);
+    width: 40px;
+    height: 0;
   }
   60% {
-    transform: translateY(-302%);
+    animation-timing-function: cubic-bezier(0.65,0,0.35,1);
+    width: 0;
+    height: 40px;
   }
-  75% {
-    transform: translateY(-300%);
+  80%,
+  to {
+    width: 40px;
+    height: 40px;
   }
-  85% {
-    transform: translateY(-402%);
+}
+
+@keyframes pl1-c {
+  from {
+    animation-timing-function: cubic-bezier(0.33,0,0.67,0);
+    width: 40px;
+    height: 40px;
+    transform: translate(0,48px);
   }
-  100% {
-    transform: translateY(-400%);
+  20% {
+    animation-timing-function: cubic-bezier(0.33,1,0.67,1);
+    width: 40px;
+    height: 88px;
+    transform: translate(0,0);
+  }
+  40% {
+    animation-timing-function: cubic-bezier(0.33,0,0.67,0);
+    width: 40px;
+    height: 40px;
+    transform: translate(0,0);
+  }
+  60% {
+    animation-timing-function: cubic-bezier(0.33,1,0.67,1);
+    width: 88px;
+    height: 40px;
+    transform: translate(0,0);
+  }
+  80%,
+  to {
+    width: 40px;
+    height: 40px;
+    transform: translate(48px,0);
   }
 }
 

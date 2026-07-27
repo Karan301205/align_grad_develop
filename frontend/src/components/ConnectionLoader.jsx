@@ -40,44 +40,54 @@ export default function ConnectionLoader({ theme, onReady }) {
 
   return (
     <div className="fixed inset-0 bg-background flex flex-col items-center justify-center z-50 p-4 select-none">
-      <div className="loader-card flex flex-col items-center space-y-1">
-        <div className="flex flex-row items-center gap-1">
-          <div>
-            {theme === 'dark' ? (
-              <img
-                src="/a_g_lg_dark.webp"
-                alt="AlignGrade Logo"
-                className="h-28 w-auto object-contain"
-              />
-            ) : (
-              <img
-                src="/a_g_l_w.webp"
-                alt="AlignGrade Logo"
-                className="h-28 w-auto object-contain"
-              />
-            )}
-          </div>
+      <main className="flex flex-col items-center justify-center">
+        <svg height="224px" width="224px" viewBox="0 0 128 128" className="pl1">
+          <defs>
+            <linearGradient y2="1" x2="1" y1="0" x1="0" id="pl-grad">
+              <stop stopColor="#000" offset="0%"></stop>
+              <stop stopColor="#fff" offset="100%"></stop>
+            </linearGradient>
+            <mask id="pl-mask">
+              <rect fill="url(#pl-grad)" height="128" width="128" y="0" x="0"></rect>
+            </mask>
+          </defs>
+          <g fill="var(--c-primary, var(--primary, #003527))">
+            <g className="pl1__g">
+              <g transform="translate(20,20) rotate(0,44,44)">
+                <g className="pl1__rect-g">
+                  <rect height="40" width="40" ry="8" rx="8" className="pl1__rect"></rect>
+                  <rect transform="translate(0,48)" height="40" width="40" ry="8" rx="8" className="pl1__rect"></rect>
+                </g>
+                <g transform="rotate(180,44,44)" className="pl1__rect-g">
+                  <rect height="40" width="40" ry="8" rx="8" className="pl1__rect"></rect>
+                  <rect transform="translate(0,48)" height="40" width="40" ry="8" rx="8" className="pl1__rect"></rect>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g mask="url(#pl-mask)" fill="hsl(343,90%,50%)">
+            <g className="pl1__g">
+              <g transform="translate(20,20) rotate(0,44,44)">
+                <g className="pl1__rect-g">
+                  <rect height="40" width="40" ry="8" rx="8" className="pl1__rect"></rect>
+                  <rect transform="translate(0,48)" height="40" width="40" ry="8" rx="8" className="pl1__rect"></rect>
+                </g>
+                <g transform="rotate(180,44,44)" className="pl1__rect-g">
+                  <rect height="40" width="40" ry="8" rx="8" className="pl1__rect"></rect>
+                  <rect transform="translate(0,48)" height="40" width="40" ry="8" rx="8" className="pl1__rect"></rect>
+                </g>
+              </g>
+            </g>
+          </g>
+        </svg>
+      </main>
 
-          {/* Reference loader design */}
-          <div className="loader-container">
-            <p className="text-on-surface-variant font-medium select-none">loading</p>
-            <div className="loader-words">
-              <span className="loader-word">server</span>
-              <span className="loader-word">database</span>
-              <span className="loader-word">routes</span>
-              <span className="loader-word">session</span>
-              <span className="loader-word">server</span>
-            </div>
-          </div>
+      {/* Quietly display retry status only if there's a connection issue */}
+      {hasError && (
+        <div className="mt-6 text-[11px] font-mono text-error text-center animate-pulse">
+          Services inactive. Retrying in background... (Attempt #{retryCount + 1})
         </div>
-
-        {/* Quietly display retry status only if there's a connection issue */}
-        {hasError && (
-          <div className="text-[11px] font-mono text-error text-center animate-pulse">
-            Services inactive. Retrying in background... (Attempt #{retryCount + 1})
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }

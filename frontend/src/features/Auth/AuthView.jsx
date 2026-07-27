@@ -19,6 +19,8 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import ThemeToggle from '../../components/ui/ThemeToggle';
 import ClickSpark from '../../components/ui/ClickSpark';
+import AnimatedContent from '../../components/ui/AnimatedContent';
+import GoogleAuthButton from '../../components/ui/GoogleAuthButton';
 import { formatErrorMessage } from '../../utils/errorFormatter';
 
 export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
@@ -153,42 +155,44 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
             <div className="max-w-6xl mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center text-left mb-12">
                 <div className="col-span-12 lg:col-span-7">
-                  
+                  <AnimatedContent distance={80} direction="vertical" duration={0.8} ease="power3.out" delay={0.1}>
+                    <h1 className="font-headline text-4xl sm:text-5xl lg:text-6xl font-extrabold text-primary mb-6 leading-tight tracking-tight">
+                      Hire on merit, <br className="hidden md:block" />
+                      <span className="text-on-primary-container">not just resumes</span>
+                    </h1>
 
-                  <h1 className="font-headline text-4xl sm:text-5xl lg:text-6xl font-extrabold text-primary mb-6 leading-tight tracking-tight">
-                    Hire on merit, <br className="hidden md:block" />
-                    <span className="text-on-primary-container">not just resumes</span>
-                  </h1>
+                    <p className="font-body text-base sm:text-lg text-secondary max-w-xl mb-8 leading-relaxed">
+                      The institutional-grade skill verification platform for technical and professional roles. Reduce time-to-hire by 60% with data-driven meritocracy.
+                    </p>
 
-                  <p className="font-body text-base sm:text-lg text-secondary max-w-xl mb-8 leading-relaxed">
-                    The institutional-grade skill verification platform for technical and professional roles. Reduce time-to-hire by 60% with data-driven meritocracy.
-                  </p>
-
-                  <div className="flex flex-col sm:flex-row items-start justify-start gap-4">
-                    <button
-                      onClick={() => triggerAuthFlow('register')}
-                      className="btn-primary px-8 py-3.5 rounded-lg font-semibold text-sm flex items-center gap-2 shadow-lg hover:brightness-110 cursor-pointer"
-                    >
-                      <span>Start Verifying Now</span>
-                      <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                    </button>
-                    <button
-                      onClick={() => navigateToCandidate('signup')}
-                      className="btn-secondary px-8 py-3.5 rounded-lg font-semibold text-sm cursor-pointer"
-                    >
-                      View Sample Reports
-                    </button>
-                  </div>
+                    <div className="flex flex-col sm:flex-row items-start justify-start gap-4">
+                      <button
+                        onClick={() => triggerAuthFlow('register')}
+                        className="btn-primary px-8 py-3.5 rounded-lg font-semibold text-sm flex items-center gap-2 shadow-lg hover:brightness-110 cursor-pointer"
+                      >
+                        <span>Start Verifying Now</span>
+                        <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                      </button>
+                      <button
+                        onClick={() => navigateToCandidate('signup')}
+                        className="btn-secondary px-8 py-3.5 rounded-lg font-semibold text-sm cursor-pointer"
+                      >
+                        View Sample Reports
+                      </button>
+                    </div>
+                  </AnimatedContent>
                 </div>
 
                 <div className="col-span-12 lg:col-span-5 flex justify-center lg:justify-end">
-                  <div className="relative rounded-2xl overflow-hidden">
-                    <img 
-                      src="/handshake.webp" 
-                      alt="Handshake Meritocracy Verification" 
-                      className="w-full max-w-md lg:max-w-full h-auto object-contain transition-transform duration-500" 
-                    />
-                  </div>
+                  <AnimatedContent distance={80} direction="horizontal" duration={0.8} ease="power3.out" delay={0.2}>
+                    <div className="relative rounded-2xl overflow-hidden">
+                      <img 
+                        src="/handshake.webp" 
+                        alt="Handshake Meritocracy Verification" 
+                        className="w-full max-w-md lg:max-w-full h-auto object-contain transition-transform duration-500" 
+                      />
+                    </div>
+                  </AnimatedContent>
                 </div>
               </div>
 
@@ -196,92 +200,96 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
               <div className="grid grid-cols-12 gap-4 mt-12 items-stretch relative">
                 {/* Left Column: Image + Rapid Verification */}
                 <div className="col-span-12 lg:col-span-4 flex flex-col justify-end text-left relative z-10">
-                  <div className="-mt-16 -mb-8 lg:-mt-14 relative z-10 flex justify-center">
-                    <img 
-                      src="/laptop_guy_hd.png" 
-                      alt="Developer working on Laptop" 
-                      className="w-full max-w-sm sm:max-w-md lg:max-w-full h-70 sm:h-82 lg:h-82 object-contain -scale-x-100 transition-transform duration-500 drop-shadow-md" 
-                    />
-                  </div>
-                  <div className="flex-1 glass-card rounded-xl p-3 border-outline-variant flex flex-col justify-center">
-                    <span className="material-symbols-outlined text-primary mb-3 text-3xl">speed</span>
-                    <h3 className="text-lg font-headline font-bold text-primary mb-1">Rapid Verification</h3>
-                    <p className="text-xs text-secondary leading-relaxed">Assessments deliver results in real-time with comprehensive audit logs.</p>
-                  </div>
+                  <AnimatedContent distance={60} direction="horizontal" reverse={true} duration={0.8} delay={0.3} className="h-full flex flex-col justify-end">
+                    <div className="-mt-16 -mb-8 lg:-mt-14 relative z-10 flex justify-center">
+                      <img 
+                        src="/laptop_guy_hd.png" 
+                        alt="Developer working on Laptop" 
+                        className="w-full max-w-sm sm:max-w-md lg:max-w-full h-70 sm:h-82 lg:h-82 object-contain -scale-x-100 transition-transform duration-500 drop-shadow-md" 
+                      />
+                    </div>
+                    <div className="flex-1 glass-card rounded-xl p-3 border-outline-variant flex flex-col justify-center">
+                      <span className="material-symbols-outlined text-primary mb-3 text-3xl">speed</span>
+                      <h3 className="text-lg font-headline font-bold text-primary mb-1">Rapid Verification</h3>
+                      <p className="text-xs text-secondary leading-relaxed">Assessments deliver results in real-time with comprehensive audit logs.</p>
+                    </div>
+                  </AnimatedContent>
                 </div>
 
                 {/* Right Column: Verified Skill Dashboard */}
-                <div className="col-span-12 lg:col-span-8 glass-card rounded-xl overflow-hidden shadow-lg border-outline-variant text-left flex flex-col">
-                  <div className="flex items-center gap-3 px-4 py-2.5 bg-surface-container-low border-b border-outline-variant">
-                    <div className="flex gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-error/20 border border-error/40"></div>
-                      <div className="w-3 h-3 rounded-full bg-secondary-container border border-on-secondary-container/20"></div>
-                      <div className="w-3 h-3 rounded-full bg-tertiary-fixed-dim border border-on-tertiary-fixed-variant/20"></div>
-                    </div>
-                    <div className="flex-grow text-center text-xs font-mono text-on-surface-variant font-medium">
-                      Verified Skill Dashboard - Lead Software Engineer Role
-                    </div>
-                  </div>
-
-                  <div className="p-6 flex-1 flex flex-col justify-center">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-4">
-                        <div className="p-4 rounded-lg bg-surface-container border border-outline-variant">
-                          <div className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1">CANDIDATE SCORE</div>
-                          <div className="text-3xl font-headline font-bold text-primary">94.8<span className="text-sm font-normal text-secondary">/100</span></div>
-                        </div>
-                        <div className="p-4 rounded-lg bg-surface-container border border-outline-variant">
-                          <div className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1">PERCENTILE</div>
-                          <div className="text-3xl font-headline font-bold text-primary">Top 2%</div>
-                        </div>
+                <div className="col-span-12 lg:col-span-8">
+                  <AnimatedContent distance={60} direction="horizontal" duration={0.8} delay={0.3} className="glass-card rounded-xl overflow-hidden shadow-lg border-outline-variant text-left flex flex-col h-full">
+                    <div className="flex items-center gap-3 px-4 py-2.5 bg-surface-container-low border-b border-outline-variant">
+                      <div className="flex gap-1.5">
+                        <div className="w-3 h-3 rounded-full bg-error/20 border border-error/40"></div>
+                        <div className="w-3 h-3 rounded-full bg-secondary-container border border-on-secondary-container/20"></div>
+                        <div className="w-3 h-3 rounded-full bg-tertiary-fixed-dim border border-on-tertiary-fixed-variant/20"></div>
                       </div>
-
-                      <div className="md:col-span-2 p-4 rounded-lg bg-surface-container-lowest border border-outline-variant relative flex flex-col justify-between">
-                        <div>
-                          <div className="flex justify-between items-center mb-4">
-                            <span className="text-xs font-bold text-primary uppercase font-mono">Skill Distribution</span>
-                            <span className="material-symbols-outlined text-secondary text-sm">analytics</span>
-                          </div>
-
-                          <div className="space-y-3">
-                            <div className="space-y-1">
-                              <div className="flex justify-between text-xs font-medium">
-                                <span>System Architecture</span>
-                                <span className="font-bold text-primary">98%</span>
-                              </div>
-                              <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
-                                <div className="h-full bg-primary w-[98%]"></div>
-                              </div>
-                            </div>
-                            <div className="space-y-1">
-                              <div className="flex justify-between text-xs font-medium">
-                                <span>Concurrency Patterns</span>
-                                <span className="font-bold text-primary">91%</span>
-                              </div>
-                              <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
-                                <div className="h-full bg-primary w-[91%]"></div>
-                              </div>
-                            </div>
-                            <div className="space-y-1">
-                              <div className="flex justify-between text-xs font-medium">
-                                <span>Cloud Infrastructure</span>
-                                <span className="font-bold text-primary">87%</span>
-                              </div>
-                              <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
-                                <div className="h-full bg-primary w-[87%]"></div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="mt-4 flex justify-end">
-                          <div className="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[10px] font-mono font-bold">
-                            VERIFIED ON-CHAIN
-                          </div>
-                        </div>
+                      <div className="flex-grow text-center text-xs font-mono text-on-surface-variant font-medium">
+                        Verified Skill Dashboard - Lead Software Engineer Role
                       </div>
                     </div>
-                  </div>
+
+                    <div className="p-6 flex-1 flex flex-col justify-center">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-4">
+                          <div className="p-4 rounded-lg bg-surface-container border border-outline-variant">
+                            <div className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1">CANDIDATE SCORE</div>
+                            <div className="text-3xl font-headline font-bold text-primary">94.8<span className="text-sm font-normal text-secondary">/100</span></div>
+                          </div>
+                          <div className="p-4 rounded-lg bg-surface-container border border-outline-variant">
+                            <div className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1">PERCENTILE</div>
+                            <div className="text-3xl font-headline font-bold text-primary">Top 2%</div>
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-2 p-4 rounded-lg bg-surface-container-lowest border border-outline-variant relative flex flex-col justify-between">
+                          <div>
+                            <div className="flex justify-between items-center mb-4">
+                              <span className="text-xs font-bold text-primary uppercase font-mono">Skill Distribution</span>
+                              <span className="material-symbols-outlined text-secondary text-sm">analytics</span>
+                            </div>
+
+                            <div className="space-y-3">
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs font-medium">
+                                  <span>System Architecture</span>
+                                  <span className="font-bold text-primary">98%</span>
+                                </div>
+                                <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                                  <div className="h-full bg-primary w-[98%]"></div>
+                                </div>
+                              </div>
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs font-medium">
+                                  <span>Concurrency Patterns</span>
+                                  <span className="font-bold text-primary">91%</span>
+                                </div>
+                                <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                                  <div className="h-full bg-primary w-[91%]"></div>
+                                </div>
+                              </div>
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs font-medium">
+                                  <span>Cloud Infrastructure</span>
+                                  <span className="font-bold text-primary">87%</span>
+                                </div>
+                                <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                                  <div className="h-full bg-primary w-[87%]"></div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 flex justify-end">
+                            <div className="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[10px] font-mono font-bold">
+                              VERIFIED ON-CHAIN
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </AnimatedContent>
                 </div>
               </div>
             </div>
@@ -291,39 +299,45 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
           <section id="solutions" className="py-6 md:py-8 px-4 sm:px-8 bg-surface-container-lowest border-t border-outline-variant">
             <div className="max-w-6xl mx-auto">
               <div className="grid grid-cols-12 gap-6 items-center">
-                <div className="col-span-12 lg:col-span-5 glass-card rounded-2xl p-6 border border-outline-variant shadow-sm space-y-4">
-                  <h2 className="text-2xl font-headline font-bold text-primary">Verified Skills</h2>
-                  <p className="text-xs text-secondary leading-relaxed">
-                    Our proprietary verification engine goes beyond simple tests. We analyze real-world task performance to build a high-fidelity skill profile for every candidate.
-                  </p>
-                  <ul className="space-y-3">
-                    <li className="flex gap-2.5 items-start">
-                      <div className="w-5 h-5 rounded-full bg-secondary-container flex items-center justify-center shrink-0 mt-0.5">
-                        <span className="material-symbols-outlined text-on-secondary-container text-[11px] font-bold">check</span>
-                      </div>
-                      <span className="text-xs text-on-surface font-medium">Algorithmic difficulty mapping for fair comparisons.</span>
-                    </li>
-                    <li className="flex gap-2.5 items-start">
-                      <div className="w-5 h-5 rounded-full bg-secondary-container flex items-center justify-center shrink-0 mt-0.5">
-                        <span className="material-symbols-outlined text-on-secondary-container text-[11px] font-bold">check</span>
-                      </div>
-                      <span className="text-xs text-on-surface font-medium">Anti-cheat behavioral analysis and session integrity monitoring.</span>
-                    </li>
-                    <li className="flex gap-2.5 items-start">
-                      <div className="w-5 h-5 rounded-full bg-secondary-container flex items-center justify-center shrink-0 mt-0.5">
-                        <span className="material-symbols-outlined text-on-secondary-container text-[11px] font-bold">check</span>
-                      </div>
-                      <span className="text-xs text-on-surface font-medium">Integrated IDE and sandbox environments.</span>
-                    </li>
-                  </ul>
+                <div className="col-span-12 lg:col-span-5">
+                  <AnimatedContent distance={60} direction="horizontal" reverse={true} duration={0.8}>
+                    <div className="glass-card rounded-2xl p-6 border border-outline-variant shadow-sm space-y-4">
+                      <h2 className="text-2xl font-headline font-bold text-primary">Verified Skills</h2>
+                      <p className="text-xs text-secondary leading-relaxed">
+                        Our proprietary verification engine goes beyond simple tests. We analyze real-world task performance to build a high-fidelity skill profile for every candidate.
+                      </p>
+                      <ul className="space-y-3">
+                        <li className="flex gap-2.5 items-start">
+                          <div className="w-5 h-5 rounded-full bg-secondary-container flex items-center justify-center shrink-0 mt-0.5">
+                            <span className="material-symbols-outlined text-on-secondary-container text-[11px] font-bold">check</span>
+                          </div>
+                          <span className="text-xs text-on-surface font-medium">Algorithmic difficulty mapping for fair comparisons.</span>
+                        </li>
+                        <li className="flex gap-2.5 items-start">
+                          <div className="w-5 h-5 rounded-full bg-secondary-container flex items-center justify-center shrink-0 mt-0.5">
+                            <span className="material-symbols-outlined text-on-secondary-container text-[11px] font-bold">check</span>
+                          </div>
+                          <span className="text-xs text-on-surface font-medium">Anti-cheat behavioral analysis and session integrity monitoring.</span>
+                        </li>
+                        <li className="flex gap-2.5 items-start">
+                          <div className="w-5 h-5 rounded-full bg-secondary-container flex items-center justify-center shrink-0 mt-0.5">
+                            <span className="material-symbols-outlined text-on-secondary-container text-[11px] font-bold">check</span>
+                          </div>
+                          <span className="text-xs text-on-surface font-medium">Integrated IDE and sandbox environments.</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </AnimatedContent>
                 </div>
 
                 <div className="col-span-12 lg:col-span-7 flex justify-center items-center">
-                  <img 
-                    src="/women_studying.webp" 
-                    alt="Women Studying" 
-                    className="w-full max-w-xs sm:max-w-sm h-auto object-contain -scale-x-100 transition-transform duration-500" 
-                  />
+                  <AnimatedContent distance={60} direction="horizontal" duration={0.8}>
+                    <img 
+                      src="/women_studying.webp" 
+                      alt="Women Studying" 
+                      className="w-full max-w-xs sm:max-w-sm h-auto object-contain -scale-x-100 transition-transform duration-500" 
+                    />
+                  </AnimatedContent>
                 </div>
               </div>
             </div>
@@ -332,47 +346,61 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
           {/* Premium Assessments Section */}
           <section id="assessments" className="py-20 px-4 sm:px-8 border-t border-outline-variant">
             <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-headline font-bold text-primary mb-3">Premium Assessments</h2>
-                <p className="text-sm text-secondary max-w-xl mx-auto">Crafted by industry experts and PhDs to ensure maximum predictive validity for on-the-job success.</p>
-              </div>
+              <AnimatedContent distance={40} direction="vertical" duration={0.6}>
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl font-headline font-bold text-primary mb-3">Premium Assessments</h2>
+                  <p className="text-sm text-secondary max-w-xl mx-auto">Crafted by industry experts and PhDs to ensure maximum predictive validity for on-the-job success.</p>
+                </div>
+              </AnimatedContent>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Tech Card */}
-                <div className="p-6 bg-white border border-outline-variant rounded-xl hover:shadow-lg transition-all group">
-                  <div className="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
-                    <span className="material-symbols-outlined text-primary group-hover:text-white">code</span>
+                <AnimatedContent distance={60} direction="vertical" delay={0.1} duration={0.8}>
+                  <div className="p-6 bg-white border border-outline-variant rounded-xl hover:shadow-lg transition-all group h-full flex flex-col justify-between">
+                    <div>
+                      <div className="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
+                        <span className="material-symbols-outlined text-primary group-hover:text-white">code</span>
+                      </div>
+                      <h3 className="text-lg font-headline font-bold text-primary mb-2">Software Engineering</h3>
+                      <p className="text-xs text-secondary leading-relaxed mb-6">Systems design, data structures, and production-level debugging scenarios.</p>
+                    </div>
+                    <button onClick={() => navigateToCandidate('login')} className="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all cursor-pointer">
+                      Explore Track <span className="material-symbols-outlined text-sm">chevron_right</span>
+                    </button>
                   </div>
-                  <h3 className="text-lg font-headline font-bold text-primary mb-2">Software Engineering</h3>
-                  <p className="text-xs text-secondary leading-relaxed mb-6">Systems design, data structures, and production-level debugging scenarios.</p>
-                  <button onClick={() => navigateToCandidate('login')} className="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all">
-                    Explore Track <span className="material-symbols-outlined text-sm">chevron_right</span>
-                  </button>
-                </div>
+                </AnimatedContent>
 
                 {/* Data Card */}
-                <div className="p-6 bg-white border border-outline-variant rounded-xl hover:shadow-lg transition-all group">
-                  <div className="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
-                    <span className="material-symbols-outlined text-primary group-hover:text-white">monitoring</span>
+                <AnimatedContent distance={60} direction="vertical" delay={0.25} duration={0.8}>
+                  <div className="p-6 bg-white border border-outline-variant rounded-xl hover:shadow-lg transition-all group h-full flex flex-col justify-between">
+                    <div>
+                      <div className="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
+                        <span className="material-symbols-outlined text-primary group-hover:text-white">monitoring</span>
+                      </div>
+                      <h3 className="text-lg font-headline font-bold text-primary mb-2">Data &amp; Analytics</h3>
+                      <p className="text-xs text-secondary leading-relaxed mb-6">Statistical modeling, SQL optimization, and visual insight communication.</p>
+                    </div>
+                    <button onClick={() => navigateToCandidate('login')} className="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all cursor-pointer">
+                      Explore Track <span className="material-symbols-outlined text-sm">chevron_right</span>
+                    </button>
                   </div>
-                  <h3 className="text-lg font-headline font-bold text-primary mb-2">Data &amp; Analytics</h3>
-                  <p className="text-xs text-secondary leading-relaxed mb-6">Statistical modeling, SQL optimization, and visual insight communication.</p>
-                  <button onClick={() => navigateToCandidate('login')} className="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all">
-                    Explore Track <span className="material-symbols-outlined text-sm">chevron_right</span>
-                  </button>
-                </div>
+                </AnimatedContent>
 
                 {/* Leadership Card */}
-                <div className="p-6 bg-white border border-outline-variant rounded-xl hover:shadow-lg transition-all group">
-                  <div className="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
-                    <span className="material-symbols-outlined text-primary group-hover:text-white">psychology</span>
+                <AnimatedContent distance={60} direction="vertical" delay={0.4} duration={0.8}>
+                  <div className="p-6 bg-white border border-outline-variant rounded-xl hover:shadow-lg transition-all group h-full flex flex-col justify-between">
+                    <div>
+                      <div className="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
+                        <span className="material-symbols-outlined text-primary group-hover:text-white">psychology</span>
+                      </div>
+                      <h3 className="text-lg font-headline font-bold text-primary mb-2">Leadership &amp; Strategy</h3>
+                      <p className="text-xs text-secondary leading-relaxed mb-6">Conflict resolution, architectural roadmapping, and team scaling dynamics.</p>
+                    </div>
+                    <button onClick={() => navigateToCandidate('login')} className="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all cursor-pointer">
+                      Explore Track <span className="material-symbols-outlined text-sm">chevron_right</span>
+                    </button>
                   </div>
-                  <h3 className="text-lg font-headline font-bold text-primary mb-2">Leadership &amp; Strategy</h3>
-                  <p className="text-xs text-secondary leading-relaxed mb-6">Conflict resolution, architectural roadmapping, and team scaling dynamics.</p>
-                  <button onClick={() => navigateToCandidate('login')} className="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all">
-                    Explore Track <span className="material-symbols-outlined text-sm">chevron_right</span>
-                  </button>
-                </div>
+                </AnimatedContent>
               </div>
             </div>
           </section>
@@ -382,40 +410,44 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
             <div className="max-w-6xl mx-auto relative z-10">
               <div className="grid grid-cols-12 gap-8 items-center">
                 <div className="col-span-12 lg:col-span-6 space-y-6">
-                  <div className="inline-block px-3 py-1 bg-white/10 rounded-full border border-white/20">
-                    <span className="font-mono text-[10px] uppercase text-primary-fixed font-bold tracking-wider">SCALABLE INFRASTRUCTURE</span>
-                  </div>
-                  <h2 className="text-3xl font-headline font-bold">Enterprise-Grade Matching</h2>
-                  <p className="text-sm text-on-primary-container leading-relaxed">
-                    Our AI-driven matching engine uses verified skill data to rank candidates against your specific headcount requirements, ensuring cultural and technical alignment at scale.
-                  </p>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-lg bg-white/5 border border-white/10">
-                      <div className="text-2xl font-bold mb-1">99.9%</div>
-                      <div className="text-[10px] font-mono text-on-primary-container uppercase">Platform Uptime</div>
+                  <AnimatedContent distance={60} direction="horizontal" reverse={true} duration={0.8}>
+                    <div className="inline-block px-3 py-1 bg-white/10 rounded-full border border-white/20 mb-4">
+                      <span className="font-mono text-[10px] uppercase text-primary-fixed font-bold tracking-wider">SCALABLE INFRASTRUCTURE</span>
                     </div>
-                    <div className="p-4 rounded-lg bg-white/5 border border-white/10">
-                      <div className="text-2xl font-bold mb-1">SSO</div>
-                      <div className="text-[10px] font-mono text-on-primary-container uppercase">SAML Integrated</div>
+                    <h2 className="text-3xl font-headline font-bold mb-3">Enterprise-Grade Matching</h2>
+                    <p className="text-sm text-on-primary-container leading-relaxed mb-6">
+                      Our AI-driven matching engine uses verified skill data to rank candidates against your specific headcount requirements, ensuring cultural and technical alignment at scale.
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                        <div className="text-2xl font-bold mb-1">99.9%</div>
+                        <div className="text-[10px] font-mono text-on-primary-container uppercase">Platform Uptime</div>
+                      </div>
+                      <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                        <div className="text-2xl font-bold mb-1">SSO</div>
+                        <div className="text-[10px] font-mono text-on-primary-container uppercase">SAML Integrated</div>
+                      </div>
                     </div>
-                  </div>
+                  </AnimatedContent>
                 </div>
 
                 <div className="col-span-12 lg:col-span-6">
-                  <div className="p-8 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl space-y-6">
-                    <div className="space-y-4">
-                      <p className="text-sm italic leading-relaxed text-slate-200">
-                        "AlignGrad has fundamentally changed how we view talent. We no longer rely on pedigree; we rely on proof."
-                      </p>
-                      <p className="text-xs font-bold text-white">— Sarah Chen, VP of Talent at GlobalTech</p>
+                  <AnimatedContent distance={60} direction="horizontal" duration={0.8}>
+                    <div className="p-8 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl space-y-6">
+                      <div className="space-y-4">
+                        <p className="text-sm italic leading-relaxed text-slate-200">
+                          "AlignGrad has fundamentally changed how we view talent. We no longer rely on pedigree; we rely on proof."
+                        </p>
+                        <p className="text-xs font-bold text-white">— Sarah Chen, VP of Talent at GlobalTech</p>
+                      </div>
+                      <div className="pt-4 border-t border-white/10 flex items-center justify-between opacity-70 text-xs font-mono font-bold tracking-wider">
+                        <span>MICROSOFT</span>
+                        <span>AIRBNB</span>
+                        <span>STRIPE</span>
+                        <span>ADOBE</span>
+                      </div>
                     </div>
-                    <div className="pt-4 border-t border-white/10 flex items-center justify-between opacity-70 text-xs font-mono font-bold tracking-wider">
-                      <span>MICROSOFT</span>
-                      <span>AIRBNB</span>
-                      <span>STRIPE</span>
-                      <span>ADOBE</span>
-                    </div>
-                  </div>
+                  </AnimatedContent>
                 </div>
               </div>
             </div>
@@ -423,25 +455,27 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
 
           {/* CTA Section */}
           <section id="pricing" className="py-20 px-4 sm:px-8 bg-surface-container-low text-center border-t border-outline-variant">
-            <div className="max-w-2xl mx-auto space-y-6">
-              <h2 className="text-3xl font-headline font-bold text-primary">Ready to build a high-performance team?</h2>
-              <p className="text-sm text-secondary">Join the elite organizations using AlignGrad to verify skills and hire with absolute confidence.</p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button
-                  onClick={() => triggerAuthFlow('register')}
-                  className="btn-primary px-8 py-3.5 rounded-lg font-bold text-sm w-full sm:w-auto cursor-pointer"
-                >
-                  Get Started for Free
-                </button>
-                <button
-                  onClick={() => navigateToRecruiter('login')}
-                  className="btn-secondary px-8 py-3.5 rounded-lg font-bold text-sm w-full sm:w-auto cursor-pointer"
-                >
-                  Contact Sales
-                </button>
+            <AnimatedContent distance={60} direction="vertical" duration={0.8}>
+              <div className="max-w-2xl mx-auto space-y-6">
+                <h2 className="text-3xl font-headline font-bold text-primary">Ready to build a high-performance team?</h2>
+                <p className="text-sm text-secondary">Join the elite organizations using AlignGrad to verify skills and hire with absolute confidence.</p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <button
+                    onClick={() => triggerAuthFlow('register')}
+                    className="btn-primary px-8 py-3.5 rounded-lg font-bold text-sm w-full sm:w-auto cursor-pointer"
+                  >
+                    Get Started for Free
+                  </button>
+                  <button
+                    onClick={() => navigateToRecruiter('login')}
+                    className="btn-secondary px-8 py-3.5 rounded-lg font-bold text-sm w-full sm:w-auto cursor-pointer"
+                  >
+                    Contact Sales
+                  </button>
+                </div>
+                <p className="text-[11px] font-mono text-outline">No credit card required for 14-day trial.</p>
               </div>
-              <p className="text-[11px] font-mono text-outline">No credit card required for 14-day trial.</p>
-            </div>
+            </AnimatedContent>
           </section>
         </main>
 
@@ -622,6 +656,24 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                   {isLogin ? 'Sign In to Dashboard' : 'Create Account'}
                 </Button>
               </form>
+
+              <div className="relative my-4 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-outline-variant/60"></div>
+                </div>
+                <span className="relative bg-surface-container px-3 text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">
+                  OR
+                </span>
+              </div>
+
+              <GoogleAuthButton
+                role={role}
+                onSuccess={(data) => {
+                  setToken(data.token);
+                  setUser(data.user);
+                }}
+                onError={(msg) => setError(msg)}
+              />
 
               <div className="border-t border-outline-variant pt-4 text-center">
                 <button

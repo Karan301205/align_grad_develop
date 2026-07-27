@@ -93,19 +93,19 @@ export default function TestView({ token, testSkill, setTestSkill, onPass }) {
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center py-12 px-6 overflow-y-auto custom-scrollbar">
       <div className="w-full max-w-2xl bg-surface-container border border-outline-variant rounded-2xl p-8 space-y-6">
-        
+
         {/* Header */}
         <div className="flex justify-between items-center border-b border-outline-variant pb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">AlignGrade Validation Lab</span>
-              <span className="px-2 py-0.5 bg-surface-container-high border border-outline-variant rounded text-[10px] font-mono text-primary">
+              {/* <span className="px-2 py-0.5 bg-surface-container-high border border-outline-variant rounded text-[10px] font-mono text-primary">
                 need a skill assessment image
-              </span>
+              </span> */}
             </div>
             <h2 className="text-2xl font-headline font-bold text-on-surface mt-1">{skillName} Certification Test</h2>
           </div>
-          <button 
+          <button
             onClick={() => setTestSkill(null)}
             className="px-4 py-2 text-xs text-on-surface-variant hover:text-on-surface bg-surface-container-high border border-outline-variant rounded-lg"
           >
@@ -146,7 +146,7 @@ export default function TestView({ token, testSkill, setTestSkill, onPass }) {
                 {q.options.map((opt, optIdx) => {
                   const isSelected = answers[qIdx] === optIdx;
                   let optStyle = "bg-surface-container-high/40 hover:bg-surface-container-highest border-outline-variant text-on-surface-variant hover:text-on-surface";
-                  
+
                   if (isSelected) {
                     optStyle = "bg-primary/10 border-primary text-primary font-bold";
                   }

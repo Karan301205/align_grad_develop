@@ -142,18 +142,11 @@ const saveIntroVideoSchema = {
   })
 };
 
-const parseResumeSchema = {
-  body: z.object({
-    resumeUrl: z.string().url('Invalid resume URL')
-  })
-};
-
 module.exports = {
   updateProfileSchema,
   applyJobSchema,
   submitTestSchema,
   generateTestSchema,
   submitSkillTestSchema,
-  saveIntroVideoSchema,
-  parseResumeSchema
+  saveIntroVideoSchema
 };

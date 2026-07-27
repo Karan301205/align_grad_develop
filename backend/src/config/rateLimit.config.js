@@ -6,13 +6,13 @@ module.exports = {
   // Strict limits (Auth endpoints: login, signup)
   auth: {
     windowMs: parseInt(process.env.RATE_LIMIT_AUTH_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-    maxRequests: parseInt(process.env.RATE_LIMIT_AUTH_MAX_REQUESTS) || 100, // 100 requests per IP per window
+    maxRequests: parseInt(process.env.RATE_LIMIT_AUTH_MAX_REQUESTS) || 200, // 200 requests per IP per window
     // Failed login backoff settings
     backoff: {
-      maxFailedAttempts: parseInt(process.env.AUTH_BACKOFF_MAX_FAILED_ATTEMPTS) || 3, // Lock starts after 3 failed attempts
-      baseDelayMs: parseInt(process.env.AUTH_BACKOFF_BASE_DELAY_MS) || 5000, // 5 seconds initial lock
-      multiplier: parseFloat(process.env.AUTH_BACKOFF_MULTIPLIER) || 3, // Exponential backoff multiplier: 5s, 15s, 45s, 135s...
-      maxDelayMs: parseInt(process.env.AUTH_BACKOFF_MAX_DELAY_MS) || 24 * 60 * 60 * 1000 // Max lock 24 hours
+      maxFailedAttempts: parseInt(process.env.AUTH_BACKOFF_MAX_FAILED_ATTEMPTS) || 10, // Lock starts after 10 failed attempts
+      baseDelayMs: parseInt(process.env.AUTH_BACKOFF_BASE_DELAY_MS) || 3000, // 3 seconds initial lock
+      multiplier: parseFloat(process.env.AUTH_BACKOFF_MULTIPLIER) || 2, // Exponential backoff multiplier: 3s, 6s, 12s...
+      maxDelayMs: parseInt(process.env.AUTH_BACKOFF_MAX_DELAY_MS) || 15 * 60 * 1000 // Max lock 15 minutes
     }
   },
   // Moderate limits (Public / future general endpoints)

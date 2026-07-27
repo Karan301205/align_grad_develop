@@ -54,7 +54,7 @@ const checkLoginLock = (req, res, next) => {
     const retryAfter = Math.ceil((ipRecord.lockedUntil - now) / 1000);
     res.setHeader('Retry-After', retryAfter);
     return res.status(429).json({
-      error: `Too many failed login attempts, try again in sometime.`
+      error: `Too many failed login attempts. Please wait ${retryAfter} second${retryAfter === 1 ? '' : 's'} before trying again.`
     });
   }
 

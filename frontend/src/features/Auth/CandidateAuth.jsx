@@ -18,6 +18,7 @@ import ThemeToggle from '../../components/ui/ThemeToggle';
 import AnimatedContent from '../../components/ui/AnimatedContent';
 import ClickSpark from '../../components/ui/ClickSpark';
 import DotGrid from '../../components/ui/DotGrid';
+import GoogleAuthButton from '../../components/ui/GoogleAuthButton';
 import { formatErrorMessage } from '../../utils/errorFormatter';
 
 export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, initialMode = 'login' }) {
@@ -32,13 +33,22 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    if (/\s/.test(password)) {
+      setError('Password cannot contain spaces.');
+      return;
+    }
+    if (password.includes('@')) {
+      setError("Password cannot contain '@' symbol.");
+      return;
+    }
+
     setLoading(true);
 
     const path = isLogin ? '/auth/login' : '/auth/signup';
+    const cleanEmail = email.toLowerCase().trim();
     const payload = isLogin 
-      ? { email, password, role: 'STUDENT' } 
-      : { email, password, role: 'STUDENT', name };
+      ? { email: cleanEmail, password, role: 'STUDENT' } 
+      : { email: cleanEmail, password, role: 'STUDENT', name: name.trim() };
 
     try {
       const res = await apiFetch(path, {
@@ -139,6 +149,17 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
             <AnimatedContent distance={40} direction="vertical" delay={0.1}>
               {/* Neumorphic Chassis Container */}
               <div className="glass-card rounded-2xl p-6 sm:p-8 md:p-10 shadow-lg border border-outline-variant/60 relative overflow-hidden">
+                {/* Return button in top left of form */}
+                <button
+                  type="button"
+                  onClick={navigateToLanding}
+                  className="absolute top-3.5 left-3.5 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-full transition-colors flex items-center justify-center group z-10"
+                  title="Return to home page"
+                  aria-label="Return to home page"
+                >
+                  <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+                </button>
+
                 {/* Visual Screws for skeuomorphic chassis vibe */}
                 <div className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-outline-variant/60 shadow-[inset_1px_1px_1px_rgba(0,0,0,0.3)]"></div>
                 <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-outline-variant/60 shadow-[inset_1px_1px_1px_rgba(0,0,0,0.3)]"></div>
@@ -231,6 +252,24 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
                   </Button>
                 </form>
 
+                <div className="relative my-4 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-outline-variant/60"></div>
+                  </div>
+                  <span className="relative bg-surface-container px-3 text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">
+                    OR
+                  </span>
+                </div>
+
+                <GoogleAuthButton
+                  role="STUDENT"
+                  onSuccess={(data) => {
+                    setToken(data.token);
+                    setUser(data.user);
+                  }}
+                  onError={(msg) => setError(msg)}
+                />
+
                 {/* Redirect Toggles */}
                 <div className="border-t border-outline-variant pt-5 mt-6 text-center">
                   <button
@@ -247,18 +286,6 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
                 </div>
               </div>
             </AnimatedContent>
-
-            {/* Back to landing */}
-            <div className="text-center mt-6 z-10 relative">
-              <a 
-                href="/" 
-                onClick={navigateToLanding}
-                className="inline-flex items-center gap-1.5 text-xs text-on-surface-variant hover:text-on-surface transition-colors"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Back to home page</span>
-              </a>
-            </div>
           </div>
         </main>
 

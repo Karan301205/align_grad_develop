@@ -47,6 +47,7 @@ const relaxedLimit = rateLimiter(rateLimitConfig.relaxed);
 // Public Auth routes
 router.post('/auth/signup', authLimit, validate(signupSchema), authController.signup);
 router.post('/auth/login', authLimit, checkLoginLock, validate(loginSchema), authController.login);
+router.post('/auth/google', authLimit, authController.googleAuth);
 
 // Student routes (protected)
 router.get('/student/profile', authMiddleware, relaxedLimit, studentController.getProfile);
@@ -61,7 +62,6 @@ router.post('/student/tests/submit', authMiddleware, relaxedLimit, validate(subm
 router.get('/student/applications', authMiddleware, relaxedLimit, studentController.getStudentApplications);
 router.post('/student/intro-video', authMiddleware, relaxedLimit, validate(saveIntroVideoSchema), studentController.saveIntroVideo);
 router.post('/student/video-upload-url', authMiddleware, relaxedLimit, studentController.requestVideoUploadUrl);
-router.post('/student/resume/parse', authMiddleware, relaxedLimit, validate(parseResumeSchema), studentController.parseUploadedResume);
 
 // Upload routes (protected)
 router.post('/upload/request-url', authMiddleware, relaxedLimit, validate(requestUploadUrlSchema), uploadController.requestUploadUrl);

@@ -14,7 +14,6 @@ const updateCompanySchema = z.object({
   recruiterDesignation: z.string().nullable().optional(),
   socialLinks: z.object({
     linkedin: z.string().url("Invalid LinkedIn URL").or(z.string().length(0)).nullable().optional(),
-    twitter: z.string().url("Invalid Twitter URL").or(z.string().length(0)).nullable().optional(),
     github: z.string().url("Invalid GitHub URL").or(z.string().length(0)).nullable().optional(),
     youtube: z.string().url("Invalid YouTube URL").or(z.string().length(0)).nullable().optional(),
     facebook: z.string().url("Invalid Facebook URL").or(z.string().length(0)).nullable().optional()

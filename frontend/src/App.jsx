@@ -55,9 +55,9 @@ export default function App() {
     };
 
     window.addEventListener('popstate', handleLocationChange);
-    
+
     const originalPushState = window.history.pushState;
-    window.history.pushState = function(...args) {
+    window.history.pushState = function (...args) {
       originalPushState.apply(window.history, args);
       handleLocationChange();
     };

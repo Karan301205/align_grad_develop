@@ -98,40 +98,57 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
     }
   ];
 
-  // Filter top verified candidates
+  // Gather all required technical skills across recruiter's current & past job postings
+  const recruiterSkillSet = new Set();
+  (jobs || []).forEach(job => {
+    if (job.requirements && Array.isArray(job.requirements)) {
+      job.requirements.forEach(req => {
+        const skillName = (typeof req === 'string' ? req : req.skillName || req.name || '').trim().toLowerCase();
+        if (skillName) {
+          recruiterSkillSet.add(skillName);
+        }
+      });
+    }
+  });
+
+  // Filter top verified candidates to ONLY include those matching recruiter's job skills
   const topTalent = candidates.filter(cand => {
+    const candSkills = cand.skills || [];
+    
+    // Check if candidate has at least one skill matching recruiter's posted job requirements
+    const matchingSkills = candSkills.filter(s => {
+      const sName = (typeof s === 'string' ? s : s.name || '').trim().toLowerCase();
+      return recruiterSkillSet.has(sName);
+    });
+
+    // If recruiter has posted jobs with requirements, ONLY show candidates who match at least one required skill
+    if (recruiterSkillSet.size > 0 && matchingSkills.length === 0) {
+      return false;
+    }
+
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (cand.name || '').toLowerCase().includes(q) || (cand.username || '').toLowerCase().includes(q);
-  });
+  }).map(cand => {
+    const candSkills = cand.skills || [];
+    const matchingSkills = candSkills.filter(s => {
+      const sName = (typeof s === 'string' ? s : s.name || '').trim().toLowerCase();
+      return recruiterSkillSet.has(sName);
+    });
 
-  // Fallback mock top talent cards matching Stitch screen if database candidates list is short
-  const displayTalent = topTalent.length > 0 ? topTalent : [
-    {
-      id: 'mock-1',
-      name: 'Alex Chen',
-      title: 'Senior Full-Stack Engineer',
-      skills: [{ name: 'TypeScript', rating: 9 }, { name: 'Rust', rating: 8 }, { name: 'AWS', rating: 9 }, { name: 'Kubernetes', rating: 8 }],
-      matchScore: '98%',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'mock-2',
-      name: 'Sophia Rodriguez',
-      title: 'Principal Product Manager',
-      skills: [{ name: 'Strategy', rating: 9 }, { name: 'GTM', rating: 9 }, { name: 'Roadmapping', rating: 10 }],
-      matchScore: '94%',
-      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80'
-    },
-    {
-      id: 'mock-3',
-      name: 'Marcus Thorne',
-      title: 'Lead Data Scientist',
-      skills: [{ name: 'PyTorch', rating: 9 }, { name: 'MLOps', rating: 8 }, { name: 'Big Data', rating: 9 }],
-      matchScore: '91%',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'
-    }
-  ];
+    const matchScoreVal = recruiterSkillSet.size > 0
+      ? Math.min(99, Math.max(70, Math.round((matchingSkills.length / Math.min(recruiterSkillSet.size, 5)) * 100)))
+      : 85;
+
+    return {
+      ...cand,
+      matchScore: `${matchScoreVal}%`,
+      matchingSkillsCount: matchingSkills.length
+    };
+  }).sort((a, b) => b.matchingSkillsCount - a.matchingSkillsCount);
+
+  // Fallback top talent only when no recruiter jobs or candidates are loaded
+  const displayTalent = topTalent;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto animate-fade-in text-left">
@@ -204,7 +221,7 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
             Active Jobs
           </p>
           <p className="text-4xl font-headline font-black text-on-surface">
-            {activeJobsCount || 24}
+            {activeJobsCount}
           </p>
         </div>
 
@@ -225,7 +242,7 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
             New Candidates
           </p>
           <p className="text-4xl font-headline font-black text-on-surface">
-            {totalCandidatesCount || 142}
+            {totalCandidatesCount}
           </p>
         </div>
 
@@ -243,7 +260,7 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
             Interviews Today
           </p>
           <p className="text-4xl font-headline font-black text-on-surface">
-            {recentApplications.length || 8}
+            {recentApplications.length}
           </p>
         </div>
 
@@ -278,7 +295,13 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
 
         {/* Horizontal Carousel */}
         <div ref={carouselRef} className="flex gap-6 overflow-x-auto pb-3 custom-scrollbar scroll-smooth">
-          {displayTalent.map((cand, idx) => (
+          {displayTalent.length === 0 ? (
+            <div className="w-full bg-surface border border-outline-variant/80 rounded-2xl p-8 text-center space-y-2 font-mono">
+              <p className="text-sm font-bold text-on-surface">No matching verified candidates</p>
+              <p className="text-xs text-on-surface-variant">No candidates currently match the technical skill requirements from your active or past job postings.</p>
+            </div>
+          ) : (
+            displayTalent.map((cand, idx) => (
             <div 
               key={cand.id || idx}
               onClick={() => cand.rawCandidate ? setSelectedCandidate(cand.rawCandidate) : setSelectedCandidate(cand)}
@@ -349,7 +372,8 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
                 </button>
               </div>
             </div>
-          ))}
+          ))
+        )}
         </div>
       </section>
 

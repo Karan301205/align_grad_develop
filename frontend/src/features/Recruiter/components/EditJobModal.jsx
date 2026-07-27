@@ -17,7 +17,6 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
   const [duration, setDuration] = useState(job.duration || '');
   const [location, setLocation] = useState(job.location || '');
   const [locationUrl, setLocationUrl] = useState(job.locationUrl || '');
-  const [joiningMonth, setJoiningMonth] = useState(job.joiningMonth || '');
   const [openings, setOpenings] = useState(job.openings ? String(job.openings) : '');
   const [activeDays, setActiveDays] = useState(job.activeDays || 30);
   const [jobDesc, setJobDesc] = useState(job.description || '');
@@ -84,7 +83,6 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
       location,
       locationUrl,
       activeDays: activeDays ? parseInt(activeDays, 10) : 30,
-      joiningMonth,
       openings: openings ? parseInt(openings, 10) : null,
       selectionProcess: rounds,
       requirements: reqs
@@ -156,7 +154,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Location *</label>
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">headquarters location</label>
                 <input
                   type="text"
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
@@ -385,17 +383,6 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                   />
                 </div>
               )}
-
-              <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Joining Date *</label>
-                <input
-                  type="date"
-                  className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface [color-scheme:light] dark:[color-scheme:dark]"
-                  value={joiningMonth}
-                  onChange={e => setJoiningMonth(e.target.value)}
-                  required
-                />
-              </div>
             </div>
           </div>
 

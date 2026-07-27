@@ -403,7 +403,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Risk**: Low.
 
 #### [backend/src/controllers/auth.controller.js](file:///Users/karanrawat/Desktop/a_g/backend/src/controllers/auth.controller.js)
-* **Purpose**: Express controllers managing user registrations, password hashing checks, credential validations, and signing new JWT session tokens.
+* **Purpose**: Express controllers managing user registrations, password hashing checks, credential validations, Google OAuth authentication (`googleAuth` verifying Google JWT ID tokens via `oauth2.googleapis.com/tokeninfo` and auto-provisioning candidate profiles or recruiter companies), and signing new JWT session tokens.
 * **Used By**: [backend/src/routes/api.js](file:///Users/karanrawat/Desktop/a_g/backend/src/routes/api.js).
 * **Dependencies**: [backend/src/config/db.js](file:///Users/karanrawat/Desktop/a_g/backend/src/config/db.js), `bcryptjs`, `jsonwebtoken`.
 * **Safe Modifications**: Customizing login session lifetimes, tweaking error message labels.
@@ -750,7 +750,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **`Student/components/StudentResume.jsx`**: Resume builder generating downloadable PDF resume layouts.
 * **`Student/components/StudentShowcase.jsx`**: Dashboard to record/upload introduction videos.
 * **`Student/components/StudentSkillTests.jsx`**: Certification lists and launcher panel for AI-generated MCQ tests.
-* **`Gigs/GigsMarketplace.jsx`**: Shared dashboard component handling the gigs marketplace browse list, posting form, select and hire freelancers controls, messaging chat panel, work submissions triggers, and review forms. *(Note: Navigation tab entry points temporarily hidden in Candidate and Recruiter layouts while under active development).*
+* **`Gigs/GigsMarketplace.jsx`**: Shared dashboard component handling the gigs marketplace browse list, posting form, select and hire freelancers controls, messaging chat panel, work submissions triggers, and review forms (enabled in Candidate and Recruiter portals).
 
 ---
 

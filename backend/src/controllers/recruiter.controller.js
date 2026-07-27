@@ -192,7 +192,6 @@ exports.postJob = async (req, res) => {
     location,
     locationUrl,
     activeDays,
-    joiningMonth,
     openings,
     selectionProcess
   } = req.body;
@@ -227,7 +226,6 @@ exports.postJob = async (req, res) => {
         location,
         locationUrl,
         activeDays: activeDays ? parseInt(activeDays, 10) : 30,
-        joiningMonth,
         openings: openings ? parseInt(openings, 10) : null,
         selectionProcess: selectionProcess ? {
           set: selectionProcess
@@ -320,7 +318,6 @@ exports.updateJob = async (req, res) => {
     location,
     locationUrl,
     activeDays,
-    joiningMonth,
     openings,
     selectionProcess
   } = req.body;
@@ -365,7 +362,6 @@ exports.updateJob = async (req, res) => {
         location,
         locationUrl,
         activeDays: activeDays ? parseInt(activeDays, 10) : 30,
-        joiningMonth,
         openings: openings ? parseInt(openings, 10) : null,
         selectionProcess: selectionProcess ? {
           set: selectionProcess
