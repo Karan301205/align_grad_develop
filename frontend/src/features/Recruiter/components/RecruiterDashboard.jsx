@@ -38,65 +38,17 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
       const candidateProfile = app.student || candidates.find(c => c.id === app.studentId || c.userId === app.studentId);
       recentApplications.push({
         id: app.id || app._id || `${job.id}-${app.studentId || Math.random()}`,
-        candidateName: candidateProfile?.name || app.name || 'Elena Gilbert',
-        email: candidateProfile?.email || app.email || 'elena.g@example.com',
+        candidateName: candidateProfile?.name || app.name || 'Candidate',
+        email: candidateProfile?.email || app.email || 'N/A',
         profilePic: candidateProfile?.profilePic || app.profilePic,
-        position: job.title || 'Senior Software Engineer',
-        department: job.domain || 'Engineering & Product',
-        appliedDate: app.appliedAt ? new Date(app.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Oct 24, 2023',
-        status: app.status || 'Interviewing',
+        position: job.title || 'Job Opening',
+        department: job.domain || 'Technology',
+        appliedDate: app.appliedAt ? new Date(app.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently',
+        status: app.status || 'Applied',
         rawCandidate: candidateProfile
       });
     });
   });
-
-  // Fallback demo applications matching Stitch layout if database applications queue is empty
-  const displayApplications = recentApplications.length > 0 ? recentApplications : [
-    {
-      id: 'demo-1',
-      candidateName: 'Elena Gilbert',
-      email: 'elena.g@example.com',
-      profilePic: null,
-      position: 'Head of Design',
-      department: 'Brand Experience',
-      appliedDate: 'Oct 24, 2023',
-      status: 'Interviewing',
-      rawCandidate: candidates[0] || null
-    },
-    {
-      id: 'demo-2',
-      candidateName: 'Thomas Muller',
-      email: 't.muller@example.com',
-      profilePic: null,
-      position: 'VP Engineering',
-      department: 'Core Infrastructure',
-      appliedDate: 'Oct 23, 2023',
-      status: 'Applied',
-      rawCandidate: candidates[1] || null
-    },
-    {
-      id: 'demo-3',
-      candidateName: 'Jasmine Kaur',
-      email: 'j.kaur@example.com',
-      profilePic: null,
-      position: 'Chief Operating Officer',
-      department: 'Logistics & Supply',
-      appliedDate: 'Oct 22, 2023',
-      status: 'Offer',
-      rawCandidate: candidates[2] || null
-    },
-    {
-      id: 'demo-4',
-      candidateName: 'Leo Sterling',
-      email: 'leo@sterling.tech',
-      profilePic: null,
-      position: 'Head of Talent',
-      department: 'Global Recruitment',
-      appliedDate: 'Oct 22, 2023',
-      status: 'Interviewing',
-      rawCandidate: candidates[3] || null
-    }
-  ];
 
   // Gather all required technical skills across recruiter's current & past job postings
   const recruiterSkillSet = new Set();
@@ -403,52 +355,60 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/60">
-              {displayApplications.map((app) => (
-                <tr 
-                  key={app.id} 
-                  onClick={() => app.rawCandidate && setSelectedCandidate(app.rawCandidate)}
-                  className="hover:bg-primary/5 transition-colors group cursor-pointer"
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden font-headline">
-                        {app.profilePic ? (
-                          <img src={app.profilePic} alt={app.candidateName} className="w-full h-full object-cover" />
-                        ) : (
-                          app.candidateName.charAt(0)
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-on-surface group-hover:text-primary transition-colors font-headline">{app.candidateName}</p>
-                        <p className="text-[11px] font-mono text-on-surface-variant">{app.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-xs font-bold text-on-surface">{app.position}</p>
-                    <p className="text-[11px] font-mono text-on-surface-variant">{app.department}</p>
-                  </td>
-                  <td className="px-6 py-4 text-xs font-mono text-on-surface-variant">
-                    {app.appliedDate}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider ${
-                      app.status === 'Offer'
-                        ? 'bg-secondary/15 text-secondary border border-secondary/30'
-                        : app.status === 'Interviewing'
-                        ? 'bg-primary/15 text-primary border border-primary/30'
-                        : 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30'
-                    }`}>
-                      {app.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button type="button" className="text-on-surface-variant hover:text-primary transition-colors cursor-pointer p-1">
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
+              {recentApplications.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-10 text-center font-mono text-xs text-on-surface-variant font-medium">
+                    no registration right now
                   </td>
                 </tr>
-              ))}
+              ) : (
+                recentApplications.map((app) => (
+                  <tr 
+                    key={app.id} 
+                    onClick={() => app.rawCandidate && setSelectedCandidate(app.rawCandidate)}
+                    className="hover:bg-primary/5 transition-colors group cursor-pointer"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden font-headline">
+                          {app.profilePic ? (
+                            <img src={app.profilePic} alt={app.candidateName} className="w-full h-full object-cover" />
+                          ) : (
+                            app.candidateName.charAt(0)
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-on-surface group-hover:text-primary transition-colors font-headline">{app.candidateName}</p>
+                          <p className="text-[11px] font-mono text-on-surface-variant">{app.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <p className="text-xs font-bold text-on-surface">{app.position}</p>
+                      <p className="text-[11px] font-mono text-on-surface-variant">{app.department}</p>
+                    </td>
+                    <td className="px-6 py-4 text-xs font-mono text-on-surface-variant">
+                      {app.appliedDate}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider ${
+                        app.status === 'Offer'
+                          ? 'bg-secondary/15 text-secondary border border-secondary/30'
+                          : app.status === 'Interviewing'
+                          ? 'bg-primary/15 text-primary border border-primary/30'
+                          : 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30'
+                      }`}>
+                        {app.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button type="button" className="text-on-surface-variant hover:text-primary transition-colors cursor-pointer p-1">
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

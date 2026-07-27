@@ -24,7 +24,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-surface-container border border-outline-variant w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-scale-up">
+      <div className="bg-surface-container border border-outline-variant w-full max-w-4xl rounded-2xl shadow-2xl shadow-black/60 flex flex-col max-h-[90vh] overflow-hidden animate-scale-up">
         
         {/* Modal Header */}
         <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-high">

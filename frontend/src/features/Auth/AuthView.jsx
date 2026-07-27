@@ -119,12 +119,12 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
           <div className="flex items-center gap-3">
             <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
 
-            <button
+            {/* <button
               onClick={() => triggerAuthFlow('login')}
               className="hidden sm:inline-flex text-xs font-semibold px-3 py-2 text-on-surface hover:text-primary transition-colors"
             >
               Sign In
-            </button>
+            </button> */}
 
             <button
               onClick={() => navigateToCandidate('login')}

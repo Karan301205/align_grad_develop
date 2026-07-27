@@ -175,8 +175,8 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-surface-container border border-outline-variant w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-scale-up relative">
+    <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-surface-container border border-outline-variant w-full max-w-3xl rounded-2xl shadow-2xl shadow-black/60 flex flex-col max-h-[90vh] overflow-hidden animate-scale-up relative">
 
         {/* Modal Header */}
         <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-high">
