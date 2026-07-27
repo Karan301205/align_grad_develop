@@ -95,6 +95,16 @@ export default function App() {
   const isHireHost = hostname === 'hire.aligngrad.com';
 
   if (!token) {
+    // Cross-subdomain redirect enforcement when switching roles
+    if (isCareerHost && currentPath.startsWith('/recruiter')) {
+      window.location.href = `https://hire.aligngrad.com${currentPath}`;
+      return null;
+    }
+    if (isHireHost && currentPath.startsWith('/candidate')) {
+      window.location.href = `https://career.aligngrad.com${currentPath}`;
+      return null;
+    }
+
     if (currentPath.startsWith('/candidate')) {
       const mode = currentPath.endsWith('signup') ? 'signup' : 'login';
       return (
@@ -120,6 +130,9 @@ export default function App() {
       );
     }
     if (isCareerHost) {
+      if (window.location.pathname === '/' || window.location.pathname === '') {
+        window.history.replaceState({}, '', '/candidate/login');
+      }
       return (
         <CandidateAuth
           setToken={setToken}
@@ -131,6 +144,9 @@ export default function App() {
       );
     }
     if (isHireHost) {
+      if (window.location.pathname === '/' || window.location.pathname === '') {
+        window.history.replaceState({}, '', '/recruiter/login');
+      }
       return (
         <RecruiterAuth
           setToken={setToken}

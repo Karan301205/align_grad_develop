@@ -81,14 +81,24 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
 
   const navigateToLanding = (e) => {
     e.preventDefault();
-    window.history.pushState({}, '', '/');
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocal) {
+      window.history.pushState({}, '', '/');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    } else {
+      window.location.href = 'https://aligngrad.com/';
+    }
   };
 
   const navigateToCandidate = (e) => {
     e.preventDefault();
-    window.history.pushState({}, '', '/candidate/login');
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocal) {
+      window.history.pushState({}, '', '/candidate/login');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    } else {
+      window.location.href = 'https://career.aligngrad.com/candidate/login';
+    }
   };
 
   return (

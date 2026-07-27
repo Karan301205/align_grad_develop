@@ -81,15 +81,24 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
 
   const navigateToLanding = (e) => {
     e.preventDefault();
-    window.history.pushState({}, '', '/');
-    // Dispatch popstate event to trigger route update in App.jsx
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocal) {
+      window.history.pushState({}, '', '/');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    } else {
+      window.location.href = 'https://aligngrad.com/';
+    }
   };
 
   const navigateToRecruiter = (e) => {
     e.preventDefault();
-    window.history.pushState({}, '', '/recruiter/login');
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocal) {
+      window.history.pushState({}, '', '/recruiter/login');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    } else {
+      window.location.href = 'https://hire.aligngrad.com/recruiter/login';
+    }
   };
 
   return (
