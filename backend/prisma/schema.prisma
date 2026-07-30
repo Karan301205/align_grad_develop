@@ -223,17 +223,26 @@ model TestAttempt {
   createdAt DateTime @default(now())
 }
 
+type GigRequirement {
+  skillName String
+  minRating Int
+}
+
 model Gig {
   id                  String          @id @default(auto()) @map("_id") @db.ObjectId
   title               String
   description         String
+  category            String?
+  categories          String[]        @default([])
   skills              String[]
+  requirements        GigRequirement[]
   budget              Float
   deliveryTime        String
   attachments         String[]        @default([])
   ownerId             String          @db.ObjectId
   selectedCandidateId String?         @db.ObjectId
   status              String          @default("OPEN") // "OPEN", "IN_PROGRESS", "COMPLETED"
+  minRating           Int             @default(1)
   typingUserId        String?
   createdAt           DateTime        @default(now())
   applicants          GigApplicant[]
@@ -248,17 +257,19 @@ model GigApplicant {
   gig         Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
   candidateId String   @db.ObjectId
   message     String?
+  attachments String[] @default([])
   createdAt   DateTime @default(now())
 }
 
 model GigMessage {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  gigId     String   @db.ObjectId
-  gig       Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
-  senderId  String   @db.ObjectId
-  text      String?
-  fileUrl   String?
-  createdAt DateTime @default(now())
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  gigId      String   @db.ObjectId
+  gig        Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  senderId   String   @db.ObjectId
+  receiverId String?  @db.ObjectId
+  text       String?
+  fileUrl    String?
+  createdAt  DateTime @default(now())
 }
 
 model GigSubmission {

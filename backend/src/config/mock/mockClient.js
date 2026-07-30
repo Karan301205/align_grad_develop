@@ -50,6 +50,41 @@ const mockClient = {
       return mockDb.users.length;
     }
   },
+  company: {
+    findFirst: async (args = {}) => {
+      let result = mockDb.companies || [];
+      if (args && args.where) {
+        if (args.where.userId) {
+          result = result.filter(c => c.userId === args.where.userId);
+        }
+        if (args.where.OR) {
+          result = result.filter(c => args.where.OR.some(clause => (clause.userId && c.userId === clause.userId) || (clause.id && c.id === clause.id)));
+        }
+      }
+      return result[0] || (mockDb.companies && mockDb.companies[0]) || null;
+    },
+    findUnique: async ({ where }) => {
+      const comp = (mockDb.companies || []).find(c => (where.id && c.id === where.id) || (where.userId && c.userId === where.userId));
+      return comp || (mockDb.companies && mockDb.companies[0]) || null;
+    },
+    findMany: async () => {
+      return mockDb.companies || [];
+    },
+    create: async ({ data }) => {
+      const newComp = { id: `comp_${Date.now()}`, verified: false, ...data };
+      if (!mockDb.companies) mockDb.companies = [];
+      mockDb.companies.push(newComp);
+      return newComp;
+    },
+    update: async ({ where, data }) => {
+      const idx = (mockDb.companies || []).findIndex(c => (where.id && c.id === where.id) || (where.userId && c.userId === where.userId));
+      if (idx !== -1) {
+        Object.assign(mockDb.companies[idx], data);
+        return mockDb.companies[idx];
+      }
+      return { id: where.id || "c_mock", ...data };
+    }
+  },
   profile: {
     findUnique: async ({ where }) => {
       const field = Object.keys(where)[0];
@@ -332,7 +367,7 @@ const mockClient = {
     update: async ({ where, data }) => {
       const idx = mockDb.gigs.findIndex(g => g.id === where.id);
       if (idx !== -1) {
-        const fields = ["status", "selectedCandidateId", "title", "description", "budget", "deliveryTime", "attachments"];
+        const fields = ["status", "selectedCandidateId", "title", "description", "budget", "deliveryTime", "attachments", "category", "categories", "skills", "requirements", "minRating"];
         fields.forEach(field => {
           if (data[field] !== undefined) {
             mockDb.gigs[idx][field] = data[field];
@@ -387,8 +422,12 @@ const mockClient = {
     },
     deleteMany: async ({ where }) => {
       const initialCount = mockDb.gigApplicants.length;
-      if (where && where.gigId) {
-        mockDb.gigApplicants = mockDb.gigApplicants.filter(a => a.gigId !== where.gigId);
+      if (where) {
+        mockDb.gigApplicants = mockDb.gigApplicants.filter(a => {
+          if (where.gigId && a.gigId !== where.gigId) return true;
+          if (where.candidateId && a.candidateId !== where.candidateId) return true;
+          return false;
+        });
       }
       return { count: initialCount - mockDb.gigApplicants.length };
     }

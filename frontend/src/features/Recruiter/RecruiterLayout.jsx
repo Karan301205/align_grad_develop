@@ -264,7 +264,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     { id: 'jobs', icon: Briefcase, label: 'Active Jobs' },
     { id: 'candidates', icon: User, label: 'Candidates' },
     { id: 'post-job', icon: Plus, label: 'Post New Job' },
-    // { id: 'gigs', icon: Zap, label: 'Gigs Marketplace' },
+    { id: 'gigs', icon: Zap, label: 'Gigs Marketplace' },
     { id: 'verification', icon: ShieldCheck, label: 'Company Profile' },
   ];
 

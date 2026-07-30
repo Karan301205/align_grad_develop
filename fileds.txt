@@ -1,0 +1,76 @@
+
+ 1   Artificial Intelligence (AI)       
+ 2   Machine Learning                   
+ 3   Generative AI                      
+ 4   Natural Language Processing (NLP)  
+ 5   Computer Vision                    
+ 6   Data Science                       
+ 7   Data Analytics                     
+ 8   Business Analytics                 
+ 9   Data Engineering                   
+ 10  Business Intelligence (BI)         
+ 11  Full Stack Development             
+ 12  Frontend Development               
+ 13  Backend Development                
+ 14  Web Development                    
+ 15  Mobile App Development             
+ 16  Android Development                
+ 17  iOS Development                    
+ 18  Game Development                   
+ 19  DevOps                             
+ 20  Cloud Computing                    
+ 21  Site Reliability Engineering (SRE) 
+ 22  Platform Engineering               
+ 23  Cyber Security                     
+ 24  Ethical Hacking                    
+ 25  Network Engineering                
+ 26  Cloud Security                     
+ 27  Software Testing (QA)              
+ 28  Automation Testing                 
+ 29  Performance Testing                
+ 30  SDET                               
+ 31  Database Development               
+ 32  SQL Development                    
+ 33  Python Development                 
+ 34  Java Development                   
+ 35  JavaScript Development             
+ 36  C++ Development                    
+ 37  .NET Development                   
+ 38  PHP Development                    
+ 39  Go Development                     
+ 40  Embedded Systems                   
+ 41  IoT Development                    
+ 42  Robotics & Drones                  
+ 43  Blockchain & Web3                  
+ 44  AR/VR Development                  
+ 45  UI/UX Design                       
+ 46  Graphic Design                     
+ 47  Product Management                 
+ 48  Product Analytics                  
+ 49  Technical Support                  
+ 50  Research & Development (R&D)       
+
+
+Open Source Contributions
+API Development
+Microservices
+SaaS Development
+E-commerce Development
+CRM Development
+ERP Development
+Automation & Scripting
+Low-Code / No-Code
+Prompt Engineering
+AI Agent Development
+MLOps
+FinTech
+HealthTech
+EdTech
+Gaming & Esports
+GIS & Geospatial
+Digital Marketing
+SEO
+Content Writing
+Technical Writing
+Video Editing
+Motion Graphics

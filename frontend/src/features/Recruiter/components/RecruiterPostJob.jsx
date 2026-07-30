@@ -252,8 +252,10 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
         title: designation,
         description: jobDesc,
         skills: reqs.map(r => r.skillName),
+        requirements: reqs,
         budget: parseFloat(budget),
         deliveryTime,
+        minRating: reqs.length > 0 ? Math.max(...reqs.map(r => r.minRating || 1)) : 4,
         attachmentFile
       };
     } else {
@@ -333,7 +335,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
               {[
                 { id: 'JOB', label: 'Full-Time / Part-Time Job', desc: 'Permanent career roles with competitive packages' },
                 { id: 'INTERNSHIP', label: 'Internship', desc: 'Fixed-duration positions with monthly stipends' },
-                // { id: 'GIG', label: 'Gig (Short-Term Task)', desc: 'Contract task-based milestone deliverables' },
+                { id: 'GIG', label: 'Gig (Short-Term Task)', desc: 'Contract task-based milestone deliverables' },
               ].map((opt) => {
                 const isSelected = opportunityType === opt.id;
                 return (

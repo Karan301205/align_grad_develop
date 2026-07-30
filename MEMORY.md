@@ -46,6 +46,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   ├── prisma/
 │   │   └── schema.prisma         # Prisma schema and MongoDB collection structure definitions
 │   ├── scripts/                  # Offline generation, validation, and database seeding scripts
+│   │   ├── clearGigData.js       # Cleanup script purging all Gigs and associated attachments from DB & S3
 │   │   ├── generateQuestions.js  # Offline MCQ generator pulling 50 Qs per skill from Groq
 │   │   ├── seedQuestions.js      # Seeding script to write JSON questions to Prisma Question model
 │   │   └── verifyBankFlow.js     # End-to-end flow validator checking seed -> serve under mock
@@ -193,7 +194,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │           ├── StudentShowcase.jsx # Video introduction recorder and uploader
 │   │   │           └── StudentSkillTests.jsx # Interactive dashboard to verify and upgrade skills
 │   │   │   ├── Gigs/
-│   │   │   │   └── GigsMarketplace.jsx # Dashboard managing gigs browse, posts, chats, reviews
+│   │   │   │   └── GigsMarketplace.jsx # Dashboard managing gigs browse, posts (multi-category field selection), chats, reviews
 │   │   │   └── Community/
 │   │   │       ├── CommunityLayout.jsx # Main container layout wrapping community sidebar & feed
 │   │   │       └── components/
@@ -284,7 +285,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 ### Backend Files (`backend/`)
 
 #### [backend/prisma/schema.prisma](file:///Users/karanrawat/Desktop/a_g/backend/prisma/schema.prisma)
-* **Purpose**: Prisma ORM schema definitions for MongoDB structures. Sets up data collections (User, Profile, Company, Job, Application, TestAttempt, **SkillDefinition**, **Question**, **TestSession**, **AssessmentRecord**, **SkillRoadmap**) and their relationships.
+* **Purpose**: Prisma ORM schema definitions for MongoDB structures. Sets up data collections (User, Profile, Company, Job, Application, TestAttempt, **SkillDefinition**, **Question**, **TestSession**, **AssessmentRecord**, **SkillRoadmap**, **Gig** with `category String?` and `categories String[] @default([])`) and their relationships.
 * **`SkillDefinition` (added 2026-07-18)**: canonical registry for skill identity — `canonicalName`, `slug` (unique), `aliases[]`, `category`, `tier` (1|2|3), `status`, `targetQuestionCount`, `counters` (embedded `SkillCounters`), `createdAt/updatedAt/deletedAt`. Indexed on `[tier, status]`. Status values are plain strings (`WAITING | GENERATING | PAUSED | REVIEWING | COMPLETED | PUBLISHED`), matching the existing `User.role` convention rather than a Prisma enum. **(The `status` lifecycle values, `counters`/`SkillCounters`, and `targetQuestionCount` are legacy from the deprecated enterprise pipeline — see §19; only `canonicalName`/`slug`/`aliases`/`category`/`tier` are actively used.)**
 * **CRITICAL naming constraint**: the model is `SkillDefinition`, **never `Skill`**. `type Skill { name, rating, verifiedRating }` already exists as the embedded type on `Profile.skills`; declaring `model Skill` is a duplicate declaration and fails client generation.
 * **`Question` (added 2026-07-20, interim question bank)**: pre-generated MCQ store — `skillName`, `subtopic`, `question`, `options[]`, `correctIndex` (0-3 server-side answer key, aligned with Plan 2's `TestSession`), `source`, `createdAt`; indexed on `[skillName]`. Seeded offline by `scripts/seedQuestions.js` from `scripts/generateQuestions.js` (Groq `llama-3.3-70b-versatile`) output at `scripts/output/questions.json` (500 Qs, 10 skills × 50). **Phase 4 (2026-07-23) — assessment integration & usage tracking:** `generateSkillTest` now serves **strictly from the bank** (no live fallback — the `mcqService.generate` path was removed). Selection goes through `services/questionBank/selection.js` (pure, seeded → deterministic/testable): ACTIVE-only, distributed across subtopics (round-robin), balanced difficulty per config (`DEFAULT_DIFFICULTY_MIX`), no duplicates. `services/questionBank/repositories/questionRepository.js` is the sole assessment-path Question access — `findActiveBySkill`, `recordServed` (atomic `usageCount +1` + `lastUsed`), `recordOutcomes` (atomic `correctCount`/`wrongCount`/`skipCount`). All counter writes use Mongo atomic `$inc` (Prisma `{ increment }`) so concurrent assessments never overwrite. The bank auto-loads into the mock from `scripts/output/questionBank.json` via `config/mock/loadQuestionBankMock.js` at boot (`npm run dev:mock`). **Prod prerequisite:** the ~4,770-question bank must be seeded into Atlas (human step; see CONTINUATION) before real-DB assessments work — `prisma.question.findMany` returns empty otherwise. **Phase 5 (2026-07-23) — intelligence & maintenance:** selection is now **usage-aware** (`selection.orderByUsage`: least-used first, seeded tiebreak) so traffic spreads across the bank. Health is evaluated by `services/questionBank/health.js` (pure `evaluateHealth`/`classify`) against configurable rules in `healthConfig.js` → categories Healthy | Needs Review | Replacement Candidate | Retired. `services/questionBank/maintenance.js` `runHealthReview` (CLI `npm run bank -- health-review [--commit]`) FLAGS questions via `Question.reviewState` (`NONE | NEEDS_REVIEW | REPLACEMENT_CANDIDATE`) + `lastReviewed` — flag-only, never regenerates/deletes/alters counters; a flagged question stays `status=ACTIVE` and served until a replacement is approved (later phase). New `Question.reviewState` field + index. **Phase 6 (2026-07-23) — production readiness:** `scripts/seedQuestionBank.js` (`npm run bank:seed [-- --commit]`) seeds the bank into the DB — dry-run default, validates every record, idempotent/resumable (dedup by skillName+subtopic+normalized text), batched, graceful per-run rollback; HUMAN-run for prod, never from an agent. `scripts/verifyQuestionBank.js` (`npm run bank:verify`) produces an integrity report (canonical skill/roadmap/subtopic/orphan/dup-id/dup-in-subtopic/metadata/difficulty/reviewState) — verified clean on all 4,770. `scripts/loadTestQuestionBank.js` (`npm run bank:loadtest`) load-tests concurrency (300 assessments: 0 errors, exact atomic counters, gen ~7ms/submit ~8ms). Added `@@index([skillName, status])` for the selection hot path. Standardized non-sensitive logs (`[assessment]`, `[health-review]`, `[qbank-seed]`, `[qbank-verify]`). Added `@@index([skillName, status])`. **DEPLOYED TO PRODUCTION ATLAS 2026-07-23 (one-time, user-authorized override of the never-write-prod rule):** 143 SkillDefinitions, 36 SkillRoadmaps, and 4,770 bank questions seeded; integrity verify = ALL CHECKS PASSED. Fixed a latent prod bug found during seeding — 15 legacy interim-bank questions (12 Python + 3 Java) had `updatedAt: null` which broke every full `prisma.question.findMany()` (would have failed `findActiveBySkill` at runtime); they were repaired (timestamp set) then RETIRED (off-roadmap "Fixtures" subtopics), so the servable bank is exactly 4,770 ACTIVE. `seedQuestionBank.js`/`verifyQuestionBank.js` now use `select` on reads (efficient + robust to null-timestamp legacy rows). Prod totals: 4,785 questions (4,770 ACTIVE + 15 RETIRED).
@@ -515,7 +516,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 * **Risk**: Low.
 
 #### [backend/src/validators/gig.validator.js](file:///Users/karanrawat/Desktop/a_g/backend/src/validators/gig.validator.js)
-* **Purpose**: Zod validation schemas enforcing constraints on gig actions (gig creations, applications messages, chat messages, submissions descriptions, reviews ratings).
+* **Purpose**: Zod validation schemas enforcing constraints on gig actions (gig creations, updates, category/categories selection, applications messages, chat messages, submissions descriptions, reviews ratings).
 * **Used By**: [backend/src/routes/api.js](file:///Users/karanrawat/Desktop/a_g/backend/src/routes/api.js).
 * **Dependencies**: `zod`.
 * **Safe Modifications**: Appending new fields to gig creation forms, modifying minimum text lengths.
@@ -1020,8 +1021,8 @@ src/index.js
 
 ### Gigs Endpoints (Bearer JWT Required)
 * **`POST /api/gigs`**
-  - **Purpose**: Publishes a new gig task. Recruiter only.
-  - **Files**: `gig.controller.js`, `api.js`
+  - **Purpose**: Publishes a new gig task with per-skill required proficiency rating thresholds (`requirements: [{ skillName, minRating }]`). Recruiter only.
+  - **Files**: `gig.controller.js`, `api.js`, `gig.validator.js`
 * **`GET /api/gigs`**
   - **Purpose**: Lists and filters active marketplace gigs.
   - **Files**: `gig.controller.js`, `api.js`
@@ -1032,22 +1033,25 @@ src/index.js
   - **Purpose**: Retrieves full details, pitches, chat messages, and deliverables of a gig.
   - **Files**: `gig.controller.js`, `api.js`
 * **`PUT /api/gigs/:gigId`**
-  - **Purpose**: Modifies open/paused gig parameters. Recruiter only.
-  - **Files**: `gig.controller.js`, `api.js`
+  - **Purpose**: Modifies open/paused gig parameters (title, description, requirements, skills, budget, deliveryTime). Recruiter only.
+  - **Files**: `gig.controller.js`, `api.js`, `gig.validator.js`
 * **`PATCH /api/gigs/:gigId/status`**
   - **Purpose**: Toggles status of owned gig between OPEN and PAUSED. Recruiter only.
   - **Files**: `gig.controller.js`, `api.js`
 * **`DELETE /api/gigs/:gigId`**
   - **Purpose**: Removes open/paused gig and cascaded applications. Recruiter only.
   - **Files**: `gig.controller.js`, `api.js`
-* **`POST /api/gigs/:gigId/pitch`**
-  - **Purpose**: Submits candidate pitch application for a gig. Student only.
+* **`POST /api/gigs/:gigId/apply`**
+  - **Purpose**: Submits candidate pitch application for a gig with optional work sample image attachments (max 2MB, uploaded to AWS S3). Enforces student per-skill rating eligibility (`candidateSkillRating >= requirement.minRating`); candidates falling short on any required skill are gated with a prompt listing missing skills and directing to take skill tests. Student only.
   - **Files**: `gig.controller.js`, `api.js`
 * **`POST /api/gigs/:gigId/select`**
-  - **Purpose**: Hires selected candidate for gig and updates status to IN_PROGRESS. Recruiter only.
+  - **Purpose**: Hires selected candidate for gig and updates status to IN_PROGRESS. Applicants are retained to allow recruiters to view alternative pitches and communicate via the "View Rest of Candidates" workspace modal. Recruiter only.
+  - **Files**: `gig.controller.js`, `api.js`
+* **`POST /api/gigs/:gigId/reject`**
+  - **Purpose**: Rejects and removes a candidate's application for a gig. Recruiter only.
   - **Files**: `gig.controller.js`, `api.js`
 * **`POST /api/gigs/:gigId/chat`**
-  - **Purpose**: Sends chat message in workspace room. Chat is only open after hiring.
+  - **Purpose**: Sends chat message in workspace room. Accepts optional `receiverId` to route messages directly to specific candidates.
   - **Files**: `gig.controller.js`, `api.js`
 * **`POST /api/gigs/:gigId/deliverable`**
   - **Purpose**: Submits completed deliverable description/link. Student only.
@@ -1248,10 +1252,8 @@ src/index.js
   - Files: `frontend/src/config/index.js` (`API_BASE`), `frontend/src/services/apiClient.js` (`apiFetch`); admin: `admin_ws/frontend/src/api/adminApi.js`.
 * **Task: Change admin storage/billing computation**
   - Files: `admin_ws/backend/src/services/{s3Storage,mongoStorage}.service.js`, `utils/formatBytes.js`, `mocks/storage.mock.js`.
-* **Task: Expose a New API Path**
-  - Files: `backend/src/routes/api.js`, controllers in `backend/src/controllers/`
-* **Task: Modify DB Schema**
-  - Files: `backend/prisma/schema.prisma`
+* **Task: Modify Gigs Marketplace & 3-Column Gig Workspace Layout**
+  - Files: `frontend/src/features/Gigs/GigsMarketplace.jsx` (3-column layout: Column 1 Left Sidebar = Posted Gigs & Gig Specs + INFO button; Column 2 Center Main = 1-on-1 Direct Chat; Column 3 Right Sidebar = Accepted Candidates + Submission Workspace & Unreviewed Pitches Feed; Unreviewed Pitches card click opens candidate pitch popup modal featuring "Know About Candidate" profile button, pitch message, attachments, Hire, & Reject controls; recruiter Close/Re-Open button for explicit status control), `frontend/src/features/Recruiter/components/CandidateProfileModal.jsx` (candidate profile modal), `backend/src/controllers/gig.controller.js` (continuous application flow allowing multiple simultaneous applications stored independently until explicitly CLOSED or PAUSED, candidate retention post-hiring, candidate rejection, receiverId messaging), `backend/src/config/db.js` (MongoDB Atlas proxy connection & timeout initialization), `backend/src/config/mock/mockClient.js` (company model emulation fallback), `backend/prisma/schema.prisma` (`GigMessage.receiverId` model).
 * **Task: Adjust Mock / Seeding Records**
   - Files: `backend/src/config/mock/seed.js` (fixtures) and `backend/src/config/mock/mockClient.js` (query methods)
 
@@ -1508,3 +1510,23 @@ shippable** ahead of the rest of the spine.
 2. ✅ **RESOLVED 2026-07-20 (Plan 2).** Was: the answer key shipped to the client. Now `generateSkillTest` stores the key in the `TestSession` and returns options-only questions; correct answers are returned only in the submit response (post-scoring), safe for the review UI.
 
 Note: as of the 2026-07-20 fix there IS a real pass threshold — **70% (7/10)**, computed server-side in `scoring.js` — but it is enforced against the `TestSession` answer key, not taken from the client.
+
+---
+
+## 15. Git Branching & Release Workflow
+
+AlignGrade enforces a dual-branch development and testing workflow to isolate unstable in-progress feature work from the founder/tester release branch.
+
+* **Branch Structure**:
+  - `main`: Stable branch dedicated exclusively to founder testing and production releases. Must ALWAYS contain clean, working, tested code. Never commit raw, incomplete, or experimental feature code directly to `main`.
+  - `develop`: Active development branch for all ongoing feature work, UI updates, database migrations, and experimental features.
+* **Workflow Rules**:
+  1. **Active Development**: All new code, features, bug fixes, UI components, and API changes MUST be implemented and committed on `develop`.
+  2. **Branch Check Before Task Execution**: Prior to starting any development task, agents/developers MUST verify the active branch (`git branch`). If the current branch is `main` and feature development is attempted, halt and switch to `develop`.
+  3. **Release / Merging (`develop` → `main`)**: Merge `develop` into `main` ONLY after features are fully implemented, verified, and ready for founder testing.
+  4. **Hotfix Workflow (`main` → `develop`)**: If bugs are reported during testing on `main`:
+     - Switch to `main` (`git checkout main`).
+     - Implement and test ONLY the specific bug fix.
+     - Commit and push to `main`.
+     - Immediately merge `main` back into `develop` (`git checkout develop && git merge main`) to ensure both branches remain synchronized.
+

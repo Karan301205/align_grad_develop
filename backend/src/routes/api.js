@@ -101,6 +101,7 @@ router.get('/gigs/my-gigs', authMiddleware, relaxedLimit, gigController.getMyGig
 router.get('/gigs/:gigId', authMiddleware, relaxedLimit, gigController.getGigDetails);
 router.post('/gigs/:gigId/apply', authMiddleware, relaxedLimit, validate(applyGigSchema), gigController.applyToGig);
 router.post('/gigs/:gigId/hire', authMiddleware, relaxedLimit, gigController.hireCandidate);
+router.post('/gigs/:gigId/reject', authMiddleware, relaxedLimit, gigController.rejectCandidate);
 router.post('/gigs/:gigId/messages', authMiddleware, relaxedLimit, validate(sendMessageSchema), gigController.sendMessage);
 router.post('/gigs/:gigId/submit', authMiddleware, relaxedLimit, validate(submitWorkSchema), gigController.submitWork);
 router.post('/gigs/:gigId/complete', authMiddleware, relaxedLimit, gigController.completeGig);

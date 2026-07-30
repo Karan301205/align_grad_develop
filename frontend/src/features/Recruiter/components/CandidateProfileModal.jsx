@@ -262,8 +262,8 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
                   return (
                     <>
-                      {/* Gigs Stats Summary - Hidden for now */}
-                      {/* {gigExperienceItems.length > 0 && (
+                      {/* Gigs Stats Summary */}
+                      {gigExperienceItems.length > 0 && (
                         <div className="grid grid-cols-2 gap-4 bg-surface-container-high/40 p-3.5 rounded-xl border border-outline-variant/50">
                           <div className="flex items-center gap-2">
                             <Award className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -275,12 +275,12 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                           <div className="flex items-center gap-2">
                             <Star className="w-4 h-4 text-warning fill-warning/20 shrink-0" />
                             <div>
-                              <p className="text-[9px] font-mono uppercase text-on-surface-variant">Average Rating</p>
+                              <p className="text-[9px] font-mono uppercase text-on-surface-variant font-bold">Average Rating</p>
                               <p className="text-xs font-bold text-on-surface">{averageRating} / 5.0 Rating</p>
                             </div>
                           </div>
                         </div>
-                      )} */}
+                      )}
 
                       {candidate.experience && candidate.experience.length > 0 ? (
                         <div className="space-y-3">

@@ -536,7 +536,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     { id: 'resume', icon: FileText, label: 'Resume', locked: !isComplete },
     { id: 'tests', icon: BookOpen, label: 'Your Tests', locked: !isComplete },
     { id: 'progress', icon: ClipboardList, label: 'Your Job Progress', locked: !isComplete },
-    // { id: 'gigs', icon: Zap, label: 'Gigs Marketplace', locked: !isComplete },
+    { id: 'gigs', icon: Zap, label: 'Gigs Marketplace', locked: !isComplete },
   ];
 
   const goToTab = (tabId) => {
@@ -817,6 +817,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 theme={theme}
                 profile={profile}
                 onUpdateProfile={fetchProfileAndJobs}
+                onNavigateToTests={() => goToTab('tests')}
               />
             )}
           </div>

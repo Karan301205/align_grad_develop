@@ -26,7 +26,10 @@ try {
 // Proxy wrapper so we can dynamically swap out the active client if connection fails or model is unindexed
 const prismaProxy = new Proxy({}, {
   get(target, prop) {
-    const client = (activeClient && activeClient[prop]) ? activeClient : mockClient;
+    let client = activeClient || mockClient;
+    if (client && !(prop in client) && mockClient && (prop in mockClient)) {
+      client = mockClient;
+    }
     const val = client ? client[prop] : undefined;
     if (typeof val === 'function') {
       return val.bind(client);
@@ -39,12 +42,12 @@ const prismaProxy = new Proxy({}, {
 if (!useMock && prismaInstance) {
   const connectionCheck = prismaInstance.user.count();
   const timeout = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('Database connection timed out')), 10000)
+    setTimeout(() => reject(new Error('Database connection timed out')), 20000)
   );
 
   Promise.race([connectionCheck, timeout])
     .then((count) => {
-      console.log(`Successfully connected to MongoDB database. Seed count: ${count}`);
+      console.log(`Successfully connected to MongoDB database. User seed count: ${count}`);
     })
     .catch((err) => {
       console.warn(`[DATABASE CONNECT FAIL] ${err.message}. Falling back to mock datastore.`);
