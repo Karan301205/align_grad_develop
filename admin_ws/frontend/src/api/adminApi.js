@@ -1,6 +1,6 @@
 const ADMIN_API_BASE =
   import.meta.env.VITE_ADMIN_API_BASE_URL ||
-  "https://aligngrad.com/api";
+  "https://admin.aligngrad.com/api";
 
 function getHeaders() {
   const token = localStorage.getItem('adminToken');

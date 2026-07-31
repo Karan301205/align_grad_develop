@@ -10,7 +10,7 @@ This is the standalone Admin Portal for WhiteScholars administrators, running co
 
 The admin UI reads its API base from `VITE_ADMIN_API_BASE_URL` (see `frontend/.env.example`).
 
-- Production default (if unset): `https://aligngrad.com/api`
+- Production default (if unset): `https://admin.aligngrad.com/api`
 - Local development: copy `frontend/.env.example` to `frontend/.env` and set e.g. `VITE_ADMIN_API_BASE_URL=http://localhost:5002/api`
 
 Vite inlines this value at build time, so production deploys must set it before `npm run build` in `frontend/`.
