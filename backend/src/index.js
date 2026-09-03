@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const apiRoutes = require('./routes/api');
-const { prisma } = require('./config/db');
+const { prisma, initDb } = require('./config/db');
 
 // Triggering nodemon reload to load the updated Prisma Client schema: reload 3
 dotenv.config();
@@ -44,26 +44,33 @@ app.use((req, res, next) => {
 
 app.use(errorHandler);
 
-const skillRegistry = require('./services/questionBank/skills/registryCache');
+async function startServer() {
+  await initDb();
 
-// Non-fatal: an unseeded registry degrades to raw name matching.
-skillRegistry.load().catch((err) => {
-  console.warn('[skill-registry] load failed, falling back to raw name matching:', err.message);
-});
+  const skillRegistry = require('./services/questionBank/skills/registryCache');
 
-// Local dev only: load the pre-generated question bank into the in-memory mock so
-// the skill quiz works without a real database. No-op unless the mock is active.
-const { loadQuestionBankIntoMock } = require('./config/mock/loadQuestionBankMock');
-loadQuestionBankIntoMock().catch((err) => {
-  console.warn('[question-bank] mock load skipped:', err.message);
-});
-
-const { ensureGlobalCommunity } = require('./services/community/community.service');
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  // Initialize Global Community at application startup
-  ensureGlobalCommunity().catch(err => {
-    console.warn('[community] Global community startup initialization skipped:', err.message);
+  // Non-fatal: an unseeded registry degrades to raw name matching.
+  skillRegistry.load().catch((err) => {
+    console.warn('[skill-registry] load failed, falling back to raw name matching:', err.message);
   });
-});
+
+  // Local dev only: load the pre-generated question bank into the in-memory mock so
+  // the skill quiz works without a real database. No-op unless the mock is active.
+  const { loadQuestionBankIntoMock } = require('./config/mock/loadQuestionBankMock');
+  loadQuestionBankIntoMock().catch((err) => {
+    console.warn('[question-bank] mock load skipped:', err.message);
+  });
+
+  const { ensureGlobalCommunity } = require('./services/community/community.service');
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    // Initialize Global Community at application startup
+    ensureGlobalCommunity().catch(err => {
+      console.warn('[community] Global community startup initialization skipped:', err.message);
+    });
+  });
+}
+
+startServer();
+

@@ -108,8 +108,7 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
       {/* Top Header Action Bar */}
       <header className="bg-surface border border-outline-variant/80 p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-mono font-bold uppercase tracking-wider mb-2">
-            <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+          <div className="inline-flex items-center gap-2 border-on-surface/20 text-on-surface-variant text-xs font-mono font-bold uppercase tracking-wider mb-2">
             <span>Recruiter Executive Hub</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-headline font-bold text-on-surface tracking-tight">

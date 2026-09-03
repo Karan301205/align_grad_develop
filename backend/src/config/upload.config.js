@@ -15,14 +15,20 @@ module.exports = {
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ],
-    image: ['image/jpeg', 'image/png'],
+    image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
     video: ['video/mp4', 'video/webm', 'video/x-matroska'],
     doc: [
       'application/pdf',
       'image/jpeg',
       'image/png',
+      'image/webp',
+      'image/gif',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/msword'
+      'application/msword',
+      'application/zip',
+      'application/x-zip-compressed',
+      'application/octet-stream',
+      'text/plain'
     ]
   }
 };

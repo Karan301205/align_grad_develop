@@ -358,7 +358,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                 </div>
                 {isExpanded && (
                   <div className="min-w-0 animate-fade-in">
-                    <p className="text-sm font-bold text-on-surface truncate">{company?.name || 'Loading...'}</p>
+                    <p className="text-sm font-bold text-on-surface truncate">{company?.name || user?.name || user?.email || 'Recruiter'}</p>
                     <p className="text-xs text-on-surface-variant truncate">Recruiter - {user?.regNo || 'REC001'}</p>
                   </div>
                 )}

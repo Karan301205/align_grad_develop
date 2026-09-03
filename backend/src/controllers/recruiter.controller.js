@@ -4,11 +4,30 @@ const { deleteS3ObjectFromUrl } = require('../services/fileCleanup.service');
 
 exports.getCompany = async (req, res) => {
   try {
-    const company = await prisma.company.findUnique({
-      where: { userId: req.user.id }
+    let company = await prisma.company.findFirst({
+      where: { OR: [{ userId: req.user.id }, { id: req.user.id }] }
     });
     if (!company) {
-      return res.status(404).json({ error: 'Company not found' });
+      const defaultName = req.user.name || (req.user.email ? req.user.email.split('@')[0] : 'Recruiter Company');
+      try {
+        company = await prisma.company.create({
+          data: {
+            userId: req.user.id,
+            name: defaultName,
+            about: 'Recruiter profile at AlignGrade',
+            website: '',
+            verified: false
+          }
+        });
+      } catch (createErr) {
+        company = {
+          userId: req.user.id,
+          name: defaultName,
+          about: 'Recruiter profile at AlignGrade',
+          website: '',
+          verified: false
+        };
+      }
     }
     res.json(company);
   } catch (err) {

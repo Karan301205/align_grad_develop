@@ -18,7 +18,8 @@ import {
   Check,
   Info,
   Users,
-  MessageSquare
+  MessageSquare,
+  Lock
 } from 'lucide-react';
 import { apiFetch } from '../../services/apiClient';
 import { putFileToS3 } from '../../services/uploadService';
@@ -349,8 +350,9 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
   const [submittingReview, setSubmittingReview] = useState(false);
   const [alertConfig, setAlertConfig] = useState(null);
 
-  // Info Modal & Other Candidates Modal state
+  // Info Modal, Submission Modal & Other Candidates Modal state
   const [showGigInfoModal, setShowGigInfoModal] = useState(false);
+  const [showSubmissionModal, setShowSubmissionModal] = useState(false);
   const [showOtherCandidatesModal, setShowOtherCandidatesModal] = useState(false);
   const [selectedOtherCandidateId, setSelectedOtherCandidateId] = useState(null);
   const [otherCandidateChatText, setOtherCandidateChatText] = useState('');
@@ -545,17 +547,27 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
     if (activeSubTab === 'my-gigs') {
       const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
       const owned = myGigs.filter(g => g.ownerId && candidateIds.includes(g.ownerId.toString()));
-      const hired = myGigs.filter(g => g.selectedCandidateId && candidateIds.includes(g.selectedCandidateId.toString()));
-      const allMy = [...owned, ...hired];
+      const hired = myGigs.filter(g => {
+        const allHired = Array.from(new Set([...(g.hiredCandidateIds || []), g.selectedCandidateId].filter(Boolean))).map(id => id.toString());
+        return candidateIds.some(cId => allHired.includes(cId));
+      });
+      const applied = myGigs.filter(g => {
+        const allHired = Array.from(new Set([...(g.hiredCandidateIds || []), g.selectedCandidateId].filter(Boolean))).map(id => id.toString());
+        const isHired = candidateIds.some(cId => allHired.includes(cId));
+        const hasApplied = (g.applicants || []).some(a => candidateIds.includes(a.candidateId?.toString()));
+        return (hasApplied || g.hasApplied) && !isHired;
+      });
+
+      const gigMap = new Map();
+      [...owned, ...hired, ...applied].forEach(g => gigMap.set(g.id, g));
+      const allMy = Array.from(gigMap.values());
+
       if (allMy.length > 0) {
         const stillExists = allMy.some(g => g.id === selectedGigId);
         if (!selectedGigId || !stillExists) {
           setSelectedGigId(allMy[0].id);
           fetchGigDetails(allMy[0].id);
         }
-      } else {
-        setSelectedGigId(null);
-        setGigDetails(null);
       }
     }
     /* eslint-enable react-hooks/set-state-in-effect */
@@ -815,23 +827,33 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
   };
 
   const handleApplyToGig = async () => {
+    if (!applyMessage.trim() && !applyFile) {
+      setAlertConfig({ message: 'Please write a pitch message or attach a work sample.', type: 'error' });
+      return;
+    }
     setApplying(true);
     try {
       let uploadedUrl = null;
       if (applyFile) {
+        const fileTypeToUse = applyFile.type?.startsWith('image/') ? 'image' : 'doc';
         const urlRes = await apiFetch('/upload/request-url', {
           token,
           method: 'POST',
           json: {
-            fileType: 'avatar',
+            fileType: fileTypeToUse,
             fileName: applyFile.name,
-            contentType: applyFile.type
+            contentType: applyFile.type || 'application/octet-stream'
           }
         });
         if (urlRes.ok) {
           const { uploadUrl, publicUrl } = await urlRes.json();
-          await putFileToS3(uploadUrl, applyFile, applyFile.type, token);
+          await putFileToS3(uploadUrl, applyFile, applyFile.type || 'application/octet-stream', token);
           uploadedUrl = publicUrl;
+        } else {
+          const d = await urlRes.json();
+          setAlertConfig({ message: d.error || 'Failed to upload pitch attachment', type: 'error' });
+          setApplying(false);
+          return;
         }
       }
 
@@ -849,6 +871,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         setApplyMessage('');
         setApplyFile(null);
         fetchGigs();
+        fetchMyGigs();
       } else {
         const d = await res.json();
         setAlertConfig({ message: d.error || 'Failed to apply', type: 'error' });
@@ -905,12 +928,16 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
     const textToSend = chatText;
     const attachmentToSend = chatAttachment;
+    const targetReceiverId = isOwner
+      ? (selectedOtherCandidateId || gigDetails?.selectedCandidateId || gigDetails?.hiredCandidateIds?.[0])
+      : gigDetails?.ownerId;
 
     // Construct optimistic temp message
     const tempId = `temp_${Date.now()}`;
     const tempMessage = {
       id: tempId,
       senderId: user.id,
+      receiverId: targetReceiverId,
       text: textToSend,
       fileUrl: attachmentToSend ? URL.createObjectURL(attachmentToSend) : null,
       createdAt: new Date().toISOString(),
@@ -953,7 +980,8 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         method: 'POST',
         json: {
           text: textToSend,
-          fileUrl: uploadedUrl
+          fileUrl: uploadedUrl,
+          receiverId: targetReceiverId
         }
       });
       if (res.ok) {
@@ -994,6 +1022,10 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
   const handleSubmitWork = async (e) => {
     e.preventDefault();
+    if (!submitText.trim() && !submitFile) {
+      setAlertConfig({ message: 'Please provide description text or attach a deliverables file.', type: 'error' });
+      return;
+    }
     setSubmittingWork(true);
     try {
       let uploadedUrl = null;
@@ -1004,13 +1036,18 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
           json: {
             fileType: 'doc',
             fileName: submitFile.name,
-            contentType: submitFile.type
+            contentType: submitFile.type || 'application/octet-stream'
           }
         });
         if (urlRes.ok) {
           const { uploadUrl, publicUrl } = await urlRes.json();
-          await putFileToS3(uploadUrl, submitFile, submitFile.type, token);
+          await putFileToS3(uploadUrl, submitFile, submitFile.type || 'application/octet-stream', token);
           uploadedUrl = publicUrl;
+        } else {
+          const d = await urlRes.json();
+          setAlertConfig({ message: d.error || 'Failed to request upload URL', type: 'error' });
+          setSubmittingWork(false);
+          return;
         }
       }
 
@@ -1027,9 +1064,14 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         setSubmitText('');
         setSubmitFile(null);
         fetchGigDetails(gigDetails.id);
+        fetchMyGigs();
+      } else {
+        const d = await res.json();
+        setAlertConfig({ message: d.error || 'Failed to submit work', type: 'error' });
       }
     } catch (err) {
       console.error(err);
+      setAlertConfig({ message: 'Error submitting work deliverables', type: 'error' });
     } finally {
       setSubmittingWork(false);
     }
@@ -1049,9 +1091,13 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         });
         fetchGigDetails(gigDetails.id);
         fetchMyGigs();
+      } else {
+        const d = await res.json();
+        setAlertConfig({ message: d.error || 'Failed to update review status', type: 'error' });
       }
     } catch (err) {
       console.error(err);
+      setAlertConfig({ message: 'Error updating review action', type: 'error' });
     }
   };
 
@@ -1084,7 +1130,9 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
     }
   };
 
-  const isOwner = gigDetails?.ownerId === user.id;
+  const currentUserIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
+  const isOwner = Boolean(user && gigDetails?.ownerId && currentUserIds.includes(gigDetails.ownerId.toString()));
+  const isHiredCandidate = Boolean(user && gigDetails?.selectedCandidateId && currentUserIds.includes(gigDetails.selectedCandidateId.toString()));
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -1183,24 +1231,42 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             </div>
 
             {/* Split Screen Feed & Detail Panel */}
-            {loading ? (
-              <div className="flex justify-center py-20">
-                <RefreshCw className="w-8 h-8 text-primary animate-spin" />
-              </div>
-            ) : gigs.length === 0 ? (
-              <div className="text-center py-20 bg-surface-container border border-outline-variant rounded-2xl shadow-[var(--shadow-card)]">
-                <AlertTriangle className="w-8 h-8 text-on-surface-variant mx-auto mb-3" />
-                <h3 className="font-headline font-bold text-on-surface">No active gigs found</h3>
-                <p className="text-xs text-on-surface-variant mt-1">Get started by posting your first gig!</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-                {/* Left Pane: Compact Gigs List (Matching Screenshot 2 Mockup) */}
-                <div className="lg:col-span-5 flex flex-col gap-3.5 overflow-y-auto pr-2 custom-scrollbar max-h-[680px]">
-                  {gigs.map(gig => {
-                    const isSelected = gig.id === selectedGigId;
-                    const gigCategory = gig.category || (gig.categories && gig.categories[0]) || 'General';
-                    const hasUserApplied = user.role === 'STUDENT' && gig.applicants?.some(a => a.candidateId === user.id);
+            {(() => {
+              const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
+              const displayGigs = user?.role === 'STUDENT'
+                ? gigs.filter(g => {
+                    const hasApplied = g.hasApplied || (g.applicants || []).some(a => candidateIds.includes(a.candidateId?.toString()));
+                    const isHired = candidateIds.some(cId => Array.from(new Set([...(g.hiredCandidateIds || []), g.selectedCandidateId].filter(Boolean))).map(id => id.toString()).includes(cId));
+                    return !hasApplied && !isHired;
+                  })
+                : gigs;
+
+              if (loading) {
+                return (
+                  <div className="flex justify-center py-20">
+                    <RefreshCw className="w-8 h-8 text-primary animate-spin" />
+                  </div>
+                );
+              }
+
+              if (displayGigs.length === 0) {
+                return (
+                  <div className="text-center py-20 bg-surface-container border border-outline-variant rounded-2xl shadow-[var(--shadow-card)]">
+                    <AlertTriangle className="w-8 h-8 text-on-surface-variant mx-auto mb-3" />
+                    <h3 className="font-headline font-bold text-on-surface">No open gigs available</h3>
+                    <p className="text-xs text-on-surface-variant mt-1">Check your workspace for your applied and active gigs!</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                  {/* Left Pane: Compact Gigs List (Matching Screenshot 2 Mockup) */}
+                  <div className="lg:col-span-5 flex flex-col gap-3.5 overflow-y-auto pr-2 custom-scrollbar max-h-[680px]">
+                    {displayGigs.map(gig => {
+                      const isSelected = gig.id === selectedGigId;
+                      const gigCategory = gig.category || (gig.categories && gig.categories[0]) || 'General';
+                      const hasUserApplied = user.role === 'STUDENT' && (gig.hasApplied || gig.applicants?.some(a => candidateIds.includes(a.candidateId?.toString())));
                     return (
                       <div
                         key={gig.id}
@@ -1527,7 +1593,8 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   )}
                 </div>
               </div>
-            )}
+            );
+          })()}
           </div>
         )}
 
@@ -1770,19 +1837,25 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         {activeSubTab === 'my-gigs' && (
           /* Main 3-Column Gig Workspace Grid */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-140px)] min-h-[640px] items-stretch overflow-hidden font-sans">
-            
             {/* COLUMN 1: LEFT SIDEBAR (lg:col-span-3) */}
             <div className="lg:col-span-3 flex flex-col gap-3 h-full overflow-hidden">
-              {/* TOP BOX: ALL THE GIG BY RECRUITER */}
+              {/* TOP BOX: GIGS IN WHICH CANDIDATE IS HIRED / ALL POSTED GIGS FOR RECRUITER */}
               <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
                 <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
                   <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">
-                    {user?.role === 'STUDENT' ? 'Hired Projects' : 'All My Posted Gigs'}
+                    {user?.role === 'STUDENT' ? 'Gigs in Which You Are Hired' : 'All My Posted Gigs'}
                   </h4>
                   <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                    {user?.role === 'STUDENT'
-                      ? myGigs.filter(g => g.selectedCandidateId && [user?.id, user?.userId, user?._id].filter(Boolean).map(id => id.toString()).includes(g.selectedCandidateId.toString())).length
-                      : myGigs.filter(g => g.ownerId === user.id).length} Gigs
+                    {(() => {
+                      const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
+                      if (user?.role === 'STUDENT') {
+                        return myGigs.filter(g => {
+                          const allHired = Array.from(new Set([...(g.hiredCandidateIds || []), g.selectedCandidateId].filter(Boolean))).map(id => id.toString());
+                          return candidateIds.some(cId => allHired.includes(cId));
+                        }).length;
+                      }
+                      return myGigs.filter(g => g.ownerId === user.id).length;
+                    })()} Gigs
                   </span>
                 </div>
 
@@ -1790,9 +1863,13 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   {user?.role === 'STUDENT' ? (
                     (() => {
                       const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
-                      const hiredGigs = myGigs.filter(g => g.selectedCandidateId && candidateIds.includes(g.selectedCandidateId.toString()));
+                      const hiredGigs = myGigs.filter(g => {
+                        const allHired = Array.from(new Set([...(g.hiredCandidateIds || []), g.selectedCandidateId].filter(Boolean))).map(id => id.toString());
+                        return candidateIds.some(cId => allHired.includes(cId));
+                      });
+
                       if (hiredGigs.length === 0) {
-                        return <p className="text-center text-xs font-mono text-on-surface-variant py-8">No hired projects found.</p>;
+                        return <p className="text-center text-xs font-mono text-on-surface-variant py-8">No active hired gigs found.</p>;
                       }
                       return hiredGigs.map(gig => {
                         const isSelected = gig.id === selectedGigId;
@@ -1883,7 +1960,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </div>
             </div>
 
-            {/* COLUMN 2: CENTER MAIN WORKSPACE (lg:col-span-6 - CHAT SECTION WITH THE CANDIDATE) */}
+            {/* COLUMN 2: CENTER MAIN WORKSPACE (lg:col-span-6 - CHAT SECTION WITH THE RECRUITER) */}
             <div className="lg:col-span-6 flex flex-col bg-surface-container border border-outline-variant rounded-2xl shadow-md h-full overflow-hidden">
               {loadingDetails ? (
                 <div className="flex-1 flex items-center justify-center">
@@ -1919,41 +1996,89 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       </div>
                     </div>
 
-                    {isOwner && (
-                      <div className="flex items-center gap-1.5">
-                        {(gigDetails.status === 'OPEN' || gigDetails.status === 'PAUSED') && (
-                          <button onClick={() => handleOpenEditModal(gigDetails)} className="px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-outline-variant bg-surface-container hover:text-primary transition-all cursor-pointer">Edit</button>
-                        )}
-                        <button onClick={() => handleTogglePause(gigDetails)} className="px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-outline-variant bg-surface-container hover:text-warning transition-all cursor-pointer">
-                          {gigDetails.status === 'PAUSED' ? 'Resume' : 'Pause'}
-                        </button>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {/* Profile Button for Active Candidate or Recruiter */}
+                      {(() => {
+                        const activeCandId = selectedOtherCandidateId || gigDetails.selectedCandidateId || (gigDetails.applicants && gigDetails.applicants[0]?.candidateId);
+                        const activeCand = gigDetails.applicants?.find(a => a.candidateId === activeCandId)?.candidate;
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (isOwner) {
+                                handleOpenCandidateProfile(activeCandId, activeCand);
+                              } else {
+                                handleOpenCandidateProfile(gigDetails.ownerId, { name: gigDetails.ownerName || 'Recruiter' });
+                              }
+                            }}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-outline-variant bg-surface-container text-on-surface hover:text-primary hover:border-primary/40 transition-all cursor-pointer flex items-center gap-1"
+                          >
+                            <User className="w-3 h-3 text-primary" />
+                            <span>Profile</span>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Submission Button */}
+                      {(isOwner || isHiredCandidate || gigDetails.submissions?.length > 0) && (
                         <button
-                          onClick={() => handleToggleClose(gigDetails)}
-                          className={`px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border transition-all cursor-pointer ${
-                            gigDetails.status === 'CLOSED'
-                              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white'
-                              : 'border-rose-500/40 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white'
+                          type="button"
+                          onClick={() => setShowSubmissionModal(true)}
+                          className={`px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border transition-all cursor-pointer flex items-center gap-1 ${
+                            gigDetails.submissions?.length > 0
+                              ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white'
+                              : 'bg-primary/10 border-primary/30 text-primary hover:bg-primary hover:text-white'
                           }`}
                         >
-                          {gigDetails.status === 'CLOSED' ? 'Re-Open' : 'Close Gig'}
+                          <Paperclip className="w-3 h-3" />
+                          <span>Submission</span>
+                          {gigDetails.submissions?.length > 0 && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
+                          )}
                         </button>
-                        {(gigDetails.status === 'OPEN' || gigDetails.status === 'PAUSED') && (
-                          <button onClick={() => handleDeleteGig(gigDetails.id)} className="px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-error/30 bg-surface-container text-error hover:bg-error hover:text-white transition-all cursor-pointer">Delete</button>
-                        )}
-                      </div>
-                    )}
+                      )}
+
+                      {/* Recruiter Owner Action Buttons */}
+                      {isOwner && (
+                        <>
+                          {(gigDetails.status === 'OPEN' || gigDetails.status === 'PAUSED') && (
+                            <button onClick={() => handleOpenEditModal(gigDetails)} className="px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-outline-variant bg-surface-container hover:text-primary transition-all cursor-pointer">Edit</button>
+                          )}
+                          <button onClick={() => handleTogglePause(gigDetails)} className="px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-outline-variant bg-surface-container hover:text-warning transition-all cursor-pointer">
+                            {gigDetails.status === 'PAUSED' ? 'Resume' : 'Pause'}
+                          </button>
+                          <button
+                            onClick={() => handleToggleClose(gigDetails)}
+                            className={`px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border transition-all cursor-pointer ${
+                              gigDetails.status === 'CLOSED'
+                                ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white'
+                                : 'border-rose-500/40 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white'
+                            }`}
+                          >
+                            {gigDetails.status === 'CLOSED' ? 'Re-Open' : 'Close Gig'}
+                          </button>
+                          {(gigDetails.status === 'OPEN' || gigDetails.status === 'PAUSED') && (
+                            <button onClick={() => handleDeleteGig(gigDetails.id)} className="px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-error/30 bg-surface-container text-error hover:bg-error hover:text-white transition-all cursor-pointer">Delete</button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   {/* Chat Messages Feed Area */}
                   <div className="flex-1 p-4 space-y-3 overflow-y-auto custom-scrollbar bg-surface-container-high/10">
                     {(() => {
-                      const activeTargetId = selectedOtherCandidateId || gigDetails.selectedCandidateId;
-                      const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
+                      const activeTargetId = selectedOtherCandidateId || gigDetails.selectedCandidateId || gigDetails.hiredCandidateIds?.[0];
+                      const currentUserIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
 
                       const filteredMessages = (gigDetails.messages || []).filter(msg => {
-                        if (!activeTargetId) return true;
-                        if (!msg.receiverId) return true;
-                        return msg.senderId === activeTargetId || msg.receiverId === activeTargetId || candidateIds.includes(msg.senderId?.toString());
+                        if (isOwner) {
+                          if (!activeTargetId) return false;
+                          const activeStr = activeTargetId.toString();
+                          return msg.senderId?.toString() === activeStr || msg.receiverId?.toString() === activeStr;
+                        } else {
+                          return currentUserIds.some(cId => msg.senderId?.toString() === cId || msg.receiverId?.toString() === cId);
+                        }
                       });
 
                       if (filteredMessages.length === 0) {
@@ -1966,7 +2091,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       }
 
                       return filteredMessages.map(msg => {
-                        const isMe = msg.senderId && candidateIds.includes(msg.senderId.toString());
+                        const isMe = msg.senderId && currentUserIds.includes(msg.senderId.toString());
                         const isSystem = msg.text?.startsWith('[SYSTEM:');
                         return (
                           <div key={msg.id} className={`flex flex-col ${isSystem ? 'items-center w-full' : isMe ? 'items-end' : 'items-start'}`}>
@@ -1987,10 +2112,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                 </div>
                                 <p className={`text-[8px] font-mono text-on-surface-variant px-1 flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
                                   {msg.sending ? (
-                                    <>
-                                      <Clock className="w-2.5 h-2.5 animate-spin" />
-                                      <span>Sending...</span>
-                                    </>
+                                    <RefreshCw className="w-2.5 h-2.5 animate-spin text-primary" />
                                   ) : (
                                     new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                                   )}
@@ -2001,47 +2123,52 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                         );
                       });
                     })()}
-
-                    {/* Typing Indicator */}
-                    {gigDetails.typingUserId && gigDetails.typingUserId !== user.id && (
-                      <div className="flex flex-col items-start animate-fade-in">
-                        <div className="max-w-[80%] space-y-1">
-                          <div className="p-2.5 bg-surface-container-low border border-outline-variant rounded-xl rounded-tl-none flex items-center gap-1.5 shadow-sm">
-                            <span className="typing-dot"></span>
-                            <span className="typing-dot"></span>
-                            <span className="typing-dot"></span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
                     <div ref={chatEndRef} />
                   </div>
 
                   {/* Chat Input Footer */}
-                  <form onSubmit={handleSendMessage} className="p-3 border-t border-outline-variant bg-surface-container-low space-y-2 shrink-0">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={chatText}
-                        onChange={(e) => setChatText(e.target.value)}
-                        placeholder="Type message..."
-                        className="flex-1 bg-surface-container-high border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none placeholder:text-on-surface-variant/50"
-                      />
-                      <button type="submit" disabled={sendingMessage} className="px-3.5 py-2 bg-primary text-white rounded-xl shadow-md cursor-pointer font-bold text-xs">
-                        <Send className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <label className="cursor-pointer text-[9px] font-mono text-on-surface-variant hover:text-on-surface border border-outline-variant rounded px-2 py-1 bg-surface-container flex items-center gap-1 shadow-sm">
-                        <Paperclip className="w-3 h-3 text-primary" />
-                        <span>{chatAttachment ? chatAttachment.name : 'Attach File'}</span>
-                        <input type="file" onChange={(e) => setChatAttachment(e.target.files[0])} className="hidden" />
-                      </label>
-                      {chatAttachment && (
-                        <button type="button" onClick={() => setChatAttachment(null)} className="text-[9px] text-error font-mono font-bold">Remove</button>
-                      )}
-                    </div>
-                  </form>
+                  {(() => {
+                    const allHiredCandidateIds = Array.from(new Set([...(gigDetails?.hiredCandidateIds || []), gigDetails?.selectedCandidateId].filter(Boolean))).map(id => id.toString());
+                    const isHiredCandidate = currentUserIds.some(cId => allHiredCandidateIds.includes(cId));
+
+                    if (!isOwner && !isHiredCandidate) {
+                      return (
+                        <div className="p-3.5 border-t border-outline-variant bg-surface-container-low text-center shrink-0">
+                          <p className="text-xs font-mono text-on-surface-variant flex items-center justify-center gap-1.5 font-bold">
+                            <Lock className="w-3.5 h-3.5 text-amber-500" />
+                            <span>Application Pending Review &bull; Direct messaging unlocks when hired</span>
+                          </p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <form onSubmit={handleSendMessage} className="p-3 border-t border-outline-variant bg-surface-container-low space-y-2 shrink-0">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={chatText}
+                            onChange={(e) => setChatText(e.target.value)}
+                            placeholder="Type message..."
+                            className="flex-1 bg-surface-container-high border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none placeholder:text-on-surface-variant/50"
+                          />
+                          <button type="submit" disabled={sendingMessage} className="px-3.5 py-2 bg-primary text-white rounded-xl shadow-md cursor-pointer font-bold text-xs">
+                            <Send className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <label className="cursor-pointer text-[9px] font-mono text-on-surface-variant hover:text-on-surface border border-outline-variant rounded px-2 py-1 bg-surface-container flex items-center gap-1 shadow-sm">
+                            <Paperclip className="w-3 h-3 text-primary" />
+                            <span>{chatAttachment ? chatAttachment.name : 'Attach File'}</span>
+                            <input type="file" onChange={(e) => setChatAttachment(e.target.files[0])} className="hidden" />
+                          </label>
+                          {chatAttachment && (
+                            <button type="button" onClick={() => setChatAttachment(null)} className="text-[9px] text-error font-mono font-bold">Remove</button>
+                          )}
+                        </div>
+                      </form>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="flex-1 flex items-center justify-center text-center p-8">
@@ -2050,212 +2177,264 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               )}
             </div>
 
-            {/* COLUMN 3: RIGHT SIDEBAR (lg:col-span-3 - ACCEPTED CANDIDATES & UNREVIEWED PITCHES) */}
+            {/* COLUMN 3: RIGHT SIDEBAR (lg:col-span-3) */}
             <div className="lg:col-span-3 flex flex-col gap-3 h-full overflow-hidden">
-              {/* TOP BOX: LIST OF THE CANDIDATED ACCEPTED BY THE RECUITER */}
-              <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
-                <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
-                  <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">
-                    Accepted Candidates
-                  </h4>
-                  {gigDetails?.selectedCandidateId && (
-                    <span className="text-[8px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase">Hired</span>
-                  )}
-                </div>
+              {user?.role === 'STUDENT' || !isOwner ? (
+                /* CANDIDATE COLUMN 3: LIST OF GIGS APPLIED TO BUT NOT YET READ/HIRED BY RECRUITER */
+                <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
+                  <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
+                    <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">
+                      Applied Gigs (Pending Review)
+                    </h4>
+                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                      {(() => {
+                        const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
+                        const pendingGigs = myGigs.filter(g => {
+                          const allHired = Array.from(new Set([...(g.hiredCandidateIds || []), g.selectedCandidateId].filter(Boolean))).map(id => id.toString());
+                          const isHired = candidateIds.some(cId => allHired.includes(cId));
+                          const hasApplied = (g.applicants || []).some(a => candidateIds.includes(a.candidateId?.toString()));
+                          return (hasApplied || g.hasApplied) && !isHired;
+                        });
+                        return pendingGigs.length;
+                      })()}
+                    </span>
+                  </div>
 
-                <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1">
-                  {gigDetails?.selectedCandidateId ? (
-                    (() => {
-                      const hiredApplicant = gigDetails.applicants?.find(a => a.candidateId === gigDetails.selectedCandidateId);
-                      return (
-                        <div className="space-y-3">
-                          <div
-                            onClick={() => setSelectedOtherCandidateId(gigDetails.selectedCandidateId)}
-                            className="p-3 bg-emerald-500/5 border border-emerald-500/30 rounded-xl space-y-2 cursor-pointer hover:bg-emerald-500/10 transition-all shadow-xs"
-                          >
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 font-mono font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
-                                {hiredApplicant?.candidate?.avatar || hiredApplicant?.candidate?.profilePic ? (
-                                  <img src={hiredApplicant.candidate.avatar || hiredApplicant.candidate.profilePic} alt="Accepted Candidate" className="w-full h-full object-cover" />
-                                ) : (
-                                  <span>{hiredApplicant?.candidate?.name?.charAt(0) || 'C'}</span>
-                                )}
-                              </div>
-                              <div>
-                                <h5 className="text-xs font-bold text-on-surface">{hiredApplicant?.candidate?.name || 'Hired Freelancer'}</h5>
-                                <p className="text-[9px] font-mono text-emerald-500 font-bold">Active Gig Freelancer</p>
-                              </div>
-                            </div>
+                  <div className="flex-1 overflow-y-auto space-y-2.5 custom-scrollbar pr-1">
+                    {(() => {
+                      const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
+                      const pendingGigs = myGigs.filter(g => {
+                        const allHired = Array.from(new Set([...(g.hiredCandidateIds || []), g.selectedCandidateId].filter(Boolean))).map(id => id.toString());
+                        const isHired = candidateIds.some(cId => allHired.includes(cId));
+                        const hasApplied = (g.applicants || []).some(a => candidateIds.includes(a.candidateId?.toString()));
+                        return (hasApplied || g.hasApplied) && !isHired;
+                      });
+
+                      if (pendingGigs.length === 0) {
+                        return (
+                          <div className="text-center py-8">
+                            <p className="text-xs font-mono text-on-surface-variant">No pending applications.</p>
                           </div>
+                        );
+                      }
 
-                          {/* Work Deliverables / Review Workspace Panel */}
-                          {gigDetails.status === 'IN_PROGRESS' && (
-                            <div className="p-3 bg-primary/5 border border-primary/20 rounded-xl space-y-2 shadow-xs">
-                              <h5 className="text-[9px] font-mono uppercase tracking-wider text-primary font-bold">Submission Workspace</h5>
-                              {!isOwner ? (
-                                <form onSubmit={handleSubmitWork} className="space-y-2">
-                                  <TextArea value={submitText} onChange={(e) => setSubmitText(e.target.value)} placeholder="Deliverables description..." rows={2} required />
-                                  <label className="cursor-pointer text-[9px] font-mono text-on-surface-variant hover:text-on-surface border border-outline-variant bg-surface-container p-1.5 rounded-lg flex items-center justify-between w-full">
-                                    <span className="truncate">{submitFile ? submitFile.name : 'Upload File'}</span>
-                                    <input type="file" onChange={(e) => setSubmitFile(e.target.files[0])} className="hidden" />
-                                  </label>
-                                  <Button type="submit" disabled={submittingWork} className="w-full text-[9px] py-1.5">{submittingWork ? 'Uploading...' : 'Submit Work'}</Button>
-                                </form>
-                              ) : (
-                                gigDetails.submissions?.length > 0 ? (
-                                  <div className="space-y-2">
-                                    <div className="p-2 bg-surface-container-low border border-outline-variant rounded-lg text-xs space-y-1">
-                                      <p className="font-mono text-[8px] uppercase text-primary font-bold">Work Submitted:</p>
-                                      <p className="text-on-surface text-[10px]">{gigDetails.submissions[0].text}</p>
-                                      {gigDetails.submissions[0].fileUrl && (
-                                        <a href={gigDetails.submissions[0].fileUrl} target="_blank" rel="noreferrer" className="text-primary underline flex items-center gap-1 text-[9px] font-mono mt-0.5">
-                                          <Paperclip className="w-3 h-3" /> View Work File
-                                        </a>
+                      return pendingGigs.map(gig => {
+                        const isSelected = gig.id === selectedGigId;
+                        return (
+                          <div
+                            key={gig.id}
+                            onClick={() => { setSelectedGigId(gig.id); fetchGigDetails(gig.id); }}
+                            className={`p-3 rounded-xl border space-y-1.5 transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-surface-container-high border-primary shadow-xs'
+                                : 'bg-surface-container-low border-outline-variant hover:border-outline-variant/60'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start gap-2">
+                              <h5 className="text-xs font-bold text-on-surface line-clamp-1">{gig.title}</h5>
+                              <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
+                                Pending Review
+                              </span>
+                            </div>
+                            <p className="text-[10px] font-mono text-on-surface-variant">Budget: <strong className="text-emerald-500">₹{gig.budget}</strong></p>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+              ) : (
+                /* RECRUITER COLUMN 3: ACCEPTED CANDIDATES & UNREVIEWED PITCHES */
+                <>
+                  {/* TOP BOX: ACCEPTED CANDIDATES */}
+                  <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
+                    <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
+                      <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">
+                        Accepted Candidates
+                      </h4>
+                      {gigDetails?.hiredCandidates?.length > 0 && (
+                        <span className="text-[8px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase">
+                          {gigDetails.hiredCandidates.length} Hired
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto space-y-2.5 custom-scrollbar pr-1">
+                      {gigDetails?.hiredCandidates && gigDetails.hiredCandidates.length > 0 ? (
+                        gigDetails.hiredCandidates.map((hc) => {
+                          const isSelected = (selectedOtherCandidateId || gigDetails.selectedCandidateId) === hc.candidateId;
+                          return (
+                            <div key={hc.candidateId} className="space-y-2">
+                              <div
+                                onClick={() => setSelectedOtherCandidateId(hc.candidateId)}
+                                className={`p-2.5 rounded-xl border transition-all cursor-pointer shadow-xs ${
+                                  isSelected
+                                    ? 'bg-emerald-500/10 border-emerald-500/50 shadow-sm'
+                                    : 'bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 font-mono font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
+                                    {hc.candidate?.avatar || hc.candidate?.profilePic ? (
+                                      <img src={hc.candidate.avatar || hc.candidate.profilePic} alt={hc.candidate.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                      <span>{hc.candidate?.name?.charAt(0) || 'C'}</span>
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h5 className="text-xs font-bold text-on-surface truncate">{hc.candidate?.name || 'Hired Freelancer'}</h5>
+                                    <p className="text-[9px] font-mono text-emerald-500 font-bold">Active Gig Freelancer</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Feedback Room Panel when gig is COMPLETED */}
+                              {gigDetails.status === 'COMPLETED' && isSelected && (
+                                <div className="p-3 bg-success/5 border border-success/20 rounded-xl space-y-2 shadow-xs">
+                                  <h5 className="text-[9px] font-mono uppercase tracking-wider text-success font-bold">Feedback Room</h5>
+                                  {(() => {
+                                    const currentUserIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
+                                    const myReview = gigDetails.reviews?.find(r => r.reviewerId && currentUserIds.includes(r.reviewerId.toString()));
+                                    if (myReview) {
+                                      return (
+                                        <div className="text-xs space-y-1">
+                                          <div className="flex items-center gap-0.5">
+                                            {[1, 2, 3, 4, 5].map(star => (
+                                              <Star key={star} className={`w-3 h-3 ${star <= myReview.rating ? 'text-warning fill-warning' : 'text-outline-variant'}`} />
+                                            ))}
+                                          </div>
+                                          <p className="text-on-surface italic text-[10px]">"{myReview.review}"</p>
+                                        </div>
+                                      );
+                                    }
+                                    return (
+                                      <form onSubmit={handleSubmitReview} className="space-y-2">
+                                        <div className="flex gap-1">
+                                          {[1, 2, 3, 4, 5].map(star => (
+                                            <button key={star} type="button" onClick={() => setRating(star)} className="hover:scale-110 transition-transform cursor-pointer">
+                                              <Star className={`w-4 h-4 ${star <= rating ? 'text-warning fill-warning' : 'text-outline-variant'}`} />
+                                            </button>
+                                          ))}
+                                        </div>
+                                        <TextArea value={review} onChange={(e) => setReview(e.target.value)} placeholder="Write feedback review..." rows={2} required />
+                                        <Button type="submit" disabled={submittingReview} className="w-full text-[9px] py-1.5">Submit Feedback</Button>
+                                      </form>
+                                    );
+                                  })()}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="text-center py-8">
+                          <p className="text-xs font-mono text-on-surface-variant">No candidate accepted yet.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* BOTTOM BOX: UNREVIEWED PITCHES */}
+                  {(() => {
+                    const hiredIds = gigDetails?.hiredCandidateIds || (gigDetails?.selectedCandidateId ? [gigDetails.selectedCandidateId] : []);
+                    const unreviewedApplicants = (gigDetails?.applicants || []).filter(a => !hiredIds.includes(a.candidateId) && !a.isHired);
+
+                    return (
+                      <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
+                        <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
+                          <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">
+                            Unreviewed Pitches
+                          </h4>
+                          <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                            {unreviewedApplicants.length}
+                          </span>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto space-y-2.5 custom-scrollbar pr-1">
+                          {unreviewedApplicants.length === 0 ? (
+                            <div className="text-center py-8">
+                              <p className="text-xs font-mono text-on-surface-variant">No pending pitches to review.</p>
+                            </div>
+                          ) : (
+                            unreviewedApplicants.map(app => (
+                              <div
+                                key={app.id}
+                                onClick={() => {
+                                  setSelectedOtherCandidateId(app.candidateId);
+                                  setSelectedUnreviewedPitchApp(app);
+                                }}
+                                className={`p-3 rounded-xl border space-y-2 transition-all cursor-pointer ${
+                                  selectedOtherCandidateId === app.candidateId
+                                    ? 'bg-surface-container-high border-primary shadow-xs'
+                                    : 'bg-surface-container-low border-outline-variant hover:border-outline-variant/60'
+                                }`}
+                              >
+                                <div className="flex justify-between items-center gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/30 text-primary font-mono font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
+                                      {app.candidate?.avatar || app.candidate?.profilePic ? (
+                                        <img src={app.candidate.avatar || app.candidate.profilePic} alt={app.candidate.name} className="w-full h-full object-cover" />
+                                      ) : (
+                                        <span>{app.candidate?.name?.charAt(0) || 'C'}</span>
                                       )}
                                     </div>
-                                    <div className="flex gap-1.5">
-                                      <button onClick={() => handleReviewAction('ACCEPT')} className="flex-1 py-1.5 bg-success text-white text-[9px] font-mono font-bold uppercase rounded-lg hover:opacity-95">Accept</button>
-                                      <button onClick={() => handleReviewAction('REVISION')} className="flex-1 py-1.5 bg-error text-white text-[9px] font-mono font-bold uppercase rounded-lg hover:opacity-95">Revision</button>
+                                    <div>
+                                      <h5 className="text-[11px] font-bold text-on-surface line-clamp-1">{app.candidate?.name || 'Candidate'}</h5>
+                                      <p className="text-[8px] font-mono text-on-surface-variant">@{app.candidate?.username || 'candidate'}</p>
                                     </div>
                                   </div>
-                                ) : (
-                                  <p className="text-[9px] text-on-surface-variant text-center py-2 font-mono">Waiting for deliverables...</p>
-                                )
-                              )}
-                            </div>
-                          )}
+                                  {isOwner && (
+                                    <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRejectCandidate(app.candidateId)}
+                                        className="px-2 py-0.5 bg-error/10 text-error border border-error/20 text-[8px] font-mono font-bold uppercase rounded hover:bg-error/20 cursor-pointer"
+                                      >
+                                        Reject
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSelectCandidate(app.candidateId)}
+                                        className="px-2 py-0.5 bg-primary text-white text-[8px] font-mono font-bold uppercase rounded hover:opacity-90 cursor-pointer"
+                                      >
+                                        Hire
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
 
-                          {/* Feedback Room Panel when gig is COMPLETED */}
-                          {gigDetails.status === 'COMPLETED' && (
-                            <div className="p-3 bg-success/5 border border-success/20 rounded-xl space-y-2 shadow-xs">
-                              <h5 className="text-[9px] font-mono uppercase tracking-wider text-success font-bold">Feedback Room</h5>
-                              {(() => {
-                                const myReview = gigDetails.reviews?.find(r => r.reviewerId === user.id);
-                                if (myReview) {
-                                  return (
-                                    <div className="text-xs space-y-1">
-                                      <div className="flex items-center gap-0.5">
-                                        {[1, 2, 3, 4, 5].map(star => (
-                                          <Star key={star} className={`w-3 h-3 ${star <= myReview.rating ? 'text-warning fill-warning' : 'text-outline-variant'}`} />
-                                        ))}
-                                      </div>
-                                      <p className="text-on-surface italic text-[10px]">"{myReview.review}"</p>
-                                    </div>
-                                  );
-                                }
-                                return (
-                                  <form onSubmit={handleSubmitReview} className="space-y-2">
-                                    <div className="flex gap-1">
-                                      {[1, 2, 3, 4, 5].map(star => (
-                                        <button key={star} type="button" onClick={() => setRating(star)} className="hover:scale-110 transition-transform cursor-pointer">
-                                          <Star className={`w-4 h-4 ${star <= rating ? 'text-warning fill-warning' : 'text-outline-variant'}`} />
-                                        </button>
-                                      ))}
-                                    </div>
-                                    <TextArea value={review} onChange={(e) => setReview(e.target.value)} placeholder="Write feedback review..." rows={2} required />
-                                    <Button type="submit" disabled={submittingReview} className="w-full text-[9px] py-1.5">Submit Feedback</Button>
-                                  </form>
-                                );
-                              })()}
-                            </div>
+                                {/* {app.message && (
+                                  <p className="text-[10px] text-on-surface-variant line-clamp-2 italic bg-surface-container-high/40 p-1.5 rounded-lg border border-outline-variant/30">
+                                    "{app.message}"
+                                  </p>
+                                )} */}
+
+                                {app.attachments?.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 pt-1">
+                                    {app.attachments.map((url, idx) => (
+                                      <a
+                                        key={idx}
+                                        href={url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        onClick={e => e.stopPropagation()}
+                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-outline-variant bg-surface-container text-[8px] font-mono text-on-surface-variant hover:text-primary"
+                                      >
+                                        <Paperclip className="w-2.5 h-2.5 text-primary" />
+                                        <span>Attachment #{idx + 1}</span>
+                                      </a>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))
                           )}
                         </div>
-                      );
-                    })()
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-xs font-mono text-on-surface-variant">No candidate accepted yet.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* BOTTOM BOX: CANDIDATE WHO'S PITCH ARE STILL YET TO BE REVIEWED */}
-              <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
-                <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
-                  <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">
-                    Unreviewed Pitches
-                  </h4>
-                  <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                    {gigDetails?.applicants?.filter(a => a.candidateId !== gigDetails?.selectedCandidateId).length || 0}
-                  </span>
-                </div>
-
-                <div className="flex-1 overflow-y-auto space-y-2.5 custom-scrollbar pr-1">
-                  {!gigDetails?.applicants || gigDetails.applicants.filter(a => a.candidateId !== gigDetails.selectedCandidateId).length === 0 ? (
-                    <div className="text-center py-8">
-                      <p className="text-xs font-mono text-on-surface-variant">No pending pitches to review.</p>
-                    </div>
-                  ) : (
-                    gigDetails.applicants.filter(a => a.candidateId !== gigDetails.selectedCandidateId).map(app => (
-                      <div
-                        key={app.id}
-                        onClick={() => {
-                          setSelectedOtherCandidateId(app.candidateId);
-                          setSelectedUnreviewedPitchApp(app);
-                        }}
-                        className={`p-3 rounded-xl border space-y-2 transition-all cursor-pointer ${selectedOtherCandidateId === app.candidateId ? 'bg-surface-container-high border-primary shadow-xs' : 'bg-surface-container-low border-outline-variant hover:border-outline-variant/60'}`}
-                      >
-                        <div className="flex justify-between items-center gap-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/30 text-primary font-mono font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
-                              {app.candidate?.avatar || app.candidate?.profilePic ? (
-                                <img src={app.candidate.avatar || app.candidate.profilePic} alt={app.candidate.name} className="w-full h-full object-cover" />
-                              ) : (
-                                <span>{app.candidate?.name?.charAt(0) || 'C'}</span>
-                              )}
-                            </div>
-                            <div>
-                              <h5 className="text-[11px] font-bold text-on-surface line-clamp-1">{app.candidate?.name || 'Candidate'}</h5>
-                              <p className="text-[8px] font-mono text-on-surface-variant">@{app.candidate?.username || 'candidate'}</p>
-                            </div>
-                          </div>
-                          {isOwner && (
-                            <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                              <button
-                                type="button"
-                                onClick={() => handleRejectCandidate(app.candidateId)}
-                                className="px-2 py-0.5 bg-error/10 text-error border border-error/20 text-[8px] font-mono font-bold uppercase rounded hover:bg-error/20 cursor-pointer"
-                              >
-                                Reject
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleSelectCandidate(app.candidateId)}
-                                className="px-2 py-0.5 bg-primary text-white text-[8px] font-mono font-bold uppercase rounded hover:opacity-90 cursor-pointer"
-                              >
-                                Hire
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-                        <p className="text-[10px] text-on-surface-variant line-clamp-2 leading-relaxed bg-surface-container-high/40 p-2 rounded-lg border border-outline-variant/20">
-                          {app.message}
-                        </p>
-
-                        {app.attachments?.length > 0 && (
-                          <div className="flex flex-wrap gap-1 pt-1">
-                            {app.attachments.map((url, idx) => (
-                              <a
-                                key={idx}
-                                href={url}
-                                target="_blank"
-                                rel="noreferrer"
-                                onClick={e => e.stopPropagation()}
-                                className="inline-flex items-center gap-1 text-[8px] font-mono text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded"
-                              >
-                                <Paperclip className="w-2.5 h-2.5" />
-                                <span>Attachment #{idx + 1}</span>
-                              </a>
-                            ))}
-                          </div>
-                        )}
                       </div>
-                    ))
-                  )}
-                </div>
-              </div>
+                    );
+                  })()}
+                </>
+              )}
             </div>
 
           </div>
@@ -2868,10 +3047,11 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                 try {
                                   let uploadedUrl = null;
                                   if (otherCandidateChatFile) {
+                                    const fileTypeToUse = otherCandidateChatFile.type?.startsWith('image/') ? 'image' : 'doc';
                                     const urlRes = await apiFetch('/upload/request-url', {
                                       token,
                                       method: 'POST',
-                                      json: { fileType: 'avatar', fileName: otherCandidateChatFile.name, contentType: otherCandidateChatFile.type }
+                                      json: { fileType: fileTypeToUse, fileName: otherCandidateChatFile.name, contentType: otherCandidateChatFile.type || 'application/octet-stream' }
                                     });
                                     if (urlRes.ok) {
                                       const { uploadUrl, publicUrl } = await urlRes.json();
@@ -3065,6 +3245,142 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   </button>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Candidate Work Submission Modal */}
+      {showSubmissionModal && gigDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in pointer-events-auto">
+          <div className="w-full max-w-lg bg-surface border border-outline-variant rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-scale-up">
+            {/* Modal Header */}
+            <div className="p-4 bg-surface-container-high border-b border-outline-variant flex justify-between items-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/30 text-primary font-mono font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
+                  <Paperclip className="w-4.5 h-4.5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-on-surface">Candidate Work Deliverables</h3>
+                  <p className="text-[10px] font-mono text-on-surface-variant">Project: {gigDetails.title}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSubmissionModal(false)}
+                className="p-1.5 hover:bg-surface-container-low rounded-lg text-on-surface-variant hover:text-on-surface transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 overflow-y-auto space-y-4 custom-scrollbar bg-background text-left font-sans">
+              {isHiredCandidate && gigDetails.status === 'IN_PROGRESS' && (
+                <form onSubmit={async (e) => {
+                  await handleSubmitWork(e);
+                  setShowSubmissionModal(false);
+                }} className="space-y-3 pb-3 border-b border-outline-variant/40">
+                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-primary font-bold">Submission Form</h4>
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold">Work Description *</label>
+                    <TextArea value={submitText} onChange={(e) => setSubmitText(e.target.value)} placeholder="Describe your completed deliverables, instructions, or links..." rows={3} required />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold">Attach Work File (PDF/PNG/JPG/DOCX/ZIP)</label>
+                    <input type="file" onChange={(e) => setSubmitFile(e.target.files[0])} className="w-full text-xs text-on-surface bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 cursor-pointer" />
+                  </div>
+                  <Button type="submit" disabled={submittingWork} className="w-full text-xs py-2 font-mono font-bold uppercase">
+                    {submittingWork ? 'Uploading & Submitting...' : 'Submit Work Deliverables'}
+                  </Button>
+                </form>
+              )}
+
+              {(() => {
+                const activeCandId = selectedOtherCandidateId || gigDetails.selectedCandidateId || (gigDetails.hiredCandidateIds && gigDetails.hiredCandidateIds[0]);
+                const candSubmission = (gigDetails.submissions || []).find(s => s.candidateId === activeCandId || currentUserIds.includes(s.candidateId?.toString())) || gigDetails.submissions?.[0];
+
+                if (!candSubmission) {
+                  return !isHiredCandidate ? (
+                    <div className="text-center py-8 bg-surface-container-low rounded-xl border border-outline-variant border-dashed p-4">
+                      <Paperclip className="w-8 h-8 text-on-surface-variant/40 mx-auto mb-2" />
+                      <p className="text-xs font-mono text-on-surface-variant">No work deliverables submitted yet by this candidate.</p>
+                    </div>
+                  ) : null;
+                }
+
+                return (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-[10px] font-mono uppercase tracking-wider text-primary font-bold">Submitted Deliverables</h4>
+                      <span className={`text-[9px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase border ${
+                        candSubmission.status === 'ACCEPTED'
+                          ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                          : candSubmission.status === 'REJECTED'
+                          ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                          : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                      }`}>
+                        {candSubmission.status || 'PENDING REVIEW'}
+                      </span>
+                    </div>
+                    <div className="p-3.5 bg-surface-container border border-outline-variant/60 rounded-xl text-xs text-on-surface leading-relaxed whitespace-pre-wrap">
+                      {candSubmission.text}
+                    </div>
+                    {candSubmission.fileUrl && (
+                      <div className="p-3 bg-surface-container-low border border-outline-variant rounded-xl flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 text-xs font-mono text-on-surface truncate">
+                          <Paperclip className="w-4 h-4 text-primary shrink-0" />
+                          <span className="truncate">{candSubmission.fileUrl.split('/').pop() || 'Work Deliverable File'}</span>
+                        </div>
+                        <a
+                          href={candSubmission.fileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3.5 py-1.5 bg-primary text-white text-[10px] font-mono font-bold uppercase rounded-xl hover:opacity-90 transition-all shrink-0 shadow-xs"
+                        >
+                          View Work File
+                        </a>
+                      </div>
+                    )}
+
+                    {isOwner && (
+                      <div className="flex gap-2 pt-3 border-t border-outline-variant/40">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await handleReviewAction('ACCEPT', candSubmission.candidateId);
+                            setShowSubmissionModal(false);
+                          }}
+                          className="flex-1 py-2 bg-success text-white text-xs font-mono font-bold uppercase rounded-xl hover:opacity-95 shadow-xs cursor-pointer font-bold"
+                        >
+                          Accept Work
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await handleReviewAction('REVISION', candSubmission.candidateId);
+                            setShowSubmissionModal(false);
+                          }}
+                          className="flex-1 py-2 bg-error text-white text-xs font-mono font-bold uppercase rounded-xl hover:opacity-95 shadow-xs cursor-pointer font-bold"
+                        >
+                          Request Revision
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3 border-t border-outline-variant bg-surface-container-low flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowSubmissionModal(false)}
+                className="px-4 py-2 bg-surface-container-high border border-outline-variant hover:bg-surface-container text-on-surface text-xs font-mono font-bold rounded-xl cursor-pointer"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

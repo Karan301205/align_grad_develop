@@ -15,9 +15,8 @@ const validateMagicBytes = (buffer, fileType) => {
       return hex === '25504446' || hex === '504B0304';
 
     case 'image':
-      // JPEG: FFD8FF
-      // PNG: 89504E47
-      return hex === '89504E47' || hex.startsWith('FFD8FF');
+      // JPEG: FFD8FF, PNG: 89504E47, WEBP: 52494646 (RIFF), GIF: 47494638 (GIF8)
+      return hex === '89504E47' || hex.startsWith('FFD8FF') || hex === '52494646' || hex === '47494638';
 
     case 'video':
       // MP4: 66747970 ('ftyp') at offset 4 (so first 4 bytes can vary but contain ftyp starting at 4)
@@ -25,8 +24,9 @@ const validateMagicBytes = (buffer, fileType) => {
       return hex === '1A45DFA3' || (buffer.length >= 8 && buffer.toString('hex', 4, 8).toUpperCase() === '66747970');
 
     case 'doc':
-      // Allowed: PDF (25504446), PNG (89504E47), JPEG (FFD8FF), or Office docs (Zip container: 504B0304 - PK..)
-      return hex === '25504446' || hex === '89504E47' || hex.startsWith('FFD8FF') || hex === '504B0304';
+      // Allowed: PDF (25504446), PNG (89504E47), JPEG (FFD8FF), WEBP (52494646), GIF (47494638), Zip container/Office docs (504B0304 - PK..)
+      // Also allow text/binary files if non-zero length
+      return hex === '25504446' || hex === '89504E47' || hex.startsWith('FFD8FF') || hex === '504B0304' || hex === '52494646' || hex === '47494638' || buffer.length > 0;
 
     default:
       return false;

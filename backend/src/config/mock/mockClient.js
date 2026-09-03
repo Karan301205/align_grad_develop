@@ -302,7 +302,18 @@ const mockClient = {
         if (where.OR) {
           // Used for my-gigs tabs
           result = result.filter(g => {
-            return g.ownerId === where.OR[0].ownerId || g.selectedCandidateId === where.OR[1].selectedCandidateId;
+            return where.OR.some(cond => {
+              if (cond.ownerId?.in) return cond.ownerId.in.includes(g.ownerId);
+              if (cond.ownerId) return cond.ownerId === g.ownerId;
+              if (cond.selectedCandidateId?.in) return cond.selectedCandidateId.in.includes(g.selectedCandidateId);
+              if (cond.selectedCandidateId) return cond.selectedCandidateId === g.selectedCandidateId;
+              if (cond.hiredCandidateIds?.hasSome) return cond.hiredCandidateIds.hasSome.some(id => (g.hiredCandidateIds || []).includes(id));
+              if (cond.applicants?.some?.candidateId?.in) {
+                const candApps = mockDb.gigApplicants.filter(a => a.gigId === g.id);
+                return candApps.some(a => cond.applicants.some.candidateId.in.includes(a.candidateId));
+              }
+              return false;
+            });
           });
         }
       }
@@ -311,8 +322,10 @@ const mockClient = {
         const ownerProfile = mockDb.profiles.find(p => p.userId === g.ownerId) || mockDb.profiles.find(p => p.id === g.ownerId);
         const ownerCompany = mockDb.companies.find(c => c.userId === g.ownerId) || mockDb.companies.find(c => c.id === g.ownerId);
         const ownerName = ownerProfile ? ownerProfile.name : (ownerCompany ? ownerCompany.name : "System User");
+        const applicants = mockDb.gigApplicants.filter(a => a.gigId === g.id);
         return {
           ...g,
+          applicants,
           ownerName,
           ownerRole: ownerProfile ? "STUDENT" : "RECRUITER"
         };
@@ -367,7 +380,7 @@ const mockClient = {
     update: async ({ where, data }) => {
       const idx = mockDb.gigs.findIndex(g => g.id === where.id);
       if (idx !== -1) {
-        const fields = ["status", "selectedCandidateId", "title", "description", "budget", "deliveryTime", "attachments", "category", "categories", "skills", "requirements", "minRating"];
+        const fields = ["status", "selectedCandidateId", "hiredCandidateIds", "title", "description", "budget", "deliveryTime", "attachments", "category", "categories", "skills", "requirements", "minRating"];
         fields.forEach(field => {
           if (data[field] !== undefined) {
             mockDb.gigs[idx][field] = data[field];
@@ -457,13 +470,16 @@ const mockClient = {
       mockDb.gigSubmissions.push(newSubmission);
       return newSubmission;
     },
+    findFirst: async ({ where }) => {
+      return mockDb.gigSubmissions.find(s => s.gigId === where.gigId || s.id === where.id) || null;
+    },
     findUnique: async ({ where }) => {
-      return mockDb.gigSubmissions.find(s => s.gigId === where.gigId) || null;
+      return mockDb.gigSubmissions.find(s => s.gigId === where.gigId || s.id === where.id) || null;
     },
     update: async ({ where, data }) => {
       const idx = mockDb.gigSubmissions.findIndex(s => s.gigId === where.gigId || s.id === where.id);
       if (idx !== -1) {
-        if (data.status) mockDb.gigSubmissions[idx].status = data.status;
+        Object.assign(mockDb.gigSubmissions[idx], data);
         return mockDb.gigSubmissions[idx];
       }
       throw new Error("Submission not found");

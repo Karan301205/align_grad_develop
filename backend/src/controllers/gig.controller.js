@@ -129,8 +129,13 @@ exports.getMyGigs = async (req, res) => {
       where: {
         OR: [
           { ownerId: { in: candidateIds } },
-          { selectedCandidateId: { in: candidateIds } }
+          { selectedCandidateId: { in: candidateIds } },
+          { hiredCandidateIds: { hasSome: candidateIds } },
+          { applicants: { some: { candidateId: { in: candidateIds } } } }
         ]
+      },
+      include: {
+        applicants: true
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -138,7 +143,8 @@ exports.getMyGigs = async (req, res) => {
     const companies = await prisma.company.findMany();
     const gigsWithCompany = gigs.map(g => {
       const company = companies.find(c => c.userId === g.ownerId || c.id === g.ownerId) || null;
-      return { ...g, company };
+      const hasApplied = (g.applicants || []).some(a => candidateIds.includes(a.candidateId?.toString()));
+      return { ...g, company, hasApplied };
     });
     res.status(200).json(gigsWithCompany);
   } catch (err) {
@@ -176,9 +182,11 @@ exports.getGigDetails = async (req, res) => {
       if (userProfile.userId) candidateIds.push(userProfile.userId);
     }
 
+    const allHiredIds = Array.from(new Set([...(gig.hiredCandidateIds || []), gig.selectedCandidateId].filter(Boolean)));
+
     // Check access permission
     const isOwner = candidateIds.includes(gig.ownerId);
-    const isCandidate = gig.selectedCandidateId && candidateIds.includes(gig.selectedCandidateId);
+    const isCandidate = candidateIds.some(cId => allHiredIds.includes(cId));
     const isApplicant = gig.applicants.some(a => candidateIds.includes(a.candidateId));
 
     if (!isOwner && !isCandidate && !isApplicant && req.user.role !== 'RECRUITER') {
@@ -212,7 +220,7 @@ exports.getGigDetails = async (req, res) => {
       where: { OR: [{ userId: gig.ownerId }, { id: gig.ownerId }] }
     });
 
-    const candidateUserIds = (gig.applicants || []).map(a => a.candidateId).filter(Boolean);
+    const candidateUserIds = Array.from(new Set([...allHiredIds, ...(gig.applicants || []).map(a => a.candidateId).filter(Boolean)]));
     const candidateProfiles = candidateUserIds.length > 0
       ? await prisma.profile.findMany({
           where: {
@@ -225,17 +233,35 @@ exports.getGigDetails = async (req, res) => {
         })
       : [];
 
+    const enrichedHired = allHiredIds.map(hId => {
+      const p = candidateProfiles.find(cp => cp.userId === hId || cp.id === hId);
+      return {
+        candidateId: hId,
+        candidate: p
+          ? { id: hId, name: p.name, username: p.username, avatar: p.profilePic, bio: p.bio }
+          : { id: hId, name: 'Hired Candidate' }
+      };
+    });
+
     const enrichedApplicants = (gig.applicants || []).map(a => {
       const p = candidateProfiles.find(cp => cp.userId === a.candidateId || cp.id === a.candidateId);
       return {
         ...a,
+        isHired: allHiredIds.includes(a.candidateId),
         candidate: p
           ? { id: a.candidateId, name: p.name, username: p.username, avatar: p.profilePic, bio: p.bio }
           : { id: a.candidateId, name: 'Candidate' }
       };
     });
 
-    res.status(200).json({ ...gig, applicants: enrichedApplicants, company, hasApplied: isApplicant });
+    res.status(200).json({
+      ...gig,
+      hiredCandidateIds: allHiredIds,
+      hiredCandidates: enrichedHired,
+      applicants: enrichedApplicants,
+      company,
+      hasApplied: isApplicant
+    });
   } catch (err) {
     console.error('Error fetching gig details:', err);
     res.status(500).json({ error: 'Failed to fetch gig details' });
@@ -353,11 +379,20 @@ exports.hireCandidate = async (req, res) => {
       return res.status(400).json({ error: 'Cannot hire candidate for a closed gig' });
     }
     
+    const currentHired = Array.isArray(gig.hiredCandidateIds) ? [...gig.hiredCandidateIds] : [];
+    if (gig.selectedCandidateId && !currentHired.includes(gig.selectedCandidateId)) {
+      currentHired.push(gig.selectedCandidateId);
+    }
+    if (candidateId && !currentHired.includes(candidateId)) {
+      currentHired.push(candidateId);
+    }
+
     const updatedGig = await prisma.gig.update({
       where: { id: gigId },
       data: {
         status: gig.status === 'CLOSED' ? 'CLOSED' : 'IN_PROGRESS',
-        selectedCandidateId: candidateId
+        selectedCandidateId: candidateId,
+        hiredCandidateIds: currentHired
       }
     });
     
@@ -428,11 +463,11 @@ exports.sendMessage = async (req, res) => {
     }
     
     const isOwner = gig.ownerId === senderId;
-    const isSelected = gig.selectedCandidateId === senderId;
-    const isApplicant = gig.applicants?.some(a => a.candidateId === senderId);
+    const allHiredIds = Array.from(new Set([...(gig.hiredCandidateIds || []), gig.selectedCandidateId].filter(Boolean)));
+    const isHiredCandidate = allHiredIds.includes(senderId);
 
-    if (!isOwner && !isSelected && !isApplicant) {
-      return res.status(403).json({ error: 'You are not active on this communication channel' });
+    if (!isOwner && !isHiredCandidate) {
+      return res.status(403).json({ error: 'Direct messaging unlocks once you are hired for this gig' });
     }
     
     // Set sender as typing
@@ -446,11 +481,13 @@ exports.sendMessage = async (req, res) => {
       // Artificially delay message creation to let the receiver observe the typing indicator smoothly
       await new Promise(resolve => setTimeout(resolve, 800));
       
+      const targetReceiverId = receiverId || (isOwner ? (gig.selectedCandidateId || gig.hiredCandidateIds?.[0] || null) : gig.ownerId);
+
       message = await prisma.gigMessage.create({
         data: {
           gigId,
           senderId,
-          receiverId: receiverId || null,
+          receiverId: targetReceiverId,
           text,
           fileUrl
         }
@@ -475,7 +512,7 @@ exports.submitWork = async (req, res) => {
   try {
     const { gigId } = req.params;
     const { text, fileUrl } = req.body;
-    const candidateId = req.user.id;
+    const userId = req.user.id;
     
     const gig = await prisma.gig.findUnique({
       where: { id: gigId }
@@ -484,18 +521,32 @@ exports.submitWork = async (req, res) => {
     if (!gig) {
       return res.status(404).json({ error: 'Gig not found' });
     }
+
+    const candidateIds = [userId];
+    const userProfile = await prisma.profile.findFirst({
+      where: { OR: [{ userId }, { id: userId }] }
+    });
+    if (userProfile) {
+      if (userProfile.id) candidateIds.push(userProfile.id);
+      if (userProfile.userId) candidateIds.push(userProfile.userId);
+    }
     
-    if (gig.selectedCandidateId !== candidateId) {
-      return res.status(403).json({ error: 'Only the selected freelancer can submit work' });
+    const allHired = Array.from(new Set([...(gig.hiredCandidateIds || []), gig.selectedCandidateId].filter(Boolean)));
+    const isHiredCandidate = candidateIds.some(cId => allHired.includes(cId));
+    if (!isHiredCandidate) {
+      return res.status(403).json({ error: 'Only a hired freelancer can submit work' });
     }
     
     if (gig.status !== 'IN_PROGRESS') {
       return res.status(400).json({ error: 'Work can only be submitted for active gigs' });
     }
     
-    // Check if submission already exists
-    const existingSubmission = await prisma.gigSubmission.findUnique({
-      where: { gigId }
+    // Check if submission already exists for this candidate
+    const existingSubmission = await prisma.gigSubmission.findFirst({
+      where: {
+        gigId,
+        candidateId: { in: candidateIds }
+      }
     });
     
     let submission;
@@ -513,7 +564,7 @@ exports.submitWork = async (req, res) => {
       submission = await prisma.gigSubmission.create({
         data: {
           gigId,
-          candidateId,
+          candidateId: userId,
           text,
           fileUrl,
           status: "PENDING"
@@ -525,8 +576,9 @@ exports.submitWork = async (req, res) => {
     await prisma.gigMessage.create({
       data: {
         gigId,
-        senderId: candidateId,
-        text: `[SYSTEM: WORK SUBMITTED] I have submitted the final work deliverables for your review. Description: ${text || 'No description provided.'}`
+        senderId: userId,
+        receiverId: gig.ownerId,
+        text: `I have submitted the final work deliverables for your review. Description: ${text || 'No description provided.'}`
       }
     });
     
@@ -541,7 +593,7 @@ exports.submitWork = async (req, res) => {
 exports.completeGig = async (req, res) => {
   try {
     const { gigId } = req.params;
-    const { action } = req.body; // "ACCEPT" or "REVISION"
+    const { action, candidateId } = req.body; // "ACCEPT" or "REVISION"
     const userId = req.user.id;
     
     const gig = await prisma.gig.findUnique({
@@ -551,25 +603,36 @@ exports.completeGig = async (req, res) => {
     if (!gig) {
       return res.status(404).json({ error: 'Gig not found' });
     }
+
+    const ownerIds = [userId];
+    const userProfile = await prisma.profile.findFirst({
+      where: { OR: [{ userId }, { id: userId }] }
+    });
+    if (userProfile) {
+      if (userProfile.id) ownerIds.push(userProfile.id);
+      if (userProfile.userId) ownerIds.push(userProfile.userId);
+    }
     
-    if (gig.ownerId !== userId) {
+    if (!ownerIds.includes(gig.ownerId)) {
       return res.status(403).json({ error: 'Only the gig owner can complete the gig or request revisions' });
     }
     
-    const submission = await prisma.gigSubmission.findUnique({
-      where: { gigId }
-    });
+    let submission;
+    if (candidateId) {
+      submission = await prisma.gigSubmission.findFirst({
+        where: { gigId, candidateId }
+      });
+    } else {
+      submission = await prisma.gigSubmission.findFirst({
+        where: { gigId }
+      });
+    }
     
     if (!submission) {
       return res.status(400).json({ error: 'No deliverables have been submitted yet' });
     }
     
     if (action === 'ACCEPT') {
-      await prisma.gig.update({
-        where: { id: gigId },
-        data: { status: "COMPLETED" }
-      });
-      
       await prisma.gigSubmission.update({
         where: { id: submission.id },
         data: { status: "ACCEPTED" }
@@ -579,7 +642,8 @@ exports.completeGig = async (req, res) => {
         data: {
           gigId,
           senderId: userId,
-          text: `[SYSTEM: GIG COMPLETED] The deliverables have been reviewed and accepted! The project has been marked as Completed.`
+          receiverId: submission.candidateId,
+          text: `The deliverables have been reviewed and accepted! Thank you for your work.`
         }
       });
     } else {
@@ -592,7 +656,8 @@ exports.completeGig = async (req, res) => {
         data: {
           gigId,
           senderId: userId,
-          text: `[SYSTEM: REVISIONS REQUESTED] Revisions requested on the submitted work. Please check requirements and update your submission.`
+          receiverId: submission.candidateId,
+          text: `Revisions requested on the submitted work. Please check requirements and update your submission.`
         }
       });
     }

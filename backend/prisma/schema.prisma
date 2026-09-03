@@ -241,6 +241,7 @@ model Gig {
   attachments         String[]        @default([])
   ownerId             String          @db.ObjectId
   selectedCandidateId String?         @db.ObjectId
+  hiredCandidateIds   String[]        @default([]) @db.ObjectId
   status              String          @default("OPEN") // "OPEN", "IN_PROGRESS", "COMPLETED"
   minRating           Int             @default(1)
   typingUserId        String?
