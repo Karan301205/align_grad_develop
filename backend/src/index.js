@@ -1,8 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const apiRoutes = require('./routes/api');
-const { prisma, initDb } = require('./config/db');
+const apiRoutes = require('./routes/index');
+const { prisma, initDb } = require('./infrastructure/database');
 
 // Triggering nodemon reload to load the updated Prisma Client schema: reload 3
 dotenv.config();
