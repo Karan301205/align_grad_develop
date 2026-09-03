@@ -33,249 +33,108 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   # NOTE: there is NO root-level package.json. frontend/ and backend/ are
 │   # independent npm projects and must be installed/run separately.
 │
-├── docs/superpowers/
-│   ├── specs/
-│   │   └── 2026-07-21-question-bank-architecture-design.md  # CURRENT architecture (pre-generated bank)
-│   ├── archive/
-│   │   └── 2026-07-18-question-bank-spine-design.md  # SUPERSEDED — deprecated enterprise pipeline design
-│   └── plans/
-│       ├── 2026-07-18-skill-registry-foundation.md   # Plan 1: skill registry (kept, shipped)
-│       └── 2026-07-20-testsession-security.md        # Plan 2: TestSession security (kept, shipped)
+├── docs/                         # System and domain documentation
+│   ├── api/                      # OpenAPI specifications and endpoint docs
+│   ├── architecture/             # High-level design and module boundaries
+│   ├── database/                 # Prisma schemas, Atlas migrations, mock store notes
+│   ├── deployment/               # Cloud architecture, CI/CD, and scaling plans
+│   └── superpowers/              # Feature design specs, archives, and migration plans
 │
 ├── backend/                      # --- Main Express.js API Workspace (Port 5001) ---
 │   ├── prisma/
 │   │   └── schema.prisma         # Prisma schema and MongoDB collection structure definitions
 │   ├── scripts/                  # Offline generation, validation, and database seeding scripts
-│   │   ├── clearGigData.js       # Cleanup script purging all Gigs and associated attachments from DB & S3
-│   │   ├── generateQuestions.js  # Offline MCQ generator pulling 50 Qs per skill from Groq
-│   │   ├── seedQuestions.js      # Seeding script to write JSON questions to Prisma Question model
-│   │   └── verifyBankFlow.js     # End-to-end flow validator checking seed -> serve under mock
 │   ├── src/
-│   │   ├── config/               # System configurations and DB connections
-│   │   │   ├── db.js             # DB wrapper initializing Prisma Client or hot-swapping Mock
-│   │   │   ├── env.js            # Environment validator enforcing fail-fast in production
-│   │   │   ├── rateLimit.config.js # Centralized configuration parameters for rate limit layers
-│   │   │   ├── s3.js             # AWS S3 client builder and upload buffer helper methods
-│   │   │   ├── upload.config.js  # File size thresholds and allowed upload MIME type sets
-│   │   │   └── mock/             # Sandbox mock client & fixture sets
-│   │   │       ├── mockClient.js # In-memory emulation of Prisma API for offline execution
-│   │   │       └── seed.js       # Initial mock data and database state for the mock store
-│   │   │       └── loadQuestionBankMock.js # Boot-loads questions from JSON into the mock database
+│   │   ├── config/               # Legacy re-export shims & configuration files (db.js, s3.js, env.js, rateLimit.config.js, upload.config.js)
 │   │   ├── cli/                  # Operator CLI (npm run bank -- <command>)
-│   │   │   ├── bank.js           # Subcommand dispatcher; every write defaults to dry-run
-│   │   │   └── commands/
-│   │   │       ├── seedSkills.js # Seeds SkillDefinition rows from seedData.json
-│   │   │       └── normalizeSkillNames.js # Reversible canonical-name migration (dry-run default, human-only --commit)
-│   │   ├── constants/
-│   │   │   └── technicalSkills.js # LEGACY after registry seeding — see SkillDefinition
-│   │   ├── services/questionBank/ # Question bank subsystem (see docs/superpowers/specs/)
-│   │   │   ├── repositories/
-│   │   │   │   └── skillDefinitionRepository.js # SOLE Prisma access for SkillDefinition
-│   │   │   └── skills/
-│   │   │       ├── normalize.js  # Pure: normalizeToken, buildAliasIndex, resolveSkill
-│   │   │       ├── seedData.json # 143 generated canonical skill definitions
-│   │   │       └── registryCache.js # Boot-cached alias index; degrades to identity when unloaded/empty
-│   │   ├── controllers/          # HTTP request controllers (Routing handlers only)
-│   │   │   ├── auth.controller.js # Signups, logins, and token issuance
-│   │   │   ├── recruiter.controller.js # Verification, candidate search, job postings
-│   │   │   ├── student.controller.js # Profile updates, job listings, quiz scoring
-│   │   │   ├── upload.controller.js # Presigned S3 url generator and binary magic-bytes checking
-│   │   │   ├── gig.controller.js # Gigs marketplace controller workflow
-│   │   │   └── community.controller.js # LinkedIn-style community, feeds, media, and engagement controller
-│   │   ├── middleware/           # HTTP Interceptors and guards
-│   │   │   ├── auth.js           # Decodes and validates JWT bearer token signatures
-│   │   │   ├── errorHandler.js   # Catches errors, formatting 500s with masked prod warnings
-│   │   │   ├── rateLimiter.js    # Express rate limit wrapper enforcing brute-force lockouts
-│   │   │   └── validate.js       # Zod validator middleware processing incoming payloads
+│   │   ├── middleware/           # HTTP Interceptors (auth.js, errorHandler.js, rateLimiter.js, validate.js)
 │   │   ├── routes/
-│   │   │   └── api.js            # Express API endpoint definitions & middleware chains
-│   │   ├── services/             # Core business and external integration logic
-│   │   │   ├── fileCleanup.service.js # Removes outdated files/media from AWS S3 storage
-│   │   │   ├── jobLifecycle.service.js # Checks and deactivates expired job postings
-│   │   │   ├── skillMatching.service.js # Computes requirements overlap between students and jobs
-│   │   │   ├── community/        # LinkedIn-style community subsystem
-│   │   │   │   ├── permission.engine.js # Scalable role-to-permission mapping engine
-│   │   │   │   ├── community.service.js # Community lifecycle, startup global init, password validation
-│   │   │   │   ├── invite.service.js # Tokenized invitation links with expiration & max usage limits
-│   │   │   │   ├── post.service.js # Post creation with linked Media records, edit, soft delete
-│   │   │   │   ├── feed.service.js # Chronological feed queries with enriched reactions & comments
-│   │   │   │   ├── media.service.js # S3 presigned URL generation with strict size & MIME checks
-│   │   │   │   ├── reaction.service.js # 6 reaction types (Like, Love, Celebrate, Insightful, Support, Funny)
-│   │   │   │   ├── comment.service.js # Nested comment replies supporting unlimited depth
-│   │   │   │   ├── bookmark.service.js # User post bookmarking & saved post retrieval
-│   │   │   │   └── view.service.js # Unique post view tracking enforcing (postId, userId) uniqueness
-│   │   │   └── mcq/              # LLM-powered multiple choice question generator
-│   │   │       ├── mcqService.js # Main orchestrator coordinating provider sequences
-│   │   │       ├── prompts.js    # AI prompt string templates formatting questions JSON
-│   │   │       └── providers/
-│   │   │           ├── bedrockProvider.js # AWS Bedrock Claude/Llama integration
-│   │   │           └── groqProvider.js # Groq LLM API provider integration
-│   │   ├── utils/
-│   │   │   └── fileSignature.js  # Magic-bytes utility validating binary signatures of files
-│   │   ├── validators/           # Zod schema definitions validating input payloads
-│   │   │   ├── auth.validator.js
-│   │   │   ├── recruiter.validator.js
-│   │   │   ├── recruiterCompany.validator.js # Zod schemas for company settings
-│   │   │   ├── student.validator.js
-│   │   │   ├── upload.validator.js
-│   │   │   ├── gig.validator.js
-│   │   │   └── community.validator.js # Zod schemas for community, posts, comments, media, and reactions
-│   │   └── index.js              # Application entrypoint setting up middleware, DB, and ports
+│   │   │   ├── index.js          # Thin route aggregator mounting domain modules
+│   │   │   └── api.js            # Backwards-compatible route re-export shim
+│   │   ├── infrastructure/       # Core low-level I/O and external integrations
+│   │   │   ├── database/         # Prisma Client proxy & hot-swapping mock database
+│   │   │   │   ├── index.js      # Primary DB export ({ prisma, isMock, initDb })
+│   │   │   │   └── mock/         # In-memory sandbox DB store (mockClient.js, seed.js, loadQuestionBankMock.js)
+│   │   │   ├── storage/s3/       # AWS S3 client builder, presigned URLs, and uploadBuffer helper
+│   │   │   ├── ai/               # AI LLM providers (bedrockProvider.js, groqProvider.js)
+│   │   │   └── logging/          # Centralized logger adapter
+│   │   ├── shared/               # Cross-cutting utilities & helpers
+│   │   │   └── utils/
+│   │   │       └── fileSignature.js # Binary magic-bytes validator
+│   │   ├── modules/              # Domain-oriented feature modules
+│   │   │   ├── auth/             # Authentication & token issuance (controller, routes, validator, index)
+│   │   │   ├── students/         # Student profiles, applications, video showcase (controller, routes, validator, index)
+│   │   │   ├── recruiters/       # Recruiter profiles, company verification, talent search (controller, routes, validator, index)
+│   │   │   ├── jobs/             # Job lifecycle, listings, requirements (jobLifecycle.service, index)
+│   │   │   ├── gigs/             # Gigs freelance marketplace (controller, routes, validator, index)
+│   │   │   ├── assessments/      # Skill assessments & pre-generated question bank
+│   │   │   │   ├── mcq/          # AI prompt builders & MCQ service
+│   │   │   │   └── question-bank/ # Selection, scoring, repositories, health, CLI tools
+│   │   │   ├── skills/           # Technical skills taxonomy & match scoring engine (technicalSkills.js, skillMatching.service.js, index)
+│   │   │   ├── uploads/          # Presigned upload URLs & S3 file cleanup (controller, routes, validator, fileCleanup.service, index)
+│   │   │   └── community/        # Community networks, feeds, posts, reactions, comments (controller, routes, validator, services/, index)
+│   │   └── index.js              # Application entrypoint setting up Express, DB, and mounting /api routes
 │   ├── package.json
 │   ├── package-lock.json
 │   └── nodemon.json
 │
 ├── frontend/                     # --- Main React + Vite Client Workspace (Port 5173) ---
-│   ├── public/                   # Static browser-accessible assets (logos, icons, illustrations)
-│   │   ├── a_g_lg_dark.webp
-│   │   ├── a_g_logo.webp
-│   │   ├── a_g_logo_dark.webp
-│   │   ├── a_g_l_w.webp
-│   │   ├── favicon.svg
-│   │   ├── icons.svg
-│   │   └── login_visual.png
+│   ├── public/                   # Static assets (logos, icons, illustrations)
 │   ├── src/
-│   │   ├── App.css               # Shared layout resets and global container settings
-│   │   ├── App.jsx               # Navigation router coordinating student, recruiter, and auth states
-│   │   ├── index.css             # Main styling entry: Tailwind v4 config & neumorphic classes
-│   │   ├── main.jsx              # Client mounting layer rendering the React DOM tree
-│   │   ├── assets/               # Styled components SVG assets
-│   │   ├── components/           # Cross-cutting UI layouts and overlays
-│   │   │   ├── ConnectionLoader.jsx # Floating warning indicator showing offline API status
-│   │   │   ├── JobDetailsModal.jsx # Detail job specs drawer showing matching stats & Apply hooks
-│   │   │   ├── CompanyProfileModal.jsx # Unified candidate-facing company details card modal
-│   │   │   └── ui/               # Reusable Neumorphic atomic elements
-│   │   │       ├── AnimatedContent.jsx # Framer Motion container for slick transition animations
-│   │   │       ├── Badge.jsx     # Skeuomorphic tag displaying skills or status indicators
-│   │   │       ├── Button.jsx    # Custom chassis button supporting raised, pressed & LED states
-│   │   │       ├── Card.jsx      # Neumorphic chassis card for grouping content surfaces
-│   │   │       ├── ClickSpark.jsx # Canvas wrapper drawing particle sparks on click triggers
-│   │   │       ├── DotGrid.css   # Layout settings for the dashboard dot matrix background
-│   │   │       ├── DotGrid.jsx   # Dot matrix canvas overlay giving a workshop style look
-│   │   │       ├── EmptyState.jsx # Styled recess panel rendering empty list reminders
-│   │   │       ├── Input.jsx     # Recessed input field with neumorphic shadow configurations
-│   │   │       ├── PageHeader.jsx # Page breadcrumbs, titles, and subtitle labels
-│   │   │       ├── Select.jsx    # Neumorphic selection menu dropdown container
-│   │   │       ├── SidebarNavItem.jsx # Icon + text items indicating active layout navigation
-│   │   │       ├── StatCard.jsx  # Digital counter panels for tracking core metrics and KPIs
-│   │   │       ├── TextArea.jsx  # Recessed multiline comment box for larger input texts
-│   │   │       └── ThemeToggle.jsx # Slide toggle changing index.css from light to dark mode
-│   │   ├── config/
-│   │   │   └── index.js          # Client runtime variables (API_BASE endpoint url)
-│   │   ├── constants/            # Client lookup options and barrel interfaces
-│   │   │   ├── index.js          # Backward compatible barrel exporting constant subsets
-│   │   │   ├── domains.js        # Option list of candidate specialization focus areas
-│   │   │   ├── indianStates.js   # Option list of 28 states & 8 Union Territories in India
-│   │   │   ├── skills.js         # Complete set of skills recognized by the frontend
-│   │   │   └── testQuestions.js  # Static fallback questions for offline skill certifications
-│   │   ├── features/             # Business modules organizing specific portal workspaces
-│   │   │   ├── Auth/
-│   │   │   │   ├── AuthView.jsx  # Marketing landing page with login picker
-│   │   │   │   ├── CandidateAuth.jsx # Dedicated login/signup pages for students
-│   │   │   │   └── RecruiterAuth.jsx # Dedicated login/signup pages for recruiters
-│   │   │   ├── SkillTest/
-│   │   │   │   └── TestView.jsx  # Lockdown fullscreen exam panel executing student skill checks
-│   │   │   ├── Recruiter/
-│   │   │   │   ├── RecruiterLayout.jsx # Recruiter portal navigation, dashboard layouts, and tabs
-│   │   │   │   └── components/
-│   │   │   │       ├── CandidateProfileModal.jsx # Reusable candidate profile dossier drawer modal
-│   │   │   │       ├── EditJobModal.jsx # Recruiter drawer to update postings and requirements
-│   │   │   │       ├── RecruiterCandidates.jsx # Candidate search directory with 3 filters (Work Mode, Work Type, Preferred Locations) & 10-profile pagination
-│   │   │   │       ├── RecruiterCompany.jsx # Company details and document uploading check
-│   │   │   │       ├── RecruiterDashboard.jsx # Executive Recruiter Dashboard (KPI Bento cards, Top Verified Talent Carousel, Recent Applications audit table)
-│   │   │   │       ├── RecruiterJobs.jsx # Posted positions list with matching applicant cards
-│   │   │   │       └── RecruiterPostJob.jsx # Multi-step form setup to post new jobs
-│   │   │   └── Student/
-│   │   │       ├── StudentLayout.jsx # Student portal navigation, layout drawers, and view routes
-│   │   │           ├── StudentDashboard.jsx # Stitch bento grid candidate hub (Profile Integrity, Verification Center, Application Timeline, Recommended Matches & Career Insights)
-│   │   │           ├── StudentProfile.jsx # Complex profiles layout (experience, projects, info)
-│   │   │           ├── StudentProgress.jsx # Tracker displaying selection rounds progress stats
-│   │   │           ├── StudentResume.jsx # Resume builder compiling details and exporting PDF
-│   │   │           ├── StudentShowcase.jsx # Video introduction recorder and uploader
-│   │   │           └── StudentSkillTests.jsx # Interactive dashboard to verify and upgrade skills
-│   │   │   ├── Gigs/
-│   │   │   │   └── GigsMarketplace.jsx # Dashboard managing gigs browse, posts (multi-category field selection), chats, reviews
-│   │   │   └── Community/
-│   │   │       ├── CommunityLayout.jsx # Main container layout wrapping community sidebar & feed
-│   │   │       └── components/
-│   │   │           ├── CommunitySidebar.jsx # Sidebar listing Global/Private networks, search, and action triggers
-│   │   │           ├── CommunityFeed.jsx # Chronological feed stream with header details & post list
-│   │   │           ├── PostComposer.jsx # Rich post composer supporting Text, Image grid, Video player, PDF document
-│   │   │           ├── PostCard.jsx # LinkedIn-style card with multi-media, 6 reactions, comment drawer, views, and save
-│   │   │           ├── CommentSection.jsx # Infinite nested comment thread supporting inline replies
-│   │   │           ├── CreateCommunityModal.jsx # Modal to set up private communities (Name, Description, Logo, Password)
-│   │   │           └── JoinCommunityModal.jsx # Modal to join private communities via Password or Invite Link token
-│   │   ├── services/             # Client-side utility abstractions
-│   │   │   ├── apiClient.js      # Unified wrapper managing fetches, endpoints, and headers
-│   │   │   ├── resumePdf.js      # Generates a PDF resume from student profile DOM structures
-│   │   │   └── uploadService.js  # Puts raw documents/media directly to AWS S3 buckets
-│   │   └── utils/
-│   │       ├── errorFormatter.jsx    # Parses and presents validation error arrays beautifully
-│   │       └── profileCompleteness.js # Calculates profile percentages & identifies missing fields
+│   │   ├── app/
+│   │   │   └── App.jsx           # Main application coordinator & route view state controller
+│   │   ├── styles/
+│   │   │   ├── index.css         # Main design system & token definitions (Tailwind v4)
+│   │   │   └── App.css           # Global resets and container configurations
+│   │   ├── main.jsx              # Client mounting layer rendering App into DOM
+│   │   ├── components/           # Reusable generic UI elements & cross-cutting modals
+│   │   │   ├── CompanyProfileModal.jsx
+│   │   │   ├── ConnectionLoader.jsx
+│   │   │   ├── JobDetailsModal.jsx
+│   │   │   └── ui/               # Atomic Neumorphic primitives (Button, Card, Input, Badge, etc.)
+│   │   ├── features/             # Domain-oriented frontend features
+│   │   │   ├── auth/             # Auth pages & views (AuthView, CandidateAuth, RecruiterAuth, index)
+│   │   │   ├── student/          # Student portal (pages/StudentLayout, components/, index)
+│   │   │   ├── recruiter/        # Recruiter portal (pages/RecruiterLayout, components/, index)
+│   │   │   ├── gigs/             # Freelance marketplace (pages/GigsMarketplace, index)
+│   │   │   ├── skill-test/       # Skill certification exam (pages/TestView, index)
+│   │   │   └── community/        # Community network & feed (pages/CommunityLayout, components/, index)
+│   │   ├── config/               # Client runtime configuration
+│   │   ├── constants/            # Client lookup options & skill lists
+│   │   ├── services/             # Client API fetchers & upload services
+│   │   └── utils/                # Error formatters & profile completeness calculators
 │   ├── package.json
 │   ├── package-lock.json
-│   ├── postcss.config.js
-│   ├── tailwind.config.js
-│   ├── eslint.config.js
 │   └── vite.config.js
 │
 └── admin_ws/                     # --- Isolated Admin Portal Workspace (Independent Project) ---
-    ├── docker-compose.yml        # Docker environment builder running mock local databases
-    ├── package.json              # Workspace script coordinator
-    ├── README.md                 # Administrative setup and deployment guide
-    │
-    ├── backend/                  # --- Administrative Backend Express Server (Port 5002) ---
-    │   ├── server.js             # Starts server and registers system event log listeners
-    │   ├── app.js                # Mounts core middlewares, validation, and admin route sets
+    ├── backend/                  # Administrative Backend Express Server (Port 5002)
+    │   ├── server.js             # Starts server and listeners
+    │   ├── app.js                # Express app mounting modular admin routes
     │   ├── src/
-    │   │   ├── config/
-    │   │   │   ├── database.js   # Native MongoDB client connection containing getDbSafe() helper
-    │   │   │   ├── env.js        # Admin environment validator for production safety checks
-    │   │   │   ├── rateLimit.config.js # Custom configuration limits for admin traffic
-    │   │   │   └── s3.js         # AWS S3 client builder for admin storage verification
-    │   │   ├── controllers/      # HTTP request controllers (Direct MongoDB Queries)
-    │   │   │   ├── analytics.controller.js # Analyzes skill metrics (job demands vs student profiles)
-    │   │   │   ├── dashboard.controller.js # Aggregates summary cards and recent activity stats
-    │   │   │   ├── job.controller.js # Fetches positions data and associated candidate applications
-    │   │   │   ├── recruiter.controller.js # Queries company profiles and updates trust statuses
-    │   │   │   ├── storage.controller.js # Coordinates storage logs across S3 and MongoDB
-    │   │   │   └── student.controller.js # Returns complete student accounts and verification stats
-    │   │   ├── middleware/
-    │   │   │   ├── errorHandler.js # Formats server errors to prevent administrative leaks
-    │   │   │   ├── rateLimiter.js # Enforces query limit blocks on admin endpoints
-    │   │   │   └── validate.js   # Admin validation adapter evaluating payload schemas
-    │   │   ├── mocks/
-    │   │   │   └── storage.mock.js # Mock fallbacks for MongoDB and S3 storage bills
-    │   │   ├── routes/           # Routes linking endpoints to admin controllers
-    │   │   │   ├── analytics.routes.js
-    │   │   │   ├── dashboard.routes.js
-    │   │   │   ├── job.routes.js
-    │   │   │   ├── recruiter.routes.js
-    │   │   │   ├── storage.routes.js
-    │   │   │   └── student.routes.js
-    │   │   ├── services/         # Administrative helper and analytics engines
-    │   │   │   ├── mongoStorage.service.js # Checks DB statistics and estimates MongoDB Atlas bills
-    │   │   │   └── s3Storage.service.js # Queries bucket sizes and calculates AWS usage bills
-    │   │   ├── utils/
-    │   │   │   └── formatBytes.js # Bytes-to-human-readable size formatting helper
-    │   │   └── validators/
-    │   │       └── job.validator.js # Zod schemas verifying job parameters (checks MongoDB ObjectId)
-    │   ├── package.json
-    │   └── package-lock.json
-    │
-    └── frontend/                 # --- Administrative React Client Dashboard (Port 5174) ---
-        ├── index.html            # Admin entry HTML template
-        ├── postcss.config.js     # PostCSS setup compiling Tailwind configurations
-        ├── tailwind.config.js    # Custom styling overrides for admin portal layouts
-        ├── vite.config.js        # Vite config running client server on port 5174
+    │   │   ├── config/           # DB connection, env, s3, and rateLimit configs
+    │   │   ├── middleware/       # Admin auth, error handling, rate limiting
+    │   │   ├── modules/          # Domain-oriented admin modules
+    │   │   │   ├── auth/         # Admin login & token generation (controller, routes, index)
+    │   │   │   ├── dashboard/    # Executive summary metrics & stats (controller, routes, index)
+    │   │   │   ├── students/     # Student accounts & verification stats (controller, routes, index)
+    │   │   │   ├── recruiters/   # Recruiter accounts & company trust status (controller, routes, index)
+    │   │   │   ├── jobs/         # Job listings audit & validation (controller, routes, validator, index)
+    │   │   │   ├── analytics/    # Skill supply vs demand analytics (controller, routes, index)
+    │   │   │   └── storage/      # MongoDB Atlas & S3 storage metrics & billing estimates (controller, routes, services/, index)
+    │   │   ├── utils/            # Admin helpers (formatBytes.js)
+    │   │   └── mocks/            # Fallback mocks for offline admin operations
+    │   └── package.json
+    └── frontend/                 # Administrative React Client Dashboard (Port 5174)
         ├── src/
-        │   ├── App.jsx           # Monolithic coordinator rendering overview tables & modal detail overlays
-        │   ├── index.css         # Styles defining dashboard layout appearances
-        │   ├── main.jsx          # Admin React DOM mounting layer
+        │   ├── app/
+        │   │   └── App.jsx       # Main admin dashboard layout coordinator
+        │   ├── styles/
+        │   │   └── index.css     # Admin dashboard appearance styling
+        │   ├── main.jsx          # Admin DOM mount
         │   └── api/
-        │       └── adminApi.js   # Centralized API fetch wrapper for administrative endpoints
-        ├── package.json
-        └── package-lock.json
+        │       └── adminApi.js   # Admin API fetch client
+        └── package.json
 ```
 
 ---
@@ -283,6 +142,34 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 ## 3. File Responsibilities
 
 ### Backend Files (`backend/`)
+
+### Modular Domain Architecture (`backend/src/modules/`, `infrastructure/`, `shared/`)
+
+As part of the pure architectural refactoring (completed on branch `file_restructure`), the backend is organized into a clean domain-oriented modular architecture while maintaining 100% functional parity and preserving backwards-compatible shims for all existing entry points:
+
+1. **Infrastructure Layer (`backend/src/infrastructure/`)**:
+   - `database/`: Database client wrapper (`index.js` exporting `{ prisma, isMock, initDb }`), handling dynamic mock fallback and connection pooling. Sandbox fixtures and in-memory mock client reside under `mock/` (`mockClient.js`, `seed.js`, `loadQuestionBankMock.js`).
+   - `storage/s3/`: AWS S3 client instantiation, presigned upload URLs generator, and buffer uploader.
+   - `ai/`: Unified LLM provider implementations (`bedrockProvider.js`, `groqProvider.js`).
+   - `logging/`: Centralized logger adapter and structured diagnostics.
+
+2. **Shared Utilities Layer (`backend/src/shared/`)**:
+   - `utils/fileSignature.js`: Magic bytes validation enforcing strict binary MIME checking.
+
+3. **Domain Modules (`backend/src/modules/`)**:
+   - `auth/`: User signup, login, Google OAuth verification, token issuance (`auth.controller.js`, `auth.validator.js`, `auth.routes.js`, `index.js`).
+   - `students/`: Candidate profile management, applications submission, video showcase (`student.controller.js`, `student.validator.js`, `student.routes.js`, `index.js`).
+   - `recruiters/`: Recruiter authentication, company verification, talent search, job management (`recruiter.controller.js`, `recruiter.validator.js`, `recruiterCompany.validator.js`, `recruiter.routes.js`, `index.js`).
+   - `jobs/`: Job lifecycle, expiration management (`jobLifecycle.service.js`, `index.js`).
+   - `gigs/`: Freelance gigs marketplace, bids, hiring, deliverables, messaging (`gig.controller.js`, `gig.validator.js`, `gig.routes.js`, `index.js`).
+   - `assessments/`: Skill assessment generation, test session scoring, question-bank subsystem (`mcq/`, `question-bank/`, `index.js`).
+   - `skills/`: Technical skills registry and match scoring engine (`technicalSkills.js`, `skillMatching.service.js`, `index.js`).
+   - `uploads/`: Presigned upload URL generation and S3 file cleanup (`upload.controller.js`, `upload.validator.js`, `fileCleanup.service.js`, `upload.routes.js`, `index.js`).
+   - `community/`: LinkedIn-style feed, multi-media posts, nested comments, reactions, bookmarks (`community.controller.js`, `community.validator.js`, `community.routes.js`, `services/`, `index.js`).
+
+4. **Route Aggregator (`backend/src/routes/index.js`)**:
+   - Thin aggregator mounting all domain routes under identical URI namespaces: `/api/auth`, `/api/student`, `/api/recruiter`, `/api/upload`, `/api/gigs`, `/api/community`.
+   - `backend/src/routes/api.js` re-exports `backend/src/routes/index.js` for backwards compatibility.
 
 #### [backend/prisma/schema.prisma](file:///Users/karanrawat/Desktop/a_g/backend/prisma/schema.prisma)
 * **Purpose**: Prisma ORM schema definitions for MongoDB structures. Sets up data collections (User, Profile, Company, Job, Application, TestAttempt, **SkillDefinition**, **Question**, **TestSession**, **AssessmentRecord**, **SkillRoadmap**, **Gig** with `category String?`, `categories String[] @default([])`, and `hiredCandidateIds String[] @default([])` for multi-candidate hiring) and their relationships.
@@ -574,6 +461,20 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 
 ### Frontend Files (`frontend/`)
 
+### Frontend Modular Domain Architecture (`frontend/src/app/`, `features/`, `styles/`)
+
+The frontend adheres to a feature-based domain architecture:
+1. **App Coordinator (`frontend/src/app/App.jsx`)**: Coordinates route views, authentication state, role switches, and global modal overlays. `frontend/src/App.jsx` re-exports it for backwards compatibility.
+2. **Styles (`frontend/src/styles/`)**: `index.css` (Tailwind v4 tokens, neumorphic styles) and `App.css`. `frontend/src/index.css` forwards to `styles/index.css`.
+3. **Features (`frontend/src/features/`)**:
+   - `auth/`: `pages/AuthView.jsx`, `pages/CandidateAuth.jsx`, `pages/RecruiterAuth.jsx`, and barrel `index.js`.
+   - `student/`: `pages/StudentLayout.jsx`, `components/` (`StudentDashboard.jsx`, `StudentProfile.jsx`, etc.), and barrel `index.js`.
+   - `recruiter/`: `pages/RecruiterLayout.jsx`, `components/` (`RecruiterJobs.jsx`, `RecruiterCandidates.jsx`, etc.), and barrel `index.js`.
+   - `gigs/`: `pages/GigsMarketplace.jsx`, and barrel `index.js`.
+   - `skill-test/`: `pages/TestView.jsx`, and barrel `index.js`.
+   - `community/`: `pages/CommunityLayout.jsx`, `components/` (`CommunityFeed.jsx`, `PostComposer.jsx`, etc.), and barrel `index.js`.
+4. **UI Primitives (`frontend/src/components/ui/`)**: Reusable atomic elements (`Button.jsx`, `Card.jsx`, `Input.jsx`, `Badge.jsx`, etc.).
+
 #### [frontend/src/main.jsx](file:///Users/karanrawat/Desktop/a_g/frontend/src/main.jsx)
 * **Purpose**: The browser entrypoint which imports stylesheets, sets up root DOM components, and loads the main `App` React layer.
 * **Used By**: [frontend/index.html](file:///Users/karanrawat/Desktop/a_g/frontend/index.html).
@@ -756,6 +657,26 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 ---
 
 ### Admin Portal Files (`admin_ws/`)
+
+### Admin Workspace Modular Architecture (`admin_ws/backend/src/modules/`, `admin_ws/frontend/src/app/`, `styles/`)
+
+Following Rule 2 (Admin Portal Isolation), `admin_ws` remains completely standalone with zero imports from the main application. Its backend and frontend have been restructured into clean modules:
+
+1. **Admin Backend Modules (`admin_ws/backend/src/modules/`)**:
+   - `auth/`: Admin authentication (`auth.controller.js`, `auth.routes.js`, `index.js`).
+   - `dashboard/`: Overview analytics and summary telemetry (`dashboard.controller.js`, `dashboard.routes.js`, `index.js`).
+   - `students/`: Candidate account oversight and verification auditing (`student.controller.js`, `student.routes.js`, `index.js`).
+   - `recruiters/`: Company trust scoring and recruiter auditing (`recruiter.controller.js`, `recruiter.routes.js`, `index.js`).
+   - `jobs/`: Job postings validation and auditing (`job.controller.js`, `job.validator.js`, `job.routes.js`, `index.js`).
+   - `analytics/`: Skill supply vs demand analytics (`analytics.controller.js`, `analytics.routes.js`, `index.js`).
+   - `storage/`: S3 and MongoDB storage calculation and billing estimates (`storage.controller.js`, `storage.routes.js`, `services/`, `index.js`).
+   - Mounted modularly in `admin_ws/backend/app.js` with legacy `admin_ws/backend/src/routes/*.routes.js` shims preserved.
+
+2. **Admin Frontend Architecture (`admin_ws/frontend/src/`)**:
+   - `app/App.jsx`: Main administrative dashboard layout coordinator.
+   - `styles/index.css`: Tailwind styling tokens and appearances.
+   - `api/adminApi.js`: Centralized administrative API fetch wrapper.
+   - `main.jsx`: Mounts `app/App.jsx` and `styles/index.css`.
 
 #### [admin_ws/package.json](file:///Users/karanrawat/Desktop/a_g/admin_ws/package.json)
 * **Purpose**: Coordinates administrative tasks (booting dev configurations, workspace scripts, docker controls).
