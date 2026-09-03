@@ -20,15 +20,15 @@ app.get('/health', (req, res) => {
 });
 
 // Auth Routes (unprotected)
-app.use('/api/auth', require('./src/routes/auth.routes'));
+app.use('/api/auth', require('./src/modules/auth').routes);
 
 // Administrative Routes (protected by JWT authMiddleware)
-app.use('/api/dashboard', authMiddleware, require('./src/routes/dashboard.routes'));
-app.use('/api/student', authMiddleware, require('./src/routes/student.routes'));
-app.use('/api/recruiter', authMiddleware, require('./src/routes/recruiter.routes'));
-app.use('/api/job', authMiddleware, require('./src/routes/job.routes'));
-app.use('/api/storage', authMiddleware, require('./src/routes/storage.routes'));
-app.use('/api/analytics', authMiddleware, require('./src/routes/analytics.routes'));
+app.use('/api/dashboard', authMiddleware, require('./src/modules/dashboard').routes);
+app.use('/api/student', authMiddleware, require('./src/modules/students').routes);
+app.use('/api/recruiter', authMiddleware, require('./src/modules/recruiters').routes);
+app.use('/api/job', authMiddleware, require('./src/modules/jobs').routes);
+app.use('/api/storage', authMiddleware, require('./src/modules/storage').routes);
+app.use('/api/analytics', authMiddleware, require('./src/modules/analytics').routes);
 
 // Error handling
 app.use(errorHandler);
