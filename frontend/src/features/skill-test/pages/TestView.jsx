@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Award, AlertTriangle, BookOpen, CheckCircle, RefreshCw } from 'lucide-react';
-import { apiFetch } from '../../services/apiClient';
-import { TEST_QUESTIONS } from '../../constants/testQuestions';
+import { apiFetch } from '../../../services/apiClient';
+import { TEST_QUESTIONS } from '../../../constants/testQuestions';
 
 
 export default function TestView({ token, testSkill, setTestSkill, onPass }) {
