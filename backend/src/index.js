@@ -47,7 +47,7 @@ app.use(errorHandler);
 async function startServer() {
   await initDb();
 
-  const skillRegistry = require('./services/questionBank/skills/registryCache');
+  const skillRegistry = require('./modules/assessments/question-bank/skills/registryCache');
 
   // Non-fatal: an unseeded registry degrades to raw name matching.
   skillRegistry.load().catch((err) => {
@@ -56,12 +56,12 @@ async function startServer() {
 
   // Local dev only: load the pre-generated question bank into the in-memory mock so
   // the skill quiz works without a real database. No-op unless the mock is active.
-  const { loadQuestionBankIntoMock } = require('./config/mock/loadQuestionBankMock');
+  const { loadQuestionBankIntoMock } = require('./infrastructure/database/mock/loadQuestionBankMock');
   loadQuestionBankIntoMock().catch((err) => {
     console.warn('[question-bank] mock load skipped:', err.message);
   });
 
-  const { ensureGlobalCommunity } = require('./services/community/community.service');
+  const { ensureGlobalCommunity } = require('./modules/community/services/community.service');
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
