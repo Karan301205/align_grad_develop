@@ -139,8 +139,13 @@ setInterval(() => {
   }
 }, 60 * 1000); // Runs every 1 minute
 
+const authLimit = rateLimiter(rateLimitConfig.auth);
+const relaxedLimit = rateLimiter(rateLimitConfig.relaxed);
+
 module.exports = {
   rateLimiter,
+  authLimit,
+  relaxedLimit,
   checkLoginLock,
   recordFailedAttempt,
   resetFailedAttempts
