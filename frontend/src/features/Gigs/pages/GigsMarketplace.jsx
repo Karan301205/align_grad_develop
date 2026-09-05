@@ -126,7 +126,7 @@ function SearchableCategorySelect({ value, onChange, placeholder = "Search or se
           )}
 
           {filteredCategories.length === 0 ? (
-            <div className="p-2.5 text-center text-xs text-on-surface-variant font-mono">
+            <div className="p-2.5 text-center text-xs text-on-surface-variant font-sans font-normal">
               No matching field found
               {allowCustom && searchTerm.trim() && (
                 <button
@@ -231,7 +231,7 @@ function MultiSearchableCategorySelect({ values = [], onChange, placeholder = "S
       {isOpen && (
         <div className="absolute z-50 left-0 right-0 mt-1 bg-surface-container border border-outline-variant rounded-xl shadow-2xl max-h-56 overflow-y-auto custom-scrollbar p-1">
           {filteredCategories.length === 0 ? (
-            <div className="p-2.5 text-center text-xs text-on-surface-variant font-mono">
+            <div className="p-2.5 text-center text-xs text-on-surface-variant font-sans font-normal">
               No matching field found
               {allowCustom && searchTerm.trim() && !values.includes(searchTerm.trim()) && (
                 <button
@@ -1144,7 +1144,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             setSelectedGigId(null);
             setGigDetails(null);
           }}
-          className={`px-4 py-2.5 rounded-xl text-xs font-mono tracking-wider font-bold transition-all uppercase ${activeSubTab === 'browse'
+          className={`px-4 py-2.5 rounded-xl text-xs font-headline font-medium tracking-wider font-bold transition-all uppercase ${activeSubTab === 'browse'
               ? 'bg-primary/10 text-primary border-b-2 border-primary'
               : 'text-on-surface-variant hover:text-on-surface'
             }`}
@@ -1158,7 +1158,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               setSelectedGigId(null);
               setGigDetails(null);
             }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-mono tracking-wider font-bold transition-all uppercase ${activeSubTab === 'post'
+            className={`px-4 py-2.5 rounded-xl text-xs font-headline font-medium tracking-wider font-bold transition-all uppercase ${activeSubTab === 'post'
                 ? 'bg-primary/10 text-primary border-b-2 border-primary'
                 : 'text-on-surface-variant hover:text-on-surface'
               }`}
@@ -1173,7 +1173,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             setSelectedGigId(null);
             setGigDetails(null);
           }}
-          className={`px-4 py-2.5 rounded-xl text-xs font-mono tracking-wider font-bold transition-all uppercase flex items-center gap-1.5 ${activeSubTab === 'my-gigs'
+          className={`px-4 py-2.5 rounded-xl text-xs font-headline font-medium tracking-wider font-bold transition-all uppercase flex items-center gap-1.5 ${activeSubTab === 'my-gigs'
               ? 'bg-primary/10 text-primary border-b-2 border-primary'
               : 'text-on-surface-variant hover:text-on-surface'
             }`}
@@ -1223,7 +1223,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               <button
                 onClick={fetchGigs}
                 disabled={loading}
-                className="px-6 py-3 bg-primary text-white rounded-xl hover:opacity-90 font-mono text-xs font-bold uppercase transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                className="px-6 py-3 bg-primary text-white rounded-xl hover:opacity-90 font-headline font-medium text-xs font-bold uppercase transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
               >
                 {loading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
                 Find Gigs
@@ -1253,7 +1253,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                 return (
                   <div className="text-center py-20 bg-surface-container border border-outline-variant rounded-2xl shadow-[var(--shadow-card)]">
                     <AlertTriangle className="w-8 h-8 text-on-surface-variant mx-auto mb-3" />
-                    <h3 className="font-headline font-bold text-on-surface">No open gigs available</h3>
+                    <h3 className="font-headline font-medium text-on-surface">No open gigs available</h3>
                     <p className="text-xs text-on-surface-variant mt-1">Check your workspace for your applied and active gigs!</p>
                   </div>
                 );
@@ -1281,8 +1281,8 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       >
                         {/* Top Row: Gig Name & Amount */}
                         <div className="flex justify-between items-start gap-2">
-                          <h3 className="text-xs font-headline font-bold text-on-surface line-clamp-1">{gig.title}</h3>
-                          <div className="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-xl text-emerald-600 dark:text-emerald-400 text-xs font-mono font-extrabold shrink-0">
+                          <h3 className="text-xs font-headline font-medium text-on-surface line-clamp-1">{gig.title}</h3>
+                          <div className="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-xl text-emerald-600 dark:text-emerald-400 text-xs font-headline font-medium shrink-0">
                             <span>₹{gig.budget}</span>
                           </div>
                         </div>
@@ -1295,7 +1295,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                 ? gig.categories
                                 : (gig.category ? [gig.category] : ['General']);
                               return catList.map((catItem, idx) => (
-                                <span key={idx} className="text-[9px] font-mono uppercase font-bold px-2 py-0.5 rounded-lg bg-primary/10 text-primary border border-primary/20 flex items-center gap-1 shrink-0">
+                                <span key={idx} className="text-[9px] font-headline font-medium uppercase font-bold px-2 py-0.5 rounded-lg bg-primary/10 text-primary border border-primary/20 flex items-center gap-1 shrink-0">
                                   <Sparkles className="w-3 h-3" />
                                   {catItem}
                                 </span>
@@ -1303,7 +1303,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                             })()}
                           </div>
                           {hasUserApplied && (
-                            <span className="text-[9px] font-mono px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold rounded-md border border-emerald-500/20 flex items-center gap-1 shrink-0">
+                            <span className="text-[9px] font-headline font-medium px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold rounded-md border border-emerald-500/20 flex items-center gap-1 shrink-0">
                               <CheckCircle className="w-3 h-3 text-emerald-500" /> Applied
                             </span>
                           )}
@@ -1311,7 +1311,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
                         {/* Bottom Row: Time to Complete (Left) & 3-4 Tech Stack Badges (Right) */}
                         <div className="flex justify-between items-center gap-2 pt-2 border-t border-outline-variant/30">
-                          <div className="flex items-center gap-1 text-[10px] font-mono text-on-surface-variant shrink-0">
+                          <div className="flex items-center gap-1 text-[10px] font-sans font-normal text-on-surface-variant shrink-0">
                             <Clock className="w-3 h-3 text-primary" />
                             <span>Delivery: <strong className="text-on-surface">{gig.deliveryTime} {/^\d+$/.test(gig.deliveryTime?.toString().trim()) ? 'days' : ''}</strong></span>
                           </div>
@@ -1319,12 +1319,12 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           {/* 3 or 4 Tech Stack Badges */}
                           <div className="flex flex-wrap items-center justify-end gap-1 overflow-hidden">
                             {(gig.skills || []).slice(0, 4).map(skill => (
-                              <span key={skill} className="px-2 py-0.5 rounded-md bg-surface-container-high border border-outline-variant/60 text-[9px] font-mono text-on-surface font-semibold">
+                              <span key={skill} className="px-2 py-0.5 rounded-md bg-surface-container-high border border-outline-variant/60 text-[9px] font-sans font-normal text-on-surface font-semibold">
                                 {skill}
                               </span>
                             ))}
                             {(gig.skills || []).length > 4 && (
-                              <span className="text-[8px] font-mono text-on-surface-variant px-1 rounded">
+                              <span className="text-[8px] font-sans font-normal text-on-surface-variant px-1 rounded">
                                 +{(gig.skills || []).length - 4}
                               </span>
                             )}
@@ -1347,7 +1347,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       <div className="border-b border-outline-variant pb-4 space-y-3">
                         <div className="flex justify-between items-start gap-4">
                           <div>
-                            <h2 className="text-base font-headline font-bold text-on-surface">{gigDetails.title}</h2>
+                            <h2 className="text-base font-headline font-medium text-on-surface">{gigDetails.title}</h2>
                             {gigDetails.company ? (
                               <div className="flex items-center gap-2 mt-1.5">
                                 <button
@@ -1374,7 +1374,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                   >
                                     {gigDetails.company.name}
                                     {gigDetails.company.verified && (
-                                      <span className="text-[8px] bg-success-container text-success px-1.5 py-0.5 rounded font-bold uppercase tracking-wider font-mono">
+                                      <span className="text-[8px] bg-success-container text-success px-1.5 py-0.5 rounded font-bold uppercase tracking-wider font-headline font-medium">
                                         ✓ Verified
                                       </span>
                                     )}
@@ -1388,20 +1388,20 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                               <p className="text-xs text-on-surface-variant mt-1 flex items-center gap-1.5">
                                 <User className="w-3.5 h-3.5 text-primary" />
                                 <span>Posted by {gigDetails.ownerName || 'Client'}</span>
-                                <span className="px-1.5 py-0.5 bg-surface-container-high text-[9px] font-mono uppercase rounded text-on-surface-variant">
+                                <span className="px-1.5 py-0.5 bg-surface-container-high text-[9px] font-headline font-medium uppercase rounded text-on-surface-variant">
                                   {gigDetails.ownerRole}
                                 </span>
                               </p>
                             )}
                           </div>
                           <div className="text-right shrink-0">
-                            <div className="text-lg font-bold text-emerald-500 font-mono">₹{gigDetails.budget}</div>
-                            <span className="text-[10px] font-mono text-on-surface-variant uppercase">Budget Rate</span>
+                            <div className="text-lg font-bold text-emerald-500 font-sans font-normal">₹{gigDetails.budget}</div>
+                            <span className="text-[10px] font-headline font-medium text-on-surface-variant uppercase">Budget Rate</span>
                           </div>
                         </div>
 
                         <div className="flex flex-wrap gap-2 items-center justify-between pt-2">
-                          <div className="flex items-center gap-3 text-xs font-mono text-on-surface-variant">
+                          <div className="flex items-center gap-3 text-xs font-sans font-normal text-on-surface-variant">
                             <span className="flex items-center gap-1">
                               <Clock className="w-4 h-4 text-primary" /> Delivery: <strong className="text-on-surface ml-1">{gigDetails.deliveryTime}</strong>
                             </span>
@@ -1412,7 +1412,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                             (() => {
                               if (gigDetails.status === 'CLOSED') {
                                 return (
-                                  <div className="px-4 py-2.5 bg-rose-500/10 text-rose-500 border border-rose-500/30 rounded-xl font-mono text-xs font-bold flex items-center gap-2 shrink-0 animate-fade-in shadow-xs">
+                                  <div className="px-4 py-2.5 bg-rose-500/10 text-rose-500 border border-rose-500/30 rounded-xl font-headline font-medium text-xs font-bold flex items-center gap-2 shrink-0 animate-fade-in shadow-xs">
                                     <span>Closed for Applications</span>
                                   </div>
                                 );
@@ -1420,7 +1420,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
                               if (gigDetails.status === 'PAUSED') {
                                 return (
-                                  <div className="px-4 py-2.5 bg-amber-500/10 text-amber-500 border border-amber-500/30 rounded-xl font-mono text-xs font-bold flex items-center gap-2 shrink-0 animate-fade-in shadow-xs">
+                                  <div className="px-4 py-2.5 bg-amber-500/10 text-amber-500 border border-amber-500/30 rounded-xl font-headline font-medium text-xs font-bold flex items-center gap-2 shrink-0 animate-fade-in shadow-xs">
                                     <span>Currently Paused</span>
                                   </div>
                                 );
@@ -1430,7 +1430,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
                               if (hasApplied) {
                                 return (
-                                  <div className="px-4 py-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-xl font-mono text-xs font-bold flex items-center gap-2 shrink-0 animate-fade-in shadow-xs">
+                                  <div className="px-4 py-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-xl font-headline font-medium text-xs font-bold flex items-center gap-2 shrink-0 animate-fade-in shadow-xs">
                                     <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
                                     <span>Applied &bull; Awaiting Client Response</span>
                                   </div>
@@ -1466,7 +1466,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                               if (!isRatingMatched) {
                                 return (
                                   <div className="w-full mt-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl space-y-2.5 text-left animate-fade-in">
-                                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-headline font-bold text-xs">
+                                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-headline font-medium text-xs">
                                       <ShieldCheck className="w-4 h-4 shrink-0" />
                                       <span>Rating Requirements Locked</span>
                                     </div>
@@ -1475,7 +1475,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                     </p>
                                     <ul className="space-y-1 text-xs">
                                       {missingSkillReqs.map(m => (
-                                        <li key={m.skillName} className="flex items-center justify-between bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 font-mono text-[11px]">
+                                        <li key={m.skillName} className="flex items-center justify-between bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 font-sans font-normal text-[11px]">
                                           <span className="font-bold text-on-surface">{m.skillName}</span>
                                           <span className="text-amber-700 dark:text-amber-400 font-semibold">Your Rating: Lvl {m.currentRating}/10 &bull; Req: Lvl {m.requiredRating}/10</span>
                                         </li>
@@ -1486,7 +1486,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                       onClick={() => {
                                         if (onNavigateToTests) onNavigateToTests();
                                       }}
-                                      className="px-4 py-2 bg-primary text-white rounded-xl text-xs font-mono font-bold uppercase hover:opacity-90 transition-all shadow-sm flex items-center gap-1.5 cursor-pointer mt-2"
+                                      className="px-4 py-2 bg-primary text-white rounded-xl text-xs font-headline font-medium uppercase hover:opacity-90 transition-all shadow-sm flex items-center gap-1.5 cursor-pointer mt-2"
                                     >
                                       <Sparkles className="w-3.5 h-3.5" /> Take Skill Test to Upgrade Rating
                                     </button>
@@ -1500,7 +1500,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                     setTargetApplyGig(gigDetails);
                                     setShowApplyModal(true);
                                   }}
-                                  className="px-5 py-2.5 rounded-xl font-mono text-xs font-bold uppercase transition-all shadow-md flex items-center gap-1.5 shrink-0 bg-primary text-white hover:opacity-90 active:scale-95 cursor-pointer"
+                                  className="px-5 py-2.5 rounded-xl font-headline font-medium text-xs font-bold uppercase transition-all shadow-md flex items-center gap-1.5 shrink-0 bg-primary text-white hover:opacity-90 active:scale-95 cursor-pointer"
                                 >
                                   <Send className="w-3.5 h-3.5" />
                                   Pitch & Apply
@@ -1513,13 +1513,13 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
                       {/* Detail Description */}
                       <div className="space-y-3">
-                        <h3 className="text-xs font-mono uppercase tracking-wider text-primary">Task Description</h3>
+                        <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Task Description</h3>
                         <p className="text-xs text-on-surface-variant leading-relaxed whitespace-pre-wrap">{gigDetails.description}</p>
                       </div>
 
                       {/* Required Skills */}
                       <div className="space-y-2">
-                        <h3 className="text-xs font-mono uppercase tracking-wider text-primary">Required Skill Set & Rating Thresholds</h3>
+                        <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Required Skill Set & Rating Thresholds</h3>
                         <div className="flex flex-wrap gap-2">
                           {(() => {
                             const reqs = (gigDetails.requirements && gigDetails.requirements.length > 0)
@@ -1533,11 +1533,11 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                 <div key={r.skillName} className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-xl text-xs font-medium text-on-surface">
                                   <span className="font-bold">{r.skillName}</span>
                                   {isTech ? (
-                                    <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-lg border border-primary/20">
+                                    <span className="text-[10px] font-headline font-medium text-primary bg-primary/10 px-2.5 py-0.5 rounded-lg border border-primary/20">
                                       Lvl {r.minRating || 1}/10 Req
                                     </span>
                                   ) : (
-                                    <span className="text-[9px] font-mono text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-lg border border-outline-variant">
+                                    <span className="text-[9px] font-sans font-normal text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-lg border border-outline-variant">
                                       Required
                                     </span>
                                   )}
@@ -1551,7 +1551,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       {/* Attachments */}
                       {gigDetails.attachments?.length > 0 && (
                         <div className="space-y-2">
-                          <h3 className="text-xs font-mono uppercase tracking-wider text-primary font-bold">Brief Attachments</h3>
+                          <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold">Brief Attachments</h3>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                             {gigDetails.attachments.map((link, idx) => {
                               const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(link) || link.includes('/avatar/') || link.includes('image');
@@ -1576,7 +1576,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                     <p className="font-bold text-on-surface text-[11px] truncate group-hover:text-primary transition-colors">
                                       Attachment #{idx + 1}
                                     </p>
-                                    <span className="text-[9px] font-mono text-on-surface-variant/70 block truncate">Click to view file</span>
+                                    <span className="text-[9px] font-sans font-normal text-on-surface-variant/70 block truncate">Click to view file</span>
                                   </div>
                                 </a>
                               );
@@ -1588,7 +1588,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-on-surface-variant">
                       <AlertTriangle className="w-10 h-10 mb-2 opacity-40" />
-                      <p className="text-xs font-mono">No gig selected or loaded</p>
+                      <p className="text-xs font-sans font-normal">No gig selected or loaded</p>
                     </div>
                   )}
                 </div>
@@ -1601,7 +1601,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         {activeSubTab === 'post' && (
           <Card className="max-w-2xl mx-auto p-6 space-y-6">
             <div className="border-b border-outline-variant pb-3">
-              <h3 className="text-sm font-headline font-bold text-on-surface flex items-center gap-1.5">
+              <h3 className="text-sm font-headline font-medium text-on-surface flex items-center gap-1.5">
                 <Sparkles className="w-5 h-5 text-primary" /> Post a paid Task / Gig
               </h3>
               <p className="text-xs text-on-surface-variant mt-1">Hire other verified candidates to help complete milestones.</p>
@@ -1609,7 +1609,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
             <form onSubmit={handlePostGig} className="space-y-4">
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Gig Title</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Gig Title</label>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -1619,7 +1619,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Description details</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Description details</label>
                 <TextArea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -1631,7 +1631,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Category of Field *</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Category of Field *</label>
                   <MultiSearchableCategorySelect
                     values={categories}
                     onChange={(vals) => setCategories(vals)}
@@ -1640,7 +1640,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold font-mono">Budget rate (INR) *</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-headline font-medium">Budget rate (INR) *</label>
                   <Input
                     type="number"
                     value={budget}
@@ -1650,7 +1650,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold font-mono">Expected Delivery Time *</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-headline font-medium">Expected Delivery Time *</label>
                   <Input
                     value={deliveryTime}
                     onChange={(e) => setDeliveryTime(e.target.value)}
@@ -1680,7 +1680,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </div>
 
               <div className="space-y-4 pt-2">
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant font-bold">
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold">
                   Required Stacks & Rating Thresholds *
                 </label>
 
@@ -1726,7 +1726,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           s => s.skill.toLowerCase().includes(skillSearchTerm.toLowerCase()) &&
                             !reqs.some(exist => exist.skillName.toLowerCase() === s.skill.toLowerCase())
                         ).length === 0 ? (
-                          <div className="p-3 text-xs text-on-surface-variant font-mono text-center">
+                          <div className="p-3 text-xs text-on-surface-variant font-sans font-normal text-center">
                             No matching skills found. Press Enter to add "{skillSearchTerm.trim()}"
                           </div>
                         ) : (
@@ -1746,7 +1746,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                               className="w-full text-left px-3.5 py-2 text-xs text-on-surface hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between group cursor-pointer rounded-lg font-sans"
                             >
                               <span>{s.skill}</span>
-                              <span className="text-[10px] font-mono capitalize px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/60 text-on-surface-variant">
+                              <span className="text-[10px] font-sans font-normal capitalize px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/60 text-on-surface-variant">
                                 {s.type}
                               </span>
                             </button>
@@ -1760,7 +1760,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                 {/* Added Skill Requirements with Rating Sliders */}
                 {reqs.length === 0 ? (
                   <div className="p-4 bg-surface-container-low border border-dashed border-outline-variant/80 rounded-xl text-center">
-                    <p className="text-xs text-on-surface-variant font-mono">No skill requirements added yet. Search and select skills above.</p>
+                    <p className="text-xs text-on-surface-variant font-sans font-normal">No skill requirements added yet. Search and select skills above.</p>
                   </div>
                 ) : (
                   <div className="space-y-3 pt-1">
@@ -1773,16 +1773,16 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                             <span className="font-bold text-on-surface font-headline">{r.skillName}</span>
                             <div className="flex items-center gap-3">
                               {isTech ? (
-                                <span className="text-primary font-mono font-bold text-xs bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+                                <span className="text-primary font-headline font-medium text-xs bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
                                   Required Level: Lvl {r.minRating}/10
                                 </span>
                               ) : (
-                                <span className="text-on-surface-variant font-mono text-[10px] uppercase tracking-wider bg-surface-container-high border border-outline-variant px-2 py-0.5 rounded">Required Skill</span>
+                                <span className="text-on-surface-variant font-headline font-medium text-[10px] uppercase tracking-wider bg-surface-container-high border border-outline-variant px-2 py-0.5 rounded">Required Skill</span>
                               )}
                               <button
                                 type="button"
                                 onClick={() => setReqs(prev => prev.filter(item => item.skillName !== r.skillName))}
-                                className="text-error hover:underline text-[11px] font-mono cursor-pointer"
+                                className="text-error hover:underline text-[11px] font-sans font-normal cursor-pointer"
                               >
                                 Remove
                               </button>
@@ -1809,8 +1809,8 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Brief Attachments (Optional)</label>
-                <label className="cursor-pointer text-xs font-mono text-on-surface-variant hover:text-on-surface border border-outline-variant bg-surface-container-low p-3 rounded-xl flex items-center gap-2 shadow-sm w-full">
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Brief Attachments (Optional)</label>
+                <label className="cursor-pointer text-xs font-headline font-medium text-on-surface-variant hover:text-on-surface border border-outline-variant bg-surface-container-low p-3 rounded-xl flex items-center gap-2 shadow-sm w-full">
                   <Paperclip className="w-4 h-4 shrink-0 text-primary" />
                   <span className="truncate">{attachmentFile ? attachmentFile.name : 'Select document / archive file'}</span>
                   <input
@@ -1842,10 +1842,10 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               {/* TOP BOX: GIGS IN WHICH CANDIDATE IS HIRED / ALL POSTED GIGS FOR RECRUITER */}
               <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
                 <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
-                  <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-widest text-primary font-bold">
                     {user?.role === 'STUDENT' ? 'Gigs in Which You Are Hired' : 'All My Posted Gigs'}
                   </h4>
-                  <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                  <span className="text-[9px] font-headline font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                     {(() => {
                       const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
                       if (user?.role === 'STUDENT') {
@@ -1869,7 +1869,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       });
 
                       if (hiredGigs.length === 0) {
-                        return <p className="text-center text-xs font-mono text-on-surface-variant py-8">No active hired gigs found.</p>;
+                        return <p className="text-center text-xs font-sans font-normal text-on-surface-variant py-8">No active hired gigs found.</p>;
                       }
                       return hiredGigs.map(gig => {
                         const isSelected = gig.id === selectedGigId;
@@ -1881,16 +1881,16 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           >
                             <div className="flex justify-between items-start gap-2">
                               <h5 className="text-xs font-bold text-on-surface line-clamp-1">{gig.title}</h5>
-                              <span className={`text-[8px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${gig.status === 'COMPLETED' ? 'bg-success/15 text-success' : 'bg-primary/15 text-primary'}`}>{gig.status}</span>
+                              <span className={`text-[8px] font-headline font-medium uppercase px-1.5 py-0.5 rounded font-bold ${gig.status === 'COMPLETED' ? 'bg-success/15 text-success' : 'bg-primary/15 text-primary'}`}>{gig.status}</span>
                             </div>
-                            <p className="text-[10px] font-mono text-on-surface-variant">Budget: <strong className="text-emerald-500">₹{gig.budget}</strong></p>
+                            <p className="text-[10px] font-sans font-normal text-on-surface-variant">Budget: <strong className="text-emerald-500">₹{gig.budget}</strong></p>
                           </div>
                         );
                       });
                     })()
                   ) : (
                     myGigs.filter(g => g.ownerId === user.id).length === 0 ? (
-                      <p className="text-center text-xs font-mono text-on-surface-variant py-8">No gigs posted yet.</p>
+                      <p className="text-center text-xs font-sans font-normal text-on-surface-variant py-8">No gigs posted yet.</p>
                     ) : (
                       myGigs.filter(g => g.ownerId === user.id).map(gig => {
                         const isSelected = gig.id === selectedGigId;
@@ -1902,7 +1902,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           >
                             <div className="flex justify-between items-start gap-2">
                               <h5 className="text-xs font-bold text-on-surface line-clamp-1">{gig.title}</h5>
-                              <span className={`text-[8px] font-mono uppercase px-1.5 py-0.5 rounded font-bold ${
+                              <span className={`text-[8px] font-headline font-medium uppercase px-1.5 py-0.5 rounded font-bold ${
                                 gig.status === 'COMPLETED'
                                   ? 'bg-success/15 text-success'
                                   : gig.status === 'IN_PROGRESS'
@@ -1914,7 +1914,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                   : 'bg-warning/15 text-warning'
                               }`}>{gig.status}</span>
                             </div>
-                            <p className="text-[10px] font-mono text-on-surface-variant">Budget: <strong className="text-emerald-500">₹{gig.budget}</strong></p>
+                            <p className="text-[10px] font-sans font-normal text-on-surface-variant">Budget: <strong className="text-emerald-500">₹{gig.budget}</strong></p>
                           </div>
                         );
                       })
@@ -1929,15 +1929,15 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   <div className="flex flex-col h-full justify-between space-y-2">
                     <div>
                       <div className="flex items-center justify-between gap-1 mb-1">
-                        <h4 className="text-[10px] font-mono uppercase tracking-wider text-primary font-bold">Selected Gig Details</h4>
-                        <span className="text-[8px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">{gigDetails.status}</span>
+                        <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary font-bold">Selected Gig Details</h4>
+                        <span className="text-[8px] font-headline font-medium uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">{gigDetails.status}</span>
                       </div>
                       <h3 className="text-xs font-bold text-on-surface line-clamp-1">{gigDetails.title}</h3>
                       <p className="text-[10px] text-on-surface-variant line-clamp-2 mt-1 leading-relaxed">{gigDetails.description}</p>
                     </div>
 
                     <div className="space-y-2 pt-1 border-t border-outline-variant/40">
-                      <div className="flex justify-between text-[10px] font-mono">
+                      <div className="flex justify-between text-[10px] font-sans font-normal">
                         <span className="text-on-surface-variant">Rate: <strong className="text-emerald-500">₹{gigDetails.budget}</strong></span>
                         <span className="text-on-surface-variant">Delivery: <strong className="text-on-surface">{gigDetails.deliveryTime}</strong></span>
                       </div>
@@ -1945,7 +1945,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       <button
                         type="button"
                         onClick={() => setShowGigInfoModal(true)}
-                        className="w-full py-2 bg-primary text-white text-[10px] font-mono font-bold uppercase rounded-xl hover:opacity-90 transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
+                        className="w-full py-2 bg-primary text-white text-[10px] font-headline font-medium uppercase rounded-xl hover:opacity-90 transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
                       >
                         <Info className="w-3.5 h-3.5" />
                         <span>INFO / Full Project Specifications</span>
@@ -1954,7 +1954,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   </div>
                 ) : (
                   <div className="flex-1 flex items-center justify-center text-center p-4">
-                    <p className="text-xs font-mono text-on-surface-variant">Select a gig above to view details</p>
+                    <p className="text-xs font-sans font-normal text-on-surface-variant">Select a gig above to view details</p>
                   </div>
                 )}
               </div>
@@ -1971,7 +1971,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   {/* Chat Section Header */}
                   <div className="px-5 py-3.5 bg-surface-container-low border-b border-outline-variant flex items-center justify-between shrink-0 shadow-xs">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 text-primary font-mono font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 text-primary font-headline font-medium flex items-center justify-center text-xs overflow-hidden shrink-0">
                         {(() => {
                           const activeCandId = selectedOtherCandidateId || gigDetails.selectedCandidateId || (gigDetails.applicants && gigDetails.applicants[0]?.candidateId);
                           const activeCand = gigDetails.applicants?.find(a => a.candidateId === activeCandId)?.candidate;
@@ -1990,7 +1990,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                             return activeCand?.name || (isOwner ? 'Candidate Communication Channel' : gigDetails.ownerName || 'Recruiter Client');
                           })()}
                         </h3>
-                        <p className="text-[9px] font-mono text-on-surface-variant uppercase">
+                        <p className="text-[9px] font-headline font-medium text-on-surface-variant uppercase">
                           {gigDetails.title} &bull; <span className="text-emerald-500 font-bold">₹{gigDetails.budget}</span>
                         </p>
                       </div>
@@ -2011,7 +2011,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                 handleOpenCandidateProfile(gigDetails.ownerId, { name: gigDetails.ownerName || 'Recruiter' });
                               }
                             }}
-                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-outline-variant bg-surface-container text-on-surface hover:text-primary hover:border-primary/40 transition-all cursor-pointer flex items-center gap-1"
+                            className="px-2 py-1 text-[9px] font-headline font-medium uppercase rounded-lg border border-outline-variant bg-surface-container text-on-surface hover:text-primary hover:border-primary/40 transition-all cursor-pointer flex items-center gap-1"
                           >
                             <User className="w-3 h-3 text-primary" />
                             <span>Profile</span>
@@ -2024,7 +2024,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                         <button
                           type="button"
                           onClick={() => setShowSubmissionModal(true)}
-                          className={`px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border transition-all cursor-pointer flex items-center gap-1 ${
+                          className={`px-2 py-1 text-[9px] font-headline font-medium uppercase rounded-lg border transition-all cursor-pointer flex items-center gap-1 ${
                             gigDetails.submissions?.length > 0
                               ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white'
                               : 'bg-primary/10 border-primary/30 text-primary hover:bg-primary hover:text-white'
@@ -2042,14 +2042,14 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       {isOwner && (
                         <>
                           {(gigDetails.status === 'OPEN' || gigDetails.status === 'PAUSED') && (
-                            <button onClick={() => handleOpenEditModal(gigDetails)} className="px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-outline-variant bg-surface-container hover:text-primary transition-all cursor-pointer">Edit</button>
+                            <button onClick={() => handleOpenEditModal(gigDetails)} className="px-2 py-1 text-[9px] font-headline font-medium uppercase rounded-lg border border-outline-variant bg-surface-container hover:text-primary transition-all cursor-pointer">Edit</button>
                           )}
-                          <button onClick={() => handleTogglePause(gigDetails)} className="px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-outline-variant bg-surface-container hover:text-warning transition-all cursor-pointer">
+                          <button onClick={() => handleTogglePause(gigDetails)} className="px-2 py-1 text-[9px] font-headline font-medium uppercase rounded-lg border border-outline-variant bg-surface-container hover:text-warning transition-all cursor-pointer">
                             {gigDetails.status === 'PAUSED' ? 'Resume' : 'Pause'}
                           </button>
                           <button
                             onClick={() => handleToggleClose(gigDetails)}
-                            className={`px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border transition-all cursor-pointer ${
+                            className={`px-2 py-1 text-[9px] font-headline font-medium uppercase rounded-lg border transition-all cursor-pointer ${
                               gigDetails.status === 'CLOSED'
                                 ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white'
                                 : 'border-rose-500/40 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white'
@@ -2058,7 +2058,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                             {gigDetails.status === 'CLOSED' ? 'Re-Open' : 'Close Gig'}
                           </button>
                           {(gigDetails.status === 'OPEN' || gigDetails.status === 'PAUSED') && (
-                            <button onClick={() => handleDeleteGig(gigDetails.id)} className="px-2 py-1 text-[9px] font-mono font-bold uppercase rounded-lg border border-error/30 bg-surface-container text-error hover:bg-error hover:text-white transition-all cursor-pointer">Delete</button>
+                            <button onClick={() => handleDeleteGig(gigDetails.id)} className="px-2 py-1 text-[9px] font-headline font-medium uppercase rounded-lg border border-error/30 bg-surface-container text-error hover:bg-error hover:text-white transition-all cursor-pointer">Delete</button>
                           )}
                         </>
                       )}
@@ -2085,7 +2085,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                         return (
                           <div className="text-center py-16">
                             <MessageSquare className="w-8 h-8 text-on-surface-variant/40 mx-auto mb-2" />
-                            <p className="text-xs font-mono text-on-surface-variant">No direct messages yet. Send a message to start communicating.</p>
+                            <p className="text-xs font-sans font-normal text-on-surface-variant">No direct messages yet. Send a message to start communicating.</p>
                           </div>
                         );
                       }
@@ -2096,7 +2096,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                         return (
                           <div key={msg.id} className={`flex flex-col ${isSystem ? 'items-center w-full' : isMe ? 'items-end' : 'items-start'}`}>
                             {isSystem ? (
-                              <div className="bg-primary/5 border border-primary/20 text-on-surface-variant text-[9px] font-mono px-2.5 py-1 rounded-lg text-center max-w-md shadow-sm">
+                              <div className="bg-primary/5 border border-primary/20 text-on-surface-variant text-[9px] font-sans font-normal px-2.5 py-1 rounded-lg text-center max-w-md shadow-sm">
                                 {msg.text}
                               </div>
                             ) : (
@@ -2104,13 +2104,13 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                 <div className={`p-2.5 rounded-xl text-xs leading-relaxed ${isMe ? 'bg-primary text-white rounded-tr-none' : 'bg-surface-container-low border border-outline-variant rounded-tl-none text-on-surface'}`}>
                                   {msg.text}
                                   {msg.fileUrl && (
-                                    <div className={`mt-2 p-1.5 rounded-lg text-[9px] font-mono flex items-center gap-1.5 ${isMe ? 'bg-black/20 text-white' : 'bg-surface-container-high text-on-surface-variant'}`}>
+                                    <div className={`mt-2 p-1.5 rounded-lg text-[9px] font-sans font-normal flex items-center gap-1.5 ${isMe ? 'bg-black/20 text-white' : 'bg-surface-container-high text-on-surface-variant'}`}>
                                       <Paperclip className="w-3 h-3" />
                                       <a href={msg.fileUrl} target="_blank" rel="noreferrer" className="underline font-bold truncate max-w-[120px]">Attachment File</a>
                                     </div>
                                   )}
                                 </div>
-                                <p className={`text-[8px] font-mono text-on-surface-variant px-1 flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                <p className={`text-[8px] font-sans font-normal text-on-surface-variant px-1 flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
                                   {msg.sending ? (
                                     <RefreshCw className="w-2.5 h-2.5 animate-spin text-primary" />
                                   ) : (
@@ -2134,7 +2134,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                     if (!isOwner && !isHiredCandidate) {
                       return (
                         <div className="p-3.5 border-t border-outline-variant bg-surface-container-low text-center shrink-0">
-                          <p className="text-xs font-mono text-on-surface-variant flex items-center justify-center gap-1.5 font-bold">
+                          <p className="text-xs font-sans font-normal text-on-surface-variant flex items-center justify-center gap-1.5 font-bold">
                             <Lock className="w-3.5 h-3.5 text-amber-500" />
                             <span>Application Pending Review &bull; Direct messaging unlocks when hired</span>
                           </p>
@@ -2157,13 +2157,13 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
-                          <label className="cursor-pointer text-[9px] font-mono text-on-surface-variant hover:text-on-surface border border-outline-variant rounded px-2 py-1 bg-surface-container flex items-center gap-1 shadow-sm">
+                          <label className="cursor-pointer text-[9px] font-headline font-medium text-on-surface-variant hover:text-on-surface border border-outline-variant rounded px-2 py-1 bg-surface-container flex items-center gap-1 shadow-sm">
                             <Paperclip className="w-3 h-3 text-primary" />
                             <span>{chatAttachment ? chatAttachment.name : 'Attach File'}</span>
                             <input type="file" onChange={(e) => setChatAttachment(e.target.files[0])} className="hidden" />
                           </label>
                           {chatAttachment && (
-                            <button type="button" onClick={() => setChatAttachment(null)} className="text-[9px] text-error font-mono font-bold">Remove</button>
+                            <button type="button" onClick={() => setChatAttachment(null)} className="text-[9px] text-error font-headline font-medium">Remove</button>
                           )}
                         </div>
                       </form>
@@ -2172,7 +2172,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                 </div>
               ) : (
                 <div className="flex-1 flex items-center justify-center text-center p-8">
-                  <p className="text-xs font-mono text-on-surface-variant">Select a gig from the left panel to open workspace</p>
+                  <p className="text-xs font-sans font-normal text-on-surface-variant">Select a gig from the left panel to open workspace</p>
                 </div>
               )}
             </div>
@@ -2183,10 +2183,10 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                 /* CANDIDATE COLUMN 3: LIST OF GIGS APPLIED TO BUT NOT YET READ/HIRED BY RECRUITER */
                 <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
                   <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
-                    <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">
+                    <h4 className="text-[10px] font-headline font-medium uppercase tracking-widest text-primary font-bold">
                       Applied Gigs (Pending Review)
                     </h4>
-                    <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                    <span className="text-[9px] font-headline font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                       {(() => {
                         const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
                         const pendingGigs = myGigs.filter(g => {
@@ -2213,7 +2213,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       if (pendingGigs.length === 0) {
                         return (
                           <div className="text-center py-8">
-                            <p className="text-xs font-mono text-on-surface-variant">No pending applications.</p>
+                            <p className="text-xs font-sans font-normal text-on-surface-variant">No pending applications.</p>
                           </div>
                         );
                       }
@@ -2232,11 +2232,11 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           >
                             <div className="flex justify-between items-start gap-2">
                               <h5 className="text-xs font-bold text-on-surface line-clamp-1">{gig.title}</h5>
-                              <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
+                              <span className="text-[8px] font-headline font-medium uppercase px-1.5 py-0.5 rounded font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
                                 Pending Review
                               </span>
                             </div>
-                            <p className="text-[10px] font-mono text-on-surface-variant">Budget: <strong className="text-emerald-500">₹{gig.budget}</strong></p>
+                            <p className="text-[10px] font-sans font-normal text-on-surface-variant">Budget: <strong className="text-emerald-500">₹{gig.budget}</strong></p>
                           </div>
                         );
                       });
@@ -2249,11 +2249,11 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   {/* TOP BOX: ACCEPTED CANDIDATES */}
                   <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
                     <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
-                      <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">
+                      <h4 className="text-[10px] font-headline font-medium uppercase tracking-widest text-primary font-bold">
                         Accepted Candidates
                       </h4>
                       {gigDetails?.hiredCandidates?.length > 0 && (
-                        <span className="text-[8px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase">
+                        <span className="text-[8px] font-headline font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase">
                           {gigDetails.hiredCandidates.length} Hired
                         </span>
                       )}
@@ -2274,7 +2274,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                 }`}
                               >
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 font-mono font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
+                                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 font-headline font-medium flex items-center justify-center text-xs overflow-hidden shrink-0">
                                     {hc.candidate?.avatar || hc.candidate?.profilePic ? (
                                       <img src={hc.candidate.avatar || hc.candidate.profilePic} alt={hc.candidate.name} className="w-full h-full object-cover" />
                                     ) : (
@@ -2283,7 +2283,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <h5 className="text-xs font-bold text-on-surface truncate">{hc.candidate?.name || 'Hired Freelancer'}</h5>
-                                    <p className="text-[9px] font-mono text-emerald-500 font-bold">Active Gig Freelancer</p>
+                                    <p className="text-[9px] font-sans font-normal text-emerald-500 font-bold">Active Gig Freelancer</p>
                                   </div>
                                 </div>
                               </div>
@@ -2291,7 +2291,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                               {/* Feedback Room Panel when gig is COMPLETED */}
                               {gigDetails.status === 'COMPLETED' && isSelected && (
                                 <div className="p-3 bg-success/5 border border-success/20 rounded-xl space-y-2 shadow-xs">
-                                  <h5 className="text-[9px] font-mono uppercase tracking-wider text-success font-bold">Feedback Room</h5>
+                                  <h5 className="text-[9px] font-headline font-medium uppercase tracking-wider text-success font-bold">Feedback Room</h5>
                                   {(() => {
                                     const currentUserIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
                                     const myReview = gigDetails.reviews?.find(r => r.reviewerId && currentUserIds.includes(r.reviewerId.toString()));
@@ -2328,7 +2328,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                         })
                       ) : (
                         <div className="text-center py-8">
-                          <p className="text-xs font-mono text-on-surface-variant">No candidate accepted yet.</p>
+                          <p className="text-xs font-sans font-normal text-on-surface-variant">No candidate accepted yet.</p>
                         </div>
                       )}
                     </div>
@@ -2342,10 +2342,10 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                     return (
                       <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
                         <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
-                          <h4 className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">
+                          <h4 className="text-[10px] font-headline font-medium uppercase tracking-widest text-primary font-bold">
                             Unreviewed Pitches
                           </h4>
-                          <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                          <span className="text-[9px] font-headline font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                             {unreviewedApplicants.length}
                           </span>
                         </div>
@@ -2353,7 +2353,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                         <div className="flex-1 overflow-y-auto space-y-2.5 custom-scrollbar pr-1">
                           {unreviewedApplicants.length === 0 ? (
                             <div className="text-center py-8">
-                              <p className="text-xs font-mono text-on-surface-variant">No pending pitches to review.</p>
+                              <p className="text-xs font-sans font-normal text-on-surface-variant">No pending pitches to review.</p>
                             </div>
                           ) : (
                             unreviewedApplicants.map(app => (
@@ -2371,7 +2371,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                               >
                                 <div className="flex justify-between items-center gap-2">
                                   <div className="flex items-center gap-2">
-                                    <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/30 text-primary font-mono font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
+                                    <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/30 text-primary font-headline font-medium flex items-center justify-center text-xs overflow-hidden shrink-0">
                                       {app.candidate?.avatar || app.candidate?.profilePic ? (
                                         <img src={app.candidate.avatar || app.candidate.profilePic} alt={app.candidate.name} className="w-full h-full object-cover" />
                                       ) : (
@@ -2380,7 +2380,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                     </div>
                                     <div>
                                       <h5 className="text-[11px] font-bold text-on-surface line-clamp-1">{app.candidate?.name || 'Candidate'}</h5>
-                                      <p className="text-[8px] font-mono text-on-surface-variant">@{app.candidate?.username || 'candidate'}</p>
+                                      <p className="text-[8px] font-sans font-normal text-on-surface-variant">@{app.candidate?.username || 'candidate'}</p>
                                     </div>
                                   </div>
                                   {isOwner && (
@@ -2388,14 +2388,14 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                       <button
                                         type="button"
                                         onClick={() => handleRejectCandidate(app.candidateId)}
-                                        className="px-2 py-0.5 bg-error/10 text-error border border-error/20 text-[8px] font-mono font-bold uppercase rounded hover:bg-error/20 cursor-pointer"
+                                        className="px-2 py-0.5 bg-error/10 text-error border border-error/20 text-[8px] font-headline font-medium uppercase rounded hover:bg-error/20 cursor-pointer"
                                       >
                                         Reject
                                       </button>
                                       <button
                                         type="button"
                                         onClick={() => handleSelectCandidate(app.candidateId)}
-                                        className="px-2 py-0.5 bg-primary text-white text-[8px] font-mono font-bold uppercase rounded hover:opacity-90 cursor-pointer"
+                                        className="px-2 py-0.5 bg-primary text-white text-[8px] font-headline font-medium uppercase rounded hover:opacity-90 cursor-pointer"
                                       >
                                         Hire
                                       </button>
@@ -2418,7 +2418,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                         target="_blank"
                                         rel="noreferrer"
                                         onClick={e => e.stopPropagation()}
-                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-outline-variant bg-surface-container text-[8px] font-mono text-on-surface-variant hover:text-primary"
+                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-outline-variant bg-surface-container text-[8px] font-sans font-normal text-on-surface-variant hover:text-primary"
                                       >
                                         <Paperclip className="w-2.5 h-2.5 text-primary" />
                                         <span>Attachment #{idx + 1}</span>
@@ -2445,10 +2445,10 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
       {showApplyModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent animate-fade-in pointer-events-auto">
           <div className="w-full max-w-md bg-surface border border-outline-variant rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.55),0_10px_30px_rgba(0,0,0,0.3)] p-6 space-y-4 animate-scale-up">
-            <h3 className="text-sm font-headline font-bold text-on-surface">Apply to: {targetApplyGig?.title}</h3>
+            <h3 className="text-sm font-headline font-medium text-on-surface">Apply to: {targetApplyGig?.title}</h3>
 
             <div className="space-y-2">
-              <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold">Pitch Message / Cover Letter *</label>
+              <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant font-bold">Pitch Message / Cover Letter *</label>
               <TextArea
                 value={applyMessage}
                 onChange={(e) => setApplyMessage(e.target.value)}
@@ -2459,7 +2459,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold flex justify-between items-center">
+              <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant font-bold flex justify-between items-center">
                 <span>Attach Work Sample Image (Optional)</span>
                 <span className="text-[9px] text-on-surface-variant/70 font-normal">Max 2MB</span>
               </label>
@@ -2486,10 +2486,10 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                     setApplyFile(null);
                   }
                 }}
-                className="w-full text-xs text-on-surface bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 cursor-pointer file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-mono file:bg-primary/10 file:text-primary file:font-bold hover:file:bg-primary/20"
+                className="w-full text-xs text-on-surface bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 cursor-pointer file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-headline font-medium file:bg-primary/10 file:text-primary file:font-bold hover:file:bg-primary/20"
               />
               {applyFile && (
-                <p className="text-[10px] font-mono text-emerald-500 flex items-center gap-1 font-semibold">
+                <p className="text-[10px] font-sans font-normal text-emerald-500 flex items-center gap-1 font-semibold">
                   ✓ Attached: {applyFile.name} ({(applyFile.size / 1024).toFixed(0)} KB)
                 </p>
               )}
@@ -2498,14 +2498,14 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setShowApplyModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-mono bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-headline font-medium bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleApplyToGig}
                 disabled={applying}
-                className="px-4 py-2 bg-primary text-white text-xs font-mono font-bold uppercase rounded-xl hover:opacity-90 transition-all shadow-md active:scale-95 cursor-pointer"
+                className="px-4 py-2 bg-primary text-white text-xs font-headline font-medium uppercase rounded-xl hover:opacity-90 transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 {applying ? 'Submitting...' : 'Send Pitch'}
               </button>
@@ -2518,11 +2518,11 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent animate-fade-in pointer-events-auto">
           <form onSubmit={handleUpdateGigSubmit} className="w-full max-w-md bg-surface-container border border-outline-variant rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.55),0_10px_30px_rgba(0,0,0,0.3)] p-6 space-y-4 animate-scale-up">
-            <h3 className="text-sm font-headline font-bold text-on-surface">Edit Gig Details</h3>
+            <h3 className="text-sm font-headline font-medium text-on-surface">Edit Gig Details</h3>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1">Title *</label>
+                <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1">Title *</label>
                 <input
                   type="text"
                   required
@@ -2533,7 +2533,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1">Description *</label>
+                <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1">Description *</label>
                 <TextArea
                   required
                   rows={4}
@@ -2543,7 +2543,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1 font-bold">Required Stacks & Rating Thresholds *</label>
+                <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1 font-bold">Required Stacks & Rating Thresholds *</label>
                 <div className="relative">
                   <input
                     type="text"
@@ -2588,7 +2588,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           s => s.skill.toLowerCase().includes(editSkillSearchTerm.toLowerCase()) &&
                             !editReqs.some(exist => exist.skillName.toLowerCase() === s.skill.toLowerCase())
                         ).length === 0 ? (
-                          <div className="p-2.5 text-[11px] text-on-surface-variant font-mono text-center">
+                          <div className="p-2.5 text-[11px] text-on-surface-variant font-sans font-normal text-center">
                             No matching skills found. Press Enter to add "{editSkillSearchTerm.trim()}"
                           </div>
                         ) : (
@@ -2608,7 +2608,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                               className="w-full text-left px-3 py-1.5 text-xs text-on-surface hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between group cursor-pointer rounded-lg font-sans"
                             >
                               <span>{s.skill}</span>
-                              <span className="text-[9px] font-mono capitalize px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/60 text-on-surface-variant">
+                              <span className="text-[9px] font-sans font-normal capitalize px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/60 text-on-surface-variant">
                                 {s.type}
                               </span>
                             </button>
@@ -2621,7 +2621,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
                 {/* Edit Skill Requirements with Rating Sliders */}
                 {editReqs.length === 0 ? (
-                  <p className="text-[10px] text-on-surface-variant/70 font-mono mt-1">No skills selected yet.</p>
+                  <p className="text-[10px] text-on-surface-variant/70 font-sans font-normal mt-1">No skills selected yet.</p>
                 ) : (
                   <div className="space-y-2.5 pt-2">
                     {editReqs.map(r => {
@@ -2633,16 +2633,16 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                             <span className="font-bold text-on-surface font-headline">{r.skillName}</span>
                             <div className="flex items-center gap-2">
                               {isTech ? (
-                                <span className="text-primary font-mono font-bold text-[10px] bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+                                <span className="text-primary font-headline font-medium text-[10px] bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
                                   Lvl {r.minRating}/10
                                 </span>
                               ) : (
-                                <span className="text-on-surface-variant font-mono text-[9px] uppercase bg-surface-container-high border border-outline-variant px-1.5 py-0.5 rounded">Required</span>
+                                <span className="text-on-surface-variant font-headline font-medium text-[9px] uppercase bg-surface-container-high border border-outline-variant px-1.5 py-0.5 rounded">Required</span>
                               )}
                               <button
                                 type="button"
                                 onClick={() => setEditReqs(prev => prev.filter(item => item.skillName !== r.skillName))}
-                                className="text-error hover:underline text-[10px] font-mono cursor-pointer"
+                                className="text-error hover:underline text-[10px] font-sans font-normal cursor-pointer"
                               >
                                 Remove
                               </button>
@@ -2669,7 +2669,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1 font-bold">Category of Field *</label>
+                <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1 font-bold">Category of Field *</label>
                 <MultiSearchableCategorySelect
                   values={editCategories}
                   onChange={(vals) => setEditCategories(vals)}
@@ -2699,23 +2699,23 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1 font-bold">Budget (INR) *</label>
+                  <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1 font-bold">Budget (INR) *</label>
                   <input
                     type="number"
                     min="1"
                     required
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none font-mono"
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none font-sans font-normal"
                     value={editBudget}
                     onChange={e => setEditBudget(e.target.value)}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1 font-bold">Delivery Time *</label>
+                  <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1 font-bold">Delivery Time *</label>
                   <input
                     type="text"
                     required
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none font-mono"
+                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none font-sans font-normal"
                     value={editDeliveryTime}
                     onChange={e => setEditDeliveryTime(e.target.value)}
                   />
@@ -2723,7 +2723,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono uppercase text-on-surface-variant mb-1">Update Spec Attachment (Optional)</label>
+                <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1">Update Spec Attachment (Optional)</label>
                 <input
                   type="file"
                   className="w-full text-xs text-on-surface bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2"
@@ -2736,14 +2736,14 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               <button
                 type="button"
                 onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-mono bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-headline font-medium bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={updatingGig}
-                className="px-4 py-2 bg-primary text-white text-xs font-mono font-bold uppercase rounded-xl hover:opacity-90 transition-all shadow-md active:scale-95 cursor-pointer"
+                className="px-4 py-2 bg-primary text-white text-xs font-headline font-medium uppercase rounded-xl hover:opacity-90 transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 {updatingGig ? 'Saving...' : 'Save Changes'}
               </button>
@@ -2764,7 +2764,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-on-surface font-sans">{gigDetails.title}</h3>
-                  <p className="text-[10px] font-mono text-on-surface-variant">Full Project Brief & Specifications</p>
+                  <p className="text-[10px] font-sans font-normal text-on-surface-variant">Full Project Brief & Specifications</p>
                 </div>
               </div>
               <button
@@ -2781,12 +2781,12 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-outline-variant/40">
                 <div className="flex flex-wrap gap-1.5">
                   {(gigDetails.categories || [gigDetails.category]).filter(Boolean).map(c => (
-                    <span key={c} className="px-2.5 py-0.5 rounded-lg bg-primary/10 text-primary border border-primary/20 text-[10px] font-mono font-bold">
+                    <span key={c} className="px-2.5 py-0.5 rounded-lg bg-primary/10 text-primary border border-primary/20 text-[10px] font-headline font-medium">
                       {c}
                     </span>
                   ))}
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-[9px] font-mono font-bold uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                <span className="px-2.5 py-1 rounded-full text-[9px] font-headline font-medium uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                   {gigDetails.status}
                 </span>
               </div>
@@ -2794,18 +2794,18 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               {/* Budget & Delivery */}
               <div className="grid grid-cols-2 gap-3 p-3 bg-surface-container-low border border-outline-variant/60 rounded-xl">
                 <div>
-                  <span className="text-[9px] font-mono uppercase text-on-surface-variant block font-bold">Budget Rate</span>
-                  <span className="text-sm font-bold text-emerald-500 font-mono">₹{gigDetails.budget}</span>
+                  <span className="text-[9px] font-headline font-medium uppercase text-on-surface-variant block font-bold">Budget Rate</span>
+                  <span className="text-sm font-bold text-emerald-500 font-sans font-normal">₹{gigDetails.budget}</span>
                 </div>
                 <div>
-                  <span className="text-[9px] font-mono uppercase text-on-surface-variant block font-bold">Delivery Time</span>
+                  <span className="text-[9px] font-headline font-medium uppercase text-on-surface-variant block font-bold">Delivery Time</span>
                   <span className="text-xs font-semibold text-on-surface">{gigDetails.deliveryTime}</span>
                 </div>
               </div>
 
               {/* Description */}
               <div className="space-y-1.5">
-                <h4 className="text-[10px] font-mono uppercase tracking-wider text-primary font-bold">Detailed Requirements</h4>
+                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary font-bold">Detailed Requirements</h4>
                 <div className="p-3.5 bg-surface-container-high/30 rounded-xl text-on-surface border border-outline-variant/30 leading-relaxed whitespace-pre-wrap">
                   {gigDetails.description}
                 </div>
@@ -2813,7 +2813,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
               {/* Required Stacks */}
               <div className="space-y-2">
-                <h4 className="text-[10px] font-mono uppercase tracking-wider text-primary font-bold">Required Skills & Ratings</h4>
+                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary font-bold">Required Skills & Ratings</h4>
                 <div className="flex flex-wrap gap-2">
                   {((gigDetails.requirements && gigDetails.requirements.length > 0)
                     ? gigDetails.requirements
@@ -2821,7 +2821,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   ).map(r => (
                     <div key={r.skillName} className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container border border-outline-variant rounded-xl text-xs">
                       <span className="font-bold text-on-surface">{r.skillName}</span>
-                      <span className="text-[9px] font-mono text-primary font-bold bg-primary/10 px-2 py-0.5 rounded">Lvl {r.minRating || 1}/10</span>
+                      <span className="text-[9px] font-headline font-medium text-primary font-bold bg-primary/10 px-2 py-0.5 rounded">Lvl {r.minRating || 1}/10</span>
                     </div>
                   ))}
                 </div>
@@ -2830,7 +2830,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               {/* Brief Attachments */}
               {gigDetails.attachments?.length > 0 && (
                 <div className="space-y-2 pt-2 border-t border-outline-variant/40">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-primary font-bold">Brief Attachments ({gigDetails.attachments.length})</h4>
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary font-bold">Brief Attachments ({gigDetails.attachments.length})</h4>
                   <div className="flex flex-wrap gap-2">
                     {gigDetails.attachments.map((url, idx) => {
                       const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(url) || url.includes('/avatar/') || url.includes('image');
@@ -2840,7 +2840,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           <img src={url} alt="Brief Attachment" className="w-full h-full object-cover" />
                         </a>
                       ) : (
-                        <a key={idx} href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-outline-variant bg-surface-container text-xs font-mono hover:text-primary">
+                        <a key={idx} href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-outline-variant bg-surface-container text-xs font-sans font-normal hover:text-primary">
                           <Paperclip className="w-4 h-4 text-primary" />
                           <span className="max-w-[160px] truncate">{filename}</span>
                         </a>
@@ -2854,7 +2854,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             <div className="p-3 border-t border-outline-variant bg-surface-container-low flex justify-end">
               <button
                 onClick={() => setShowGigInfoModal(false)}
-                className="px-4 py-2 bg-surface-container-high border border-outline-variant hover:bg-surface-container text-on-surface text-xs font-mono font-bold rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-surface-container-high border border-outline-variant hover:bg-surface-container text-on-surface text-xs font-headline font-medium rounded-xl cursor-pointer"
               >
                 Close
               </button>
@@ -2875,7 +2875,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-on-surface font-sans">Rest of Candidates</h3>
-                  <p className="text-[10px] font-mono text-on-surface-variant">Review pitches & communicate directly with applicants</p>
+                  <p className="text-[10px] font-sans font-normal text-on-surface-variant">Review pitches & communicate directly with applicants</p>
                 </div>
               </div>
               <button
@@ -2890,14 +2890,14 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             <div className="p-5 overflow-y-auto space-y-6 custom-scrollbar font-sans text-xs">
               {/* Section 1: Candidate Pitches */}
               <div className="space-y-3">
-                <h4 className="text-[11px] font-mono uppercase tracking-wider text-primary font-bold flex items-center gap-1.5">
+                <h4 className="text-[11px] font-headline font-medium uppercase tracking-wider text-primary font-bold flex items-center gap-1.5">
                   <span>Candidate Pitches</span>
                   <span className="text-[9px] px-2 py-0.5 bg-primary/10 rounded-full">{gigDetails.applicants?.length || 0} Total</span>
                 </h4>
 
                 {gigDetails.applicants?.length === 0 ? (
                   <div className="text-center py-6 bg-surface-container-low rounded-xl border border-outline-variant border-dashed">
-                    <p className="text-xs font-mono text-on-surface-variant">No other candidate pitches submitted yet</p>
+                    <p className="text-xs font-sans font-normal text-on-surface-variant">No other candidate pitches submitted yet</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -2907,7 +2907,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                         <div key={app.id} className={`p-4 rounded-xl border transition-all space-y-3 shadow-xs ${isHired ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-surface-container-low border-outline-variant'}`}>
                           <div className="flex justify-between items-center gap-2">
                             <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 text-primary font-mono font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
+                              <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 text-primary font-headline font-medium flex items-center justify-center text-xs overflow-hidden shrink-0">
                                 {app.candidate?.avatar || app.candidate?.profilePic ? (
                                   <img src={app.candidate.avatar || app.candidate.profilePic} alt={app.candidate.name} className="w-full h-full object-cover" />
                                 ) : (
@@ -2917,9 +2917,9 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                               <div>
                                 <div className="flex items-center gap-2">
                                   <h4 className="text-xs font-bold text-on-surface">{app.candidate?.name || 'Candidate'}</h4>
-                                  {isHired && <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[8px] font-mono font-bold rounded-full uppercase">Currently Hired</span>}
+                                  {isHired && <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[8px] font-headline font-medium rounded-full uppercase">Currently Hired</span>}
                                 </div>
-                                <p className="text-[9px] font-mono text-on-surface-variant">@{app.candidate?.username || 'candidate'}</p>
+                                <p className="text-[9px] font-sans font-normal text-on-surface-variant">@{app.candidate?.username || 'candidate'}</p>
                               </div>
                             </div>
                             {isOwner && (
@@ -2927,14 +2927,14 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                 <button
                                   type="button"
                                   onClick={() => handleRejectCandidate(app.candidateId)}
-                                  className="px-3 py-1 bg-error/10 text-error border border-error/20 hover:bg-error/20 text-[9px] font-mono font-bold uppercase rounded-lg transition-all shadow-xs cursor-pointer"
+                                  className="px-3 py-1 bg-error/10 text-error border border-error/20 hover:bg-error/20 text-[9px] font-headline font-medium uppercase rounded-lg transition-all shadow-xs cursor-pointer"
                                 >
                                   Reject
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleSelectCandidate(app.candidateId)}
-                                  className={`px-3 py-1 text-[9px] font-mono font-bold uppercase rounded-lg transition-all shadow-sm cursor-pointer ${isHired ? 'bg-emerald-600 text-white' : 'bg-primary text-white hover:opacity-90'}`}
+                                  className={`px-3 py-1 text-[9px] font-headline font-medium uppercase rounded-lg transition-all shadow-sm cursor-pointer ${isHired ? 'bg-emerald-600 text-white' : 'bg-primary text-white hover:opacity-90'}`}
                                 >
                                   {isHired ? 'Selected' : 'Switch Hire'}
                                 </button>
@@ -2946,7 +2946,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           </div>
                           {app.attachments?.length > 0 && (
                             <div className="space-y-1.5 pt-2 border-t border-outline-variant/30">
-                              <p className="text-[10px] font-mono text-on-surface-variant uppercase font-bold flex items-center gap-1.5">
+                              <p className="text-[10px] font-headline font-medium text-on-surface-variant uppercase font-bold flex items-center gap-1.5">
                                 <Paperclip className="w-3.5 h-3.5 text-primary" /> Pitch Attachments ({app.attachments.length}):
                               </p>
                               <div className="flex flex-wrap gap-2 pt-0.5">
@@ -2958,7 +2958,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                       <img src={url} alt="Pitch Attachment" className="w-full h-full object-cover" />
                                     </a>
                                   ) : (
-                                    <a key={idx} href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-outline-variant bg-surface-container text-xs font-mono text-on-surface-variant hover:text-primary">
+                                    <a key={idx} href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-outline-variant bg-surface-container text-xs font-sans font-normal text-on-surface-variant hover:text-primary">
                                       <Paperclip className="w-3.5 h-3.5 text-primary" />
                                       <span className="max-w-[140px] truncate">{filename}</span>
                                     </a>
@@ -2976,12 +2976,12 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
               {/* Section 2: Other Candidate Chats */}
               <div className="pt-4 border-t border-outline-variant/50 space-y-3">
-                <h4 className="text-[11px] font-mono uppercase tracking-wider text-primary font-bold">
+                <h4 className="text-[11px] font-headline font-medium uppercase tracking-wider text-primary font-bold">
                   Other Candidate Chats
                 </h4>
 
                 {gigDetails.applicants?.length === 0 ? (
-                  <p className="text-xs font-mono text-on-surface-variant">No candidates to chat with.</p>
+                  <p className="text-xs font-sans font-normal text-on-surface-variant">No candidates to chat with.</p>
                 ) : (
                   <div className="border border-outline-variant rounded-xl overflow-hidden bg-surface-container-low/50">
                     {/* Candidate Tab Selection Bar */}
@@ -2993,7 +2993,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                             key={app.candidateId}
                             type="button"
                             onClick={() => setSelectedOtherCandidateId(app.candidateId)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-headline font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                               isSelectedTab ? 'bg-primary text-white shadow-xs' : 'bg-surface-container-high text-on-surface-variant hover:text-on-surface'
                             }`}
                           >
@@ -3015,7 +3015,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           <div className="space-y-3">
                             <div className="max-h-56 overflow-y-auto space-y-2 p-2 border border-outline-variant/30 rounded-xl bg-surface-container-high/10 custom-scrollbar">
                               {candMessages.length === 0 ? (
-                                <p className="text-center text-xs font-mono text-on-surface-variant py-6">No direct chat history with this candidate yet. Type a message below to start.</p>
+                                <p className="text-center text-xs font-sans font-normal text-on-surface-variant py-6">No direct chat history with this candidate yet. Type a message below to start.</p>
                               ) : (
                                 candMessages.map(msg => {
                                   const isMe = msg.senderId === user.id;
@@ -3024,12 +3024,12 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                       <div className={`p-2.5 rounded-xl text-xs max-w-[80%] ${isMe ? 'bg-primary text-white rounded-tr-none' : 'bg-surface-container border border-outline-variant text-on-surface rounded-tl-none'}`}>
                                         {msg.text}
                                         {msg.fileUrl && (
-                                          <div className="mt-1 text-[9px] font-mono underline">
+                                          <div className="mt-1 text-[9px] font-sans font-normal underline">
                                             <a href={msg.fileUrl} target="_blank" rel="noreferrer">View Attachment</a>
                                           </div>
                                         )}
                                       </div>
-                                      <span className="text-[8px] font-mono text-on-surface-variant px-1 mt-0.5">
+                                      <span className="text-[8px] font-sans font-normal text-on-surface-variant px-1 mt-0.5">
                                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                       </span>
                                     </div>
@@ -3093,7 +3093,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                   <Send className="w-3.5 h-3.5" />
                                 </button>
                               </div>
-                              <div className="flex items-center justify-between text-[9px] font-mono">
+                              <div className="flex items-center justify-between text-[9px] font-sans font-normal">
                                 <label className="cursor-pointer text-on-surface-variant hover:text-on-surface border border-outline-variant rounded px-2 py-1 bg-surface-container flex items-center gap-1">
                                   <Paperclip className="w-3 h-3" />
                                   <span>{otherCandidateChatFile ? otherCandidateChatFile.name : 'Attach File'}</span>
@@ -3116,7 +3116,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             <div className="p-3 border-t border-outline-variant bg-surface-container-low flex justify-end">
               <button
                 onClick={() => setShowOtherCandidatesModal(false)}
-                className="px-4 py-2 bg-surface-container-high border border-outline-variant hover:bg-surface-container text-on-surface text-xs font-mono font-bold rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-surface-container-high border border-outline-variant hover:bg-surface-container text-on-surface text-xs font-headline font-medium rounded-xl cursor-pointer"
               >
                 Close
               </button>
@@ -3132,7 +3132,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             {/* Modal Header */}
             <div className="p-4 bg-surface-container-high border-b border-outline-variant flex justify-between items-center shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/30 text-primary font-mono font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
+                <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/30 text-primary font-headline font-medium flex items-center justify-center text-xs overflow-hidden shrink-0">
                   {selectedUnreviewedPitchApp.candidate?.avatar || selectedUnreviewedPitchApp.candidate?.profilePic ? (
                     <img src={selectedUnreviewedPitchApp.candidate.avatar || selectedUnreviewedPitchApp.candidate.profilePic} alt="Candidate" className="w-full h-full object-cover" />
                   ) : (
@@ -3141,7 +3141,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-on-surface">{selectedUnreviewedPitchApp.candidate?.name || 'Candidate'}</h3>
-                  <p className="text-[10px] font-mono text-primary font-bold">@{selectedUnreviewedPitchApp.candidate?.username || 'candidate'}</p>
+                  <p className="text-[10px] font-sans font-normal text-primary font-bold">@{selectedUnreviewedPitchApp.candidate?.username || 'candidate'}</p>
                 </div>
               </div>
               <button
@@ -3155,7 +3155,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             {/* Modal Body */}
             <div className="p-5 overflow-y-auto space-y-4 custom-scrollbar bg-background text-left">
               <div className="space-y-1.5">
-                <h4 className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant font-bold">Candidate Pitch Message</h4>
+                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold">Candidate Pitch Message</h4>
                 <div className="p-3.5 bg-surface-container border border-outline-variant/60 rounded-xl text-xs text-on-surface leading-relaxed whitespace-pre-wrap">
                   {selectedUnreviewedPitchApp.message}
                 </div>
@@ -3163,7 +3163,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
               {selectedUnreviewedPitchApp.attachments?.length > 0 && (
                 <div className="space-y-2 pt-2 border-t border-outline-variant/40">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant font-bold flex items-center gap-1.5">
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold flex items-center gap-1.5">
                     <Paperclip className="w-3.5 h-3.5 text-primary" /> Pitch Attachments ({selectedUnreviewedPitchApp.attachments.length})
                   </h4>
                   <div className="flex flex-wrap gap-2 pt-1">
@@ -3186,7 +3186,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           href={url}
                           target="_blank"
                           rel="noreferrer"
-                          className="group inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-outline-variant bg-surface-container hover:border-primary/60 hover:bg-surface-container-high transition-all text-xs font-mono text-on-surface-variant hover:text-primary shadow-xs"
+                          className="group inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-outline-variant bg-surface-container hover:border-primary/60 hover:bg-surface-container-high transition-all text-xs font-sans font-normal text-on-surface-variant hover:text-primary shadow-xs"
                         >
                           <Paperclip className="w-4 h-4 text-primary shrink-0" />
                           <span className="max-w-[180px] truncate font-semibold">{filename}</span>
@@ -3209,7 +3209,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                     selectedUnreviewedPitchApp.candidate
                   );
                 }}
-                className="px-3.5 py-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-[10px] font-mono font-bold uppercase rounded-xl flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                className="px-3.5 py-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-[10px] font-headline font-medium uppercase rounded-xl flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
               >
                 {loadingProfile ? (
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -3228,7 +3228,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       setSelectedUnreviewedPitchApp(null);
                       handleRejectCandidate(candId);
                     }}
-                    className="px-3.5 py-2 bg-error/10 text-error border border-error/20 hover:bg-error/20 text-[10px] font-mono font-bold uppercase rounded-xl transition-all cursor-pointer active:scale-95"
+                    className="px-3.5 py-2 bg-error/10 text-error border border-error/20 hover:bg-error/20 text-[10px] font-headline font-medium uppercase rounded-xl transition-all cursor-pointer active:scale-95"
                   >
                     Reject
                   </button>
@@ -3239,7 +3239,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       setSelectedUnreviewedPitchApp(null);
                       handleSelectCandidate(candId);
                     }}
-                    className="px-4 py-2 bg-primary text-white text-[10px] font-mono font-bold uppercase rounded-xl hover:opacity-90 transition-all shadow-sm cursor-pointer active:scale-95"
+                    className="px-4 py-2 bg-primary text-white text-[10px] font-headline font-medium uppercase rounded-xl hover:opacity-90 transition-all shadow-sm cursor-pointer active:scale-95"
                   >
                     Hire Candidate
                   </button>
@@ -3257,12 +3257,12 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             {/* Modal Header */}
             <div className="p-4 bg-surface-container-high border-b border-outline-variant flex justify-between items-center shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/30 text-primary font-mono font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/30 text-primary font-headline font-medium flex items-center justify-center text-xs overflow-hidden shrink-0">
                   <Paperclip className="w-4.5 h-4.5 text-primary" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-on-surface">Candidate Work Deliverables</h3>
-                  <p className="text-[10px] font-mono text-on-surface-variant">Project: {gigDetails.title}</p>
+                  <p className="text-[10px] font-sans font-normal text-on-surface-variant">Project: {gigDetails.title}</p>
                 </div>
               </div>
               <button
@@ -3281,16 +3281,16 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   await handleSubmitWork(e);
                   setShowSubmissionModal(false);
                 }} className="space-y-3 pb-3 border-b border-outline-variant/40">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-primary font-bold">Submission Form</h4>
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary font-bold">Submission Form</h4>
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold">Work Description *</label>
+                    <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant font-bold">Work Description *</label>
                     <TextArea value={submitText} onChange={(e) => setSubmitText(e.target.value)} placeholder="Describe your completed deliverables, instructions, or links..." rows={3} required />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] font-mono uppercase text-on-surface-variant font-bold">Attach Work File (PDF/PNG/JPG/DOCX/ZIP)</label>
+                    <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant font-bold">Attach Work File (PDF/PNG/JPG/DOCX/ZIP)</label>
                     <input type="file" onChange={(e) => setSubmitFile(e.target.files[0])} className="w-full text-xs text-on-surface bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 cursor-pointer" />
                   </div>
-                  <Button type="submit" disabled={submittingWork} className="w-full text-xs py-2 font-mono font-bold uppercase">
+                  <Button type="submit" disabled={submittingWork} className="w-full text-xs py-2 font-headline font-medium uppercase">
                     {submittingWork ? 'Uploading & Submitting...' : 'Submit Work Deliverables'}
                   </Button>
                 </form>
@@ -3304,7 +3304,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   return !isHiredCandidate ? (
                     <div className="text-center py-8 bg-surface-container-low rounded-xl border border-outline-variant border-dashed p-4">
                       <Paperclip className="w-8 h-8 text-on-surface-variant/40 mx-auto mb-2" />
-                      <p className="text-xs font-mono text-on-surface-variant">No work deliverables submitted yet by this candidate.</p>
+                      <p className="text-xs font-sans font-normal text-on-surface-variant">No work deliverables submitted yet by this candidate.</p>
                     </div>
                   ) : null;
                 }
@@ -3312,8 +3312,8 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                 return (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-[10px] font-mono uppercase tracking-wider text-primary font-bold">Submitted Deliverables</h4>
-                      <span className={`text-[9px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase border ${
+                      <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary font-bold">Submitted Deliverables</h4>
+                      <span className={`text-[9px] font-headline font-medium px-2.5 py-0.5 rounded-full uppercase border ${
                         candSubmission.status === 'ACCEPTED'
                           ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                           : candSubmission.status === 'REJECTED'
@@ -3328,7 +3328,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                     </div>
                     {candSubmission.fileUrl && (
                       <div className="p-3 bg-surface-container-low border border-outline-variant rounded-xl flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 text-xs font-mono text-on-surface truncate">
+                        <div className="flex items-center gap-2 text-xs font-sans font-normal text-on-surface truncate">
                           <Paperclip className="w-4 h-4 text-primary shrink-0" />
                           <span className="truncate">{candSubmission.fileUrl.split('/').pop() || 'Work Deliverable File'}</span>
                         </div>
@@ -3336,7 +3336,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           href={candSubmission.fileUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="px-3.5 py-1.5 bg-primary text-white text-[10px] font-mono font-bold uppercase rounded-xl hover:opacity-90 transition-all shrink-0 shadow-xs"
+                          className="px-3.5 py-1.5 bg-primary text-white text-[10px] font-headline font-medium uppercase rounded-xl hover:opacity-90 transition-all shrink-0 shadow-xs"
                         >
                           View Work File
                         </a>
@@ -3351,7 +3351,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                             await handleReviewAction('ACCEPT', candSubmission.candidateId);
                             setShowSubmissionModal(false);
                           }}
-                          className="flex-1 py-2 bg-success text-white text-xs font-mono font-bold uppercase rounded-xl hover:opacity-95 shadow-xs cursor-pointer font-bold"
+                          className="flex-1 py-2 bg-success text-white text-xs font-headline font-medium uppercase rounded-xl hover:opacity-95 shadow-xs cursor-pointer font-bold"
                         >
                           Accept Work
                         </button>
@@ -3361,7 +3361,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                             await handleReviewAction('REVISION', candSubmission.candidateId);
                             setShowSubmissionModal(false);
                           }}
-                          className="flex-1 py-2 bg-error text-white text-xs font-mono font-bold uppercase rounded-xl hover:opacity-95 shadow-xs cursor-pointer font-bold"
+                          className="flex-1 py-2 bg-error text-white text-xs font-headline font-medium uppercase rounded-xl hover:opacity-95 shadow-xs cursor-pointer font-bold"
                         >
                           Request Revision
                         </button>
@@ -3377,7 +3377,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               <button
                 type="button"
                 onClick={() => setShowSubmissionModal(false)}
-                className="px-4 py-2 bg-surface-container-high border border-outline-variant hover:bg-surface-container text-on-surface text-xs font-mono font-bold rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-surface-container-high border border-outline-variant hover:bg-surface-container text-on-surface text-xs font-headline font-medium rounded-xl cursor-pointer"
               >
                 Close
               </button>

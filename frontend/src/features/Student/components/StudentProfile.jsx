@@ -572,7 +572,7 @@ export default function StudentProfile({
         }`}>
         {/* <CheckCircle className="w-5 h-5 text-success animate-bounce" /> */}
         <div className="flex flex-col">
-          <span className="text-xs font-bold uppercase tracking-wider font-mono">Success</span>
+          <span className="text-xs font-bold uppercase tracking-wider font-headline font-medium">Success</span>
           <span className="text-[11px] opacity-90">Photo uploaded successfully!</span>
         </div>
       </div>
@@ -642,18 +642,18 @@ export default function StudentProfile({
                   type="button"
                   disabled={!prevTab}
                   onClick={() => prevTab && setProfileTab(prevTab.id)}
-                  className="px-3 py-1.5 bg-surface-container-high border border-outline-variant hover:bg-surface-container-highest disabled:opacity-40 disabled:pointer-events-none rounded-xl text-xs font-mono font-bold text-on-surface flex items-center gap-1.5 transition-all"
+                  className="px-3 py-1.5 bg-surface-container-high border border-outline-variant hover:bg-surface-container-highest disabled:opacity-40 disabled:pointer-events-none rounded-xl text-xs font-sans font-normal font-semibold text-on-surface flex items-center gap-1.5 transition-all"
                 >
                   &larr; Prev: {prevTab ? prevTab.label : 'None'}
                 </button>
-                <span className="text-xs font-mono font-bold text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-wider">
+                <span className="text-xs font-headline font-medium text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-wider">
                   {tabsList[currentTabIdx]?.label}
                 </span>
                 {nextTab ? (
                   <button
                     type="button"
                     onClick={() => setProfileTab(nextTab.id)}
-                    className="px-3 py-1.5 bg-surface-container-high border border-outline-variant hover:bg-surface-container-highest disabled:opacity-40 disabled:pointer-events-none rounded-xl text-xs font-mono font-bold text-on-surface flex items-center gap-1.5 transition-all"
+                    className="px-3 py-1.5 bg-surface-container-high border border-outline-variant hover:bg-surface-container-highest disabled:opacity-40 disabled:pointer-events-none rounded-xl text-xs font-sans font-normal font-semibold text-on-surface flex items-center gap-1.5 transition-all"
                   >
                     Next: {nextTab.label} &rarr;
                   </button>
@@ -689,7 +689,7 @@ export default function StudentProfile({
                     )}
                   </div>
                   <div className="space-y-2 text-center md:text-left flex-1">
-                    <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Profile Picture</label>
+                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Profile Picture</label>
                     <p className="text-[10px] text-on-surface-variant leading-relaxed">
                       Recommended: square image. Automatically resized and compressed to under 100KB.
                     </p>
@@ -721,7 +721,7 @@ export default function StudentProfile({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Full Name</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Full Name</label>
                   <input
                     type="text"
                     className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
@@ -732,11 +732,11 @@ export default function StudentProfile({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Username</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Username</label>
                   <div className="relative">
                     <input
                       type="text"
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-mono"
+                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
                       value={username || ''}
                       onChange={handleUsernameChange}
                       placeholder="e.g. johndoe"
@@ -754,7 +754,7 @@ export default function StudentProfile({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Describe Yourself</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Describe Yourself</label>
                   <textarea
                     rows="3"
                     className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
@@ -766,7 +766,7 @@ export default function StudentProfile({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Nationality</label>
+                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Nationality</label>
                     <select
                       className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
                       value={nationality}
@@ -784,7 +784,7 @@ export default function StudentProfile({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Gender</label>
+                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Gender</label>
                     <select
                       className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
                       value={gender}
@@ -801,7 +801,7 @@ export default function StudentProfile({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Email Address</label>
+                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Email Address</label>
                     <input
                       type="email"
                       className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
@@ -812,10 +812,10 @@ export default function StudentProfile({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Date of Birth</label>
+                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Date of Birth</label>
                     <input
                       type="date"
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-mono dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                       value={dob}
                       onChange={e => setDob(e.target.value)}
                     />
@@ -828,11 +828,11 @@ export default function StudentProfile({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Phone Number</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Phone Number</label>
                   <div className="flex gap-3">
                     {/* Country Code Select */}
                     <select
-                      className="bg-surface-container-low border border-outline-variant rounded-xl px-3 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface w-24 shrink-0 font-mono"
+                      className="bg-surface-container-low border border-outline-variant rounded-xl px-3 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface w-24 shrink-0 font-sans font-normal"
                       value={countryCode}
                       onChange={handleCountryCodeChange}
                     >
@@ -850,7 +850,7 @@ export default function StudentProfile({
                     <div className="relative flex-1">
                       <input
                         type="text"
-                        className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-mono"
+                        className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
                         value={localPhone}
                         onChange={handleLocalPhoneChange}
                         placeholder="Enter mobile number"
@@ -863,7 +863,7 @@ export default function StudentProfile({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-2">Resume</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Resume</label>
                   <input
                     type="url"
                     className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
@@ -876,13 +876,13 @@ export default function StudentProfile({
                 {/* Work Preferences & Location Block inside General Tab */}
                 <div className="pt-4 border-t border-outline-variant space-y-6">
                   <div>
-                    <h3 className="text-sm font-headline font-bold text-primary uppercase font-mono tracking-wider">Work Preferences & Location</h3>
+                    <h3 className="text-sm font-headline font-bold text-primary uppercase font-headline font-medium tracking-wider">Work Preferences & Location</h3>
                     <p className="text-xs text-on-surface-variant">Specify your desired work modes, position types, and preferred locations across India.</p>
                   </div>
 
                   {/* Mode of Work */}
                   <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl space-y-2.5">
-                    <label className="block text-xs font-mono uppercase tracking-wider text-primary font-bold">
+                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold">
                       Mode of Work
                     </label>
                     <p className="text-[11px] text-on-surface-variant">Select all work modes you are open to:</p>
@@ -894,7 +894,7 @@ export default function StudentProfile({
                             key={mode}
                             type="button"
                             onClick={() => toggleWorkMode(mode)}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono transition-all border cursor-pointer flex items-center gap-2 ${
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-sans font-normal transition-all border cursor-pointer flex items-center gap-2 ${
                               isSelected
                                 ? 'bg-primary text-on-primary border-primary shadow-sm'
                                 : 'bg-surface-container border-outline-variant text-on-surface hover:bg-surface-container-high'
@@ -914,7 +914,7 @@ export default function StudentProfile({
 
                   {/* Type of Work */}
                   <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl space-y-2.5">
-                    <label className="block text-xs font-mono uppercase tracking-wider text-primary font-bold">
+                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold">
                       Type of Work Looking For
                     </label>
                     <p className="text-[11px] text-on-surface-variant">Select target position types:</p>
@@ -926,7 +926,7 @@ export default function StudentProfile({
                             key={type}
                             type="button"
                             onClick={() => toggleWorkType(type)}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono transition-all border cursor-pointer flex items-center gap-2 ${
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-sans font-normal transition-all border cursor-pointer flex items-center gap-2 ${
                               isSelected
                                 ? 'bg-secondary text-on-secondary border-secondary shadow-sm'
                                 : 'bg-surface-container border-outline-variant text-on-surface hover:bg-surface-container-high'
@@ -948,7 +948,7 @@ export default function StudentProfile({
                   <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl space-y-3.5">
                     <div className="flex justify-between items-center flex-wrap gap-2">
                       <div>
-                        <label className="block text-xs font-mono uppercase tracking-wider text-primary font-bold">
+                        <label className="block text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold">
                           Preferred Location(s) in India
                         </label>
                         <p className="text-[11px] text-on-surface-variant">Search and select preferred districts, tech hubs, states/UTs or opt for open relocation.</p>
@@ -962,7 +962,7 @@ export default function StudentProfile({
                           onChange={e => setOpenToAnyLocation(e.target.checked)}
                           className="rounded border-outline-variant text-primary focus:ring-0 w-4 h-4"
                         />
-                        <span className="text-xs font-bold font-mono text-on-surface">Any Location / Open to Relocate</span>
+                        <span className="text-xs font-bold font-sans font-normal text-on-surface">Any Location / Open to Relocate</span>
                       </label>
                     </div>
 
@@ -971,7 +971,7 @@ export default function StudentProfile({
                       <input
                         type="text"
                         placeholder="Search district, city or state (e.g. Hyderabad, Telangana)..."
-                        className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-2.5 text-xs text-on-surface focus:outline-none focus:border-primary transition-all font-mono"
+                        className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-2.5 text-xs text-on-surface focus:outline-none focus:border-primary transition-all font-sans font-normal"
                         value={locationSearchQuery}
                         onChange={e => {
                           setLocationSearchQuery(e.target.value);
@@ -983,7 +983,7 @@ export default function StudentProfile({
                       {isLocationDropdownOpen && (
                         <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-surface-container-high border border-outline-variant rounded-xl shadow-xl z-30 custom-scrollbar divide-y divide-outline-variant/30">
                           {INDIAN_STATES.filter(state => state.toLowerCase().includes(locationSearchQuery.toLowerCase())).length === 0 ? (
-                            <div className="p-3 text-xs text-on-surface-variant text-center font-mono">No matching districts or states found</div>
+                            <div className="p-3 text-xs text-on-surface-variant text-center font-sans font-normal">No matching districts or states found</div>
                           ) : (
                             INDIAN_STATES.filter(state => state.toLowerCase().includes(locationSearchQuery.toLowerCase())).map(state => {
                               const isAdded = preferredLocations.includes(state);
@@ -991,7 +991,7 @@ export default function StudentProfile({
                                 <div
                                   key={state}
                                   onClick={() => addLocation(state)}
-                                  className={`px-4 py-2.5 text-xs font-mono flex justify-between items-center cursor-pointer transition-colors ${
+                                  className={`px-4 py-2.5 text-xs font-sans font-normal flex justify-between items-center cursor-pointer transition-colors ${
                                     isAdded ? 'bg-primary/10 text-primary font-bold' : 'hover:bg-surface-container-highest text-on-surface'
                                   }`}
                                 >
@@ -1007,13 +1007,13 @@ export default function StudentProfile({
 
                     {/* Selected Locations Badges */}
                     <div className="space-y-1.5">
-                      <p className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">Selected Locations ({preferredLocations.length}):</p>
+                      <p className="text-[10px] font-sans font-normal uppercase tracking-wider text-on-surface-variant">Selected Locations ({preferredLocations.length}):</p>
                       <div className="flex flex-wrap gap-2">
                         {preferredLocations.length === 0 ? (
-                          <span className="text-xs text-on-surface-variant font-mono italic">No specific locations selected yet.</span>
+                          <span className="text-xs text-on-surface-variant font-sans font-normal italic">No specific locations selected yet.</span>
                         ) : (
                           preferredLocations.map(loc => (
-                            <span key={loc} className="px-3 py-1 bg-surface-container border border-outline-variant rounded-xl text-xs font-mono text-on-surface flex items-center gap-1.5 shadow-2xs">
+                            <span key={loc} className="px-3 py-1 bg-surface-container border border-outline-variant rounded-xl text-xs font-sans font-normal text-on-surface flex items-center gap-1.5 shadow-2xs">
                               <span>📍 {loc}</span>
                               <button
                                 type="button"
@@ -1127,7 +1127,7 @@ export default function StudentProfile({
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1.5">
                           {link.logo}
-                          <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">{link.label}</label>
+                          <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">{link.label}</label>
                         </div>
                         <input
                           type="url"
@@ -1148,7 +1148,7 @@ export default function StudentProfile({
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-outline-variant pb-3">
                   <h3 className="text-lg font-headline font-bold text-on-surface">Education History</h3>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">{educationList.length} Items Added</span>
+                  <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">{educationList.length} Items Added</span>
                 </div>
 
                 {/* Existing items */}
@@ -1159,7 +1159,7 @@ export default function StudentProfile({
                         <div>
                           <p className="text-sm font-bold text-on-surface">{edu.degree} - {edu.fieldOfStudy}</p>
                           <p className="text-xs text-on-surface-variant">{edu.institute} ({edu.eduType})</p>
-                          <p className="text-[10px] text-secondary font-mono mt-1">
+                          <p className="text-[10px] text-secondary font-sans font-normal mt-1">
                             {edu.startDate} to {edu.endDate} • {edu.gradeType}: {edu.gradeValue || 'N/A'}
                           </p>
                         </div>
@@ -1179,7 +1179,7 @@ export default function StudentProfile({
                               }
                               setEditingEduIdx(idx);
                             }}
-                            className="text-primary hover:text-primary/70 text-xs font-mono transition-colors"
+                            className="text-primary hover:text-primary/70 text-xs font-sans font-normal transition-colors"
                           >
                             Edit
                           </button>
@@ -1195,7 +1195,7 @@ export default function StudentProfile({
                                 setClass11Stream('');
                               }
                             }}
-                            className="text-error hover:text-error/70 text-xs font-mono transition-colors"
+                            className="text-error hover:text-error/70 text-xs font-sans font-normal transition-colors"
                           >
                             Delete
                           </button>
@@ -1207,11 +1207,11 @@ export default function StudentProfile({
 
                 {/* Add Form */}
                 <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
-                  <h4 className="text-xs font-mono uppercase tracking-wider text-primary">Add Education Record</h4>
+                  <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Add Education Record</h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Education Type</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Education Type</label>
                       <select
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
                         value={newEdu.eduType}
@@ -1237,7 +1237,7 @@ export default function StudentProfile({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Institute</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Institute</label>
                       <input
                         type="text"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1251,7 +1251,7 @@ export default function StudentProfile({
                   {newEdu.eduType === 'High School' ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Percentage in Class 10</label>
+                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Percentage in Class 10</label>
                         <input
                           type="text"
                           className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1262,7 +1262,7 @@ export default function StudentProfile({
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Percentage in Class 12</label>
+                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Percentage in Class 12</label>
                         <input
                           type="text"
                           className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1273,7 +1273,7 @@ export default function StudentProfile({
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Stream in Class 11</label>
+                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Stream in Class 11</label>
                         <input
                           type="text"
                           className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1286,7 +1286,7 @@ export default function StudentProfile({
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Degree</label>
+                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Degree</label>
                         <input
                           type="text"
                           className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1297,7 +1297,7 @@ export default function StudentProfile({
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Field of Study</label>
+                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Field of Study</label>
                         <input
                           type="text"
                           className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1312,27 +1312,27 @@ export default function StudentProfile({
                   {newEdu.eduType !== 'High School' && (
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div className="md:col-span-1">
-                        <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Start Date</label>
+                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Start Date</label>
                         <input
                           type="date"
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-mono dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                           value={newEdu.startDate}
                           onChange={e => setNewEdu({ ...newEdu, startDate: e.target.value })}
                         />
                       </div>
 
                       <div className="md:col-span-1">
-                        <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">End Date</label>
+                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">End Date</label>
                         <input
                           type="date"
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-mono dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                           value={newEdu.endDate}
                           onChange={e => setNewEdu({ ...newEdu, endDate: e.target.value })}
                         />
                       </div>
 
                       <div className="md:col-span-1">
-                        <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Grade Type</label>
+                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Grade Type</label>
                         <select
                           className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
                           value={newEdu.gradeType}
@@ -1347,7 +1347,7 @@ export default function StudentProfile({
                       </div>
 
                       <div className="md:col-span-1">
-                        <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Grade Value</label>
+                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Grade Value</label>
                         <input
                           type="text"
                           className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1409,7 +1409,7 @@ export default function StudentProfile({
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-outline-variant pb-3">
                   <h3 className="text-lg font-headline font-bold text-on-surface">Work Experience</h3>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">{experienceList.length} Items Added</span>
+                  <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">{experienceList.length} Items Added</span>
                 </div>
 
                 {/* Verified Gig Stats Card */}
@@ -1420,7 +1420,7 @@ export default function StudentProfile({
                         <Award className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-mono uppercase text-on-surface-variant">Completed Geeks</p>
+                        <p className="text-[10px] font-sans font-normal uppercase text-on-surface-variant">Completed Geeks</p>
                         <p className="text-xs font-bold text-on-surface">{completedGigsCount} Verified Geeks</p>
                       </div>
                     </div>
@@ -1429,7 +1429,7 @@ export default function StudentProfile({
                         <Star className="w-5 h-5 fill-warning/20" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-mono uppercase text-on-surface-variant">Average Rating</p>
+                        <p className="text-[10px] font-sans font-normal uppercase text-on-surface-variant">Average Rating</p>
                         <p className="text-xs font-bold text-on-surface">{averageRating} / 5.0 Rating</p>
                       </div>
                     </div>
@@ -1445,13 +1445,13 @@ export default function StudentProfile({
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="text-sm font-bold text-on-surface">{exp.designation} at {exp.companyName}</p>
                             {exp.expType === 'Gig' && (
-                              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[9px] font-mono font-bold border border-emerald-500/20">
+                              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[9px] font-sans font-normal font-semibold border border-emerald-500/20">
                                 <Award className="w-3 h-3" /> Verified Gig
                               </span>
                             )}
                           </div>
                           <p className="text-xs text-on-surface-variant">{exp.domain} ({exp.expType || 'Experience'}) {exp.involvesTech && '• Tech Role'}</p>
-                          <p className="text-[10px] text-secondary font-mono mt-1">
+                          <p className="text-[10px] text-secondary font-sans font-normal mt-1">
                             {exp.startDate} to {exp.currentlyWorking ? 'Present' : exp.endDate} • {exp.location || 'Remote'}
                           </p>
                           {exp.expType === 'Gig' && exp.description && (
@@ -1470,7 +1470,7 @@ export default function StudentProfile({
                                 setDomainSearch('');
                                 setEditingExpIdx(idx);
                               }}
-                              className="text-primary hover:text-primary/70 text-xs font-mono transition-colors"
+                              className="text-primary hover:text-primary/70 text-xs font-sans font-normal transition-colors"
                             >
                               Edit
                             </button>
@@ -1484,7 +1484,7 @@ export default function StudentProfile({
                                   setDomainSearch('');
                                 }
                               }}
-                              className="text-error hover:text-error/70 text-xs font-mono transition-colors"
+                              className="text-error hover:text-error/70 text-xs font-sans font-normal transition-colors"
                             >
                               Delete
                             </button>
@@ -1497,11 +1497,11 @@ export default function StudentProfile({
 
                 {/* Add Form */}
                 <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
-                  <h4 className="text-xs font-mono uppercase tracking-wider text-primary">Add Work Experience</h4>
+                  <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Add Work Experience</h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Experience Type</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Experience Type</label>
                       <select
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
                         value={newExp.expType}
@@ -1516,7 +1516,7 @@ export default function StudentProfile({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Designation</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Designation</label>
                       <input
                         type="text"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1542,7 +1542,7 @@ export default function StudentProfile({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Company Name</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Company Name</label>
                       <input
                         type="text"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1553,7 +1553,7 @@ export default function StudentProfile({
                     </div>
 
                     <div className="relative">
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Domain of Experience</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Domain of Experience</label>
                       <div className="relative">
                         <input
                           type="text"
@@ -1586,7 +1586,7 @@ export default function StudentProfile({
                           {filteredDomains.length === 0 && domainSearch.trim() !== '' && (
                             <button
                               type="button"
-                              className="w-full text-left px-3 py-2 text-xs text-on-surface hover:bg-primary/10 transition-colors font-mono"
+                              className="w-full text-left px-3 py-2 text-xs text-on-surface hover:bg-primary/10 transition-colors font-sans font-normal"
                               onClick={() => {
                                 setNewExp({ ...newExp, domain: domainSearch });
                                 setDomainSearch('');
@@ -1628,20 +1628,20 @@ export default function StudentProfile({
 
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Start Date</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Start Date</label>
                       <input
                         type="date"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-mono dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                         value={newExp.startDate}
                         onChange={e => setNewExp({ ...newExp, startDate: e.target.value })}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">End Date</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">End Date</label>
                       <input
                         type="date"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-mono dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                         disabled={newExp.currentlyWorking}
                         value={newExp.currentlyWorking ? '' : newExp.endDate}
                         onChange={e => setNewExp({ ...newExp, endDate: e.target.value })}
@@ -1661,7 +1661,7 @@ export default function StudentProfile({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Location</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Location</label>
                       <input
                         type="text"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1673,7 +1673,7 @@ export default function StudentProfile({
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Description</label>
+                    <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Description</label>
                     <textarea
                       rows="3"
                       className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1729,7 +1729,7 @@ export default function StudentProfile({
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-outline-variant pb-3">
                   <h3 className="text-lg font-headline font-bold text-on-surface">Certifications</h3>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">{certificatesList.length} Items Added</span>
+                  <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">{certificatesList.length} Items Added</span>
                 </div>
 
                 {/* Existing items */}
@@ -1740,7 +1740,7 @@ export default function StudentProfile({
                         <div>
                           <p className="text-sm font-bold text-on-surface">{cert.title}</p>
                           <p className="text-xs text-on-surface-variant">Issued by: {cert.org}</p>
-                          <p className="text-[10px] text-secondary font-mono mt-1">
+                          <p className="text-[10px] text-secondary font-sans font-normal mt-1">
                             Issued: {cert.startDate} • {cert.link ? <a href={cert.link} target="_blank" rel="noopener noreferrer" className="underline text-primary hover:text-primary/70">View Certificate Link</a> : 'No Link'}
                             {cert.certNumber && ` • ID: ${cert.certNumber}`}
                             {cert.attachment && (
@@ -1766,7 +1766,7 @@ export default function StudentProfile({
                               setCertFileUploadError('');
                               setEditingCertIdx(idx);
                             }}
-                            className="text-primary hover:text-primary/70 text-xs font-mono transition-colors"
+                            className="text-primary hover:text-primary/70 text-xs font-sans font-normal transition-colors"
                           >
                             Edit
                           </button>
@@ -1780,7 +1780,7 @@ export default function StudentProfile({
                                 setCertFileUploadError('');
                               }
                             }}
-                            className="text-error hover:text-error/70 text-xs font-mono transition-colors"
+                            className="text-error hover:text-error/70 text-xs font-sans font-normal transition-colors"
                           >
                             Delete
                           </button>
@@ -1792,11 +1792,11 @@ export default function StudentProfile({
 
                 {/* Add Form */}
                 <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
-                  <h4 className="text-xs font-mono uppercase tracking-wider text-primary">Add Certification</h4>
+                  <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Add Certification</h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Certificate Title</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Certificate Title</label>
                       <input
                         type="text"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1807,7 +1807,7 @@ export default function StudentProfile({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Provider Organisation Name</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Provider Organisation Name</label>
                       <input
                         type="text"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1820,17 +1820,17 @@ export default function StudentProfile({
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Start Date</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Start Date</label>
                       <input
                         type="date"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-mono dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                         value={newCert.startDate}
                         onChange={e => setNewCert({ ...newCert, startDate: e.target.value })}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Certification Link</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Certification Link</label>
                       <input
                         type="url"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1841,7 +1841,7 @@ export default function StudentProfile({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Certification Number</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Certification Number</label>
                       <input
                         type="text"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1853,7 +1853,7 @@ export default function StudentProfile({
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant">Upload Certificate File (Optional, max 100KB)</label>
+                    <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant">Upload Certificate File (Optional, max 100KB)</label>
                     <div className="flex items-center gap-4 p-3 bg-surface-container border border-outline-variant rounded-lg">
                       <input
                         type="file"
@@ -1871,17 +1871,17 @@ export default function StudentProfile({
                       <div className="flex-1 min-w-0">
                         {newCert.attachment ? (
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-xs text-on-surface truncate font-mono">✓ Certificate file attached</span>
+                            <span className="text-xs text-on-surface truncate font-sans font-normal">✓ Certificate file attached</span>
                             <button
                               type="button"
                               onClick={() => setNewCert(prev => ({ ...prev, attachment: '' }))}
-                              className="text-[10px] text-error hover:underline font-mono"
+                              className="text-[10px] text-error hover:underline font-sans font-normal"
                             >
                               Remove
                             </button>
                           </div>
                         ) : (
-                          <span className="text-xs text-on-surface-variant font-mono">No file selected (Supports PDF or Images)</span>
+                          <span className="text-xs text-on-surface-variant font-sans font-normal">No file selected (Supports PDF or Images)</span>
                         )}
                       </div>
                     </div>
@@ -1891,7 +1891,7 @@ export default function StudentProfile({
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Description</label>
+                    <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Description</label>
                     <textarea
                       rows="2"
                       className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -1947,7 +1947,7 @@ export default function StudentProfile({
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-outline-variant pb-3">
                   <h3 className="text-lg font-headline font-bold text-on-surface">Projects</h3>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">{projectsList.length} Items Added</span>
+                  <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">{projectsList.length} Items Added</span>
                 </div>
 
                 {/* Existing items */}
@@ -1958,7 +1958,7 @@ export default function StudentProfile({
                         <div>
                           <p className="text-sm font-bold text-on-surface">{proj.title}</p>
                           <p className="text-xs text-on-surface-variant">Role: {proj.role}</p>
-                          <p className="text-[10px] text-secondary font-mono mt-1">
+                          <p className="text-[10px] text-secondary font-sans font-normal mt-1">
                             {proj.startDate} - {proj.currentlyWorking ? 'Present' : proj.endDate}
                           </p>
                           <div className="flex gap-3 mt-1">
@@ -1982,7 +1982,7 @@ export default function StudentProfile({
                               setNewProj({ ...item });
                               setEditingProjIdx(idx);
                             }}
-                            className="text-primary hover:text-primary/70 text-xs font-mono transition-colors"
+                            className="text-primary hover:text-primary/70 text-xs font-sans font-normal transition-colors"
                           >
                             Edit
                           </button>
@@ -1995,7 +1995,7 @@ export default function StudentProfile({
                                 setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
                               }
                             }}
-                            className="text-error hover:text-error/70 text-xs font-mono transition-colors"
+                            className="text-error hover:text-error/70 text-xs font-sans font-normal transition-colors"
                           >
                             Delete
                           </button>
@@ -2007,11 +2007,11 @@ export default function StudentProfile({
 
                 {/* Add Form */}
                 <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
-                  <h4 className="text-xs font-mono uppercase tracking-wider text-primary">Add Project Record</h4>
+                  <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Add Project Record</h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Title</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Title</label>
                       <input
                         type="text"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -2022,7 +2022,7 @@ export default function StudentProfile({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Company / Role</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Company / Role</label>
                       <input
                         type="text"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -2035,7 +2035,7 @@ export default function StudentProfile({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Code URL</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Code URL</label>
                       <input
                         type="url"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -2046,7 +2046,7 @@ export default function StudentProfile({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Hosted URL</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Hosted URL</label>
                       <input
                         type="url"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -2059,20 +2059,20 @@ export default function StudentProfile({
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Start Date</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Start Date</label>
                       <input
                         type="date"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-mono dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                         value={newProj.startDate}
                         onChange={e => setNewProj({ ...newProj, startDate: e.target.value })}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">End Date</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">End Date</label>
                       <input
                         type="date"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-mono dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                         disabled={newProj.currentlyWorking}
                         value={newProj.currentlyWorking ? '' : newProj.endDate}
                         onChange={e => setNewProj({ ...newProj, endDate: e.target.value })}
@@ -2093,7 +2093,7 @@ export default function StudentProfile({
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Description</label>
+                    <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Description</label>
                     <textarea
                       rows="3"
                       className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -2146,8 +2146,8 @@ export default function StudentProfile({
             {profileTab === 'skills' && (
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Your Stacks & Skills</label>
-                  <span className="text-[10px] font-mono text-yellow-800 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-950/30 border border-yellow-300 dark:border-yellow-800/50 px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 shadow-sm">
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Your Stacks & Skills</label>
+                  <span className="text-[10px] font-sans font-normal text-yellow-800 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-950/30 border border-yellow-300 dark:border-yellow-800/50 px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 shadow-sm">
                   Default rating is 1 and can be increased by giving the test.
                   </span>
                 </div>
@@ -2191,7 +2191,7 @@ export default function StudentProfile({
                             s => s.skill.toLowerCase().includes(selectedNewSkill.toLowerCase()) &&
                               !skillsList.some(exist => exist.name.toLowerCase() === s.skill.toLowerCase())
                           ).length === 0 ? (
-                            <div className="px-4 py-3 text-xs text-on-surface-variant font-mono">No matching skills found</div>
+                            <div className="px-4 py-3 text-xs text-on-surface-variant font-sans font-normal">No matching skills found</div>
                           ) : (
                             ALL_SKILLS.filter(
                               s => s.skill.toLowerCase().includes(selectedNewSkill.toLowerCase()) &&
@@ -2210,7 +2210,7 @@ export default function StudentProfile({
                                 className="w-full text-left px-4 py-2.5 text-xs text-on-surface hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between group cursor-pointer"
                               >
                                 <span>{s.skill}</span>
-                                <span className="text-[10px] opacity-60 group-hover:opacity-100 font-mono capitalize px-1.5 py-0.5 rounded bg-surface-container-low border border-outline-variant text-on-surface-variant group-hover:border-primary/20 group-hover:text-primary transition-all">
+                                <span className="text-[10px] opacity-60 group-hover:opacity-100 font-sans font-normal capitalize px-1.5 py-0.5 rounded bg-surface-container-low border border-outline-variant text-on-surface-variant group-hover:border-primary/20 group-hover:text-primary transition-all">
                                   {s.type}
                                 </span>
                               </button>
@@ -2222,7 +2222,7 @@ export default function StudentProfile({
                   </div>
 
                   {skillsList.length === 0 ? (
-                    <p className="text-xs text-on-surface-variant font-mono">No skills added yet. Select a skill above.</p>
+                    <p className="text-xs text-on-surface-variant font-sans font-normal">No skills added yet. Select a skill above.</p>
                   ) : (
                     <div className="flex flex-wrap gap-2.5 pt-1">
                       {skillsList.map(skill => {
@@ -2238,7 +2238,7 @@ export default function StudentProfile({
                             <span className="font-semibold text-on-surface">{skill.name}</span>
                             
                             {isTech && displayRating > 0 && (
-                              <span className="text-[10px] font-mono text-secondary font-bold bg-secondary/10 px-1.5 py-0.5 rounded-md border border-secondary/20">
+                              <span className="text-[10px] font-sans font-normal text-secondary font-bold bg-secondary/10 px-1.5 py-0.5 rounded-md border border-secondary/20">
                                 {displayRating}/10
                               </span>
                             )}
@@ -2250,7 +2250,7 @@ export default function StudentProfile({
                             )}
 
                             {!isTech && (
-                              <span className="text-[9px] opacity-60 font-mono capitalize px-1 py-0.5 rounded bg-surface-container-high text-on-surface-variant">
+                              <span className="text-[9px] opacity-60 font-sans font-normal capitalize px-1 py-0.5 rounded bg-surface-container-high text-on-surface-variant">
                                 soft
                               </span>
                             )}
@@ -2276,7 +2276,7 @@ export default function StudentProfile({
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-outline-variant pb-3">
                   <h3 className="text-lg font-headline font-bold text-on-surface">Co-curricular & POR</h3>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">{cocurricular.length} Items Added</span>
+                  <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">{cocurricular.length} Items Added</span>
                 </div>
 
                 {/* Existing items */}
@@ -2287,7 +2287,7 @@ export default function StudentProfile({
                         <div>
                           <p className="text-sm font-bold text-on-surface">{act.activity}</p>
                           {act.description && <p className="text-xs text-on-surface-variant mt-1">{act.description}</p>}
-                          <p className="text-[10px] text-secondary font-mono mt-1">
+                          <p className="text-[10px] text-secondary font-sans font-normal mt-1">
                             {act.link ? <a href={act.link} target="_blank" rel="noopener noreferrer" className="underline text-primary hover:text-primary/70">View Certification Link</a> : 'No Link'}
                           </p>
                         </div>
@@ -2299,7 +2299,7 @@ export default function StudentProfile({
                               setNewCocurricular({ ...item });
                               setEditingCocurricularIdx(idx);
                             }}
-                            className="text-primary hover:text-primary/70 text-xs font-mono transition-colors"
+                            className="text-primary hover:text-primary/70 text-xs font-sans font-normal transition-colors"
                           >
                             Edit
                           </button>
@@ -2312,7 +2312,7 @@ export default function StudentProfile({
                                 setNewCocurricular({ activity: '', link: '', description: '' });
                               }
                             }}
-                            className="text-error hover:text-error/70 text-xs font-mono transition-colors"
+                            className="text-error hover:text-error/70 text-xs font-sans font-normal transition-colors"
                           >
                             Delete
                           </button>
@@ -2324,11 +2324,11 @@ export default function StudentProfile({
 
                 {/* Add Form */}
                 <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
-                  <h4 className="text-xs font-mono uppercase tracking-wider text-primary">Add Co-curricular Activity</h4>
+                  <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Add Co-curricular Activity</h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Activity / Title</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Activity / Title</label>
                       <input
                         type="text"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -2339,7 +2339,7 @@ export default function StudentProfile({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Certification Link (Optional)</label>
+                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Certification Link (Optional)</label>
                       <input
                         type="url"
                         className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
@@ -2351,7 +2351,7 @@ export default function StudentProfile({
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">Description (Optional)</label>
+                    <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Description (Optional)</label>
                     <textarea
                       rows="2"
                       className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"

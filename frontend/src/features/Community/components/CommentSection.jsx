@@ -64,7 +64,7 @@ function CommentItem({ comment, postId, token, currentUserId, onReplyAdded, onCo
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-on-surface">{comment.author?.name || 'User'}</span>
-              <span className="text-[9px] font-mono bg-primary/10 text-primary px-1.5 py-0.2 rounded font-bold">
+              <span className="text-[9px] font-headline font-medium bg-primary/10 text-primary px-1.5 py-0.2 rounded font-bold">
                 {comment.authorRole || 'STUDENT'}
               </span>
             </div>
@@ -81,7 +81,7 @@ function CommentItem({ comment, postId, token, currentUserId, onReplyAdded, onCo
 
           <p className="text-on-surface whitespace-pre-wrap leading-relaxed font-sans">{comment.content}</p>
 
-          <div className="flex items-center gap-3 pt-1 text-[10px] font-mono text-on-surface-variant">
+          <div className="flex items-center gap-3 pt-1 text-[10px] font-sans font-normal text-on-surface-variant">
             <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
             <button
               onClick={() => setReplying(!replying)}
@@ -105,7 +105,7 @@ function CommentItem({ comment, postId, token, currentUserId, onReplyAdded, onCo
               <button
                 type="submit"
                 disabled={!replyContent.trim() || submittingReply}
-                className="px-3 py-1.5 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1 cursor-pointer"
+                className="px-3 py-1.5 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40 rounded-xl text-xs font-bold font-sans font-normal transition-all flex items-center gap-1 cursor-pointer"
               >
                 {submittingReply ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
               </button>
@@ -196,7 +196,7 @@ export default function CommentSection({ postId, token, currentUserId }) {
         <button
           type="submit"
           disabled={!newComment.trim() || submitting}
-          className="px-4 py-2 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1 cursor-pointer"
+          className="px-4 py-2 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40 rounded-xl text-xs font-bold font-sans font-normal transition-all flex items-center gap-1 cursor-pointer"
         >
           {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
           Comment
@@ -205,12 +205,12 @@ export default function CommentSection({ postId, token, currentUserId }) {
 
       {/* Comment List */}
       {loading ? (
-        <div className="py-4 text-center text-xs font-mono text-on-surface-variant flex items-center justify-center gap-2">
+        <div className="py-4 text-center text-xs font-sans font-normal text-on-surface-variant flex items-center justify-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin text-primary" />
           Loading comments...
         </div>
       ) : comments.length === 0 ? (
-        <p className="py-2 text-center text-xs font-mono text-on-surface-variant">No comments yet. Be the first to comment!</p>
+        <p className="py-2 text-center text-xs font-sans font-normal text-on-surface-variant">No comments yet. Be the first to comment!</p>
       ) : (
         <div className="space-y-3">
           {comments.map((c) => (

@@ -176,11 +176,11 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
                 <div className="absolute bottom-2 right-2 w-1.5 h-1.5 rounded-full bg-outline-variant/60 shadow-[inset_1px_1px_1px_rgba(0,0,0,0.3)]"></div>
 
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/15 border border-outline-variant text-on-surface text-[10px] font-mono font-bold uppercase tracking-wider mb-3">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/15 border border-outline-variant text-on-surface text-[10px] font-headline font-medium uppercase tracking-wider mb-3">
                     {/* <Briefcase className="w-3.5 h-3.5 text-primary" /> */}
                     <span>Recruiter Workspace</span>
                   </div>
-                  <h1 className="font-headline text-2xl font-bold tracking-tight text-on-surface">
+                  <h1 className="font-headline text-2xl font-medium tracking-tight text-on-surface">
                     {isLogin ? 'Recruiter Sign In' : 'Register Company'}
                   </h1>
                   <p className="text-xs text-on-surface-variant mt-1.5">
@@ -213,14 +213,14 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
                   />
 
                   <div>
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">
+                    <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">
                       Password
                     </label>
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}
                         required
-                        className="w-full bg-surface-container-low neu-recessed rounded-xl pl-4 pr-11 py-3 text-sm font-mono text-on-surface placeholder-on-surface-variant/50 transition-all focus:outline-none focus-visible:shadow-[var(--shadow-recessed),0_0_0_2px_var(--c-primary)]"
+                        className="w-full bg-surface-container-low neu-recessed rounded-xl pl-4 pr-11 py-3 text-sm font-sans font-normal text-on-surface placeholder-on-surface-variant/50 transition-all focus:outline-none focus-visible:shadow-[var(--shadow-recessed),0_0_0_2px_var(--c-primary)]"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         placeholder="••••••••"
@@ -265,7 +265,7 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-outline-variant/60"></div>
                   </div>
-                  <span className="relative bg-surface-container px-3 text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">
+                  <span className="relative bg-surface-container px-3 text-[10px] font-headline font-medium text-on-surface-variant uppercase tracking-wider">
                     OR
                   </span>
                 </div>
@@ -299,7 +299,7 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
         </main>
 
         {/* Footer */}
-        <footer className="relative z-10 py-6 text-center text-[10px] font-mono text-on-surface-variant/70 border-t border-outline-variant/30">
+        <footer className="relative z-10 py-6 text-center text-[10px] font-sans font-normal text-on-surface-variant/70 border-t border-outline-variant/30">
           <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <span>© 2026 AlignGrad Employer Network</span>
             <div className="flex gap-4">

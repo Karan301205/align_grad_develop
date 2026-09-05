@@ -59,7 +59,7 @@ export default function CreateCommunityModal({ isOpen, onClose, token, onCommuni
         <div className="p-5 border-b border-outline-variant flex justify-between items-center bg-surface-container-high/40">
           <div className="flex items-center gap-2">
             <Lock className="w-5 h-5 text-primary" />
-            <h3 className="font-headline font-bold text-base text-primary">Create Private Community</h3>
+            <h3 className="font-headline font-medium text-base text-primary">Create Private Community</h3>
           </div>
           <button onClick={onClose} className="p-1 text-on-surface-variant hover:text-on-surface cursor-pointer">
             <X className="w-5 h-5" />
@@ -68,14 +68,14 @@ export default function CreateCommunityModal({ isOpen, onClose, token, onCommuni
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {errorMsg && (
-            <div className="p-3 bg-error-container/20 border border-error-container text-error rounded-xl text-xs flex items-center gap-2 font-mono">
+            <div className="p-3 bg-error-container/20 border border-error-container text-error rounded-xl text-xs flex items-center gap-2 font-sans font-normal">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           <div className="space-y-1">
-            <label className="text-xs font-mono font-bold text-on-surface-variant">Community Name *</label>
+            <label className="text-xs font-headline font-medium text-on-surface-variant">Community Name *</label>
             <input
               type="text"
               required
@@ -87,7 +87,7 @@ export default function CreateCommunityModal({ isOpen, onClose, token, onCommuni
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-mono font-bold text-on-surface-variant">Description</label>
+            <label className="text-xs font-headline font-medium text-on-surface-variant">Description</label>
             <textarea
               rows={3}
               placeholder="Describe the focus and goals of your private network..."
@@ -98,29 +98,29 @@ export default function CreateCommunityModal({ isOpen, onClose, token, onCommuni
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-mono font-bold text-on-surface-variant">Protection Password (Optional)</label>
+            <label className="text-xs font-headline font-medium text-on-surface-variant">Protection Password (Optional)</label>
             <input
               type="password"
               placeholder="Set a password for join requests"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-surface-container-high border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface focus:outline-none focus:border-primary font-mono"
+              className="w-full bg-surface-container-high border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal"
             />
-            <p className="text-[10px] font-mono text-on-surface-variant">If set, passwords are hashed securely with bcrypt.</p>
+            <p className="text-[10px] font-sans font-normal text-on-surface-variant">If set, passwords are hashed securely with bcrypt.</p>
           </div>
 
           <div className="pt-4 border-t border-outline-variant flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface rounded-xl text-xs font-bold font-mono cursor-pointer"
+              className="px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface rounded-xl text-xs font-bold font-sans font-normal cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!name.trim() || submitting}
-              className="px-5 py-2 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-5 py-2 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40 rounded-xl text-xs font-bold font-sans font-normal transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
               Create Network

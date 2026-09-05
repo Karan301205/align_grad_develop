@@ -297,7 +297,7 @@ export default function App() {
             <div className="absolute bottom-3 right-3 w-1 h-1 rounded-full bg-slate-700"></div>
 
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-mono font-bold uppercase tracking-wider mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-headline font-medium uppercase tracking-wider mb-4">
                 <Settings className="w-3.5 h-3.5" />
                 <span>Admin Gateway</span>
               </div>
@@ -318,28 +318,28 @@ export default function App() {
 
             <form onSubmit={handleLoginSubmit} className="space-y-5">
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2">
+                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-slate-400 mb-2">
                   Admin Email Address
                 </label>
                 <input
                   type="email"
                   required
                   placeholder="admin@aligngrade.com"
-                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-white placeholder-slate-600 transition-all focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30"
+                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm font-sans font-normal text-white placeholder-slate-600 transition-all focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30"
                   value={emailInput}
                   onChange={e => setEmailInput(e.target.value)}
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2">
+                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-slate-400 mb-2">
                   System Security Key
                 </label>
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
-                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm font-mono text-white placeholder-slate-600 transition-all focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30"
+                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm font-sans font-normal text-white placeholder-slate-600 transition-all focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30"
                   value={passwordInput}
                   onChange={e => setPasswordInput(e.target.value)}
                 />
@@ -432,7 +432,7 @@ export default function App() {
                 <Server className="w-3.5 h-3.5 text-indigo-400" />
                 <span>MongoDB</span>
               </div>
-              <span className="text-emerald-400 font-mono text-[10px]">Connected</span>
+              <span className="text-emerald-400 font-sans font-normal text-[10px]">Connected</span>
             </div>
 
             <div className="flex items-center justify-between text-xs font-semibold">
@@ -440,7 +440,7 @@ export default function App() {
                 <HardDrive className="w-3.5 h-3.5 text-sky-400" />
                 <span>AWS S3</span>
               </div>
-              <span className="text-emerald-400 font-mono text-[10px]">{stats.storageSize}</span>
+              <span className="text-emerald-400 font-sans font-normal text-[10px]">{stats.storageSize}</span>
             </div>
           </div>
         </div>
@@ -470,7 +470,7 @@ export default function App() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed text-indigo-400 text-[10px] font-mono font-bold uppercase tracking-wider transition-all duration-200"
+              className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed text-indigo-400 text-[10px] font-headline font-medium uppercase tracking-wider transition-all duration-200"
             >
               <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Refreshing...' : 'Refresh Section'}
@@ -543,10 +543,10 @@ export default function App() {
                     <line x1="270" y1="10" x2="270" y2="90" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
 
                     {/* Y-Axis Label Numbers */}
-                    <text x="5" y="13" fill="rgba(255,255,255,0.4)" fontSize="7" fontFamily="monospace">12</text>
-                    <text x="5" y="39" fill="rgba(255,255,255,0.4)" fontSize="7" fontFamily="monospace">8</text>
-                    <text x="5" y="66" fill="rgba(255,255,255,0.4)" fontSize="7" fontFamily="monospace">4</text>
-                    <text x="5" y="93" fill="rgba(255,255,255,0.4)" fontSize="7" fontFamily="monospace">0</text>
+                    <text x="5" y="13" fill="rgba(255,255,255,0.4)" fontSize="7" fontFamily="'Geist', sans-serif">12</text>
+                    <text x="5" y="39" fill="rgba(255,255,255,0.4)" fontSize="7" fontFamily="'Geist', sans-serif">8</text>
+                    <text x="5" y="66" fill="rgba(255,255,255,0.4)" fontSize="7" fontFamily="'Geist', sans-serif">4</text>
+                    <text x="5" y="93" fill="rgba(255,255,255,0.4)" fontSize="7" fontFamily="'Geist', sans-serif">0</text>
 
                     {/* Stroke line connecting the dots */}
                     <path 
@@ -576,7 +576,7 @@ export default function App() {
                   </svg>
                   
                   {/* X-Axis labels */}
-                  <div className="absolute left-[30px] right-0 bottom-[-4px] flex justify-between text-[8px] text-slate-500 font-mono">
+                  <div className="absolute left-[30px] right-0 bottom-[-4px] flex justify-between text-[8px] text-slate-500 font-sans font-normal">
                     <span className="w-16 text-center -ml-8">Week 1 - Jul</span>
                     <span className="w-16 text-center -ml-8">Week 2 - Jul</span>
                     <span className="w-16 text-center -ml-8">Week 3 - Jul</span>
@@ -639,7 +639,7 @@ export default function App() {
                             <span className="text-xl font-extrabold text-white tracking-tight">
                               {stats.totalStudents === '...' ? '...' : totalUsers}
                             </span>
-                            <span className="text-[9px] text-slate-500 font-mono">Total Users</span>
+                            <span className="text-[9px] text-slate-500 font-sans font-normal">Total Users</span>
                           </div>
                         </div>
                       </div>
@@ -691,13 +691,13 @@ export default function App() {
                   <tbody className="divide-y divide-slate-900/40">
                     {stats.recentStudents.length === 0 ? (
                       <tr>
-                        <td colSpan="4" className="py-4 text-center text-slate-500 font-mono">No registrations found</td>
+                        <td colSpan="4" className="py-4 text-center text-slate-500 font-sans font-normal">No registrations found</td>
                       </tr>
                     ) : (
                       stats.recentStudents.map((student, index) => (
                         <tr key={index} className="hover:bg-slate-900/10">
                           <td className="py-4 font-bold text-white">{student.name}</td>
-                          <td className="py-4 text-slate-400 font-mono">{student.email}</td>
+                          <td className="py-4 text-slate-400 font-sans font-normal">{student.email}</td>
                           <td className="py-4">{student.skills}</td>
                           <td className="py-4">
                             <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
@@ -723,11 +723,11 @@ export default function App() {
             <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
               <div className="flex justify-between items-center pb-2">
                 <h3 className="text-sm font-bold text-white tracking-wide">Students Directory</h3>
-                <span className="text-[10px] text-indigo-400 font-mono uppercase tracking-wider">{students.length} Registered</span>
+                <span className="text-[10px] text-indigo-400 font-headline font-medium uppercase tracking-wider">{students.length} Registered</span>
               </div>
 
               {loadingStudents ? (
-                <div className="text-center py-10 font-mono text-xs text-slate-500 animate-pulse">
+                <div className="text-center py-10 font-sans font-normal text-xs text-slate-500 animate-pulse">
                   Loading students...
                 </div>
               ) : (
@@ -749,7 +749,7 @@ export default function App() {
                         (student.username && student.username.toLowerCase().includes(searchQuery.toLowerCase()))
                       ).length === 0 ? (
                         <tr>
-                          <td colSpan="5" className="py-6 text-center text-slate-500 font-mono">No students found</td>
+                          <td colSpan="5" className="py-6 text-center text-slate-500 font-sans font-normal">No students found</td>
                         </tr>
                       ) : (
                         students.filter(student => 
@@ -759,19 +759,19 @@ export default function App() {
                         ).map((student) => (
                           <tr key={student.id} className="hover:bg-slate-900/10 transition-colors">
                             <td className="py-4 font-bold text-white">{student.name}</td>
-                            <td className="py-4 text-slate-400 font-mono">{student.email}</td>
+                            <td className="py-4 text-slate-400 font-sans font-normal">{student.email}</td>
                             <td className="py-4">
                               {student.skills && student.skills.length > 0 ? (
                                 <div className="flex flex-wrap gap-1">
                                   {student.skills.slice(0, 3).map((s, i) => (
-                                    <span key={i} className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[9px] text-indigo-400 font-mono font-medium">
+                                    <span key={i} className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[9px] text-indigo-400 font-sans font-normal font-medium">
                                       {s.name}
                                     </span>
                                   ))}
                                   {student.skills.length > 3 && <span className="text-[9px] text-slate-500">+{student.skills.length - 3}</span>}
                                 </div>
                               ) : (
-                                <span className="text-slate-500 font-mono text-[10px]">No skills added</span>
+                                <span className="text-slate-500 font-sans font-normal text-[10px]">No skills added</span>
                               )}
                             </td>
                             <td className="py-4 text-slate-400">{student.nationality || 'N/A'}</td>
@@ -798,11 +798,11 @@ export default function App() {
             <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
               <div className="flex justify-between items-center pb-2">
                 <h3 className="text-sm font-bold text-white tracking-wide">Recruiters Directory</h3>
-                <span className="text-[10px] text-indigo-400 font-mono uppercase tracking-wider">{recruiters.length} Registered</span>
+                <span className="text-[10px] text-indigo-400 font-headline font-medium uppercase tracking-wider">{recruiters.length} Registered</span>
               </div>
 
               {loadingRecruiters ? (
-                <div className="text-center py-10 font-mono text-xs text-slate-500 animate-pulse">
+                <div className="text-center py-10 font-sans font-normal text-xs text-slate-500 animate-pulse">
                   Loading recruiters...
                 </div>
               ) : (
@@ -823,7 +823,7 @@ export default function App() {
                         recruiter.email.toLowerCase().includes(searchQuery.toLowerCase())
                       ).length === 0 ? (
                         <tr>
-                          <td colSpan="5" className="py-6 text-center text-slate-500 font-mono">No recruiters found</td>
+                          <td colSpan="5" className="py-6 text-center text-slate-500 font-sans font-normal">No recruiters found</td>
                         </tr>
                       ) : (
                         recruiters.filter(recruiter => 
@@ -832,7 +832,7 @@ export default function App() {
                         ).map((recruiter) => (
                           <tr key={recruiter.id} className="hover:bg-slate-900/10 transition-colors">
                             <td className="py-4 font-bold text-white">{recruiter.companyName}</td>
-                            <td className="py-4 text-slate-400 font-mono">{recruiter.email}</td>
+                            <td className="py-4 text-slate-400 font-sans font-normal">{recruiter.email}</td>
                             <td className="py-4">
                               <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
                                 recruiter.verified 
@@ -842,7 +842,7 @@ export default function App() {
                                 {recruiter.verified ? 'Verified' : 'Pending Verification'}
                               </span>
                             </td>
-                            <td className="py-4 text-slate-400 font-mono">{recruiter.jobs ? recruiter.jobs.length : 0} Jobs</td>
+                            <td className="py-4 text-slate-400 font-sans font-normal">{recruiter.jobs ? recruiter.jobs.length : 0} Jobs</td>
                             <td className="py-4 text-right">
                               <button 
                                 onClick={() => setSelectedRecruiter(recruiter)}
@@ -867,11 +867,11 @@ export default function App() {
             <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
               <div className="flex justify-between items-center pb-2">
                 <h3 className="text-sm font-bold text-white tracking-wide">Jobs Directory</h3>
-                <span className="text-[10px] text-indigo-400 font-mono uppercase tracking-wider">{jobs.length} Active Openings</span>
+                <span className="text-[10px] text-indigo-400 font-headline font-medium uppercase tracking-wider">{jobs.length} Active Openings</span>
               </div>
 
               {loadingJobs ? (
-                <div className="text-center py-10 font-mono text-xs text-slate-500 animate-pulse">
+                <div className="text-center py-10 font-sans font-normal text-xs text-slate-500 animate-pulse">
                   Loading jobs...
                 </div>
               ) : (
@@ -880,7 +880,7 @@ export default function App() {
                     job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                     job.companyName.toLowerCase().includes(searchQuery.toLowerCase())
                   ).length === 0 ? (
-                    <div className="col-span-full py-10 text-center text-slate-500 font-mono text-xs">
+                    <div className="col-span-full py-10 text-center text-slate-500 font-sans font-normal text-xs">
                       No jobs found
                     </div>
                   ) : (
@@ -893,9 +893,9 @@ export default function App() {
                           <div className="flex justify-between items-start gap-2">
                             <div>
                               <h4 className="font-extrabold text-sm text-white tracking-wide leading-snug">{job.title}</h4>
-                              <p className="text-[10px] font-semibold text-slate-400 font-mono mt-0.5">{job.companyName}</p>
+                              <p className="text-[10px] font-semibold text-slate-400 font-sans font-normal mt-0.5">{job.companyName}</p>
                             </div>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[8px] text-indigo-400 font-mono font-bold uppercase tracking-wider shrink-0">
+                            <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[8px] text-indigo-400 font-headline font-medium uppercase tracking-wider shrink-0">
                               {job.jobType}
                             </span>
                           </div>
@@ -903,7 +903,7 @@ export default function App() {
                         </div>
 
                         <div className="pt-3 border-t border-slate-900/80 flex flex-col gap-3">
-                          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 font-semibold">
+                          <div className="flex justify-between items-center text-[10px] font-sans font-normal text-slate-500 font-semibold">
                             <span>📍 {job.location}</span>
                             <span className="text-emerald-400 font-bold">{job.salaryRange}</span>
                           </div>
@@ -938,19 +938,19 @@ export default function App() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h3 className="text-base font-bold text-white tracking-wide">S3 Storage Explorer</h3>
-                <p className="text-xs text-slate-400 font-mono mt-1">
+                <p className="text-xs text-slate-400 font-sans font-normal mt-1">
                   Bucket: <span className="text-indigo-400">{storageInfo?.bucketName || '...'}</span> | Region: <span className="text-indigo-400">{storageInfo?.region || '...'}</span>
                 </p>
               </div>
               {storageInfo?.isMock && (
-                <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-[9px] text-amber-400 font-mono font-bold rounded-lg uppercase tracking-wider shrink-0">
+                <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-[9px] text-amber-400 font-headline font-medium rounded-lg uppercase tracking-wider shrink-0">
                   ⚠️ Local Sandbox Mode (Simulated Data)
                 </span>
               )}
             </div>
 
             {loadingStorage ? (
-              <div className="text-center py-20 font-mono text-xs text-slate-500 animate-pulse">
+              <div className="text-center py-20 font-sans font-normal text-xs text-slate-500 animate-pulse">
                 Analyzing AWS S3 storage volumes...
               </div>
             ) : (
@@ -958,24 +958,24 @@ export default function App() {
                 {/* Metrics Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-mono">Total Space Used</span>
-                    <div className="text-2xl font-black text-white leading-none font-mono">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-headline font-medium">Total Space Used</span>
+                    <div className="text-2xl font-black text-white leading-none font-sans font-normal">
                       {storageInfo?.formattedTotalBytes || '0 Bytes'}
                     </div>
                     <span className="text-[9px] text-slate-400 block leading-tight font-medium">Accumulated size of all user assets</span>
                   </div>
 
                   <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-mono">Estimated Monthly Bill</span>
-                    <div className="text-2xl font-black text-emerald-400 leading-none font-mono">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-headline font-medium">Estimated Monthly Bill</span>
+                    <div className="text-2xl font-black text-emerald-400 leading-none font-sans font-normal">
                       ${storageInfo?.estimatedMonthlyBill?.toFixed(4) || '0.0000'}
                     </div>
                     <span className="text-[9px] text-slate-400 block leading-tight font-medium">Based on Standard S3 rate ($0.023/GB)</span>
                   </div>
 
                   <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-mono">Total Objects Stored</span>
-                    <div className="text-2xl font-black text-indigo-400 leading-none font-mono">
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-headline font-medium">Total Objects Stored</span>
+                    <div className="text-2xl font-black text-indigo-400 leading-none font-sans font-normal">
                       {storageInfo?.totalFiles || 0}
                     </div>
                     <span className="text-[9px] text-slate-400 block leading-tight font-medium">Total index of files in AWS bucket</span>
@@ -984,7 +984,7 @@ export default function App() {
 
                 {/* Categories Summary Table */}
                 <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
-                  <h4 className="text-xs font-bold text-white tracking-wide font-mono uppercase">Usage by Category</h4>
+                  <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium uppercase">Usage by Category</h4>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs font-semibold text-slate-300">
                       <thead>
@@ -995,7 +995,7 @@ export default function App() {
                           <th className="py-3 text-right">Est. Cost / Month</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-900/40 font-mono text-[11px]">
+                      <tbody className="divide-y divide-slate-900/40 font-sans font-normal text-[11px]">
                         {storageInfo?.categories && Object.entries(storageInfo.categories).map(([key, cat]) => (
                           <tr key={key} className="hover:bg-slate-900/10">
                             <td className="py-3.5 font-sans font-bold text-slate-200">{cat.name}</td>
@@ -1012,8 +1012,8 @@ export default function App() {
                 {/* S3 Objects Browser Table */}
                 <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
                   <div className="flex justify-between items-center pb-2">
-                    <h4 className="text-xs font-bold text-white tracking-wide font-mono uppercase">AWS Bucket File List</h4>
-                    <span className="text-[10px] text-indigo-400 font-mono font-bold uppercase tracking-wider">{storageInfo?.files?.length || 0} items listed</span>
+                    <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium uppercase">AWS Bucket File List</h4>
+                    <span className="text-[10px] text-indigo-400 font-headline font-medium uppercase tracking-wider">{storageInfo?.files?.length || 0} items listed</span>
                   </div>
 
                   <div className="overflow-x-auto">
@@ -1027,7 +1027,7 @@ export default function App() {
                           <th className="py-3.5 text-right">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-900/40 font-mono text-[11px]">
+                      <tbody className="divide-y divide-slate-900/40 font-sans font-normal text-[11px]">
                         {storageInfo?.files?.filter(file => 
                           file.key.toLowerCase().includes(searchQuery.toLowerCase())
                         ).length === 0 ? (
@@ -1074,12 +1074,12 @@ export default function App() {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                       <h3 className="text-base font-bold text-white tracking-wide">MongoDB Database Explorer</h3>
-                      <p className="text-xs text-slate-400 font-mono mt-1">
+                      <p className="text-xs text-slate-400 font-sans font-normal mt-1">
                         Database: <span className="text-indigo-400">{storageInfo?.mongoStats?.dbName || '...'}</span> | Total Documents: <span className="text-indigo-400">{storageInfo?.mongoStats?.totalDocuments || 0}</span>
                       </p>
                     </div>
                     {storageInfo?.mongoStats?.isMock && (
-                      <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-[9px] text-amber-400 font-mono font-bold rounded-lg uppercase tracking-wider shrink-0">
+                      <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-[9px] text-amber-400 font-headline font-medium rounded-lg uppercase tracking-wider shrink-0">
                         ⚠️ Local Sandbox Mode (Simulated Data)
                       </span>
                     )}
@@ -1088,24 +1088,24 @@ export default function App() {
                   {/* MongoDB Metrics Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-mono">Total DB Storage Size</span>
-                      <div className="text-2xl font-black text-white leading-none font-mono">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-headline font-medium">Total DB Storage Size</span>
+                      <div className="text-2xl font-black text-white leading-none font-sans font-normal">
                         {storageInfo?.mongoStats?.formattedStorageSize || '0 Bytes'}
                       </div>
                       <span className="text-[9px] text-slate-400 block leading-tight font-medium">Disk space allocated for database records</span>
                     </div>
 
                     <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-mono">Estimated Monthly DB Bill</span>
-                      <div className="text-2xl font-black text-emerald-400 leading-none font-mono">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-headline font-medium">Estimated Monthly DB Bill</span>
+                      <div className="text-2xl font-black text-emerald-400 leading-none font-sans font-normal">
                         ${storageInfo?.mongoStats?.estimatedMonthlyBill?.toFixed(4) || '0.0000'}
                       </div>
                       <span className="text-[9px] text-slate-400 block leading-tight font-medium">Based on Atlas Serverless storage rate ($0.10/GB)</span>
                     </div>
 
                     <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-mono">Total Index Size</span>
-                      <div className="text-2xl font-black text-indigo-400 leading-none font-mono">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-headline font-medium">Total Index Size</span>
+                      <div className="text-2xl font-black text-indigo-400 leading-none font-sans font-normal">
                         {storageInfo?.mongoStats?.formattedIndexSize || '0 Bytes'}
                       </div>
                       <span className="text-[9px] text-slate-400 block leading-tight font-medium">Total memory footprint of lookup indexes</span>
@@ -1114,7 +1114,7 @@ export default function App() {
 
                   {/* Collections Breakdown Table */}
                   <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
-                    <h4 className="text-xs font-bold text-white tracking-wide font-mono uppercase">Usage by Collection</h4>
+                    <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium uppercase">Usage by Collection</h4>
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs font-semibold text-slate-300">
                         <thead>
@@ -1126,7 +1126,7 @@ export default function App() {
                             <th className="py-3 text-right">Est. Cost / Month</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-900/40 font-mono text-[11px]">
+                        <tbody className="divide-y divide-slate-900/40 font-sans font-normal text-[11px]">
                           {storageInfo?.mongoStats?.collections && storageInfo.mongoStats.collections.map((col, idx) => (
                             <tr key={idx} className="hover:bg-slate-900/10">
                               <td className="py-3.5 font-sans font-bold text-slate-200">{col.name}</td>
@@ -1157,7 +1157,7 @@ export default function App() {
             </div>
 
             {loadingAnalytics ? (
-              <div className="text-center py-20 font-mono text-xs text-slate-500 animate-pulse">
+              <div className="text-center py-20 font-sans font-normal text-xs text-slate-500 animate-pulse">
                 Loading live platform metrics...
               </div>
             ) : (
@@ -1166,8 +1166,8 @@ export default function App() {
                 <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-6 flex flex-col justify-between animate-fade-in">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-xs font-bold text-white tracking-wide font-mono uppercase">Most In-Demand Skills (Recruiters)</h4>
-                      <span className="text-[10px] text-indigo-400 font-mono font-bold uppercase tracking-wider">Market Demand</span>
+                      <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium uppercase">Most In-Demand Skills (Recruiters)</h4>
+                      <span className="text-[10px] text-indigo-400 font-headline font-medium uppercase tracking-wider">Market Demand</span>
                     </div>
                     <p className="text-[11px] text-slate-400 leading-normal">
                       Ranked by the number of active job postings requiring each technical skill.
@@ -1176,7 +1176,7 @@ export default function App() {
 
                   <div className="space-y-4 flex-1 pt-2">
                     {analyticsData?.recruiterSkills?.length === 0 ? (
-                      <div className="text-center py-10 text-xs text-slate-500 font-mono">No skill requirements recorded.</div>
+                      <div className="text-center py-10 text-xs text-slate-500 font-sans font-normal">No skill requirements recorded.</div>
                     ) : (
                       (showAllRecruiterSkills 
                         ? analyticsData?.recruiterSkills 
@@ -1185,7 +1185,7 @@ export default function App() {
                         <div key={idx} className="group space-y-1.5 relative">
                           <div className="flex justify-between text-[11px] font-bold">
                             <span className="text-slate-300 group-hover:text-white transition-colors">{skill.name}</span>
-                            <span className="text-indigo-400 font-mono">{skill.count} jobs ({skill.percentage}%)</span>
+                            <span className="text-indigo-400 font-sans font-normal">{skill.count} jobs ({skill.percentage}%)</span>
                           </div>
                           
                           {/* Horizontal Bar container */}
@@ -1197,7 +1197,7 @@ export default function App() {
                               title={`Skill: ${skill.name} | Used in ${skill.count} active job postings (${skill.percentage}% of all requirements)`}
                             />
                             {/* Hover tooltip indicator */}
-                            <div className="absolute right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[9px] text-slate-400 font-mono pointer-events-none">
+                            <div className="absolute right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[9px] text-slate-400 font-sans font-normal pointer-events-none">
                               Click list to inspect jobs
                             </div>
                           </div>
@@ -1210,7 +1210,7 @@ export default function App() {
                     <div className="pt-4 border-t border-slate-900/40 text-center">
                       <button
                         onClick={() => setShowAllRecruiterSkills(!showAllRecruiterSkills)}
-                        className="px-4 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-[10px] text-indigo-400 font-mono font-bold rounded-xl transition-all uppercase tracking-wider"
+                        className="px-4 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-[10px] text-indigo-400 font-headline font-medium rounded-xl transition-all uppercase tracking-wider"
                       >
                         {showAllRecruiterSkills ? 'Show Top 8 Only' : `View All (${analyticsData.recruiterSkills.length} skills)`}
                       </button>
@@ -1222,8 +1222,8 @@ export default function App() {
                 <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-6 flex flex-col justify-between animate-fade-in">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-xs font-bold text-white tracking-wide font-mono uppercase">Most Preferred Skills (Students)</h4>
-                      <span className="text-[10px] text-emerald-400 font-mono font-bold uppercase tracking-wider">Candidate Supply</span>
+                      <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium uppercase">Most Preferred Skills (Students)</h4>
+                      <span className="text-[10px] text-emerald-400 font-headline font-medium uppercase tracking-wider">Candidate Supply</span>
                     </div>
                     <p className="text-[11px] text-slate-400 leading-normal">
                       Ranked by the number of students listing or rating each skill in their profile pages.
@@ -1232,7 +1232,7 @@ export default function App() {
 
                   <div className="space-y-4 flex-1 pt-2">
                     {analyticsData?.studentSkills?.length === 0 ? (
-                      <div className="text-center py-10 text-xs text-slate-500 font-mono">No student skills recorded.</div>
+                      <div className="text-center py-10 text-xs text-slate-500 font-sans font-normal">No student skills recorded.</div>
                     ) : (
                       (showAllStudentSkills 
                         ? analyticsData?.studentSkills 
@@ -1241,7 +1241,7 @@ export default function App() {
                         <div key={idx} className="group space-y-1.5 relative">
                           <div className="flex justify-between text-[11px] font-bold">
                             <span className="text-slate-300 group-hover:text-white transition-colors">{skill.name}</span>
-                            <span className="text-emerald-400 font-mono">{skill.count} students ({skill.percentage}%)</span>
+                            <span className="text-emerald-400 font-sans font-normal">{skill.count} students ({skill.percentage}%)</span>
                           </div>
                           
                           {/* Horizontal Bar container */}
@@ -1253,7 +1253,7 @@ export default function App() {
                               title={`Skill: ${skill.name} | Listed by ${skill.count} students (${skill.percentage}% of all students)`}
                             />
                             {/* Hover tooltip indicator */}
-                            <div className="absolute right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[9px] text-slate-400 font-mono pointer-events-none">
+                            <div className="absolute right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[9px] text-slate-400 font-sans font-normal pointer-events-none">
                               Click list to inspect profiles
                             </div>
                           </div>
@@ -1266,7 +1266,7 @@ export default function App() {
                     <div className="pt-4 border-t border-slate-900/40 text-center">
                       <button
                         onClick={() => setShowAllStudentSkills(!showAllStudentSkills)}
-                        className="px-4 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-[10px] text-emerald-400 font-mono font-bold rounded-xl transition-all uppercase tracking-wider"
+                        className="px-4 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-[10px] text-emerald-400 font-headline font-medium rounded-xl transition-all uppercase tracking-wider"
                       >
                         {showAllStudentSkills ? 'Show Top 8 Only' : `View All (${analyticsData.studentSkills.length} skills)`}
                       </button>
@@ -1291,7 +1291,7 @@ export default function App() {
               </p>
             </div>
             <div className="pt-2">
-              <span className="inline-block px-3 py-1 bg-slate-900/80 border border-slate-800 text-[10px] text-indigo-400 font-mono rounded-lg">
+              <span className="inline-block px-3 py-1 bg-slate-900/80 border border-slate-800 text-[10px] text-indigo-400 font-sans font-normal rounded-lg">
                 Ready for API endpoints integrations
               </span>
             </div>
@@ -1310,7 +1310,7 @@ export default function App() {
             <div className="p-6 border-b border-slate-900 flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-bold text-white">{selectedStudent.name}</h3>
-                <p className="text-xs text-slate-400 font-mono mt-0.5">{selectedStudent.email}</p>
+                <p className="text-xs text-slate-400 font-sans font-normal mt-0.5">{selectedStudent.email}</p>
               </div>
               <button 
                 onClick={() => setSelectedStudent(null)}
@@ -1328,7 +1328,7 @@ export default function App() {
                 
                 {/* 1-min video */}
                 <div className="space-y-2">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold">1-Minute Video Resume</h4>
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">1-Minute Video Resume</h4>
                   {selectedStudent.introVideoUrl ? (
                     <video 
                       src={selectedStudent.introVideoUrl} 
@@ -1336,7 +1336,7 @@ export default function App() {
                       className="w-full rounded-xl border border-slate-900 bg-slate-950 aspect-video object-contain"
                     />
                   ) : (
-                    <div className="h-48 rounded-xl border border-slate-900 bg-slate-950/40 flex items-center justify-center text-slate-500 font-mono text-xs">
+                    <div className="h-48 rounded-xl border border-slate-900 bg-slate-950/40 flex items-center justify-center text-slate-500 font-sans font-normal text-xs">
                       No video resume uploaded
                     </div>
                   )}
@@ -1344,34 +1344,34 @@ export default function App() {
 
                 {/* General Info */}
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold">General Details</h4>
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">General Details</h4>
                   
                   <div className="grid grid-cols-2 gap-4 text-xs font-semibold">
                     <div>
-                      <span className="block text-[9px] text-slate-500 uppercase font-mono">Username</span>
-                      <span className="text-slate-300 font-mono">@{selectedStudent.username}</span>
+                      <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Username</span>
+                      <span className="text-slate-300 font-sans font-normal">@{selectedStudent.username}</span>
                     </div>
                     <div>
-                      <span className="block text-[9px] text-slate-500 uppercase font-mono">Nationality</span>
+                      <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Nationality</span>
                       <span className="text-slate-300">{selectedStudent.nationality || 'N/A'}</span>
                     </div>
                     <div>
-                      <span className="block text-[9px] text-slate-500 uppercase font-mono">Gender</span>
+                      <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Gender</span>
                       <span className="text-slate-300">{selectedStudent.gender || 'N/A'}</span>
                     </div>
                     <div>
-                      <span className="block text-[9px] text-slate-500 uppercase font-mono">Date of Birth</span>
-                      <span className="text-slate-300 font-mono">{selectedStudent.dob || 'N/A'}</span>
+                      <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Date of Birth</span>
+                      <span className="text-slate-300 font-sans font-normal">{selectedStudent.dob || 'N/A'}</span>
                     </div>
                     <div className="col-span-2">
-                      <span className="block text-[9px] text-slate-500 uppercase font-mono">Phone Number</span>
-                      <span className="text-slate-300 font-mono">{selectedStudent.phone || 'N/A'}</span>
+                      <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Phone Number</span>
+                      <span className="text-slate-300 font-sans font-normal">{selectedStudent.phone || 'N/A'}</span>
                     </div>
                   </div>
 
                   {selectedStudent.bio && (
                     <div className="pt-2">
-                      <span className="block text-[9px] text-slate-500 uppercase font-mono mb-1">Biography</span>
+                      <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium mb-1">Biography</span>
                       <p className="text-xs text-slate-400 leading-relaxed font-medium">{selectedStudent.bio}</p>
                     </div>
                   )}
@@ -1383,9 +1383,9 @@ export default function App() {
                 
                 {/* Skills */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold">Technical & Non-Technical Skills</h4>
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Technical & Non-Technical Skills</h4>
                   {selectedStudent.skills && selectedStudent.skills.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                    <div className="grid grid-cols-2 gap-2 text-xs font-sans font-normal">
                       {selectedStudent.skills.map((skill, index) => (
                         <div key={index} className="p-2.5 rounded-xl bg-slate-950 border border-slate-900/80 flex items-center justify-between">
                           <span className="font-bold text-slate-300">{skill.name}</span>
@@ -1394,26 +1394,26 @@ export default function App() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500 font-mono">No skills specified.</p>
+                    <p className="text-xs text-slate-500 font-sans font-normal">No skills specified.</p>
                   )}
                 </div>
 
                 {/* Education */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold">Education History</h4>
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Education History</h4>
                   {selectedStudent.education && selectedStudent.education.length > 0 ? (
                     <div className="space-y-2.5">
                       {selectedStudent.education.map((edu, index) => (
                         <div key={index} className="p-3 rounded-xl bg-slate-950 border border-slate-900/80 text-xs space-y-1">
                           <div className="flex justify-between items-start">
                             <span className="font-bold text-slate-200">{edu.institute}</span>
-                            <span className="text-[9px] text-indigo-400 font-mono font-bold capitalize">{edu.eduType}</span>
+                            <span className="text-[9px] text-indigo-400 font-headline font-medium capitalize">{edu.eduType}</span>
                           </div>
                           <p className="text-slate-400 text-[11px] font-medium">
                             {edu.degree} {edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}
                           </p>
                           {(edu.startDate || edu.endDate) && (
-                            <span className="block text-[10px] text-slate-500 font-mono font-medium">
+                            <span className="block text-[10px] text-slate-500 font-sans font-normal font-medium">
                               {edu.startDate || 'N/A'} - {edu.endDate || 'Present'}
                             </span>
                           )}
@@ -1421,7 +1421,7 @@ export default function App() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500 font-mono">No education history details.</p>
+                    <p className="text-xs text-slate-500 font-sans font-normal">No education history details.</p>
                   )}
                 </div>
               </div>
@@ -1431,14 +1431,14 @@ export default function App() {
                 
                 {/* Experience */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold">Work Experience</h4>
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Work Experience</h4>
                   {selectedStudent.experience && selectedStudent.experience.length > 0 ? (
                     <div className="space-y-2.5">
                       {selectedStudent.experience.map((exp, index) => (
                         <div key={index} className="p-3 rounded-xl bg-slate-950 border border-slate-900/80 text-xs space-y-1">
                           <div className="flex justify-between items-start">
                             <span className="font-bold text-slate-200">{exp.companyName}</span>
-                            <span className="text-[9px] text-slate-500 font-mono font-bold">{exp.startDate || 'N/A'} - {exp.endDate || 'Present'}</span>
+                            <span className="text-[9px] text-slate-500 font-headline font-medium">{exp.startDate || 'N/A'} - {exp.endDate || 'Present'}</span>
                           </div>
                           <p className="text-indigo-400 text-[11px] font-bold">{exp.designation}</p>
                           {exp.description && <p className="text-slate-400 text-[10px] leading-relaxed mt-1 font-medium">{exp.description}</p>}
@@ -1446,23 +1446,23 @@ export default function App() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500 font-mono">No work experience history details.</p>
+                    <p className="text-xs text-slate-500 font-sans font-normal">No work experience history details.</p>
                   )}
                 </div>
 
                 {/* Projects */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold">Academic Projects</h4>
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Academic Projects</h4>
                   {selectedStudent.projects && selectedStudent.projects.length > 0 ? (
                     <div className="space-y-2.5">
                       {selectedStudent.projects.map((proj, index) => (
                         <div key={index} className="p-3 rounded-xl bg-slate-950 border border-slate-900/80 text-xs space-y-1">
                           <div className="flex justify-between items-start">
                             <span className="font-bold text-slate-200">{proj.title}</span>
-                            <span className="text-[9px] text-indigo-400 font-mono font-bold">{proj.role}</span>
+                            <span className="text-[9px] text-indigo-400 font-headline font-medium">{proj.role}</span>
                           </div>
                           {proj.description && <p className="text-slate-400 text-[10px] leading-relaxed mt-1 font-medium">{proj.description}</p>}
-                          <div className="flex gap-3 pt-1 text-[10px] font-mono font-bold">
+                          <div className="flex gap-3 pt-1 text-[10px] font-sans font-normal font-bold">
                             {proj.codeUrl && <a href={proj.codeUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-400 underline">Code Link</a>}
                             {proj.hostedUrl && <a href={proj.hostedUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-400 underline">Live Link</a>}
                           </div>
@@ -1470,7 +1470,7 @@ export default function App() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500 font-mono">No projects specified.</p>
+                    <p className="text-xs text-slate-500 font-sans font-normal">No projects specified.</p>
                   )}
                 </div>
               </div>
@@ -1480,45 +1480,45 @@ export default function App() {
                 
                 {/* Certifications */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold">Certifications</h4>
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Certifications</h4>
                   {selectedStudent.certificates && selectedStudent.certificates.length > 0 ? (
                     <div className="space-y-2.5">
                       {selectedStudent.certificates.map((cert, index) => (
                         <div key={index} className="p-3 rounded-xl bg-slate-950 border border-slate-900/80 text-xs space-y-1">
                           <span className="font-bold text-slate-200 block">{cert.title}</span>
                           <span className="text-[11px] text-slate-400 block">{cert.org}</span>
-                          {cert.certNumber && <span className="text-[10px] text-slate-500 font-mono font-medium block">ID: {cert.certNumber}</span>}
-                          {cert.link && <a href={cert.link} target="_blank" rel="noopener noreferrer" className="text-[10px] text-indigo-400 font-mono font-bold underline block mt-1">Verification Link</a>}
+                          {cert.certNumber && <span className="text-[10px] text-slate-500 font-sans font-normal font-medium block">ID: {cert.certNumber}</span>}
+                          {cert.link && <a href={cert.link} target="_blank" rel="noopener noreferrer" className="text-[10px] text-indigo-400 font-sans font-normal font-bold underline block mt-1">Verification Link</a>}
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500 font-mono">No certifications earned.</p>
+                    <p className="text-xs text-slate-500 font-sans font-normal">No certifications earned.</p>
                   )}
                 </div>
 
                 {/* Co-curricular */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold">Co-curricular & POR</h4>
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Co-curricular & POR</h4>
                   {selectedStudent.cocurricular && Array.isArray(selectedStudent.cocurricular) && selectedStudent.cocurricular.length > 0 ? (
                     <div className="space-y-2.5">
                       {selectedStudent.cocurricular.map((act, index) => (
                         <div key={index} className="p-3 rounded-xl bg-slate-950 border border-slate-900/80 text-xs space-y-1">
                           <span className="font-bold text-slate-200 block">{act.activity}</span>
                           {act.description && <p className="text-slate-400 text-[10px] leading-relaxed mt-1 font-medium">{act.description}</p>}
-                          {act.link && <a href={act.link} target="_blank" rel="noopener noreferrer" className="text-[10px] text-indigo-400 font-mono font-bold underline block mt-1">Activity Link</a>}
+                          {act.link && <a href={act.link} target="_blank" rel="noopener noreferrer" className="text-[10px] text-indigo-400 font-sans font-normal font-bold underline block mt-1">Activity Link</a>}
                         </div>
                       ))}
                     </div>
                   ) : selectedStudent.cocurricular && typeof selectedStudent.cocurricular === 'string' ? (
                     <div className="p-3 rounded-xl bg-slate-950 border border-slate-900/80 text-xs space-y-1">
                       <span className="font-bold text-slate-200 block">Certificate Portfolio Link</span>
-                      <a href={selectedStudent.cocurricular} target="_blank" rel="noopener noreferrer" className="text-[10px] text-indigo-400 font-mono font-bold underline block mt-1">
+                      <a href={selectedStudent.cocurricular} target="_blank" rel="noopener noreferrer" className="text-[10px] text-indigo-400 font-sans font-normal font-bold underline block mt-1">
                         View Drive Link
                       </a>
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500 font-mono">No co-curricular records.</p>
+                    <p className="text-xs text-slate-500 font-sans font-normal">No co-curricular records.</p>
                   )}
                 </div>
               </div>
@@ -1548,7 +1548,7 @@ export default function App() {
             <div className="p-6 border-b border-slate-900 flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-bold text-white">{selectedRecruiter.companyName}</h3>
-                <p className="text-xs text-slate-400 font-mono mt-0.5">{selectedRecruiter.email}</p>
+                <p className="text-xs text-slate-400 font-sans font-normal mt-0.5">{selectedRecruiter.email}</p>
               </div>
               <button 
                 onClick={() => setSelectedRecruiter(null)}
@@ -1564,7 +1564,7 @@ export default function App() {
               {/* Verification Info */}
               <div className="p-5 rounded-xl bg-slate-950 border border-slate-900/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <span className="block text-[9px] text-slate-500 uppercase font-mono">Company Verification Status</span>
+                  <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Company Verification Status</span>
                   <div className="flex items-center gap-2">
                     <span className={`w-2.5 h-2.5 rounded-full ${selectedRecruiter.verified ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
                     <span className="text-xs font-bold text-slate-200">
@@ -1587,7 +1587,7 @@ export default function App() {
 
               {/* Jobs Posted List */}
               <div className="space-y-4">
-                <h4 className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold">Jobs Posted ({selectedRecruiter.jobs ? selectedRecruiter.jobs.length : 0})</h4>
+                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Jobs Posted ({selectedRecruiter.jobs ? selectedRecruiter.jobs.length : 0})</h4>
                 
                 {selectedRecruiter.jobs && selectedRecruiter.jobs.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1596,7 +1596,7 @@ export default function App() {
                         <div className="space-y-2">
                           <div className="flex justify-between items-start">
                             <h5 className="font-bold text-sm text-slate-200">{job.title}</h5>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[8px] text-indigo-400 font-mono font-bold uppercase tracking-wider">
+                            <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[8px] text-indigo-400 font-headline font-medium uppercase tracking-wider">
                               {job.jobType}
                             </span>
                           </div>
@@ -1604,7 +1604,7 @@ export default function App() {
                         </div>
 
                         <div className="pt-3 border-t border-slate-900/80 space-y-3">
-                          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
+                          <div className="flex justify-between items-center text-[10px] font-sans font-normal text-slate-500">
                             <span>📍 {job.location}</span>
                             <span className="text-emerald-400 font-bold">{job.salaryRange}</span>
                           </div>
@@ -1630,7 +1630,7 @@ export default function App() {
                     ))}
                   </div>
                 ) : (
-                  <div className="p-8 text-center bg-slate-950/40 rounded-xl border border-slate-900/80 text-slate-500 font-mono text-xs">
+                  <div className="p-8 text-center bg-slate-950/40 rounded-xl border border-slate-900/80 text-slate-500 font-sans font-normal text-xs">
                     No jobs posted yet.
                   </div>
                 )}
@@ -1661,7 +1661,7 @@ export default function App() {
             <div className="p-6 border-b border-slate-900 flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-bold text-white">{selectedJob.title}</h3>
-                <p className="text-xs text-slate-400 font-mono mt-0.5">{selectedJob.companyName}</p>
+                <p className="text-xs text-slate-400 font-sans font-normal mt-0.5">{selectedJob.companyName}</p>
               </div>
               <button 
                 onClick={() => setSelectedJob(null)}
@@ -1677,16 +1677,16 @@ export default function App() {
               {/* Job Details Grid */}
               <div className="grid grid-cols-2 gap-4 text-xs font-semibold">
                 <div>
-                  <span className="block text-[9px] text-slate-500 uppercase font-mono">Location</span>
+                  <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Location</span>
                   <span className="text-slate-300">📍 {selectedJob.location}</span>
                 </div>
                 <div>
-                  <span className="block text-[9px] text-slate-500 uppercase font-mono">Salary Range</span>
+                  <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Salary Range</span>
                   <span className="text-emerald-400 font-bold">{selectedJob.salaryRange}</span>
                 </div>
                 <div>
-                  <span className="block text-[9px] text-slate-500 uppercase font-mono">Job Type</span>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[9px] text-indigo-400 font-mono font-bold uppercase tracking-wider inline-block">
+                  <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Job Type</span>
+                  <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[9px] text-indigo-400 font-headline font-medium uppercase tracking-wider inline-block">
                     {selectedJob.jobType}
                   </span>
                 </div>
@@ -1694,15 +1694,15 @@ export default function App() {
 
               {/* Description */}
               <div className="space-y-2 pt-4 border-t border-slate-900/60">
-                <h4 className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold">Job Description</h4>
+                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Job Description</h4>
                 <p className="text-xs text-slate-300 leading-relaxed font-medium whitespace-pre-line">{selectedJob.description}</p>
               </div>
 
               {/* Requirements */}
               {selectedJob.requirements && selectedJob.requirements.length > 0 && (
                 <div className="space-y-3 pt-4 border-t border-slate-900/60">
-                  <h4 className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold">Skill Requirements</h4>
-                  <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Skill Requirements</h4>
+                  <div className="grid grid-cols-2 gap-2 text-xs font-sans font-normal">
                     {selectedJob.requirements.map((req, idx) => (
                       <div key={idx} className="p-2.5 rounded-xl bg-slate-950 border border-slate-900/80 flex items-center justify-between">
                         <span className="font-bold text-slate-300">{req.skill}</span>
@@ -1738,7 +1738,7 @@ export default function App() {
             <div className="p-6 border-b border-slate-900 flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-bold text-white">Candidates Applied</h3>
-                <p className="text-xs text-slate-400 font-mono mt-0.5">
+                <p className="text-xs text-slate-400 font-sans font-normal mt-0.5">
                   {selectedJobForApplicants.title} — {selectedJobForApplicants.companyName}
                 </p>
               </div>
@@ -1753,7 +1753,7 @@ export default function App() {
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-6">
               {loadingApplicants ? (
-                <div className="text-center py-10 font-mono text-xs text-slate-500 animate-pulse">
+                <div className="text-center py-10 font-sans font-normal text-xs text-slate-500 animate-pulse">
                   Loading applicants list...
                 </div>
               ) : selectedJobApplicants && selectedJobApplicants.length > 0 ? (
@@ -1762,8 +1762,8 @@ export default function App() {
                     <div key={applicant.id} className="p-4 rounded-xl bg-slate-950 border border-slate-900/80 flex items-center justify-between gap-4">
                       <div>
                         <h4 className="text-sm font-bold text-white">{applicant.name}</h4>
-                        <span className="text-[10px] text-slate-500 font-mono font-medium block">@{applicant.username}</span>
-                        <span className="text-xs text-slate-400 font-mono mt-1 block">{applicant.email}</span>
+                        <span className="text-[10px] text-slate-500 font-sans font-normal font-medium block">@{applicant.username}</span>
+                        <span className="text-xs text-slate-400 font-sans font-normal mt-1 block">{applicant.email}</span>
                       </div>
                       <button 
                         onClick={() => setSelectedStudent(applicant)}
@@ -1775,7 +1775,7 @@ export default function App() {
                   ))}
                 </div>
               ) : (
-                <div className="p-10 text-center bg-slate-950/40 rounded-xl border border-slate-900/80 text-slate-500 font-mono text-xs">
+                <div className="p-10 text-center bg-slate-950/40 rounded-xl border border-slate-900/80 text-slate-500 font-sans font-normal text-xs">
                   No candidates have applied to this job opening yet.
                 </div>
               )}

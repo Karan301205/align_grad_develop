@@ -328,7 +328,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                   }`}
                 />
                 {isExpanded && (
-                  <p className="text-[9px] font-mono uppercase tracking-wider text-on-surface-variant opacity-70 px-1 animate-fade-in">Recruiter Hub</p>
+                  <p className="text-[9px] font-headline font-medium uppercase tracking-wider text-on-surface-variant opacity-70 px-1 animate-fade-in">Recruiter Hub</p>
                 )}
               </div>
               {isExpanded && (

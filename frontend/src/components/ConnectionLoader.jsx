@@ -84,7 +84,7 @@ export default function ConnectionLoader({ theme, onReady }) {
 
       {/* Quietly display retry status only if there's a connection issue */}
       {hasError && (
-        <div className="mt-6 text-[11px] font-mono text-error text-center animate-pulse">
+        <div className="mt-6 text-[11px] font-sans font-normal text-error text-center animate-pulse">
           Services inactive. Retrying in background... (Attempt #{retryCount + 1})
         </div>
       )}

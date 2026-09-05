@@ -14,15 +14,15 @@ export default function StatCard({ icon: Icon, label, value, sublabel, accent = 
   return (
     <div className="relative glass-card neu-screws rounded-2xl p-5 flex flex-col justify-between h-36 transition-all duration-300 hover:-translate-y-1 hover:neu-floating">
       <div className="flex justify-between items-start">
-        <span className={`flex items-center gap-2 text-[11px] font-mono font-bold uppercase tracking-[0.08em] ${colors.text}`}>
+        <span className={`flex items-center gap-2 text-[11px] font-headline font-medium uppercase tracking-[0.08em] ${colors.text}`}>
           <span className={`${colors.led} animate-pulse`} />
           {label}
         </span>
         {Icon && <Icon className={`w-5 h-5 ${colors.icon}`} strokeWidth={1.5} />}
       </div>
       <div className="mt-auto">
-        <span className="text-3xl font-mono font-extrabold tracking-tight text-on-surface tabular-nums">{value}</span>
-        {sublabel && <p className="text-[11px] font-mono text-on-surface-variant mt-1">{sublabel}</p>}
+        <span className="text-3xl font-headline font-medium tracking-tight text-on-surface tabular-nums">{value}</span>
+        {sublabel && <p className="text-[11px] font-sans font-normal text-on-surface-variant mt-1">{sublabel}</p>}
       </div>
     </div>
   );

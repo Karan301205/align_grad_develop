@@ -141,7 +141,7 @@ export default function PostComposer({ token, communityId, onPostCreated, userPr
         </div>
         <div>
           <h4 className="font-bold text-xs text-on-surface">{userProfile?.name || 'Share your insights'}</h4>
-          <p className="text-[10px] font-mono text-on-surface-variant">Post to Community Feed</p>
+          <p className="text-[10px] font-sans font-normal text-on-surface-variant">Post to Community Feed</p>
         </div>
       </div>
 
@@ -164,13 +164,13 @@ export default function PostComposer({ token, communityId, onPostCreated, userPr
                   <img src={item.url} alt="Uploaded" className="w-full h-24 object-cover" />
                 )}
                 {item.mediaType === 'VIDEO' && (
-                  <div className="p-3 text-center text-xs font-mono">
+                  <div className="p-3 text-center text-xs font-sans font-normal">
                     <Video className="w-6 h-6 text-primary mx-auto mb-1" />
                     <span className="truncate block max-w-[100px] text-[10px]">{item.fileName || 'Video'}</span>
                   </div>
                 )}
                 {item.mediaType === 'PDF' && (
-                  <div className="p-3 text-center text-xs font-mono">
+                  <div className="p-3 text-center text-xs font-sans font-normal">
                     <FileText className="w-6 h-6 text-secondary mx-auto mb-1" />
                     <span className="truncate block max-w-[100px] text-[10px]">{item.fileName || 'Document.pdf'}</span>
                   </div>
@@ -189,7 +189,7 @@ export default function PostComposer({ token, communityId, onPostCreated, userPr
 
         {/* Error Alert */}
         {errorMsg && (
-          <div className="p-2.5 bg-error-container/20 border border-error-container text-error rounded-xl text-xs flex items-center gap-2 font-mono">
+          <div className="p-2.5 bg-error-container/20 border border-error-container text-error rounded-xl text-xs flex items-center gap-2 font-sans font-normal">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMsg}</span>
           </div>
@@ -207,7 +207,7 @@ export default function PostComposer({ token, communityId, onPostCreated, userPr
               type="button"
               disabled={uploading}
               onClick={() => imageInputRef.current?.click()}
-              className="p-2 hover:bg-surface-container-high rounded-xl text-on-surface-variant hover:text-primary transition-all flex items-center gap-1 text-xs font-mono cursor-pointer"
+              className="p-2 hover:bg-surface-container-high rounded-xl text-on-surface-variant hover:text-primary transition-all flex items-center gap-1 text-xs font-sans font-normal cursor-pointer"
               title="Add Images (max 9, 5MB)"
             >
               <Image className="w-4 h-4 text-emerald-600" />
@@ -218,7 +218,7 @@ export default function PostComposer({ token, communityId, onPostCreated, userPr
               type="button"
               disabled={uploading}
               onClick={() => videoInputRef.current?.click()}
-              className="p-2 hover:bg-surface-container-high rounded-xl text-on-surface-variant hover:text-primary transition-all flex items-center gap-1 text-xs font-mono cursor-pointer"
+              className="p-2 hover:bg-surface-container-high rounded-xl text-on-surface-variant hover:text-primary transition-all flex items-center gap-1 text-xs font-sans font-normal cursor-pointer"
               title="Add Video (max 100MB, 90s)"
             >
               <Video className="w-4 h-4 text-blue-600" />
@@ -229,7 +229,7 @@ export default function PostComposer({ token, communityId, onPostCreated, userPr
               type="button"
               disabled={uploading}
               onClick={() => pdfInputRef.current?.click()}
-              className="p-2 hover:bg-surface-container-high rounded-xl text-on-surface-variant hover:text-primary transition-all flex items-center gap-1 text-xs font-mono cursor-pointer"
+              className="p-2 hover:bg-surface-container-high rounded-xl text-on-surface-variant hover:text-primary transition-all flex items-center gap-1 text-xs font-sans font-normal cursor-pointer"
               title="Add PDF Document (max 20MB)"
             >
               <FileText className="w-4 h-4 text-amber-600" />
@@ -240,7 +240,7 @@ export default function PostComposer({ token, communityId, onPostCreated, userPr
           <button
             type="submit"
             disabled={!content.trim() || uploading || submitting}
-            className="px-4 py-2 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+            className="px-4 py-2 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl text-xs font-bold font-sans font-normal transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
             {submitting || uploading ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

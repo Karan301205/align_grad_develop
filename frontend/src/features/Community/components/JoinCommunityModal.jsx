@@ -85,7 +85,7 @@ export default function JoinCommunityModal({ isOpen, onClose, token, onJoined })
         <div className="p-5 border-b border-outline-variant flex justify-between items-center bg-surface-container-high/40">
           <div className="flex items-center gap-2">
             <KeyRound className="w-5 h-5 text-primary" />
-            <h3 className="font-headline font-bold text-base text-primary">Join Private Network</h3>
+            <h3 className="font-headline font-medium text-base text-primary">Join Private Network</h3>
           </div>
           <button onClick={onClose} className="p-1 text-on-surface-variant hover:text-on-surface cursor-pointer">
             <X className="w-5 h-5" />
@@ -93,7 +93,7 @@ export default function JoinCommunityModal({ isOpen, onClose, token, onJoined })
         </div>
 
         {/* Tab Selection */}
-        <div className="flex border-b border-outline-variant text-xs font-mono">
+        <div className="flex border-b border-outline-variant text-xs font-sans font-normal">
           <button
             onClick={() => setTab('invite')}
             className={`flex-1 py-3 font-bold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
@@ -116,14 +116,14 @@ export default function JoinCommunityModal({ isOpen, onClose, token, onJoined })
 
         <div className="p-6 space-y-4">
           {errorMsg && (
-            <div className="p-3 bg-error-container/20 border border-error-container text-error rounded-xl text-xs flex items-center gap-2 font-mono">
+            <div className="p-3 bg-error-container/20 border border-error-container text-error rounded-xl text-xs flex items-center gap-2 font-sans font-normal">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-xl text-xs flex items-center gap-2 font-mono font-bold">
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-xl text-xs flex items-center gap-2 font-sans font-normal font-bold">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{successMsg}</span>
             </div>
@@ -132,14 +132,14 @@ export default function JoinCommunityModal({ isOpen, onClose, token, onJoined })
           {tab === 'invite' ? (
             <form onSubmit={handleJoinViaInvite} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-mono font-bold text-on-surface-variant">Invite Link or Token *</label>
+                <label className="text-xs font-headline font-medium text-on-surface-variant">Invite Link or Token *</label>
                 <input
                   type="text"
                   required
                   placeholder="Paste invitation token (e.g. 4a8b9c...)"
                   value={inviteToken}
                   onChange={(e) => setInviteToken(e.target.value)}
-                  className="w-full bg-surface-container-high border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface focus:outline-none focus:border-primary font-mono"
+                  className="w-full bg-surface-container-high border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal"
                 />
               </div>
 
@@ -147,14 +147,14 @@ export default function JoinCommunityModal({ isOpen, onClose, token, onJoined })
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface rounded-xl text-xs font-bold font-mono cursor-pointer"
+                  className="px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface rounded-xl text-xs font-bold font-sans font-normal cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!inviteToken.trim() || submitting}
-                  className="px-5 py-2 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-5 py-2 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40 rounded-xl text-xs font-bold font-sans font-normal transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Join Network'}
                 </button>
@@ -163,25 +163,25 @@ export default function JoinCommunityModal({ isOpen, onClose, token, onJoined })
           ) : (
             <form onSubmit={handleJoinViaPassword} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-mono font-bold text-on-surface-variant">Community ID *</label>
+                <label className="text-xs font-headline font-medium text-on-surface-variant">Community ID *</label>
                 <input
                   type="text"
                   required
                   placeholder="Paste Community ID"
                   value={communityId}
                   onChange={(e) => setCommunityId(e.target.value)}
-                  className="w-full bg-surface-container-high border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface focus:outline-none focus:border-primary font-mono"
+                  className="w-full bg-surface-container-high border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-mono font-bold text-on-surface-variant">Password</label>
+                <label className="text-xs font-headline font-medium text-on-surface-variant">Password</label>
                 <input
                   type="password"
                   placeholder="Enter protection password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-surface-container-high border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface focus:outline-none focus:border-primary font-mono"
+                  className="w-full bg-surface-container-high border border-outline-variant rounded-xl p-2.5 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal"
                 />
               </div>
 
@@ -189,14 +189,14 @@ export default function JoinCommunityModal({ isOpen, onClose, token, onJoined })
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface rounded-xl text-xs font-bold font-mono cursor-pointer"
+                  className="px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface rounded-xl text-xs font-bold font-sans font-normal cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!communityId.trim() || submitting}
-                  className="px-5 py-2 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-5 py-2 bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-40 rounded-xl text-xs font-bold font-sans font-normal transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Submit & Join'}
                 </button>

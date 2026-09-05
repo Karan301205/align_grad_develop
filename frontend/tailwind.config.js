@@ -8,9 +8,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        headline: ["Plus Jakarta Sans", "Inter", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        sans: ["Geist", "sans-serif"],
+        headline: ["Inter", "sans-serif"],
+        mono: ["Geist", "sans-serif"],
       }
     },
   },

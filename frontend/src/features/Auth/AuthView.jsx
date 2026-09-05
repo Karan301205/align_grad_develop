@@ -156,7 +156,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center text-left mb-12">
                 <div className="col-span-12 lg:col-span-7">
                   <AnimatedContent distance={80} direction="vertical" duration={0.8} ease="power3.out" delay={0.1}>
-                    <h1 className="font-headline text-4xl sm:text-5xl lg:text-6xl font-extrabold text-primary mb-6 leading-tight tracking-tight">
+                    <h1 className="font-headline text-4xl sm:text-5xl lg:text-6xl font-medium text-primary mb-6 leading-tight tracking-tight">
                       Hire on merit, <br className="hidden md:block" />
                       <span className="text-on-primary-container">not just resumes</span>
                     </h1>
@@ -210,7 +210,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                     </div>
                     <div className="flex-1 glass-card rounded-xl p-3 border-outline-variant flex flex-col justify-center">
                       <span className="material-symbols-outlined text-primary mb-3 text-3xl">speed</span>
-                      <h3 className="text-lg font-headline font-bold text-primary mb-1">Rapid Verification</h3>
+                      <h3 className="text-lg font-headline font-medium text-primary mb-1">Rapid Verification</h3>
                       <p className="text-xs text-secondary leading-relaxed">Assessments deliver results in real-time with comprehensive audit logs.</p>
                     </div>
                   </AnimatedContent>
@@ -225,7 +225,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                         <div className="w-3 h-3 rounded-full bg-secondary-container border border-on-secondary-container/20"></div>
                         <div className="w-3 h-3 rounded-full bg-tertiary-fixed-dim border border-on-tertiary-fixed-variant/20"></div>
                       </div>
-                      <div className="flex-grow text-center text-xs font-mono text-on-surface-variant font-medium">
+                      <div className="flex-grow text-center text-xs font-headline font-medium text-on-surface-variant">
                         Verified Skill Dashboard - Lead Software Engineer Role
                       </div>
                     </div>
@@ -234,19 +234,19 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-4">
                           <div className="p-4 rounded-lg bg-surface-container border border-outline-variant">
-                            <div className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1">CANDIDATE SCORE</div>
-                            <div className="text-3xl font-headline font-bold text-primary">94.8<span className="text-sm font-normal text-secondary">/100</span></div>
+                            <div className="text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1">CANDIDATE SCORE</div>
+                            <div className="text-3xl font-headline font-medium text-primary">94.8<span className="text-sm font-normal text-secondary">/100</span></div>
                           </div>
                           <div className="p-4 rounded-lg bg-surface-container border border-outline-variant">
-                            <div className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1">PERCENTILE</div>
-                            <div className="text-3xl font-headline font-bold text-primary">Top 2%</div>
+                            <div className="text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1">PERCENTILE</div>
+                            <div className="text-3xl font-headline font-medium text-primary">Top 2%</div>
                           </div>
                         </div>
 
                         <div className="md:col-span-2 p-4 rounded-lg bg-surface-container-lowest border border-outline-variant relative flex flex-col justify-between">
                           <div>
                             <div className="flex justify-between items-center mb-4">
-                              <span className="text-xs font-bold text-primary uppercase font-mono">Skill Distribution</span>
+                              <span className="text-xs font-headline font-medium text-primary uppercase">Skill Distribution</span>
                               <span className="material-symbols-outlined text-secondary text-sm">analytics</span>
                             </div>
 
@@ -282,7 +282,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                           </div>
 
                           <div className="mt-4 flex justify-end">
-                            <div className="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[10px] font-mono font-bold">
+                            <div className="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[10px] font-headline font-medium">
                               VERIFIED ON-CHAIN
                             </div>
                           </div>
@@ -302,7 +302,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 <div className="col-span-12 lg:col-span-5">
                   <AnimatedContent distance={60} direction="horizontal" reverse={true} duration={0.8}>
                     <div className="glass-card rounded-2xl p-6 border border-outline-variant shadow-sm space-y-4">
-                      <h2 className="text-2xl font-headline font-bold text-primary">Verified Skills</h2>
+                      <h2 className="text-2xl font-headline font-medium text-primary">Verified Skills</h2>
                       <p className="text-xs text-secondary leading-relaxed">
                         Our proprietary verification engine goes beyond simple tests. We analyze real-world task performance to build a high-fidelity skill profile for every candidate.
                       </p>
@@ -348,7 +348,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
             <div className="max-w-6xl mx-auto">
               <AnimatedContent distance={40} direction="vertical" duration={0.6}>
                 <div className="text-center mb-12">
-                  <h2 className="text-3xl font-headline font-bold text-primary mb-3">Premium Assessments</h2>
+                  <h2 className="text-3xl font-headline font-medium text-primary mb-3">Premium Assessments</h2>
                   <p className="text-sm text-secondary max-w-xl mx-auto">Crafted by industry experts and PhDs to ensure maximum predictive validity for on-the-job success.</p>
                 </div>
               </AnimatedContent>
@@ -361,7 +361,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                       <div className="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
                         <span className="material-symbols-outlined text-primary group-hover:text-white">code</span>
                       </div>
-                      <h3 className="text-lg font-headline font-bold text-primary mb-2">Software Engineering</h3>
+                      <h3 className="text-lg font-headline font-medium text-primary mb-2">Software Engineering</h3>
                       <p className="text-xs text-secondary leading-relaxed mb-6">Systems design, data structures, and production-level debugging scenarios.</p>
                     </div>
                     <button onClick={() => navigateToCandidate('login')} className="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all cursor-pointer">
@@ -377,7 +377,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                       <div className="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
                         <span className="material-symbols-outlined text-primary group-hover:text-white">monitoring</span>
                       </div>
-                      <h3 className="text-lg font-headline font-bold text-primary mb-2">Data &amp; Analytics</h3>
+                      <h3 className="text-lg font-headline font-medium text-primary mb-2">Data &amp; Analytics</h3>
                       <p className="text-xs text-secondary leading-relaxed mb-6">Statistical modeling, SQL optimization, and visual insight communication.</p>
                     </div>
                     <button onClick={() => navigateToCandidate('login')} className="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all cursor-pointer">
@@ -393,7 +393,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                       <div className="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
                         <span className="material-symbols-outlined text-primary group-hover:text-white">psychology</span>
                       </div>
-                      <h3 className="text-lg font-headline font-bold text-primary mb-2">Leadership &amp; Strategy</h3>
+                      <h3 className="text-lg font-headline font-medium text-primary mb-2">Leadership &amp; Strategy</h3>
                       <p className="text-xs text-secondary leading-relaxed mb-6">Conflict resolution, architectural roadmapping, and team scaling dynamics.</p>
                     </div>
                     <button onClick={() => navigateToCandidate('login')} className="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all cursor-pointer">
@@ -412,20 +412,20 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 <div className="col-span-12 lg:col-span-6 space-y-6">
                   <AnimatedContent distance={60} direction="horizontal" reverse={true} duration={0.8}>
                     <div className="inline-block px-3 py-1 bg-white/10 rounded-full border border-white/20 mb-4">
-                      <span className="font-mono text-[10px] uppercase text-primary-fixed font-bold tracking-wider">SCALABLE INFRASTRUCTURE</span>
+                      <span className="font-headline font-medium text-[10px] uppercase text-primary-fixed tracking-wider">SCALABLE INFRASTRUCTURE</span>
                     </div>
-                    <h2 className="text-3xl font-headline font-bold mb-3">Enterprise-Grade Matching</h2>
+                    <h2 className="text-3xl font-headline font-medium mb-3">Enterprise-Grade Matching</h2>
                     <p className="text-sm text-on-primary-container leading-relaxed mb-6">
                       Our AI-driven matching engine uses verified skill data to rank candidates against your specific headcount requirements, ensuring cultural and technical alignment at scale.
                     </p>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                         <div className="text-2xl font-bold mb-1">99.9%</div>
-                        <div className="text-[10px] font-mono text-on-primary-container uppercase">Platform Uptime</div>
+                        <div className="text-[10px] font-headline font-medium text-on-primary-container uppercase">Platform Uptime</div>
                       </div>
                       <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                         <div className="text-2xl font-bold mb-1">SSO</div>
-                        <div className="text-[10px] font-mono text-on-primary-container uppercase">SAML Integrated</div>
+                        <div className="text-[10px] font-headline font-medium text-on-primary-container uppercase">SAML Integrated</div>
                       </div>
                     </div>
                   </AnimatedContent>
@@ -440,7 +440,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                         </p>
                         <p className="text-xs font-bold text-white">— Sarah Chen, VP of Talent at GlobalTech</p>
                       </div>
-                      <div className="pt-4 border-t border-white/10 flex items-center justify-between opacity-70 text-xs font-mono font-bold tracking-wider">
+                      <div className="pt-4 border-t border-white/10 flex items-center justify-between opacity-70 text-xs font-headline font-medium tracking-wider">
                         <span>MICROSOFT</span>
                         <span>AIRBNB</span>
                         <span>STRIPE</span>
@@ -457,7 +457,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
           <section id="pricing" className="py-20 px-4 sm:px-8 bg-surface-container-low text-center border-t border-outline-variant">
             <AnimatedContent distance={60} direction="vertical" duration={0.8}>
               <div className="max-w-2xl mx-auto space-y-6">
-                <h2 className="text-3xl font-headline font-bold text-primary">Ready to build a high-performance team?</h2>
+                <h2 className="text-3xl font-headline font-medium text-primary">Ready to build a high-performance team?</h2>
                 <p className="text-sm text-secondary">Join the elite organizations using AlignGrad to verify skills and hire with absolute confidence.</p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <button
@@ -473,7 +473,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                     Contact Sales
                   </button>
                 </div>
-                <p className="text-[11px] font-mono text-outline">No credit card required for 14-day trial.</p>
+                <p className="text-[11px] font-sans font-normal text-outline">No credit card required for 14-day trial.</p>
               </div>
             </AnimatedContent>
           </section>
@@ -536,7 +536,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
             </div>
           </div>
 
-          <div className="max-w-6xl mx-auto pt-6 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-4 text-outline font-mono text-[11px]">
+          <div className="max-w-6xl mx-auto pt-6 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-4 text-outline font-sans font-normal text-[11px]">
             <p>© 2026 AlignGrad Recruitment Systems. All rights reserved.</p>
             <div className="flex gap-4">
               <span className="hover:text-primary cursor-pointer">English (US)</span>
@@ -551,7 +551,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
             <div className="relative w-full max-w-md bg-surface-container border border-outline-variant rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
               <div className="flex justify-between items-center border-b border-outline-variant pb-4">
                 <div>
-                  <h3 className="text-xl font-headline font-bold text-on-surface">
+                  <h3 className="text-xl font-headline font-medium text-on-surface">
                     {isLogin ? 'Welcome Back' : 'Create Account'}
                   </h3>
                   <p className="text-xs text-on-surface-variant">
@@ -588,7 +588,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 />
 
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">
+                  <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">
                     Password
                   </label>
                   <div className="relative">
@@ -611,7 +611,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono uppercase tracking-wider text-on-surface-variant mb-1.5">
+                  <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">
                     Account Classification
                   </label>
                   <div className="grid grid-cols-2 gap-3 mt-1.5">
@@ -661,7 +661,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-outline-variant/60"></div>
                 </div>
-                <span className="relative bg-surface-container px-3 text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">
+                <span className="relative bg-surface-container px-3 text-[10px] font-headline font-medium text-on-surface-variant uppercase tracking-wider">
                   OR
                 </span>
               </div>

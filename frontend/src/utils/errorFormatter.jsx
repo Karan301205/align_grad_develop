@@ -74,7 +74,7 @@ export const ToastNotification = ({ msg, type = 'error', onClose, duration = 400
 
       {/* Message Content */}
       <div className="flex-1 min-w-0 text-left space-y-1">
-        <h4 className="font-headline font-bold text-sm text-slate-900 dark:text-white leading-tight">
+        <h4 className="font-headline font-medium text-sm text-slate-900 dark:text-white leading-tight">
           {type === 'info' ? 'Notification' : isSuccess ? 'Success' : 'Alert'}
         </h4>
         <p className="text-xs text-slate-600 dark:text-slate-200 mt-0.5 leading-relaxed font-sans break-words">

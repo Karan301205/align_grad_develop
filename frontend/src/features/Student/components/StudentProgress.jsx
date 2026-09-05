@@ -162,14 +162,14 @@ export default function StudentProgress({ applications, loading }) {
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
       <div className="border-b border-outline-variant pb-3">
         <h2 className="text-2xl font-headline font-bold text-on-surface">Your Job Progress</h2>
-        <p className="text-xs text-on-surface-variant font-mono mt-0.5">Track real-time selection rounds and updates</p>
+        <p className="text-xs text-on-surface-variant font-sans font-normal mt-0.5">Track real-time selection rounds and updates</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Left Side: Application List */}
         <div className="lg:col-span-1 space-y-3">
-          <h3 className="text-xs font-mono uppercase tracking-wider text-on-surface-variant px-1">Applied Roles</h3>
+          <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant px-1">Applied Roles</h3>
           <div className="space-y-2.5 max-h-[70vh] overflow-y-auto custom-scrollbar pr-1">
             {applications.map((app) => {
               const isActive = activeApp?.id === app.id;
@@ -234,10 +234,10 @@ export default function StudentProgress({ applications, loading }) {
                   </div>
                   <div>
                     <h3 className="text-xl font-headline font-bold text-on-surface">{activeApp.job?.title}</h3>
-                    <p className="text-sm text-on-surface-variant font-mono mt-0.5">{activeCompanyDisplayName}</p>
+                    <p className="text-sm text-on-surface-variant font-sans font-normal mt-0.5">{activeCompanyDisplayName}</p>
                     
                     {/* Metadata tags */}
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-on-surface-variant mt-2 font-mono">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-on-surface-variant mt-2 font-sans font-normal">
                       <span className="flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5" />
                         {activeApp.job?.location || 'Remote'}
@@ -251,7 +251,7 @@ export default function StudentProgress({ applications, loading }) {
                   </div>
                 </div>
 
-                <div className="flex flex-col items-start sm:items-end gap-1.5 font-mono">
+                <div className="flex flex-col items-start sm:items-end gap-1.5 font-sans font-normal">
                   <span className="text-[10px] text-on-surface-variant uppercase tracking-wider">Overall Status</span>
                   <Badge type={getStatusBadgeType(activeApp.status)}>
                     {activeApp.status === 'APPLIED' ? 'Pending' : activeApp.status?.replace('_', ' ')}
@@ -261,7 +261,7 @@ export default function StudentProgress({ applications, loading }) {
 
               {/* Recruitment Timeline */}
               <div className="space-y-4">
-                <h4 className="text-xs font-mono uppercase tracking-wider text-on-surface-variant">Selection Timeline</h4>
+                <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Selection Timeline</h4>
                 
                 <div className="relative pl-6 space-y-8 mt-4">
                   {/* Stepper Vertical Connector Line */}
@@ -282,14 +282,14 @@ export default function StudentProgress({ applications, loading }) {
                         <div className="pl-4">
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                             <h5 className="text-sm font-bold text-on-surface">{round.name}</h5>
-                            <span className={`text-xs font-mono capitalize ${getRoundStatusStyles(round.status)}`}>
+                            <span className={`text-xs font-headline font-medium capitalize ${getRoundStatusStyles(round.status)}`}>
                               {displayStatus === 'cleared' || displayStatus === 'qualified' ? 'Cleared' : displayStatus?.replace('_', ' ')}
                             </span>
                           </div>
 
                           {/* Date for system step or optional updatedAt */}
                           {(round.date || isSystemStep) && (
-                            <span className="text-[10px] text-on-surface-variant font-mono mt-0.5 block">
+                            <span className="text-[10px] text-on-surface-variant font-sans font-normal mt-0.5 block">
                               {formatDate(round.date || activeApp.createdAt)}
                             </span>
                           )}
@@ -297,7 +297,7 @@ export default function StudentProgress({ applications, loading }) {
                           {/* Recruiter Feedback box */}
                           {round.feedback && (
                             <div className="mt-2.5 p-3.5 bg-surface-container-low border border-outline-variant rounded-xl text-xs text-on-surface-variant leading-relaxed">
-                              <p className="font-mono text-[9px] uppercase tracking-wider text-secondary mb-1">Feedback</p>
+                              <p className="font-headline font-medium text-[9px] uppercase tracking-wider text-secondary mb-1">Feedback</p>
                               {round.feedback}
                             </div>
                           )}

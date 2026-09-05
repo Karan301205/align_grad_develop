@@ -460,11 +460,11 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
           {activeMode === 'record' && !recordedUrl && (
             <div className="flex-1 flex flex-col space-y-4">
               <div className="flex items-center justify-between border-b border-outline-variant pb-4">
-                {/* <h3 className="text-sm font-mono uppercase text-primary tracking-wider flex items-center gap-1.5">
+                {/* <h3 className="text-sm font-headline font-medium uppercase text-primary tracking-wider flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Live Camera Stream (720p)
                 </h3> */}
                 {isRecording && (
-                  <span className={`px-3 py-1 border rounded-lg text-xs font-mono flex items-center gap-1.5 ${
+                  <span className={`px-3 py-1 border rounded-lg text-xs font-sans font-normal font-semibold flex items-center gap-1.5 ${
                     isPaused
                       ? 'bg-amber-500/20 text-amber-500 border-amber-500/30 font-bold'
                       : recordingSeconds >= 40 
@@ -513,7 +513,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                   </div>
 
                   {/* Segment Titles & Custom Timers */}
-                  <div className="grid grid-cols-6 gap-2 text-[10px] font-mono text-on-surface-variant text-center select-none">
+                  <div className="grid grid-cols-6 gap-2 text-[10px] font-headline font-medium text-on-surface-variant text-center select-none">
                     <span className={`col-span-2 truncate ${recordingSeconds < 20 ? 'text-primary font-bold' : ''}`}>Self & Edu (20s)</span>
                     <span className={`col-span-1 truncate ${recordingSeconds >= 20 && recordingSeconds < 30 ? 'text-primary font-bold' : ''}`}>Skills (10s)</span>
                     <span className={`col-span-1 truncate ${recordingSeconds >= 30 && recordingSeconds < 40 ? 'text-primary font-bold' : ''}`}>Exp (10s) <span className="text-amber-500 font-bold">*40s Min</span></span>
@@ -523,7 +523,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                   {/* Current Active Guide prompt card */}
                   <div className="bg-surface-container-high/80 p-3 rounded-lg border border-outline-variant flex items-center justify-between gap-4">
                     <div className="space-y-0.5">
-                      <span className="text-[9px] font-mono uppercase text-secondary tracking-widest">Active Topic</span>
+                      <span className="text-[9px] font-headline font-medium uppercase text-secondary tracking-widest">Active Topic</span>
                       <p className="text-xs font-semibold text-on-surface leading-relaxed">
                         {recordingSeconds < 20 && "🎓 Tell us about yourself and your educational background"}
                         {recordingSeconds >= 20 && recordingSeconds < 30 && "⚡ Talk about the skills and technologies you know"}
@@ -532,8 +532,8 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                       </p>
                     </div>
                     <div className="shrink-0 text-center bg-secondary/15 border border-secondary/20 px-3 py-1 rounded-lg min-w-[70px]">
-                      <span className="text-[9px] font-mono text-secondary uppercase block tracking-wider">Next in</span>
-                      <span className="text-xs font-bold font-mono text-on-surface">
+                      <span className="text-[9px] font-headline font-medium text-secondary uppercase block tracking-wider">Next in</span>
+                      <span className="text-xs font-bold font-sans font-normal text-on-surface">
                         {recordingSeconds < 20 && `${20 - recordingSeconds}s`}
                         {recordingSeconds >= 20 && recordingSeconds < 30 && `${30 - recordingSeconds}s`}
                         {recordingSeconds >= 30 && recordingSeconds < 40 && `${40 - recordingSeconds}s`}
@@ -641,10 +641,10 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
           {recordedUrl && (
             <div className="flex-1 flex flex-col space-y-4">
               <div className="flex items-center justify-between border-b border-outline-variant pb-4">
-                <h3 className="text-sm font-mono uppercase text-secondary tracking-wider">
+                <h3 className="text-sm font-headline font-medium uppercase text-secondary tracking-wider">
                   Review Your Showcase
                 </h3>
-                <span className="px-2.5 py-0.5 bg-surface-container-high border border-outline-variant rounded text-[10px] font-mono text-on-surface-variant">
+                <span className="px-2.5 py-0.5 bg-surface-container-high border border-outline-variant rounded text-[10px] font-headline font-medium text-on-surface-variant">
                   Ready to Publish
                 </span>
               </div>
@@ -660,7 +660,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
 
               {uploadProgress > 0 && (
                 <div className="space-y-1.5 w-full">
-                  <div className="flex justify-between text-xs font-mono text-on-surface-variant">
+                  <div className="flex justify-between text-xs font-sans font-normal text-on-surface-variant">
                     <span>Uploading to Cloud...</span>
                     <span>{uploadProgress}%</span>
                   </div>
@@ -760,7 +760,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
           </div>
 
           {/* <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-3.5">
-            <h4 className="text-xs font-mono uppercase text-on-surface-variant tracking-wider">Tips for an Excellent Intro</h4>
+            <h4 className="text-xs font-headline font-medium uppercase text-on-surface-variant tracking-wider">Tips for an Excellent Intro</h4>
             <ul className="text-xs text-on-surface-variant space-y-2.5 list-disc list-inside">
               <li><strong>Duration:</strong> 40 to 60 seconds is mandatory.</li>
               <li>State your name, key stacks, and recent achievements.</li>

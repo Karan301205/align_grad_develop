@@ -166,7 +166,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-background text-on-surface font-sans flex items-center justify-center p-6">
         <div className="max-w-md w-full glass-card rounded-2xl p-8 text-center space-y-4">
-          <h1 className="font-headline text-xl font-bold text-on-surface">Access denied</h1>
+          <h1 className="font-headline text-xl font-medium text-on-surface">Access denied</h1>
           <p className="text-sm text-on-surface-variant">
             This portal is for students only. Please sign in with a student account or use the recruiter portal.
           </p>
@@ -186,7 +186,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-background text-on-surface font-sans flex items-center justify-center p-6">
         <div className="max-w-md w-full glass-card rounded-2xl p-8 text-center space-y-4">
-          <h1 className="font-headline text-xl font-bold text-on-surface">Access denied</h1>
+          <h1 className="font-headline text-xl font-medium text-on-surface">Access denied</h1>
           <p className="text-sm text-on-surface-variant">
             This portal is for recruiters only. Please sign in with a recruiter account or use the student portal.
           </p>

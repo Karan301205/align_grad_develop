@@ -108,7 +108,7 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
       {/* Top Header Action Bar */}
       <header className="bg-surface border border-outline-variant/80 p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 border-on-surface/20 text-on-surface-variant text-xs font-mono font-bold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-2 border-on-surface/20 text-on-surface-variant text-xs font-headline font-medium uppercase tracking-wider mb-2">
             <span>Recruiter Executive Hub</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-headline font-bold text-on-surface tracking-tight">
@@ -164,14 +164,14 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
             <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all shadow-xs">
               <Briefcase className="w-6 h-6" />
             </div>
-            {/* <span className="text-xs font-mono font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20">
+            {/* <span className="text-xs font-headline font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20">
               
             </span> */}
           </div>
-          <p className="text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1 font-bold">
+          <p className="text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1 font-bold">
             Active Jobs
           </p>
-          <p className="text-4xl font-headline font-black text-on-surface">
+          <p className="text-4xl font-headline font-medium text-on-surface">
             {activeJobsCount}
           </p>
         </div>
@@ -185,14 +185,14 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
             <div className="w-12 h-12 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center group-hover:bg-secondary group-hover:text-on-secondary transition-all shadow-xs">
               <UserPlus className="w-6 h-6" />
             </div>
-            {/* <span className="text-xs font-mono font-bold text-secondary bg-secondary/10 px-2.5 py-1 rounded-lg border border-secondary/20">
+            {/* <span className="text-xs font-headline font-medium text-secondary bg-secondary/10 px-2.5 py-1 rounded-lg border border-secondary/20">
               New
             </span> */}
           </div>
-          <p className="text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1 font-bold">
+          <p className="text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1 font-bold">
             New Candidates
           </p>
-          <p className="text-4xl font-headline font-black text-on-surface">
+          <p className="text-4xl font-headline font-medium text-on-surface">
             {totalCandidatesCount}
           </p>
         </div>
@@ -203,14 +203,14 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
             <div className="w-12 h-12 bg-warning/10 text-warning rounded-xl flex items-center justify-center group-hover:bg-warning group-hover:text-on-warning transition-all shadow-xs">
               <Calendar className="w-6 h-6" />
             </div>
-            {/* <span className="text-xs font-mono font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-lg">
+            {/* <span className="text-xs font-headline font-medium text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-lg">
               Priority
             </span> */}
           </div>
-          <p className="text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1 font-bold">
+          <p className="text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1 font-bold">
             Interviews Today
           </p>
-          <p className="text-4xl font-headline font-black text-on-surface">
+          <p className="text-4xl font-headline font-medium text-on-surface">
             {recentApplications.length}
           </p>
         </div>
@@ -247,7 +247,7 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
         {/* Horizontal Carousel */}
         <div ref={carouselRef} className="flex gap-6 overflow-x-auto pb-3 custom-scrollbar scroll-smooth">
           {displayTalent.length === 0 ? (
-            <div className="w-full bg-surface border border-outline-variant/80 rounded-2xl p-8 text-center space-y-2 font-mono">
+            <div className="w-full bg-surface border border-outline-variant/80 rounded-2xl p-8 text-center space-y-2 font-sans font-normal">
               <p className="text-sm font-bold text-on-surface">No matching verified candidates</p>
               <p className="text-xs text-on-surface-variant">No candidates currently match the technical skill requirements from your active or past job postings.</p>
             </div>
@@ -271,7 +271,7 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
                       <h4 className="font-bold text-sm text-on-surface group-hover:text-primary transition-colors truncate font-headline">
                         {cand.name}
                       </h4>
-                      <p className="text-xs text-on-surface-variant font-mono truncate">
+                      <p className="text-xs text-on-surface-variant font-sans font-normal truncate">
                         {cand.title || cand.username ? `@${cand.username}` : 'Full-Stack Engineer'}
                       </p>
                     </div>
@@ -295,22 +295,22 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
                         ][i % 3];
 
                         return (
-                          <span key={i} className={`text-[11px] px-2.5 py-1 rounded-lg border font-mono font-bold ${pillStyles}`}>
+                          <span key={i} className={`text-[11px] px-2.5 py-1 rounded-lg border font-headline font-medium ${pillStyles}`}>
                             {name} {rating ? <span className="underline ml-0.5">Lvl {rating}</span> : ''}
                           </span>
                         );
                       })
                     ) : (
                       <>
-                        <span className="text-[11px] px-2.5 py-1 bg-primary/10 text-primary border border-primary/20 rounded-lg font-mono font-bold">TypeScript</span>
-                        <span className="text-[11px] px-2.5 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-lg font-mono font-bold">Rust</span>
-                        <span className="text-[11px] px-2.5 py-1 bg-amber-500/10 text-amber-700 border border-amber-500/20 rounded-lg font-mono font-bold">AWS</span>
+                        <span className="text-[11px] px-2.5 py-1 bg-primary/10 text-primary border border-primary/20 rounded-lg font-headline font-medium">TypeScript</span>
+                        <span className="text-[11px] px-2.5 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-lg font-headline font-medium">Rust</span>
+                        <span className="text-[11px] px-2.5 py-1 bg-amber-500/10 text-amber-700 border border-amber-500/20 rounded-lg font-headline font-medium">AWS</span>
                       </>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-outline-variant/60 flex justify-between items-center text-xs font-mono">
+                <div className="mt-6 pt-4 border-t border-outline-variant/60 flex justify-between items-center text-xs font-sans font-normal">
                   <span className="text-on-surface-variant font-medium">
                     Match Score: <span className="font-bold text-primary font-sans text-sm">{cand.matchScore || `${98 - idx * 3}%`}</span>
                   </span>
@@ -335,7 +335,7 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
           <button
             type="button"
             onClick={() => goToTab && goToTab('candidates')}
-            className="text-xs font-mono font-bold text-primary hover:underline cursor-pointer flex items-center gap-1"
+            className="text-xs font-sans font-normal font-bold text-primary hover:underline cursor-pointer flex items-center gap-1"
           >
             <span>View All</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -346,17 +346,17 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
           <table className="w-full text-left border-collapse">
             <thead className="bg-surface-container-high/60 border-b border-outline-variant/60">
               <tr>
-                <th className="px-6 py-3.5 text-xs font-mono uppercase tracking-wider text-on-surface-variant font-bold">Candidate</th>
-                <th className="px-6 py-3.5 text-xs font-mono uppercase tracking-wider text-on-surface-variant font-bold">Position</th>
-                <th className="px-6 py-3.5 text-xs font-mono uppercase tracking-wider text-on-surface-variant font-bold">Applied Date</th>
-                <th className="px-6 py-3.5 text-xs font-mono uppercase tracking-wider text-on-surface-variant font-bold">Status</th>
+                <th className="px-6 py-3.5 text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold">Candidate</th>
+                <th className="px-6 py-3.5 text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold">Position</th>
+                <th className="px-6 py-3.5 text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold">Applied Date</th>
+                <th className="px-6 py-3.5 text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold">Status</th>
                 <th className="px-6 py-3.5"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/60">
               {recentApplications.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center font-mono text-xs text-on-surface-variant font-medium">
+                  <td colSpan="5" className="px-6 py-10 text-center font-sans font-normal text-xs text-on-surface-variant font-medium">
                     no registration right now
                   </td>
                 </tr>
@@ -378,19 +378,19 @@ export default function RecruiterDashboard({ company, jobs = [], candidates = []
                         </div>
                         <div>
                           <p className="text-xs font-bold text-on-surface group-hover:text-primary transition-colors font-headline">{app.candidateName}</p>
-                          <p className="text-[11px] font-mono text-on-surface-variant">{app.email}</p>
+                          <p className="text-[11px] font-sans font-normal text-on-surface-variant">{app.email}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-xs font-bold text-on-surface">{app.position}</p>
-                      <p className="text-[11px] font-mono text-on-surface-variant">{app.department}</p>
+                      <p className="text-[11px] font-sans font-normal text-on-surface-variant">{app.department}</p>
                     </td>
-                    <td className="px-6 py-4 text-xs font-mono text-on-surface-variant">
+                    <td className="px-6 py-4 text-xs font-sans font-normal text-on-surface-variant">
                       {app.appliedDate}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider ${app.status === 'Offer'
+                      <span className={`px-3 py-1 rounded-full text-xs font-headline font-medium uppercase tracking-wider ${app.status === 'Offer'
                         ? 'bg-secondary/15 text-secondary border border-secondary/30'
                         : app.status === 'Interviewing'
                           ? 'bg-primary/15 text-primary border border-primary/30'

@@ -98,12 +98,9 @@ export default function TestView({ token, testSkill, setTestSkill, onPass }) {
         <div className="flex justify-between items-center border-b border-outline-variant pb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">AlignGrade Validation Lab</span>
-              {/* <span className="px-2 py-0.5 bg-surface-container-high border border-outline-variant rounded text-[10px] font-mono text-primary">
-                need a skill assessment image
-              </span> */}
+              <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">AlignGrade Validation Lab</span>
             </div>
-            <h2 className="text-2xl font-headline font-bold text-on-surface mt-1">{skillName} Certification Test</h2>
+            <h2 className="text-2xl font-headline font-medium text-on-surface mt-1">{skillName} Certification Test</h2>
           </div>
           <button
             onClick={() => setTestSkill(null)}
@@ -115,7 +112,7 @@ export default function TestView({ token, testSkill, setTestSkill, onPass }) {
 
         {/* Test status banner */}
         {!submitted ? (
-          <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl flex items-center gap-3 text-xs text-primary font-mono leading-relaxed">
+          <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl flex items-center gap-3 text-xs text-primary font-sans font-normal leading-relaxed">
             <BookOpen className="w-5 h-5 flex-shrink-0" />
             <span>Complete the verification test to verify your skill proficiency level and save your rating based on what you score.</span>
           </div>

@@ -166,7 +166,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
           
           {/* Section 1: Brand & Basic Identity */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="text-sm font-mono uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h3 className="text-sm font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <Building className="w-4 h-4" /> Brand & Basic Identity
             </h3>
 
@@ -195,17 +195,17 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
                 <button
                   type="button"
                   onClick={() => document.getElementById('logo-upload').click()}
-                  className="px-3 py-1.5 bg-surface-container-high border border-outline-variant text-on-surface hover:bg-surface-container-highest rounded-xl text-xs font-mono font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+                  className="px-3 py-1.5 bg-surface-container-high border border-outline-variant text-on-surface hover:bg-surface-container-highest rounded-xl text-xs font-sans font-normal font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
                 >
                   Change Logo
                 </button>
-                <p className="text-[10px] text-on-surface-variant/70 font-mono">JPG, PNG up to 2MB. Square dimensions recommended.</p>
+                <p className="text-[10px] text-on-surface-variant/70 font-sans font-normal">JPG, PNG up to 2MB. Square dimensions recommended.</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Name *</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Name *</label>
                 <input
                   type="text"
                   required
@@ -216,7 +216,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div className="relative">
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Industry *</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Industry *</label>
                 <input
                   type="text"
                   required
@@ -237,7 +237,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
                       {MAJOR_INDUSTRIES.filter(ind =>
                         ind.toLowerCase().includes((industry || '').toLowerCase())
                       ).length === 0 ? (
-                        <div className="p-3 text-xs text-on-surface-variant font-mono text-center">Type custom industry or select from list</div>
+                        <div className="p-3 text-xs text-on-surface-variant font-sans font-normal text-center">Type custom industry or select from list</div>
                       ) : (
                         MAJOR_INDUSTRIES.filter(ind =>
                           ind.toLowerCase().includes((industry || '').toLowerCase())
@@ -266,7 +266,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Size *</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Size *</label>
                 <select
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:border-primary focus:outline-none transition-all shadow-inner"
                   value={companySize}
@@ -282,7 +282,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div className="relative">
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Headquarters Location</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Headquarters Location</label>
                 <input
                   type="text"
                   placeholder="Search & select location (e.g. Bengaluru, Karnataka)..."
@@ -305,7 +305,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
                       {INDIAN_STATES.filter(loc =>
                         loc.toLowerCase().includes((location || '').toLowerCase())
                       ).length === 0 ? (
-                        <div className="px-3.5 py-2.5 text-xs text-on-surface-variant font-mono">No matching locations found</div>
+                        <div className="px-3.5 py-2.5 text-xs text-on-surface-variant font-sans font-normal">No matching locations found</div>
                       ) : (
                         INDIAN_STATES.filter(loc =>
                           loc.toLowerCase().includes((location || '').toLowerCase())
@@ -334,7 +334,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Founded Year</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Founded Year</label>
                 <input
                   type="text"
                   placeholder="e.g. 2019"
@@ -345,7 +345,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Official Website URL</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Official Website URL</label>
                 <input
                   type="url"
                   placeholder="https://example.com"
@@ -357,7 +357,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Description *</label>
+              <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Description *</label>
               <textarea
                 rows="4"
                 required
@@ -371,13 +371,13 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
 
           {/* Section 2: Contact Person / Recruiter Business Card */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="text-sm font-mono uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h3 className="text-sm font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <User className="w-4 h-4" /> Recruiter Details
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Recruiter Name *</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Recruiter Name *</label>
                 <input
                   type="text"
                   required
@@ -389,7 +389,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Recruiter Designation *</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Recruiter Designation *</label>
                 <input
                   type="text"
                   required
@@ -401,7 +401,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Official Email Address *</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Official Email Address *</label>
                 <input
                   type="email"
                   required
@@ -416,12 +416,12 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
 
           {/* Section 3: Social & Showcase Media */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="text-sm font-mono uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h3 className="text-sm font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <Link className="w-4 h-4" /> Social Profile Links
             </h3>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company LinkedIn Page</label>
+              <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company LinkedIn Page</label>
               <input
                 type="url"
                 placeholder="https://linkedin.com/company/..."
@@ -435,7 +435,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
           {/* Section 4: Office Showcase Photos */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-5 shadow-sm">
             <div className="flex justify-between items-center border-b border-outline-variant pb-2">
-              <h3 className="text-sm font-mono uppercase tracking-wider text-primary flex items-center gap-2">
+              <h3 className="text-sm font-headline font-medium uppercase tracking-wider text-primary flex items-center gap-2">
                 <Globe className="w-4 h-4" /> Office Showcase Gallery
               </h3>
               <input
@@ -449,18 +449,18 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
                 type="button"
                 disabled={uploadingPhoto}
                 onClick={() => document.getElementById('photo-upload').click()}
-                className="px-3 py-1.5 bg-secondary text-on-secondary hover:brightness-105 active:scale-95 font-mono font-bold text-xs rounded-xl flex items-center gap-1 cursor-pointer"
+                className="px-3 py-1.5 bg-secondary text-on-secondary hover:brightness-105 active:scale-95 font-sans font-normal font-bold text-xs rounded-xl flex items-center gap-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" /> Upload Photo
               </button>
             </div>
             
             {uploadingPhoto && (
-              <p className="text-xs text-primary font-mono animate-pulse">Uploading gallery image to S3...</p>
+              <p className="text-xs text-primary font-sans font-normal animate-pulse">Uploading gallery image to S3...</p>
             )}
 
             {photos.length === 0 ? (
-              <p className="text-xs text-on-surface-variant font-mono">No showcase photos uploaded yet. Click upload to build your profile gallery.</p>
+              <p className="text-xs text-on-surface-variant font-sans font-normal">No showcase photos uploaded yet. Click upload to build your profile gallery.</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {photos.map((p, idx) => (
@@ -488,7 +488,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
         {/* Right Side: Trust Verification Status Widget */}
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="text-sm font-mono uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h3 className="text-sm font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <Shield className="w-4 h-4" /> Trust & Verification
             </h3>
 
@@ -533,7 +533,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
                     <UploadCloud className="w-5 h-5" />
                   </div>
                   <p className="text-xs font-bold text-on-surface">Click to select legal document</p>
-                  <p className="text-[10px] text-on-surface-variant font-mono">PDF up to 10MB</p>
+                  <p className="text-[10px] text-on-surface-variant font-sans font-normal">PDF up to 10MB</p>
                 </div>
                 {submittingDoc && (
                   <div className="text-center text-xs text-primary font-medium animate-pulse">

@@ -84,7 +84,7 @@ export default function RecruiterCandidates({ candidates }) {
             <select
               value={workModeFilter}
               onChange={e => handleFilterChange(setWorkModeFilter, e.target.value)}
-              className="bg-surface-container-high border border-outline-variant text-on-surface text-xs font-mono rounded-xl px-3 py-2 focus:border-primary focus:outline-none transition-all cursor-pointer"
+              className="bg-surface-container-high border border-outline-variant text-on-surface text-xs font-sans font-normal rounded-xl px-3 py-2 focus:border-primary focus:outline-none transition-all cursor-pointer"
             >
               <option value="">All Work Modes</option>
               <option value="Remote">Remote</option>
@@ -96,7 +96,7 @@ export default function RecruiterCandidates({ candidates }) {
             <select
               value={workTypeFilter}
               onChange={e => handleFilterChange(setWorkTypeFilter, e.target.value)}
-              className="bg-surface-container-high border border-outline-variant text-on-surface text-xs font-mono rounded-xl px-3 py-2 focus:border-primary focus:outline-none transition-all cursor-pointer"
+              className="bg-surface-container-high border border-outline-variant text-on-surface text-xs font-sans font-normal rounded-xl px-3 py-2 focus:border-primary focus:outline-none transition-all cursor-pointer"
             >
               <option value="">All Work Types</option>
               <option value="Internship">Internship</option>
@@ -108,7 +108,7 @@ export default function RecruiterCandidates({ candidates }) {
             <select
               value={locationFilter}
               onChange={e => handleFilterChange(setLocationFilter, e.target.value)}
-              className="bg-surface-container-high border border-outline-variant text-on-surface text-xs font-mono rounded-xl px-3 py-2 focus:border-primary focus:outline-none transition-all cursor-pointer max-w-[190px] truncate"
+              className="bg-surface-container-high border border-outline-variant text-on-surface text-xs font-sans font-normal rounded-xl px-3 py-2 focus:border-primary focus:outline-none transition-all cursor-pointer max-w-[190px] truncate"
             >
               <option value="">All Locations (India)</option>
               <option value="Any Location">Open to Relocate / Any</option>
@@ -129,7 +129,7 @@ export default function RecruiterCandidates({ candidates }) {
                   setLocationFilter('');
                   setCurrentPage(1);
                 }}
-                className="text-[11px] font-mono text-primary hover:text-primary/80 font-bold px-2 py-1 cursor-pointer transition-colors"
+                className="text-[11px] font-sans font-normal text-primary hover:text-primary/80 font-bold px-2 py-1 cursor-pointer transition-colors"
               >
                 Reset
               </button>
@@ -137,7 +137,7 @@ export default function RecruiterCandidates({ candidates }) {
           </div>
         </div>
 
-        <div className="flex justify-between items-center text-xs font-mono text-on-surface-variant pt-2 border-t border-outline-variant/40">
+        <div className="flex justify-between items-center text-xs font-sans font-normal text-on-surface-variant pt-2 border-t border-outline-variant/40">
           <span>Active Filters applied: <span className="font-bold text-primary">{[workModeFilter, workTypeFilter, locationFilter, searchQuery].filter(Boolean).length}</span></span>
           <span>Matching Candidates: <span className="font-bold text-primary">{filteredCandidates.length}</span></span>
         </div>
@@ -164,7 +164,7 @@ export default function RecruiterCandidates({ candidates }) {
                     <div>
                       <h4 className="text-lg font-bold text-on-surface group-hover:text-primary transition-colors">{cand.name}</h4>
                       {cand.username && (
-                        <p className="text-xs text-primary font-mono font-medium">@{cand.username}</p>
+                        <p className="text-xs text-primary font-sans font-normal font-medium">@{cand.username}</p>
                       )}
                     </div>
                   </div>
@@ -176,30 +176,30 @@ export default function RecruiterCandidates({ candidates }) {
                 </div>
 
                 <div className="flex flex-wrap gap-1.5 items-center mt-1">
-                  <span className="text-xs text-on-surface-variant font-mono">Candidate</span>
+                  <span className="text-xs text-on-surface-variant font-sans font-normal">Candidate</span>
                   {cand.introVideoUrl && (
-                    <span className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-[9px] font-mono font-bold text-primary rounded-full flex items-center gap-1">
+                    <span className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-[9px] font-headline font-medium text-primary rounded-full flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
                       🎥 Showcase Video
                     </span>
                   )}
                   {cand.preferredWorkModes && cand.preferredWorkModes.map(m => (
-                    <span key={m} className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-[9px] font-mono font-bold text-primary rounded">
+                    <span key={m} className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-[9px] font-headline font-medium text-primary rounded">
                       {m}
                     </span>
                   ))}
                   {cand.preferredWorkTypes && cand.preferredWorkTypes.map(t => (
-                    <span key={t} className="px-2 py-0.5 bg-secondary/10 border border-secondary/20 text-[9px] font-mono font-bold text-secondary rounded">
+                    <span key={t} className="px-2 py-0.5 bg-secondary/10 border border-secondary/20 text-[9px] font-headline font-medium text-secondary rounded">
                       {t}
                     </span>
                   ))}
                   {cand.openToAnyLocation && (
-                    <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-mono font-bold text-emerald-600 rounded">
+                    <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-headline font-medium text-emerald-600 rounded">
                       📍 Open to Relocate
                     </span>
                   )}
                   {!cand.openToAnyLocation && cand.preferredLocations && cand.preferredLocations.slice(0, 2).map(l => (
-                    <span key={l} className="px-2 py-0.5 bg-surface-container-high border border-outline-variant text-[9px] font-mono text-on-surface-variant rounded">
+                    <span key={l} className="px-2 py-0.5 bg-surface-container-high border border-outline-variant text-[9px] font-sans font-normal text-on-surface-variant rounded">
                       📍 {l}
                     </span>
                   ))}
@@ -207,11 +207,11 @@ export default function RecruiterCandidates({ candidates }) {
 
                 {/* Stacks display */}
                 <div className="space-y-2">
-                  <p className="text-xs font-mono uppercase tracking-wider text-on-surface-variant">Proficiency Levels</p>
+                  <p className="text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Proficiency Levels</p>
                   <div className="flex flex-wrap gap-2">
                     {cand.skills && cand.skills.length > 0 ? (
                       cand.skills.map((s, i) => (
-                        <span key={i} className="px-2.5 py-1 bg-surface-container-low border border-outline-variant rounded text-xs font-mono text-on-surface">
+                        <span key={i} className="px-2.5 py-1 bg-surface-container-low border border-outline-variant rounded text-xs font-sans font-normal text-on-surface">
                           {s.name} <span className="text-primary font-bold">Lvl {s.rating}/10</span>
                           {s.verifiedRating && (
                             <span className="ml-1 text-[9px] bg-secondary/20 text-secondary px-1 py-0.2 rounded font-bold">✓ Verified</span>
@@ -219,7 +219,7 @@ export default function RecruiterCandidates({ candidates }) {
                         </span>
                       ))
                     ) : (
-                      <span className="text-xs text-on-surface-variant font-mono">No skills rated yet.</span>
+                      <span className="text-xs text-on-surface-variant font-sans font-normal">No skills rated yet.</span>
                     )}
                   </div>
                 </div>
@@ -239,7 +239,7 @@ export default function RecruiterCandidates({ candidates }) {
 
       {/* Pagination Controls Bar */}
       {filteredCandidates.length > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-outline-variant/50 font-mono text-xs text-on-surface-variant">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-outline-variant/50 font-sans font-normal text-xs text-on-surface-variant">
           <div>
             Showing <span className="font-bold text-primary">{startIndex + 1}</span> - <span className="font-bold text-primary">{Math.min(startIndex + ITEMS_PER_PAGE, filteredCandidates.length)}</span> of <span className="font-bold text-primary">{filteredCandidates.length}</span> profiles
           </div>

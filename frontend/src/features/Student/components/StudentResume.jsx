@@ -59,7 +59,7 @@ export default function StudentResume({
 
             <div className="p-4 bg-primary-container/40 border border-primary/20 rounded-xl flex items-start gap-3">
               <CheckCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-              <div className="text-[10px] text-on-surface-variant font-mono leading-relaxed">
+              <div className="text-[10px] text-on-surface-variant font-sans font-normal leading-relaxed">
                 Your self-rated skills will dynamically render with their corresponding verified rating level (e.g. HTML , CSS, REACT.js LVL 8/10).
               </div>
             </div>
@@ -162,7 +162,7 @@ export default function StudentResume({
                   {educationList.map((edu, idx) => (
                     <div key={idx} className="text-[10px]">
                       <p className="font-bold text-neutral-900">{edu.degree}</p>
-                      <p className="text-neutral-500 font-mono text-[9px] mt-0.5">{edu.startDate} - {edu.endDate}</p>
+                      <p className="text-neutral-500 font-sans font-normal text-[9px] mt-0.5">{edu.startDate} - {edu.endDate}</p>
                       <p className="text-neutral-700 mt-0.5">{edu.institute}</p>
                       {edu.gradeType && edu.gradeValue && (
                         <p className="text-neutral-600 font-medium mt-0.5">{edu.gradeType}: {edu.gradeValue}</p>
@@ -185,7 +185,7 @@ export default function StudentResume({
                   {certificatesList.map((cert, idx) => (
                     <li key={idx}>
                       <span className="font-medium text-neutral-900">{cert.title}</span> - {cert.org}
-                      {cert.startDate && <span className="text-neutral-500 font-mono text-[8px] ml-1">({cert.startDate})</span>}
+                      {cert.startDate && <span className="text-neutral-500 font-sans font-normal text-[8px] ml-1">({cert.startDate})</span>}
                     </li>
                   ))}
                 </ul>
@@ -203,7 +203,7 @@ export default function StudentResume({
                 <ul className="list-disc pl-3.5 space-y-1.5 text-[9.5px] text-neutral-700">
                   {skillsList.map((skill, idx) => (
                     <li key={idx} className="uppercase font-medium">
-                      {skill.name} <span className="text-[8px] text-neutral-500 font-mono italic font-normal">(LVL {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? skill.verifiedRating : skill.rating}/10{skill.verifiedRating !== null && skill.verifiedRating !== undefined ? ' VERIFIED' : ''})</span>
+                      {skill.name} <span className="text-[8px] text-neutral-500 font-sans font-normal italic">(LVL {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? skill.verifiedRating : skill.rating}/10{skill.verifiedRating !== null && skill.verifiedRating !== undefined ? ' VERIFIED' : ''})</span>
                     </li>
                   ))}
                 </ul>
@@ -254,7 +254,7 @@ export default function StudentResume({
                           </>
                         )}
                       </p>
-                      <p className="text-neutral-500 font-mono text-[9px] mt-0.5">
+                      <p className="text-neutral-500 font-sans font-normal text-[9px] mt-0.5">
                         {proj.startDate} - {proj.currentlyWorking ? 'Present' : proj.endDate}
                       </p>
                       {proj.description && (
@@ -285,7 +285,7 @@ export default function StudentResume({
                       <p className="font-medium text-neutral-800 mt-0.5">
                         {exp.companyName} {exp.location ? `| ${exp.location}` : ''} ({exp.expType})
                       </p>
-                      <p className="text-neutral-500 font-mono text-[9px] mt-0.5">
+                      <p className="text-neutral-500 font-sans font-normal text-[9px] mt-0.5">
                         {exp.startDate} - {exp.currentlyWorking ? 'Present' : exp.endDate}
                       </p>
                       {exp.description && (

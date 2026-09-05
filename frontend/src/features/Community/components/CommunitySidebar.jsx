@@ -21,10 +21,10 @@ export default function CommunitySidebar({
             </div>
             <div>
               <h3 className="font-bold text-sm text-on-surface">Communities</h3>
-              <p className="text-[10px] font-mono text-on-surface-variant">Hubs & Networks</p>
+              <p className="text-[10px] font-sans font-normal text-on-surface-variant">Hubs & Networks</p>
             </div>
           </div>
-          <span className="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-mono font-bold rounded-full">
+          <span className="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-headline font-medium rounded-full">
             Live
           </span>
         </div>
@@ -37,7 +37,7 @@ export default function CommunitySidebar({
             placeholder="Search communities..."
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 bg-surface-container-high border border-outline-variant rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary transition-all font-mono"
+            className="w-full pl-8 pr-3 py-2 bg-surface-container-high border border-outline-variant rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary transition-all font-sans font-normal"
           />
         </div>
 
@@ -45,14 +45,14 @@ export default function CommunitySidebar({
         <div className="grid grid-cols-2 gap-2 pt-1">
           <button
             onClick={onOpenCreateModal}
-            className="py-2 px-3 bg-primary text-on-primary hover:bg-primary/90 rounded-xl text-xs font-bold font-mono transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+            className="py-2 px-3 bg-primary text-on-primary hover:bg-primary/90 rounded-xl text-xs font-bold font-sans font-normal transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
           >
             <Plus className="w-3.5 h-3.5" />
             Create
           </button>
           <button
             onClick={onOpenJoinModal}
-            className="py-2 px-3 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface rounded-xl text-xs font-bold font-mono transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="py-2 px-3 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface rounded-xl text-xs font-bold font-sans font-normal transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <KeyRound className="w-3.5 h-3.5 text-primary" />
             Join
@@ -62,7 +62,7 @@ export default function CommunitySidebar({
 
       {/* Community List Navigation */}
       <div className="bg-surface-container border border-outline-variant rounded-2xl p-4 space-y-3 shadow-xs">
-        <h4 className="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant font-bold px-1">
+        <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold px-1">
           Your Networks ({communities.length})
         </h4>
 
@@ -99,7 +99,7 @@ export default function CommunitySidebar({
                   <div className="flex items-center gap-1.5">
                     <p className="text-xs font-bold truncate">{comm.name}</p>
                     {isGlobal && (
-                      <span className={`text-[9px] px-1.5 py-0.2 rounded font-mono font-bold shrink-0 ${
+                      <span className={`text-[9px] px-1.5 py-0.2 rounded font-headline font-medium shrink-0 ${
                         isSelected ? 'bg-on-primary/20 text-on-primary' : 'bg-primary/10 text-primary'
                       }`}>
                         Global
@@ -109,7 +109,7 @@ export default function CommunitySidebar({
                       <Lock className={`w-3 h-3 shrink-0 ${isSelected ? 'text-on-primary/80' : 'text-on-surface-variant'}`} />
                     )}
                   </div>
-                  <p className={`text-[10px] truncate font-mono mt-0.5 ${isSelected ? 'text-on-primary/80' : 'text-on-surface-variant'}`}>
+                  <p className={`text-[10px] truncate font-sans font-normal mt-0.5 ${isSelected ? 'text-on-primary/80' : 'text-on-surface-variant'}`}>
                     {comm.role ? `Role: ${comm.role}` : (isGlobal ? 'Auto-Joined Member' : 'Member')}
                   </p>
                 </div>

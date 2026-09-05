@@ -99,7 +99,7 @@ export default function CommunityLayout({ user, token }) {
               currentUserId={user?.id}
             />
           ) : (
-            <div className="flex-1 py-12 text-center text-xs font-mono text-on-surface-variant bg-surface-container border border-outline-variant rounded-2xl">
+            <div className="flex-1 py-12 text-center text-xs font-sans font-normal text-on-surface-variant bg-surface-container border border-outline-variant rounded-2xl">
               No active community selected.
             </div>
           )}

@@ -5,13 +5,13 @@ export default function Select({ label, error, className = '', containerClassNam
   return (
     <div className={containerClassName}>
       {label && (
-        <label className="block text-[10px] font-mono font-bold uppercase tracking-[0.08em] text-on-surface-variant mb-1.5">
+        <label className="block text-[10px] font-headline font-medium uppercase tracking-[0.08em] text-on-surface-variant mb-1.5">
           {label}
         </label>
       )}
       <div className="relative">
         <select
-          className={`w-full appearance-none bg-surface-container-low neu-recessed border-none rounded-lg px-4 py-3 pr-10 text-sm font-mono text-on-surface outline-none transition-all focus:outline-none focus-visible:shadow-[var(--shadow-recessed),0_0_0_2px_var(--c-primary)] ${error ? 'shadow-[var(--shadow-recessed),0_0_0_2px_var(--c-error)]' : ''} ${className}`}
+          className={`w-full appearance-none bg-surface-container-low neu-recessed border-none rounded-lg px-4 py-3 pr-10 text-sm font-sans font-normal text-on-surface outline-none transition-all focus:outline-none focus-visible:shadow-[var(--shadow-recessed),0_0_0_2px_var(--c-primary)] ${error ? 'shadow-[var(--shadow-recessed),0_0_0_2px_var(--c-error)]' : ''} ${className}`}
           {...rest}
         >
           {children}

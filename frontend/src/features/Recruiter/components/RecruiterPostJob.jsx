@@ -324,11 +324,11 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
           {/* HIRING OPTION TYPE SELECTION */}
           <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-4 shadow-xs">
             <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-              <label className="text-xs font-mono uppercase tracking-wider text-primary font-bold flex items-center gap-2">
+              <label className="text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                 Select Opportunity Type *
               </label>
-              <span className="text-[10px] font-mono text-on-surface-variant/70 uppercase">STEP 1 OF 5</span>
+              <span className="text-[10px] font-headline font-medium text-on-surface-variant/70 uppercase">STEP 1 OF 5</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
@@ -371,16 +371,16 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
           {/* SECTION 1: Role & Company Details */}
           <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs">
             <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-              <h3 className="text-xs font-mono uppercase tracking-wider text-primary font-bold flex items-center gap-2">
+              <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold flex items-center gap-2">
                 <Briefcase className="w-4 h-4 text-primary" /> {opportunityType === 'GIG' ? 'Gig Details' : 'Role & Company Details'}
               </h3>
-              <span className="text-[10px] font-mono text-on-surface-variant/70 uppercase">STEP 2 OF 5</span>
+              <span className="text-[10px] font-headline font-medium text-on-surface-variant/70 uppercase">STEP 2 OF 5</span>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Designation Field */}
               <div id="field-container-designation" className="space-y-1.5">
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">
                   {opportunityType === 'GIG' ? 'Gig Title *' : 'Designation (Job Title) *'}
                 </label>
                 <div className="relative">
@@ -415,7 +415,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
               {/* Company Name Field */}
               {opportunityType !== 'GIG' && (
                 <div id="field-container-companyName" className="space-y-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Company Name *</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Company Name *</label>
                   <div className="relative">
                     <input
                       id="input-companyName"
@@ -449,7 +449,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
               {/* Official Website */}
               {opportunityType !== 'GIG' && (
                 <div id="field-container-officialWebsite" className="space-y-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Official Website</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Official Website</label>
                   <input
                     type="url"
                     className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm font-sans focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-on-surface"
@@ -462,7 +462,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
 
               {/* Location Field */}
               <div id="field-container-location" className="relative space-y-1.5">
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">headquarters location</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">headquarters location</label>
                 <div className="relative">
                   <input
                     id="input-location"
@@ -506,7 +506,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                     ></div>
                     <div className="absolute z-20 left-0 right-0 mt-1 bg-surface-container border border-outline-variant rounded-xl shadow-xl max-h-60 overflow-y-auto custom-scrollbar p-1.5 text-left">
                       {filteredLocations.length === 0 ? (
-                        <div className="p-3 text-xs text-on-surface-variant text-center font-mono">
+                        <div className="p-3 text-xs text-on-surface-variant text-center font-sans font-normal">
                           No matching locations found
                         </div>
                       ) : (
@@ -538,7 +538,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
               {/* Location URL */}
               {opportunityType !== 'GIG' && (
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Location URL</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Location URL</label>
                   <input
                     type="url"
                     className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm font-sans focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-on-surface"
@@ -552,7 +552,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
               {/* Openings Count */}
               {opportunityType !== 'GIG' && (
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">No of Openings</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">No of Openings</label>
                   <input
                     type="number"
                     min="1"
@@ -570,15 +570,15 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
           {opportunityType !== 'GIG' && (
             <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs">
               <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-primary font-bold flex items-center gap-2">
+                <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold flex items-center gap-2">
                   <ListChecks className="w-4 h-4 text-primary" /> Candidate Prerequisites & Skill Matrix
                 </h3>
-                <span className="text-[10px] font-mono text-on-surface-variant/70 uppercase">STEP 3 OF 5</span>
+                <span className="text-[10px] font-headline font-medium text-on-surface-variant/70 uppercase">STEP 3 OF 5</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Preferred Education</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Preferred Education</label>
                   <input
                     type="text"
                     className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm font-sans focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-on-surface"
@@ -590,7 +590,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
 
                 {/* Desired Experience */}
                 <div id="field-container-desiredExperience" className="relative space-y-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Desired Experience *</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Desired Experience *</label>
                   <div className="relative">
                     <button
                       type="button"
@@ -635,7 +635,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
 
               {/* Required Skills list */}
               <div id="field-container-reqs" className="space-y-4 pt-2">
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant font-bold">
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold">
                   {opportunityType === 'GIG' ? 'Add Required Skills *' : 'Required Stacks & Rating Thresholds *'}
                 </label>
 
@@ -664,7 +664,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                         {ALL_SKILLS.filter(s =>
                           s.skill.toLowerCase().includes(selectedReqSkill.toLowerCase())
                         ).length === 0 ? (
-                          <div className="p-3 text-xs text-on-surface-variant font-mono text-center">No matching skills found</div>
+                          <div className="p-3 text-xs text-on-surface-variant font-sans font-normal text-center">No matching skills found</div>
                         ) : (
                           ALL_SKILLS.filter(s =>
                             s.skill.toLowerCase().includes(selectedReqSkill.toLowerCase())
@@ -679,7 +679,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                               className="w-full text-left px-3.5 py-2 text-xs text-on-surface hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between group cursor-pointer rounded-lg font-sans"
                             >
                               <span>{s.skill}</span>
-                              <span className="text-[10px] font-mono capitalize px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/60 text-on-surface-variant">
+                              <span className="text-[10px] font-sans font-normal capitalize px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/60 text-on-surface-variant">
                                 {s.type}
                               </span>
                             </button>
@@ -724,7 +724,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
 
                 {reqs.length === 0 ? (
                   <div className="p-4 bg-surface-container-low border border-dashed border-outline-variant/80 rounded-xl text-center">
-                    <p className="text-xs text-on-surface-variant font-mono">No skill requirements added yet. Search and add skills above.</p>
+                    <p className="text-xs text-on-surface-variant font-sans font-normal">No skill requirements added yet. Search and add skills above.</p>
                   </div>
                 ) : (
                   <div className="space-y-3 pt-1">
@@ -737,16 +737,16 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                             <span className="font-bold text-on-surface font-headline">{r.skillName}</span>
                             <div className="flex items-center gap-3">
                               {isTech && opportunityType !== 'GIG' ? (
-                                <span className="text-primary font-mono font-bold text-xs bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+                                <span className="text-primary font-headline font-medium text-xs bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
                                   Required Level: Lvl {r.minRating}/10
                                 </span>
                               ) : (
-                                <span className="text-on-surface-variant font-mono text-[10px] uppercase tracking-wider bg-surface-container-high border border-outline-variant px-2 py-0.5 rounded">Required Skill</span>
+                                <span className="text-on-surface-variant font-headline font-medium text-[10px] uppercase tracking-wider bg-surface-container-high border border-outline-variant px-2 py-0.5 rounded">Required Skill</span>
                               )}
                               <button
                                 type="button"
                                 onClick={() => setReqs(prev => prev.filter(item => item.skillName !== r.skillName))}
-                                className="text-error hover:underline text-[11px] font-mono cursor-pointer"
+                                className="text-error hover:underline text-[11px] font-sans font-normal cursor-pointer"
                               >
                                 Remove
                               </button>
@@ -778,16 +778,16 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
           {opportunityType === 'GIG' ? (
             <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs">
               <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-primary font-bold flex items-center gap-2">
+                <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-primary" /> Gig Budget & Timeline
                 </h3>
-                <span className="text-[10px] font-mono text-on-surface-variant/70 uppercase">STEP 3 OF 5</span>
+                <span className="text-[10px] font-headline font-medium text-on-surface-variant/70 uppercase">STEP 3 OF 5</span>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Budget Field */}
                 <div id="field-container-budget" className="space-y-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Project Budget ($ USD) *</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Project Budget ($ USD) *</label>
                   <div className="relative">
                     <input
                       id="input-budget"
@@ -820,7 +820,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
 
                 {/* Delivery Time Field */}
                 <div id="field-container-deliveryTime" className="space-y-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Delivery Time / Duration *</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Delivery Time / Duration *</label>
                   <div className="relative">
                     <input
                       id="input-deliveryTime"
@@ -851,11 +851,11 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                 </div>
 
                 <div className="md:col-span-2 space-y-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Upload Specs Attachment (Optional)</label>
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Upload Specs Attachment (Optional)</label>
                   <input
                     type="file"
                     onChange={e => setAttachmentFile(e.target.files[0])}
-                    className="w-full text-xs font-mono text-on-surface bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 focus:outline-none cursor-pointer"
+                    className="w-full text-xs font-sans font-normal text-on-surface bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 focus:outline-none cursor-pointer"
                   />
                 </div>
               </div>
@@ -863,15 +863,15 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
           ) : (
             <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs">
               <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-primary font-bold flex items-center gap-2">
+                <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-primary" /> Compensation & Schedule
                 </h3>
-                <span className="text-[10px] font-mono text-on-surface-variant/70 uppercase">STEP 4 OF 5</span>
+                <span className="text-[10px] font-headline font-medium text-on-surface-variant/70 uppercase">STEP 4 OF 5</span>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">
                     {opportunityType === 'INTERNSHIP' ? 'Stipend/Month (Part-Time)' : 'Salary/Month (Part-Time)'}
                   </label>
                   <input
@@ -884,7 +884,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">
+                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">
                     {opportunityType === 'INTERNSHIP' ? 'Stipend/Month (Full-Time)' : 'Salary/Month (Full-Time)'}
                   </label>
                   <input
@@ -899,7 +899,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                 {/* Duration Field */}
                 {opportunityType === 'INTERNSHIP' && (
                   <div id="field-container-duration" className="space-y-1.5">
-                    <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Duration *</label>
+                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Duration *</label>
                     <div className="relative">
                       <input
                         id="input-duration"
@@ -937,15 +937,15 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
           {/* SECTION 4: Description & Process */}
           <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs">
             <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-              <h3 className="text-xs font-mono uppercase tracking-wider text-primary font-bold flex items-center gap-2">
+              <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-primary" /> {opportunityType === 'GIG' ? 'Gig Tasks & Brief' : 'Description & Recruitment Process'}
               </h3>
-              <span className="text-[10px] font-mono text-on-surface-variant/70 uppercase">STEP 5 OF 5</span>
+              <span className="text-[10px] font-headline font-medium text-on-surface-variant/70 uppercase">STEP 5 OF 5</span>
             </div>
 
             {/* Job Description Field */}
             <div id="field-container-jobDesc" className="space-y-1.5">
-              <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">
+              <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">
                 {opportunityType === 'GIG' ? 'Gig Tasks & Description *' : 'Job / Internship Summary *'}
               </label>
               <div className="relative">
@@ -980,7 +980,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
             {/* Role Responsibilities Field */}
             {opportunityType !== 'GIG' && (
               <div id="field-container-roleResponsibilities" className="space-y-1.5">
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Role and Responsibilities *</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Role and Responsibilities *</label>
                 <div className="relative">
                   <textarea
                     id="input-roleResponsibilities"
@@ -1014,7 +1014,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
             {/* Dynamic Selection Process */}
             {opportunityType !== 'GIG' && (
               <div className="space-y-4 pt-2">
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant font-bold">Selection Process Rounds</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold">Selection Process Rounds</label>
                 
                 <div className="bg-surface-container-low border border-outline-variant/70 rounded-xl p-4 sm:p-5 space-y-4">
                   
@@ -1045,13 +1045,13 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                   </div>
 
                   {rounds.length === 0 ? (
-                    <p className="text-xs text-on-surface-variant font-mono">No selection rounds added. Add evaluation stages above.</p>
+                    <p className="text-xs text-on-surface-variant font-sans font-normal">No selection rounds added. Add evaluation stages above.</p>
                   ) : (
                     <div className="space-y-2.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
                       {rounds.map((round, idx) => (
                         <div key={idx} className="flex items-start justify-between p-3.5 bg-surface-container border border-outline-variant/60 rounded-xl">
                           <div className="space-y-0.5">
-                            <span className="text-[10px] font-mono text-primary font-bold uppercase tracking-wider">Round #{round.roundNumber}</span>
+                            <span className="text-[10px] font-headline font-medium text-primary font-bold uppercase tracking-wider">Round #{round.roundNumber}</span>
                             <h4 className="text-xs font-bold text-on-surface font-headline">{round.name}</h4>
                             <p className="text-xs text-on-surface-variant leading-relaxed font-sans">{round.description}</p>
                           </div>
@@ -1075,11 +1075,11 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
           {/* SECTION 5: Listing Duration */}
           {opportunityType !== 'GIG' && (
             <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-5 shadow-xs">
-              <h3 className="text-xs font-mono uppercase tracking-wider text-primary font-bold flex items-center gap-2 border-b border-outline-variant/60 pb-3">
+              <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold flex items-center gap-2 border-b border-outline-variant/60 pb-3">
                 <Clock className="w-4 h-4 text-primary" /> Listing Duration Settings
               </h3>
               <div className="space-y-1.5">
-                <label className="block text-xs font-mono uppercase tracking-wider text-on-surface-variant">Active Time (Days) *</label>
+                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Active Time (Days) *</label>
                 <input
                   type="number"
                   min="1"
@@ -1096,7 +1096,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                     }
                   }}
                 />
-                <p className="text-[10px] text-on-surface-variant/80 font-mono">Specify how many days this opportunity listing will remain active before automatic archive.</p>
+                <p className="text-[10px] text-on-surface-variant/80 font-sans font-normal">Specify how many days this opportunity listing will remain active before automatic archive.</p>
               </div>
             </div>
           )}
@@ -1149,7 +1149,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                         <h4 className="text-xs font-bold text-on-surface group-hover:text-primary transition-colors font-headline line-clamp-1">
                           {job.title}
                         </h4>
-                        <span className={`text-[9px] font-mono px-2 py-0.5 rounded font-bold uppercase tracking-wider shrink-0 ${
+                        <span className={`text-[9px] font-headline font-medium px-2 py-0.5 rounded font-bold uppercase tracking-wider shrink-0 ${
                           isActive 
                             ? 'bg-primary/10 text-primary border border-primary/20' 
                             : 'bg-surface-container-high text-on-surface-variant border border-outline-variant'
@@ -1157,7 +1157,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                           {isActive ? 'ACTIVE' : 'EXPIRED'}
                         </span>
                       </div>
-                      <p className="text-[10px] font-mono text-on-surface-variant/80">
+                      <p className="text-[10px] font-sans font-normal text-on-surface-variant/80">
                         Posted {formattedTime}
                       </p>
                     </div>
@@ -1166,7 +1166,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
             </div>
           ) : (
             <div className="p-4 bg-surface-container-low border border-dashed border-outline-variant/80 rounded-xl text-center">
-              <p className="text-xs text-on-surface-variant font-mono">No recent postings yet.</p>
+              <p className="text-xs text-on-surface-variant font-sans font-normal">No recent postings yet.</p>
             </div>
           )}
 

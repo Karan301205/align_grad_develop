@@ -247,9 +247,9 @@
   --color-brand-blue: var(--c-brand-blue);
 
   /* TYPOGRAPHY FAMILY SYSTEM */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-headline: "Manrope", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "Geist", sans-serif;
+  --font-headline: "Inter", sans-serif;
+  --font-mono: "Geist", sans-serif;
 
   /* MODERN SMOOTH ROUNDED CORNERS GLOBALLY */
   --radius-xs: 0.15rem;
@@ -272,7 +272,7 @@
     color: var(--c-body);
     font-family: var(--font-sans);
     font-size: 1rem; /* 16px */
-    font-weight: 400; /* Body 16px / 400 */
+    font-weight: 400; /* Body 16px / 400 Geist */
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -283,89 +283,99 @@
   }
   h1, h2, h3, h4, h5, h6 {
     color: var(--c-heading);
-    font-family: var(--font-headline);
+    font-family: var(--font-headline) !important;
+    font-weight: 500 !important; /* Uniform Inter 500 for all headings and subheadings */
     letter-spacing: -0.02em;
   }
   h1 {
-    font-size: 2.5rem; /* Page Heading 40px / 700 */
-    font-weight: 700;
+    font-size: 2.5rem; /* Page Heading 40px / 500 */
+    font-weight: 500 !important;
     line-height: 1.2;
   }
   h2 {
-    font-size: 1.875rem; /* Section Title 30px / 700 */
-    font-weight: 700;
+    font-size: 1.875rem; /* Section Title 30px / 500 */
+    font-weight: 500 !important;
     line-height: 1.25;
   }
   h3, h4 {
-    font-size: 1.375rem; /* Card Title 22px / 600 */
-    font-weight: 600;
+    font-size: 1.375rem; /* Card Title 22px / 500 */
+    font-weight: 500 !important;
     line-height: 1.3;
+  }
+  h5, h6 {
+    font-weight: 500 !important;
+    line-height: 1.35;
   }
   input:not([type="checkbox"]):not([type="radio"]),
   textarea,
   select {
     font-family: var(--font-sans) !important;
     font-size: 0.875rem; /* Small text 14px / 400 default */
+    font-weight: 400;
   }
   button {
     font-family: var(--font-sans);
-    font-size: 0.9375rem; /* Button 15px / 600 */
-    font-weight: 600;
+    font-size: 0.9375rem; /* Button 15px / 500 */
+    font-weight: 500;
   }
 }
 
 @layer utilities {
   /* STRICT TYPOGRAPHY SCALE UTILITIES */
   .hero-title {
-    font-family: var(--font-headline);
+    font-family: var(--font-headline) !important;
     font-size: 3.5rem !important; /* 56px */
-    font-weight: 700 !important;
+    font-weight: 500 !important;
     line-height: 1.15;
     letter-spacing: -0.03em;
   }
   .page-heading {
-    font-family: var(--font-headline);
+    font-family: var(--font-headline) !important;
     font-size: 2.5rem !important; /* 40px */
-    font-weight: 700 !important;
+    font-weight: 500 !important;
     line-height: 1.2;
     letter-spacing: -0.025em;
   }
   .section-title {
-    font-family: var(--font-headline);
+    font-family: var(--font-headline) !important;
     font-size: 1.875rem !important; /* 30px */
-    font-weight: 700 !important;
+    font-weight: 500 !important;
     line-height: 1.25;
     letter-spacing: -0.02em;
   }
   .card-title {
-    font-family: var(--font-headline);
+    font-family: var(--font-headline) !important;
     font-size: 1.375rem !important; /* 22px */
-    font-weight: 600 !important;
+    font-weight: 500 !important;
     line-height: 1.3;
     letter-spacing: -0.015em;
   }
+  .font-headline {
+    font-family: var(--font-headline) !important;
+    font-weight: 500 !important;
+  }
   .text-body-spec {
-    font-family: var(--font-sans);
+    font-family: var(--font-sans) !important;
     font-size: 1rem !important; /* 16px */
     font-weight: 400 !important;
     line-height: 1.5;
   }
   .text-small-spec {
-    font-family: var(--font-sans);
+    font-family: var(--font-sans) !important;
     font-size: 0.875rem !important; /* 14px */
     font-weight: 400 !important;
     line-height: 1.45;
   }
   .text-caption-spec {
-    font-family: var(--font-sans);
+    font-family: var(--font-sans) !important;
     font-size: 0.75rem !important; /* 12px */
     font-weight: 400 !important;
     line-height: 1.4;
   }
   .text-button-spec {
-    font-family: var(--font-sans);
+    font-family: var(--font-sans) !important;
     font-size: 0.9375rem !important; /* 15px */
-    font-weight: 600 !important;
+    font-weight: 500 !important;
     line-height: 1.35;
   }
   ::placeholder {

@@ -121,17 +121,17 @@ export default function CommunityFeed({ community, token, userProfile, currentUs
                   <button
                     onClick={handleGenerateInvite}
                     disabled={generatingInvite}
-                    className="py-2 px-3.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    className="py-2 px-3.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface rounded-xl text-xs font-bold font-sans font-normal transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     {generatingInvite ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Share2 className="w-3.5 h-3.5 text-primary" />}
                     Invite Members
                   </button>
                 ) : (
                   <div className="flex items-center gap-1.5 bg-surface-container-high border border-outline-variant p-1 rounded-xl">
-                    <span className="text-[10px] font-mono px-2 text-primary font-bold truncate max-w-[120px]">{inviteToken}</span>
+                    <span className="text-[10px] font-headline font-medium px-2 text-primary font-bold truncate max-w-[120px]">{inviteToken}</span>
                     <button
                       onClick={handleCopyInvite}
-                      className="px-2 py-1 bg-primary text-on-primary rounded-lg text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer"
+                      className="px-2 py-1 bg-primary text-on-primary rounded-lg text-[10px] font-headline font-medium flex items-center gap-1 cursor-pointer"
                     >
                       {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                       {copied ? 'Copied' : 'Copy'}
@@ -144,13 +144,13 @@ export default function CommunityFeed({ community, token, userProfile, currentUs
 
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-headline font-bold text-primary">{community?.name}</h2>
+              <h2 className="text-xl font-headline font-medium text-primary">{community?.name}</h2>
               {isGlobal ? (
-                <span className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[10px] font-mono font-bold rounded-full">
+                <span className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[10px] font-headline font-medium rounded-full">
                   Global Ecosystem
                 </span>
               ) : (
-                <span className="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-mono font-bold rounded-full flex items-center gap-1">
+                <span className="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-headline font-medium rounded-full flex items-center gap-1">
                   <Lock className="w-3 h-3" /> Private Network
                 </span>
               )}
@@ -173,7 +173,7 @@ export default function CommunityFeed({ community, token, userProfile, currentUs
 
       {/* Feed Posts Stream */}
       {loading ? (
-        <div className="py-12 text-center text-xs font-mono text-on-surface-variant flex items-center justify-center gap-2 bg-surface-container border border-outline-variant rounded-2xl">
+        <div className="py-12 text-center text-xs font-sans font-normal text-on-surface-variant flex items-center justify-center gap-2 bg-surface-container border border-outline-variant rounded-2xl">
           <Loader2 className="w-4 h-4 animate-spin text-primary" />
           Loading community feed...
         </div>
@@ -183,7 +183,7 @@ export default function CommunityFeed({ community, token, userProfile, currentUs
             <Users className="w-6 h-6 text-primary" />
           </div>
           <p className="font-bold text-on-surface text-sm text-center">No posts in this feed yet</p>
-          <p className="text-xs text-on-surface-variant max-w-sm mx-auto text-center font-mono">
+          <p className="text-xs text-on-surface-variant max-w-sm mx-auto text-center font-sans font-normal">
             Be the first to start the discussion! Share code proficiencies, career updates, or technical insights above.
           </p>
         </div>
@@ -205,7 +205,7 @@ export default function CommunityFeed({ community, token, userProfile, currentUs
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="px-6 py-2.5 bg-surface-container border border-outline-variant hover:bg-surface-container-high text-xs font-mono font-bold text-on-surface rounded-xl transition-all cursor-pointer shadow-xs"
+                className="px-6 py-2.5 bg-surface-container border border-outline-variant hover:bg-surface-container-high text-xs font-sans font-normal font-bold text-on-surface rounded-xl transition-all cursor-pointer shadow-xs"
               >
                 {loadingMore ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Load More Posts'}
               </button>

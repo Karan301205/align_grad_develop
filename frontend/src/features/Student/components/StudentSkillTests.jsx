@@ -35,7 +35,7 @@ export default function StudentSkillTests({
         <div className="p-8 bg-surface-container border border-outline-variant rounded-2xl flex flex-col items-center justify-center space-y-4 min-h-[400px]">
           <RefreshCw className="w-10 h-10 text-primary animate-spin" />
           <p className="text-sm font-bold text-on-surface">Generating 10 custom questions for {activeTestSkill}...</p>
-          <p className="text-xs text-on-surface-variant max-w-sm text-center font-mono">
+          <p className="text-xs text-on-surface-variant max-w-sm text-center font-sans font-normal">
             Querying Claude API with Groq fallback. Crafting conceptual theory and code analysis questions...
           </p>
         </div>
@@ -46,10 +46,10 @@ export default function StudentSkillTests({
         <div className="bg-surface-container border border-outline-variant rounded-2xl p-8 space-y-6">
           <div className="flex justify-between items-center border-b border-outline-variant pb-4">
             <div>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-primary">Technical Verification Test</span>
+              <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary">Technical Verification Test</span>
               <h3 className="text-xl font-headline font-bold text-on-surface mt-1">{activeTestSkill} Assessment</h3>
             </div>
-            <span className="px-3 py-1 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-mono text-secondary">
+            <span className="px-3 py-1 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-headline font-medium text-secondary">
               Question {currentQuestionIdx + 1} of 10
             </span>
           </div>
@@ -108,7 +108,7 @@ export default function StudentSkillTests({
               type="button"
               onClick={() => setCurrentQuestionIdx(prev => Math.max(0, prev - 1))}
               disabled={currentQuestionIdx === 0}
-              className="px-4 py-2 border border-outline-variant text-on-surface hover:bg-surface-container-high disabled:opacity-30 rounded-lg text-xs font-mono transition-all"
+              className="px-4 py-2 border border-outline-variant text-on-surface hover:bg-surface-container-high disabled:opacity-30 rounded-lg text-xs font-headline font-medium transition-all"
             >
               Previous
             </button>
@@ -117,7 +117,7 @@ export default function StudentSkillTests({
               <button
                 type="button"
                 onClick={() => setCurrentQuestionIdx(prev => Math.min(9, prev + 1))}
-                className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface hover:bg-surface-container-highest rounded-lg text-xs font-mono transition-all"
+                className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface hover:bg-surface-container-highest rounded-lg text-xs font-headline font-medium transition-all"
               >
                 Next
               </button>
@@ -126,7 +126,7 @@ export default function StudentSkillTests({
                 type="button"
                 onClick={handleSubmitSkillTest}
                 disabled={submittingTest || selectedAnswers[9] === undefined}
-                className="px-5 py-2.5 bg-primary text-on-primary font-bold hover:brightness-110 active:scale-95 disabled:opacity-50 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-primary text-on-primary font-bold hover:brightness-110 active:scale-95 disabled:opacity-50 rounded-lg text-xs font-headline font-medium transition-all flex items-center gap-1.5"
               >
                 {submittingTest ? (
                   <>
@@ -160,15 +160,15 @@ export default function StudentSkillTests({
             <h3 className="text-2xl font-headline font-bold text-on-surface">
               {testResult.passed ? 'Verification Completed!' : 'Not Verified Yet'}
             </h3>
-            <p className="text-xs text-on-surface-variant font-mono">
+            <p className="text-xs text-on-surface-variant font-sans font-normal">
               Tested Skill: {activeTestSkill}
             </p>
           </div>
 
           <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl w-full">
-            <p className="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">Your Score</p>
+            <p className="text-[10px] font-headline font-medium text-on-surface-variant uppercase tracking-wider">Your Score</p>
             <p className="text-3xl font-black text-on-surface mt-1">{testResult.percent}%</p>
-            <p className="text-[10px] text-secondary font-mono mt-1">
+            <p className="text-[10px] text-secondary font-sans font-normal mt-1">
               {testResult.passed ? `Verified Rating Saved: Level ${testResult.rating}/10` : 'Need 70% to verify'}
             </p>
           </div>
@@ -200,7 +200,7 @@ export default function StudentSkillTests({
               <button
                 type="button"
                 onClick={() => setFilter('all')}
-                className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all border select-none ${
+                className={`px-3 py-1.5 rounded-full text-xs font-headline font-medium transition-all border select-none ${
                   filter === 'all'
                     ? 'bg-primary/10 border-primary text-primary font-bold'
                     : 'bg-surface-container border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
@@ -211,7 +211,7 @@ export default function StudentSkillTests({
               <button
                 type="button"
                 onClick={() => setFilter('verified')}
-                className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all border select-none ${
+                className={`px-3 py-1.5 rounded-full text-xs font-headline font-medium transition-all border select-none ${
                   filter === 'verified'
                     ? 'bg-success-container border-success/30 text-success font-bold'
                     : 'bg-surface-container border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
@@ -222,7 +222,7 @@ export default function StudentSkillTests({
               <button
                 type="button"
                 onClick={() => setFilter('unverified')}
-                className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all border select-none ${
+                className={`px-3 py-1.5 rounded-full text-xs font-headline font-medium transition-all border select-none ${
                   filter === 'unverified'
                     ? 'bg-error-container border-error/30 text-error font-bold'
                     : 'bg-surface-container border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
@@ -255,7 +255,7 @@ export default function StudentSkillTests({
               if (filteredTestable.length === 0 && filteredPending.length === 0) {
                 return (
                   <div className="text-center py-16 bg-surface-container border border-outline-variant rounded-2xl">
-                    <p className="text-xs text-on-surface-variant italic font-mono">No {filter} skills found.</p>
+                    <p className="text-xs text-on-surface-variant italic font-sans font-normal">No {filter} skills found.</p>
                   </div>
                 );
               }
@@ -270,7 +270,7 @@ export default function StudentSkillTests({
                         <h3 className="font-headline font-bold text-sm text-on-surface uppercase tracking-wider">
                           Available Skill Assessments (Test Now)
                         </h3>
-                        <span className="px-2 py-0.5 bg-primary/10 text-primary font-mono text-[10px] rounded-full font-bold">
+                        <span className="px-2 py-0.5 bg-primary/10 text-primary font-headline font-medium text-[10px] rounded-full">
                           {filteredTestable.length}
                         </span>
                       </div>
@@ -283,13 +283,13 @@ export default function StudentSkillTests({
                                 <h4 className="text-base font-bold text-on-surface truncate max-w-[160px] uppercase font-headline">
                                   {skill.name}
                                 </h4>
-                                <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded text-[9px] font-mono font-bold uppercase">
+                                <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded text-[9px] font-headline font-medium uppercase">
                                   Quiz Available
                                 </span>
                               </div>
                               
                               <div className="space-y-1 pt-1">
-                                <div className="flex justify-between text-[11px] font-mono">
+                                <div className="flex justify-between text-[11px] font-sans font-normal">
                                   <span className="text-on-surface-variant">Verified Rating:</span>
                                   {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? (
                                     <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
@@ -305,7 +305,7 @@ export default function StudentSkillTests({
                             <button
                               type="button"
                               onClick={() => handleStartSkillTest(skill.name)}
-                              className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs font-mono rounded-xl transition-all shadow-sm cursor-pointer"
+                              className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs font-headline font-medium rounded-xl transition-all shadow-sm cursor-pointer"
                             >
                               {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? 'Retake Verification Test' : 'Take Verification Test'}
                             </button>
@@ -325,7 +325,7 @@ export default function StudentSkillTests({
                             Pending Quiz Generation (Auto-Verified for Now)
                           </h3>
                         </div>
-                        <span className="px-2 py-0.5 bg-amber-500/15 text-amber-700 dark:text-amber-400 font-mono text-[10px] rounded-full font-bold">
+                        <span className="px-2 py-0.5 bg-amber-500/15 text-amber-700 dark:text-amber-400 font-headline font-medium text-[10px] rounded-full">
                           {filteredPending.length} Skills
                         </span>
                       </div>
@@ -338,7 +338,7 @@ export default function StudentSkillTests({
                                 <h4 className="text-base font-bold text-on-surface truncate max-w-[160px] uppercase font-headline">
                                   {skill.name}
                                 </h4>
-                                <span className="px-2 py-0.5 bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded text-[9px] font-mono font-bold uppercase">
+                                <span className="px-2 py-0.5 bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded text-[9px] font-headline font-medium uppercase">
                                   Quiz Coming Soon
                                 </span>
                               </div>
@@ -348,7 +348,7 @@ export default function StudentSkillTests({
                               </p>
                             </div>
 
-                            <div className="py-2 px-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-mono font-bold text-[11px] rounded-xl flex items-center justify-center gap-1.5">
+                            <div className="py-2 px-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-headline font-medium text-[11px] rounded-xl flex items-center justify-center gap-1.5">
                               <ShieldCheck className="w-4 h-4" />
                               <span>Auto-Verified for Applications</span>
                             </div>

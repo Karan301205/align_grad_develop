@@ -41,7 +41,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
         title="Enterprise Job Dashboard"
         subtitle="Manage posted roles and review candidate alignment scores"
         action={
-          <span className="px-3 py-1.5 bg-surface-container-high border border-outline-variant rounded-lg text-[11px] font-mono text-primary flex items-center gap-1.5">
+          <span className="px-3 py-1.5 bg-surface-container-high border border-outline-variant rounded-lg text-[11px] font-sans font-normal text-primary flex items-center gap-1.5">
             <span className="material-symbols-outlined text-[14px]">image</span>
             need a recruiter dashboard image
           </span>
@@ -69,7 +69,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
             type="button"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface-variant hover:text-on-surface rounded-xl text-xs font-mono transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface-variant hover:text-on-surface rounded-xl text-xs font-sans font-normal transition-all active:scale-95 cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
@@ -100,13 +100,13 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                       {job.opportunityType === 'INTERNSHIP' ? 'Internship' : 'Job'}
                     </Badge>
                     {job.edited && (
-                      <span className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[9px] font-mono font-bold rounded-full uppercase tracking-wider shrink-0">
+                      <span className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[9px] font-headline font-medium rounded-full uppercase tracking-wider shrink-0">
                         Updated
                       </span>
                     )}
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-sans font-normal">
                     <button
                       type="button"
                       onClick={() => setSelectedJob(job)}
@@ -134,7 +134,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                   
                   <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">{job.description}</p>
                 </div>
-                <span className="px-3 py-1 bg-surface-container-high border border-outline-variant rounded text-xs font-mono text-secondary shrink-0">
+                <span className="px-3 py-1 bg-surface-container-high border border-outline-variant rounded text-xs font-sans font-normal text-secondary shrink-0">
                   {job.applications?.length || 0} applications • {getRemainingDays(job.createdAt, job.activeDays)} days left
                 </span>
               </div>
@@ -143,8 +143,8 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
               <div className="bg-surface-container-low rounded-xl p-4 border border-outline-variant">
                 <div className="flex justify-between items-center flex-wrap gap-3">
                   <div>
-                    <h5 className="text-xs font-mono uppercase tracking-wider text-on-surface-variant">Applicants</h5>
-                    <p className="text-xs text-on-surface-variant font-mono mt-0.5">
+                    <h5 className="text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Applicants</h5>
+                    <p className="text-xs text-on-surface-variant font-sans font-normal mt-0.5">
                       {(!job.applications || job.applications.length === 0) 
                         ? 'No candidates have applied yet.' 
                         : `${job.applications.length} candidate(s) applied`}
@@ -154,7 +154,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                     <button
                       type="button"
                       onClick={() => setViewingApplicantsJob(job)}
-                      className="px-4 py-2 bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 text-xs font-bold font-mono rounded-xl transition-all active:scale-95 cursor-pointer"
+                      className="px-4 py-2 bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 text-xs font-bold font-sans font-normal rounded-xl transition-all active:scale-95 cursor-pointer"
                     >
                       View Applicants
                     </button>
@@ -189,9 +189,9 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
           <div className="bg-surface-container border border-outline-variant rounded-2xl w-full max-w-xl p-6 space-y-6 animate-fade-in max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div className="flex justify-between items-center border-b border-outline-variant pb-3">
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">Applicant Progress Lab</span>
+                <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">Applicant Progress Lab</span>
                 <h4 className="text-xl font-bold text-on-surface">Manage Recruitment Progress</h4>
-                <p className="text-xs text-on-surface-variant font-mono mt-0.5">Candidate: {managingApp.student?.name}</p>
+                <p className="text-xs text-on-surface-variant font-sans font-normal mt-0.5">Candidate: {managingApp.student?.name}</p>
               </div>
               <button 
                 onClick={() => setManagingApp(null)}
@@ -218,7 +218,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                           updated[idx].status = e.target.value;
                           setManagingApp({ ...managingApp, roundStatuses: updated });
                         }}
-                        className="bg-surface-container border border-outline-variant rounded-lg text-xs font-mono text-on-surface px-2 py-1.5 focus:outline-none focus:border-primary"
+                        className="bg-surface-container border border-outline-variant rounded-lg text-xs font-sans font-normal text-on-surface px-2 py-1.5 focus:outline-none focus:border-primary"
                       >
                         <option value="PENDING">Pending</option>
                         <option value="IN_PROGRESS">In Progress</option>
@@ -229,7 +229,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider block mb-1">Feedback</label>
+                      <label className="text-[10px] font-headline font-medium text-on-surface-variant uppercase tracking-wider block mb-1">Feedback</label>
                       <textarea
                         value={round.feedback || ''}
                         onChange={(e) => {
@@ -291,9 +291,9 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
             
             <div className="flex justify-between items-center border-b border-outline-variant pb-3">
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-secondary">Candidate Submissions</span>
+                <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">Candidate Submissions</span>
                 <h4 className="text-xl font-bold text-on-surface">Applicants for {viewingApplicantsJob.title}</h4>
-                <p className="text-xs text-on-surface-variant font-mono mt-0.5">
+                <p className="text-xs text-on-surface-variant font-sans font-normal mt-0.5">
                   Total applications: {viewingApplicantsJob.applications?.length || 0}
                 </p>
               </div>
@@ -307,7 +307,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
 
             <div className="space-y-4">
               {(!viewingApplicantsJob.applications || viewingApplicantsJob.applications.length === 0) ? (
-                <p className="text-sm text-on-surface-variant text-center font-mono py-4">No candidates have applied yet.</p>
+                <p className="text-sm text-on-surface-variant text-center font-sans font-normal py-4">No candidates have applied yet.</p>
               ) : (
                 <div className="space-y-4">
                   {viewingApplicantsJob.applications.map((app, index) => (
@@ -316,7 +316,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                         <p className="text-sm font-bold text-on-surface">{app.student?.name || 'Anonymous Student'}</p>
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           {app.student?.skills?.map((s, idx) => (
-                            <span key={idx} className="text-[10px] bg-primary-container border border-primary/20 text-on-primary-container px-1.5 py-0.5 rounded font-mono">
+                            <span key={idx} className="text-[10px] bg-primary-container border border-primary/20 text-on-primary-container px-1.5 py-0.5 rounded font-sans font-normal">
                               {s.name}: Lvl {s.rating}/10
                             </span>
                           ))}

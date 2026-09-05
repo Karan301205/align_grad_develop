@@ -112,12 +112,12 @@ export default function PostCard({ post, token, currentUserId, onPostDeleted }) 
           <div>
             <div className="flex items-center gap-1.5">
               <h4 className="font-bold text-sm text-on-surface">{post.author?.name || 'Community Member'}</h4>
-              <span className="text-[9px] font-mono bg-primary/10 text-primary px-1.5 py-0.2 rounded font-bold uppercase">
+              <span className="text-[9px] font-headline font-medium bg-primary/10 text-primary px-1.5 py-0.2 rounded font-bold uppercase">
                 {post.author?.role || 'STUDENT'}
               </span>
               <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
             </div>
-            <p className="text-[10px] font-mono text-on-surface-variant mt-0.5">
+            <p className="text-[10px] font-sans font-normal text-on-surface-variant mt-0.5">
               {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
               {post.edited && <span className="ml-1 text-[9px] text-on-surface-variant font-bold">(edited)</span>}
             </p>
@@ -178,17 +178,17 @@ export default function PostCard({ post, token, currentUserId, onPostDeleted }) 
                 </div>
                 <div>
                   <p className="text-xs font-bold text-on-surface group-hover:text-primary transition-colors">Attached PDF Document</p>
-                  <p className="text-[10px] font-mono text-on-surface-variant">Click to open & view document</p>
+                  <p className="text-[10px] font-sans font-normal text-on-surface-variant">Click to open & view document</p>
                 </div>
               </div>
-              <span className="text-xs font-mono font-bold text-primary">&rarr;</span>
+              <span className="text-xs font-headline font-medium text-primary">&rarr;</span>
             </a>
           )}
         </div>
       )}
 
       {/* Engagement Stats Readout */}
-      <div className="flex items-center justify-between pt-2 text-[10px] font-mono text-on-surface-variant border-t border-outline-variant/40">
+      <div className="flex items-center justify-between pt-2 text-[10px] font-sans font-normal text-on-surface-variant border-t border-outline-variant/40">
         <div className="flex items-center gap-1.5">
           <span className="text-xs">👍</span>
           <span className="font-bold">{reactionsCount} reactions</span>
@@ -227,7 +227,7 @@ export default function PostCard({ post, token, currentUserId, onPostDeleted }) 
           <button
             onClick={() => handleToggleReaction(userReaction || 'LIKE')}
             onMouseEnter={() => setShowReactionPicker(true)}
-            className={`px-3 py-1.5 hover:bg-surface-container-high rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 hover:bg-surface-container-high rounded-xl text-xs font-sans font-normal font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               currentReactionObj ? currentReactionObj.color : 'text-on-surface-variant hover:text-primary'
             }`}
           >
@@ -239,7 +239,7 @@ export default function PostCard({ post, token, currentUserId, onPostDeleted }) 
         {/* Comment Trigger */}
         <button
           onClick={() => setShowComments(!showComments)}
-          className="px-3 py-1.5 hover:bg-surface-container-high rounded-xl text-xs font-mono text-on-surface-variant hover:text-primary font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+          className="px-3 py-1.5 hover:bg-surface-container-high rounded-xl text-xs font-sans font-normal text-on-surface-variant hover:text-primary font-bold transition-all flex items-center gap-1.5 cursor-pointer"
         >
           <MessageSquare className="w-3.5 h-3.5" />
           Comment
@@ -248,7 +248,7 @@ export default function PostCard({ post, token, currentUserId, onPostDeleted }) 
         {/* Bookmark Save Trigger */}
         <button
           onClick={handleToggleBookmark}
-          className={`px-3 py-1.5 hover:bg-surface-container-high rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+          className={`px-3 py-1.5 hover:bg-surface-container-high rounded-xl text-xs font-sans font-normal font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
             isSaved ? 'text-primary' : 'text-on-surface-variant hover:text-primary'
           }`}
         >
