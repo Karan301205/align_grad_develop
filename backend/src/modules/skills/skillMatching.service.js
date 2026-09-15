@@ -46,20 +46,22 @@ function getMissingRequirements(job, studentSkills, skillsWithQuestionsSet = nul
           ? (studentSkillData.rating || 0)
           : verifiedRating;
 
+        const effectiveRating = (verifiedRating && verifiedRating > 0) ? verifiedRating : (selfRating || 0);
+
         // Check if question bank has MCQs generated for this skill yet
         const hasQuizInBank = skillsWithQuestionsSet ? skillsWithQuestionsSet.has(canonical) : true;
 
-        // If candidate lacks verified rating AND the skill has an active quiz in the bank,
+        // If candidate lacks required rating AND the skill has an active quiz in the bank,
         // it gates the application. If the skill has NO quiz in the bank yet, it is auto-verified for now.
-        if (verifiedRating < reqSkill.minRating) {
+        if (effectiveRating < reqSkill.minRating) {
           if (hasQuizInBank) {
             missingRequirements.push({
               skillName: reqSkill.skillName,
               requiredRating: reqSkill.minRating,
-              currentRating: verifiedRating,
+              currentRating: effectiveRating,
               selfRating: selfRating,
               isMissingFromProfile: !isPresent,
-              isUnverified: isPresent && (!verifiedRating || verifiedRating < reqSkill.minRating),
+              isUnverified: isPresent && (!effectiveRating || effectiveRating < reqSkill.minRating),
               hasQuiz: true,
               autoVerifiedForNow: false
             });
@@ -72,7 +74,7 @@ function getMissingRequirements(job, studentSkills, skillsWithQuestionsSet = nul
 }
 
 // Returns comprehensive requirement status for every skill on a job posting,
-// indicating whether it is test-verified, missing/unverified (with quiz), or auto-verified for now (without quiz).
+// indicating whether it is test-verified, met by rating, missing/unverified (with quiz), or auto-verified for now (without quiz).
 function getRequirementStatuses(job, studentSkills, skillsWithQuestionsSet = null) {
   if (!job || !job.requirements) return [];
   return job.requirements.map(reqSkill => {
@@ -86,15 +88,19 @@ function getRequirementStatuses(job, studentSkills, skillsWithQuestionsSet = nul
     const verifiedRating = typeof studentSkillData === 'object'
       ? (studentSkillData.verifiedRating || 0)
       : (typeof studentSkillData === 'number' ? studentSkillData : 0);
+    const selfRating = typeof studentSkillData === 'object'
+      ? (studentSkillData.rating || 0)
+      : verifiedRating;
+    const effectiveRating = (verifiedRating && verifiedRating > 0) ? verifiedRating : (selfRating || 0);
     const hasQuizInBank = skillsWithQuestionsSet ? skillsWithQuestionsSet.has(canonical) : true;
 
-    if (verifiedRating >= reqSkill.minRating) {
+    if (effectiveRating >= reqSkill.minRating) {
       return {
         skillName: reqSkill.skillName,
         minRating: reqSkill.minRating,
         isTech: true,
-        status: 'VERIFIED_BY_TEST',
-        verifiedRating,
+        status: (verifiedRating && verifiedRating >= reqSkill.minRating) ? 'VERIFIED_BY_TEST' : 'MET_BY_RATING',
+        verifiedRating: effectiveRating,
         hasQuiz: hasQuizInBank
       };
     }
@@ -105,7 +111,7 @@ function getRequirementStatuses(job, studentSkills, skillsWithQuestionsSet = nul
         minRating: reqSkill.minRating,
         isTech: true,
         status: 'AUTO_VERIFIED_NO_QUIZ',
-        verifiedRating: 0,
+        verifiedRating: effectiveRating,
         hasQuiz: false
       };
     }
@@ -115,7 +121,7 @@ function getRequirementStatuses(job, studentSkills, skillsWithQuestionsSet = nul
       minRating: reqSkill.minRating,
       isTech: true,
       status: isPresent ? 'UNVERIFIED' : 'MISSING_FROM_PROFILE',
-      verifiedRating,
+      verifiedRating: effectiveRating,
       hasQuiz: true
     };
   });

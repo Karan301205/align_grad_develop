@@ -19,6 +19,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
   const [locationUrl, setLocationUrl] = useState(job.locationUrl || '');
   const [openings, setOpenings] = useState(job.openings ? String(job.openings) : '');
   const [activeDays, setActiveDays] = useState(job.activeDays || 30);
+  const [joiningMonth, setJoiningMonth] = useState(job.joiningMonth || 'Immediate');
   const [jobDesc, setJobDesc] = useState(job.description || '');
   const [roleResponsibilities, setRoleResponsibilities] = useState(job.roleResponsibilities || '');
 
@@ -83,6 +84,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
       location,
       locationUrl,
       activeDays: activeDays ? parseInt(activeDays, 10) : 30,
+      joiningMonth: joiningMonth.trim() || 'Immediate',
       openings: openings ? parseInt(openings, 10) : null,
       selectionProcess: rounds,
       requirements: reqs
@@ -116,13 +118,13 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
           
           {/* SECTION 1: Role & Company Details */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-5 space-y-4">
-            <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h4 className="text-xs font-headline font-medium  tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <Briefcase className="w-4 h-4" /> Role & Company Details
             </h4>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Designation (Job Title) *</label>
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">Designation (Job Title) *</label>
                 <input
                   type="text"
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
@@ -133,7 +135,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Name *</label>
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Name *</label>
                 <input
                   type="text"
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
@@ -144,7 +146,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Official Website</label>
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">Official Website</label>
                 <input
                   type="url"
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
@@ -154,7 +156,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">headquarters location</label>
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">headquarters location</label>
                 <input
                   type="text"
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
@@ -165,7 +167,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Location URL</label>
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">Location URL</label>
                 <input
                   type="url"
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
@@ -175,7 +177,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">No of Openings</label>
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">No of Openings</label>
                 <input
                   type="number"
                   min="1"
@@ -189,13 +191,13 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
 
           {/* SECTION 2: Prerequisites */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-5 space-y-4">
-            <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h4 className="text-xs font-headline font-medium  tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <ListChecks className="w-4 h-4" /> Candidate Prerequisites
             </h4>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Preferred Education</label>
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">Preferred Education</label>
                 <input
                   type="text"
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
@@ -205,7 +207,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Desired Experience *</label>
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">Desired Experience *</label>
                 <select
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
                   value={desiredExperience}
@@ -223,7 +225,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
 
             {/* Stacks rating */}
             <div className="space-y-3 pt-2">
-              <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold">Required Stacks & Rating Thresholds *</label>
+              <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant font-bold">Required Stacks & Rating Thresholds *</label>
               <div className="bg-surface-container-low border border-outline-variant rounded-xl p-4 space-y-3">
                 <div className="flex gap-2 pb-2 border-b border-outline-variant">
                   <div className="relative flex-1">
@@ -311,7 +313,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                               {isTech ? (
                                 <span className="text-secondary font-sans font-normal text-[10px]">Min: Lvl {r.minRating}/10</span>
                               ) : (
-                                <span className="text-on-surface-variant/70 font-headline font-medium text-[9px] uppercase tracking-wider bg-surface-container-high border border-outline-variant px-1.5 py-0.5 rounded">Non-Technical</span>
+                                <span className="text-on-surface-variant/70 font-headline font-medium text-[9px]  tracking-wider bg-surface-container-high border border-outline-variant px-1.5 py-0.5 rounded">Non-Technical</span>
                               )}
                               <button
                                 type="button"
@@ -343,13 +345,13 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
 
           {/* SECTION 3: Compensation & Schedule */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-5 space-y-4">
-            <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h4 className="text-xs font-headline font-medium  tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <DollarSign className="w-4 h-4" /> Compensation & Schedule
             </h4>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">
                   {job.opportunityType === 'INTERNSHIP' ? 'Stipend/Month (Part-Time)' : 'Salary/Month (Part-Time)'}
                 </label>
                 <input
@@ -361,7 +363,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               </div>
 
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">
                   {job.opportunityType === 'INTERNSHIP' ? 'Stipend/Month (Full-Time)' : 'Salary/Month (Full-Time)'}
                 </label>
                 <input
@@ -374,7 +376,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
 
               {job.opportunityType === 'INTERNSHIP' && (
                 <div>
-                  <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Duration (Internship)</label>
+                  <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">Duration (Internship)</label>
                   <input
                     type="text"
                     className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
@@ -383,17 +385,47 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                   />
                 </div>
               )}
+
+              <div>
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">Joining Month</label>
+                <input
+                  type="text"
+                  list="edit-joining-month-options"
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface font-sans"
+                  placeholder="e.g. Immediate, May 2026, Next Month"
+                  value={joiningMonth}
+                  onChange={e => setJoiningMonth(e.target.value)}
+                />
+                <datalist id="edit-joining-month-options">
+                  <option value="Immediate" />
+                  <option value="Within 15 Days" />
+                  <option value="Within 1 Month" />
+                  <option value="Next Month" />
+                  <option value="January" />
+                  <option value="February" />
+                  <option value="March" />
+                  <option value="April" />
+                  <option value="May" />
+                  <option value="June" />
+                  <option value="July" />
+                  <option value="August" />
+                  <option value="September" />
+                  <option value="October" />
+                  <option value="November" />
+                  <option value="December" />
+                </datalist>
+              </div>
             </div>
           </div>
 
           {/* SECTION 4: Description & Selection Process */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-5 space-y-4">
-            <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h4 className="text-xs font-headline font-medium  tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <Calendar className="w-4 h-4" /> Description & Recruitment Process
             </h4>
 
             <div>
-              <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Opportunity Summary *</label>
+              <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">Opportunity Summary *</label>
               <textarea
                 rows="3"
                 className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
@@ -404,7 +436,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
             </div>
 
             <div>
-              <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Role & Responsibilities *</label>
+              <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">Role & Responsibilities *</label>
               <textarea
                 rows="3"
                 className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2 text-xs focus:border-primary focus:outline-none text-on-surface"
@@ -416,7 +448,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
 
             {/* Selection Rounds */}
             <div className="space-y-3 pt-2">
-              <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold">Selection Process Rounds</label>
+              <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant font-bold">Selection Process Rounds</label>
               <div className="bg-surface-container-low border border-outline-variant rounded-xl p-4 space-y-3">
                 <div className="space-y-2">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -472,11 +504,11 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
 
           {/* SECTION 5: Listing Duration */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-5 space-y-4">
-            <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h4 className="text-xs font-headline font-medium  tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <Clock className="w-4 h-4" /> Listing Duration Settings
             </h4>
             <div>
-              <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Active Time (Days) *</label>
+              <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5 font-bold">Active Time (Days) *</label>
               <input
                 type="number"
                 min="1"

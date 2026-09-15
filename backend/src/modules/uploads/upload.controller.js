@@ -72,7 +72,8 @@ exports.securePut = async (req, res) => {
 
   // 2. Enforce MIME type constraints
   const allowedMimes = uploadConfig.allowedMimeTypes[fileType];
-  if (allowedMimes && !allowedMimes.includes(contentType)) {
+  const baseContentType = (contentType || '').split(';')[0].trim().toLowerCase();
+  if (allowedMimes && !allowedMimes.includes(baseContentType) && !allowedMimes.includes(contentType)) {
     return res.status(400).json({ error: `Invalid Content-Type header. Expected one of: ${allowedMimes.join(', ')}` });
   }
 

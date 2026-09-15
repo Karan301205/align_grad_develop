@@ -8,7 +8,20 @@ const updateProfileSchema = {
     name: z.string().min(1, 'Name is required').max(100, 'Name must not exceed 100 characters').optional(),
     username: z.string().regex(/^[a-zA-Z0-9_]{3,15}$/, 'Invalid username format. 3-15 characters, alphanumeric/underscores only.').or(z.literal('')).optional().nullable(),
     profilePic: z.string().url('Invalid profile picture URL').or(z.literal('')).optional().nullable(),
-    resumeUrl: z.string().url('Invalid resume S3 URL').or(z.literal('')).optional().nullable(),
+    resumeUrl: z.string().url('Invalid resume URL').refine(val => {
+      if (!val || val === '') return true;
+      try {
+        const parsed = new URL(val);
+        return (
+          parsed.hostname === 'drive.google.com' ||
+          parsed.hostname === 'docs.google.com' ||
+          parsed.hostname.endsWith('.drive.google.com') ||
+          parsed.hostname.endsWith('.docs.google.com')
+        );
+      } catch (e) {
+        return false;
+      }
+    }, 'Resume URL must be a valid Google Drive link').or(z.literal('')).optional().nullable(),
     bio: z.string().max(500, 'Bio must not exceed 500 characters').optional().nullable(),
     nationality: z.string().max(100).optional().nullable(),
     gender: z.string().max(50).optional().nullable(),

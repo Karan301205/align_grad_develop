@@ -2,21 +2,21 @@ import React, { useState } from 'react';
 import { adminApi } from '../api/adminApi';
 import {
   LayoutDashboard,
-  Users, 
-  Building2, 
-  Briefcase, 
-  FileText, 
-  Award, 
-  HardDrive, 
-  BarChart3, 
-  FileSpreadsheet, 
-  Settings, 
-  Activity, 
-  CheckCircle2, 
-  Search, 
-  Download, 
-  Server, 
-  TrendingUp, 
+  Users,
+  Building2,
+  Briefcase,
+  FileText,
+  Award,
+  HardDrive,
+  BarChart3,
+  FileSpreadsheet,
+  Settings,
+  Activity,
+  CheckCircle2,
+  Search,
+  Download,
+  Server,
+  TrendingUp,
   AlertTriangle,
   Menu,
   X,
@@ -297,7 +297,7 @@ export default function App() {
             <div className="absolute bottom-3 right-3 w-1 h-1 rounded-full bg-slate-700"></div>
 
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-headline font-medium uppercase tracking-wider mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-headline font-medium  tracking-wider mb-4">
                 <Settings className="w-3.5 h-3.5" />
                 <span>Admin Gateway</span>
               </div>
@@ -318,7 +318,7 @@ export default function App() {
 
             <form onSubmit={handleLoginSubmit} className="space-y-5">
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-slate-400 mb-2">
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-slate-400 mb-2">
                   Admin Email Address
                 </label>
                 <input
@@ -332,7 +332,7 @@ export default function App() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-slate-400 mb-2">
+                <label className="block text-[10px] font-headline font-medium  tracking-wider text-slate-400 mb-2">
                   System Security Key
                 </label>
                 <input
@@ -368,9 +368,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#070b13] text-[#f1f5f9] flex font-sans">
-      
+
       {/* Mobile Sidebar Toggle */}
-      <button 
+      <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
         className="fixed top-4 left-4 z-50 md:hidden p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300 hover:text-white transition-all backdrop-blur-md"
       >
@@ -379,7 +379,7 @@ export default function App() {
 
       {/* Sidebar Panel */}
       <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-slate-950/80 border-r border-slate-900/60 backdrop-blur-xl flex flex-col py-6 px-4 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
-        
+
         {/* Brand Logo Header */}
         <div className="flex items-center gap-3 px-3 mb-8">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
@@ -387,7 +387,7 @@ export default function App() {
           </div>
           <div>
             <h1 className="font-bold text-sm tracking-wide text-white leading-tight">AlignGrade</h1>
-            <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Admin Workspace</p>
+            <p className="text-[10px] text-slate-400 font-medium  tracking-wider">Admin Workspace</p>
           </div>
         </div>
 
@@ -403,11 +403,10 @@ export default function App() {
                   setActiveTab(item.id);
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${
-                  isActive 
-                    ? 'bg-indigo-600/15 border-l-2 border-indigo-500 text-indigo-400 font-bold' 
+                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition-all ${isActive
+                    ? 'bg-indigo-600/15 border-l-2 border-indigo-500 text-indigo-400 font-bold'
                     : 'text-slate-400 hover:bg-slate-900/40 hover:text-slate-200'
-                }`}
+                  }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-400' : 'text-slate-400'}`} />
                 {item.label}
@@ -418,14 +417,14 @@ export default function App() {
 
         {/* Database & AWS Health status card */}
         <div className="mt-6 p-4 rounded-2xl bg-slate-950 border border-slate-900/80 space-y-3">
-          <div className="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+          <div className="flex items-center justify-between text-[10px] text-slate-400  tracking-widest font-bold">
             <span>System Status</span>
             <span className="flex h-1.5 w-1.5 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
             </span>
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold">
               <div className="flex items-center gap-2 text-slate-300">
@@ -457,7 +456,7 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 md:ml-64 p-6 md:p-10 space-y-8 overflow-y-auto">
-        
+
         {/* Top bar header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-900/60">
           <div>
@@ -470,19 +469,19 @@ export default function App() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed text-indigo-400 text-[10px] font-headline font-medium uppercase tracking-wider transition-all duration-200"
+              className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed text-indigo-400 text-[10px] font-headline font-medium  tracking-wider transition-all duration-200"
             >
               <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Refreshing...' : 'Refresh Section'}
             </button>
           </div>
-          
+
           {/* Quick Search */}
           <div className="relative w-full md:w-72">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-            <input 
-              type="text" 
-              placeholder="Quick search student, job..." 
+            <input
+              type="text"
+              placeholder="Quick search student, job..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-950/60 border border-slate-900 rounded-xl pl-10 pr-4 py-3 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 transition-all font-semibold"
@@ -493,7 +492,7 @@ export default function App() {
         {/* Tab content conditional routing */}
         {activeTab === 'dashboard' && (
           <div className="space-y-8">
-            
+
             {/* KPI Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {kpiStats.map((kpi, idx) => {
@@ -519,14 +518,14 @@ export default function App() {
 
             {/* Custom SVG Charts Panel */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
+
               {/* Enrollment Growth Chart */}
               <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md lg:col-span-2 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-bold text-white tracking-wide">Platform Enrollment Growth</h3>
-                  <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">Users Enrolled</span>
+                  <span className="text-[10px] text-indigo-400 font-bold  tracking-wider">Users Enrolled</span>
                 </div>
-                
+
                 {/* SVG Graph rendering */}
                 <div className="h-48 w-full relative pb-4">
                   <svg className="w-full h-full overflow-visible" viewBox="0 0 300 100" preserveAspectRatio="none">
@@ -535,7 +534,7 @@ export default function App() {
                     <line x1="30" y1="36" x2="270" y2="36" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
                     <line x1="30" y1="63" x2="270" y2="63" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
                     <line x1="30" y1="90" x2="270" y2="90" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-                    
+
                     {/* Vertical grid lines */}
                     <line x1="30" y1="10" x2="30" y2="90" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
                     <line x1="110" y1="10" x2="110" y2="90" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
@@ -549,11 +548,11 @@ export default function App() {
                     <text x="5" y="93" fill="rgba(255,255,255,0.4)" fontSize="7" fontFamily="'Geist', sans-serif">0</text>
 
                     {/* Stroke line connecting the dots */}
-                    <path 
-                      d="M 30 70 L 110 50 L 190 30 L 270 10" 
-                      fill="none" 
-                      stroke="#6366f1" 
-                      strokeWidth="2" 
+                    <path
+                      d="M 30 70 L 110 50 L 190 30 L 270 10"
+                      fill="none"
+                      stroke="#6366f1"
+                      strokeWidth="2"
                       strokeLinecap="round"
                     />
 
@@ -574,7 +573,7 @@ export default function App() {
                     <circle cx="270" cy="10" r="5" fill="rgba(99, 102, 241, 0.2)" className="animate-pulse" />
                     <circle cx="270" cy="10" r="3" fill="#6366f1" stroke="#ffffff" strokeWidth="1" title="Week 4: 12 Users Enrolled" />
                   </svg>
-                  
+
                   {/* X-Axis labels */}
                   <div className="absolute left-[30px] right-0 bottom-[-4px] flex justify-between text-[8px] text-slate-500 font-sans font-normal">
                     <span className="w-16 text-center -ml-8">Week 1 - Jul</span>
@@ -588,7 +587,7 @@ export default function App() {
               {/* Status Breakdown Circle Ring */}
               <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-6">
                 <h3 className="text-sm font-bold text-white tracking-wide">User Roles Distribution</h3>
-                
+
                 {(() => {
                   const numStudents = parseInt(stats.totalStudents) || 0;
                   const numRecruiters = parseInt(stats.totalRecruiters) || 0;
@@ -681,7 +680,7 @@ export default function App() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-semibold text-slate-300">
                   <thead>
-                    <tr className="border-b border-slate-900/80 text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                    <tr className="border-b border-slate-900/80 text-[10px] text-slate-400  tracking-wider font-bold">
                       <th className="py-3.5">Name</th>
                       <th className="py-3.5">Email</th>
                       <th className="py-3.5">Verified Skills</th>
@@ -700,11 +699,10 @@ export default function App() {
                           <td className="py-4 text-slate-400 font-sans font-normal">{student.email}</td>
                           <td className="py-4">{student.skills}</td>
                           <td className="py-4">
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
-                              student.status === 'Fully Verified'
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${student.status === 'Fully Verified'
                                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                 : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                            }`}>
+                              }`}>
                               {student.status}
                             </span>
                           </td>
@@ -723,7 +721,7 @@ export default function App() {
             <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
               <div className="flex justify-between items-center pb-2">
                 <h3 className="text-sm font-bold text-white tracking-wide">Students Directory</h3>
-                <span className="text-[10px] text-indigo-400 font-headline font-medium uppercase tracking-wider">{students.length} Registered</span>
+                <span className="text-[10px] text-indigo-400 font-headline font-medium  tracking-wider">{students.length} Registered</span>
               </div>
 
               {loadingStudents ? (
@@ -734,7 +732,7 @@ export default function App() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs font-semibold text-slate-300">
                     <thead>
-                      <tr className="border-b border-slate-900/80 text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                      <tr className="border-b border-slate-900/80 text-[10px] text-slate-400  tracking-wider font-bold">
                         <th className="py-3.5">Name</th>
                         <th className="py-3.5">Email</th>
                         <th className="py-3.5">Verified Skills</th>
@@ -743,8 +741,8 @@ export default function App() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-900/40">
-                      {students.filter(student => 
-                        student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                      {students.filter(student =>
+                        student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         (student.username && student.username.toLowerCase().includes(searchQuery.toLowerCase()))
                       ).length === 0 ? (
@@ -752,8 +750,8 @@ export default function App() {
                           <td colSpan="5" className="py-6 text-center text-slate-500 font-sans font-normal">No students found</td>
                         </tr>
                       ) : (
-                        students.filter(student => 
-                          student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        students.filter(student =>
+                          student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (student.username && student.username.toLowerCase().includes(searchQuery.toLowerCase()))
                         ).map((student) => (
@@ -776,7 +774,7 @@ export default function App() {
                             </td>
                             <td className="py-4 text-slate-400">{student.nationality || 'N/A'}</td>
                             <td className="py-4 text-right">
-                              <button 
+                              <button
                                 onClick={() => setSelectedStudent(student)}
                                 className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] tracking-wide transition-colors"
                               >
@@ -798,7 +796,7 @@ export default function App() {
             <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
               <div className="flex justify-between items-center pb-2">
                 <h3 className="text-sm font-bold text-white tracking-wide">Recruiters Directory</h3>
-                <span className="text-[10px] text-indigo-400 font-headline font-medium uppercase tracking-wider">{recruiters.length} Registered</span>
+                <span className="text-[10px] text-indigo-400 font-headline font-medium  tracking-wider">{recruiters.length} Registered</span>
               </div>
 
               {loadingRecruiters ? (
@@ -809,7 +807,7 @@ export default function App() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs font-semibold text-slate-300">
                     <thead>
-                      <tr className="border-b border-slate-900/80 text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                      <tr className="border-b border-slate-900/80 text-[10px] text-slate-400  tracking-wider font-bold">
                         <th className="py-3.5">Company Name</th>
                         <th className="py-3.5">Contact Email</th>
                         <th className="py-3.5">Verification</th>
@@ -818,33 +816,32 @@ export default function App() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-900/40">
-                      {recruiters.filter(recruiter => 
-                        recruiter.companyName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                      {recruiters.filter(recruiter =>
+                        recruiter.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         recruiter.email.toLowerCase().includes(searchQuery.toLowerCase())
                       ).length === 0 ? (
                         <tr>
                           <td colSpan="5" className="py-6 text-center text-slate-500 font-sans font-normal">No recruiters found</td>
                         </tr>
                       ) : (
-                        recruiters.filter(recruiter => 
-                          recruiter.companyName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        recruiters.filter(recruiter =>
+                          recruiter.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           recruiter.email.toLowerCase().includes(searchQuery.toLowerCase())
                         ).map((recruiter) => (
                           <tr key={recruiter.id} className="hover:bg-slate-900/10 transition-colors">
                             <td className="py-4 font-bold text-white">{recruiter.companyName}</td>
                             <td className="py-4 text-slate-400 font-sans font-normal">{recruiter.email}</td>
                             <td className="py-4">
-                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
-                                recruiter.verified 
-                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${recruiter.verified
+                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                   : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                              }`}>
+                                }`}>
                                 {recruiter.verified ? 'Verified' : 'Pending Verification'}
                               </span>
                             </td>
                             <td className="py-4 text-slate-400 font-sans font-normal">{recruiter.jobs ? recruiter.jobs.length : 0} Jobs</td>
                             <td className="py-4 text-right">
-                              <button 
+                              <button
                                 onClick={() => setSelectedRecruiter(recruiter)}
                                 className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] tracking-wide transition-colors"
                               >
@@ -867,7 +864,7 @@ export default function App() {
             <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
               <div className="flex justify-between items-center pb-2">
                 <h3 className="text-sm font-bold text-white tracking-wide">Jobs Directory</h3>
-                <span className="text-[10px] text-indigo-400 font-headline font-medium uppercase tracking-wider">{jobs.length} Active Openings</span>
+                <span className="text-[10px] text-indigo-400 font-headline font-medium  tracking-wider">{jobs.length} Active Openings</span>
               </div>
 
               {loadingJobs ? (
@@ -876,16 +873,16 @@ export default function App() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {jobs.filter(job => 
-                    job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                  {jobs.filter(job =>
+                    job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     job.companyName.toLowerCase().includes(searchQuery.toLowerCase())
                   ).length === 0 ? (
                     <div className="col-span-full py-10 text-center text-slate-500 font-sans font-normal text-xs">
                       No jobs found
                     </div>
                   ) : (
-                    jobs.filter(job => 
-                      job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                    jobs.filter(job =>
+                      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                       job.companyName.toLowerCase().includes(searchQuery.toLowerCase())
                     ).map((job) => (
                       <div key={job.id} className="p-6 rounded-2xl bg-slate-950/60 border border-slate-900/80 hover:border-slate-800 transition-all flex flex-col justify-between space-y-4 shadow-sm">
@@ -895,7 +892,7 @@ export default function App() {
                               <h4 className="font-extrabold text-sm text-white tracking-wide leading-snug">{job.title}</h4>
                               <p className="text-[10px] font-semibold text-slate-400 font-sans font-normal mt-0.5">{job.companyName}</p>
                             </div>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[8px] text-indigo-400 font-headline font-medium uppercase tracking-wider shrink-0">
+                            <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[8px] text-indigo-400 font-headline font-medium  tracking-wider shrink-0">
                               {job.jobType}
                             </span>
                           </div>
@@ -909,15 +906,15 @@ export default function App() {
                           </div>
 
                           <div className="grid grid-cols-2 gap-2">
-                            <button 
+                            <button
                               onClick={() => setSelectedJob(job)}
-                              className="w-full py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-bold text-[9px] uppercase tracking-wider transition-all"
+                              className="w-full py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-bold text-[9px]  tracking-wider transition-all"
                             >
                               View Details
                             </button>
-                            <button 
+                            <button
                               onClick={() => viewJobApplicants(job)}
-                              className="w-full py-2 rounded-lg bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 hover:border-indigo-500/30 text-indigo-400 hover:text-indigo-300 font-bold text-[9px] uppercase tracking-wider transition-all"
+                              className="w-full py-2 rounded-lg bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 hover:border-indigo-500/30 text-indigo-400 hover:text-indigo-300 font-bold text-[9px]  tracking-wider transition-all"
                             >
                               Who Applied
                             </button>
@@ -943,7 +940,7 @@ export default function App() {
                 </p>
               </div>
               {storageInfo?.isMock && (
-                <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-[9px] text-amber-400 font-headline font-medium rounded-lg uppercase tracking-wider shrink-0">
+                <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-[9px] text-amber-400 font-headline font-medium rounded-lg  tracking-wider shrink-0">
                   ⚠️ Local Sandbox Mode (Simulated Data)
                 </span>
               )}
@@ -958,7 +955,7 @@ export default function App() {
                 {/* Metrics Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-headline font-medium">Total Space Used</span>
+                    <span className="text-[10px] text-slate-500 font-bold  tracking-wider block font-headline font-medium">Total Space Used</span>
                     <div className="text-2xl font-black text-white leading-none font-sans font-normal">
                       {storageInfo?.formattedTotalBytes || '0 Bytes'}
                     </div>
@@ -966,7 +963,7 @@ export default function App() {
                   </div>
 
                   <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-headline font-medium">Estimated Monthly Bill</span>
+                    <span className="text-[10px] text-slate-500 font-bold  tracking-wider block font-headline font-medium">Estimated Monthly Bill</span>
                     <div className="text-2xl font-black text-emerald-400 leading-none font-sans font-normal">
                       ${storageInfo?.estimatedMonthlyBill?.toFixed(4) || '0.0000'}
                     </div>
@@ -974,7 +971,7 @@ export default function App() {
                   </div>
 
                   <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-headline font-medium">Total Objects Stored</span>
+                    <span className="text-[10px] text-slate-500 font-bold  tracking-wider block font-headline font-medium">Total Objects Stored</span>
                     <div className="text-2xl font-black text-indigo-400 leading-none font-sans font-normal">
                       {storageInfo?.totalFiles || 0}
                     </div>
@@ -984,11 +981,11 @@ export default function App() {
 
                 {/* Categories Summary Table */}
                 <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
-                  <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium uppercase">Usage by Category</h4>
+                  <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium ">Usage by Category</h4>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs font-semibold text-slate-300">
                       <thead>
-                        <tr className="border-b border-slate-900/80 text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                        <tr className="border-b border-slate-900/80 text-[10px] text-slate-400  tracking-wider font-bold">
                           <th className="py-3">Asset Type</th>
                           <th className="py-3">Files Count</th>
                           <th className="py-3">Storage Space</th>
@@ -1012,14 +1009,14 @@ export default function App() {
                 {/* S3 Objects Browser Table */}
                 <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
                   <div className="flex justify-between items-center pb-2">
-                    <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium uppercase">AWS Bucket File List</h4>
-                    <span className="text-[10px] text-indigo-400 font-headline font-medium uppercase tracking-wider">{storageInfo?.files?.length || 0} items listed</span>
+                    <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium ">AWS Bucket File List</h4>
+                    <span className="text-[10px] text-indigo-400 font-headline font-medium  tracking-wider">{storageInfo?.files?.length || 0} items listed</span>
                   </div>
 
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs font-semibold text-slate-300">
                       <thead>
-                        <tr className="border-b border-slate-900/80 text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                        <tr className="border-b border-slate-900/80 text-[10px] text-slate-400  tracking-wider font-bold">
                           <th className="py-3.5">Filename</th>
                           <th className="py-3.5">Category</th>
                           <th className="py-3.5">File Size</th>
@@ -1028,14 +1025,14 @@ export default function App() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-900/40 font-sans font-normal text-[11px]">
-                        {storageInfo?.files?.filter(file => 
+                        {storageInfo?.files?.filter(file =>
                           file.key.toLowerCase().includes(searchQuery.toLowerCase())
                         ).length === 0 ? (
                           <tr>
                             <td colSpan="5" className="py-6 text-center text-slate-500">No objects found</td>
                           </tr>
                         ) : (
-                          storageInfo?.files?.filter(file => 
+                          storageInfo?.files?.filter(file =>
                             file.key.toLowerCase().includes(searchQuery.toLowerCase())
                           ).map((file, idx) => (
                             <tr key={idx} className="hover:bg-slate-900/10 transition-colors">
@@ -1043,7 +1040,7 @@ export default function App() {
                                 {file.name}
                               </td>
                               <td className="py-4">
-                                <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[9px] text-indigo-400 font-bold uppercase">
+                                <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[9px] text-indigo-400 font-bold ">
                                   {file.category}
                                 </span>
                               </td>
@@ -1052,11 +1049,11 @@ export default function App() {
                                 {new Date(file.lastModified).toLocaleString()}
                               </td>
                               <td className="py-4 text-right">
-                                <a 
-                                  href={file.url} 
-                                  target="_blank" 
+                                <a
+                                  href={file.url}
+                                  target="_blank"
                                   rel="noopener noreferrer"
-                                  className="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-sans font-bold text-[9px] uppercase tracking-wider transition-colors inline-block"
+                                  className="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-sans font-bold text-[9px]  tracking-wider transition-colors inline-block"
                                 >
                                   Open File
                                 </a>
@@ -1079,7 +1076,7 @@ export default function App() {
                       </p>
                     </div>
                     {storageInfo?.mongoStats?.isMock && (
-                      <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-[9px] text-amber-400 font-headline font-medium rounded-lg uppercase tracking-wider shrink-0">
+                      <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-[9px] text-amber-400 font-headline font-medium rounded-lg  tracking-wider shrink-0">
                         ⚠️ Local Sandbox Mode (Simulated Data)
                       </span>
                     )}
@@ -1088,7 +1085,7 @@ export default function App() {
                   {/* MongoDB Metrics Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-headline font-medium">Total DB Storage Size</span>
+                      <span className="text-[10px] text-slate-500 font-bold  tracking-wider block font-headline font-medium">Total DB Storage Size</span>
                       <div className="text-2xl font-black text-white leading-none font-sans font-normal">
                         {storageInfo?.mongoStats?.formattedStorageSize || '0 Bytes'}
                       </div>
@@ -1096,7 +1093,7 @@ export default function App() {
                     </div>
 
                     <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-headline font-medium">Estimated Monthly DB Bill</span>
+                      <span className="text-[10px] text-slate-500 font-bold  tracking-wider block font-headline font-medium">Estimated Monthly DB Bill</span>
                       <div className="text-2xl font-black text-emerald-400 leading-none font-sans font-normal">
                         ${storageInfo?.mongoStats?.estimatedMonthlyBill?.toFixed(4) || '0.0000'}
                       </div>
@@ -1104,7 +1101,7 @@ export default function App() {
                     </div>
 
                     <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block font-headline font-medium">Total Index Size</span>
+                      <span className="text-[10px] text-slate-500 font-bold  tracking-wider block font-headline font-medium">Total Index Size</span>
                       <div className="text-2xl font-black text-indigo-400 leading-none font-sans font-normal">
                         {storageInfo?.mongoStats?.formattedIndexSize || '0 Bytes'}
                       </div>
@@ -1114,11 +1111,11 @@ export default function App() {
 
                   {/* Collections Breakdown Table */}
                   <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
-                    <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium uppercase">Usage by Collection</h4>
+                    <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium ">Usage by Collection</h4>
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs font-semibold text-slate-300">
                         <thead>
-                          <tr className="border-b border-slate-900/80 text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                          <tr className="border-b border-slate-900/80 text-[10px] text-slate-400  tracking-wider font-bold">
                             <th className="py-3">Collection Name</th>
                             <th className="py-3">Record Count</th>
                             <th className="py-3">Data Size</th>
@@ -1166,8 +1163,8 @@ export default function App() {
                 <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-6 flex flex-col justify-between animate-fade-in">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium uppercase">Most In-Demand Skills (Recruiters)</h4>
-                      <span className="text-[10px] text-indigo-400 font-headline font-medium uppercase tracking-wider">Market Demand</span>
+                      <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium ">Most In-Demand Skills (Recruiters)</h4>
+                      <span className="text-[10px] text-indigo-400 font-headline font-medium  tracking-wider">Market Demand</span>
                     </div>
                     <p className="text-[11px] text-slate-400 leading-normal">
                       Ranked by the number of active job postings requiring each technical skill.
@@ -1178,8 +1175,8 @@ export default function App() {
                     {analyticsData?.recruiterSkills?.length === 0 ? (
                       <div className="text-center py-10 text-xs text-slate-500 font-sans font-normal">No skill requirements recorded.</div>
                     ) : (
-                      (showAllRecruiterSkills 
-                        ? analyticsData?.recruiterSkills 
+                      (showAllRecruiterSkills
+                        ? analyticsData?.recruiterSkills
                         : analyticsData?.recruiterSkills?.slice(0, 8)
                       )?.map((skill, idx) => (
                         <div key={idx} className="group space-y-1.5 relative">
@@ -1187,12 +1184,12 @@ export default function App() {
                             <span className="text-slate-300 group-hover:text-white transition-colors">{skill.name}</span>
                             <span className="text-indigo-400 font-sans font-normal">{skill.count} jobs ({skill.percentage}%)</span>
                           </div>
-                          
+
                           {/* Horizontal Bar container */}
                           <div className="h-6 w-full bg-slate-900/80 rounded-lg overflow-hidden border border-slate-800/40 flex items-center relative">
                             {/* Animated colored bar */}
-                            <div 
-                              className="h-full bg-gradient-to-r from-indigo-600/90 to-indigo-400/90 group-hover:from-indigo-500 group-hover:to-indigo-300 rounded-r-md transition-all duration-500 ease-out" 
+                            <div
+                              className="h-full bg-gradient-to-r from-indigo-600/90 to-indigo-400/90 group-hover:from-indigo-500 group-hover:to-indigo-300 rounded-r-md transition-all duration-500 ease-out"
                               style={{ width: `${Math.max(skill.percentage, 5)}%` }}
                               title={`Skill: ${skill.name} | Used in ${skill.count} active job postings (${skill.percentage}% of all requirements)`}
                             />
@@ -1210,7 +1207,7 @@ export default function App() {
                     <div className="pt-4 border-t border-slate-900/40 text-center">
                       <button
                         onClick={() => setShowAllRecruiterSkills(!showAllRecruiterSkills)}
-                        className="px-4 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-[10px] text-indigo-400 font-headline font-medium rounded-xl transition-all uppercase tracking-wider"
+                        className="px-4 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-[10px] text-indigo-400 font-headline font-medium rounded-xl transition-all  tracking-wider"
                       >
                         {showAllRecruiterSkills ? 'Show Top 8 Only' : `View All (${analyticsData.recruiterSkills.length} skills)`}
                       </button>
@@ -1222,8 +1219,8 @@ export default function App() {
                 <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-6 flex flex-col justify-between animate-fade-in">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium uppercase">Most Preferred Skills (Students)</h4>
-                      <span className="text-[10px] text-emerald-400 font-headline font-medium uppercase tracking-wider">Candidate Supply</span>
+                      <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium ">Most Preferred Skills (Students)</h4>
+                      <span className="text-[10px] text-emerald-400 font-headline font-medium  tracking-wider">Candidate Supply</span>
                     </div>
                     <p className="text-[11px] text-slate-400 leading-normal">
                       Ranked by the number of students listing or rating each skill in their profile pages.
@@ -1234,8 +1231,8 @@ export default function App() {
                     {analyticsData?.studentSkills?.length === 0 ? (
                       <div className="text-center py-10 text-xs text-slate-500 font-sans font-normal">No student skills recorded.</div>
                     ) : (
-                      (showAllStudentSkills 
-                        ? analyticsData?.studentSkills 
+                      (showAllStudentSkills
+                        ? analyticsData?.studentSkills
                         : analyticsData?.studentSkills?.slice(0, 8)
                       )?.map((skill, idx) => (
                         <div key={idx} className="group space-y-1.5 relative">
@@ -1243,12 +1240,12 @@ export default function App() {
                             <span className="text-slate-300 group-hover:text-white transition-colors">{skill.name}</span>
                             <span className="text-emerald-400 font-sans font-normal">{skill.count} students ({skill.percentage}%)</span>
                           </div>
-                          
+
                           {/* Horizontal Bar container */}
                           <div className="h-6 w-full bg-slate-900/80 rounded-lg overflow-hidden border border-slate-800/40 flex items-center relative">
                             {/* Animated colored bar */}
-                            <div 
-                              className="h-full bg-gradient-to-r from-emerald-600/90 to-emerald-400/90 group-hover:from-emerald-500 group-hover:to-emerald-300 rounded-r-md transition-all duration-500 ease-out" 
+                            <div
+                              className="h-full bg-gradient-to-r from-emerald-600/90 to-emerald-400/90 group-hover:from-emerald-500 group-hover:to-emerald-300 rounded-r-md transition-all duration-500 ease-out"
                               style={{ width: `${Math.max(skill.percentage, 5)}%` }}
                               title={`Skill: ${skill.name} | Listed by ${skill.count} students (${skill.percentage}% of all students)`}
                             />
@@ -1266,7 +1263,7 @@ export default function App() {
                     <div className="pt-4 border-t border-slate-900/40 text-center">
                       <button
                         onClick={() => setShowAllStudentSkills(!showAllStudentSkills)}
-                        className="px-4 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-[10px] text-emerald-400 font-headline font-medium rounded-xl transition-all uppercase tracking-wider"
+                        className="px-4 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-[10px] text-emerald-400 font-headline font-medium rounded-xl transition-all  tracking-wider"
                       >
                         {showAllStudentSkills ? 'Show Top 8 Only' : `View All (${analyticsData.studentSkills.length} skills)`}
                       </button>
@@ -1305,14 +1302,14 @@ export default function App() {
       {selectedStudent && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
           <div className="w-full max-w-4xl bg-[#090d16] border border-slate-900 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden my-8">
-            
+
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-900 flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-bold text-white">{selectedStudent.name}</h3>
                 <p className="text-xs text-slate-400 font-sans font-normal mt-0.5">{selectedStudent.email}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedStudent(null)}
                 className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all"
               >
@@ -1322,17 +1319,17 @@ export default function App() {
 
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-6">
-              
+
               {/* Row 1: Intro Video & General info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
+
                 {/* 1-min video */}
                 <div className="space-y-2">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">1-Minute Video Resume</h4>
+                  <h4 className="text-[10px] font-headline font-medium  tracking-wider text-indigo-400 font-bold">1-Minute Video Resume</h4>
                   {selectedStudent.introVideoUrl ? (
-                    <video 
-                      src={selectedStudent.introVideoUrl} 
-                      controls 
+                    <video
+                      src={selectedStudent.introVideoUrl}
+                      controls
                       className="w-full rounded-xl border border-slate-900 bg-slate-950 aspect-video object-contain"
                     />
                   ) : (
@@ -1344,34 +1341,34 @@ export default function App() {
 
                 {/* General Info */}
                 <div className="space-y-4">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">General Details</h4>
-                  
+                  <h4 className="text-[10px] font-headline font-medium  tracking-wider text-indigo-400 font-bold">General Details</h4>
+
                   <div className="grid grid-cols-2 gap-4 text-xs font-semibold">
                     <div>
-                      <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Username</span>
+                      <span className="block text-xs text-slate-500 font-headline font-medium">Username</span>
                       <span className="text-slate-300 font-sans font-normal">@{selectedStudent.username}</span>
                     </div>
                     <div>
-                      <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Nationality</span>
+                      <span className="block text-[9px] text-slate-500  font-headline font-medium">Nationality</span>
                       <span className="text-slate-300">{selectedStudent.nationality || 'N/A'}</span>
                     </div>
                     <div>
-                      <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Gender</span>
+                      <span className="block text-[9px] text-slate-500  font-headline font-medium">Gender</span>
                       <span className="text-slate-300">{selectedStudent.gender || 'N/A'}</span>
                     </div>
                     <div>
-                      <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Date of Birth</span>
+                      <span className="block text-[9px] text-slate-500  font-headline font-medium">Date of Birth</span>
                       <span className="text-slate-300 font-sans font-normal">{selectedStudent.dob || 'N/A'}</span>
                     </div>
                     <div className="col-span-2">
-                      <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Phone Number</span>
+                      <span className="block text-[9px] text-slate-500  font-headline font-medium">Phone Number</span>
                       <span className="text-slate-300 font-sans font-normal">{selectedStudent.phone || 'N/A'}</span>
                     </div>
                   </div>
 
                   {selectedStudent.bio && (
                     <div className="pt-2">
-                      <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium mb-1">Biography</span>
+                      <span className="block text-[9px] text-slate-500  font-headline font-medium mb-1">Biography</span>
                       <p className="text-xs text-slate-400 leading-relaxed font-medium">{selectedStudent.bio}</p>
                     </div>
                   )}
@@ -1380,10 +1377,10 @@ export default function App() {
 
               {/* Row 2: Skills & Education */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-900/60">
-                
+
                 {/* Skills */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Technical & Non-Technical Skills</h4>
+                  <h4 className="text-[10px] font-headline font-medium  tracking-wider text-indigo-400 font-bold">Technical & Non-Technical Skills</h4>
                   {selectedStudent.skills && selectedStudent.skills.length > 0 ? (
                     <div className="grid grid-cols-2 gap-2 text-xs font-sans font-normal">
                       {selectedStudent.skills.map((skill, index) => (
@@ -1400,7 +1397,7 @@ export default function App() {
 
                 {/* Education */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Education History</h4>
+                  <h4 className="text-[10px] font-headline font-medium  tracking-wider text-indigo-400 font-bold">Education History</h4>
                   {selectedStudent.education && selectedStudent.education.length > 0 ? (
                     <div className="space-y-2.5">
                       {selectedStudent.education.map((edu, index) => (
@@ -1428,10 +1425,10 @@ export default function App() {
 
               {/* Row 3: Experience & Projects */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-900/60">
-                
+
                 {/* Experience */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Work Experience</h4>
+                  <h4 className="text-[10px] font-headline font-medium  tracking-wider text-indigo-400 font-bold">Work Experience</h4>
                   {selectedStudent.experience && selectedStudent.experience.length > 0 ? (
                     <div className="space-y-2.5">
                       {selectedStudent.experience.map((exp, index) => (
@@ -1452,7 +1449,7 @@ export default function App() {
 
                 {/* Projects */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Academic Projects</h4>
+                  <h4 className="text-[10px] font-headline font-medium  tracking-wider text-indigo-400 font-bold">Academic Projects</h4>
                   {selectedStudent.projects && selectedStudent.projects.length > 0 ? (
                     <div className="space-y-2.5">
                       {selectedStudent.projects.map((proj, index) => (
@@ -1477,10 +1474,10 @@ export default function App() {
 
               {/* Row 4: Certifications & Co-curricular */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-900/60">
-                
+
                 {/* Certifications */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Certifications</h4>
+                  <h4 className="text-[10px] font-headline font-medium  tracking-wider text-indigo-400 font-bold">Certifications</h4>
                   {selectedStudent.certificates && selectedStudent.certificates.length > 0 ? (
                     <div className="space-y-2.5">
                       {selectedStudent.certificates.map((cert, index) => (
@@ -1499,7 +1496,7 @@ export default function App() {
 
                 {/* Co-curricular */}
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Co-curricular & POR</h4>
+                  <h4 className="text-[10px] font-headline font-medium  tracking-wider text-indigo-400 font-bold">Co-curricular & POR</h4>
                   {selectedStudent.cocurricular && Array.isArray(selectedStudent.cocurricular) && selectedStudent.cocurricular.length > 0 ? (
                     <div className="space-y-2.5">
                       {selectedStudent.cocurricular.map((act, index) => (
@@ -1527,7 +1524,7 @@ export default function App() {
 
             {/* Modal Footer */}
             <div className="p-4 bg-slate-950 border-t border-slate-900 flex justify-end">
-              <button 
+              <button
                 onClick={() => setSelectedStudent(null)}
                 className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300 hover:text-white transition-all"
               >
@@ -1543,14 +1540,14 @@ export default function App() {
       {selectedRecruiter && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
           <div className="w-full max-w-4xl bg-[#090d16] border border-slate-900 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden my-8">
-            
+
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-900 flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-bold text-white">{selectedRecruiter.companyName}</h3>
                 <p className="text-xs text-slate-400 font-sans font-normal mt-0.5">{selectedRecruiter.email}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedRecruiter(null)}
                 className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all"
               >
@@ -1560,11 +1557,11 @@ export default function App() {
 
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-6">
-              
+
               {/* Verification Info */}
               <div className="p-5 rounded-xl bg-slate-950 border border-slate-900/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Company Verification Status</span>
+                  <span className="block text-[9px] text-slate-500  font-headline font-medium">Company Verification Status</span>
                   <div className="flex items-center gap-2">
                     <span className={`w-2.5 h-2.5 rounded-full ${selectedRecruiter.verified ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
                     <span className="text-xs font-bold text-slate-200">
@@ -1574,9 +1571,9 @@ export default function App() {
                 </div>
 
                 {selectedRecruiter.docUrl && (
-                  <a 
-                    href={selectedRecruiter.docUrl} 
-                    target="_blank" 
+                  <a
+                    href={selectedRecruiter.docUrl}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="px-4 py-2 rounded-xl bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 text-indigo-400 font-bold text-xs transition-all flex items-center gap-2"
                   >
@@ -1587,8 +1584,8 @@ export default function App() {
 
               {/* Jobs Posted List */}
               <div className="space-y-4">
-                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Jobs Posted ({selectedRecruiter.jobs ? selectedRecruiter.jobs.length : 0})</h4>
-                
+                <h4 className="text-[10px] font-headline font-medium  tracking-wider text-indigo-400 font-bold">Jobs Posted ({selectedRecruiter.jobs ? selectedRecruiter.jobs.length : 0})</h4>
+
                 {selectedRecruiter.jobs && selectedRecruiter.jobs.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {selectedRecruiter.jobs.map((job) => (
@@ -1596,7 +1593,7 @@ export default function App() {
                         <div className="space-y-2">
                           <div className="flex justify-between items-start">
                             <h5 className="font-bold text-sm text-slate-200">{job.title}</h5>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[8px] text-indigo-400 font-headline font-medium uppercase tracking-wider">
+                            <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[8px] text-indigo-400 font-headline font-medium  tracking-wider">
                               {job.jobType}
                             </span>
                           </div>
@@ -1609,18 +1606,18 @@ export default function App() {
                             <span className="text-emerald-400 font-bold">{job.salaryRange}</span>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
-                            <button 
+                            <button
                               onClick={() => setSelectedJob(job)}
-                              className="w-full py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-bold text-[9px] uppercase tracking-wider transition-all"
+                              className="w-full py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-bold text-[9px]  tracking-wider transition-all"
                             >
                               View Details
                             </button>
-                            <button 
+                            <button
                               onClick={() => {
                                 setSelectedRecruiter(null);
                                 viewJobApplicants(job);
                               }}
-                              className="w-full py-2 rounded-lg bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 hover:border-indigo-500/30 text-indigo-400 hover:text-indigo-300 font-bold text-[9px] uppercase tracking-wider transition-all"
+                              className="w-full py-2 rounded-lg bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 hover:border-indigo-500/30 text-indigo-400 hover:text-indigo-300 font-bold text-[9px]  tracking-wider transition-all"
                             >
                               Who Applied
                             </button>
@@ -1640,7 +1637,7 @@ export default function App() {
 
             {/* Modal Footer */}
             <div className="p-4 bg-slate-950 border-t border-slate-900 flex justify-end">
-              <button 
+              <button
                 onClick={() => setSelectedRecruiter(null)}
                 className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300 hover:text-white transition-all"
               >
@@ -1656,14 +1653,14 @@ export default function App() {
       {selectedJob && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
           <div className="w-full max-w-2xl bg-[#090d16] border border-slate-900 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden my-8">
-            
+
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-900 flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-bold text-white">{selectedJob.title}</h3>
                 <p className="text-xs text-slate-400 font-sans font-normal mt-0.5">{selectedJob.companyName}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedJob(null)}
                 className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all"
               >
@@ -1673,20 +1670,20 @@ export default function App() {
 
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-6">
-              
+
               {/* Job Details Grid */}
               <div className="grid grid-cols-2 gap-4 text-xs font-semibold">
                 <div>
-                  <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Location</span>
+                  <span className="block text-[9px] text-slate-500  font-headline font-medium">Location</span>
                   <span className="text-slate-300">📍 {selectedJob.location}</span>
                 </div>
                 <div>
-                  <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Salary Range</span>
+                  <span className="block text-[9px] text-slate-500  font-headline font-medium">Salary Range</span>
                   <span className="text-emerald-400 font-bold">{selectedJob.salaryRange}</span>
                 </div>
                 <div>
-                  <span className="block text-[9px] text-slate-500 uppercase font-headline font-medium">Job Type</span>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[9px] text-indigo-400 font-headline font-medium uppercase tracking-wider inline-block">
+                  <span className="block text-[9px] text-slate-500  font-headline font-medium">Job Type</span>
+                  <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[9px] text-indigo-400 font-headline font-medium  tracking-wider inline-block">
                     {selectedJob.jobType}
                   </span>
                 </div>
@@ -1694,14 +1691,14 @@ export default function App() {
 
               {/* Description */}
               <div className="space-y-2 pt-4 border-t border-slate-900/60">
-                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Job Description</h4>
+                <h4 className="text-[10px] font-headline font-medium  tracking-wider text-indigo-400 font-bold">Job Description</h4>
                 <p className="text-xs text-slate-300 leading-relaxed font-medium whitespace-pre-line">{selectedJob.description}</p>
               </div>
 
               {/* Requirements */}
               {selectedJob.requirements && selectedJob.requirements.length > 0 && (
                 <div className="space-y-3 pt-4 border-t border-slate-900/60">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-indigo-400 font-bold">Skill Requirements</h4>
+                  <h4 className="text-[10px] font-headline font-medium  tracking-wider text-indigo-400 font-bold">Skill Requirements</h4>
                   <div className="grid grid-cols-2 gap-2 text-xs font-sans font-normal">
                     {selectedJob.requirements.map((req, idx) => (
                       <div key={idx} className="p-2.5 rounded-xl bg-slate-950 border border-slate-900/80 flex items-center justify-between">
@@ -1717,7 +1714,7 @@ export default function App() {
 
             {/* Modal Footer */}
             <div className="p-4 bg-slate-950 border-t border-slate-900 flex justify-end">
-              <button 
+              <button
                 onClick={() => setSelectedJob(null)}
                 className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300 hover:text-white transition-all"
               >
@@ -1733,7 +1730,7 @@ export default function App() {
       {selectedJobForApplicants && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
           <div className="w-full max-w-3xl bg-[#090d16] border border-slate-900 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden my-8">
-            
+
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-900 flex justify-between items-center">
               <div>
@@ -1742,7 +1739,7 @@ export default function App() {
                   {selectedJobForApplicants.title} — {selectedJobForApplicants.companyName}
                 </p>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedJobForApplicants(null)}
                 className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all"
               >
@@ -1765,9 +1762,9 @@ export default function App() {
                         <span className="text-[10px] text-slate-500 font-sans font-normal font-medium block">@{applicant.username}</span>
                         <span className="text-xs text-slate-400 font-sans font-normal mt-1 block">{applicant.email}</span>
                       </div>
-                      <button 
+                      <button
                         onClick={() => setSelectedStudent(applicant)}
-                        className="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] tracking-wide uppercase transition-colors shrink-0"
+                        className="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] tracking-wide  transition-colors shrink-0"
                       >
                         View Profile
                       </button>
@@ -1783,7 +1780,7 @@ export default function App() {
 
             {/* Modal Footer */}
             <div className="p-4 bg-slate-950 border-t border-slate-900 flex justify-end">
-              <button 
+              <button
                 onClick={() => setSelectedJobForApplicants(null)}
                 className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300 hover:text-white transition-all"
               >

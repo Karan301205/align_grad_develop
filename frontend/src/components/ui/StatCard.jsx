@@ -14,7 +14,7 @@ export default function StatCard({ icon: Icon, label, value, sublabel, accent = 
   return (
     <div className="relative glass-card neu-screws rounded-2xl p-5 flex flex-col justify-between h-36 transition-all duration-300 hover:-translate-y-1 hover:neu-floating">
       <div className="flex justify-between items-start">
-        <span className={`flex items-center gap-2 text-[11px] font-headline font-medium uppercase tracking-[0.08em] ${colors.text}`}>
+        <span className={`flex items-center gap-2 text-[11px] font-headline font-medium tracking-[0.08em] ${colors.text}`}>
           <span className={`${colors.led} animate-pulse`} />
           {label}
         </span>

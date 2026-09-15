@@ -59,7 +59,7 @@ export default function StudentResume({
 
             <div className="p-4 bg-primary-container/40 border border-primary/20 rounded-xl flex items-start gap-3">
               <CheckCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-              <div className="text-[10px] text-on-surface-variant font-sans font-normal leading-relaxed">
+              <div className="text-xs text-on-surface-variant font-sans font-normal leading-relaxed">
                 Your self-rated skills will dynamically render with their corresponding verified rating level (e.g. HTML , CSS, REACT.js LVL 8/10).
               </div>
             </div>
@@ -89,10 +89,10 @@ export default function StudentResume({
       >
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold tracking-[0.2em] uppercase text-black font-serif">
+          <h1 className="text-2xl font-bold tracking-[0.2em]  text-black font-serif">
             {profile?.name || 'YOUR NAME'}
           </h1>
-          <p className="text-[10px] tracking-[0.15em] text-neutral-600 italic uppercase mt-1">
+          <p className="text-[10px] tracking-[0.15em] text-neutral-600 italic  mt-1">
             {experienceList[0]?.designation || 'Software Developer'} || {experienceList[0]?.domain || 'Engineering'}
           </p>
         </div>
@@ -103,7 +103,7 @@ export default function StudentResume({
           <div className="w-[35%] pr-5 flex flex-col gap-5">
             {/* Contact */}
             <div>
-              <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 uppercase">
+              <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 ">
                 Contact
               </h2>
               <ul className="space-y-2 text-[10px] text-neutral-700">
@@ -125,7 +125,7 @@ export default function StudentResume({
                     <span>{nationality}</span>
                   </li>
                 )}
-                {socialLinks?.linkedin && socialLinks?.showLinkedin && (
+                {socialLinks?.linkedin && (socialLinks?.showLinkedin ?? true) && (
                   <li className="flex items-center gap-2 overflow-hidden">
                     <span className="text-[11px]">🌐</span>
                     <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="underline truncate">
@@ -133,7 +133,7 @@ export default function StudentResume({
                     </a>
                   </li>
                 )}
-                {socialLinks?.portfolio && socialLinks?.showPortfolio && (
+                {socialLinks?.portfolio && (socialLinks?.showPortfolio ?? true) && (
                   <li className="flex items-center gap-2 overflow-hidden">
                     <span className="text-[11px]">🕸️</span>
                     <a href={socialLinks.portfolio} target="_blank" rel="noopener noreferrer" className="underline truncate">
@@ -154,7 +154,7 @@ export default function StudentResume({
 
             {/* Education */}
             <div>
-              <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 uppercase">
+              <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 ">
                 Education
               </h2>
               {educationList && educationList.length > 0 ? (
@@ -162,7 +162,7 @@ export default function StudentResume({
                   {educationList.map((edu, idx) => (
                     <div key={idx} className="text-[10px]">
                       <p className="font-bold text-neutral-900">{edu.degree}</p>
-                      <p className="text-neutral-500 font-sans font-normal text-[9px] mt-0.5">{edu.startDate} - {edu.endDate}</p>
+                      <p className="text-neutral-500 font-sans font-normal text-xs mt-0.5">{edu.startDate} - {edu.endDate}</p>
                       <p className="text-neutral-700 mt-0.5">{edu.institute}</p>
                       {edu.gradeType && edu.gradeValue && (
                         <p className="text-neutral-600 font-medium mt-0.5">{edu.gradeType}: {edu.gradeValue}</p>
@@ -177,7 +177,7 @@ export default function StudentResume({
 
             {/* Awards & Certifications */}
             <div>
-              <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 uppercase">
+              <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 ">
                 Awards & Certifications
               </h2>
               {certificatesList && certificatesList.length > 0 ? (
@@ -185,7 +185,7 @@ export default function StudentResume({
                   {certificatesList.map((cert, idx) => (
                     <li key={idx}>
                       <span className="font-medium text-neutral-900">{cert.title}</span> - {cert.org}
-                      {cert.startDate && <span className="text-neutral-500 font-sans font-normal text-[8px] ml-1">({cert.startDate})</span>}
+                      {cert.startDate && <span className="text-neutral-500 font-sans font-normal text-xs ml-1">({cert.startDate})</span>}
                     </li>
                   ))}
                 </ul>
@@ -196,14 +196,14 @@ export default function StudentResume({
 
             {/* Skills */}
             <div>
-              <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 uppercase">
+              <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 ">
                 Skills
               </h2>
               {skillsList && skillsList.length > 0 ? (
                 <ul className="list-disc pl-3.5 space-y-1.5 text-[9.5px] text-neutral-700">
                   {skillsList.map((skill, idx) => (
-                    <li key={idx} className="uppercase font-medium">
-                      {skill.name} <span className="text-[8px] text-neutral-500 font-sans font-normal italic">(LVL {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? skill.verifiedRating : skill.rating}/10{skill.verifiedRating !== null && skill.verifiedRating !== undefined ? ' VERIFIED' : ''})</span>
+                    <li key={idx} className=" font-medium">
+                      {skill.name} <span className="text-xs text-neutral-500 font-sans font-normal italic">(LVL {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? skill.verifiedRating : skill.rating}/10{skill.verifiedRating !== null && skill.verifiedRating !== undefined ? ' VERIFIED' : ''})</span>
                     </li>
                   ))}
                 </ul>
@@ -217,7 +217,7 @@ export default function StudentResume({
           <div className="w-[65%] pl-5 border-l border-neutral-300 flex flex-col gap-5">
             {/* Profile */}
             <div>
-              <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 uppercase">
+              <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 ">
                 Profile
               </h2>
               <p className="text-[10px] text-neutral-700 leading-relaxed">
@@ -227,14 +227,14 @@ export default function StudentResume({
 
             {/* My Projects */}
             <div>
-              <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 uppercase">
+              <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 ">
                 My Projects
               </h2>
               {projectsList && projectsList.length > 0 ? (
                 <div className="space-y-4">
                   {projectsList.map((proj, idx) => (
                     <div key={idx} className="text-[10px]">
-                      <p className="font-bold tracking-wide uppercase text-neutral-900">{proj.title || 'PROJECT TITLE'}</p>
+                      <p className="font-bold tracking-wide  text-neutral-900">{proj.title || 'PROJECT TITLE'}</p>
                       <p className="font-semibold text-neutral-800 text-[9.5px] mt-0.5">
                         <span className="underline">{proj.role || 'Project Link'}</span>
                         {proj.codeUrl && (
@@ -254,7 +254,7 @@ export default function StudentResume({
                           </>
                         )}
                       </p>
-                      <p className="text-neutral-500 font-sans font-normal text-[9px] mt-0.5">
+                      <p className="text-neutral-500 font-sans font-normal text-xs mt-0.5">
                         {proj.startDate} - {proj.currentlyWorking ? 'Present' : proj.endDate}
                       </p>
                       {proj.description && (
@@ -275,17 +275,17 @@ export default function StudentResume({
             {/* Work Experience */}
             {experienceList && experienceList.length > 0 && (
               <div>
-                <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 uppercase">
+                <h2 className="text-[11px] font-bold tracking-[0.15em] text-black border-b border-neutral-300 pb-1 mb-2.5 ">
                   Work Experience
                 </h2>
                 <div className="space-y-4">
                   {experienceList.map((exp, idx) => (
                     <div key={idx} className="text-[10px]">
-                      <p className="font-bold tracking-wide uppercase text-neutral-900">{exp.designation || 'ROLE'}</p>
+                      <p className="font-bold tracking-wide  text-neutral-900">{exp.designation || 'ROLE'}</p>
                       <p className="font-medium text-neutral-800 mt-0.5">
                         {exp.companyName} {exp.location ? `| ${exp.location}` : ''} ({exp.expType})
                       </p>
-                      <p className="text-neutral-500 font-sans font-normal text-[9px] mt-0.5">
+                      <p className="text-neutral-500 font-sans font-normal text-xs mt-0.5">
                         {exp.startDate} - {exp.currentlyWorking ? 'Present' : exp.endDate}
                       </p>
                       {exp.description && (

@@ -36,7 +36,8 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
+    <>
+      <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
       <PageHeader
         title="Enterprise Job Dashboard"
         subtitle="Manage posted roles and review candidate alignment scores"
@@ -100,7 +101,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                       {job.opportunityType === 'INTERNSHIP' ? 'Internship' : 'Job'}
                     </Badge>
                     {job.edited && (
-                      <span className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[9px] font-headline font-medium rounded-full uppercase tracking-wider shrink-0">
+                      <span className="px-2 py-0.5 bg-primary/10 border border-primary/20 text-primary text-[9px] font-headline font-medium rounded-full tracking-wider shrink-0">
                         Updated
                       </span>
                     )}
@@ -143,7 +144,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
               <div className="bg-surface-container-low rounded-xl p-4 border border-outline-variant">
                 <div className="flex justify-between items-center flex-wrap gap-3">
                   <div>
-                    <h5 className="text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Applicants</h5>
+                    <h5 className="text-xs font-headline font-medium tracking-wider text-on-surface-variant">Applicants</h5>
                     <p className="text-xs text-on-surface-variant font-sans font-normal mt-0.5">
                       {(!job.applications || job.applications.length === 0) 
                         ? 'No candidates have applied yet.' 
@@ -165,6 +166,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
           ))
         )}
       </div>
+    </div>
 
       {/* Reusable Details Modal */}
       {selectedJob && (
@@ -185,17 +187,17 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
       )}
 
       {managingApp && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface-container border border-outline-variant rounded-2xl w-full max-w-xl p-6 space-y-6 animate-fade-in max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-surface-container border border-outline-variant rounded-2xl w-full max-w-xl p-6 space-y-6 animate-scale-up max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div className="flex justify-between items-center border-b border-outline-variant pb-3">
               <div>
-                <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">Applicant Progress Lab</span>
+                <span className="text-[10px] font-headline font-medium tracking-wider text-secondary">Applicant Progress Lab</span>
                 <h4 className="text-xl font-bold text-on-surface">Manage Recruitment Progress</h4>
                 <p className="text-xs text-on-surface-variant font-sans font-normal mt-0.5">Candidate: {managingApp.student?.name}</p>
               </div>
               <button 
                 onClick={() => setManagingApp(null)}
-                className="p-1 hover:bg-surface-container-high rounded animate-fade-in"
+                className="p-1 hover:bg-surface-container-high rounded animate-fade-in cursor-pointer"
               >
                 <X className="w-5 h-5 text-on-surface-variant hover:text-on-surface" />
               </button>
@@ -203,10 +205,10 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
 
             <div className="space-y-4">
               <p className="text-xs text-on-surface-variant leading-relaxed">
-                Update the status and add feedback for each round. Completing or rejecting a round updates the candidate's real-time dashboard.
+                Update the status and add feedback for each round. Completing or rejecting a round updates the candidate&apos;s real-time dashboard.
               </p>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {(managingApp.roundStatuses || []).map((round, idx) => (
                   <div key={idx} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant space-y-3">
                     <div className="flex justify-between items-center">
@@ -229,7 +231,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-headline font-medium text-on-surface-variant uppercase tracking-wider block mb-1">Feedback</label>
+                      <label className="text-[10px] font-headline font-medium text-on-surface-variant tracking-wider block mb-1">Feedback</label>
                       <textarea
                         value={round.feedback || ''}
                         onChange={(e) => {
@@ -238,7 +240,8 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                           setManagingApp({ ...managingApp, roundStatuses: updated });
                         }}
                         placeholder="Add round feedback or instructions..."
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg p-2 text-xs text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary h-16 resize-none custom-scrollbar"
+                        rows={2}
+                        className="w-full bg-surface-container border border-outline-variant rounded-lg text-xs font-sans font-normal text-on-surface p-2 focus:outline-none focus:border-primary"
                       />
                     </div>
                   </div>
@@ -246,10 +249,10 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-2 border-t border-outline-variant">
+            <div className="flex justify-end gap-3 pt-3 border-t border-outline-variant">
               <button
                 onClick={() => setManagingApp(null)}
-                className="px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-on-surface bg-surface-container-high border border-outline-variant rounded-xl hover:brightness-105 transition-all"
+                className="px-4 py-2 text-xs font-bold text-on-surface-variant hover:text-on-surface bg-surface-container-high border border-outline-variant rounded-xl hover:brightness-105 transition-all cursor-pointer"
               >
                 Cancel
               </button>
@@ -275,7 +278,7 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                     alert('Error updating progress');
                   }
                 }}
-                className="px-4 py-2 text-xs font-bold text-on-primary bg-primary rounded-xl hover:brightness-110 active:scale-95 transition-all"
+                className="px-4 py-2 text-xs font-bold text-on-primary bg-primary rounded-xl hover:brightness-110 active:scale-95 transition-all cursor-pointer"
               >
                 Save Progress
               </button>
@@ -286,12 +289,12 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
 
       {/* Applicants List Modal */}
       {viewingApplicantsJob && (
-        <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-surface-container border border-outline-variant rounded-2xl w-full max-w-2xl p-6 space-y-6 animate-fade-in max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-surface-container border border-outline-variant rounded-2xl w-full max-w-2xl p-6 space-y-6 animate-scale-up max-h-[90vh] overflow-y-auto custom-scrollbar">
             
             <div className="flex justify-between items-center border-b border-outline-variant pb-3">
               <div>
-                <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">Candidate Submissions</span>
+                <span className="text-[10px] font-headline font-medium tracking-wider text-secondary">Candidate Submissions</span>
                 <h4 className="text-xl font-bold text-on-surface">Applicants for {viewingApplicantsJob.title}</h4>
                 <p className="text-xs text-on-surface-variant font-sans font-normal mt-0.5">
                   Total applications: {viewingApplicantsJob.applications?.length || 0}
@@ -343,7 +346,10 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
                         
                         <button
                           type="button"
-                          onClick={() => setManagingApp(app)}
+                          onClick={() => {
+                            setViewingApplicantsJob(null);
+                            setManagingApp(app);
+                          }}
                           className="px-2.5 py-1.5 bg-secondary text-on-secondary hover:brightness-105 text-xs font-bold rounded-lg transition-all active:scale-95 cursor-pointer"
                         >
                           Manage Progress
@@ -372,6 +378,6 @@ export default function RecruiterJobs({ jobs, company, handleUpdateJob, handleDe
         candidate={selectedCandidate}
         onClose={() => setSelectedCandidate(null)}
       />
-    </div>
+    </>
   );
 }

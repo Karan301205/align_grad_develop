@@ -237,7 +237,9 @@ model Gig {
   skills              String[]
   requirements        GigRequirement[]
   budget              Float
+  currency            String          @default("INR")
   deliveryTime        String
+  logo                String?
   attachments         String[]        @default([])
   ownerId             String          @db.ObjectId
   selectedCandidateId String?         @db.ObjectId

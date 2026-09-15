@@ -166,7 +166,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
           
           {/* Section 1: Brand & Basic Identity */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="text-sm font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h3 className="text-sm font-headline font-medium tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <Building className="w-4 h-4" /> Brand & Basic Identity
             </h3>
 
@@ -205,7 +205,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Name *</label>
+                <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Name *</label>
                 <input
                   type="text"
                   required
@@ -216,7 +216,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div className="relative">
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Industry *</label>
+                <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-1.5 font-bold">Industry *</label>
                 <input
                   type="text"
                   required
@@ -266,7 +266,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div>
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Size *</label>
+                <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Size *</label>
                 <select
                   className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:border-primary focus:outline-none transition-all shadow-inner"
                   value={companySize}
@@ -282,7 +282,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div className="relative">
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Headquarters Location</label>
+                <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-1.5 font-bold">Headquarters Location</label>
                 <input
                   type="text"
                   placeholder="Search & select location (e.g. Bengaluru, Karnataka)..."
@@ -334,7 +334,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div>
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Founded Year</label>
+                <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-1.5 font-bold">Founded Year</label>
                 <input
                   type="text"
                   placeholder="e.g. 2019"
@@ -345,7 +345,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div>
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Official Website URL</label>
+                <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-1.5 font-bold">Official Website URL</label>
                 <input
                   type="url"
                   placeholder="https://example.com"
@@ -357,7 +357,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
             </div>
 
             <div>
-              <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Description *</label>
+              <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-1.5 font-bold">Company Description *</label>
               <textarea
                 rows="4"
                 required
@@ -371,13 +371,13 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
 
           {/* Section 2: Contact Person / Recruiter Business Card */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="text-sm font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h3 className="text-sm font-headline font-medium tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <User className="w-4 h-4" /> Recruiter Details
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Recruiter Name *</label>
+                <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-1.5 font-bold">Recruiter Name *</label>
                 <input
                   type="text"
                   required
@@ -389,7 +389,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div>
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Recruiter Designation *</label>
+                <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-1.5 font-bold">Recruiter Designation *</label>
                 <input
                   type="text"
                   required
@@ -401,7 +401,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
               </div>
 
               <div>
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Official Email Address *</label>
+                <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-1.5 font-bold">Official Email Address *</label>
                 <input
                   type="email"
                   required
@@ -416,12 +416,12 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
 
           {/* Section 3: Social & Showcase Media */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="text-sm font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h3 className="text-sm font-headline font-medium tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <Link className="w-4 h-4" /> Social Profile Links
             </h3>
 
             <div>
-              <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Company LinkedIn Page</label>
+              <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-1.5 font-bold">Company LinkedIn Page</label>
               <input
                 type="url"
                 placeholder="https://linkedin.com/company/..."
@@ -435,7 +435,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
           {/* Section 4: Office Showcase Photos */}
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-5 shadow-sm">
             <div className="flex justify-between items-center border-b border-outline-variant pb-2">
-              <h3 className="text-sm font-headline font-medium uppercase tracking-wider text-primary flex items-center gap-2">
+              <h3 className="text-sm font-headline font-medium tracking-wider text-primary flex items-center gap-2">
                 <Globe className="w-4 h-4" /> Office Showcase Gallery
               </h3>
               <input
@@ -488,7 +488,7 @@ export default function RecruiterCompany({ company, token, docLink, setDocLink, 
         {/* Right Side: Trust Verification Status Widget */}
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-5 shadow-sm">
-            <h3 className="text-sm font-headline font-medium uppercase tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
+            <h3 className="text-sm font-headline font-medium tracking-wider text-primary border-b border-outline-variant pb-2 flex items-center gap-2">
               <Shield className="w-4 h-4" /> Trust & Verification
             </h3>
 

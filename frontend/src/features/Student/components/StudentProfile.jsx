@@ -1,13 +1,13 @@
 import React from 'react';
-import { CheckCircle, ChevronRight, Plus, ChevronDown, Star, Award, Briefcase, DollarSign, X } from 'lucide-react';
-import { ALL_SKILLS } from '../../../constants';
+import { CheckCircle, AlertCircle, ChevronRight, ChevronLeft, Plus, ChevronDown, Star, Award, Briefcase, DollarSign, X, Camera, Trash2, User, GraduationCap, FolderGit2, Activity, FileText } from 'lucide-react';
+import { ALL_SKILLS, hasSkillMcq } from '../../../constants';
 import { apiFetch } from '../../../services/apiClient';
 import { putFileToS3 } from '../../../services/uploadService';
 import { DOMAIN_OPTIONS } from '../../../constants/domains';
 import Button from '../../../components/ui/Button';
 import PageHeader from '../../../components/ui/PageHeader';
 import { formatErrorMessage } from '../../../utils/errorFormatter';
-
+import { getProfileCompletionDetails } from '../../../utils/profileCompleteness';
 
 import { INDIAN_STATES } from '../../../constants/indianStates';
 import StudentShowcase from './StudentShowcase';
@@ -22,12 +22,11 @@ export default function StudentProfile({
   token,
   skillsList,
   setSkillsList,
+  techSkills = [],
   selectedNewSkill,
   setSelectedNewSkill,
   bio,
   setBio,
-  nationality,
-  setNationality,
   gender,
   setGender,
   profileEmail,
@@ -73,26 +72,80 @@ export default function StudentProfile({
   submittingProfile,
   feedbackMsg,
   handleUpdateProfile,
-  handleRatingChange
+  handleRatingChange,
+  handleDownloadGeneratedResume,
+  generatingPdf
 }) {
   const tabsList = [
     { id: 'general', label: 'General' },
-    { id: 'showcase', label: 'Video Showcase' },
-    { id: 'socials', label: 'Social Links' },
+    { id: 'showcase', label: 'Introduction' },
     { id: 'education', label: 'Education' },
     { id: 'experience', label: 'Experience' },
-    { id: 'certificates', label: 'Certificates' },
+    { id: 'certificates', label: 'Certifications' },
     { id: 'projects', label: 'Projects' },
     { id: 'skills', label: 'Skills' },
-    { id: 'cocurricular', label: 'Co-curricular' }
+    { id: 'cocurricular', label: 'Co-Curricular' }
   ];
 
   const [isSkillDropdownOpen, setIsSkillDropdownOpen] = React.useState(false);
   const [usernameStatus, setUsernameStatus] = React.useState(''); // 'loading', 'available', 'taken', 'invalid', ''
   const [usernameMsg, setUsernameMsg] = React.useState('');
 
+  const [firstName, setFirstName] = React.useState(() => {
+    const parts = (profile?.name || '').trim().split(' ');
+    return parts[0] || '';
+  });
+  const [lastName, setLastName] = React.useState(() => {
+    const parts = (profile?.name || '').trim().split(' ');
+    return parts.slice(1).join(' ') || '';
+  });
+
+  React.useEffect(() => {
+    if (profile?.name !== undefined) {
+      const parts = (profile?.name || '').trim().split(' ');
+      setFirstName(parts[0] || '');
+      setLastName(parts.slice(1).join(' ') || '');
+    }
+  }, [profile?.name]);
+
+  const updateFullName = (first, last) => {
+    const full = [first.trim(), last.trim()].filter(Boolean).join(' ');
+    setProfile(prev => ({ ...prev, name: full }));
+  };
+
   const [locationSearchQuery, setLocationSearchQuery] = React.useState('');
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = React.useState(false);
+
+  const locationContainerRef = React.useRef(null);
+  const skillContainerRef = React.useRef(null);
+  const domainContainerRef = React.useRef(null);
+  const bioRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (bioRef.current) {
+      bioRef.current.style.height = 'auto';
+      bioRef.current.style.height = `${Math.max(80, bioRef.current.scrollHeight)}px`;
+    }
+  }, [bio, profileTab]);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (locationContainerRef.current && !locationContainerRef.current.contains(event.target)) {
+        setIsLocationDropdownOpen(false);
+      }
+      if (skillContainerRef.current && !skillContainerRef.current.contains(event.target)) {
+        setIsSkillDropdownOpen(false);
+      }
+      if (domainContainerRef.current && !domainContainerRef.current.contains(event.target)) {
+        setShowDomainDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const toggleWorkMode = (mode) => {
     if (preferredWorkModes.includes(mode)) {
@@ -122,6 +175,25 @@ export default function StudentProfile({
     setPreferredLocations(preferredLocations.filter(l => l !== loc));
   };
 
+  const handleAddSkill = (skillNameToAdd) => {
+    const name = (skillNameToAdd || selectedNewSkill || '').trim();
+    if (!name) return;
+    
+    // Check if skill already exists in skillsList
+    if (skillsList.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+      setSelectedNewSkill('');
+      setIsSkillDropdownOpen(false);
+      return;
+    }
+
+    const matchInAll = ALL_SKILLS.find(s => s.skill.toLowerCase() === name.toLowerCase());
+    const canonicalName = matchInAll ? matchInAll.skill : name;
+
+    setSkillsList(prev => [...prev, { name: canonicalName, rating: 1 }]);
+    setSelectedNewSkill('');
+    setIsSkillDropdownOpen(false);
+  };
+
   const gigExperienceItems = (experienceList || []).filter(exp => exp.expType === 'Gig');
   const completedGigsCount = gigExperienceItems.length;
   let totalRating = 0;
@@ -140,6 +212,46 @@ export default function StudentProfile({
   const [editingCertIdx, setEditingCertIdx] = React.useState(null);
   const [editingProjIdx, setEditingProjIdx] = React.useState(null);
   const [editingCocurricularIdx, setEditingCocurricularIdx] = React.useState(null);
+  const [activeModal, setActiveModal] = React.useState(null); // 'education' | 'experience' | 'certificates' | 'projects' | 'cocurricular' | null
+
+  const openAddEduModal = () => {
+    setEditingEduIdx(null);
+    setNewEdu({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
+    setClass10Percent('');
+    setClass12Percent('');
+    setClass11Stream('');
+    setActiveModal('education');
+  };
+
+  const openAddExpModal = () => {
+    setEditingExpIdx(null);
+    setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
+    setDomainSearch('');
+    setActiveModal('experience');
+  };
+
+  const openAddCertModal = () => {
+    setEditingCertIdx(null);
+    setNewCert({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
+    setCertFileUploadError('');
+    setActiveModal('certificates');
+  };
+
+  const openAddProjModal = () => {
+    setEditingProjIdx(null);
+    setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
+    setActiveModal('projects');
+  };
+
+  const openAddCocurricularModal = () => {
+    setEditingCocurricularIdx(null);
+    setNewCocurricular({ activity: '', link: '', description: '' });
+    setActiveModal('cocurricular');
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+  };
 
   const debouncedCheckRef = React.useRef(null);
 
@@ -408,6 +520,24 @@ export default function StudentProfile({
   const age = calculateAge(dob);
   const isUnderage = age !== null && age < 17;
 
+  const isValidDriveUrl = (url) => {
+    if (!url || !url.trim()) return true;
+    const trimmed = url.trim();
+    try {
+      const parsed = new URL(trimmed.startsWith('http://') || trimmed.startsWith('https://') ? trimmed : `https://${trimmed}`);
+      return (
+        parsed.hostname === 'drive.google.com' ||
+        parsed.hostname === 'docs.google.com' ||
+        parsed.hostname.endsWith('.drive.google.com') ||
+        parsed.hostname.endsWith('.docs.google.com')
+      );
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const isInvalidResumeUrl = Boolean(resumeUrl && resumeUrl.trim() && !isValidDriveUrl(resumeUrl));
+
   const [certFileUploadError, setCertFileUploadError] = React.useState('');
   const [processingCertFile, setProcessingCertFile] = React.useState(false);
 
@@ -458,7 +588,6 @@ export default function StudentProfile({
     if ((orig.username || '') !== (username || '')) return true;
     if ((orig.profilePic || '') !== (profilePic || '')) return true;
     if ((orig.bio || '') !== (bio || '')) return true;
-    if ((orig.nationality || '') !== (nationality || '')) return true;
     if ((orig.gender || '') !== (gender || '')) return true;
     if ((orig.email || '') !== (profileEmail || '')) return true;
     if ((orig.dob || '') !== (dob || '')) return true;
@@ -468,10 +597,7 @@ export default function StudentProfile({
     // Compare socialLinks
     const origSocials = orig.socialLinks || {};
     const currSocials = socialLinks || {};
-    const socialKeys = [
-      'linkedin', 'github', 'hackerEarth', 'hackerRank', 'codechef', 'leetcode', 'codeforces', 'kaggle', 'portfolio',
-      'showLinkedin', 'showGithub', 'showHackerEarth', 'showHackerRank', 'showCodechef', 'showLeetcode', 'showCodeforces', 'showKaggle', 'showPortfolio'
-    ];
+    const socialKeys = ['linkedin', 'portfolio'];
     for (const key of socialKeys) {
       const origVal = origSocials[key] === undefined ? '' : String(origSocials[key]);
       const currVal = currSocials[key] === undefined ? '' : String(currSocials[key]);
@@ -498,17 +624,52 @@ export default function StudentProfile({
 
     return false;
   }, [
-    profile, username, profilePic, bio, nationality, gender, profileEmail, dob, phone, resumeUrl, cocurricular,
+    profile, username, profilePic, bio, gender, profileEmail, dob, phone, resumeUrl, cocurricular,
     socialLinks, educationList, experienceList, certificatesList, projectsList, skillsList
   ]);
 
   const isSaveActive = React.useMemo(() => {
     const ageValue = calculateAge(dob);
     if (ageValue !== null && ageValue < 17) return false;
+    if (resumeUrl && !isValidDriveUrl(resumeUrl)) return false;
 
     const isFirstTime = !profile || !profile.name;
     return isFirstTime || hasChanges;
-  }, [profile, hasChanges, dob]);
+  }, [profile, hasChanges, dob, resumeUrl]);
+
+  const { overallCompletion, missingProfileItems } = React.useMemo(() => {
+    const details = getProfileCompletionDetails({
+      name: profile?.name,
+      username,
+      bio,
+      profileEmail,
+      localPhone,
+      dob,
+      gender,
+      resumeUrl,
+      linkedin: socialLinks?.linkedin,
+      portfolio: socialLinks?.portfolio,
+      profilePic,
+      preferredWorkModes,
+      preferredWorkTypes,
+      preferredLocations,
+      skillsList,
+      educationList,
+      experienceList,
+      projectsList,
+      certificatesList,
+      introVideoUrl: profile?.introVideoUrl
+    });
+    return {
+      overallCompletion: details.percentage,
+      missingProfileItems: details.missingItems
+    };
+  }, [
+    profile?.name, username, bio, profileEmail, localPhone, dob, gender, resumeUrl,
+    socialLinks?.linkedin, socialLinks?.portfolio, profilePic, preferredWorkModes,
+    preferredWorkTypes, preferredLocations, skillsList, educationList,
+    experienceList, projectsList, certificatesList, profile?.introVideoUrl
+  ]);
 
   const handleClass10Change = (val) => {
     setClass10Percent(val);
@@ -550,7 +711,7 @@ export default function StudentProfile({
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     const ageValue = calculateAge(dob);
     if (ageValue !== null && ageValue < 17) {
       alert('You must be at least 17 years old to access this platform.');
@@ -561,7 +722,13 @@ export default function StudentProfile({
       alert('Please fix the phone number validation error before saving.');
       return;
     }
-    handleUpdateProfile(e);
+    if (resumeUrl && resumeUrl.trim() && !isValidDriveUrl(resumeUrl)) {
+      alert('Please enter a valid Google Drive URL for your resume (e.g. https://drive.google.com/...).');
+      return;
+    }
+    const activeTabObj = tabsList.find(t => t.id === profileTab);
+    const sectionName = activeTabObj ? activeTabObj.label : 'Profile';
+    handleUpdateProfile(e, sectionName);
   };
 
   return (
@@ -572,19 +739,89 @@ export default function StudentProfile({
         }`}>
         {/* <CheckCircle className="w-5 h-5 text-success animate-bounce" /> */}
         <div className="flex flex-col">
-          <span className="text-xs font-bold uppercase tracking-wider font-headline font-medium">Success</span>
+          <span className="text-xs font-headline font-medium tracking-wider">Success</span>
           <span className="text-[11px] opacity-90">Photo uploaded successfully!</span>
         </div>
       </div>
       <PageHeader
-        title="Profile & Ratings"
+        title="Your Profile"
         subtitle="Update your professional details, social portfolios, academic history, and self-rate your proficiencies"
+        action={
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <Button
+              type="button"
+              onClick={handleDownloadGeneratedResume}
+              loading={generatingPdf}
+              variant="outline"
+              size="sm"
+              className="font-headline font-medium tracking-wider text-xs px-3.5 py-2 flex items-center gap-2 border-outline-variant bg-surface-container-low hover:bg-surface-container transition-all text-on-surface cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-primary" />
+              <span>{generatingPdf ? 'Generating PDF...' : 'Generate Resume'}</span>
+            </Button>
+            <Button
+              type="submit"
+              form="student-profile-form"
+              loading={submittingProfile}
+              disabled={!isSaveActive}
+              size="sm"
+              className="font-headline font-medium tracking-wider text-xs  disabled:opacity-40 disabled:pointer-events-none py-2"
+            >
+              Save Profile
+            </Button>
+          </div>
+        }
       />
+
+      {/* Overall Profile Completion Widget */}
+      <div className="bg-surface-container border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0 border border-primary/20">
+              {overallCompletion}%
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-xs sm:text-sm font-headline font-medium text-on-surface tracking-wider">
+                  Overall Profile Completion
+                </h3>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-headline font-medium tracking-wider ${
+                  overallCompletion === 100
+                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                    : overallCompletion >= 70
+                    ? 'bg-primary/15 text-primary border border-primary/30'
+                    : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                }`}>
+                  {overallCompletion === 100 ? 'All-Star (Complete)' : overallCompletion >= 70 ? 'Strong Profile' : 'In Progress'}
+                </span>
+              </div>
+              <p className="text-[11px] text-on-surface-variant font-sans font-normal mt-0.5">
+                {overallCompletion === 100 ? (
+                  'Your profile is 100% completed and optimized for recruiter discovery.'
+                ) : (
+                  <>
+                    <span className="font-medium text-on-surface">To reach 100%:</span> Add {missingProfileItems.join(', ')}.
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <span className="text-base font-headline font-bold text-primary">{overallCompletion}%</span>
+          </div>
+        </div>
+        <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden border border-outline-variant/60">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-primary via-emerald-600 to-emerald-500 transition-all duration-500 ease-out"
+            style={{ width: `${overallCompletion}%` }}
+          />
+        </div>
+      </div>
 
       {feedbackMsg && (() => {
         const isErr = /failed|error|invalid|denied/i.test(feedbackMsg);
         return (
-          <div className={`p-4 rounded-xl border text-sm flex items-center gap-3 w-full ${
+          <div className={`p-4 rounded-xl border text-sm flex items-center gap-3 w-full animate-fade-in transition-all duration-300 ${
             isErr
               ? 'border-rose-500/30 bg-rose-500/10 text-rose-800 dark:text-rose-300'
               : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
@@ -599,220 +836,194 @@ export default function StudentProfile({
         );
       })()}
 
-      <form onSubmit={handleSubmit} className="bg-surface-container border border-outline-variant rounded-2xl overflow-hidden grid grid-cols-12 min-h-[650px]">
-
-        {/* Left Side: Sub-tabs Sidebar */}
-        <div className="col-span-12 md:col-span-3 bg-surface-container-low border-r border-outline-variant p-4 flex flex-col gap-1">
-          {tabsList.map(tab => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setProfileTab(tab.id)}
-              className={`w-full text-left px-3 py-2.5 rounded-xl font-medium transition-all text-xs flex items-center justify-between ${profileTab === tab.id
-                  ? 'bg-primary/10 text-primary border-l-4 border-primary font-bold'
-                  : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-                }`}
-            >
-              <span className="truncate">{tab.label}</span>
-              <ChevronRight className="w-3.5 h-3.5 opacity-50 shrink-0" />
-            </button>
-          ))}
-
-          <Button
-            type="submit"
-            loading={submittingProfile}
-            disabled={!isSaveActive}
-            fullWidth
-            size="sm"
-            className="mt-6 font-bold uppercase tracking-wider text-xs shadow-glow disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
-          >
-            Save Profile & Ratings
-          </Button>
-        </div>
-
-        {/* Right Side: Tab Form Panel */}
-        <div className="col-span-12 md:col-span-9 p-6 md:p-8 flex flex-col justify-between space-y-6">
-          {(() => {
-            const currentTabIdx = tabsList.findIndex(t => t.id === profileTab);
-            const prevTab = currentTabIdx > 0 ? tabsList[currentTabIdx - 1] : null;
-            const nextTab = currentTabIdx < tabsList.length - 1 ? tabsList[currentTabIdx + 1] : null;
-            return (
-              <div className="flex justify-between items-center border-b border-outline-variant pb-4 select-none">
-                <button
-                  type="button"
-                  disabled={!prevTab}
-                  onClick={() => prevTab && setProfileTab(prevTab.id)}
-                  className="px-3 py-1.5 bg-surface-container-high border border-outline-variant hover:bg-surface-container-highest disabled:opacity-40 disabled:pointer-events-none rounded-xl text-xs font-sans font-normal font-semibold text-on-surface flex items-center gap-1.5 transition-all"
-                >
-                  &larr; Prev: {prevTab ? prevTab.label : 'None'}
-                </button>
-                <span className="text-xs font-headline font-medium text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-wider">
-                  {tabsList[currentTabIdx]?.label}
-                </span>
-                {nextTab ? (
+      <form id="student-profile-form" onSubmit={handleSubmit} className="bg-surface-container border border-outline-variant rounded-2xl flex flex-col justify-between min-h-[620px] shadow-sm overflow-hidden relative">
+        {/* Top Horizontal Stepper Navigation integrated as container header */}
+        <div className="bg-surface-container-low/60 border-b border-outline-variant p-3 sm:p-4 overflow-x-auto custom-scrollbar">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-max">
+            {tabsList.map((tab, idx) => {
+              const isActive = profileTab === tab.id;
+              const currentIdx = tabsList.findIndex(t => t.id === profileTab);
+              const isPast = currentIdx > idx;
+              return (
+                <React.Fragment key={tab.id}>
                   <button
                     type="button"
-                    onClick={() => setProfileTab(nextTab.id)}
-                    className="px-3 py-1.5 bg-surface-container-high border border-outline-variant hover:bg-surface-container-highest disabled:opacity-40 disabled:pointer-events-none rounded-xl text-xs font-sans font-normal font-semibold text-on-surface flex items-center gap-1.5 transition-all"
+                    onClick={() => setProfileTab(tab.id)}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-headline font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer ${
+                      isActive
+                        ? 'bg-primary text-on-primary shadow-sm ring-2 ring-primary/25 font-semibold scale-[1.02]'
+                        : isPast
+                          ? 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest hover:text-primary border border-outline-variant'
+                          : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border border-outline-variant/60'
+                    }`}
                   >
-                    Next: {nextTab.label} &rarr;
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-sans font-medium shrink-0 ${
+                      isActive
+                        ? 'bg-on-primary text-primary font-bold'
+                        : isPast
+                          ? 'bg-primary/20 text-primary font-semibold'
+                          : 'bg-surface-container-highest text-on-surface-variant'
+                    }`}>
+                      {isPast ? '✓' : idx + 1}
+                    </span>
+                    <span className="whitespace-nowrap">{tab.label}</span>
                   </button>
-                ) : (
-                  <Button
-                    type="submit"
-                    loading={submittingProfile}
-                    disabled={!isSaveActive}
-                    size="sm"
-                    className="font-bold uppercase tracking-wider text-[11px] shadow-glow disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none py-1.5 px-4"
-                  >
-                    Save
-                  </Button>
-                )}
+                  {idx < tabsList.length - 1 && (
+                    <ChevronRight className="w-3.5 h-3.5 text-on-surface-variant/40 shrink-0 select-none" />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Section Content & Action Body */}
+        <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between space-y-8">
+          <div className="flex-1 space-y-6">
+
+          {/* Panel 1: General */}
+          {profileTab === 'general' && (
+            <div className="space-y-6">
+              <div className="border-b border-outline-variant pb-3">
+                <h3 className="text-lg font-headline font-bold text-on-surface">General Information</h3>
+                {/* <p className="text-xs text-on-surface-variant font-sans font-normal mt-0.5">Manage your personal details, profile avatar, and primary contact information.</p> */}
               </div>
-            );
-          })()}
 
-          <div className="flex-1 space-y-6 overflow-y-auto max-h-[550px] pr-2 custom-scrollbar">
-
-            {/* Panel 1: General */}
-            {profileTab === 'general' && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-headline font-bold text-on-surface mb-2">General Information</h3>
-
-                {/* Profile Pic Upload Container */}
-                <div className="flex flex-col md:flex-row items-center gap-6 p-4 bg-surface-container-low border border-outline-variant rounded-xl mb-4">
-                  <div className="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-2xl overflow-hidden shrink-0">
-                    {profilePic ? (
-                      <img src={profilePic} alt="Profile preview" className="w-full h-full object-cover" />
-                    ) : (
-                      profile?.name?.charAt(0) || 'S'
-                    )}
-                  </div>
-                  <div className="space-y-2 text-center md:text-left flex-1">
-                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Profile Picture</label>
-                    <p className="text-[10px] text-on-surface-variant leading-relaxed">
-                      Recommended: square image. Automatically resized and compressed to under 100KB.
-                    </p>
-                    <div className="flex gap-2 justify-center md:justify-start">
-                      <label className="px-3 py-1.5 bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary rounded-xl cursor-pointer hover:bg-primary/20 transition-all">
-                        {compressing ? 'Processing...' : 'Upload Photo'}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleProfilePicChange}
-                          disabled={compressing}
-                        />
-                      </label>
-                      {profilePic && (
-                        <button
-                          type="button"
-                          onClick={() => setProfilePic('')}
-                          className="px-3 py-1.5 bg-error-container border border-error/20 text-[10px] font-bold text-on-error-container rounded-xl hover:bg-error-container/80 transition-all"
-                        >
-                          Remove
-                        </button>
+              {/* Profile Top Showcase Banner (Horizontal layout: Avatar + Name & Email) */}
+              <div className="p-5 sm:p-6 bg-surface-container-low border border-outline-variant rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-5 shadow-2xs">
+                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 text-center sm:text-left w-full sm:w-auto">
+                  {/* Avatar circle with photo / initials */}
+                  <div className="relative group shrink-0">
+                    <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-headline font-bold text-2xl sm:text-3xl overflow-hidden shrink-0 shadow-sm ring-4 ring-outline-variant/40">
+                      {profilePic ? (
+                        <img src={profilePic} alt="Profile preview" className="w-full h-full object-cover" />
+                      ) : (
+                        profile?.name?.charAt(0) || 'S'
                       )}
                     </div>
-                    {photoError && (
-                      <p className="text-[10px] text-error font-medium">{photoError}</p>
-                    )}
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Full Name</label>
-                  <input
-                    type="text"
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
-                    value={profile?.name || ''}
-                    onChange={e => setProfile({ ...profile, name: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Username</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
-                      value={username || ''}
-                      onChange={handleUsernameChange}
-                      placeholder="e.g. johndoe"
-                      required
-                    />
-                    {usernameMsg && (
-                      <p className={`text-[10px] mt-1.5 font-medium ${usernameStatus === 'available' ? 'text-success' :
-                          usernameStatus === 'loading' ? 'text-warning animate-pulse' :
-                            'text-error'
-                        }`}>
-                        {usernameMsg}
+                  {/* Name and Email side-by-side horizontally */}
+                  <div className="space-y-1 min-w-0">
+                    <h3 className="text-lg sm:text-xl font-headline font-bold text-on-surface tracking-tight truncate">
+                      {profile?.name || 'Your Name'}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-on-surface-variant font-sans font-normal truncate">
+                      {profileEmail || 'name@domain.com'}
+                    </p>
+                    {username && (
+                      <p className="text-xs text-primary font-sans font-medium">
+                        @{username}
                       </p>
                     )}
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Describe Yourself</label>
-                  <textarea
-                    rows="3"
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
-                    value={bio}
-                    onChange={e => setBio(e.target.value)}
-                    placeholder="Software Engineer specializing in Full-Stack..."
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Nationality</label>
-                    <select
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
-                      value={nationality}
-                      onChange={e => setNationality(e.target.value)}
-                    >
-                      <option value="">Select Nationality</option>
-                      <option value="India">India</option>
-                      <option value="United States">United States</option>
-                      <option value="United Kingdom">United Kingdom</option>
-                      <option value="Canada">Canada</option>
-                      <option value="Singapore">Singapore</option>
-                      <option value="Germany">Germany</option>
-                      <option value="Australia">Australia</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Gender</label>
-                    <select
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
-                      value={gender}
-                      onChange={e => setGender(e.target.value)}
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Non-binary">Non-binary</option>
-                      <option value="Prefer not to say">Prefer not to say</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Email Address</label>
+                {/* Photo Upload / Remove Buttons */}
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <label className="px-3.5 py-2 bg-primary text-on-primary hover:bg-primary/90 text-xs font-headline font-medium rounded-xl cursor-pointer transition-all shadow-xs flex items-center gap-1.5">
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>{compressing ? 'Processing...' : 'Upload Photo'}</span>
                     <input
-                      type="email"
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
-                      value={profileEmail}
-                      onChange={e => setProfileEmail(e.target.value)}
-                      placeholder="name@domain.com"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleProfilePicChange}
+                      disabled={compressing}
+                    />
+                  </label>
+                  {profilePic && (
+                    <button
+                      type="button"
+                      onClick={() => setProfilePic('')}
+                      className="px-3 py-2 bg-error-container border border-error/20 text-xs font-headline font-medium text-on-error-container rounded-xl hover:bg-error-container/80 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Remove</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+              {photoError && (
+                <p className="text-xs text-error font-medium">{photoError}</p>
+              )}
+
+              {/* Basic Information Section */}
+              <div className="pt-2 border-t border-outline-variant space-y-4">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-[#000000]" />
+                  <h4 className="text-sm font-headline font-medium text-[#000000] tracking-wider">Basic Information</h4>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Row 1, Col 1: First Name */}
+                  <div>
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      First Name <span className="text-red-500 font-bold">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                      value={firstName}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setFirstName(val);
+                        updateFullName(val, lastName);
+                      }}
+                      placeholder="e.g. John"
+                      required
                     />
                   </div>
 
+                  {/* Row 1, Col 2: Last Name */}
                   <div>
-                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Date of Birth</label>
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      Last Name <span className="text-red-500 font-bold">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                      value={lastName}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setLastName(val);
+                        updateFullName(firstName, val);
+                      }}
+                      placeholder="e.g. Doe"
+                      required
+                    />
+                  </div>
+
+                  {/* Row 2, Col 1: Username */}
+                  <div>
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      Username <span className="text-red-500 font-bold">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                        value={username || ''}
+                        onChange={handleUsernameChange}
+                        placeholder="e.g. johndoe"
+                        required
+                      />
+                      {usernameMsg && (
+                        <p className={`text-[10px] mt-1.5 font-medium ${usernameStatus === 'available' ? 'text-success' :
+                            usernameStatus === 'loading' ? 'text-warning animate-pulse' :
+                              'text-error'
+                          }`}>
+                          {usernameMsg}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Row 2, Col 2: Date of Birth */}
+                  <div>
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      Date of Birth <span className="text-red-500 font-bold">*</span>
+                    </label>
                     <input
                       type="date"
                       className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
@@ -825,212 +1036,292 @@ export default function StudentProfile({
                       </p>
                     )}
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Phone Number</label>
-                  <div className="flex gap-3">
-                    {/* Country Code Select */}
-                    <select
-                      className="bg-surface-container-low border border-outline-variant rounded-xl px-3 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface w-24 shrink-0 font-sans font-normal"
-                      value={countryCode}
-                      onChange={handleCountryCodeChange}
-                    >
-                      <option value="+91">+91 (IN)</option>
-                      <option value="+1">+1 (US)</option>
-                      <option value="+44">+44 (UK)</option>
-                      <option value="+61">+61 (AU)</option>
-                      <option value="+65">+65 (SG)</option>
-                      <option value="+971">+971 (AE)</option>
-                      <option value="+82">+82 (KR)</option>
-                      <option value="+81">+81 (JP)</option>
-                    </select>
-
-                    {/* Local Number input */}
-                    <div className="relative flex-1">
-                      <input
-                        type="text"
-                        className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
-                        value={localPhone}
-                        onChange={handleLocalPhoneChange}
-                        placeholder="Enter mobile number"
-                      />
-                    </div>
+                  {/* Row 3: Professional Summary (Full Width - Auto-Expanding) */}
+                  <div className="col-span-1 md:col-span-2">
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      Professional Summary <span className="text-red-500 font-bold">*</span>
+                    </label>
+                    <textarea
+                      ref={bioRef}
+                      rows="3"
+                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal resize-none min-h-[80px] overflow-hidden leading-relaxed"
+                      value={bio}
+                      onChange={e => {
+                        setBio(e.target.value);
+                        if (bioRef.current) {
+                          bioRef.current.style.height = 'auto';
+                          bioRef.current.style.height = `${Math.max(80, bioRef.current.scrollHeight)}px`;
+                        }
+                      }}
+                      placeholder="Software Engineer specializing in Full-Stack development, building responsive web applications..."
+                    />
                   </div>
-                  {phoneWarning && (
-                    <p className="text-[10px] text-error mt-1.5 font-medium">{phoneWarning}</p>
-                  )}
-                </div>
 
-                <div>
-                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-2">Resume</label>
-                  <input
-                    type="url"
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface"
-                    value={resumeUrl}
-                    onChange={e => setResumeUrl(e.target.value)}
-                    placeholder="https://drive.google.com/your-resume.pdf"
-                  />
-                </div>
-
-                {/* Work Preferences & Location Block inside General Tab */}
-                <div className="pt-4 border-t border-outline-variant space-y-6">
+                  {/* Row 4, Col 1: Phone Number */}
                   <div>
-                    <h3 className="text-sm font-headline font-bold text-primary uppercase font-headline font-medium tracking-wider">Work Preferences & Location</h3>
-                    <p className="text-xs text-on-surface-variant">Specify your desired work modes, position types, and preferred locations across India.</p>
-                  </div>
-
-                  {/* Mode of Work */}
-                  <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl space-y-2.5">
-                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold">
-                      Mode of Work
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      Phone Number <span className="text-red-500 font-bold">*</span>
                     </label>
-                    <p className="text-[11px] text-on-surface-variant">Select all work modes you are open to:</p>
-                    <div className="flex flex-wrap gap-2.5">
-                      {['Remote', 'On-Site', 'Hybrid'].map(mode => {
-                        const isSelected = preferredWorkModes.includes(mode);
-                        return (
-                          <button
-                            key={mode}
-                            type="button"
-                            onClick={() => toggleWorkMode(mode)}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-sans font-normal transition-all border cursor-pointer flex items-center gap-2 ${
-                              isSelected
-                                ? 'bg-primary text-on-primary border-primary shadow-sm'
-                                : 'bg-surface-container border-outline-variant text-on-surface hover:bg-surface-container-high'
-                            }`}
-                          >
-                            <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[9px] ${
-                              isSelected ? 'bg-on-primary text-primary border-on-primary' : 'border-outline-variant'
-                            }`}>
-                              {isSelected && '✓'}
-                            </span>
-                            {mode}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Type of Work */}
-                  <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl space-y-2.5">
-                    <label className="block text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold">
-                      Type of Work Looking For
-                    </label>
-                    <p className="text-[11px] text-on-surface-variant">Select target position types:</p>
-                    <div className="flex flex-wrap gap-2.5">
-                      {['Internship', 'Part-Time', 'Full-Time'].map(type => {
-                        const isSelected = preferredWorkTypes.includes(type);
-                        return (
-                          <button
-                            key={type}
-                            type="button"
-                            onClick={() => toggleWorkType(type)}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-sans font-normal transition-all border cursor-pointer flex items-center gap-2 ${
-                              isSelected
-                                ? 'bg-secondary text-on-secondary border-secondary shadow-sm'
-                                : 'bg-surface-container border-outline-variant text-on-surface hover:bg-surface-container-high'
-                            }`}
-                          >
-                            <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[9px] ${
-                              isSelected ? 'bg-on-secondary text-secondary border-on-secondary' : 'border-outline-variant'
-                            }`}>
-                              {isSelected && '✓'}
-                            </span>
-                            {type}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Preferred Location in India */}
-                  <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl space-y-3.5">
-                    <div className="flex justify-between items-center flex-wrap gap-2">
-                      <div>
-                        <label className="block text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold">
-                          Preferred Location(s) in India
-                        </label>
-                        <p className="text-[11px] text-on-surface-variant">Search and select preferred districts, tech hubs, states/UTs or opt for open relocation.</p>
-                      </div>
-
-                      {/* Any Location Checkbox */}
-                      <label className="flex items-center gap-2 px-3 py-1.5 bg-surface-container border border-outline-variant rounded-xl cursor-pointer hover:border-primary/50 transition-all select-none">
+                    <div className="flex gap-2">
+                      <select
+                        className="bg-surface-container-low border border-outline-variant rounded-xl px-2.5 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface w-24 shrink-0 font-sans font-normal"
+                        value={countryCode}
+                        onChange={handleCountryCodeChange}
+                      >
+                        <option value="+91">+91 (IN)</option>
+                        <option value="+1">+1 (US)</option>
+                        <option value="+44">+44 (UK)</option>
+                        <option value="+61">+61 (AU)</option>
+                        <option value="+65">+65 (SG)</option>
+                        <option value="+971">+971 (AE)</option>
+                        <option value="+82">+82 (KR)</option>
+                        <option value="+81">+81 (JP)</option>
+                      </select>
+                      <div className="relative flex-1">
                         <input
-                          type="checkbox"
-                          checked={openToAnyLocation}
-                          onChange={e => setOpenToAnyLocation(e.target.checked)}
-                          className="rounded border-outline-variant text-primary focus:ring-0 w-4 h-4"
+                          type="text"
+                          className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                          value={localPhone}
+                          onChange={handleLocalPhoneChange}
+                          placeholder="Enter mobile number"
                         />
-                        <span className="text-xs font-bold font-sans font-normal text-on-surface">Any Location / Open to Relocate</span>
-                      </label>
-                    </div>
-
-                    {/* Search bar & dropdown for states */}
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Search district, city or state (e.g. Hyderabad, Telangana)..."
-                        className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-2.5 text-xs text-on-surface focus:outline-none focus:border-primary transition-all font-sans font-normal"
-                        value={locationSearchQuery}
-                        onChange={e => {
-                          setLocationSearchQuery(e.target.value);
-                          setIsLocationDropdownOpen(true);
-                        }}
-                        onFocus={() => setIsLocationDropdownOpen(true)}
-                      />
-
-                      {isLocationDropdownOpen && (
-                        <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-surface-container-high border border-outline-variant rounded-xl shadow-xl z-30 custom-scrollbar divide-y divide-outline-variant/30">
-                          {INDIAN_STATES.filter(state => state.toLowerCase().includes(locationSearchQuery.toLowerCase())).length === 0 ? (
-                            <div className="p-3 text-xs text-on-surface-variant text-center font-sans font-normal">No matching districts or states found</div>
-                          ) : (
-                            INDIAN_STATES.filter(state => state.toLowerCase().includes(locationSearchQuery.toLowerCase())).map(state => {
-                              const isAdded = preferredLocations.includes(state);
-                              return (
-                                <div
-                                  key={state}
-                                  onClick={() => addLocation(state)}
-                                  className={`px-4 py-2.5 text-xs font-sans font-normal flex justify-between items-center cursor-pointer transition-colors ${
-                                    isAdded ? 'bg-primary/10 text-primary font-bold' : 'hover:bg-surface-container-highest text-on-surface'
-                                  }`}
-                                >
-                                  <span>{state}</span>
-                                  {isAdded && <span className="text-[10px] bg-primary text-on-primary px-1.5 py-0.5 rounded font-sans">Added</span>}
-                                </div>
-                              );
-                            })
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Selected Locations Badges */}
-                    <div className="space-y-1.5">
-                      <p className="text-[10px] font-sans font-normal uppercase tracking-wider text-on-surface-variant">Selected Locations ({preferredLocations.length}):</p>
-                      <div className="flex flex-wrap gap-2">
-                        {preferredLocations.length === 0 ? (
-                          <span className="text-xs text-on-surface-variant font-sans font-normal italic">No specific locations selected yet.</span>
-                        ) : (
-                          preferredLocations.map(loc => (
-                            <span key={loc} className="px-3 py-1 bg-surface-container border border-outline-variant rounded-xl text-xs font-sans font-normal text-on-surface flex items-center gap-1.5 shadow-2xs">
-                              <span>📍 {loc}</span>
-                              <button
-                                type="button"
-                                onClick={() => removeLocation(loc)}
-                                className="text-on-surface-variant hover:text-error transition-colors text-xs font-bold px-1 cursor-pointer"
-                              >
-                                ✕
-                              </button>
-                            </span>
-                          ))
-                        )}
                       </div>
+                    </div>
+                    {phoneWarning && (
+                      <p className="text-[10px] text-error mt-1.5 font-medium">{phoneWarning}</p>
+                    )}
+                  </div>
+
+                  {/* Row 4, Col 2: Email Address */}
+                  <div>
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      Email Address <span className="text-red-500 font-bold">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                      value={profileEmail}
+                      onChange={e => setProfileEmail(e.target.value)}
+                      placeholder="name@domain.com"
+                    />
+                  </div>
+
+                  {/* Row 5, Col 1: Gender */}
+                  <div>
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      Gender <span className="text-red-500 font-bold">*</span>
+                    </label>
+                    <select
+                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                      value={gender}
+                      onChange={e => setGender(e.target.value)}
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Non-binary">Non-binary</option>
+                      <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                  </div>
+
+                  {/* Row 5, Col 2: Resume URL (Upload A Drive URL) */}
+                  <div>
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      Resume URL (Upload A Drive URL)
+                    </label>
+                    <input
+                      type="url"
+                      className={`w-full bg-surface-container-low border rounded-xl px-4 py-3 text-xs focus:outline-none transition-all text-on-surface font-sans font-normal ${
+                        isInvalidResumeUrl
+                          ? 'border-error focus:border-error ring-1 ring-error/30'
+                          : 'border-outline-variant focus:border-primary'
+                      }`}
+                      value={resumeUrl}
+                      onChange={e => setResumeUrl(e.target.value)}
+                      placeholder="https://drive.google.com/your-resume.pdf"
+                    />
+                    {isInvalidResumeUrl && (
+                      <p className="text-[10px] text-error font-medium mt-1.5">
+                        * Only valid Google Drive URLs are accepted.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Row 6, Col 1: LinkedIn Profile Link */}
+                  <div>
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      LinkedIn Profile Link
+                    </label>
+                    <div className="relative flex items-center">
+                      <div className="absolute left-3.5 pointer-events-none text-on-surface-variant flex items-center">
+                        <img
+                          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAABW0lEQVR4nO2ZvUoDQRRGjyh2/oC2goW+ge+g4C5aikI6S1/BRgJ5EJ/BThP1QewUfxB0U6W5sjCNYXZnZi32jtwDXxPuzH6HzWazCRiG0ZUjYAJMAek5U2AMlKkSIwXlpSHDlDMhylPEiEwUFJVA7mJEKgVFJZDvGBHJJEH6LigmMkfb4hfgBNhwOQPechTZV/RxHaRt8apnfi1HkdIzX+Qo8g4MgE2X+hp5zVFEFCVI3wXFRObosjhl5tHdi7aAZWAF2AMugY8cROob50Hg2OvAjXaRnZiDA0vAg2aRFLaBWQ4iixEz15pFLoBnN/cEnLfMnmoVOU58/t7VKnLfsGf9GwEdvoz2JvLZsGf9uo8FrSJ/3VdMBBPxYiKYCCYiJuJHTIT2xZoS5N+IVApKSiBfMSJjBUUlkNsYkVJBUQnkkEiGCspKQ65IpHD/nmq4Zir3doo+E4Zh8IsfFdRDh8Z3YCsAAAAASUVORK5CYII="
+                          alt="LinkedIn"
+                          className="w-4 h-4 object-contain"
+                        />
+                      </div>
+                      <input
+                        type="url"
+                        className="w-full bg-surface-container-low border border-outline-variant rounded-xl pl-10 pr-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                        value={socialLinks?.linkedin || ''}
+                        onChange={e => setSocialLinks({ ...socialLinks, linkedin: e.target.value, showLinkedin: true })}
+                        placeholder="https://linkedin.com/in/username"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 6, Col 2: Personal Portfolio Link */}
+                  <div>
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      Personal Portfolio Link
+                    </label>
+                    <div className="relative flex items-center">
+                      <div className="absolute left-3.5 pointer-events-none text-on-surface-variant flex items-center">
+                        <img
+                          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAAByElEQVR4nO2YzStEURiHn/JR2LCQKWQUkRUlHzsr/gUslLUFZWNlZaZs5Z/QZEmxVaSoYW2hFOUrxqyUObp13MY0M/frXPe9uk/9ms095/09zZ3TnQsJ/5MeIAcUAOUy1rX7wCCCJF48CFTGWtuNAHK60IGWcot17aFeu4cACrqMF4kfevXaNwSgdKJab4xEJGyRFJAF8kAxwGlkOkXdKQN0OUksCCuvauQDmK8lsQiUBJRULlOqJpPSllGXUz6+mV+3WVZAKb/ZKhe5ElDIb6wDwCaOt5XSsbrbhDnoC3jVn2HNsDG98QOwCYwCTXrGLvAZJ5FjoIPqtOhj/km6yC3QijP9hmVsTG24invWJIuMeRDpkyyS9iDSLFlkyoNIt2SRDQ8iS5JFpj2IjEgWGfYg0ilZZAdocCmSkSyigEkXEmnDM21MbrqNM+txECkCQ3UkBgK+YlV/JWLlpo7IRQjzbFSYm1dwHyeRxzoi13EReQZm64hMAHeSRfLACtCOM23AMnAqSSQPzOCfceAkapFL/fc1KI3AUZQic5gjyENkYBHrwc8k71H+RiTEJuoiiQiJCCJjE3WRRIQKkXMBZfzmrFwkASF8AwtIav6AvpvW"
+                          alt="Portfolio"
+                          className="w-4 h-4 object-contain"
+                        />
+                      </div>
+                      <input
+                        type="url"
+                        className="w-full bg-surface-container-low border border-outline-variant rounded-xl pl-10 pr-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                        value={socialLinks?.portfolio || ''}
+                        onChange={e => setSocialLinks({ ...socialLinks, portfolio: e.target.value, showPortfolio: true })}
+                        placeholder="https://myportfolio.com"
+                      />
                     </div>
                   </div>
                 </div>
               </div>
-            )}
+
+              {/* Work Preferences & Location Block */}
+              <div className="pt-4 border-t border-outline-variant space-y-4">
+                <div className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-[#000000]" />
+                  <h3 className="text-sm font-headline font-medium tracking-wider text-[#000000]">Work Preferences & Location</h3>
+                </div>
+
+                {/* Mode of Work and Type of Work as Dropdowns */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Mode of Work Dropdown */}
+                  <div>
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      Mode of Work<span className="text-red-500 font-bold"> *</span>
+                    </label>
+                    <select
+                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                      value={preferredWorkModes[0] || ''}
+                      onChange={e => setPreferredWorkModes(e.target.value ? [e.target.value] : [])}
+                    >
+                      <option value="">Open to All Modes</option>
+                      <option value="Remote">Remote</option>
+                      <option value="Hybrid">Hybrid</option>
+                      <option value="On-Site">On-Site</option>
+                    </select>
+                  </div>
+
+                  {/* Type of Work Looking For Dropdown */}
+                  <div>
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                      Type of Work Looking For<span className="text-red-500 font-bold"> *</span>
+                    </label>
+                    <select
+                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                      value={preferredWorkTypes[0] || ''}
+                      onChange={e => setPreferredWorkTypes(e.target.value ? [e.target.value] : [])}
+                    >
+                      <option value="">Open to All Types</option>
+                      <option value="Full-Time">Full-Time</option>
+                      <option value="Part-Time">Part-Time</option>
+                      <option value="Internship">Internship</option>
+                      <option value="Contract">Contract</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Preferred Location in India */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center flex-wrap gap-2">
+                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant">
+                      Preferred Location(s) in India <span className="text-red-500 font-bold">*</span>
+                    </label>
+
+                    {/* Any Location Checkbox */}
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={openToAnyLocation}
+                        onChange={e => setOpenToAnyLocation(e.target.checked)}
+                        className="rounded border-outline-variant text-primary focus:ring-0 w-4 h-4 cursor-pointer"
+                      />
+                      <span className="text-xs font-headline font-medium text-on-surface-variant">Any Location / Open to Relocate</span>
+                    </label>
+                  </div>
+
+                  {/* Search bar & dropdown for states */}
+                  <div className="relative" ref={locationContainerRef}>
+                    <input
+                      type="text"
+                      placeholder="Search district, city or state (e.g. Hyderabad, Telangana)..."
+                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs text-on-surface focus:outline-none focus:border-primary transition-all font-sans font-normal"
+                      value={locationSearchQuery}
+                      onChange={e => {
+                        setLocationSearchQuery(e.target.value);
+                        setIsLocationDropdownOpen(true);
+                      }}
+                      onFocus={() => setIsLocationDropdownOpen(true)}
+                    />
+
+                    {isLocationDropdownOpen && (
+                      <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-surface-container-high border border-outline-variant rounded-xl shadow-xl z-30 custom-scrollbar divide-y divide-outline-variant/30">
+                        {INDIAN_STATES.filter(state => state.toLowerCase().includes(locationSearchQuery.toLowerCase())).length === 0 ? (
+                          <div className="p-3 text-xs text-on-surface-variant text-center font-sans font-normal">No matching districts or states found</div>
+                        ) : (
+                          INDIAN_STATES.filter(state => state.toLowerCase().includes(locationSearchQuery.toLowerCase())).map(state => {
+                            const isAdded = preferredLocations.includes(state);
+                            return (
+                              <div
+                                key={state}
+                                onClick={() => addLocation(state)}
+                                className={`px-4 py-2.5 text-xs font-sans font-normal flex justify-between items-center cursor-pointer transition-colors ${
+                                  isAdded ? 'bg-primary/10 text-primary font-bold' : 'hover:bg-surface-container-highest text-on-surface'
+                                }`}
+                              >
+                                <span>{state}</span>
+                                {isAdded && <span className="text-[10px] bg-primary text-on-primary px-1.5 py-0.5 rounded font-sans">Added</span>}
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Selected Locations Badges */}
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {preferredLocations.length === 0 ? (
+                      <span className="text-xs text-on-surface-variant font-sans font-normal italic">No specific locations selected yet.</span>
+                    ) : (
+                      preferredLocations.map(loc => (
+                        <span key={loc} className="px-3 py-1 bg-surface-container border border-outline-variant rounded-xl text-xs font-sans font-normal text-on-surface flex items-center gap-1.5 shadow-2xs">
+                          <span>📍 {loc}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeLocation(loc)}
+                            className="text-on-surface-variant hover:text-error transition-colors text-xs font-bold px-1 cursor-pointer"
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
             {/* Panel 2: Video Showcase */}
             {profileTab === 'showcase' && (
@@ -1043,364 +1334,366 @@ export default function StudentProfile({
               </div>
             )}
 
-            {/* Panel 3: Social Links */}
-            {profileTab === 'socials' && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-headline font-bold text-on-surface mb-2">Social Profiles</h3>
-                <p className="text-xs text-on-surface-variant mb-4">Tick the checkbox to show the link on your resume.</p>
-                {[
-                  {
-                    key: 'linkedin',
-                    label: 'LinkedIn Profile Link',
-                    placeholder: 'https://linkedin.com/in/username',
-                    logo: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAABW0lEQVR4nO2ZvUoDQRRGjyh2/oC2goW+ge+g4C5aikI6S1/BRgJ5EJ/BThP1QewUfxB0U6W5sjCNYXZnZi32jtwDXxPuzH6HzWazCRiG0ZUjYAJMAek5U2AMlKkSIwXlpSHDlDMhylPEiEwUFJVA7mJEKgVFJZDvGBHJJEH6LigmMkfb4hfgBNhwOQPechTZV/RxHaRt8apnfi1HkdIzX+Qo8g4MgE2X+hp5zVFEFCVI3wXFRObosjhl5tHdi7aAZWAF2AMugY8cROob50Hg2OvAjXaRnZiDA0vAg2aRFLaBWQ4iixEz15pFLoBnN/cEnLfMnmoVOU58/t7VKnLfsGf9GwEdvoz2JvLZsGf9uo8FrSJ/3VdMBBPxYiKYCCYiJuJHTIT2xZoS5N+IVApKSiBfMSJjBUUlkNsYkVJBUQnkkEiGCspKQ65IpHD/nmq4Zir3doo+E4Zh8IsfFdRDh8Z3YCsAAAAASUVORK5CYII=" alt="linkedin" className="w-4.5 h-4.5 object-contain shrink-0" />
-                  },{
-                    key: 'portfolio',
-                    label: 'Personal Portfolio Link',
-                    placeholder: 'https://myportfolio.com',
-                    logo: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAAByElEQVR4nO2YzStEURiHn/JR2LCQKWQUkRUlHzsr/gUslLUFZWNlZaZs5Z/QZEmxVaSoYW2hFOUrxqyUObp13MY0M/frXPe9uk/9ms095/09zZ3TnQsJ/5MeIAcUAOUy1rX7wCCCJF48CFTGWtuNAHK60IGWcot17aFeu4cACrqMF4kfevXaNwSgdKJab4xEJGyRFJAF8kAxwGlkOkXdKQN0OUksCCuvauQDmK8lsQiUBJRULlOqJpPSllGXUz6+mV+3WVZAKb/ZKhe5ElDIb6wDwCaOt5XSsbrbhDnoC3jVn2HNsDG98QOwCYwCTXrGLvAZJ5FjoIPqtOhj/km6yC3QijP9hmVsTG24invWJIuMeRDpkyyS9iDSLFlkyoNIt2SRDQ8iS5JFpj2IjEgWGfYg0ilZZAdocCmSkSyigEkXEmnDM21MbrqNM+txECkCQ3UkBgK+YlV/JWLlpo7IRQjzbFSYm1dwHyeRxzoi13EReQZm64hMAHeSRfLACtCOM23AMnAqSSQPzOCfceAkapFL/fc1KI3AUZQic5gjyENkYBHrwc8k71H+RiTEJuoiiQiJCCJjE3WRRIQKkXMBZfzmrFwkASF8AwtIav6AvpvW" alt="portfolio" className="w-4.5 h-4.5 object-contain shrink-0" />
-                  },
-                  {
-                    key: 'github',
-                    label: 'GitHub Profile Link',
-                    placeholder: 'https://github.com/username',
-                    logo: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAACi0lEQVR4nO2YS0hVURSGv+ulhzRyUFCIZYNe0qwGNbWEdNTAWRBBo3AmWYKRQRmZ1jScFSRJSNhrakERNQl6QUSBVDQPe5F1YscKDoe9jse717EL7g8WnHvu3v9ae6/9PBCJRCKROmM90AX0AMfE3HMn0EKd0gaMAu+AZB57C5wHtlIHbAGmgN8FAs+aq3MD2Pw/Am8ABoAfNQSete9Av2guCquAuwaBZ+2WaJce/MMSgk/EHpTZiIaSej7xZKKU4TSQcfQT2AHsAa7I76JBurKXgXZgJzCX+d/NCfPVJjthn3uWUpehaWAIOAx0i7nns8A9KbMtU/elZ2JvsmzAlKcXHxnqP/boT1qJtynr/GsrB8Abj/4vq81uJGf9rhroV0XL5+Ocgb56PDiDHUOKD5eZIFoU4W9AE3Y0iabPV3OIcJciehN7biu+9oWI9iiiF7DnouLrSIhovyLahz19iq+gTe2oIjqIPacUXy6GmjmkiF7FnmuKr4Mhop2K6EfjA1cV+FTGJF6Tc9vabxc/3YoP53t1qPgrRfw9sM4g+GbJqM/HCwP9v9t5othToDVAeyPwLEffnWCDaU2d112vd8inkll591nuCmsXoOkyd0LqasHPyScaEyZTF5HjQAXYKyfG9Hh1KT+ZozMoZYp8xZjAEJeFLynxA/K+1+PYNUyjo0DgiWTXrPd9m9qH1OXbnZfuAE+AS8CKHI3Ggr3fSwlUJK3/nAzXqKOdOhOxcfFVCiuB+ylnY8B2YDmwrOCymteA6XkyaEKjsu27ofE1oAHk0kGLQkXmRHpiJzU2YFbGfGnDJo8NwPXUPjFToM5Map2fqJdP7m7JOw3sKlB2t5Q1XyYjkUgksvT4A9CAyJgLiLHIAAAAAElFTkSuQmCC" alt="github" className="w-6.5 h-6.5 object-contain shrink-0" />
-                  },
-                  {
-                    key: 'hackerEarth',
-                    label: 'HackerEarth Profile Link',
-                    placeholder: 'https://hackerearth.com/@username',
-                    logo: (
-                      <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="Hackerearth--Streamline-Simple-Icons" className="w-4.5 h-4.5 shrink-0" fill="currentColor">
-                        <title>HackerEarth</title>
-                        <path d="M18.447 20.936H5.553V19.66h12.894zM20.973 0H9.511v6.51h0.104c0.986 -1.276 2.206 -1.4 3.538 -1.306 1.967 0.117 3.89 1.346 4.017 5.169v7.322c0 0.089 -0.05 0.177 -0.138 0.177h-2.29c-0.09 0 -0.253 -0.082 -0.253 -0.177V10.6c0 -1.783 -0.58 -3.115 -2.341 -3.115 -1.282 0 -2.637 0.892 -2.637 2.77v7.417c0 0.089 -0.008 0.072 -0.102 0.072h-2.29c-0.09 0 -0.29 0.022 -0.29 -0.072V0H3.178c-0.843 0 -1.581 0.673 -1.581 1.515v20.996c0 0.843 0.738 1.489 1.58 1.489h17.797c0.843 0 1.431 -0.646 1.431 -1.489V1.515c0 -0.842 -0.588 -1.515 -1.43 -1.515" strokeWidth="1"></path>
-                      </svg>
-                    )
-                  },
-                  {
-                    key: 'hackerRank',
-                    label: 'HackerRank Profile Link',
-                    placeholder: 'https://hackerrank.com/username',
-                    logo: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAABl0lEQVR4nLWWu0qDQRCFP9BKBQu1sDHgGxgvxOANfAGfwkrFzkZFEFSwUxFsxIew0spSI6igUcGEBALemmhSeeGXhSmG5d/N/qIDp5mcM5PM7p4JhEUXsAIUBctAJ38QbcACUAUiCzVgA2j/TeFmYB54jSls4wWYBZpCi/cDuYDCkYVLINNoHHvAtyWsA9eBTYx2B2i1i6eA+xhBFUgDLcBxgl+TB3p0gwMH8QzoFs5qwpHt6wa+mfcJ50rlnoBpYM2jO9UNyh7igHBurREg43PpSrqB7zoOCaeocua8TAx6dM+6Qd1DHBZOReUKkst4dO+6wZeHOCKcTbnGBuuSy3p0n6ENxnDHqEf3oYk1D3FcOIfAueBIchOhI/IdclY4BZV7lNxk6CGXA27RncpVAhqUQh/aFNALPKic+ULI+QQ9NJdVRA5sKQ/LhVhFynqpjXAi7mus/S3m8xvb7BCL3Y2x68iBfMwDNdptcV9npMVFo4S4aLRw7JU5J+uwUWFzHWeSrEx7bP+y9O0wf1GW5LEZLAIdIcofdeZeKYubThQAAAAASUVORK5CYII=" alt="hackerRank" className="w-4.5 h-4.5 object-contain shrink-0" />
-                  },
-                  {
-                    key: 'codechef',
-                    label: 'CodeChef Profile Link',
-                    placeholder: 'https://codechef.com/users/username',
-                    logo: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFjUlEQVR4nO2aeWxVVRDGfy2CtlJDFRcQMVHQiqJBIkpcAyh1wR0XggbcRepeIMGoMY2xaEUNaAyKCzUoKlUTrVLFFa0QFNS44PKHKyKiogXF1pqJ300mJ+e10Hf72hq+5CbvnHvPnDvnzpn5Zs6DrWgV+UAxUEQXw3bABGAh8CPwD9DsrnXAZ7p/KzAO2JtOhN2BCmBN8OJ2/S4FNkXuJdf3wBxgFJCXa5M5ErgFeB34273UUuAaYHZkXG/gFOBM4EagBlgbKPU+MCYXShwBfBhMvhF4UvcMl7vfHqbEbpFFOQSYD3znZM4FeraXEmOBvzSR7YE7gRuAnYPn5gE9IuMfySC3F3A1sC1wFdCgOT4C+qatxAFugueAAvWbTR8TPFsdGT8wQ7/hJuBQ1y5xX/0TYCdSxDwJfgCYAhS6eycB27v2U5Hx1+qFQ3QH3pCJeewIrNCciyL32wQTsl7udE9gMvCaE74rcIF73txriAXA+ZH+02RWMQwANkiZTM9sEQZK2JfOnJYBpe4Z+1IJXorI+FSeLsRc7ZEQBUAdcIbm/k0LlhWGStg7rs880x2ubZNuo9/vRkzB4skeEbOqzDDn3VLS8Izmn5WlHuwjQRaV/Wd/xbWf0HOJUmaCCQo13iK/h7noYZH5Bik2Hav2iRpfm60i3eWxmoB+rv8D93sGcIJ+20oe5+71kq2HGJ9hEz8KrAa6qX29FLmPFDBfwspd39PALvo92W34aUBZENG/jchMFPfoIzpzj9pmrp9r7uPTUGSMhK0MXOpIF7WNmiSeyNtzT8WFEN5ZJCjXPMPVvkTtj9PiYT0cKTxIfcOdWxzq4oTtj5fd2Hy56xCmfIiV8nB5YsbrNefppIhZEmr7AW3exG7NxKrcs0uCscZuPbrJtXr0l/xpkr1M7cdIGYdJ8DfuM3sTMu6VoDogffZyHkYeRwR9FwON4lcPaa4vlJylijzHUI0PGW6WV0u8S4JJwMGubQmXx17A4KDPXv55jbU5/og8kxoe1yS2eiha2/5AGV+CwUE73Nj7RyK1sd0qMWyjQ2fRjiiTIkYiE1s/W79HiIZXiFutUnCs056x/TQVGC3JnDCBRI4o8JPk3047Y1/HfQrlzewFl7eQysYuW/G3gIskp5+7tzhQst1QrwnvUr6QvMBa5SrTFbVLFWdOVtts/3652EY37itxLvv9q7xXTnBFsLrLZV6xrDATiqTc0kDWVHKIvq7UM9N5rbZ6wtmSZdTEJ2g5wdua/JzISh8l25+i+pWt8kSlsz6zTFDqKig5R+K9nlVUv06eqamVTd4o+j9JZNJwtO69mns1/osBjcob/gxKQ/a1HgRu01Wp+LMiKNQ1KIGa4LxVh2CRc6W1IoGt2Xix6P6Lka9naUGHYD9VDC22tLXElKSxzfo6XRqWDtybxYKkCiOBQ0Q1RinWdPrjhAHApUG+na/EymLCqSohWYl1S2B5fpnS3Xb3VJUqJNRniAnZ4DzgB5HHalVTUkWhssIN4knjM5C6PHGhVap7xTBSxYT6SPHbYKZ5uKr7G4MKZtZYLK9S0UoBYIhIX7lWNoYXVNhbrWifCYNU1EuKdKlgoWKFlUwvbIFb9VaQe1MFhBiqlJ806MAnhonAL6rSpH6CdaCqiRbEvhaPiuXS47Tq5rliKFZKO8MV4Hwhr0YL5o8Z2gUlqgQ2KTqnCcsuHwZ2IIcYtpnV8SRJytNX7bIoEI2fqdPfTov+kb7RMr8al6+U6AzRaP+VkYPOnKW3mTBHm9tOoy5z+XxyNamEuiToX6Pj7bHyZFY96VBMbyWR2qTEq7aV56ym1aHoE5yPh5e5abTR17VQGjqXTsJ8F4hSNCtrrHMnTr5oYab4s1PgPR1DdCrkKeBtzlFykf4gsBX/W/wL6eSc61JkiqEAAAAASUVORK5CYII=" alt="codechef" className="w-4.5 h-4.5 object-contain shrink-0" />
-                  },
-                  {
-                    key: 'leetcode',
-                    label: 'LeetCode Profile Link',
-                    placeholder: 'https://leetcode.com/username',
-                    logo: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAABcUlEQVR4nLWVSytFURTHf96vsRkjX0CGBnTiSuIDmAmZmPgG0r0DJckzYSiZiYi6MvAVlJmJieRKHhfXu1371Go711nn3ONfa3LWf/3Wbp+914boKgeWgAdgJEZ9KHwd+LZxnCS8GMgT8BfASxK+LOAFYCBJ+IqAmxhMEr7owE3cA2mgslT4fABcxgFQE7fBnAPbBSaBTeBDfN8DqqPCZwXgExh28ikgLzw7QIUWPiMKv4CxIr5O4FF4+zTwtAMfD/G3AzngGmgKg3dbqN9gQrMi+5OrNMZ9AZ/iH5Sz8JuA8+0BdyFH1g9zwjaCGhSs4SwgN62Ey4v4Sxc2+Rrww5qBLSCriMNio2RBrOAUaNDurVZmlbeiyQlQr6jrB3q1TTqAJ9EkC9T94c8Ir7kTKnnOGDgCakNuvBknrURQF/DsNGm0ObNtqw58iBhK2WdRPpHn9rGX42Q0DtxXjwOU8VYq3FeLfewvgXfgCtgG2jTVPwrwoQTdUqOjAAAAAElFTkSuQmCC" alt="leetcode" className="w-4.5 h-4.5 object-contain shrink-0" />
-                  },
-                  {
-                    key: 'codeforces',
-                    label: 'CodeForces Profile Link',
-                    placeholder: 'https://codeforces.com/profile/username',
-                    logo: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAdUlEQVR4nO2VQQrAIAwE5zE+UegHah9ZfEg9pRQUSmtA2hw8ZGFBwq4DOSi4jLQBBZDq65wwVLld3nxYAkTxHIAARGCpjnVmBsid4m4JkIGyzAAI2qqtAFlbtRVAtIwDmhzA58zIU1z+ZFLnM1kf5WSUcfHSCQs09IEYzMYTAAAAAElFTkSuQmCC" alt="codeforces" className="w-4.5 h-4.5 object-contain shrink-0" />
-                  },
-                  {
-                    key: 'kaggle',
-                    label: 'Kaggle Profile Link',
-                    placeholder: 'https://kaggle.com/username',
-                    logo: <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAA1UlEQVR4nO3WMQrCQBCF4T9WVnoJG/EA9h5AULDIEewtlYAgqGBn7xns7FLYiq3WXkBQEKtEFlIM4yIGJ2CRgWlml/exU4SAv3ZAmnWPAioWQFgCviqB/wcCYA4cRHesgABYi3PXK8sXLFT4Mm/4J2Cmwt2asAKmVuE+YKTCJ7+Ea2Cvwh2GJZCKToBBkUAK3IGWJZAAY+AiZmegbgVE2awNPMV8C1QsgFDMh2pdkTXgaqPW18cYqAJHcX4DmpaAqwZwFXdOQC0P8M1vSxd4iHvuC/tWL9T+il5MsxLWAAAAAElFTkSuQmCC" alt="kaggle" className="w-4.5 h-4.5 object-contain shrink-0" />
-                  }
-                ].map(link => {
-                  const showKey = `show${link.key.charAt(0).toUpperCase()}${link.key.slice(1)}`;
-                  const hasLink = socialLinks[link.key] !== undefined && socialLinks[link.key] !== null && String(socialLinks[link.key]).trim() !== '';
-                  return (
-                    <div key={link.key} className="p-4 bg-surface-container-low border border-outline-variant rounded-xl flex items-center gap-4">
-                      <div className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
-                        {hasLink && (
-                          <label className="flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="rounded border-outline-variant text-primary bg-surface-container-low focus:ring-0 focus:ring-offset-0 w-4 h-4 animate-fade-in"
-                              checked={socialLinks[showKey] || false}
-                              onChange={e => setSocialLinks({ ...socialLinks, [showKey]: e.target.checked })}
-                            />
-                          </label>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          {link.logo}
-                          <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">{link.label}</label>
-                        </div>
-                        <input
-                          type="url"
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:border-primary focus:outline-none transition-all"
-                          value={socialLinks[link.key] || ''}
-                          onChange={e => setSocialLinks({ ...socialLinks, [link.key]: e.target.value })}
-                          placeholder={link.placeholder}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
             {/* Panel 3: Education */}
             {profileTab === 'education' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-outline-variant pb-3">
                   <h3 className="text-lg font-headline font-bold text-on-surface">Education History</h3>
-                  <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">{educationList.length} Items Added</span>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-xs font-sans font-normal tracking-wider text-secondary">{educationList.length} Items Added</span>
+                    {educationList.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={openAddEduModal}
+                        className="px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-headline font-medium hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Add Education
+                      </button>
+                    )}
+                  </div>
                 </div>
+
+                {/* Empty State */}
+                {educationList.length === 0 && (
+                  <div className="p-8 sm:p-12 border border-outline-variant border-dashed rounded-2xl bg-surface-container-low/50 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in">
+                    <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface-variant">
+                      <GraduationCap className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-headline font-bold text-on-surface">You haven't added any record</h4>
+                      <p className="text-xs font-sans font-normal text-on-surface-variant max-w-sm">
+                        Add your school, college, or university education to display your academic background.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={openAddEduModal}
+                      className="px-4 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Education
+                    </button>
+                  </div>
+                )}
 
                 {/* Existing items */}
                 {educationList.length > 0 && (
-                  <div className="space-y-3">
+                  <div className="flex flex-col gap-4">
                     {educationList.map((edu, idx) => (
-                      <div key={idx} className="p-4 bg-surface-container-low border border-outline-variant rounded-xl flex justify-between items-start">
-                        <div>
-                          <p className="text-sm font-bold text-on-surface">{edu.degree} - {edu.fieldOfStudy}</p>
-                          <p className="text-xs text-on-surface-variant">{edu.institute} ({edu.eduType})</p>
-                          <p className="text-[10px] text-secondary font-sans font-normal mt-1">
-                            {edu.startDate} to {edu.endDate} • {edu.gradeType}: {edu.gradeValue || 'N/A'}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const item = educationList[idx];
-                              setNewEdu({ ...item });
-                              if (item.eduType === 'High School') {
-                                const match10 = item.degree.match(/Class 10:\s*([\d.]+)%/);
-                                const match12 = item.degree.match(/Class 12:\s*([\d.]+)%/);
-                                const match11 = item.fieldOfStudy.match(/Class 11 Stream:\s*(.*)/);
-                                if (match10) setClass10Percent(match10[1]);
-                                if (match12) setClass12Percent(match12[1]);
-                                if (match11) setClass11Stream(match11[1]);
-                              }
-                              setEditingEduIdx(idx);
-                            }}
-                            className="text-primary hover:text-primary/70 text-xs font-sans font-normal transition-colors"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEducationList(educationList.filter((_, i) => i !== idx));
-                              if (editingEduIdx === idx) {
-                                setEditingEduIdx(null);
-                                setNewEdu({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
-                                setClass10Percent('');
-                                setClass12Percent('');
-                                setClass11Stream('');
-                              }
-                            }}
-                            className="text-error hover:text-error/70 text-xs font-sans font-normal transition-colors"
-                          >
-                            Delete
-                          </button>
+                      <div
+                        key={idx}
+                        className="p-5 sm:p-6 bg-surface-container-low border border-outline-variant hover:border-primary/40 rounded-2xl flex flex-col gap-3.5 shadow-2xs hover:shadow-sm transition-all overflow-hidden w-full max-w-full"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="space-y-1.5 flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="px-2.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md text-[10px] font-headline font-bold tracking-wider">
+                                {edu.eduType || 'Degree'}
+                              </span>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-3">
+                              <h4 className="text-base sm:text-lg font-headline font-bold text-on-surface tracking-tight break-words">
+                                {edu.degree || edu.eduType}
+                              </h4>
+                              {edu.fieldOfStudy && (
+                                <p className="text-xs sm:text-sm font-sans font-semibold text-on-surface-variant flex items-center gap-1.5">
+                                  <span>{edu.fieldOfStudy}</span>
+                                </p>
+                              )}
+                            </div>
+
+                            <p className="text-xs sm:text-sm font-sans font-medium text-on-surface flex items-center gap-1.5">
+                              🏛️ <span className="font-semibold">{edu.institute}</span>
+                            </p>
+
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              {(edu.startDate || edu.endDate) && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-sans font-medium text-on-surface">
+                                  🗓️ {edu.startDate || 'N/A'} - {edu.endDate || 'N/A'}
+                                </span>
+                              )}
+                              {edu.gradeValue && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 border border-primary/20 rounded-lg text-xs font-headline font-semibold text-primary">
+                                  ⭐ {edu.gradeType || 'Grade'}: {edu.gradeValue}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 sm:self-start">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const item = educationList[idx];
+                                setNewEdu({ ...item });
+                                if (item.eduType === 'High School') {
+                                  const match10 = item.degree.match(/Class 10:\s*([\d.]+)%/);
+                                  const match12 = item.degree.match(/Class 12:\s*([\d.]+)%/);
+                                  const match11 = item.fieldOfStudy.match(/Class 11 Stream:\s*(.*)/);
+                                  if (match10) setClass10Percent(match10[1]);
+                                  if (match12) setClass12Percent(match12[1]);
+                                  if (match11) setClass11Stream(match11[1]);
+                                }
+                                setEditingEduIdx(idx);
+                                setActiveModal('education');
+                              }}
+                              className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEducationList(educationList.filter((_, i) => i !== idx));
+                                if (editingEduIdx === idx) {
+                                  setEditingEduIdx(null);
+                                  setNewEdu({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
+                                  setClass10Percent('');
+                                  setClass12Percent('');
+                                  setClass11Stream('');
+                                  closeModal();
+                                }
+                              }}
+                              className="px-3 py-1.5 bg-error-container hover:bg-error-container/80 text-on-error-container border border-error/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
 
-                {/* Add Form */}
-                <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
-                  <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Add Education Record</h4>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Education Type</label>
-                      <select
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        value={newEdu.eduType}
-                        onChange={handleEduTypeChange}
-                      >
-                        <option value="">Select level of education</option>
-                        {!educationList.some(e => e.eduType === 'High School') && (
-                          <option value="High School">High School</option>
-                        )}
-                        {!educationList.some(e => e.eduType === 'Diploma') && (
-                          <option value="Diploma">Diploma</option>
-                        )}
-                        {!educationList.some(e => e.eduType === 'Bachelors') && (
-                          <option value="Bachelors">Bachelors Degree</option>
-                        )}
-                        {!educationList.some(e => e.eduType === 'Masters') && (
-                          <option value="Masters">Masters Degree</option>
-                        )}
-                        {!educationList.some(e => e.eduType === 'Doctorate') && (
-                          <option value="Doctorate">Doctorate / PhD</option>
-                        )}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Institute</label>
-                      <input
-                        type="text"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="Enter your Institute Name"
-                        value={newEdu.institute}
-                        onChange={e => setNewEdu({ ...newEdu, institute: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  {newEdu.eduType === 'High School' ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Percentage in Class 10</label>
-                        <input
-                          type="text"
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                          placeholder="e.g. 92%"
-                          value={class10Percent}
-                          onChange={e => handleClass10Change(e.target.value)}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Percentage in Class 12</label>
-                        <input
-                          type="text"
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                          placeholder="e.g. 88%"
-                          value={class12Percent}
-                          onChange={e => handleClass12Change(e.target.value)}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Stream in Class 11</label>
-                        <input
-                          type="text"
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                          placeholder="e.g. Science"
-                          value={class11Stream}
-                          onChange={e => handleStreamChange(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Degree</label>
-                        <input
-                          type="text"
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                          placeholder="ex. Bachelor of Education"
-                          value={newEdu.degree}
-                          onChange={e => setNewEdu({ ...newEdu, degree: e.target.value })}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Field of Study</label>
-                        <input
-                          type="text"
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                          placeholder="ex. Computer Science"
-                          value={newEdu.fieldOfStudy}
-                          onChange={e => setNewEdu({ ...newEdu, fieldOfStudy: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {newEdu.eduType !== 'High School' && (
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="md:col-span-1">
-                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Start Date</label>
-                        <input
-                          type="date"
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                          value={newEdu.startDate}
-                          onChange={e => setNewEdu({ ...newEdu, startDate: e.target.value })}
-                        />
-                      </div>
-
-                      <div className="md:col-span-1">
-                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">End Date</label>
-                        <input
-                          type="date"
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                          value={newEdu.endDate}
-                          onChange={e => setNewEdu({ ...newEdu, endDate: e.target.value })}
-                        />
-                      </div>
-
-                      <div className="md:col-span-1">
-                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Grade Type</label>
-                        <select
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                          value={newEdu.gradeType}
-                          onChange={e => setNewEdu({ ...newEdu, gradeType: e.target.value })}
-                        >
-                          <option value="">Select Grade Type</option>
-                          <option value="Percentage">Percentage (%)</option>
-                          <option value="CGPA">CGPA</option>
-                          <option value="GPA">GPA</option>
-                          <option value="Grade">Letter Grade</option>
-                        </select>
-                      </div>
-
-                      <div className="md:col-span-1">
-                        <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Grade Value</label>
-                        <input
-                          type="text"
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                          placeholder="e.g. 9.4 / 92%"
-                          value={newEdu.gradeValue}
-                          onChange={e => setNewEdu({ ...newEdu, gradeValue: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!newEdu.eduType || !newEdu.institute || !newEdu.degree) {
-                          alert('Please fill out Education Type, Institute, and Degree/Class details.');
-                          return;
-                        }
-                        if (editingEduIdx !== null) {
-                          const updatedList = [...educationList];
-                          updatedList[editingEduIdx] = newEdu;
-                          setEducationList(updatedList);
-                          setEditingEduIdx(null);
-                        } else {
-                          setEducationList([...educationList, newEdu]);
-                        }
-                        setNewEdu({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
-                        setClass10Percent('');
-                        setClass12Percent('');
-                        setClass11Stream('');
-                      }}
-                      className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
-                    >
-                      {editingEduIdx !== null ? 'Save Edit' : 'Add to List'}
-                    </button>
-                    {editingEduIdx !== null && (
+                {/* Pop-up Modal for Add/Edit Education */}
+                {activeModal === 'education' && (
+                  <div
+                    className="absolute inset-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/25 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget) closeModal();
+                    }}
+                  >
+                    <div className="bg-surface-container border border-outline-variant rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                       <button
                         type="button"
-                        onClick={() => {
-                          setEditingEduIdx(null);
-                          setNewEdu({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
-                          setClass10Percent('');
-                          setClass12Percent('');
-                          setClass11Stream('');
-                        }}
-                        className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-bold rounded-lg text-xs hover:bg-surface-container-highest transition-all"
+                        onClick={closeModal}
+                        className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all cursor-pointer"
                       >
-                        Cancel
+                        <X className="w-4 h-4" />
                       </button>
-                    )}
+
+                      <div className="flex items-center gap-3 border-b border-outline-variant pb-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                          <GraduationCap className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-headline font-bold text-on-surface">
+                            {editingEduIdx !== null ? 'Edit Education Record' : 'Add Education Record'}
+                          </h3>
+                          <p className="text-xs font-sans font-normal text-on-surface-variant">
+                            {editingEduIdx !== null ? 'Update your academic credentials' : 'Enter details of your school, college, or university'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Education Type</label>
+                            <select
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              value={newEdu.eduType}
+                              onChange={handleEduTypeChange}
+                            >
+                              <option value="">Select level of education</option>
+                              {(!educationList.some((e, i) => e.eduType === 'High School' && i !== editingEduIdx)) && (
+                                <option value="High School">High School</option>
+                              )}
+                              {(!educationList.some((e, i) => e.eduType === 'Diploma' && i !== editingEduIdx)) && (
+                                <option value="Diploma">Diploma</option>
+                              )}
+                              {(!educationList.some((e, i) => e.eduType === 'Bachelors' && i !== editingEduIdx)) && (
+                                <option value="Bachelors">Bachelors Degree</option>
+                              )}
+                              {(!educationList.some((e, i) => e.eduType === 'Masters' && i !== editingEduIdx)) && (
+                                <option value="Masters">Masters Degree</option>
+                              )}
+                              {(!educationList.some((e, i) => e.eduType === 'Doctorate' && i !== editingEduIdx)) && (
+                                <option value="Doctorate">Doctorate / PhD</option>
+                              )}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Institute</label>
+                            <input
+                              type="text"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="Enter your Institute Name"
+                              value={newEdu.institute}
+                              onChange={e => setNewEdu({ ...newEdu, institute: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        {newEdu.eduType === 'High School' ? (
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Percentage in Class 10</label>
+                              <input
+                                type="text"
+                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                placeholder="e.g. 92%"
+                                value={class10Percent}
+                                onChange={e => handleClass10Change(e.target.value)}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Percentage in Class 12</label>
+                              <input
+                                type="text"
+                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                placeholder="e.g. 88%"
+                                value={class12Percent}
+                                onChange={e => handleClass12Change(e.target.value)}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Stream in Class 11</label>
+                              <input
+                                type="text"
+                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                placeholder="e.g. Science"
+                                value={class11Stream}
+                                onChange={e => handleStreamChange(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Degree</label>
+                              <input
+                                type="text"
+                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                placeholder="ex. Bachelor of Education"
+                                value={newEdu.degree}
+                                onChange={e => setNewEdu({ ...newEdu, degree: e.target.value })}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Field of Study</label>
+                              <input
+                                type="text"
+                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                placeholder="ex. Computer Science"
+                                value={newEdu.fieldOfStudy}
+                                onChange={e => setNewEdu({ ...newEdu, fieldOfStudy: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {newEdu.eduType !== 'High School' && (
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="md:col-span-1">
+                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Start Date</label>
+                              <input
+                                type="date"
+                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                                value={newEdu.startDate}
+                                onChange={e => setNewEdu({ ...newEdu, startDate: e.target.value })}
+                              />
+                            </div>
+
+                            <div className="md:col-span-1">
+                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">End Date</label>
+                              <input
+                                type="date"
+                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                                value={newEdu.endDate}
+                                onChange={e => setNewEdu({ ...newEdu, endDate: e.target.value })}
+                              />
+                            </div>
+
+                            <div className="md:col-span-1">
+                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Grade Type</label>
+                              <select
+                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                value={newEdu.gradeType}
+                                onChange={e => setNewEdu({ ...newEdu, gradeType: e.target.value })}
+                              >
+                                <option value="">Select Grade Type</option>
+                                <option value="Percentage">Percentage (%)</option>
+                                <option value="CGPA">CGPA</option>
+                                <option value="GPA">GPA</option>
+                                <option value="Grade">Letter Grade</option>
+                              </select>
+                            </div>
+
+                            <div className="md:col-span-1">
+                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Grade Value</label>
+                              <input
+                                type="text"
+                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                placeholder="e.g. 9.4 / 92%"
+                                value={newEdu.gradeValue}
+                                onChange={e => setNewEdu({ ...newEdu, gradeValue: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingEduIdx(null);
+                            setNewEdu({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
+                            setClass10Percent('');
+                            setClass12Percent('');
+                            setClass11Stream('');
+                            closeModal();
+                          }}
+                          className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-headline font-medium rounded-xl text-xs hover:bg-surface-container-highest transition-all cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!newEdu.eduType || !newEdu.institute || !newEdu.degree) {
+                              alert('Please fill out Education Type, Institute, and Degree/Class details.');
+                              return;
+                            }
+                            if (editingEduIdx !== null) {
+                              const updatedList = [...educationList];
+                              updatedList[editingEduIdx] = newEdu;
+                              setEducationList(updatedList);
+                              setEditingEduIdx(null);
+                            } else {
+                              setEducationList([...educationList, newEdu]);
+                            }
+                            setNewEdu({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
+                            setClass10Percent('');
+                            setClass12Percent('');
+                            setClass11Stream('');
+                            closeModal();
+                          }}
+                          className="px-5 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                        >
+                          {editingEduIdx !== null ? 'Save Edit' : 'Add to List'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -1409,7 +1702,19 @@ export default function StudentProfile({
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-outline-variant pb-3">
                   <h3 className="text-lg font-headline font-bold text-on-surface">Work Experience</h3>
-                  <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">{experienceList.length} Items Added</span>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-xs font-sans font-normal tracking-wider text-secondary">{experienceList.length} Items Added</span>
+                    {experienceList.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={openAddExpModal}
+                        className="px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-headline font-medium hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Add Experience
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Verified Gig Stats Card */}
@@ -1420,7 +1725,7 @@ export default function StudentProfile({
                         <Award className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-sans font-normal uppercase text-on-surface-variant">Completed Geeks</p>
+                        <p className="text-xs font-sans font-normal text-on-surface-variant">Completed Geeks</p>
                         <p className="text-xs font-bold text-on-surface">{completedGigsCount} Verified Geeks</p>
                       </div>
                     </div>
@@ -1429,65 +1734,127 @@ export default function StudentProfile({
                         <Star className="w-5 h-5 fill-warning/20" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-sans font-normal uppercase text-on-surface-variant">Average Rating</p>
+                        <p className="text-xs font-sans font-normal text-on-surface-variant">Average Rating</p>
                         <p className="text-xs font-bold text-on-surface">{averageRating} / 5.0 Rating</p>
                       </div>
                     </div>
                   </div>
                 )}
 
+                {/* Empty State */}
+                {experienceList.length === 0 && (
+                  <div className="p-8 sm:p-12 border border-outline-variant border-dashed rounded-2xl bg-surface-container-low/50 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in">
+                    <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface-variant">
+                      <Briefcase className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-headline font-bold text-on-surface">You haven't added any record</h4>
+                      <p className="text-xs font-sans font-normal text-on-surface-variant max-w-sm">
+                        Add your internships, full-time jobs, or freelance projects to showcase your professional journey.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={openAddExpModal}
+                      className="px-4 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Experience
+                    </button>
+                  </div>
+                )}
+
                 {/* Existing items */}
                 {experienceList.length > 0 && (
-                  <div className="space-y-3">
+                  <div className="flex flex-col gap-4">
                     {experienceList.map((exp, idx) => (
-                      <div key={idx} className={`p-4 border rounded-xl flex justify-between items-start ${exp.expType === 'Gig' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-surface-container-low border-outline-variant'}`}>
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-sm font-bold text-on-surface">{exp.designation} at {exp.companyName}</p>
-                            {exp.expType === 'Gig' && (
-                              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[9px] font-sans font-normal font-semibold border border-emerald-500/20">
-                                <Award className="w-3 h-3" /> Verified Gig
+                      <div
+                        key={idx}
+                        className={`p-5 sm:p-6 border rounded-2xl flex flex-col gap-4 shadow-2xs hover:shadow-sm transition-all overflow-hidden w-full max-w-full ${
+                          exp.expType === 'Gig'
+                            ? 'bg-emerald-500/5 border-emerald-500/30'
+                            : 'bg-surface-container-low border-outline-variant hover:border-primary/40'
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="space-y-1.5 flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="px-2.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md text-[10px] font-headline font-bold tracking-wider">
+                                {exp.expType || 'Role'}
                               </span>
-                            )}
+                              {exp.expType === 'Gig' && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 text-[10px] font-headline font-bold border border-emerald-500/20">
+                                  <Award className="w-3 h-3" /> Verified Gig
+                                </span>
+                              )}
+                              {exp.involvesTech && (
+                                <span className="px-2 py-0.5 bg-secondary/10 text-secondary border border-secondary/20 rounded-md text-[10px] font-headline font-medium">
+                                  Tech Role
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-3">
+                              <h4 className="text-base sm:text-lg font-headline font-bold text-on-surface tracking-tight break-words">
+                                {exp.designation}
+                              </h4>
+                              <p className="text-xs sm:text-sm font-sans font-semibold text-on-surface-variant flex items-center gap-1.5">
+                                <span>🏢 {exp.companyName}</span>
+                                {exp.domain && <span className="opacity-75">• {exp.domain}</span>}
+                              </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-sans font-medium text-on-surface">
+                                🗓️ {exp.startDate} to {exp.currentlyWorking ? 'Present' : exp.endDate || 'N/A'}
+                              </span>
+                              {exp.location && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container border border-outline-variant rounded-lg text-xs font-sans font-medium text-on-surface">
+                                  📍 {exp.location}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-xs text-on-surface-variant">{exp.domain} ({exp.expType || 'Experience'}) {exp.involvesTech && '• Tech Role'}</p>
-                          <p className="text-[10px] text-secondary font-sans font-normal mt-1">
-                            {exp.startDate} to {exp.currentlyWorking ? 'Present' : exp.endDate} • {exp.location || 'Remote'}
-                          </p>
-                          {exp.expType === 'Gig' && exp.description && (
-                            <p className="text-xs text-on-surface-variant mt-2 italic bg-surface-container-high/40 p-2.5 rounded-lg border border-outline-variant/30 leading-relaxed">
-                              {exp.description}
-                            </p>
+
+                          {exp.expType !== 'Gig' && (
+                            <div className="flex items-center gap-2 shrink-0 sm:self-start">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const item = experienceList[idx];
+                                  setNewExp({ ...item });
+                                  setDomainSearch('');
+                                  setEditingExpIdx(idx);
+                                  setActiveModal('experience');
+                                }}
+                                className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setExperienceList(experienceList.filter((_, i) => i !== idx));
+                                  if (editingExpIdx === idx) {
+                                    setEditingExpIdx(null);
+                                    setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
+                                    setDomainSearch('');
+                                    closeModal();
+                                  }
+                                }}
+                                className="px-3 py-1.5 bg-error-container hover:bg-error-container/80 text-on-error-container border border-error/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           )}
                         </div>
-                        {exp.expType !== 'Gig' && (
-                          <div className="flex items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const item = experienceList[idx];
-                                setNewExp({ ...item });
-                                setDomainSearch('');
-                                setEditingExpIdx(idx);
-                              }}
-                              className="text-primary hover:text-primary/70 text-xs font-sans font-normal transition-colors"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setExperienceList(experienceList.filter((_, i) => i !== idx));
-                                if (editingExpIdx === idx) {
-                                  setEditingExpIdx(null);
-                                  setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
-                                  setDomainSearch('');
-                                }
-                              }}
-                              className="text-error hover:text-error/70 text-xs font-sans font-normal transition-colors"
-                            >
-                              Delete
-                            </button>
+
+                        {exp.description && (
+                          <div className="pt-2 border-t border-outline-variant/40 w-full overflow-hidden">
+                            <p className="text-xs sm:text-sm font-sans font-normal text-on-surface leading-relaxed bg-surface-container/60 p-3.5 sm:p-4 rounded-xl border border-outline-variant/40 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
+                              {exp.description}
+                            </p>
                           </div>
                         )}
                       </div>
@@ -1495,232 +1862,245 @@ export default function StudentProfile({
                   </div>
                 )}
 
-                {/* Add Form */}
-                <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
-                  <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Add Work Experience</h4>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Experience Type</label>
-                      <select
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        value={newExp.expType}
-                        onChange={e => setNewExp({ ...newExp, expType: e.target.value })}
-                      >
-                        <option value="">Select type of experience</option>
-                        <option value="Internship">Internship</option>
-                        <option value="Full-Time">Full-Time Job</option>
-                        <option value="Freelance">Freelance Contract</option>
-                        <option value="Part-Time">Part-Time</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Designation</label>
-                      <input
-                        type="text"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="Enter your role"
-                        value={newExp.designation}
-                        onChange={e => setNewExp({ ...newExp, designation: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  {/* <div className="flex items-center gap-2.5 py-1">
-                    <input
-                      type="checkbox"
-                      id="involves-tech"
-                      className="rounded border-outline-variant text-primary bg-surface-container-low focus:ring-0 focus:ring-offset-0 w-4 h-4"
-                      checked={newExp.involvesTech}
-                      onChange={e => setNewExp({ ...newExp, involvesTech: e.target.checked })}
-                    />
-                    <label htmlFor="involves-tech" className="text-xs text-on-surface-variant cursor-pointer select-none">
-                      This position involves tasks of programming languages, APIs, or frameworks
-                    </label>
-                  </div> */}
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Company Name</label>
-                      <input
-                        type="text"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="Enter Company Name"
-                        value={newExp.companyName}
-                        onChange={e => setNewExp({ ...newExp, companyName: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="relative">
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Domain of Experience</label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary pr-8"
-                          placeholder="Search or select domain"
-                          value={domainSearch || newExp.domain || ''}
-                          onChange={e => {
-                            setDomainSearch(e.target.value);
-                            setNewExp({ ...newExp, domain: e.target.value });
-                            setShowDomainDropdown(true);
-                          }}
-                          onFocus={() => setShowDomainDropdown(true)}
-                          onBlur={() => {
-                            setTimeout(() => {
-                              setShowDomainDropdown(false);
-                            }, 200);
-                          }}
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
-                          onClick={() => setShowDomainDropdown(!showDomainDropdown)}
-                        >
-                          <ChevronDown className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                      {showDomainDropdown && (
-                        <div className="absolute z-50 w-full mt-1 bg-surface-container-high border border-outline-variant rounded-xl shadow-floating max-h-56 overflow-y-auto pr-1 py-1 custom-scrollbar">
-                          {filteredDomains.length === 0 && domainSearch.trim() !== '' && (
-                            <button
-                              type="button"
-                              className="w-full text-left px-3 py-2 text-xs text-on-surface hover:bg-primary/10 transition-colors font-sans font-normal"
-                              onClick={() => {
-                                setNewExp({ ...newExp, domain: domainSearch });
-                                setDomainSearch('');
-                                setShowDomainDropdown(false);
-                              }}
-                            >
-                              Use custom: "{domainSearch}"
-                            </button>
-                          )}
-                          {filteredDomains.map(opt => (
-                            <button
-                              type="button"
-                              key={opt}
-                              className="w-full text-left px-3 py-2 text-xs text-on-surface hover:bg-primary/10 transition-colors"
-                              onClick={() => {
-                                setNewExp({ ...newExp, domain: opt });
-                                setDomainSearch('');
-                                setShowDomainDropdown(false);
-                              }}
-                            >
-                              {opt}
-                            </button>
-                          ))}
-                          <button
-                            type="button"
-                            className="w-full text-left px-3 py-2 text-xs text-on-surface hover:bg-primary/10 border-t border-outline-variant/30 transition-colors font-bold text-secondary"
-                            onClick={() => {
-                              setNewExp({ ...newExp, domain: 'Other' });
-                              setDomainSearch('');
-                              setShowDomainDropdown(false);
-                            }}
-                          >
-                            Other
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Start Date</label>
-                      <input
-                        type="date"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                        value={newExp.startDate}
-                        onChange={e => setNewExp({ ...newExp, startDate: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">End Date</label>
-                      <input
-                        type="date"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                        disabled={newExp.currentlyWorking}
-                        value={newExp.currentlyWorking ? '' : newExp.endDate}
-                        onChange={e => setNewExp({ ...newExp, endDate: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="flex items-end pb-2">
-                      <label className="flex items-center gap-2 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          className="rounded border-outline-variant text-primary bg-surface-container-low focus:ring-0 w-3.5 h-3.5"
-                          checked={newExp.currentlyWorking}
-                          onChange={e => setNewExp({ ...newExp, currentlyWorking: e.target.checked, endDate: e.target.checked ? '' : newExp.endDate })}
-                        />
-                        <span className="text-[11px] text-on-surface-variant font-medium">Currently Working Here</span>
-                      </label>
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Location</label>
-                      <input
-                        type="text"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="e.g. San Francisco / Remote"
-                        value={newExp.location}
-                        onChange={e => setNewExp({ ...newExp, location: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Description</label>
-                    <textarea
-                      rows="3"
-                      className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                      placeholder="List key responsibilities or accomplishments..."
-                      value={newExp.description}
-                      onChange={e => setNewExp({ ...newExp, description: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!newExp.expType || !newExp.designation || !newExp.companyName) {
-                          alert('Please fill out Experience Type, Designation, and Company Name.');
-                          return;
-                        }
-                        if (editingExpIdx !== null) {
-                          const updatedList = [...experienceList];
-                          updatedList[editingExpIdx] = newExp;
-                          setExperienceList(updatedList);
-                          setEditingExpIdx(null);
-                        } else {
-                          setExperienceList([...experienceList, newExp]);
-                        }
-                        setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
-                        setDomainSearch('');
-                      }}
-                      className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
-                    >
-                      {editingExpIdx !== null ? 'Save Edit' : 'Add to List'}
-                    </button>
-                    {editingExpIdx !== null && (
+                {/* Pop-up Modal for Add/Edit Experience */}
+                {activeModal === 'experience' && (
+                  <div
+                    className="absolute inset-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/25 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget) closeModal();
+                    }}
+                  >
+                    <div className="bg-surface-container border border-outline-variant rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                       <button
                         type="button"
-                        onClick={() => {
-                          setEditingExpIdx(null);
-                          setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
-                          setDomainSearch('');
-                        }}
-                        className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-bold rounded-lg text-xs hover:bg-surface-container-highest transition-all"
+                        onClick={closeModal}
+                        className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all cursor-pointer"
                       >
-                        Cancel
+                        <X className="w-4 h-4" />
                       </button>
-                    )}
+
+                      <div className="flex items-center gap-3 border-b border-outline-variant pb-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                          <Briefcase className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-headline font-bold text-on-surface">
+                            {editingExpIdx !== null ? 'Edit Work Experience' : 'Add Work Experience'}
+                          </h3>
+                          <p className="text-xs font-sans font-normal text-on-surface-variant">
+                            {editingExpIdx !== null ? 'Update your career information' : 'Enter details of your work, internship, or freelance experience'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Experience Type</label>
+                            <select
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              value={newExp.expType}
+                              onChange={e => setNewExp({ ...newExp, expType: e.target.value })}
+                            >
+                              <option value="">Select type of experience</option>
+                              <option value="Internship">Internship</option>
+                              <option value="Full-Time">Full-Time Job</option>
+                              <option value="Freelance">Freelance Contract</option>
+                              <option value="Part-Time">Part-Time</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Designation</label>
+                            <input
+                              type="text"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="Enter your role"
+                              value={newExp.designation}
+                              onChange={e => setNewExp({ ...newExp, designation: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Company Name</label>
+                            <input
+                              type="text"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="Enter Company Name"
+                              value={newExp.companyName}
+                              onChange={e => setNewExp({ ...newExp, companyName: e.target.value })}
+                            />
+                          </div>
+
+                          <div className="relative">
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Domain of Experience</label>
+                            <div className="relative" ref={domainContainerRef}>
+                              <input
+                                type="text"
+                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary pr-8 font-sans font-normal"
+                                placeholder="Search or select domain"
+                                value={domainSearch || newExp.domain || ''}
+                                onChange={e => {
+                                  setDomainSearch(e.target.value);
+                                  setNewExp({ ...newExp, domain: e.target.value });
+                                  setShowDomainDropdown(true);
+                                }}
+                                onFocus={() => setShowDomainDropdown(true)}
+                              />
+                              <button
+                                type="button"
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
+                                onClick={() => setShowDomainDropdown(!showDomainDropdown)}
+                              >
+                                <ChevronDown className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+
+                            {showDomainDropdown && (
+                              <div className="absolute z-50 w-full mt-1 bg-surface-container-high border border-outline-variant rounded-xl shadow-floating max-h-56 overflow-y-auto pr-1 py-1 custom-scrollbar">
+                                {filteredDomains.length === 0 && domainSearch.trim() !== '' && (
+                                  <button
+                                    type="button"
+                                    className="w-full text-left px-3 py-2 text-xs text-on-surface hover:bg-primary/10 transition-colors font-sans font-normal"
+                                    onClick={() => {
+                                      setNewExp({ ...newExp, domain: domainSearch });
+                                      setDomainSearch('');
+                                      setShowDomainDropdown(false);
+                                    }}
+                                  >
+                                    Use custom: "{domainSearch}"
+                                  </button>
+                                )}
+                                {filteredDomains.map(opt => (
+                                  <button
+                                    type="button"
+                                    key={opt}
+                                    className="w-full text-left px-3 py-2 text-xs text-on-surface hover:bg-primary/10 transition-colors"
+                                    onClick={() => {
+                                      setNewExp({ ...newExp, domain: opt });
+                                      setDomainSearch('');
+                                      setShowDomainDropdown(false);
+                                    }}
+                                  >
+                                    {opt}
+                                  </button>
+                                ))}
+                                <button
+                                  type="button"
+                                  className="w-full text-left px-3 py-2 text-xs text-on-surface hover:bg-primary/10 border-t border-outline-variant/30 transition-colors font-bold text-secondary"
+                                  onClick={() => {
+                                    setNewExp({ ...newExp, domain: 'Other' });
+                                    setDomainSearch('');
+                                    setShowDomainDropdown(false);
+                                  }}
+                                >
+                                  Other
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Start Date</label>
+                            <input
+                              type="date"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                              value={newExp.startDate}
+                              onChange={e => setNewExp({ ...newExp, startDate: e.target.value })}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">End Date</label>
+                            <input
+                              type="date"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                              disabled={newExp.currentlyWorking}
+                              value={newExp.currentlyWorking ? '' : newExp.endDate}
+                              onChange={e => setNewExp({ ...newExp, endDate: e.target.value })}
+                            />
+                          </div>
+
+                          <div className="flex items-end pb-2">
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                className="rounded border-outline-variant text-primary bg-surface-container-low focus:ring-0 w-3.5 h-3.5"
+                                checked={newExp.currentlyWorking}
+                                onChange={e => setNewExp({ ...newExp, currentlyWorking: e.target.checked, endDate: e.target.checked ? '' : newExp.endDate })}
+                              />
+                              <span className="text-[11px] text-on-surface-variant font-medium">Currently Working Here</span>
+                            </label>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Location</label>
+                            <input
+                              type="text"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="e.g. San Francisco / Remote"
+                              value={newExp.location}
+                              onChange={e => setNewExp({ ...newExp, location: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Roles And Responsibilities</label>
+                          <textarea
+                            rows="3"
+                            className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                            placeholder="List key responsibilities or accomplishments..."
+                            value={newExp.description}
+                            onChange={e => setNewExp({ ...newExp, description: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingExpIdx(null);
+                            setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
+                            setDomainSearch('');
+                            closeModal();
+                          }}
+                          className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-headline font-medium rounded-xl text-xs hover:bg-surface-container-highest transition-all cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!newExp.expType || !newExp.designation || !newExp.companyName) {
+                              alert('Please fill out Experience Type, Designation, and Company Name.');
+                              return;
+                            }
+                            if (editingExpIdx !== null) {
+                              const updatedList = [...experienceList];
+                              updatedList[editingExpIdx] = newExp;
+                              setExperienceList(updatedList);
+                              setEditingExpIdx(null);
+                            } else {
+                              setExperienceList([...experienceList, newExp]);
+                            }
+                            setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
+                            setDomainSearch('');
+                            closeModal();
+                          }}
+                          className="px-5 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                        >
+                          {editingExpIdx !== null ? 'Save Edit' : 'Add to List'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -1729,216 +2109,324 @@ export default function StudentProfile({
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-outline-variant pb-3">
                   <h3 className="text-lg font-headline font-bold text-on-surface">Certifications</h3>
-                  <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">{certificatesList.length} Items Added</span>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-xs font-sans font-normal tracking-wider text-secondary">{certificatesList.length} Items Added</span>
+                    {certificatesList.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={openAddCertModal}
+                        className="px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-headline font-medium hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Add Certificate
+                      </button>
+                    )}
+                  </div>
                 </div>
+
+                {/* Empty State */}
+                {certificatesList.length === 0 && (
+                  <div className="p-8 sm:p-12 border border-outline-variant border-dashed rounded-2xl bg-surface-container-low/50 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in">
+                    <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface-variant">
+                      <Award className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-headline font-bold text-on-surface">You haven't added any record</h4>
+                      <p className="text-xs font-sans font-normal text-on-surface-variant max-w-sm">
+                        Add licenses, verified credentials, and specialized course certifications you have earned.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={openAddCertModal}
+                      className="px-4 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Certificate
+                    </button>
+                  </div>
+                )}
 
                 {/* Existing items */}
                 {certificatesList.length > 0 && (
-                  <div className="space-y-3">
+                  <div className="flex flex-col gap-4">
                     {certificatesList.map((cert, idx) => (
-                      <div key={idx} className="p-4 bg-surface-container-low border border-outline-variant rounded-xl flex justify-between items-start">
-                        <div>
-                          <p className="text-sm font-bold text-on-surface">{cert.title}</p>
-                          <p className="text-xs text-on-surface-variant">Issued by: {cert.org}</p>
-                          <p className="text-[10px] text-secondary font-sans font-normal mt-1">
-                            Issued: {cert.startDate} • {cert.link ? <a href={cert.link} target="_blank" rel="noopener noreferrer" className="underline text-primary hover:text-primary/70">View Certificate Link</a> : 'No Link'}
-                            {cert.certNumber && ` • ID: ${cert.certNumber}`}
-                            {cert.attachment && (
-                              <>
-                                {' • '}
+                      <div
+                        key={idx}
+                        className="p-5 sm:p-6 bg-surface-container-low border border-outline-variant hover:border-primary/40 rounded-2xl flex flex-col gap-4 shadow-2xs hover:shadow-sm transition-all overflow-hidden w-full max-w-full"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="space-y-1.5 flex-1 min-w-0">
+                            <span className="inline-block px-2.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md text-[10px] font-headline font-bold tracking-wider">
+                              Certification
+                            </span>
+
+                            <div className="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-3">
+                              <h4 className="text-base sm:text-lg font-headline font-bold text-on-surface tracking-tight break-words">
+                                {cert.title}
+                              </h4>
+                              <p className="text-xs sm:text-sm font-sans font-semibold text-on-surface-variant flex items-center gap-1.5">
+                                <span>🏛️ Issued by: {cert.org}</span>
+                              </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              {cert.startDate && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-sans font-medium text-on-surface">
+                                  🗓️ Issued: {cert.startDate}
+                                </span>
+                              )}
+                              {cert.certNumber && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 border border-primary/20 rounded-lg text-xs font-headline font-medium text-primary">
+                                  ID: {cert.certNumber}
+                                </span>
+                              )}
+                              {cert.link && (
+                                <a
+                                  href={cert.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-lg text-xs font-headline font-semibold text-primary transition-all"
+                                >
+                                  🔗 View Link
+                                </a>
+                              )}
+                              {cert.attachment && (
                                 <a
                                   href={cert.attachment}
                                   download={`certificate_${cert.title.toLowerCase().replace(/\s+/g, '_')}`}
-                                  className="underline text-primary hover:text-primary/70 cursor-pointer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 rounded-lg text-xs font-headline font-semibold text-secondary transition-all"
                                 >
-                                  Download Certificate File
+                                  📥 Download File
                                 </a>
-                              </>
-                            )}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const item = certificatesList[idx];
-                              setNewCert({ ...item });
-                              setCertFileUploadError('');
-                              setEditingCertIdx(idx);
-                            }}
-                            className="text-primary hover:text-primary/70 text-xs font-sans font-normal transition-colors"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCertificatesList(certificatesList.filter((_, i) => i !== idx));
-                              if (editingCertIdx === idx) {
-                                setEditingCertIdx(null);
-                                setNewCert({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 sm:self-start">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const item = certificatesList[idx];
+                                setNewCert({ ...item });
                                 setCertFileUploadError('');
-                              }
-                            }}
-                            className="text-error hover:text-error/70 text-xs font-sans font-normal transition-colors"
-                          >
-                            Delete
-                          </button>
+                                setEditingCertIdx(idx);
+                                setActiveModal('certificates');
+                              }}
+                              className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCertificatesList(certificatesList.filter((_, i) => i !== idx));
+                                if (editingCertIdx === idx) {
+                                  setEditingCertIdx(null);
+                                  setNewCert({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
+                                  setCertFileUploadError('');
+                                  closeModal();
+                                }
+                              }}
+                              className="px-3 py-1.5 bg-error-container hover:bg-error-container/80 text-on-error-container border border-error/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
+
+                        {cert.description && (
+                          <div className="pt-2 border-t border-outline-variant/40 w-full overflow-hidden">
+                            <p className="text-xs sm:text-sm font-sans font-normal text-on-surface leading-relaxed bg-surface-container/60 p-3.5 sm:p-4 rounded-xl border border-outline-variant/40 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
+                              {cert.description}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 )}
 
-                {/* Add Form */}
-                <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
-                  <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Add Certification</h4>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Certificate Title</label>
-                      <input
-                        type="text"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="Enter certificate title"
-                        value={newCert.title}
-                        onChange={e => setNewCert({ ...newCert, title: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Provider Organisation Name</label>
-                      <input
-                        type="text"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="Enter Organisation Name"
-                        value={newCert.org}
-                        onChange={e => setNewCert({ ...newCert, org: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Start Date</label>
-                      <input
-                        type="date"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                        value={newCert.startDate}
-                        onChange={e => setNewCert({ ...newCert, startDate: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Certification Link</label>
-                      <input
-                        type="url"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="Enter Certification Link"
-                        value={newCert.link}
-                        onChange={e => setNewCert({ ...newCert, link: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Certification Number</label>
-                      <input
-                        type="text"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="Enter Certification Number (optional)"
-                        value={newCert.certNumber || ''}
-                        onChange={e => setNewCert({ ...newCert, certNumber: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant">Upload Certificate File (Optional, max 100KB)</label>
-                    <div className="flex items-center gap-4 p-3 bg-surface-container border border-outline-variant rounded-lg">
-                      <input
-                        type="file"
-                        id="cert-file-upload"
-                        className="hidden"
-                        accept="image/*,application/pdf"
-                        onChange={handleCertFileChange}
-                      />
-                      <label
-                        htmlFor="cert-file-upload"
-                        className="px-3 py-1.5 bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary rounded-xl cursor-pointer hover:bg-primary/20 transition-all flex items-center gap-1.5"
-                      >
-                        {processingCertFile ? 'Processing...' : 'Choose File'}
-                      </label>
-                      <div className="flex-1 min-w-0">
-                        {newCert.attachment ? (
-                          <div className="flex items-center justify-between gap-2">
-                            <span className="text-xs text-on-surface truncate font-sans font-normal">✓ Certificate file attached</span>
-                            <button
-                              type="button"
-                              onClick={() => setNewCert(prev => ({ ...prev, attachment: '' }))}
-                              className="text-[10px] text-error hover:underline font-sans font-normal"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-on-surface-variant font-sans font-normal">No file selected (Supports PDF or Images)</span>
-                        )}
-                      </div>
-                    </div>
-                    {certFileUploadError && (
-                      <p className="text-[10px] text-error font-medium">{certFileUploadError}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Description</label>
-                    <textarea
-                      rows="2"
-                      className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                      placeholder="Enter description..."
-                      value={newCert.description}
-                      onChange={e => setNewCert({ ...newCert, description: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!newCert.title || !newCert.org) {
-                          alert('Please enter Certificate Title and Provider Organisation.');
-                          return;
-                        }
-                        if (editingCertIdx !== null) {
-                          const updatedList = [...certificatesList];
-                          updatedList[editingCertIdx] = newCert;
-                          setCertificatesList(updatedList);
-                          setEditingCertIdx(null);
-                        } else {
-                          setCertificatesList([...certificatesList, newCert]);
-                        }
-                        setNewCert({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
-                        setCertFileUploadError('');
-                      }}
-                      className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
-                    >
-                      {editingCertIdx !== null ? 'Save Edit' : 'Add to List'}
-                    </button>
-                    {editingCertIdx !== null && (
+                {/* Pop-up Modal for Add/Edit Certification */}
+                {activeModal === 'certificates' && (
+                  <div
+                    className="absolute inset-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/25 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget) closeModal();
+                    }}
+                  >
+                    <div className="bg-surface-container border border-outline-variant rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                       <button
                         type="button"
-                        onClick={() => {
-                          setEditingCertIdx(null);
-                          setNewCert({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
-                          setCertFileUploadError('');
-                        }}
-                        className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-bold rounded-lg text-xs hover:bg-surface-container-highest transition-all"
+                        onClick={closeModal}
+                        className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all cursor-pointer"
                       >
-                        Cancel
+                        <X className="w-4 h-4" />
                       </button>
-                    )}
+
+                      <div className="flex items-center gap-3 border-b border-outline-variant pb-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                          <Award className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-headline font-bold text-on-surface">
+                            {editingCertIdx !== null ? 'Edit Certification' : 'Add Certification'}
+                          </h3>
+                          <p className="text-xs font-sans font-normal text-on-surface-variant">
+                            {editingCertIdx !== null ? 'Update your certificate details' : 'Enter your course, license, or credential information'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Certificate Title</label>
+                            <input
+                              type="text"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="Enter certificate title"
+                              value={newCert.title}
+                              onChange={e => setNewCert({ ...newCert, title: e.target.value })}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Provider Organisation Name</label>
+                            <input
+                              type="text"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="Enter Organisation Name"
+                              value={newCert.org}
+                              onChange={e => setNewCert({ ...newCert, org: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Start Date</label>
+                            <input
+                              type="date"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                              value={newCert.startDate}
+                              onChange={e => setNewCert({ ...newCert, startDate: e.target.value })}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Certification Link</label>
+                            <input
+                              type="url"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="Enter Certification Link"
+                              value={newCert.link}
+                              onChange={e => setNewCert({ ...newCert, link: e.target.value })}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Certification Number</label>
+                            <input
+                              type="text"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="Enter Certification Number (optional)"
+                              value={newCert.certNumber || ''}
+                              onChange={e => setNewCert({ ...newCert, certNumber: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-headline font-medium text-on-surface-variant">Upload Certificate File (Optional, max 100KB)</label>
+                          <div className="flex items-center gap-4 p-3 bg-surface-container border border-outline-variant rounded-lg">
+                            <input
+                              type="file"
+                              id="cert-file-upload"
+                              className="hidden"
+                              accept="image/*,application/pdf"
+                              onChange={handleCertFileChange}
+                            />
+                            <label
+                              htmlFor="cert-file-upload"
+                              className="px-3 py-1.5 bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary rounded-xl cursor-pointer hover:bg-primary/20 transition-all flex items-center gap-1.5"
+                            >
+                              {processingCertFile ? 'Processing...' : 'Choose File'}
+                            </label>
+                            <div className="flex-1 min-w-0">
+                              {newCert.attachment ? (
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-xs text-on-surface truncate font-sans font-normal">✓ Certificate file attached</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setNewCert(prev => ({ ...prev, attachment: '' }))}
+                                    className="text-[10px] text-error hover:underline font-sans font-normal"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-on-surface-variant font-sans font-normal">No file selected (Supports PDF or Images)</span>
+                              )}
+                            </div>
+                          </div>
+                          {certFileUploadError && (
+                            <p className="text-[10px] text-error font-medium">{certFileUploadError}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Description</label>
+                          <textarea
+                            rows="2"
+                            className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                            placeholder="Enter description..."
+                            value={newCert.description}
+                            onChange={e => setNewCert({ ...newCert, description: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingCertIdx(null);
+                            setNewCert({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
+                            setCertFileUploadError('');
+                            closeModal();
+                          }}
+                          className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-headline font-medium rounded-xl text-xs hover:bg-surface-container-highest transition-all cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!newCert.title || !newCert.org) {
+                              alert('Please enter Certificate Title and Provider Organisation.');
+                              return;
+                            }
+                            if (editingCertIdx !== null) {
+                              const updatedList = [...certificatesList];
+                              updatedList[editingCertIdx] = newCert;
+                              setCertificatesList(updatedList);
+                              setEditingCertIdx(null);
+                            } else {
+                              setCertificatesList([...certificatesList, newCert]);
+                            }
+                            setNewCert({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
+                            setCertFileUploadError('');
+                            closeModal();
+                          }}
+                          className="px-5 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                        >
+                          {editingCertIdx !== null ? 'Save Edit' : 'Add to List'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -1947,198 +2435,305 @@ export default function StudentProfile({
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-outline-variant pb-3">
                   <h3 className="text-lg font-headline font-bold text-on-surface">Projects</h3>
-                  <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">{projectsList.length} Items Added</span>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-xs font-sans font-normal tracking-wider text-secondary">{projectsList.length} Items Added</span>
+                    {projectsList.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={openAddProjModal}
+                        className="px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-headline font-medium hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Add Project
+                      </button>
+                    )}
+                  </div>
                 </div>
+
+                {/* Empty State */}
+                {projectsList.length === 0 && (
+                  <div className="p-8 sm:p-12 border border-outline-variant border-dashed rounded-2xl bg-surface-container-low/50 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in">
+                    <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface-variant">
+                      <FolderGit2 className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-headline font-bold text-on-surface">You haven't added any record</h4>
+                      <p className="text-xs font-sans font-normal text-on-surface-variant max-w-sm">
+                        Showcase personal, academic, or open-source projects along with live links and repository URLs.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={openAddProjModal}
+                      className="px-4 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Project
+                    </button>
+                  </div>
+                )}
 
                 {/* Existing items */}
                 {projectsList.length > 0 && (
-                  <div className="space-y-3">
+                  <div className="flex flex-col gap-4">
                     {projectsList.map((proj, idx) => (
-                      <div key={idx} className="p-4 bg-surface-container-low border border-outline-variant rounded-xl flex justify-between items-start">
-                        <div>
-                          <p className="text-sm font-bold text-on-surface">{proj.title}</p>
-                          <p className="text-xs text-on-surface-variant">Role: {proj.role}</p>
-                          <p className="text-[10px] text-secondary font-sans font-normal mt-1">
-                            {proj.startDate} - {proj.currentlyWorking ? 'Present' : proj.endDate}
-                          </p>
-                          <div className="flex gap-3 mt-1">
-                            {proj.codeUrl && (
-                              <a href={proj.codeUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] text-secondary hover:underline">
-                                Code URL
-                              </a>
-                            )}
-                            {proj.hostedUrl && (
-                              <a href={proj.hostedUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] text-secondary hover:underline">
-                                Hosted URL
-                              </a>
-                            )}
+                      <div
+                        key={idx}
+                        className="p-5 sm:p-6 bg-surface-container-low border border-outline-variant hover:border-primary/40 rounded-2xl flex flex-col gap-4 shadow-2xs hover:shadow-sm transition-all overflow-hidden w-full max-w-full"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="space-y-1.5 flex-1 min-w-0">
+                            <span className="inline-block px-2.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md text-[10px] font-headline font-bold tracking-wider">
+                              Project
+                            </span>
+
+                            <div className="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-3">
+                              <h4 className="text-base sm:text-lg font-headline font-bold text-on-surface tracking-tight break-words">
+                                {proj.title}
+                              </h4>
+                              {proj.role && (
+                                <p className="text-xs sm:text-sm font-sans font-semibold text-on-surface-variant flex items-center gap-1.5">
+                                  <span>Role: <strong className="text-on-surface">{proj.role}</strong></span>
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              {(proj.startDate || proj.endDate) && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-sans font-medium text-on-surface">
+                                  🗓️ {proj.startDate} - {proj.currentlyWorking ? 'Present' : proj.endDate || 'N/A'}
+                                </span>
+                              )}
+                              {proj.codeUrl && (
+                                <a
+                                  href={proj.codeUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-lg text-xs font-headline font-semibold text-primary transition-all"
+                                >
+                                  💻 Code URL
+                                </a>
+                              )}
+                              {proj.hostedUrl && (
+                                <a
+                                  href={proj.hostedUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 rounded-lg text-xs font-headline font-semibold text-secondary transition-all"
+                                >
+                                  🚀 Live Demo
+                                </a>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 sm:self-start">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const item = projectsList[idx];
+                                setNewProj({ ...item });
+                                setEditingProjIdx(idx);
+                                setActiveModal('projects');
+                              }}
+                              className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setProjectsList(projectsList.filter((_, i) => i !== idx));
+                                if (editingProjIdx === idx) {
+                                  setEditingProjIdx(null);
+                                  setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
+                                  closeModal();
+                                }
+                              }}
+                              className="px-3 py-1.5 bg-error-container hover:bg-error-container/80 text-on-error-container border border-error/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const item = projectsList[idx];
-                              setNewProj({ ...item });
-                              setEditingProjIdx(idx);
-                            }}
-                            className="text-primary hover:text-primary/70 text-xs font-sans font-normal transition-colors"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setProjectsList(projectsList.filter((_, i) => i !== idx));
-                              if (editingProjIdx === idx) {
-                                setEditingProjIdx(null);
-                                setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
-                              }
-                            }}
-                            className="text-error hover:text-error/70 text-xs font-sans font-normal transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
+
+                        {proj.description && (
+                          <div className="pt-2 border-t border-outline-variant/40 w-full overflow-hidden">
+                            <p className="text-xs sm:text-sm font-sans font-normal text-on-surface leading-relaxed bg-surface-container/60 p-3.5 sm:p-4 rounded-xl border border-outline-variant/40 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
+                              {proj.description}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 )}
 
-                {/* Add Form */}
-                <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
-                  <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Add Project Record</h4>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Title</label>
-                      <input
-                        type="text"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="Name of your project"
-                        value={newProj.title}
-                        onChange={e => setNewProj({ ...newProj, title: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Company / Role</label>
-                      <input
-                        type="text"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="Enter your role"
-                        value={newProj.role}
-                        onChange={e => setNewProj({ ...newProj, role: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Code URL</label>
-                      <input
-                        type="url"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="Enter the code URL for the project"
-                        value={newProj.codeUrl}
-                        onChange={e => setNewProj({ ...newProj, codeUrl: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Hosted URL</label>
-                      <input
-                        type="url"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="Enter hosted URL (optional)"
-                        value={newProj.hostedUrl}
-                        onChange={e => setNewProj({ ...newProj, hostedUrl: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Start Date</label>
-                      <input
-                        type="date"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                        value={newProj.startDate}
-                        onChange={e => setNewProj({ ...newProj, startDate: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">End Date</label>
-                      <input
-                        type="date"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                        disabled={newProj.currentlyWorking}
-                        value={newProj.currentlyWorking ? '' : newProj.endDate}
-                        onChange={e => setNewProj({ ...newProj, endDate: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="flex items-end pb-2">
-                      <label className="flex items-center gap-2 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          className="rounded border-outline-variant text-primary bg-surface-container-low w-3.5 h-3.5 focus:ring-0"
-                          checked={newProj.currentlyWorking}
-                          onChange={e => setNewProj({ ...newProj, currentlyWorking: e.target.checked, endDate: e.target.checked ? '' : newProj.endDate })}
-                        />
-                        <span className="text-[11px] text-on-surface-variant font-medium">Currently Working Here</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Description</label>
-                    <textarea
-                      rows="3"
-                      className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                      placeholder="Add key features, stacks, or descriptions... (New line for bullet point)"
-                      value={newProj.description}
-                      onChange={e => setNewProj({ ...newProj, description: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!newProj.title || !newProj.role) {
-                          alert('Please fill out Project Title and Role.');
-                          return;
-                        }
-                        if (editingProjIdx !== null) {
-                          const updatedList = [...projectsList];
-                          updatedList[editingProjIdx] = newProj;
-                          setProjectsList(updatedList);
-                          setEditingProjIdx(null);
-                        } else {
-                          setProjectsList([...projectsList, newProj]);
-                        }
-                        setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
-                      }}
-                      className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
-                    >
-                      {editingProjIdx !== null ? 'Save Edit' : 'Add to List'}
-                    </button>
-                    {editingProjIdx !== null && (
+                {/* Pop-up Modal for Add/Edit Project */}
+                {activeModal === 'projects' && (
+                  <div
+                    className="absolute inset-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/25 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget) closeModal();
+                    }}
+                  >
+                    <div className="bg-surface-container border border-outline-variant rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                       <button
                         type="button"
-                        onClick={() => {
-                          setEditingProjIdx(null);
-                          setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
-                        }}
-                        className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-bold rounded-lg text-xs hover:bg-surface-container-highest transition-all"
+                        onClick={closeModal}
+                        className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all cursor-pointer"
                       >
-                        Cancel
+                        <X className="w-4 h-4" />
                       </button>
-                    )}
+
+                      <div className="flex items-center gap-3 border-b border-outline-variant pb-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                          <FolderGit2 className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-headline font-bold text-on-surface">
+                            {editingProjIdx !== null ? 'Edit Project Record' : 'Add Project Record'}
+                          </h3>
+                          <p className="text-xs font-sans font-normal text-on-surface-variant">
+                            {editingProjIdx !== null ? 'Update your project information' : 'Showcase personal, academic, or professional projects'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Title</label>
+                            <input
+                              type="text"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="Name of your project"
+                              value={newProj.title}
+                              onChange={e => setNewProj({ ...newProj, title: e.target.value })}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Company / Role</label>
+                            <input
+                              type="text"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="Enter your role"
+                              value={newProj.role}
+                              onChange={e => setNewProj({ ...newProj, role: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Code URL</label>
+                            <input
+                              type="url"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="Enter the code URL for the project"
+                              value={newProj.codeUrl}
+                              onChange={e => setNewProj({ ...newProj, codeUrl: e.target.value })}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Hosted URL</label>
+                            <input
+                              type="url"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="Enter hosted URL (optional)"
+                              value={newProj.hostedUrl}
+                              onChange={e => setNewProj({ ...newProj, hostedUrl: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Start Date</label>
+                            <input
+                              type="date"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                              value={newProj.startDate}
+                              onChange={e => setNewProj({ ...newProj, startDate: e.target.value })}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">End Date</label>
+                            <input
+                              type="date"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                              disabled={newProj.currentlyWorking}
+                              value={newProj.currentlyWorking ? '' : newProj.endDate}
+                              onChange={e => setNewProj({ ...newProj, endDate: e.target.value })}
+                            />
+                          </div>
+
+                          <div className="flex items-end pb-2">
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                className="rounded border-outline-variant text-primary bg-surface-container-low w-3.5 h-3.5 focus:ring-0"
+                                checked={newProj.currentlyWorking}
+                                onChange={e => setNewProj({ ...newProj, currentlyWorking: e.target.checked, endDate: e.target.checked ? '' : newProj.endDate })}
+                              />
+                              <span className="text-[11px] text-on-surface-variant font-medium">Currently Working Here</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Description</label>
+                          <textarea
+                            rows="3"
+                            className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                            placeholder="Add key features, stacks, or descriptions... (New line for bullet point)"
+                            value={newProj.description}
+                            onChange={e => setNewProj({ ...newProj, description: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingProjIdx(null);
+                            setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
+                            closeModal();
+                          }}
+                          className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-headline font-medium rounded-xl text-xs hover:bg-surface-container-highest transition-all cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!newProj.title || !newProj.role) {
+                              alert('Please fill out Project Title and Role.');
+                              return;
+                            }
+                            if (editingProjIdx !== null) {
+                              const updatedList = [...projectsList];
+                              updatedList[editingProjIdx] = newProj;
+                              setProjectsList(updatedList);
+                              setEditingProjIdx(null);
+                            } else {
+                              setProjectsList([...projectsList, newProj]);
+                            }
+                            setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
+                            closeModal();
+                          }}
+                          className="px-5 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                        >
+                          {editingProjIdx !== null ? 'Save Edit' : 'Add to List'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -2146,119 +2741,168 @@ export default function StudentProfile({
             {profileTab === 'skills' && (
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Your Stacks & Skills</label>
-                  <span className="text-[10px] font-sans font-normal text-yellow-800 dark:text-yellow-200 bg-yellow-100 dark:bg-yellow-950/30 border border-yellow-300 dark:border-yellow-800/50 px-2.5 py-1 rounded-lg font-medium flex items-center gap-1.5 shadow-sm">
-                  Default rating is 1 and can be increased by giving the test.
+                  <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant">Your Stacks & Skills</label>
+                  <span className="text-xs font-sans font-normal text-primary dark:text-emerald-400 bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-none font-medium flex items-center gap-1.5">
+                    Skills with MCQ quizzes are verified via Skill Tests (starts at 1/10). Soft skills and technical skills without quizzes can be self-rated (1–10).
                   </span>
                 </div>
 
-                <div className="bg-surface-container-low border border-outline-variant rounded-xl p-6 space-y-5">
-                  {/* Searchable input & dropdown to add a skill directly on click */}
+                <div className="bg-surface-container-low border border-outline-variant rounded-none p-6 space-y-5">
+                  {/* Searchable input & add button */}
                   <div className="pb-3 border-b border-outline-variant">
-                    <div className="relative w-full">
-                      <input
-                        type="text"
-                        placeholder="Search and select a skill..."
-                        value={selectedNewSkill}
-                        onChange={e => {
-                          setSelectedNewSkill(e.target.value);
-                          setIsSkillDropdownOpen(true);
-                        }}
-                        onFocus={() => setIsSkillDropdownOpen(true)}
-                        onBlur={() => {
-                          setTimeout(() => setIsSkillDropdownOpen(false), 200);
-                        }}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            const matches = ALL_SKILLS.filter(
-                              s => s.skill.toLowerCase().includes(selectedNewSkill.toLowerCase()) &&
-                                !skillsList.some(exist => exist.name.toLowerCase() === s.skill.toLowerCase())
-                            );
-                            if (matches.length > 0) {
-                              setSkillsList(prev => [...prev, { name: matches[0].skill, rating: 1 }]);
-                              setSelectedNewSkill('');
-                              setIsSkillDropdownOpen(false);
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1" ref={skillContainerRef}>
+                        <input
+                          type="text"
+                          placeholder="Search or type a skill name..."
+                          value={selectedNewSkill}
+                          onChange={e => {
+                            setSelectedNewSkill(e.target.value);
+                            setIsSkillDropdownOpen(true);
+                          }}
+                          onFocus={() => setIsSkillDropdownOpen(true)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddSkill();
                             }
-                          }
-                        }}
-                        className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs text-on-surface focus:border-primary focus:outline-none transition-all"
-                      />
+                          }}
+                          className="w-full bg-surface-container border border-outline-variant rounded-none px-4 py-2.5 text-xs text-on-surface focus:border-primary focus:outline-none transition-all"
+                        />
 
-                      {isSkillDropdownOpen && (
-                        <div className="absolute top-full left-0 right-0 mt-1.5 bg-surface-container-high/95 backdrop-blur-md border border-outline-variant rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
-                          {ALL_SKILLS.filter(
-                            s => s.skill.toLowerCase().includes(selectedNewSkill.toLowerCase()) &&
-                              !skillsList.some(exist => exist.name.toLowerCase() === s.skill.toLowerCase())
-                          ).length === 0 ? (
-                            <div className="px-4 py-3 text-xs text-on-surface-variant font-sans font-normal">No matching skills found</div>
-                          ) : (
-                            ALL_SKILLS.filter(
-                              s => s.skill.toLowerCase().includes(selectedNewSkill.toLowerCase()) &&
-                                !skillsList.some(exist => exist.name.toLowerCase() === s.skill.toLowerCase())
-                            ).map(s => (
-                              <button
-                                key={s.skill}
-                                type="button"
-                                onClick={() => {
-                                  if (!skillsList.some(exist => exist.name.toLowerCase() === s.skill.toLowerCase())) {
-                                    setSkillsList(prev => [...prev, { name: s.skill, rating: 1 }]);
-                                  }
-                                  setSelectedNewSkill('');
-                                  setIsSkillDropdownOpen(false);
-                                }}
-                                className="w-full text-left px-4 py-2.5 text-xs text-on-surface hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between group cursor-pointer"
-                              >
-                                <span>{s.skill}</span>
-                                <span className="text-[10px] opacity-60 group-hover:opacity-100 font-sans font-normal capitalize px-1.5 py-0.5 rounded bg-surface-container-low border border-outline-variant text-on-surface-variant group-hover:border-primary/20 group-hover:text-primary transition-all">
-                                  {s.type}
-                                </span>
-                              </button>
-                            ))
-                          )}
-                        </div>
-                      )}
+                        {isSkillDropdownOpen && selectedNewSkill.trim() && (
+                          <div className="absolute top-full left-0 right-0 mt-1.5 bg-surface-container-high/95 backdrop-blur-md border border-outline-variant rounded-none shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
+                            {(() => {
+                              const filtered = ALL_SKILLS.filter(
+                                s => s.skill.toLowerCase().includes(selectedNewSkill.toLowerCase()) &&
+                                  !skillsList.some(exist => exist.name.toLowerCase() === s.skill.toLowerCase())
+                              );
+
+                              const isExactMatch = ALL_SKILLS.some(
+                                s => s.skill.toLowerCase() === selectedNewSkill.trim().toLowerCase()
+                              );
+
+                              return (
+                                <>
+                                  {filtered.map(s => (
+                                    <button
+                                      key={s.skill}
+                                      type="button"
+                                      onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        handleAddSkill(s.skill);
+                                      }}
+                                      className="w-full text-left px-4 py-2.5 text-xs text-on-surface hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between group cursor-pointer"
+                                    >
+                                      <span className="font-medium">{s.skill}</span>
+                                      <span className="text-[10px] opacity-60 group-hover:opacity-100 font-sans font-normal capitalize px-1.5 py-0.5 rounded-none bg-surface-container-low border border-outline-variant text-on-surface-variant group-hover:border-primary/20 group-hover:text-primary transition-all">
+                                        {s.type}
+                                      </span>
+                                    </button>
+                                  ))}
+
+                                  {!isExactMatch && selectedNewSkill.trim() && (
+                                    <button
+                                      type="button"
+                                      onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        handleAddSkill(selectedNewSkill.trim());
+                                      }}
+                                      className="w-full text-left px-4 py-2.5 text-xs text-primary bg-primary/5 hover:bg-primary/15 transition-all flex items-center justify-between border-t border-outline-variant/60 cursor-pointer font-semibold"
+                                    >
+                                      <span>+ Add custom skill: "{selectedNewSkill.trim()}"</span>
+                                      <span className="text-[10px] font-sans font-normal px-1.5 py-0.5 rounded-none bg-primary/10 text-primary">custom</span>
+                                    </button>
+                                  )}
+
+                                  {filtered.length === 0 && isExactMatch && (
+                                    <div className="px-4 py-3 text-xs text-on-surface-variant font-sans font-normal">Skill already added</div>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAddSkill()}
+                        disabled={!selectedNewSkill.trim()}
+                        className="px-4 py-2.5 bg-primary text-on-primary font-headline font-medium rounded-none text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none cursor-pointer shadow-sm shrink-0"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Add Skill</span>
+                      </button>
                     </div>
                   </div>
 
                   {skillsList.length === 0 ? (
-                    <p className="text-xs text-on-surface-variant font-sans font-normal">No skills added yet. Select a skill above.</p>
+                    <p className="text-xs text-on-surface-variant font-sans font-normal">No skills added yet. Type or search a skill above.</p>
                   ) : (
                     <div className="flex flex-wrap gap-2.5 pt-1">
                       {skillsList.map(skill => {
                         const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === skill.name.toLowerCase());
                         const isTech = skillObj ? skillObj.type === 'technical' : true;
-                        const displayRating = skill.verifiedRating !== null && skill.verifiedRating !== undefined ? skill.verifiedRating : skill.rating;
+                        const hasMcq = hasSkillMcq(skill.name) || (techSkills || []).some(t => t.name?.toLowerCase() === skill.name.toLowerCase() && t.hasQuiz);
+                        const hasVerifiedRating = skill.verifiedRating !== null && skill.verifiedRating !== undefined;
+                        const currentScore = skill.rating || 1;
 
                         return (
                           <div 
                             key={skill.name}
-                            className="inline-flex items-center gap-2 px-3.5 py-2 bg-surface-container border border-outline-variant hover:border-outline rounded-xl text-xs font-medium text-on-surface transition-all shadow-sm group select-none"
+                            className="inline-flex items-center gap-2 px-3 py-2 bg-surface-container border border-outline-variant hover:border-outline rounded-none text-xs font-medium text-on-surface transition-all shadow-xs group select-none"
                           >
                             <span className="font-semibold text-on-surface">{skill.name}</span>
                             
-                            {isTech && displayRating > 0 && (
-                              <span className="text-[10px] font-sans font-normal text-secondary font-bold bg-secondary/10 px-1.5 py-0.5 rounded-md border border-secondary/20">
-                                {displayRating}/10
-                              </span>
-                            )}
-
-                            {skill.verifiedRating !== null && skill.verifiedRating !== undefined && (
-                              <span className="text-[9px] bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide flex items-center gap-0.5" title="Verified Skill Rating">
-                                ✓
-                              </span>
+                            {/* Rating Display / Selector */}
+                            {hasMcq ? (
+                              /* Skills with MCQ: Candidate cannot self-rate. Static score display with verified/unverified mark */
+                              <div className="flex items-center gap-1.5" title={hasVerifiedRating ? `Verified by Skill Test (>= 70%): Level ${skill.verifiedRating}/10` : `Unverified Skill Test score: Level ${currentScore}/10`}>
+                                <span className="text-xs font-sans font-bold text-on-surface bg-surface-container-high px-2 py-0.5 rounded-none border border-outline-variant/60">
+                                  {currentScore}/10
+                                </span>
+                                {hasVerifiedRating ? (
+                                  <span className="text-[10px] bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-none font-bold tracking-wide flex items-center gap-0.5" title={`Verified: Level ${skill.verifiedRating}/10 (Cleared 70% threshold)`}>
+                                    ✓ Verified
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-none font-bold tracking-wide" title="Unverified: Score >= 70% on the Skill Test to earn a verified rating">
+                                    Unverified
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              /* Untestable Technical Skills and Soft Skills: Candidate is allowed to self-rate */
+                              <div className="relative inline-flex items-center" title="Set self-rating (1-10)">
+                                <select
+                                  value={skill.rating || 1}
+                                  onChange={(e) => {
+                                    const newRating = parseInt(e.target.value, 10);
+                                    setSkillsList(prev => prev.map(s => s.name.toLowerCase() === skill.name.toLowerCase() ? { ...s, rating: newRating } : s));
+                                  }}
+                                  className="text-xs font-sans font-bold text-secondary bg-secondary/10 hover:bg-secondary/20 border border-secondary/25 rounded-none px-1.5 py-0.5 pr-4 appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-secondary/50 transition-all"
+                                >
+                                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(r => (
+                                    <option key={r} value={r} className="bg-surface text-on-surface">
+                                      {r}/10
+                                    </option>
+                                  ))}
+                                </select>
+                                <ChevronDown className="w-2.5 h-2.5 text-secondary absolute right-1 pointer-events-none opacity-70" />
+                              </div>
                             )}
 
                             {!isTech && (
-                              <span className="text-[9px] opacity-60 font-sans font-normal capitalize px-1 py-0.5 rounded bg-surface-container-high text-on-surface-variant">
+                              <span className="text-[9px] opacity-60 font-sans font-normal capitalize px-1 py-0.5 rounded-none bg-surface-container-high text-on-surface-variant">
                                 soft
                               </span>
                             )}
 
                             <button
                               type="button"
-                              onClick={() => setSkillsList(prev => prev.filter(s => s.name !== skill.name))}
-                              className="text-on-surface-variant hover:text-error transition-colors ml-0.5 p-0.5 rounded-md hover:bg-error/10 cursor-pointer"
+                              onClick={() => setSkillsList(prev => prev.filter(s => s.name.toLowerCase() !== skill.name.toLowerCase()))}
+                              className="text-on-surface-variant hover:text-error transition-colors ml-0.5 p-0.5 rounded-none hover:bg-error/10 cursor-pointer"
                               title="Remove skill"
                             >
                               <X className="w-3.5 h-3.5" />
@@ -2275,144 +2919,283 @@ export default function StudentProfile({
             {profileTab === 'cocurricular' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-outline-variant pb-3">
-                  <h3 className="text-lg font-headline font-bold text-on-surface">Co-curricular & POR</h3>
-                  <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">{cocurricular.length} Items Added</span>
+                  <h3 className="text-lg font-headline font-bold text-on-surface">Co-Curricular</h3>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-xs font-sans font-normal tracking-wider text-secondary">{cocurricular.length} Items Added</span>
+                    {cocurricular.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={openAddCocurricularModal}
+                        className="px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-headline font-medium hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Add Activity
+                      </button>
+                    )}
+                  </div>
                 </div>
+
+                {/* Empty State */}
+                {cocurricular.length === 0 && (
+                  <div className="p-8 sm:p-12 border border-outline-variant border-dashed rounded-2xl bg-surface-container-low/50 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in">
+                    <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface-variant">
+                      <Activity className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-headline font-bold text-on-surface">You haven't added any record</h4>
+                      <p className="text-xs font-sans font-normal text-on-surface-variant max-w-sm">
+                        Add positions of responsibility, student clubs, hackathons, sports, or volunteer initiatives.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={openAddCocurricularModal}
+                      className="px-4 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Activity
+                    </button>
+                  </div>
+                )}
 
                 {/* Existing items */}
                 {cocurricular.length > 0 && (
-                  <div className="space-y-3">
+                  <div className="flex flex-col gap-4">
                     {cocurricular.map((act, idx) => (
-                      <div key={idx} className="p-4 bg-surface-container-low border border-outline-variant rounded-xl flex justify-between items-start">
-                        <div>
-                          <p className="text-sm font-bold text-on-surface">{act.activity}</p>
-                          {act.description && <p className="text-xs text-on-surface-variant mt-1">{act.description}</p>}
-                          <p className="text-[10px] text-secondary font-sans font-normal mt-1">
-                            {act.link ? <a href={act.link} target="_blank" rel="noopener noreferrer" className="underline text-primary hover:text-primary/70">View Certification Link</a> : 'No Link'}
-                          </p>
+                      <div
+                        key={idx}
+                        className="p-5 sm:p-6 bg-surface-container-low border border-outline-variant hover:border-primary/40 rounded-2xl flex flex-col gap-4 shadow-2xs hover:shadow-sm transition-all overflow-hidden w-full max-w-full"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="space-y-1.5 flex-1 min-w-0">
+                            <span className="inline-block px-2.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md text-[10px] font-headline font-bold tracking-wider">
+                              Activity / POR
+                            </span>
+
+                            <h4 className="text-base sm:text-lg font-headline font-bold text-on-surface tracking-tight break-words">
+                              {act.activity}
+                            </h4>
+
+                            {act.link && (
+                              <div className="pt-1">
+                                <a
+                                  href={act.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-lg text-xs font-headline font-semibold text-primary transition-all"
+                                >
+                                  🔗 View Link
+                                </a>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 sm:self-start">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const item = cocurricular[idx];
+                                setNewCocurricular({ ...item });
+                                setEditingCocurricularIdx(idx);
+                                setActiveModal('cocurricular');
+                              }}
+                              className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCocurricular(cocurricular.filter((_, i) => i !== idx));
+                                if (editingCocurricularIdx === idx) {
+                                  setEditingCocurricularIdx(null);
+                                  setNewCocurricular({ activity: '', link: '', description: '' });
+                                  closeModal();
+                                }
+                              }}
+                              className="px-3 py-1.5 bg-error-container hover:bg-error-container/80 text-on-error-container border border-error/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const item = cocurricular[idx];
-                              setNewCocurricular({ ...item });
-                              setEditingCocurricularIdx(idx);
-                            }}
-                            className="text-primary hover:text-primary/70 text-xs font-sans font-normal transition-colors"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCocurricular(cocurricular.filter((_, i) => i !== idx));
-                              if (editingCocurricularIdx === idx) {
-                                setEditingCocurricularIdx(null);
-                                setNewCocurricular({ activity: '', link: '', description: '' });
-                              }
-                            }}
-                            className="text-error hover:text-error/70 text-xs font-sans font-normal transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
+
+                        {act.description && (
+                          <div className="pt-2 border-t border-outline-variant/40 w-full overflow-hidden">
+                            <p className="text-xs sm:text-sm font-sans font-normal text-on-surface leading-relaxed bg-surface-container/60 p-3.5 sm:p-4 rounded-xl border border-outline-variant/40 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
+                              {act.description}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 )}
 
-                {/* Add Form */}
-                <div className="p-5 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
-                  <h4 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Add Co-curricular Activity</h4>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Activity / Title</label>
-                      <input
-                        type="text"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="e.g. Football Captain, Debate Club Coordinator"
-                        value={newCocurricular.activity}
-                        onChange={e => setNewCocurricular({ ...newCocurricular, activity: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Certification Link (Optional)</label>
-                      <input
-                        type="url"
-                        className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                        placeholder="Enter link to certificate/proof"
-                        value={newCocurricular.link}
-                        onChange={e => setNewCocurricular({ ...newCocurricular, link: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Description (Optional)</label>
-                    <textarea
-                      rows="2"
-                      className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
-                      placeholder="Describe your role or accomplishment..."
-                      value={newCocurricular.description}
-                      onChange={e => setNewCocurricular({ ...newCocurricular, description: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!newCocurricular.activity) {
-                          alert('Please enter Activity / Title.');
-                          return;
-                        }
-                        if (editingCocurricularIdx !== null) {
-                          const updatedList = [...cocurricular];
-                          updatedList[editingCocurricularIdx] = newCocurricular;
-                          setCocurricular(updatedList);
-                          setEditingCocurricularIdx(null);
-                        } else {
-                          setCocurricular([...cocurricular, newCocurricular]);
-                        }
-                        setNewCocurricular({ activity: '', link: '', description: '' });
-                      }}
-                      className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5"
-                    >
-                      {editingCocurricularIdx !== null ? 'Save Edit' : 'Add to List'}
-                    </button>
-                    {editingCocurricularIdx !== null && (
+                {/* Pop-up Modal for Add/Edit Co-curricular */}
+                {activeModal === 'cocurricular' && (
+                  <div
+                    className="absolute inset-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/25 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget) closeModal();
+                    }}
+                  >
+                    <div className="bg-surface-container border border-outline-variant rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                       <button
                         type="button"
-                        onClick={() => {
-                          setEditingCocurricularIdx(null);
-                          setNewCocurricular({ activity: '', link: '', description: '' });
-                        }}
-                        className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-bold rounded-lg text-xs hover:bg-surface-container-highest transition-all"
+                        onClick={closeModal}
+                        className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all cursor-pointer"
                       >
-                        Cancel
+                        <X className="w-4 h-4" />
                       </button>
-                    )}
+
+                      <div className="flex items-center gap-3 border-b border-outline-variant pb-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                          <Activity className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-headline font-bold text-on-surface">
+                            {editingCocurricularIdx !== null ? 'Edit Co-Curricular Activity' : 'Add Co-Curricular Activity'}
+                          </h3>
+                          <p className="text-xs font-sans font-normal text-on-surface-variant">
+                            {editingCocurricularIdx !== null ? 'Update your activity or position details' : 'Add positions of responsibility, clubs, sports, or volunteer work'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Activity / Title</label>
+                            <input
+                              type="text"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="e.g. Football Captain, Debate Club Coordinator"
+                              value={newCocurricular.activity}
+                              onChange={e => setNewCocurricular({ ...newCocurricular, activity: e.target.value })}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Certification Link (Optional)</label>
+                            <input
+                              type="url"
+                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              placeholder="Enter link to certificate/proof"
+                              value={newCocurricular.link}
+                              onChange={e => setNewCocurricular({ ...newCocurricular, link: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Description (Optional)</label>
+                          <textarea
+                            rows="2"
+                            className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                            placeholder="Describe your role or accomplishment..."
+                            value={newCocurricular.description}
+                            onChange={e => setNewCocurricular({ ...newCocurricular, description: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingCocurricularIdx(null);
+                            setNewCocurricular({ activity: '', link: '', description: '' });
+                            closeModal();
+                          }}
+                          className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-headline font-medium rounded-xl text-xs hover:bg-surface-container-highest transition-all cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!newCocurricular.activity) {
+                              alert('Please enter Activity / Title.');
+                              return;
+                            }
+                            if (editingCocurricularIdx !== null) {
+                              const updatedList = [...cocurricular];
+                              updatedList[editingCocurricularIdx] = newCocurricular;
+                              setCocurricular(updatedList);
+                              setEditingCocurricularIdx(null);
+                            } else {
+                              setCocurricular([...cocurricular, newCocurricular]);
+                            }
+                            setNewCocurricular({ activity: '', link: '', description: '' });
+                            closeModal();
+                          }}
+                          className="px-5 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                        >
+                          {editingCocurricularIdx !== null ? 'Save Edit' : 'Add to List'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
 
-          {/* Bottom Save button */}
-          <div className="pt-4 border-t border-outline-variant flex justify-end">
-            {/* <Button
-              type="submit"
-              loading={submittingProfile}
-              disabled={!isSaveActive}
-              size="sm"
-              className="font-bold uppercase tracking-wider text-xs shadow-glow disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none px-6"
-            >
-              Save Profile & Ratings
-            </Button> */}
-          </div>
+        {/* Bottom Navigation & Save Action Bar */}
+        {(() => {
+          const currentTabIdx = tabsList.findIndex(t => t.id === profileTab);
+          const prevTab = currentTabIdx > 0 ? tabsList[currentTabIdx - 1] : null;
+          const nextTab = currentTabIdx < tabsList.length - 1 ? tabsList[currentTabIdx + 1] : null;
+
+          return (
+            <div className="pt-6 border-t border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4">
+              <button
+                type="button"
+                disabled={!prevTab}
+                onClick={() => prevTab && setProfileTab(prevTab.id)}
+                className="w-full sm:w-auto px-5 py-2.5 glass-button disabled:opacity-40 disabled:pointer-events-none rounded-xl text-xs font-headline font-medium text-on-surface flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>PREVIOUS</span>
+              </button>
+
+              <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
+                <Button
+                  type="submit"
+                  loading={submittingProfile}
+                  disabled={!isSaveActive}
+                  variant="secondary"
+                  size="sm"
+                  className="w-full sm:w-auto font-headline font-medium text-xs border border-outline-variant hover:border-primary/40 px-5 py-2.5"
+                >
+                  Save Profile
+                </Button>
+
+                {nextTab ? (
+                  <button
+                    type="button"
+                    onClick={() => setProfileTab(nextTab.id)}
+                    className="w-full sm:w-auto px-5 py-2.5 glass-button-primary bg-primary text-on-primary hover:bg-primary/90 rounded-xl text-xs font-headline font-medium flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  >
+                    <span>NEXT</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <Button
+                    type="submit"
+                    loading={submittingProfile}
+                    disabled={!isSaveActive}
+                    size="sm"
+                    className="w-full sm:w-auto font-headline font-medium tracking-wider text-xs shadow-glow disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none px-6 py-2.5"
+                  >
+                    Finish & Save Profile
+                  </Button>
+                )}
+              </div>
+            </div>
+          );
+        })()}
         </div>
       </form>
     </div>

@@ -210,7 +210,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                   >
                     {(job.company?.name || job.companyName || 'Aether Corp').replace(/^c_/i, '')}
                     {job.company?.verified && (
-                      <span className="text-[9px] bg-success-container border border-success/30 text-success px-1.5 py-0.5 rounded font-bold uppercase tracking-wide flex items-center select-none scale-90">
+                      <span className="text-[9px] bg-success-container border border-success/30 text-success px-1.5 py-0.5 rounded font-bold  tracking-wide flex items-center select-none scale-90">
                         ✓ Verified
                       </span>
                     )}
@@ -251,9 +251,9 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
         <div className="p-6 overflow-y-auto space-y-6 custom-scrollbar bg-background">
 
           {/* Metadata Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-surface-container-low border border-outline-variant p-4 rounded-xl text-xs">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-surface-container-low border border-outline-variant p-4 rounded-xl text-xs">
             <div className="space-y-1">
-              <span className="text-on-surface-variant font-headline font-medium uppercase tracking-wider text-[9px] block">Location</span>
+              <span className="text-on-surface-variant font-headline font-medium  tracking-wider text-[9px] block">Location</span>
               <div className="flex items-center gap-1.5 text-on-surface font-semibold">
                 <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
                 {job.locationUrl ? (
@@ -271,24 +271,31 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
               </div>
             </div>
             <div className="space-y-1">
-              <span className="text-on-surface-variant font-headline font-medium uppercase tracking-wider text-[9px] block">Desired Exp</span>
+              <span className="text-on-surface-variant font-headline font-medium  tracking-wider text-[9px] block">Desired Exp</span>
               <div className="flex items-center gap-1.5 text-on-surface font-semibold">
                 <Clock className="w-3.5 h-3.5 text-primary shrink-0" />
                 <span>{job.desiredExperience || 'Fresher'}</span>
               </div>
             </div>
             <div className="space-y-1">
-              <span className="text-on-surface-variant font-headline font-medium uppercase tracking-wider text-[9px] block">Openings</span>
+              <span className="text-on-surface-variant font-headline font-medium  tracking-wider text-[9px] block">Openings</span>
               <div className="flex items-center gap-1.5 text-on-surface font-semibold">
                 <Users className="w-3.5 h-3.5 text-primary shrink-0" />
                 <span>{job.openings ? `${job.openings} positions` : 'N/A'}</span>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <span className="text-on-surface-variant font-headline font-medium  tracking-wider text-[9px] block">Joining Month</span>
+              <div className="flex items-center gap-1.5 text-on-surface font-semibold">
+                <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
+                <span>{job.joiningMonth || 'Immediate'}</span>
               </div>
             </div>
           </div>
 
           {/* Job Summary Description */}
           <div className="space-y-2">
-            <h4 className="text-xs font-headline font-medium uppercase text-on-surface-variant tracking-wider">Opportunity Summary</h4>
+            <h4 className="text-xs font-headline font-medium  text-on-surface-variant tracking-wider">Opportunity Summary</h4>
             <p className="text-sm text-on-surface leading-relaxed">
               {job.description}
             </p>
@@ -297,7 +304,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
           {/* Role and Responsibilities */}
           {job.roleResponsibilities && (
             <div className="space-y-2">
-              <h4 className="text-xs font-headline font-medium uppercase text-on-surface-variant tracking-wider">Role & Responsibilities</h4>
+              <h4 className="text-xs font-headline font-medium  text-on-surface-variant tracking-wider">Role & Responsibilities</h4>
               <p className="text-sm text-on-surface leading-relaxed whitespace-pre-line bg-surface-container-low p-4 rounded-xl border border-outline-variant">
                 {job.roleResponsibilities}
               </p>
@@ -355,7 +362,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                         <div className="flex items-center gap-2">
                           <span className="text-on-surface font-semibold">{req.skillName}</span>
                           {!isTech ? (
-                            <span className="text-on-surface-variant/70 font-headline font-medium text-[9px] uppercase tracking-wider bg-surface-container-high border border-outline-variant px-1.5 py-0.5 rounded">Non-Technical</span>
+                            <span className="text-on-surface-variant/70 font-headline font-medium text-[9px]  tracking-wider bg-surface-container-high border border-outline-variant px-1.5 py-0.5 rounded">Non-Technical</span>
                           ) : isAutoVerified ? (
                             <span className="text-[9px] font-headline font-medium bg-blue-500/15 border border-blue-500/30 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded flex items-center gap-1" title="Quiz is coming soon. Temporarily auto-verified so you can apply!">
                               <CheckCircle className="w-2.5 h-2.5" /> Auto-Verified (Quiz Coming Soon)
@@ -401,7 +408,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
           {/* Selection Process Timeline */}
           {job.selectionProcess && job.selectionProcess.length > 0 && (
             <div className="space-y-4">
-              <h4 className="text-xs font-headline font-medium uppercase text-on-surface-variant tracking-wider flex items-center gap-1.5">
+              <h4 className="text-xs font-headline font-medium text-on-surface-variant tracking-wider flex items-center gap-1.5">
                 <ClipboardList className="w-4 h-4 text-secondary" /> Selection Process (Rounds)
               </h4>
 

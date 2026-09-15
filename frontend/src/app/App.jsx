@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
 // Import features
-import { AuthView, CandidateAuth, RecruiterAuth } from '../features/auth';
-import { StudentLayout } from '../features/student';
-import { RecruiterLayout } from '../features/recruiter';
+import { AuthView, CandidateAuth, RecruiterAuth } from '../features/Auth';
+import { StudentLayout } from '../features/Student';
+import { RecruiterLayout } from '../features/Recruiter';
 import ConnectionLoader from '../components/ConnectionLoader';
 import CompanyProfileModal from '../components/CompanyProfileModal';
 

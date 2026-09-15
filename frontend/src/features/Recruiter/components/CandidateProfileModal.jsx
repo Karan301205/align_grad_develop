@@ -61,7 +61,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
             <div className="md:col-span-2 space-y-6">
               {/* Video Intro Section */}
               <div className="space-y-3">
-                <h4 className="text-sm font-headline font-medium uppercase text-primary tracking-wider flex items-center gap-1.5">
+                <h4 className="text-sm font-headline font-medium  text-primary tracking-wider flex items-center gap-1.5">
                   <Video className="w-4 h-4" /> Video Introduction
                 </h4>
                 {candidate.introVideoUrl ? (
@@ -81,7 +81,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Bio & Details */}
               <div className="space-y-3">
-                <h4 className="text-sm font-headline font-medium uppercase text-on-surface-variant tracking-wider">Bio & Summary</h4>
+                <h4 className="text-sm font-headline font-medium  text-on-surface-variant tracking-wider">Bio & Summary</h4>
                 <p className="text-xs text-on-surface leading-relaxed bg-surface-container-low/60 border border-outline-variant p-4 rounded-xl italic">
                   {candidate.bio || "No summary provided."}
                 </p>
@@ -89,7 +89,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Contact / Metadata */}
               <div className="space-y-3">
-                <h4 className="text-sm font-headline font-medium uppercase text-on-surface-variant tracking-wider">Contact & Info</h4>
+                <h4 className="text-sm font-headline font-medium  text-on-surface-variant tracking-wider">Contact & Info</h4>
                 <div className="space-y-2 bg-surface-container-low/60 border border-outline-variant p-4 rounded-xl text-xs space-y-3">
                   {candidate.email && (
                     <div className="flex items-center gap-2.5 text-on-surface-variant">
@@ -120,7 +120,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Social Profiles Section */}
               <div className="space-y-3">
-                <h4 className="text-sm font-headline font-medium uppercase text-primary tracking-wider flex items-center gap-1.5">
+                <h4 className="text-sm font-headline font-medium  text-primary tracking-wider flex items-center gap-1.5">
                   <Link className="w-4 h-4" /> Social Profiles
                 </h4>
                 {activeSocialLinks.length > 0 ? (
@@ -159,12 +159,12 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Work Preferences Section */}
               <div className="space-y-3">
-                <h4 className="text-sm font-headline font-medium uppercase text-primary tracking-wider flex items-center gap-1.5">
+                <h4 className="text-sm font-headline font-medium  text-primary tracking-wider flex items-center gap-1.5">
                   <Briefcase className="w-4 h-4" /> Work Preferences
                 </h4>
                 <div className="bg-surface-container-low/60 border border-outline-variant p-4 rounded-xl space-y-3 text-xs">
                   <div>
-                    <span className="text-[10px] font-headline font-medium uppercase text-on-surface-variant block mb-1">Work Mode:</span>
+                    <span className="text-[10px] font-headline font-medium  text-on-surface-variant block mb-1">Work Mode:</span>
                     <div className="flex flex-wrap gap-1.5">
                       {candidate.preferredWorkModes && candidate.preferredWorkModes.length > 0 ? (
                         candidate.preferredWorkModes.map(m => (
@@ -179,7 +179,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                   </div>
 
                   <div>
-                    <span className="text-[10px] font-headline font-medium uppercase text-on-surface-variant block mb-1">Target Position Type:</span>
+                    <span className="text-[10px] font-headline font-medium  text-on-surface-variant block mb-1">Target Position Type:</span>
                     <div className="flex flex-wrap gap-1.5">
                       {candidate.preferredWorkTypes && candidate.preferredWorkTypes.length > 0 ? (
                         candidate.preferredWorkTypes.map(t => (
@@ -194,7 +194,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                   </div>
 
                   <div>
-                    <span className="text-[10px] font-headline font-medium uppercase text-on-surface-variant block mb-1">Preferred Locations:</span>
+                    <span className="text-[10px] font-headline font-medium  text-on-surface-variant block mb-1">Preferred Locations:</span>
                     <div className="flex flex-wrap gap-1.5">
                       {candidate.openToAnyLocation && (
                         <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded font-headline font-medium text-[10px]">
@@ -221,7 +221,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
               
               {/* Skills Grid */}
               <div className="space-y-3">
-                <h4 className="text-sm font-headline font-medium uppercase text-on-surface-variant tracking-wider">Skills & Verified Ratings</h4>
+                <h4 className="text-sm font-headline font-medium  text-on-surface-variant tracking-wider">Skills & Verified Ratings</h4>
                 <div className="flex flex-wrap gap-2">
                   {candidate.skills && candidate.skills.length > 0 ? (
                     candidate.skills.map((s, i) => (
@@ -243,7 +243,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Experience */}
               <div className="space-y-3">
-                <h4 className="text-sm font-headline font-medium uppercase text-on-surface-variant tracking-wider flex items-center gap-1.5">
+                <h4 className="text-sm font-headline font-medium  text-on-surface-variant tracking-wider flex items-center gap-1.5">
                   <Briefcase className="w-4 h-4 text-secondary" /> Work Experience
                 </h4>
                 {(() => {
@@ -268,14 +268,14 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                           <div className="flex items-center gap-2">
                             <Award className="w-4 h-4 text-emerald-500 shrink-0" />
                             <div>
-                              <p className="text-[9px] font-headline font-medium uppercase text-on-surface-variant">Completed Gigs</p>
+                              <p className="text-[9px] font-headline font-medium  text-on-surface-variant">Completed Gigs</p>
                               <p className="text-xs font-bold text-on-surface">{completedGigsCount} Verified Task{completedGigsCount > 1 ? 's' : ''}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <Star className="w-4 h-4 text-warning fill-warning/20 shrink-0" />
                             <div>
-                              <p className="text-[9px] font-headline font-medium uppercase text-on-surface-variant font-bold">Average Rating</p>
+                              <p className="text-[9px] font-headline font-medium  text-on-surface-variant font-bold">Average Rating</p>
                               <p className="text-xs font-bold text-on-surface">{averageRating} / 5.0 Rating</p>
                             </div>
                           </div>
@@ -312,7 +312,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Projects */}
               <div className="space-y-3">
-                <h4 className="text-sm font-headline font-medium uppercase text-on-surface-variant tracking-wider flex items-center gap-1.5">
+                <h4 className="text-sm font-headline font-medium  text-on-surface-variant tracking-wider flex items-center gap-1.5">
                   <FolderGit2 className="w-4 h-4 text-secondary" /> Projects
                 </h4>
                 {candidate.projects && candidate.projects.length > 0 ? (
@@ -343,7 +343,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Education */}
               <div className="space-y-3">
-                <h4 className="text-sm font-headline font-medium uppercase text-on-surface-variant tracking-wider flex items-center gap-1.5">
+                <h4 className="text-sm font-headline font-medium  text-on-surface-variant tracking-wider flex items-center gap-1.5">
                   <GraduationCap className="w-4 h-4 text-secondary" /> Education
                 </h4>
                 {candidate.education && candidate.education.length > 0 ? (
@@ -368,7 +368,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Certificates */}
               <div className="space-y-3">
-                <h4 className="text-sm font-headline font-medium uppercase text-on-surface-variant tracking-wider flex items-center gap-1.5">
+                <h4 className="text-sm font-headline font-medium  text-on-surface-variant tracking-wider flex items-center gap-1.5">
                   <Award className="w-4 h-4 text-secondary" /> Licenses & Certifications
                 </h4>
                 {candidate.certificates && candidate.certificates.length > 0 ? (
@@ -393,7 +393,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Extra-Curricular & Co-Curricular Activities */}
               <div className="space-y-3">
-                <h4 className="text-sm font-headline font-medium uppercase text-on-surface-variant tracking-wider flex items-center gap-1.5">
+                <h4 className="text-sm font-headline font-medium  text-on-surface-variant tracking-wider flex items-center gap-1.5">
                   <Award className="w-4 h-4 text-secondary" /> Extra-Curricular & Co-Curricular Activities
                 </h4>
                 {(() => {

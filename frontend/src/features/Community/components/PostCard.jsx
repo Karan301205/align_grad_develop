@@ -112,7 +112,7 @@ export default function PostCard({ post, token, currentUserId, onPostDeleted }) 
           <div>
             <div className="flex items-center gap-1.5">
               <h4 className="font-bold text-sm text-on-surface">{post.author?.name || 'Community Member'}</h4>
-              <span className="text-[9px] font-headline font-medium bg-primary/10 text-primary px-1.5 py-0.2 rounded font-bold uppercase">
+              <span className="text-[9px] font-headline font-medium bg-primary/10 text-primary px-1.5 py-0.2 rounded font-bold ">
                 {post.author?.role || 'STUDENT'}
               </span>
               <CheckCircle2 className="w-3.5 h-3.5 text-primary" />

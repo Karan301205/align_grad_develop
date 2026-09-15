@@ -24,19 +24,34 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// Decision 1: candidates cannot set or raise their own skill ratings. The server
-// owns the numbers — a newly declared skill starts at rating 1, and any skill the
-// candidate already has keeps its server-side rating/verifiedRating (only a passed
-// assessment changes those, in submitSkillTest). The client controls only WHICH
-// skills are listed, never their ratings; any rating/verifiedRating in the request
-// body is ignored.
-function reconcileSkills(incoming, existing) {
+// Candidates cannot self-rate skills for which active MCQ tests exist (skillsWithMCQs).
+// For those skills, the server controls the rating based on test performance (or defaults to 1).
+// For untestable technical skills (no quiz in bank) and soft skills, candidates are allowed
+// to self-rate from 1 to 10.
+function reconcileSkills(incoming, existing, skillsWithMCQs = new Set()) {
   const byName = new Map((existing || []).map((s) => [String(s.name).toLowerCase(), s]));
   return (incoming || [])
     .filter((s) => s && s.name)
     .map((s) => {
-      const prior = byName.get(String(s.name).toLowerCase());
-      const skill = { name: prior ? prior.name : s.name, rating: prior ? (prior.rating || 1) : 1 };
+      const canonicalName = String(s.name).toLowerCase();
+      const prior = byName.get(canonicalName);
+      const hasMcq = skillsWithMCQs.has(canonicalName);
+
+      let rating;
+      if (hasMcq) {
+        // Skill with MCQ: Candidate cannot self-rate. Retain existing server test rating, or default to 1.
+        rating = prior ? (prior.rating || 1) : 1;
+      } else {
+        // Untested technical skills or soft skills: candidate is allowed to self-rate (1-10)
+        const incomingRating = parseInt(s.rating, 10);
+        if (!isNaN(incomingRating) && incomingRating >= 1 && incomingRating <= 10) {
+          rating = incomingRating;
+        } else {
+          rating = prior ? (prior.rating || 1) : 1;
+        }
+      }
+
+      const skill = { name: prior ? prior.name : s.name, rating };
       const vr = prior ? prior.verifiedRating : undefined;
       if (vr !== undefined && vr !== null) skill.verifiedRating = vr;
       return skill;
@@ -110,6 +125,16 @@ exports.updateProfile = async (req, res) => {
       }
     }
 
+    let skillsWithMCQs = new Set();
+    if (skills) {
+      const activeQuestions = await prisma.question.findMany({
+        where: { status: 'ACTIVE' },
+        select: { skillName: true },
+        distinct: ['skillName']
+      });
+      skillsWithMCQs = new Set(activeQuestions.map(q => q.skillName.toLowerCase()));
+    }
+
     let profile;
     if (existingProfile) {
       profile = await prisma.profile.update({
@@ -120,7 +145,7 @@ exports.updateProfile = async (req, res) => {
           profilePic,
           resumeUrl,
           skills: skills ? {
-            set: reconcileSkills(skills, existingProfile.skills)
+            set: reconcileSkills(skills, existingProfile.skills, skillsWithMCQs)
           } : undefined,
           bio,
           nationality,
@@ -151,7 +176,7 @@ exports.updateProfile = async (req, res) => {
           profilePic,
           resumeUrl,
           skills: skills ? {
-            set: reconcileSkills(skills, [])
+            set: reconcileSkills(skills, [], skillsWithMCQs)
           } : undefined,
           bio,
           nationality,
@@ -477,24 +502,30 @@ exports.submitSkillTest = async (req, res) => {
       data: { profileId: profile.id, skillName: session.skillName, score, passed },
     });
 
-    // Decision 1: ONLY a passing assessment raises a rating, and only ever
-    // upward. The rating is server-computed; the client never supplies it.
+    // Score evaluation:
+    // 70% threshold required to earn verified rating (passed).
+    // Regardless of passing, the candidate's current rating is updated to reflect their test score!
     let updatedSkills = [...(profile.skills || [])];
-    if (passed) {
-      const skillIdx = updatedSkills.findIndex(
-        (s) => s.name.toLowerCase() === session.skillName.toLowerCase()
-      );
-      if (skillIdx !== -1) {
-        updatedSkills[skillIdx].verifiedRating = Math.max(updatedSkills[skillIdx].verifiedRating || 0, rating);
-        updatedSkills[skillIdx].rating = Math.max(updatedSkills[skillIdx].rating || 1, rating);
-      } else {
-        updatedSkills.push({ name: session.skillName, rating, verifiedRating: rating });
-      }
-      await prisma.profile.update({
-        where: { id: profile.id },
-        data: { skills: { set: updatedSkills } },
+    const skillIdx = updatedSkills.findIndex(
+      (s) => s.name.toLowerCase() === session.skillName.toLowerCase()
+    );
+    const newVerifiedRating = passed ? rating : null;
+
+    if (skillIdx !== -1) {
+      updatedSkills[skillIdx].rating = rating;
+      updatedSkills[skillIdx].verifiedRating = newVerifiedRating;
+    } else {
+      updatedSkills.push({
+        name: session.skillName,
+        rating,
+        verifiedRating: newVerifiedRating,
       });
     }
+
+    await prisma.profile.update({
+      where: { id: profile.id },
+      data: { skills: { set: updatedSkills } },
+    });
 
     console.log('[assessment] submitted', {
       skillName: session.skillName, candidateId: req.user.id, score, passed,

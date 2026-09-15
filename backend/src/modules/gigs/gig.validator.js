@@ -14,9 +14,11 @@ const createGigSchema = {
     skills: z.array(z.string().min(1, 'Skill name must not be empty')).min(1, 'At least one skill is required'),
     requirements: z.array(gigRequirementSchema).optional(),
     budget: z.number().positive('Budget must be a positive number'),
+    currency: z.string().max(10).optional(),
     deliveryTime: z.string().min(1, 'Delivery time designation is required').max(100),
     minRating: z.number().int().min(1).max(10).optional(),
-    attachments: z.array(z.string().url('Invalid attachment URL')).optional()
+    attachments: z.array(z.string().url('Invalid attachment URL')).optional(),
+    logo: z.string().optional().nullable()
   })
 };
 
@@ -62,9 +64,11 @@ const updateGigSchema = {
     skills: z.array(z.string().min(1, 'Skill name must not be empty')).min(1, 'At least one skill is required').optional(),
     requirements: z.array(gigRequirementSchema).optional(),
     budget: z.number().positive('Budget must be a positive number').optional(),
+    currency: z.string().max(10).optional(),
     deliveryTime: z.string().min(1, 'Delivery time designation is required').max(100).optional(),
     minRating: z.number().int().min(1).max(10).optional(),
-    attachments: z.array(z.string().url('Invalid attachment URL')).optional()
+    attachments: z.array(z.string().url('Invalid attachment URL')).optional(),
+    logo: z.string().optional().nullable()
   })
 };
 

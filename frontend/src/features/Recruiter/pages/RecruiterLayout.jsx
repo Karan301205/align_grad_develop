@@ -11,7 +11,8 @@ import {
   DollarSign,
   LayoutDashboard,
   Users,
-  Zap
+  Zap,
+  Search
 } from 'lucide-react';
 import { apiFetch } from '../../../services/apiClient';
 import { putFileToS3 } from '../../../services/uploadService';
@@ -35,6 +36,8 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [gigsSubTab, setGigsSubTab] = useState('browse');
+  const [isGigsOpen, setIsGigsOpen] = useState(true);
   const mainRef = useRef(null);
 
   // Job Posting state
@@ -264,7 +267,22 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     { id: 'jobs', icon: Briefcase, label: 'Active Jobs' },
     { id: 'candidates', icon: User, label: 'Candidates' },
     { id: 'post-job', icon: Plus, label: 'Post New Job' },
-    { id: 'gigs', icon: Zap, label: 'Gigs Marketplace' },
+    {
+      id: 'gigs',
+      icon: Zap,
+      label: 'Gigs Marketplace',
+      subItems: [
+        { id: 'browse', label: 'Browse Gigs', icon: Search },
+        { id: 'post', label: 'Post a Gig', icon: Plus },
+        { id: 'my-gigs', label: 'My Gigs Workspace', icon: Briefcase },
+      ],
+      activeSubId: gigsSubTab,
+      onSubItemClick: (subId) => {
+        setGigsSubTab(subId);
+        setActiveTab('gigs');
+        setSidebarOpen(false);
+      }
+    },
     { id: 'verification', icon: ShieldCheck, label: 'Company Profile' },
   ];
 
@@ -328,7 +346,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                   }`}
                 />
                 {isExpanded && (
-                  <p className="text-[9px] font-headline font-medium uppercase tracking-wider text-on-surface-variant opacity-70 px-1 animate-fade-in">Recruiter Hub</p>
+                  <p className="text-[9px] font-headline font-medium tracking-wider text-on-surface-variant opacity-70 px-1 animate-fade-in">Recruiter Hub</p>
                 )}
               </div>
               {isExpanded && (
@@ -347,6 +365,11 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                   active={activeTab === item.id}
                   onClick={() => goToTab(item.id)}
                   collapsed={!isExpanded}
+                  subItems={item.subItems}
+                  isOpen={item.isOpen}
+                  onToggle={item.onToggle}
+                  activeSubId={item.activeSubId}
+                  onSubItemClick={item.onSubItemClick}
                 />
               ))}
             </nav>
@@ -426,6 +449,8 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                 theme={theme}
                 profile={null}
                 onUpdateProfile={fetchRecruiterData}
+                activeSubTab={gigsSubTab}
+                onSubTabChange={setGigsSubTab}
               />
             )}
 

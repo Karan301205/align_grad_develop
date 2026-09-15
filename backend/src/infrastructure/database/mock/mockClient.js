@@ -380,7 +380,7 @@ const mockClient = {
     update: async ({ where, data }) => {
       const idx = mockDb.gigs.findIndex(g => g.id === where.id);
       if (idx !== -1) {
-        const fields = ["status", "selectedCandidateId", "hiredCandidateIds", "title", "description", "budget", "deliveryTime", "attachments", "category", "categories", "skills", "requirements", "minRating"];
+        const fields = ["status", "selectedCandidateId", "hiredCandidateIds", "title", "description", "budget", "currency", "deliveryTime", "attachments", "category", "categories", "skills", "requirements", "minRating", "logo"];
         fields.forEach(field => {
           if (data[field] !== undefined) {
             mockDb.gigs[idx][field] = data[field];

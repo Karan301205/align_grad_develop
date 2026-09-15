@@ -207,7 +207,7 @@ export default function RecruiterCandidates({ candidates }) {
 
                 {/* Stacks display */}
                 <div className="space-y-2">
-                  <p className="text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant">Proficiency Levels</p>
+                  <p className="text-xs font-headline font-medium tracking-wider text-on-surface-variant">Proficiency Levels</p>
                   <div className="flex flex-wrap gap-2">
                     {cand.skills && cand.skills.length > 0 ? (
                       cand.skills.map((s, i) => (

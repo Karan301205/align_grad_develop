@@ -1,9 +1,30 @@
 const { prisma } = require('../../infrastructure/database');
 
+const parseDeliveryDays = (timelineStr) => {
+  if (!timelineStr) return 999;
+  const s = timelineStr.toString().toLowerCase();
+  const numMatch = s.match(/\d+/);
+  const num = numMatch ? parseInt(numMatch[0], 10) : 7;
+  if (s.includes('month')) return num * 30;
+  if (s.includes('week')) return num * 7;
+  if (s.includes('hour')) return Math.ceil(num / 24);
+  return num; // days
+};
+
 // Get all open gigs in the marketplace
 exports.getGigs = async (req, res) => {
   try {
-    const { q, skills, category } = req.query;
+    const { 
+      q, 
+      skills, 
+      category, 
+      minBudget, 
+      maxBudget, 
+      deliveryTimeline, 
+      verifiedOnly, 
+      minRating,
+      sortBy 
+    } = req.query;
     
     let whereClause = { status: "OPEN" };
     
@@ -36,18 +57,68 @@ exports.getGigs = async (req, res) => {
     if (skills) {
       const skillFilter = Array.isArray(skills) 
         ? skills.map(s => s.toLowerCase()) 
-        : skills.split(',').map(s => s.trim().toLowerCase());
+        : skills.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
         
-      filteredGigs = filteredGigs.filter(g => 
-        g.skills.some(skill => skillFilter.includes(skill.toLowerCase()))
-      );
+      if (skillFilter.length > 0) {
+        filteredGigs = filteredGigs.filter(g => 
+          g.skills && g.skills.some(skill => 
+            skillFilter.some(sf => skill.toLowerCase().includes(sf) || sf.includes(skill.toLowerCase()))
+          )
+        );
+      }
+    }
+
+    // Filter by Min Budget
+    if (minBudget && !isNaN(Number(minBudget))) {
+      filteredGigs = filteredGigs.filter(g => Number(g.budget) >= Number(minBudget));
+    }
+
+    // Filter by Max Budget
+    if (maxBudget && !isNaN(Number(maxBudget))) {
+      filteredGigs = filteredGigs.filter(g => Number(g.budget) <= Number(maxBudget));
+    }
+
+    // Filter by Delivery Timeline
+    if (deliveryTimeline && deliveryTimeline !== 'all') {
+      if (deliveryTimeline === '3days') {
+        filteredGigs = filteredGigs.filter(g => parseDeliveryDays(g.deliveryTime) <= 3);
+      } else if (deliveryTimeline === '7days') {
+        filteredGigs = filteredGigs.filter(g => parseDeliveryDays(g.deliveryTime) <= 7);
+      } else if (deliveryTimeline === '14days') {
+        filteredGigs = filteredGigs.filter(g => parseDeliveryDays(g.deliveryTime) <= 14);
+      } else if (deliveryTimeline === '30days') {
+        filteredGigs = filteredGigs.filter(g => parseDeliveryDays(g.deliveryTime) > 14);
+      }
+    }
+
+    // Filter by Minimum Rating Requirement
+    if (minRating && !isNaN(Number(minRating)) && Number(minRating) > 0) {
+      filteredGigs = filteredGigs.filter(g => Number(g.minRating || 1) <= Number(minRating));
     }
 
     const companies = await prisma.company.findMany();
-    const gigsWithCompany = filteredGigs.map(g => {
+    let gigsWithCompany = filteredGigs.map(g => {
       const company = companies.find(c => c.userId === g.ownerId || c.id === g.ownerId) || null;
       return { ...g, company };
     });
+
+    // Filter by Verified Clients Only
+    if (verifiedOnly === 'true' || verifiedOnly === true) {
+      gigsWithCompany = gigsWithCompany.filter(g => g.company && g.company.verified);
+    }
+
+    // Sort Results
+    if (sortBy === 'budget_desc') {
+      gigsWithCompany.sort((a, b) => (Number(b.budget) || 0) - (Number(a.budget) || 0));
+    } else if (sortBy === 'budget_asc') {
+      gigsWithCompany.sort((a, b) => (Number(a.budget) || 0) - (Number(b.budget) || 0));
+    } else if (sortBy === 'delivery_asc') {
+      gigsWithCompany.sort((a, b) => parseDeliveryDays(a.deliveryTime) - parseDeliveryDays(b.deliveryTime));
+    } else {
+      // Default: newest first
+      gigsWithCompany.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    }
+
     res.status(200).json(gigsWithCompany);
   } catch (err) {
     console.error('Error fetching gigs:', err);
@@ -61,7 +132,7 @@ exports.createGig = async (req, res) => {
     if (req.user.role !== 'RECRUITER') {
       return res.status(403).json({ error: 'Only recruiters can create gigs' });
     }
-    const { title, description, category, categories, skills, requirements, budget, deliveryTime, minRating, attachments } = req.body;
+    const { title, description, category, categories, skills, requirements, budget, currency, deliveryTime, minRating, attachments, logo } = req.body;
     const parsedMinRating = minRating !== undefined ? (parseInt(minRating, 10) || 1) : 1;
     
     // Normalize requirements array if provided, else build from skills
@@ -96,8 +167,10 @@ exports.createGig = async (req, res) => {
           }))
         },
         budget: parseFloat(budget),
+        currency: currency ? currency.toUpperCase() : 'INR',
         deliveryTime,
         minRating: calculatedMinRating,
+        logo: logo || null,
         attachments: attachments || [],
         ownerId: req.user.id,
         status: "OPEN"
@@ -752,7 +825,7 @@ exports.reviewGig = async (req, res) => {
 exports.updateGig = async (req, res) => {
   try {
     const { gigId } = req.params;
-    const { title, description, category, categories, skills, requirements, budget, deliveryTime, minRating, attachments } = req.body;
+    const { title, description, category, categories, skills, requirements, budget, currency, deliveryTime, minRating, attachments, logo } = req.body;
     const userId = req.user.id;
 
     if (req.user.role !== 'RECRUITER') {
@@ -779,6 +852,14 @@ exports.updateGig = async (req, res) => {
       deliveryTime: deliveryTime !== undefined ? deliveryTime : gig.deliveryTime,
       attachments: attachments !== undefined ? attachments : gig.attachments
     };
+
+    if (currency !== undefined) {
+      updatedData.currency = currency.toUpperCase();
+    }
+
+    if (logo !== undefined) {
+      updatedData.logo = logo;
+    }
 
     if (category !== undefined) {
       updatedData.category = category;

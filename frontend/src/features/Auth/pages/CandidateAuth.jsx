@@ -142,7 +142,7 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
             <div className="flex items-center gap-4">
               <button 
                 onClick={navigateToRecruiter}
-                className="text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-colors font-headline uppercase tracking-wider"
+                className="text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-colors font-headline  tracking-wider"
               >
                 Recruiter Portal
               </button>
@@ -176,7 +176,7 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
                 <div className="absolute bottom-2 right-2 w-1.5 h-1.5 rounded-full bg-outline-variant/60 shadow-[inset_1px_1px_1px_rgba(0,0,0,0.3)]"></div>
 
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1  bg-primary/10 border border-primary/20 text-primary text-[10px] font-headline font-medium uppercase tracking-wider mb-3">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1  bg-primary/10 border border-primary/20 text-primary text-[10px] font-headline font-medium  tracking-wider mb-3">
                     {/* <Sparkles className="w-3 h-3" /> */}
                     <span>Candidate Workspace</span>
                   </div>
@@ -213,7 +213,7 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
                   />
 
                   <div>
-                    <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">
+                    <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5">
                       Password
                     </label>
                     <div className="relative">
@@ -265,7 +265,7 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-outline-variant/60"></div>
                   </div>
-                  <span className="relative bg-surface-container px-3 text-[10px] font-headline font-medium text-on-surface-variant uppercase tracking-wider">
+                  <span className="relative bg-surface-container px-3 text-[10px] font-headline font-medium text-on-surface-variant  tracking-wider">
                     OR
                   </span>
                 </div>

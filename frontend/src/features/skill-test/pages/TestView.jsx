@@ -92,19 +92,19 @@ export default function TestView({ token, testSkill, setTestSkill, onPass }) {
 
   return (
     <div className="min-h-screen w-full bg-background flex flex-col items-center py-12 px-6 overflow-y-auto custom-scrollbar">
-      <div className="w-full max-w-2xl bg-surface-container border border-outline-variant rounded-2xl p-8 space-y-6">
+      <div className="w-full max-w-2xl bg-surface-container border border-outline-variant rounded-none p-8 space-y-6">
 
         {/* Header */}
         <div className="flex justify-between items-center border-b border-outline-variant pb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-secondary">AlignGrade Validation Lab</span>
+              <span className="text-[10px] font-headline font-medium  tracking-wider text-secondary">AlignGrade Validation Lab</span>
             </div>
             <h2 className="text-2xl font-headline font-medium text-on-surface mt-1">{skillName} Certification Test</h2>
           </div>
           <button
             onClick={() => setTestSkill(null)}
-            className="px-4 py-2 text-xs text-on-surface-variant hover:text-on-surface bg-surface-container-high border border-outline-variant rounded-lg"
+            className="px-4 py-2 text-xs text-on-surface-variant hover:text-on-surface bg-surface-container-high border border-outline-variant rounded-none cursor-pointer"
           >
             Cancel
           </button>
@@ -112,12 +112,12 @@ export default function TestView({ token, testSkill, setTestSkill, onPass }) {
 
         {/* Test status banner */}
         {!submitted ? (
-          <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl flex items-center gap-3 text-xs text-primary font-sans font-normal leading-relaxed">
+          <div className="p-4 bg-primary/10 border border-primary/20 rounded-none flex items-center gap-3 text-xs text-primary font-sans font-normal leading-relaxed">
             <BookOpen className="w-5 h-5 flex-shrink-0" />
             <span>Complete the verification test to verify your skill proficiency level and save your rating based on what you score.</span>
           </div>
         ) : (
-          <div className="p-6 rounded-xl border flex flex-col items-center gap-3 text-center bg-success-container border-success/30 text-on-success-container">
+          <div className="p-6 rounded-none border flex flex-col items-center gap-3 text-center bg-success-container border-success/30 text-on-success-container">
             <>
               <Award className="w-12 h-12" />
               <h3 className="text-xl font-bold">Verification Completed! (Score: {score}%)</h3>
@@ -126,7 +126,7 @@ export default function TestView({ token, testSkill, setTestSkill, onPass }) {
               </p>
               <button
                 onClick={onPass}
-                className="mt-4 px-6 py-2.5 bg-primary text-on-primary font-bold rounded-xl shadow shadow-primary/10 hover:brightness-110 active:scale-95 transition-all text-sm"
+                className="mt-4 px-6 py-2.5 bg-primary text-on-primary font-bold rounded-none shadow shadow-primary/10 hover:brightness-110 active:scale-95 transition-all text-sm cursor-pointer"
               >
                 Return to Dashboard
               </button>
@@ -137,7 +137,7 @@ export default function TestView({ token, testSkill, setTestSkill, onPass }) {
         {/* Questions list */}
         <div className="space-y-6 pt-4">
           {questions.map((q, qIdx) => (
-            <div key={qIdx} className="space-y-3 bg-surface-container-low/60 p-5 rounded-xl border border-outline-variant">
+            <div key={qIdx} className="space-y-3 bg-surface-container-low/60 p-5 rounded-none border border-outline-variant">
               <h4 className="text-sm font-bold text-on-surface">Q{qIdx + 1}: {q.q}</h4>
               <div className="space-y-2">
                 {q.options.map((opt, optIdx) => {
@@ -161,7 +161,7 @@ export default function TestView({ token, testSkill, setTestSkill, onPass }) {
                       key={optIdx}
                       disabled={submitted}
                       onClick={() => handleSelect(qIdx, optIdx)}
-                      className={`w-full text-left p-3 rounded-lg border text-xs transition-all flex items-center justify-between ${optStyle}`}
+                      className={`w-full text-left p-3 rounded-none border text-xs transition-all flex items-center justify-between cursor-pointer ${optStyle}`}
                     >
                       <span>{opt}</span>
                       {submitted && optIdx === q.answer && <CheckCircle className="w-4 h-4 text-primary" />}
@@ -178,7 +178,7 @@ export default function TestView({ token, testSkill, setTestSkill, onPass }) {
           <button
             onClick={handleTestSubmit}
             disabled={submitting}
-            className="w-full py-4 bg-primary text-on-primary font-bold rounded-xl hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 bg-primary text-on-primary font-bold rounded-none hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             {submitting ? (
               <RefreshCw className="w-5 h-5 animate-spin" />

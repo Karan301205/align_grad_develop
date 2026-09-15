@@ -181,3 +181,48 @@ export const ALL_SKILLS = [
   { skill: "YUM", type: "technical" },
   { skill: "Zustand", type: "technical" }
 ];
+
+// Skills for which active MCQ tests are supported by the Question Bank (36 canonical skills)
+export const SKILLS_WITH_MCQ = new Set([
+  'tailwind',
+  'redux',
+  'generative ai',
+  'machine learning',
+  'api',
+  'fastapi',
+  'typescript',
+  '.net',
+  'node.js',
+  'data structures & algorithms',
+  'django',
+  'mysql',
+  'postgresql',
+  'c',
+  'python',
+  'redis',
+  'graphql',
+  'vue.js',
+  'angularjs',
+  'mongodb',
+  'javascript',
+  'java',
+  'linux',
+  'next.js',
+  'go',
+  'express js',
+  'sql',
+  'react',
+  'html',
+  'css',
+  'git and github',
+  'aws',
+  'docker',
+  'kubernetes',
+  'c++',
+  'c#'
+]);
+
+export function hasSkillMcq(skillName) {
+  if (!skillName) return false;
+  return SKILLS_WITH_MCQ.has(String(skillName).trim().toLowerCase());
+}

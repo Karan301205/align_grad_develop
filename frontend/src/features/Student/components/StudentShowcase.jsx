@@ -11,7 +11,10 @@ import {
   RefreshCw, 
   AlertCircle,
   FileVideo,
-  Sparkles
+  Sparkles,
+  X,
+  Clock,
+  Info
 } from 'lucide-react';
 import { apiFetch } from '../../../services/apiClient';
 import PageHeader from '../../../components/ui/PageHeader';
@@ -30,6 +33,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
   const [recordedUrl, setRecordedUrl] = useState('');
   const [activeMode, setActiveMode] = useState('choose'); // 'choose', 'record', 'upload'
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [showRecordModal, setShowRecordModal] = useState(false);
 
   const videoPreviewRef = useRef(null);
   const liveStreamRef = useRef(null);
@@ -434,7 +438,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
               <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm justify-center">
                 <button
                   type="button"
-                  onClick={startCamera}
+                  onClick={() => setShowRecordModal(true)}
                   className="px-6 py-3 bg-primary text-on-primary rounded-xl text-sm font-bold hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
                   <Camera className="w-4 h-4" />
@@ -460,11 +464,11 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
           {activeMode === 'record' && !recordedUrl && (
             <div className="flex-1 flex flex-col space-y-4">
               <div className="flex items-center justify-between border-b border-outline-variant pb-4">
-                {/* <h3 className="text-sm font-headline font-medium uppercase text-primary tracking-wider flex items-center gap-1.5">
+                {/* <h3 className="text-sm font-headline font-medium text-primary tracking-wider flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Live Camera Stream (720p)
                 </h3> */}
                 {isRecording && (
-                  <span className={`px-3 py-1 border rounded-lg text-xs font-sans font-normal font-semibold flex items-center gap-1.5 ${
+                  <span className={`px-3 py-1 border rounded-lg text-xs font-sans font-normal flex items-center gap-1.5 ${
                     isPaused
                       ? 'bg-amber-500/20 text-amber-500 border-amber-500/30 font-bold'
                       : recordingSeconds >= 40 
@@ -513,7 +517,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                   </div>
 
                   {/* Segment Titles & Custom Timers */}
-                  <div className="grid grid-cols-6 gap-2 text-[10px] font-headline font-medium text-on-surface-variant text-center select-none">
+                  <div className="grid grid-cols-6 gap-2 text-xs font-sans font-normal text-on-surface-variant text-center select-none">
                     <span className={`col-span-2 truncate ${recordingSeconds < 20 ? 'text-primary font-bold' : ''}`}>Self & Edu (20s)</span>
                     <span className={`col-span-1 truncate ${recordingSeconds >= 20 && recordingSeconds < 30 ? 'text-primary font-bold' : ''}`}>Skills (10s)</span>
                     <span className={`col-span-1 truncate ${recordingSeconds >= 30 && recordingSeconds < 40 ? 'text-primary font-bold' : ''}`}>Exp (10s) <span className="text-amber-500 font-bold">*40s Min</span></span>
@@ -523,7 +527,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                   {/* Current Active Guide prompt card */}
                   <div className="bg-surface-container-high/80 p-3 rounded-lg border border-outline-variant flex items-center justify-between gap-4">
                     <div className="space-y-0.5">
-                      <span className="text-[9px] font-headline font-medium uppercase text-secondary tracking-widest">Active Topic</span>
+                      <span className="text-xs font-headline font-medium text-secondary">Active Topic</span>
                       <p className="text-xs font-semibold text-on-surface leading-relaxed">
                         {recordingSeconds < 20 && "🎓 Tell us about yourself and your educational background"}
                         {recordingSeconds >= 20 && recordingSeconds < 30 && "⚡ Talk about the skills and technologies you know"}
@@ -532,8 +536,8 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                       </p>
                     </div>
                     <div className="shrink-0 text-center bg-secondary/15 border border-secondary/20 px-3 py-1 rounded-lg min-w-[70px]">
-                      <span className="text-[9px] font-headline font-medium text-secondary uppercase block tracking-wider">Next in</span>
-                      <span className="text-xs font-bold font-sans font-normal text-on-surface">
+                      <span className="text-xs font-headline font-medium text-secondary block">Next in</span>
+                      <span className="text-xs font-headline font-medium text-on-surface">
                         {recordingSeconds < 20 && `${20 - recordingSeconds}s`}
                         {recordingSeconds >= 20 && recordingSeconds < 30 && `${30 - recordingSeconds}s`}
                         {recordingSeconds >= 30 && recordingSeconds < 40 && `${40 - recordingSeconds}s`}
@@ -641,10 +645,10 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
           {recordedUrl && (
             <div className="flex-1 flex flex-col space-y-4">
               <div className="flex items-center justify-between border-b border-outline-variant pb-4">
-                <h3 className="text-sm font-headline font-medium uppercase text-secondary tracking-wider">
+                <h3 className="text-sm font-headline font-medium text-secondary tracking-wider">
                   Review Your Showcase
                 </h3>
-                <span className="px-2.5 py-0.5 bg-surface-container-high border border-outline-variant rounded text-[10px] font-headline font-medium text-on-surface-variant">
+                <span className="px-2.5 py-0.5 bg-surface-container-high border border-outline-variant rounded text-xs font-sans font-normal text-on-surface-variant">
                   Ready to Publish
                 </span>
               </div>
@@ -760,7 +764,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
           </div>
 
           {/* <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-3.5">
-            <h4 className="text-xs font-headline font-medium uppercase text-on-surface-variant tracking-wider">Tips for an Excellent Intro</h4>
+            <h4 className="text-xs font-headline font-medium text-on-surface-variant tracking-wider">Tips for an Excellent Intro</h4>
             <ul className="text-xs text-on-surface-variant space-y-2.5 list-disc list-inside">
               <li><strong>Duration:</strong> 40 to 60 seconds is mandatory.</li>
               <li>State your name, key stacks, and recent achievements.</li>
@@ -772,6 +776,76 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
         </div>
 
       </div>
+
+      {/* Video Duration Guidelines Pop-up Modal */}
+      {showRecordModal && (
+        <div className="fixed inset-0 z-90 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-surface-container border border-outline-variant rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-scale-in relative">
+            <button
+              type="button"
+              onClick={() => setShowRecordModal(false)}
+              className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                <Video className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-headline font-medium text-on-surface">Video Showcase Guidelines</h3>
+                <p className="text-xs font-sans font-normal text-on-surface-variant">Please review before recording</p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-primary/10 border border-primary/25 rounded-xl space-y-2">
+              <div className="flex items-start gap-2.5">
+                <Clock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <p className="text-sm font-sans font-normal text-on-surface leading-snug">
+                  Videos must be <strong className="font-semibold text-primary">at least 40 seconds</strong> and up to <strong className="font-semibold text-primary">1 minute long</strong>.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2 text-xs font-sans font-normal text-on-surface-variant leading-relaxed">
+              <p className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+                Minimum recording duration is 40 seconds.
+              </p>
+              <p className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+                Maximum recording duration is 60 seconds (1 minute).
+              </p>
+              <p className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+                Ensure good lighting and clear audio before recording.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-outline-variant">
+              <button
+                type="button"
+                onClick={() => setShowRecordModal(false)}
+                className="px-4 py-2.5 bg-surface-container-high border border-outline-variant hover:bg-surface-container-highest rounded-xl text-xs font-semibold text-on-surface-variant transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowRecordModal(false);
+                  startCamera();
+                }}
+                className="px-5 py-2.5 bg-primary text-on-primary rounded-xl text-xs font-bold hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
+              >
+                <Camera className="w-4 h-4" />
+                Continue to Camera
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

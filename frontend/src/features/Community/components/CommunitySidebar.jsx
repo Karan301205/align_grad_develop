@@ -62,7 +62,7 @@ export default function CommunitySidebar({
 
       {/* Community List Navigation */}
       <div className="bg-surface-container border border-outline-variant rounded-2xl p-4 space-y-3 shadow-xs">
-        <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold px-1">
+        <h4 className="text-[10px] font-headline font-medium tracking-wider text-on-surface-variant font-bold px-1">
           Your Networks ({communities.length})
         </h4>
 

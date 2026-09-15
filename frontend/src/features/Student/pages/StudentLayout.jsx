@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  ChevronLeft,
   Plus,
   AlertCircle,
   CheckCircle2,
@@ -19,7 +20,8 @@ import {
   Lock,
   DollarSign,
   Users,
-  Zap
+  Zap,
+  Search
 } from 'lucide-react';
 import GigsMarketplace from '../../Gigs/GigsMarketplace';
 import { apiFetch } from '../../../services/apiClient';
@@ -42,6 +44,7 @@ import StudentResume from '../components/StudentResume';
 import StudentSkillTests from '../components/StudentSkillTests';
 import StudentShowcase from '../components/StudentShowcase';
 import StudentProgress from '../components/StudentProgress';
+import JobBriefPage from './JobBriefPage';
 
 
 export default function StudentLayout({ user, token, activeTab, setActiveTab, testSkill, setTestSkill, handleLogout, theme, toggleTheme, onOpenCompanyProfile, autoSelectOpportunity, setAutoSelectOpportunity }) {
@@ -59,6 +62,30 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const [wasComplete, setWasComplete] = useState(null);
   const [alertConfig, setAlertConfig] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [gigsSubTab, setGigsSubTab] = useState('browse');
+  const [isGigsOpen, setIsGigsOpen] = useState(true);
+  const [selectedBriefJobId, setSelectedBriefJobId] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief')) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id') || null;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    const handleUrlChange = () => {
+      if (window.location.pathname.startsWith('/job_brief')) {
+        const params = new URLSearchParams(window.location.search);
+        setSelectedBriefJobId(params.get('id') || null);
+      } else {
+        setSelectedBriefJobId(null);
+      }
+    };
+
+    window.addEventListener('popstate', handleUrlChange);
+    return () => window.removeEventListener('popstate', handleUrlChange);
+  }, []);
   
   // General Section
   const [bio, setBio] = useState('');
@@ -225,6 +252,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
 
   useEffect(() => {
     fetchProfileAndJobs();
+    fetchTechnicalSkills();
+    fetchStudentApplications();
   }, [token]);
 
   useEffect(() => {
@@ -235,18 +264,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
 
   useEffect(() => {
     if (!loading && profile) {
-      const hasGen = !!(
-        profile.name?.trim() &&
-        profile.bio?.trim() &&
-        profile.nationality?.trim() &&
-        profile.gender?.trim() &&
-        profile.email?.trim() &&
-        profile.dob?.trim() &&
-        profile.phone?.trim()
-      );
-      const hasSk = profile.skills && profile.skills.length > 0;
-      const hasVid = !!(profile.introVideoUrl && profile.introVideoUrl.trim());
-      const complete = hasGen && hasSk && hasVid;
+      const complete = isProfileComplete(profile);
       
       if (wasComplete === false && complete === true) {
         // Just completed profile, redirect to dashboard
@@ -254,7 +272,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       }
       setWasComplete(complete);
 
-      if (!complete && activeTab !== 'profile' && activeTab !== 'showcase') {
+      if (!complete && activeTab !== 'profile' && activeTab !== 'tests') {
         setActiveTab('profile');
       }
     }
@@ -314,11 +332,69 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
 
   useEffect(() => {
     if (testSkill && testSkill.skillName) {
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief')) {
+        window.history.pushState({}, '', '/');
+      }
+      setSelectedBriefJobId(null);
       setActiveTab('tests');
       handleStartSkillTest(testSkill.skillName);
       setTestSkill(null);
     }
   }, [testSkill]);
+
+  const handleAddSkillAndUpgrade = async ({ skillName, targetRating, jobId }) => {
+    try {
+      const exists = (skillsList || []).some(
+        s => s.name?.toLowerCase() === skillName?.toLowerCase()
+      );
+      if (!exists) {
+        const updated = [...(skillsList || []), { name: skillName, rating: 1 }];
+        setSkillsList(updated);
+        await apiFetch('/student/profile', {
+          token,
+          method: 'PUT',
+          json: {
+            name: profile?.name,
+            username,
+            profilePic,
+            resumeUrl,
+            skills: updated,
+            bio,
+            nationality,
+            gender,
+            email: profileEmail,
+            dob,
+            phone,
+            socialLinks,
+            education: educationList,
+            experience: experienceList,
+            certificates: certificatesList,
+            projects: projectsList,
+            cocurricular,
+            preferredWorkModes,
+            preferredWorkTypes,
+            preferredLocations,
+            openToAnyLocation
+          }
+        });
+        await fetchProfileAndJobs();
+      }
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief')) {
+        window.history.pushState({}, '', '/');
+      }
+      setSelectedBriefJobId(null);
+      setActiveTab('tests');
+      handleStartSkillTest(skillName);
+    } catch (err) {
+      console.error('Failed to add skill before starting test:', err);
+      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief')) {
+        window.history.pushState({}, '', '/');
+      }
+      setSelectedBriefJobId(null);
+      setActiveTab('tests');
+      handleStartSkillTest(skillName);
+    }
+  };
 
   const handleSubmitSkillTest = async () => {
     // Server-side scoring: submit the selected option index per question (in served
@@ -338,6 +414,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       if (res.ok) {
         const data = await res.json();
         setTestResult({
+          skillName: activeTestSkill,
           rating: data.rating,   // 1-10 level (applied to profile only when passed)
           percent: data.score,   // 0-100
           passed: data.passed,
@@ -359,8 +436,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     }
   };
 
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault();
+  const handleUpdateProfile = async (e, sectionName) => {
+    if (e && e.preventDefault) e.preventDefault();
     setSubmittingProfile(true);
     setFeedbackMsg('');
     try {
@@ -392,7 +469,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         }
       });
       if (res.ok) {
-        setFeedbackMsg('Profile updated successfully!');
+        const msg = sectionName ? `"${sectionName}" updated successfully!` : 'Profile updated successfully!';
+        setFeedbackMsg(msg);
         fetchProfileAndJobs();
       } else {
         const d = await res.json();
@@ -512,7 +590,10 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       });
       if (res.ok) {
         setAlertConfig({ message: 'Application submitted successfully!', type: 'success' });
-        fetchProfileAndJobs();
+        await Promise.all([
+          fetchProfileAndJobs(),
+          fetchStudentApplications()
+        ]);
       } else {
         const d = await res.json();
         setAlertConfig({ message: d.error || 'Could not apply', type: 'error' });
@@ -532,14 +613,33 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
 
   const navItems = [
     { id: 'dashboard', icon: Briefcase, label: 'Opportunities', locked: !isComplete },
-    { id: 'profile', icon: User, label: 'Profile & Ratings', locked: false },
-    { id: 'resume', icon: FileText, label: 'Resume', locked: !isComplete },
-    { id: 'tests', icon: BookOpen, label: 'Your Tests', locked: !isComplete },
+    { id: 'profile', icon: User, label: 'Your Profile', locked: false },
+    { id: 'tests', icon: BookOpen, label: 'Your Tests', locked: false },
     { id: 'progress', icon: ClipboardList, label: 'Your Job Progress', locked: !isComplete },
-    { id: 'gigs', icon: Zap, label: 'Gigs Marketplace', locked: !isComplete },
+    {
+      id: 'gigs',
+      icon: Zap,
+      label: 'Gigs Marketplace',
+      locked: !isComplete,
+      subItems: [
+        { id: 'browse', label: 'Browse Gigs', icon: Search },
+        { id: 'my-gigs', label: 'My Gigs Workspace', icon: Briefcase },
+      ],
+      activeSubId: gigsSubTab,
+      onSubItemClick: (subId) => {
+        if (!isComplete) return;
+        setGigsSubTab(subId);
+        setActiveTab('gigs');
+        setSidebarOpen(false);
+      }
+    },
   ];
 
   const goToTab = (tabId) => {
+    if (selectedBriefJobId || (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief'))) {
+      window.history.pushState({}, '', '/');
+      setSelectedBriefJobId(null);
+    }
     setActiveTab(tabId);
     setSidebarOpen(false);
   };
@@ -551,6 +651,16 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       mainRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [activeTab]);
+
+  // Auto-dismiss feedback message after 2 seconds
+  useEffect(() => {
+    if (feedbackMsg) {
+      const timer = setTimeout(() => {
+        setFeedbackMsg('');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [feedbackMsg]);
 
   return (
     <>
@@ -580,32 +690,56 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
 
       {/* Sidebar */}
       {(() => {
-        const isExpanded = isHovered || sidebarOpen;
+        const isExpandedState = isExpanded || isHovered || sidebarOpen;
         return (
           <aside
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             className={`h-screen fixed left-0 top-0 bg-surface-container flex flex-col py-6 px-3 border-r border-outline-variant z-50 transition-all duration-300 ${
-              isExpanded ? 'w-64' : 'w-20'
+              isExpandedState ? 'w-64' : 'w-20'
             } ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
           >
-            <div className="mb-10 flex items-center justify-between px-2.5">
-              <div className="flex flex-col gap-1.5 min-w-0 w-full">
-                <img
-                  src={isExpanded ? (theme === 'dark' ? '/a_g_logo_dark.webp' : '/a_g_logo.webp') : '/a_g_l_Background_Removed.png'}
-                  alt="AlignGrade"
-                  className={`w-auto object-contain transition-all duration-300 self-start pl-1 ${
-                    isExpanded ? 'h-12' : 'h-10'
-                  }`}
-                />
-                {isExpanded && (
-                  <p className="text-[9px] font-headline font-medium uppercase tracking-wider text-on-surface-variant opacity-70 px-1 animate-fade-in">Candidate Dashboard</p>
-                )}
-              </div>
-              {isExpanded && (
-                <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 text-on-surface-variant hover:text-on-surface" aria-label="Close menu">
-                  <X className="w-5 h-5" />
-                </button>
+            <div className="mb-8 flex items-center justify-between px-1">
+              {!isExpandedState ? (
+                <div className="flex flex-col items-center gap-3 w-full">
+                  <img
+                    src="/a_g_l_Background_Removed.png"
+                    alt="AlignGrade"
+                    className="h-9 w-auto object-contain"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsExpanded(true)}
+                    className="p-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface border border-outline-variant transition-all cursor-pointer shadow-xs"
+                    title="Open sidebar"
+                    aria-label="Open sidebar"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <img
+                      src={theme === 'dark' ? '/a_g_logo_dark.webp' : '/a_g_logo.webp'}
+                      alt="AlignGrade"
+                      className="h-10 w-auto object-contain self-start pl-1"
+                    />
+                    <p className="text-[11px] font-headline font-medium text-on-surface-variant opacity-70 px-1 animate-fade-in">Candidate Dashboard</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsExpanded(false);
+                      setSidebarOpen(false);
+                    }}
+                    className="p-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface border border-outline-variant transition-all cursor-pointer shadow-xs"
+                    title="Close sidebar"
+                    aria-label="Close sidebar"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                </>
               )}
             </div>
 
@@ -618,7 +752,12 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                   active={activeTab === item.id}
                   locked={item.locked}
                   onClick={() => goToTab(item.id)}
-                  collapsed={!isExpanded}
+                  collapsed={!isExpandedState}
+                  subItems={item.subItems}
+                  isOpen={item.isOpen}
+                  onToggle={item.onToggle}
+                  activeSubId={item.activeSubId}
+                  onSubItemClick={item.onSubItemClick}
                 />
               ))}
             </nav>
@@ -632,7 +771,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                     profile?.name?.charAt(0) || 'S'
                   )}
                 </div>
-                {isExpanded && (
+                {isExpandedState && (
                   <div className="min-w-0 animate-fade-in">
                     <p className="text-sm font-bold text-on-surface truncate">{profile?.name || 'Loading...'}</p>
                     <p className="text-xs text-on-surface-variant truncate">Candidate - {user?.regNo || 'CAN001'}</p>
@@ -641,11 +780,11 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
               </div>
               <button
                 onClick={handleLogout}
-                title={isExpanded ? undefined : "Log Out"}
-                className="w-full flex items-center gap-3 px-3.5 py-2.5 text-error rounded-xl font-medium hover:bg-error-container transition-all text-sm"
+                title={isExpandedState ? undefined : "Log Out"}
+                className="w-full flex items-center gap-3 px-3.5 py-2.5 text-error rounded-xl font-medium hover:bg-error-container transition-all text-sm cursor-pointer"
               >
                 <LogOut className="w-5 h-5 shrink-0" />
-                {isExpanded && <span className="animate-fade-in truncate">Log Out</span>}
+                {isExpandedState && <span className="animate-fade-in truncate">Log Out</span>}
               </button>
             </div>
           </aside>
@@ -662,42 +801,67 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           <div key={activeTab} className="animate-fade-in">
             {/* Show profile complete banner if incomplete */}
             {!isComplete && (
-              <div className="mb-6 p-4 bg-tertiary-container border border-tertiary/30 text-on-tertiary-container rounded-xl text-xs flex flex-col gap-2">
-                <div className="flex items-center gap-2 font-bold text-sm">
+              <div className="mb-6 p-4 bg-[#2563eb]/10 border border-[#2563eb]/25 text-[#1e40af] dark:text-[#93c5fd] rounded-xl text-xs flex flex-col gap-2">
+                <div className="flex items-center gap-2 font-bold text-sm text-[#2563eb]">
                   <Lock className="w-4 h-4 shrink-0" />
-                  <span>Profile Setup Incomplete</span>
+                  <span>Mandatory Profile Setup Incomplete</span>
                 </div>
-                <p>
-                  To unlock Job Opportunities, Resume Builder, and Skill Tests, please complete the following sections:
+                <p className="text-on-surface">
+                  To unlock Opportunities, Job Progress, and Gigs Marketplace, please complete the required fields in your profile:
                 </p>
-                <ul className="list-disc pl-5 space-y-1 font-semibold">
-                  {!hasGeneralInfo && <li>Fill in all fields in Profile & Ratings &rarr; General tab (Describe Yourself, Nationality, Gender, Email, DOB, Phone)</li>}
-                  {!hasSkills && <li>Add at least one skill in Profile & Ratings &rarr; Skills tab</li>}
-                  {!hasIntroVideo && <li>Upload an intro video in Profile & Ratings &rarr; Video Showcase tab</li>}
+                <ul className="list-disc pl-5 space-y-1 font-semibold text-on-surface">
+                  {!hasGeneralInfo && <li>Fill in all required fields in Your Profile &rarr; General tab (Name, Username, Professional Summary, Date of Birth, Phone Number, Email Address, Gender)</li>}
                 </ul>
               </div>
             )}
 
-            {activeTab === 'dashboard' && (
-              <StudentDashboard
+            {selectedBriefJobId ? (
+              <JobBriefPage
+                job={jobs.find(j => j.id === selectedBriefJobId)}
+                loading={loading}
                 profile={profile}
-                user={user}
-                jobs={jobs}
-                applications={applications}
-                skillCount={skillCount}
-                appliedCount={appliedCount}
-                handleApply={handleApply}
-                setTestSkill={setTestSkill}
-                onRefresh={async () => {
-                  await fetchProfileAndJobs();
-                  await fetchStudentApplications();
+                onBack={() => {
+                  window.history.pushState({}, '', '/');
+                  setSelectedBriefJobId(null);
+                  setActiveTab('dashboard');
                 }}
+                onApply={handleApply}
+                onUpgrade={(upgradeData) => {
+                  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief')) {
+                    window.history.pushState({}, '', '/');
+                  }
+                  setSelectedBriefJobId(null);
+                  setTestSkill(upgradeData);
+                }}
+                onAddSkillAndUpgrade={handleAddSkillAndUpgrade}
                 onOpenCompanyProfile={onOpenCompanyProfile}
-                autoSelectOpportunity={autoSelectOpportunity}
-                setAutoSelectOpportunity={setAutoSelectOpportunity}
-                goToTab={goToTab}
               />
-            )}
+            ) : (
+              <>
+                {activeTab === 'dashboard' && (
+                  <StudentDashboard
+                    profile={profile}
+                    user={user}
+                    jobs={jobs}
+                    applications={applications}
+                    skillCount={skillCount}
+                    appliedCount={appliedCount}
+                    handleApply={handleApply}
+                    setTestSkill={setTestSkill}
+                    onRefresh={async () => {
+                      await fetchProfileAndJobs();
+                      await fetchStudentApplications();
+                    }}
+                    onOpenCompanyProfile={onOpenCompanyProfile}
+                    autoSelectOpportunity={autoSelectOpportunity}
+                    setAutoSelectOpportunity={setAutoSelectOpportunity}
+                    onSelectJob={(job) => {
+                      setSelectedBriefJobId(job.id);
+                      window.history.pushState({}, '', `/job_brief?id=${job.id}`);
+                    }}
+                    goToTab={goToTab}
+                  />
+                )}
 
             {activeTab === 'profile' && (
               <StudentProfile
@@ -710,6 +874,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 token={token}
                 skillsList={skillsList}
                 setSkillsList={setSkillsList}
+                techSkills={techSkills}
                 selectedNewSkill={selectedNewSkill}
                 setSelectedNewSkill={setSelectedNewSkill}
                 bio={bio}
@@ -762,10 +927,21 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 feedbackMsg={feedbackMsg}
                 handleUpdateProfile={handleUpdateProfile}
                 handleRatingChange={handleRatingChange}
+                handleDownloadGeneratedResume={handleDownloadGeneratedResume}
+                generatingPdf={generatingPdf}
               />
             )}
 
-            {activeTab === 'resume' && (
+            {/* Off-screen Resume Template for PDF generation triggered from Profile page */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'fixed',
+                left: '-9999px',
+                top: '-9999px',
+                pointerEvents: 'none'
+              }}
+            >
               <StudentResume
                 profile={profile}
                 generatingPdf={generatingPdf}
@@ -781,7 +957,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 skillsList={skillsList}
                 projectsList={projectsList}
               />
-            )}
+            </div>
 
             {activeTab === 'tests' && (
               <StudentSkillTests
@@ -818,7 +994,16 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 profile={profile}
                 onUpdateProfile={fetchProfileAndJobs}
                 onNavigateToTests={() => goToTab('tests')}
+                onStartSkillTest={(skillName) => {
+                  goToTab('tests');
+                  handleStartSkillTest(skillName);
+                }}
+                onAddSkillAndUpgrade={handleAddSkillAndUpgrade}
+                activeSubTab={gigsSubTab}
+                onSubTabChange={setGigsSubTab}
               />
+            )}
+              </>
             )}
           </div>
         )}

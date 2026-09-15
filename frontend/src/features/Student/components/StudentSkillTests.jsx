@@ -1,8 +1,65 @@
 import React from 'react';
-import { RefreshCw, ShieldCheck, Award, AlertTriangle, CheckCircle, BookOpen } from 'lucide-react';
+import { RefreshCw, ShieldCheck, Award, AlertTriangle, CheckCircle, BookOpen, Check, X, RotateCcw, Sparkles } from 'lucide-react';
 import PageHeader from '../../../components/ui/PageHeader';
 import EmptyState from '../../../components/ui/EmptyState';
 import Button from '../../../components/ui/Button';
+
+// Helper to format question text and syntax-highlight embedded code blocks (e.g. ```python)
+function FormattedQuestionText({ questionText, questionNumber }) {
+  if (!questionText) return null;
+
+  if (!questionText.includes('```')) {
+    return (
+      <h3 className="text-sm sm:text-base font-headline font-bold text-on-surface leading-snug">
+        <span className="mr-1.5">{questionNumber}.</span>
+        {questionText}
+      </h3>
+    );
+  }
+
+  const parts = questionText.split(/(```[\s\S]*?```)/g);
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm sm:text-base font-headline font-bold text-on-surface leading-snug">
+        <span className="mr-1.5">{questionNumber}.</span>
+        {parts[0]?.trim()}
+      </h3>
+      {parts.slice(1).map((part, idx) => {
+        if (part.startsWith('```') && part.endsWith('```')) {
+          const lines = part.slice(3, -3).trim().split('\n');
+          const firstLine = lines[0].trim();
+          let lang = '';
+          let code = '';
+          if (/^[a-zA-Z0-9_-]+$/.test(firstLine)) {
+            lang = firstLine;
+            code = lines.slice(1).join('\n');
+          } else {
+            code = lines.join('\n');
+          }
+          return (
+            <div key={idx} className="my-2.5 rounded-none bg-slate-900 border border-slate-800 overflow-hidden">
+              {lang && (
+                <div className="px-3.5 py-1.5 bg-slate-800/80 text-[10px] font-mono text-slate-300 font-semibold border-b border-slate-700/60  tracking-wider flex items-center justify-between">
+                  <span>{lang}</span>
+                  <span className="text-[9px] text-slate-400 font-sans normal-case">Code Sample</span>
+                </div>
+              )}
+              <pre className="p-4 text-xs font-mono text-emerald-400 overflow-x-auto leading-relaxed whitespace-pre selection:bg-emerald-800/40">
+                <code>{code || lines.join('\n')}</code>
+              </pre>
+            </div>
+          );
+        }
+        if (!part.trim()) return null;
+        return (
+          <p key={idx} className="text-xs sm:text-sm font-sans text-on-surface leading-relaxed">
+            {part.trim()}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function StudentSkillTests({
   techSkills,
@@ -23,6 +80,31 @@ export default function StudentSkillTests({
 }) {
   const [filter, setFilter] = React.useState('all'); // 'all', 'verified', 'unverified'
 
+  const answeredCount = Object.keys(selectedAnswers).filter(
+    k => selectedAnswers[k] !== undefined && selectedAnswers[k] !== null
+  ).length;
+  const totalQuestions = testQuestions.length;
+  const isAllAnswered = answeredCount === totalQuestions && totalQuestions > 0;
+
+  // Auto-scroll to test result popup when available
+  React.useEffect(() => {
+    if (testResult) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+      const el = document.getElementById('test-result-popup-dialog');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [testResult]);
+
+  const handleAssessmentSubmit = async () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (handleSubmitSkillTest) {
+      await handleSubmitSkillTest();
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
       <PageHeader
@@ -32,203 +114,388 @@ export default function StudentSkillTests({
 
       {/* 1. Loading MCQ Test generation */}
       {activeTestSkill && generatingTest && (
-        <div className="p-8 bg-surface-container border border-outline-variant rounded-2xl flex flex-col items-center justify-center space-y-4 min-h-[400px]">
+        <div className="p-8 bg-surface-container border border-outline-variant rounded-none flex flex-col items-center justify-center space-y-4 min-h-[400px]">
           <RefreshCw className="w-10 h-10 text-primary animate-spin" />
           <p className="text-sm font-bold text-on-surface">Generating 10 custom questions for {activeTestSkill}...</p>
           <p className="text-xs text-on-surface-variant max-w-sm text-center font-sans font-normal">
-            Querying Claude API with Groq fallback. Crafting conceptual theory and code analysis questions...
+            Querying technical assessment bank. Crafting conceptual theory and code analysis questions...
           </p>
         </div>
       )}
 
-      {/* 2. Active MCQ Test Mode */}
-      {activeTestSkill && !generatingTest && testQuestions.length > 0 && !testResult && (
-        <div className="bg-surface-container border border-outline-variant rounded-2xl p-8 space-y-6">
-          <div className="flex justify-between items-center border-b border-outline-variant pb-4">
-            <div>
-              <span className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary">Technical Verification Test</span>
-              <h3 className="text-xl font-headline font-bold text-on-surface mt-1">{activeTestSkill} Assessment</h3>
-            </div>
-            <span className="px-3 py-1 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-headline font-medium text-secondary">
-              Question {currentQuestionIdx + 1} of 10
-            </span>
-          </div>
+      {/* 2. Active MCQ Test Mode - Continuous Scrolling View (Matches Reference Screenshot) */}
+      {activeTestSkill && !generatingTest && testQuestions.length > 0 && (
+        <div className="space-y-6">
+          {/* Sticky Progress & Submission Header */}
+          <div className="sticky top-0 z-30 bg-surface/95 backdrop-blur-md border border-outline-variant p-4 sm:p-5 rounded-none space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-headline font-bold tracking-wider text-primary">
+                    Technical Verification Test
+                  </span>
+                  <span className="text-[10px] font-sans px-2 py-0.5 rounded-none bg-surface-container-high text-on-surface-variant font-medium">
+                    Continuous Scroll Mode
+                  </span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-headline font-bold text-on-surface">
+                  {activeTestSkill} Assessment
+                </h3>
+              </div>
 
-          {/* Progress Bar */}
-          <div className="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
-            <div 
-              className="bg-primary h-full transition-all duration-300"
-              style={{ width: `${((currentQuestionIdx + 1) / 10) * 100}%` }}
-            ></div>
-          </div>
+              <div className="flex items-center gap-3">
+                <div className="text-right hidden sm:block">
+                  <span className="text-xs font-headline font-bold text-on-surface">
+                    {answeredCount} of {totalQuestions} answered
+                  </span>
+                  <span className="text-[10px] text-on-surface-variant block font-sans">
+                    {isAllAnswered ? 'All questions answered' : `${totalQuestions - answeredCount} pending`}
+                  </span>
+                </div>
 
-          {/* Question Card */}
-          <div className="p-6 bg-surface-container-low border border-outline-variant rounded-xl space-y-4">
-            <p className="text-sm font-semibold text-on-surface leading-relaxed whitespace-pre-line">
-              {testQuestions[currentQuestionIdx]?.question}
-            </p>
-          </div>
-
-          {/* Options Grid */}
-          <div className="grid grid-cols-1 gap-3">
-            {testQuestions[currentQuestionIdx]?.options.map((opt, optIdx) => {
-              const isSelected = selectedAnswers[currentQuestionIdx] === optIdx;
-              return (
                 <button
-                  key={optIdx}
                   type="button"
-                  onClick={() => {
-                    setSelectedAnswers({
-                      ...selectedAnswers,
-                      [currentQuestionIdx]: optIdx
-                    });
-                  }}
-                  className={`w-full text-left p-4 rounded-xl border text-xs transition-all flex items-center justify-between group ${
-                    isSelected 
-                      ? 'bg-primary/10 border-primary text-primary font-bold'
-                      : 'bg-surface-container-low border-outline-variant text-on-surface-variant hover:bg-surface-container-high/60 hover:text-on-surface'
-                  }`}
+                  onClick={handleAssessmentSubmit}
+                  disabled={submittingTest || answeredCount === 0}
+                  className="px-5 py-2 bg-primary text-on-primary font-headline font-bold text-xs rounded-none hover:brightness-110 active:scale-[0.99] disabled:opacity-50 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
                 >
-                  <span>{String.fromCharCode(65 + optIdx)}. {opt}</span>
-                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                    isSelected 
-                      ? 'border-primary bg-primary text-on-primary' 
-                      : 'border-outline-variant group-hover:border-on-surface-variant'
-                  }`}>
-                    {isSelected && <span className="text-[9px] font-bold">✓</span>}
-                  </div>
+                  {submittingTest ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      <span>Submit Test</span>
+                    </>
+                  )}
                 </button>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="w-full bg-surface-container-low h-2.5 rounded-none overflow-hidden border border-outline-variant/60">
+              <div 
+                className="bg-primary h-full transition-all duration-300 rounded-none"
+                style={{ width: `${totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Continuous Questions List (Screenshot 2 Design: Clean cards, radio buttons, open row styling, scrolling) */}
+          <div className="space-y-5">
+            {testQuestions.map((q, qIdx) => {
+              return (
+                <div
+                  key={qIdx}
+                  id={`question-item-${qIdx}`}
+                  className="bg-white dark:bg-surface-container border border-outline-variant rounded-none p-6 sm:p-7 space-y-4 scroll-mt-36 transition-all hover:border-primary/40"
+                >
+                  {/* Question Header (e.g. 1. Which of the following best defines entrepreneurship?) */}
+                  <FormattedQuestionText questionText={q.question} questionNumber={qIdx + 1} />
+
+                  {/* Options List with Clean Sharp Selection Boxes */}
+                  <div className="space-y-3 pt-1">
+                    {q.options?.map((opt, optIdx) => {
+                      const isSelected = selectedAnswers[qIdx] === optIdx;
+                      return (
+                        <label
+                          key={optIdx}
+                          onClick={() => {
+                            setSelectedAnswers(prev => ({
+                              ...prev,
+                              [qIdx]: optIdx
+                            }));
+                          }}
+                          className={`flex items-start gap-3.5 py-2.5 px-3.5 -mx-3.5 rounded-none transition-colors cursor-pointer select-none group border ${
+                            isSelected
+                              ? 'bg-slate-100 dark:bg-slate-800/60 border-slate-300 dark:border-slate-700'
+                              : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:border-slate-200 dark:hover:border-slate-700/60'
+                          }`}
+                        >
+                          {/* Sharp Edge Option Selector - Black prominent outline */}
+                          <div className="pt-0.5 shrink-0">
+                            <div
+                              className={`w-5 h-5 rounded-none flex items-center justify-center transition-all ${
+                                isSelected
+                                  ? 'border-2 border-primary bg-primary text-on-primary'
+                                  : 'border-2 border-slate-900 dark:border-slate-100 bg-white dark:bg-slate-800 group-hover:border-primary'
+                              }`}
+                            >
+                              {isSelected && (
+                                <div className="w-2.5 h-2.5 rounded-none bg-on-primary" />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Option Text - Black not grey */}
+                          <span className={`text-sm sm:text-[15px] font-sans leading-relaxed flex-1 transition-colors ${
+                            isSelected
+                              ? 'text-black dark:text-white font-bold'
+                              : 'text-black dark:text-slate-100 group-hover:text-black dark:group-hover:text-white font-medium'
+                          }`}>
+                            {opt}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between items-center pt-4 border-t border-outline-variant">
+          {/* Quick Question Jump Navigator (Placed at the bottom after the last question) */}
+          <div className="bg-white dark:bg-surface-container border border-slate-300 dark:border-slate-700 p-4 rounded-none flex items-center justify-between gap-4 flex-wrap shadow-2xs">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100">
+                Jump to Question:
+              </span>
+              <span className="text-xs text-slate-500 font-sans font-medium">
+                ({answeredCount} of {totalQuestions} answered)
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto custom-scrollbar">
+              {testQuestions.map((_, idx) => {
+                const isAnswered = selectedAnswers[idx] !== undefined && selectedAnswers[idx] !== null;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      const el = document.getElementById(`question-item-${idx}`);
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }}
+                    className={`w-8 h-8 rounded-none text-xs font-headline font-bold shrink-0 transition-all flex items-center justify-center cursor-pointer border ${
+                      isAnswered
+                        ? 'bg-primary text-on-primary border-primary'
+                        : 'bg-surface border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 hover:border-primary hover:text-primary'
+                    }`}
+                    title={`Go to Question ${idx + 1} (${isAnswered ? 'Answered' : 'Unanswered'})`}
+                  >
+                    {idx + 1}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Bottom Review & Submission Chassis */}
+          <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xs">
+            <div className="space-y-1 text-center sm:text-left">
+              <h4 className="text-base font-headline font-bold text-slate-900 dark:text-slate-100">
+                {isAllAnswered ? 'All Questions Answered!' : `${answeredCount} of ${totalQuestions} Questions Answered`}
+              </h4>
+              <p className="text-xs font-sans text-slate-600 dark:text-slate-400">
+                {isAllAnswered
+                  ? 'Great job! You have answered every question. Submit now to calculate your verified score.'
+                  : `You have ${totalQuestions - answeredCount} unanswered questions remaining. You can review and answer them above before submitting.`}
+              </p>
+            </div>
+
             <button
               type="button"
-              onClick={() => setCurrentQuestionIdx(prev => Math.max(0, prev - 1))}
-              disabled={currentQuestionIdx === 0}
-              className="px-4 py-2 border border-outline-variant text-on-surface hover:bg-surface-container-high disabled:opacity-30 rounded-lg text-xs font-headline font-medium transition-all"
+              onClick={handleAssessmentSubmit}
+              disabled={submittingTest || answeredCount === 0}
+              className="px-8 py-3.5 bg-primary text-on-primary font-headline font-bold text-sm rounded-none hover:brightness-110 active:scale-[0.99] disabled:opacity-50 transition-all flex items-center gap-2 cursor-pointer shrink-0 shadow-2xs"
             >
-              Previous
+              {submittingTest ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Submitting Assessment...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Submit Skill Assessment</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Test Results Modal Popup Overlay (Directly on the same screen) */}
+      {testResult && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs p-4 animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setTestResult(null);
+              setActiveTestSkill(null);
+            }
+          }}
+        >
+          <div id="test-result-popup-dialog" className="bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-none shadow-2xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 relative animate-scale-in">
+            <button
+              type="button"
+              onClick={() => {
+                setTestResult(null);
+                setActiveTestSkill(null);
+              }}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 cursor-pointer transition-colors"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
             </button>
 
-            {currentQuestionIdx < 9 ? (
-              <button
-                type="button"
-                onClick={() => setCurrentQuestionIdx(prev => Math.min(9, prev + 1))}
-                className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface hover:bg-surface-container-highest rounded-lg text-xs font-headline font-medium transition-all"
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSubmitSkillTest}
-                disabled={submittingTest || selectedAnswers[9] === undefined}
-                className="px-5 py-2.5 bg-primary text-on-primary font-bold hover:brightness-110 active:scale-95 disabled:opacity-50 rounded-lg text-xs font-headline font-medium transition-all flex items-center gap-1.5"
-              >
-                {submittingTest ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Submitting...</span>
-                  </>
+            <div className={`w-14 h-14 rounded-none flex items-center justify-center mx-auto ${
+              testResult.passed
+                ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-600'
+                : 'bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-400 dark:border-amber-600'
+            }`}>
+              {testResult.passed ? (
+                <ShieldCheck className="w-8 h-8 text-emerald-700 dark:text-emerald-300" />
+              ) : (
+                <Award className="w-8 h-8 text-amber-700 dark:text-amber-300" />
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="text-xl sm:text-2xl font-headline font-bold text-slate-900 dark:text-slate-100">
+                {testResult.passed ? 'Test Completed (Verified)' : 'Test Completed (Unverified)'}
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-sans">
+                Tested Skill: <strong className="text-slate-800 dark:text-slate-200 font-semibold">{testResult.skillName || activeTestSkill}</strong>
+              </p>
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none w-full">
+              <p className="text-[10px] font-headline font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                Your Score
+              </p>
+              <p className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+                {testResult.percent}%
+              </p>
+              <div className="mt-2 flex items-center justify-center">
+                {testResult.passed ? (
+                  <span className="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 text-xs font-headline font-bold rounded-none flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Verified Rating Saved: Level {testResult.rating}/10
+                  </span>
                 ) : (
-                  <>
-                    <CheckCircle className="w-3.5 h-3.5" />
-                    <span>Submit Test</span>
-                  </>
+                  <span className="px-2.5 py-1 bg-amber-100 dark:bg-amber-950/70 border border-amber-400 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-xs font-headline font-bold rounded-none flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    Current Rating: Level {testResult.rating}/10 (Unverified — Needs 70% to verify)
+                  </span>
                 )}
-              </button>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-sans">
+              {testResult.passed
+                ? `Congratulations! You scored ${testResult.percent}% and cleared the 70% verification threshold. A verified rating of Level ${testResult.rating}/10 has been added to your profile.`
+                : `You scored ${testResult.percent}%. Your current rating for ${testResult.skillName || activeTestSkill} has been updated to Level ${testResult.rating}/10 as unverified on your profile. You need at least 70% to earn the verified badge.`}
+            </p>
+
+            {/* Action buttons: Unverified has 2 options (Retake Test + Close), Verified has 1 option (Close only) */}
+            {testResult.passed ? (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTestResult(null);
+                    setActiveTestSkill(null);
+                  }}
+                  className="w-full py-3 px-5 bg-primary hover:brightness-110 text-on-primary font-headline font-bold text-xs rounded-none transition-all cursor-pointer shadow-2xs"
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <div className="pt-2 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const skillToRetake = testResult.skillName || activeTestSkill;
+                    handleStartSkillTest(skillToRetake);
+                  }}
+                  className="flex-1 py-3 px-4 bg-primary hover:brightness-110 text-on-primary font-headline font-bold text-xs rounded-none transition-all cursor-pointer shadow-2xs flex items-center justify-center gap-2"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Retake Test</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTestResult(null);
+                    setActiveTestSkill(null);
+                  }}
+                  className="flex-1 py-3 px-4 bg-surface-container hover:bg-surface-container-high text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-headline font-bold text-xs rounded-none transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>Close</span>
+                </button>
+              </div>
             )}
           </div>
         </div>
       )}
 
-      {/* 3. Test Results Mode */}
-      {testResult && (
-        <div className="max-w-md mx-auto p-8 bg-surface-container border border-outline-variant rounded-2xl flex flex-col items-center text-center space-y-6 animate-fade-in shadow-2xl">
-          <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-            testResult.passed
-              ? 'bg-success-container text-on-success-container border border-success/20'
-              : 'bg-error-container text-on-error-container border border-error/20'
-          }`}>
-            <Award className="w-8 h-8" />
-          </div>
-
-          <div className="space-y-2">
-            <h3 className="text-2xl font-headline font-bold text-on-surface">
-              {testResult.passed ? 'Verification Completed!' : 'Not Verified Yet'}
-            </h3>
-            <p className="text-xs text-on-surface-variant font-sans font-normal">
-              Tested Skill: {activeTestSkill}
-            </p>
-          </div>
-
-          <div className="p-4 bg-surface-container-low border border-outline-variant rounded-xl w-full">
-            <p className="text-[10px] font-headline font-medium text-on-surface-variant uppercase tracking-wider">Your Score</p>
-            <p className="text-3xl font-black text-on-surface mt-1">{testResult.percent}%</p>
-            <p className="text-[10px] text-secondary font-sans font-normal mt-1">
-              {testResult.passed ? `Verified Rating Saved: Level ${testResult.rating}/10` : 'Need 70% to verify'}
-            </p>
-          </div>
-
-          <p className="text-xs text-on-surface-variant leading-relaxed">
-            {testResult.passed
-              ? `Congratulations! A verified rating of Level ${testResult.rating}/10 has been added to your profile. Recruiters can view this verified rating on your profile.`
-              : `You scored ${testResult.percent}%. You need at least 70% to verify this skill — your rating was not changed. You can try the assessment again.`}
-          </p>
-
-          <Button
-            fullWidth
-            onClick={() => {
-              setActiveTestSkill(null);
-              setTestResult(null);
-            }}
-          >
-            Back to Your Tests
-          </Button>
-        </div>
-      )}
-
-      {/* 4. Skills Dashboard Grid */}
-      {!activeTestSkill && !testResult && (
+      {/* 4. Skills Dashboard Grid (Enhanced Visibility matching Opportunities section) */}
+      {!activeTestSkill && (
         <div className="space-y-6">
-          {/* Filtering Tags */}
+          {/* Filtering Tabs (High-contrast underline style matching Opportunities section) */}
           {techSkills.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="border-slate-300 dark:border-slate-700 flex items-center gap-6 sm:gap-8 overflow-x-auto custom-scrollbar">
               <button
                 type="button"
                 onClick={() => setFilter('all')}
-                className={`px-3 py-1.5 rounded-full text-xs font-headline font-medium transition-all border select-none ${
+                className={`pb-3 pt-2 text-xs sm:text-sm font-headline tracking-tight transition-all cursor-pointer select-none whitespace-nowrap flex items-center gap-2 ${
                   filter === 'all'
-                    ? 'bg-primary/10 border-primary text-primary font-bold'
-                    : 'bg-surface-container border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
+                    ? 'text-primary dark:text-emerald-400 font-bold border-b-2 border-primary dark:border-emerald-400 -mb-[1px]'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-semibold border-b-2 border-transparent -mb-[1px]'
                 }`}
               >
-                All Skills ({techSkills.length})
+                <span>All Skills</span>
+                <span className={`text-xs px-2 py-0.5 rounded-none font-sans font-bold ${
+                  filter === 'all'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200'
+                    : 'bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                }`}>
+                  {techSkills.length}
+                </span>
               </button>
+
               <button
                 type="button"
                 onClick={() => setFilter('verified')}
-                className={`px-3 py-1.5 rounded-full text-xs font-headline font-medium transition-all border select-none ${
+                className={`pb-3 pt-2 text-xs sm:text-sm font-headline tracking-tight transition-all cursor-pointer select-none whitespace-nowrap flex items-center gap-2 ${
                   filter === 'verified'
-                    ? 'bg-success-container border-success/30 text-success font-bold'
-                    : 'bg-surface-container border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
+                    ? 'text-primary dark:text-emerald-400 font-bold border-b-2 border-primary dark:border-emerald-400 -mb-[1px]'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-semibold border-b-2 border-transparent -mb-[1px]'
                 }`}
               >
-                Verified ({techSkills.filter(s => s.verifiedRating !== null && s.verifiedRating !== undefined).length})
+                <span>Verified Skills</span>
+                <span className={`text-xs px-2 py-0.5 rounded-none font-sans font-bold ${
+                  filter === 'verified'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200'
+                    : 'bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                }`}>
+                  {techSkills.filter(s => s.verifiedRating !== null && s.verifiedRating !== undefined).length}
+                </span>
               </button>
+
               <button
                 type="button"
                 onClick={() => setFilter('unverified')}
-                className={`px-3 py-1.5 rounded-full text-xs font-headline font-medium transition-all border select-none ${
+                className={`pb-3 pt-2 text-xs sm:text-sm font-headline tracking-tight transition-all cursor-pointer select-none whitespace-nowrap flex items-center gap-2 ${
                   filter === 'unverified'
-                    ? 'bg-error-container border-error/30 text-error font-bold'
-                    : 'bg-surface-container border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
+                    ? 'text-primary dark:text-emerald-400 font-bold border-b-2 border-primary dark:border-emerald-400 -mb-[1px]'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-semibold border-b-2 border-transparent -mb-[1px]'
                 }`}
               >
-                Unverified ({techSkills.filter(s => s.verifiedRating === null || s.verifiedRating === undefined).length})
+                <span>Unverified Skills</span>
+                <span className={`text-xs px-2 py-0.5 rounded-none font-sans font-bold ${
+                  filter === 'unverified'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200'
+                    : 'bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+                }`}>
+                  {techSkills.filter(s => s.verifiedRating === null || s.verifiedRating === undefined).length}
+                </span>
               </button>
             </div>
           )}
@@ -254,8 +521,8 @@ export default function StudentSkillTests({
 
               if (filteredTestable.length === 0 && filteredPending.length === 0) {
                 return (
-                  <div className="text-center py-16 bg-surface-container border border-outline-variant rounded-2xl">
-                    <p className="text-xs text-on-surface-variant italic font-sans font-normal">No {filter} skills found.</p>
+                  <div className="text-center py-16 bg-surface border border-slate-300 dark:border-slate-700 rounded-none shadow-2xs">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 italic font-sans">No {filter} skills found.</p>
                   </div>
                 );
               }
@@ -264,39 +531,52 @@ export default function StudentSkillTests({
                 <div className="space-y-8">
                   {/* 1. Available Assessments Section */}
                   {filteredTestable.length > 0 && (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 border-b border-outline-variant/60 pb-2">
-                        <Award className="w-4 h-4 text-primary" />
-                        <h3 className="font-headline font-bold text-sm text-on-surface uppercase tracking-wider">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 border-b border-slate-300 dark:border-slate-700 pb-2.5">
+                        <Award className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                        <h3 className="font-headline font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 tracking-wider">
                           Available Skill Assessments (Test Now)
                         </h3>
-                        <span className="px-2 py-0.5 bg-primary/10 text-primary font-headline font-medium text-[10px] rounded-full">
+                        <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 text-blue-900 dark:text-blue-200 font-headline font-bold text-xs rounded-none">
                           {filteredTestable.length}
                         </span>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         {filteredTestable.map((skill, idx) => (
-                          <div key={idx} className="p-5 bg-surface-container border border-outline-variant rounded-2xl flex flex-col justify-between space-y-4 hover:border-primary/40 transition-all shadow-xs">
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-start">
-                                <h4 className="text-base font-bold text-on-surface truncate max-w-[160px] uppercase font-headline">
+                          <div
+                            key={idx}
+                            className="bg-surface hover:bg-surface-container-high border border-slate-300 dark:border-slate-700 hover:border-blue-600 dark:hover:border-blue-500 rounded-none p-5 shadow-2xs hover:shadow-md transition-all duration-150 flex flex-col justify-between space-y-4"
+                          >
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-start gap-2">
+                                <h4 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 truncate font-headline">
                                   {skill.name}
                                 </h4>
-                                <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded text-[9px] font-headline font-medium uppercase">
+                                <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 text-blue-900 dark:text-blue-200 rounded-none text-[10px] font-headline font-bold tracking-wider shrink-0">
                                   Quiz Available
                                 </span>
                               </div>
                               
-                              <div className="space-y-1 pt-1">
-                                <div className="flex justify-between text-[11px] font-sans font-normal">
-                                  <span className="text-on-surface-variant">Verified Rating:</span>
+                              <div className="space-y-2 pt-1 border-t border-slate-200 dark:border-slate-800">
+                                <div className="flex justify-between items-center text-xs font-sans">
+                                  <span className="text-slate-600 dark:text-slate-400">Current Score:</span>
+                                  <span className="text-slate-900 dark:text-slate-100 font-headline font-bold text-sm">
+                                    Level {skill.rating || 1}/10
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center text-xs font-sans">
+                                  <span className="text-slate-600 dark:text-slate-400">Verification:</span>
                                   {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? (
-                                    <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
-                                      <ShieldCheck className="w-3.5 h-3.5" /> Lvl {skill.verifiedRating}/10
+                                    <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 font-headline font-bold text-[11px] rounded-none flex items-center gap-1.5">
+                                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
+                                      Verified (Lvl {skill.verifiedRating}/10)
                                     </span>
                                   ) : (
-                                    <span className="text-amber-600 dark:text-amber-400 font-bold italic">Unverified</span>
+                                    <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950/70 border border-amber-400 dark:border-amber-700 text-amber-900 dark:text-amber-200 font-headline font-bold text-[11px] rounded-none flex items-center gap-1.5">
+                                      <AlertTriangle className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
+                                      Unverified (Requires 70%)
+                                    </span>
                                   )}
                                 </div>
                               </div>
@@ -305,9 +585,19 @@ export default function StudentSkillTests({
                             <button
                               type="button"
                               onClick={() => handleStartSkillTest(skill.name)}
-                              className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs font-headline font-medium rounded-xl transition-all shadow-sm cursor-pointer"
+                              className="w-full py-2.5 bg-primary hover:brightness-110 text-on-primary font-headline font-bold text-xs rounded-none transition-all cursor-pointer shadow-2xs flex items-center justify-center gap-1.5"
                             >
-                              {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? 'Retake Verification Test' : 'Take Verification Test'}
+                              {skill.verifiedRating !== null && skill.verifiedRating !== undefined ? (
+                                <>
+                                  <RotateCcw className="w-3.5 h-3.5" />
+                                  <span>Retake Verification Test</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Award className="w-3.5 h-3.5" />
+                                  <span>Take Verification Test</span>
+                                </>
+                              )}
                             </button>
                           </div>
                         ))}
@@ -317,39 +607,42 @@ export default function StudentSkillTests({
 
                   {/* 2. Pending Quiz Generation (Auto-Verified for Now) Section */}
                   {filteredPending.length > 0 && (
-                    <div className="space-y-3 pt-4">
-                      <div className="flex items-center justify-between border-b border-outline-variant/60 pb-2">
+                    <div className="space-y-4 pt-4">
+                      <div className="flex items-center justify-between border-b border-slate-300 dark:border-slate-700 pb-2.5">
                         <div className="flex items-center gap-2">
-                          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                          <h3 className="font-headline font-bold text-sm text-on-surface uppercase tracking-wider">
+                          <ShieldCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                          <h3 className="font-headline font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 tracking-wider">
                             Pending Quiz Generation (Auto-Verified for Now)
                           </h3>
                         </div>
-                        <span className="px-2 py-0.5 bg-amber-500/15 text-amber-700 dark:text-amber-400 font-headline font-medium text-[10px] rounded-full">
+                        <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950/70 border border-amber-400 dark:border-amber-700 text-amber-900 dark:text-amber-200 font-headline font-bold text-xs rounded-none">
                           {filteredPending.length} Skills
                         </span>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         {filteredPending.map((skill, idx) => (
-                          <div key={idx} className="p-5 bg-surface-container-low border border-outline-variant/80 rounded-2xl flex flex-col justify-between space-y-4 shadow-xs relative">
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-start">
-                                <h4 className="text-base font-bold text-on-surface truncate max-w-[160px] uppercase font-headline">
+                          <div
+                            key={idx}
+                            className="bg-surface-container-low border border-slate-300 dark:border-slate-700 rounded-none p-5 flex flex-col justify-between space-y-4 hover:border-slate-400 dark:hover:border-slate-600 transition-all shadow-2xs"
+                          >
+                            <div className="space-y-2.5">
+                              <div className="flex justify-between items-start gap-2">
+                                <h4 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 truncate font-headline">
                                   {skill.name}
                                 </h4>
-                                <span className="px-2 py-0.5 bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 rounded text-[9px] font-headline font-medium uppercase">
+                                <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-950/70 border border-amber-400 dark:border-amber-700 text-amber-900 dark:text-amber-200 rounded-none text-[10px] font-headline font-bold tracking-wider shrink-0">
                                   Quiz Coming Soon
                                 </span>
                               </div>
                               
-                              <p className="text-[11px] text-on-surface-variant leading-relaxed font-sans">
-                                Quiz for this skill is being generated. It is <strong className="text-emerald-600 dark:text-emerald-400 font-bold">temporarily auto-verified</strong> so you can apply for opportunities requiring this skill without restriction.
+                              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-sans">
+                                Quiz for this skill is being generated. It is <strong className="text-emerald-700 dark:text-emerald-400 font-bold">temporarily auto-verified</strong> so you can apply for opportunities requiring this skill without restriction.
                               </p>
                             </div>
 
-                            <div className="py-2 px-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-headline font-medium text-[11px] rounded-xl flex items-center justify-center gap-1.5">
-                              <ShieldCheck className="w-4 h-4" />
+                            <div className="py-2 px-3 bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 font-headline font-bold text-xs rounded-none flex items-center justify-center gap-1.5">
+                              <ShieldCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                               <span>Auto-Verified for Applications</span>
                             </div>
                           </div>
@@ -361,12 +654,14 @@ export default function StudentSkillTests({
               );
             })()
           ) : (
-            <div className="max-w-lg mx-auto">
-              <EmptyState
-                icon={BookOpen}
-                title="No Technical Skills Found"
-                description={<>To take a skill verification test, first go to the <strong>Profile & Ratings</strong> section under the Skills tab and self-rate your IT, software, or technical proficiencies.</>}
-              />
+            <div className="max-w-lg mx-auto p-12 text-center bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-none flex flex-col items-center gap-3 shadow-2xs">
+              <div className="w-14 h-14 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-slate-600 dark:text-slate-400" strokeWidth={1.5} />
+              </div>
+              <p className="text-base font-bold text-slate-900 dark:text-slate-100 font-headline">No Technical Skills Found</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm font-sans leading-relaxed">
+                To take a skill verification test, first go to the <strong className="text-slate-900 dark:text-slate-200">Profile &amp; Ratings</strong> section under the Skills tab and self-rate your IT, software, or technical proficiencies.
+              </p>
             </div>
           )}
         </div>

@@ -4,4 +4,4 @@
 // existing imports such as `import { API_BASE, ALL_SKILLS } from '../../constants'`
 // keep working.
 export { API_BASE } from '../config';
-export { ALL_SKILLS } from './skills';
+export { ALL_SKILLS, SKILLS_WITH_MCQ, hasSkillMcq } from './skills';

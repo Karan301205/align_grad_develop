@@ -26,6 +26,7 @@ const postJobSchema = {
     location: z.string().optional().nullable(),
     locationUrl: z.string().url().or(z.literal('')).optional().nullable(),
     activeDays: z.number().int().min(1).optional().nullable().or(z.string().regex(/^\d+$/).transform(val => parseInt(val, 10))),
+    joiningMonth: z.string().optional().nullable(),
     openings: z.number().int().min(1).optional().nullable().or(z.string().regex(/^\d+$/).transform(val => parseInt(val, 10))),
     requirements: z.array(z.object({
       skillName: z.string().min(1, 'Skill name is required'),
@@ -60,7 +61,7 @@ const updateApplicationRoundsSchema = {
     roundStatuses: z.array(z.object({
       roundNumber: z.number().int().min(1),
       name: z.string().min(1, 'Round name is required'),
-      status: z.enum(['PENDING', 'CLEARED', 'QUALIFIED', 'REJECTED']),
+      status: z.enum(['PENDING', 'IN_PROGRESS', 'SCHEDULED', 'CLEARED', 'QUALIFIED', 'REJECTED']),
       feedback: z.string().optional().nullable()
     })).min(1, 'At least one round status is required')
   })

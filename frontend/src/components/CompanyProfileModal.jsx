@@ -73,7 +73,7 @@ export default function CompanyProfileModal({ companyId, isOpen, onClose, token,
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
                   <h2 className="text-2xl font-headline font-medium text-on-surface">{company.name}</h2>
                   {company.verified && (
-                    <span className="text-[10px] bg-success-container border border-success/30 text-success px-2 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1 select-none shadow-sm">
+                    <span className="text-[10px] bg-success-container border border-success/30 text-success px-2 py-0.5 rounded-full font-bold  tracking-wider flex items-center gap-1 select-none shadow-sm">
                       <span className="text-[10px]">✓</span> Verified
                     </span>
                   )}
@@ -96,29 +96,29 @@ export default function CompanyProfileModal({ companyId, isOpen, onClose, token,
             {/* Credibility Stats Strip */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-surface-container-low border border-outline-variant rounded-2xl p-4 shadow-inner">
               <div className="text-center p-2 space-y-1">
-                <span className="block text-[9px] font-headline font-medium uppercase tracking-wider text-on-surface-variant">Rating</span>
+                <span className="block text-[9px] font-headline font-medium  tracking-wider text-on-surface-variant">Rating</span>
                 <div className="flex items-center justify-center gap-1 text-sm font-bold text-on-surface">
                   <Star className="w-4 h-4 fill-warning text-warning" />
                   <span>{company.stats?.averageRating || '5.0'} / 5</span>
                 </div>
               </div>
               <div className="text-center p-2 border-l border-outline-variant/60 space-y-1">
-                <span className="block text-[9px] font-headline font-medium uppercase tracking-wider text-on-surface-variant">Jobs Posted</span>
+                <span className="block text-[9px] font-headline font-medium  tracking-wider text-on-surface-variant">Jobs Posted</span>
                 <span className="block text-sm font-bold text-on-surface">{company.stats?.totalJobs || 0}</span>
               </div>
               <div className="text-center p-2 border-l border-outline-variant/60 space-y-1">
-                <span className="block text-[9px] font-headline font-medium uppercase tracking-wider text-on-surface-variant">Gigs Posted</span>
+                <span className="block text-[9px] font-headline font-medium  tracking-wider text-on-surface-variant">Gigs Posted</span>
                 <span className="block text-sm font-bold text-on-surface">{company.stats?.totalGigs || 0}</span>
               </div>
               <div className="text-center p-2 border-l border-outline-variant/60 space-y-1">
-                <span className="block text-[9px] font-headline font-medium uppercase tracking-wider text-on-surface-variant">Active Openings</span>
+                <span className="block text-[9px] font-headline font-medium  tracking-wider text-on-surface-variant">Active Openings</span>
                 <span className="block text-sm font-bold text-primary">{company.stats?.activeOpenings || 0}</span>
               </div>
             </div>
 
             {/* About / Description */}
             <div className="space-y-2">
-              <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">About the Company</h3>
+              <h3 className="text-xs font-headline font-medium  tracking-wider text-primary">About the Company</h3>
               <p className="text-xs text-on-surface-variant leading-relaxed whitespace-pre-line bg-surface-container-low border border-outline-variant rounded-xl p-4">
                 {company.description || "No company description provided yet."}
               </p>
@@ -129,7 +129,7 @@ export default function CompanyProfileModal({ companyId, isOpen, onClose, token,
               {/* Recruiter Identity Card */}
               {company.recruiterName && (
                 <div className="bg-surface-container-low border border-outline-variant rounded-xl p-4 space-y-3">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary">Hiring Representative</h4>
+                  <h4 className="text-[10px] font-headline font-medium  tracking-wider text-primary">Hiring Representative</h4>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-headline font-medium text-sm shadow">
                       {company.recruiterName[0]}
@@ -150,7 +150,7 @@ export default function CompanyProfileModal({ companyId, isOpen, onClose, token,
 
               {/* Social links */}
               <div className="bg-surface-container-low border border-outline-variant rounded-xl p-4 flex flex-col justify-between gap-3">
-                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary">Connect</h4>
+                <h4 className="text-[10px] font-headline font-medium  tracking-wider text-primary">Connect</h4>
                 <div className="flex flex-wrap gap-2">
                   {company.socialLinks?.linkedin && (
                     <a
@@ -182,7 +182,7 @@ export default function CompanyProfileModal({ companyId, isOpen, onClose, token,
             {/* Showcase Gallery */}
             {company.photos && company.photos.length > 0 && (
               <div className="space-y-2">
-                <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Office Showcase</h3>
+                <h3 className="text-xs font-headline font-medium  tracking-wider text-primary">Office Showcase</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {company.photos.map((photo, idx) => (
                     <div key={idx} className="aspect-video rounded-xl border border-outline-variant overflow-hidden bg-surface-container-low shadow-sm">
@@ -195,11 +195,11 @@ export default function CompanyProfileModal({ companyId, isOpen, onClose, token,
 
             {/* Active Openings section */}
             <div className="space-y-3">
-              <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Active Opportunities</h3>
+              <h3 className="text-xs font-headline font-medium  tracking-wider text-primary">Active Opportunities</h3>
               
               {/* Jobs & Internships List */}
               <div className="space-y-2">
-                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant">Jobs & Internships ({company.opportunities?.jobs?.length || 0})</h4>
+                <h4 className="text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant">Jobs & Internships ({company.opportunities?.jobs?.length || 0})</h4>
                 {company.opportunities?.jobs?.length === 0 ? (
                   <p className="text-[11px] text-on-surface-variant/80 font-sans font-normal">No active job listings right now.</p>
                 ) : (
@@ -226,7 +226,7 @@ export default function CompanyProfileModal({ companyId, isOpen, onClose, token,
 
               {/* Gigs List */}
               <div className="space-y-2 pt-2">
-                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant">Gigs ({company.opportunities?.gigs?.length || 0})</h4>
+                <h4 className="text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant">Gigs ({company.opportunities?.gigs?.length || 0})</h4>
                 {company.opportunities?.gigs?.length === 0 ? (
                   <p className="text-[11px] text-on-surface-variant/80 font-sans font-normal">No active gigs right now.</p>
                 ) : (

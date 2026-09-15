@@ -1,95 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Search, 
-  MapPin, 
-  DollarSign, 
-  CheckCircle2, 
-  Clock, 
-  Filter, 
-  ChevronDown, 
-  Layers,
-  Sparkles,
-  Building,
+  Briefcase,
   RefreshCw,
-  ArrowRight,
-  ShieldCheck,
-  Calendar,
-  Briefcase
+  AlertTriangle
 } from 'lucide-react';
+import JobFilterBar from './JobFilterBar';
+import JobSnapshotCard from './JobSnapshotCard';
 import JobDetailsModal from '../../../components/JobDetailsModal';
-import { INDIAN_STATES } from '../../../constants/indianStates';
 
-const BG_COLORS = [
-  'bg-blue-600',
-  'bg-slate-700',
-  'bg-rose-700',
-  'bg-emerald-700',
-  'bg-indigo-600',
-  'bg-amber-700',
-  'bg-cyan-700',
-  'bg-purple-700'
-];
-
-function getCompanyInitials(name) {
-  if (!name) return 'AG';
-  const cleanName = name.replace(/^c_/i, '').trim();
-  if (!cleanName) return 'AG';
-  const parts = cleanName.split(' ');
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-  return cleanName.slice(0, 2).toUpperCase();
-}
-
-function getCompanyColor(name) {
-  if (!name) return BG_COLORS[0];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const idx = Math.abs(hash) % BG_COLORS.length;
-  return BG_COLORS[idx];
-}
-
-function formatStipendDisplay(job) {
-  if (!job) return 'Stipend Unspecified';
-
-  const full = job.stipendFullTime || job.stipendFull;
-  const part = job.stipendPartTime || job.stipendPart;
-  const sal = job.salary;
-  const st = job.stipend;
-
-  const formatAmount = (val) => {
-    if (!val) return '';
-    const str = String(val).trim();
-    if (!str) return '';
-    const clean = str.replace(/^₹\s*/, '');
-    const num = parseInt(clean.replace(/,/g, ''), 10);
-    if (!isNaN(num) && num > 0) {
-      return num.toLocaleString('en-IN');
-    }
-    return clean;
-  };
-
-  if (full && part) {
-    const formattedPart = formatAmount(part);
-    const formattedFull = formatAmount(full);
-    if (formattedPart === formattedFull) {
-      return `₹ ${formattedPart} /mo`;
-    }
-    return `₹ ${formattedPart} - ${formattedFull} /mo`;
-  }
-
-  const singleVal = full || part || sal || st;
-  if (singleVal) {
-    const formatted = formatAmount(singleVal);
-    if (formatted.toLowerCase().includes('/mo') || formatted.toLowerCase().includes('month') || formatted.toLowerCase().includes('k/mo')) {
-      return `₹ ${formatted}`;
-    }
-    return `₹ ${formatted} /mo`;
-  }
-
-  return 'Stipend Unspecified';
+function extractStipendNumeric(job) {
+  if (!job) return 0;
+  const raw = job.stipendFullTime || job.stipendFull || job.salary || job.stipendPartTime || job.stipend || 0;
+  const clean = String(raw).replace(/[^\d]/g, '');
+  const num = parseInt(clean, 10);
+  return isNaN(num) ? 0 : num;
 }
 
 export default function StudentDashboard({ 
@@ -105,23 +29,30 @@ export default function StudentDashboard({
   onOpenCompanyProfile, 
   autoSelectOpportunity, 
   setAutoSelectOpportunity,
+  onSelectJob,
   goToTab
 }) {
   const [selectedJob, setSelectedJob] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Filters State
-  const [mainTab, setMainTab] = useState('all'); // 'all' | 'applied'
+  // Sub-tabs inside right container ('all' | 'applied')
+  const [mainTab, setMainTab] = useState('all');
+
+  // Filter States (matching JobFilterSidebar)
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'applied' | 'not_applied'
-  const [roleFilter, setRoleFilter] = useState('all'); // 'all' | 'internship' | 'fulltime'
+  const [sortBy, setSortBy] = useState('newest');
+  const [roleFilter, setRoleFilter] = useState('all');
   const [locationFilter, setLocationFilter] = useState('all');
+  const [selectedSkills, setSelectedSkills] = useState('');
+  const [minStipend, setMinStipend] = useState('');
+  const [maxStipend, setMaxStipend] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     if (autoSelectOpportunity && autoSelectOpportunity.type === 'job') {
       const job = jobs.find(j => j.id === autoSelectOpportunity.id);
       if (job) {
-        setSelectedJob(job);
+        handleJobClick(job);
         setAutoSelectOpportunity(null);
       }
     }
@@ -135,95 +66,57 @@ export default function StudentDashboard({
     setIsRefreshing(false);
   };
 
-  // Performance metrics computed dynamically from live response data
-  const appliedJobsList = jobs.filter(j => j.applied);
-  const totalApplied = appliedJobsList.length;
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setSortBy('newest');
+    setRoleFilter('all');
+    setLocationFilter('all');
+    setSelectedSkills('');
+    setMinStipend('');
+    setMaxStipend('');
+    setStatusFilter('all');
+    setMainTab('all');
+  };
 
-  let r1Scheduled = 0;
-  let r1Cleared = 0;
-  let preFinalScheduled = 0;
-  let preFinalCleared = 0;
+  const handleJobClick = (job) => {
+    if (onSelectJob) {
+      onSelectJob(job);
+    } else {
+      window.history.pushState({}, '', `/job_brief?id=${job.id}`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  };
 
-  if (applications && applications.length > 0) {
-    r1Scheduled = applications.length;
-    applications.forEach(app => {
-      const rounds = app.roundStatuses || [];
-      const statusUpper = (app.status || '').toUpperCase();
-
-      // R-1 Cleared check
-      const r1 = rounds[0];
-      const r1Status = (r1?.status || '').toUpperCase();
-      const isR1Cleared = r1Status === 'CLEARED' || r1Status === 'QUALIFIED' || statusUpper === 'SELECTED' || statusUpper === 'OFFER_RECEIVED' || rounds.length > 1;
-      if (isR1Cleared) {
-        r1Cleared++;
-      }
-
-      // Pre-final Scheduled check
-      if (rounds.length > 1 || statusUpper === 'IN_PROGRESS' || statusUpper === 'SELECTED') {
-        const r2 = rounds[1];
-        const r2Status = (r2?.status || '').toUpperCase();
-        if (r2Status === 'SCHEDULED' || r2Status === 'IN_PROGRESS' || r2Status === 'CLEARED' || r2Status === 'QUALIFIED' || rounds.length > 2) {
-          preFinalScheduled++;
-        }
-      }
-
-      // Pre-final Cleared check
-      const isSelected = statusUpper === 'SELECTED' || statusUpper === 'OFFER_RECEIVED';
-      const hasClearedPreFinal = rounds.slice(1).some(r => {
-        const st = (r.status || '').toUpperCase();
-        return st === 'CLEARED' || st === 'QUALIFIED';
-      });
-      if (isSelected || hasClearedPreFinal) {
-        preFinalCleared++;
-      }
-    });
-  } else {
-    // Dynamic computation directly from applied jobs list
-    r1Scheduled = totalApplied;
-    r1Cleared = appliedJobsList.filter(j => {
-      const st = (j.status || '').toUpperCase();
-      return st === 'CLEARED' || st === 'QUALIFIED' || j.round1Cleared;
-    }).length;
-    preFinalScheduled = appliedJobsList.filter(j => {
-      const st = (j.status || '').toUpperCase();
-      return st === 'IN_PROGRESS' || j.round2Scheduled;
-    }).length;
-    preFinalCleared = appliedJobsList.filter(j => {
-      const st = (j.status || '').toUpperCase();
-      return st === 'SELECTED' || st === 'OFFER_RECEIVED' || j.offerReceived;
-    }).length;
-  }
-
-  const clearanceRate = r1Scheduled > 0 ? Math.round((r1Cleared / r1Scheduled) * 100) : 0;
+  const totalApplied = jobs.filter(j => j.applied).length;
 
   // Filter Jobs
   const filteredJobs = jobs.filter(job => {
-    // Tab Filter
+    // 1. Right container sub-tab
     if (mainTab === 'applied' && !job.applied) return false;
 
-    // Status Filter
+    // 2. Status filter
     if (statusFilter === 'applied' && !job.applied) return false;
     if (statusFilter === 'not_applied' && job.applied) return false;
 
-    // Role Filter
+    // 3. Role filter
     if (roleFilter !== 'all') {
       const typeStr = (job.opportunityType || '').toLowerCase();
       const titleStr = (job.title || '').toLowerCase();
       if (roleFilter === 'internship' && !typeStr.includes('intern') && !titleStr.includes('intern')) return false;
-      if (roleFilter === 'fulltime' && !typeStr.includes('full') && !titleStr.includes('developer') && !titleStr.includes('engineer')) return false;
+      if (roleFilter === 'fulltime' && !typeStr.includes('full') && !titleStr.includes('developer') && !titleStr.includes('engineer') && !typeStr.includes('job')) return false;
     }
 
-    // Location Filter
+    // 4. Location filter
     if (locationFilter !== 'all') {
       const locStr = (job.location || job.workMode || '').toLowerCase();
       if (locationFilter === 'wfh') {
-        if (!locStr.includes('home') && !locStr.includes('remote')) return false;
+        if (!locStr.includes('home') && !locStr.includes('remote') && locStr !== 'wfh') return false;
       } else {
         if (!locStr.includes(locationFilter.toLowerCase())) return false;
       }
     }
 
-    // Search Query Filter
+    // 5. Search Query Filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const titleMatch = (job.title || '').toLowerCase().includes(q);
@@ -232,285 +125,163 @@ export default function StudentDashboard({
       if (!titleMatch && !companyMatch && !skillMatch) return false;
     }
 
+    // 6. Required Skills Filter
+    if (selectedSkills.trim()) {
+      const skillsToMatch = selectedSkills.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+      const jobSkillNames = (job.requirements || []).map(r => (r.skillName || '').toLowerCase());
+      const hasMatchedSkill = skillsToMatch.some(target => jobSkillNames.some(js => js.includes(target)));
+      if (!hasMatchedSkill) return false;
+    }
+
+    // 7. Stipend Range (INR)
+    const stipendNum = extractStipendNumeric(job);
+    if (minStipend && !isNaN(parseInt(minStipend, 10))) {
+      if (stipendNum > 0 && stipendNum < parseInt(minStipend, 10)) return false;
+    }
+    if (maxStipend && !isNaN(parseInt(maxStipend, 10))) {
+      if (stipendNum > 0 && stipendNum > parseInt(maxStipend, 10)) return false;
+    }
+
     return true;
   });
 
+  // Sort Filtered Jobs
+  const sortedJobs = [...filteredJobs].sort((a, b) => {
+    if (sortBy === 'stipend_desc') {
+      return extractStipendNumeric(b) - extractStipendNumeric(a);
+    }
+    if (sortBy === 'stipend_asc') {
+      return extractStipendNumeric(a) - extractStipendNumeric(b);
+    }
+    if (sortBy === 'title_asc') {
+      return (a.title || '').localeCompare(b.title || '');
+    }
+    // newest first (default)
+    const timeA = new Date(a.createdAt || 0).getTime();
+    const timeB = new Date(b.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
+
   return (
-    <div className="space-y-6 animate-fade-in pb-12 text-left">
-      {/* Top Header & Refresh */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-6 animate-fade-in pb-16 text-left">
+      {/* Top Header & Sync */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
         <div>
-          <h1 className="font-headline text-2xl md:text-3xl font-bold text-on-surface">
-            Placements
+          <h1 className="font-headline text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
+            Find Your Next Opportunity
           </h1>
-          <p className="text-on-surface-variant text-xs font-sans font-normal mt-0.5">
-            Welcome back, <span className="font-bold text-on-surface">{profile?.name || user?.name || 'Candidate'}</span> • Top 5% Verified • {skillCount} Verified Stacks
+          <p className="text-slate-700 dark:text-slate-300 text-xs font-sans font-normal mt-0.5">
+            Welcome back, <span className="font-bold text-slate-900 dark:text-slate-100">{profile?.name || user?.name || 'Candidate'}</span> 
           </p>
         </div>
-        <button
+        {/* <button
           type="button"
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant text-on-surface-variant hover:text-on-surface rounded-xl text-xs font-headline font-medium transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3.5 py-2 bg-surface hover:bg-surface-container border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:text-blue-800 dark:hover:text-blue-300 rounded-none text-xs font-headline font-bold transition-all cursor-pointer disabled:opacity-50 shadow-2xs"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 text-blue-700 dark:text-blue-400 ${isRefreshing ? 'animate-spin' : ''}`} />
           <span>{isRefreshing ? 'Syncing...' : 'Sync Data'}</span>
-        </button>
+        </button> */}
       </div>
 
-      {/* Interview Performance Banner Card */}
-      <div className="bg-surface-container border border-outline-variant rounded-2xl p-5 shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-headline font-bold text-sm text-on-surface">Interview Performance</h3>
-          <div className="flex items-center gap-2 text-xs font-headline font-medium text-on-surface-variant">
-            <span className="text-[11px]">ⓘ Round-1 Clearance</span>
-            <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 px-2.5 py-1 font-bold text-xs">
-              {/* <div className="w-3 h-3 rounded-full border-2 border-amber-600 border-t-transparent animate-spin"></div> */}
-              <span>{clearanceRate}%</span>
-            </div>
-          </div>
-        </div>
+      {/* Top Filter Bar: Horizontal Controls across the top */}
+      <JobFilterBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        roleFilter={roleFilter}
+        setRoleFilter={setRoleFilter}
+        locationFilter={locationFilter}
+        setLocationFilter={setLocationFilter}
+        selectedSkills={selectedSkills}
+        setSelectedSkills={setSelectedSkills}
+        minStipend={minStipend}
+        setMinStipend={setMinStipend}
+        maxStipend={maxStipend}
+        setMaxStipend={setMaxStipend}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        totalJobs={sortedJobs.length}
+        onReset={handleResetFilters}
+      />
 
-        {/* Performance Metrics Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-surface-container-high/60 border border-outline-variant/60 rounded-xl p-3.5 flex items-center justify-between">
-            <span className="text-xs font-headline font-medium text-on-surface-variant">R-1 Scheduled</span>
-            <span className="font-headline font-extrabold text-lg text-on-surface">{r1Scheduled}</span>
-          </div>
-
-          <div className="bg-surface-container-high/60 border border-outline-variant/60 rounded-xl p-3.5 flex items-center justify-between">
-            <span className="text-xs font-headline font-medium text-on-surface-variant">R-1 Cleared</span>
-            <span className="font-headline font-extrabold text-lg text-emerald-600 dark:text-emerald-400">{r1Cleared}</span>
-          </div>
-
-          <div className="bg-surface-container-high/60 border border-outline-variant/60 rounded-xl p-3.5 flex items-center justify-between">
-            <span className="text-xs font-headline font-medium text-on-surface-variant">Pre-final Scheduled</span>
-            <span className="font-headline font-extrabold text-lg text-on-surface">{preFinalScheduled}</span>
-          </div>
-
-          <div className="bg-surface-container-high/60 border border-outline-variant/60 rounded-xl p-3.5 flex items-center justify-between">
-            <span className="text-xs font-headline font-medium text-on-surface-variant">Pre-final Cleared</span>
-            <span className="font-headline font-extrabold text-lg text-on-surface-variant">{preFinalCleared}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs & Search Controls */}
-      <div className="space-y-4 pt-2">
-        {/* Navigation Sub-Tabs */}
-        <div className="flex items-center gap-6 border-b border-outline-variant/60 text-xs font-headline font-medium">
-          <button
-            onClick={() => { setMainTab('all'); setStatusFilter('all'); }}
-            className={`pb-3 font-bold border-b-2 transition-all cursor-pointer ${
-              mainTab === 'all' && statusFilter === 'all'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-on-surface-variant hover:text-on-surface'
-            }`}
-          >
-            All Job Openings
-          </button>
-          <button
-            onClick={() => { setMainTab('applied'); setStatusFilter('applied'); }}
-            className={`pb-3 font-bold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
-              mainTab === 'applied' || statusFilter === 'applied'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-on-surface-variant hover:text-on-surface'
-            }`}
-          >
-            <span>Your Applications</span>
-            {totalApplied > 0 && (
-              <span className="px-1.5 py-0.2 bg-primary/10 text-primary text-[10px] rounded-full font-bold">
-                {totalApplied}
+      {/* Jobs Container: Sharp Corners with Sub-Tabs & 3-in-a-Row Box Grid */}
+      <div className="w-full flex flex-col bg-surface-container border border-slate-300 dark:border-slate-700 rounded-none shadow-xs">
+        {/* Sub-Tabs Header inside Container */}
+        <div className="flex items-center justify-between border-b border-slate-300 dark:border-slate-700 bg-surface px-4 sm:px-6 pt-3">
+          <div className="flex items-center gap-6 text-xs font-headline font-bold">
+            <button
+              type="button"
+              onClick={() => setMainTab('all')}
+              className={`pb-3 border-b-2 transition-all cursor-pointer ${
+                mainTab === 'all'
+                  ? 'border-blue-700 text-blue-800 dark:text-blue-300 font-extrabold'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              <span>All Job Openings</span>
+              <span className="ml-1.5 px-1.5 py-0.2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-[10px] rounded-none">
+                {jobs.length}
               </span>
-            )}
-          </button>
-        </div>
+            </button>
 
-        {/* Search Bar Input */}
-        <div className="relative">
-          <Search className="w-4 h-4 text-on-surface-variant absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search Company or Role..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-surface-container border border-outline-variant rounded-xl text-xs text-on-surface focus:outline-none focus:border-primary transition-all font-sans"
-          />
-        </div>
-
-        {/* Filter Pills Controls */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Status Filter Pill */}
-          <div className="relative">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="appearance-none bg-surface-container border border-outline-variant rounded-full px-4 py-1.5 pr-8 text-xs font-sans font-normal text-on-surface focus:outline-none focus:border-primary transition-all cursor-pointer"
+            <button
+              type="button"
+              onClick={() => setMainTab('applied')}
+              className={`pb-3 border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+                mainTab === 'applied'
+                  ? 'border-blue-700 text-blue-800 dark:text-blue-300 font-extrabold'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
             >
-              <option value="all">Status: All</option>
-              <option value="applied">Status: Applied ({totalApplied})</option>
-              <option value="not_applied">Status: Not Applied</option>
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-on-surface-variant absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <span>Your Applications</span>
+              {totalApplied > 0 && (
+                <span className="px-1.5 py-0.2 bg-blue-100 dark:bg-blue-950/70 border border-blue-400 text-blue-900 dark:text-blue-200 text-[10px] font-bold rounded-none">
+                  {totalApplied}
+                </span>
+              )}
+            </button>
           </div>
 
-          {/* Role Filter Pill */}
-          <div className="relative">
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="appearance-none bg-surface-container border border-outline-variant rounded-full px-4 py-1.5 pr-8 text-xs font-sans font-normal text-on-surface focus:outline-none focus:border-primary transition-all cursor-pointer"
-            >
-              <option value="all">Role: All</option>
-              <option value="internship">Role: Internship</option>
-              <option value="fulltime">Role: Full-Time / Dev</option>
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-on-surface-variant absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
-
-          {/* Location Filter Pill */}
-          <div className="relative">
-            <select
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-              className="appearance-none bg-surface-container border border-outline-variant rounded-full px-4 py-1.5 pr-8 text-xs font-sans font-normal text-on-surface focus:outline-none focus:border-primary transition-all cursor-pointer max-w-[200px] truncate"
-            >
-              <option value="all">Location: All</option>
-              <option value="wfh">Work from home / Remote</option>
-              {INDIAN_STATES.map((st) => (
-                <option key={st} value={st}>
-                  {st}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-on-surface-variant absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
+          <span className="text-[11px] font-sans font-medium text-slate-600 dark:text-slate-400 hidden sm:inline">
+            Showing {sortedJobs.length} opening{sortedJobs.length !== 1 ? 's' : ''}
+          </span>
         </div>
+
+        {/* 3-in-a-Row Box Cards Grid */}
+        {sortedJobs.length === 0 ? (
+          <div className="text-center py-20 px-6 bg-surface space-y-3">
+            <AlertTriangle className="w-10 h-10 text-slate-400 dark:text-slate-600 mx-auto opacity-70" />
+            <h3 className="font-headline font-bold text-slate-900 dark:text-slate-100 text-sm sm:text-base">
+              No job openings match your filter criteria
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-sans max-w-sm mx-auto">
+              Try adjusting your search terms, clearing specific skill tags, or resetting the filters.
+            </p>
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="mt-2 px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white text-xs font-headline font-bold rounded-none transition-colors cursor-pointer"
+            >
+              Reset All Filters
+            </button>
+          </div>
+        ) : (
+          <div className="p-5 sm:p-6 bg-surface grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {sortedJobs.map((job) => (
+              <JobSnapshotCard
+                key={job.id}
+                job={job}
+                onClick={handleJobClick}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Job Cards Grid */}
-      {filteredJobs.length === 0 ? (
-        <div className="py-12 px-4 text-center space-y-3 bg-surface-container border border-outline-variant rounded-2xl">
-          <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center mx-auto text-on-surface-variant">
-            <Briefcase className="w-6 h-6 text-primary" />
-          </div>
-          <p className="font-bold text-on-surface text-sm">No job openings match your filter criteria</p>
-          <p className="text-xs text-on-surface-variant font-sans font-normal">
-            Try adjusting your search term or clearing the Status/Role/Location filters above.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredJobs.map((job) => {
-            const rawCompanyName = job.companyName || job.company?.name || 'AlignCorp';
-            const companyDisplayName = rawCompanyName.replace(/^c_/i, '');
-            const logoUrl = job.company?.logoUrl || job.logoUrl || job.companyLogo;
-            const initials = getCompanyInitials(rawCompanyName);
-            const colorClass = getCompanyColor(companyDisplayName);
-            const isApplied = Boolean(job.applied);
-
-            return (
-              <div
-                key={job.id}
-                onClick={() => setSelectedJob(job)}
-                className="bg-surface border border-outline-variant/80 hover:border-primary rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4 group relative border-t-4 border-t-primary/70"
-              >
-                {/* Top Row: Title, Company Name & Monogram Logo Badge */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-bold text-sm md:text-base text-on-surface group-hover:text-primary transition-colors truncate font-headline">
-                      {job.title}
-                    </h3>
-                    <p className="text-xs text-on-surface-variant font-medium mt-0.5 truncate">
-                      {companyDisplayName}
-                    </p>
-                  </div>
-
-                  {/* Company Monogram Badge Box */}
-                  <div className={`w-14 h-14 rounded-2xl ${colorClass} text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-xs uppercase font-headline overflow-hidden border border-outline-variant/40`}>
-                    {logoUrl ? (
-                      <img src={logoUrl} alt={companyDisplayName} className="w-full h-full object-cover" />
-                    ) : (
-                      <span>{initials}</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Info Row: Stipend & Location */}
-                <div className="space-y-1.5 text-xs text-on-surface-variant">
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <span className="font-sans font-normal font-semibold text-primary text-sm bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 flex items-center gap-1">
-                      {formatStipendDisplay(job)}
-                    </span>
-                    <span className="flex items-center gap-1 truncate font-sans text-on-surface-variant font-medium">
-                      <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-                      {job.location || job.workMode || 'Work from home, In'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Multi-Colored Skill Pills List */}
-                <div className="flex flex-wrap gap-1.5">
-                  {job.requirements && job.requirements.length > 0 ? (
-                    job.requirements.slice(0, 3).map((req, i) => {
-                      const pillStyles = [
-                        'bg-primary/10 text-primary border-primary/20',
-                        'bg-secondary/10 text-secondary border-secondary/20',
-                        'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
-                      ][i % 3];
-                      return (
-                        <span key={i} className={`px-2.5 py-1 text-[11px] font-headline font-medium rounded-lg border ${pillStyles}`}>
-                          {req.skillName}
-                        </span>
-                      );
-                    })
-                  ) : (
-                    <>
-                      <span className="px-2.5 py-1 bg-primary/10 text-primary text-[11px] font-headline font-medium rounded-lg border border-primary/20">
-                        JavaScript
-                      </span>
-                      <span className="px-2.5 py-1 bg-secondary/10 text-secondary text-[11px] font-headline font-medium rounded-lg border border-secondary/20">
-                        Python
-                      </span>
-                    </>
-                  )}
-                  {job.requirements && job.requirements.length > 3 && (
-                    <span className="px-2.5 py-1 bg-surface-container-high text-on-surface-variant text-[11px] font-headline font-medium rounded-lg border border-outline-variant">
-                      +{job.requirements.length - 3} More
-                    </span>
-                  )}
-                </div>
-
-                {/* Footer Row: Deadline / Verification Status Badge */}
-                <div className="pt-2 border-t border-outline-variant/60 flex items-center justify-between text-[11px] font-headline font-medium">
-                  {isApplied ? (
-                    <span className="px-3 py-1 bg-secondary/15 border border-secondary/30 text-secondary font-bold rounded-full flex items-center gap-1 uppercase tracking-wider">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Applied
-                    </span>
-                  ) : job.matched ? (
-                    <span className="px-3 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold rounded-full flex items-center gap-1 uppercase tracking-wider">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Eligible to Apply
-                    </span>
-                  ) : (
-                    <span className="px-3 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 font-bold rounded-full flex items-center gap-1 uppercase tracking-wider">
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      Test Required
-                    </span>
-                  )}
-
-                  <span className="px-2.5 py-1 bg-surface-container-high text-on-surface-variant text-[10px] rounded-lg font-bold border border-outline-variant uppercase">
-                    {job.opportunityType || 'Job'}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Reusable Details Modal */}
+      {/* Fallback Modal */}
       {selectedJob && (
         <JobDetailsModal
           job={selectedJob}

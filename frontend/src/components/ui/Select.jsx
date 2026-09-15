@@ -5,7 +5,7 @@ export default function Select({ label, error, className = '', containerClassNam
   return (
     <div className={containerClassName}>
       {label && (
-        <label className="block text-[10px] font-headline font-medium uppercase tracking-[0.08em] text-on-surface-variant mb-1.5">
+        <label className="block text-[10px] font-headline font-medium  tracking-[0.08em] text-on-surface-variant mb-1.5">
           {label}
         </label>
       )}

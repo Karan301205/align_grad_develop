@@ -234,11 +234,11 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="space-y-4">
                           <div className="p-4 rounded-lg bg-surface-container border border-outline-variant">
-                            <div className="text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1">CANDIDATE SCORE</div>
+                            <div className="text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1">CANDIDATE SCORE</div>
                             <div className="text-3xl font-headline font-medium text-primary">94.8<span className="text-sm font-normal text-secondary">/100</span></div>
                           </div>
                           <div className="p-4 rounded-lg bg-surface-container border border-outline-variant">
-                            <div className="text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1">PERCENTILE</div>
+                            <div className="text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1">PERCENTILE</div>
                             <div className="text-3xl font-headline font-medium text-primary">Top 2%</div>
                           </div>
                         </div>
@@ -246,7 +246,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                         <div className="md:col-span-2 p-4 rounded-lg bg-surface-container-lowest border border-outline-variant relative flex flex-col justify-between">
                           <div>
                             <div className="flex justify-between items-center mb-4">
-                              <span className="text-xs font-headline font-medium text-primary uppercase">Skill Distribution</span>
+                              <span className="text-xs font-headline font-medium text-primary ">Skill Distribution</span>
                               <span className="material-symbols-outlined text-secondary text-sm">analytics</span>
                             </div>
 
@@ -412,7 +412,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 <div className="col-span-12 lg:col-span-6 space-y-6">
                   <AnimatedContent distance={60} direction="horizontal" reverse={true} duration={0.8}>
                     <div className="inline-block px-3 py-1 bg-white/10 rounded-full border border-white/20 mb-4">
-                      <span className="font-headline font-medium text-[10px] uppercase text-primary-fixed tracking-wider">SCALABLE INFRASTRUCTURE</span>
+                      <span className="font-headline font-medium text-[10px]  text-primary-fixed tracking-wider">SCALABLE INFRASTRUCTURE</span>
                     </div>
                     <h2 className="text-3xl font-headline font-medium mb-3">Enterprise-Grade Matching</h2>
                     <p className="text-sm text-on-primary-container leading-relaxed mb-6">
@@ -421,11 +421,11 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                         <div className="text-2xl font-bold mb-1">99.9%</div>
-                        <div className="text-[10px] font-headline font-medium text-on-primary-container uppercase">Platform Uptime</div>
+                        <div className="text-[10px] font-headline font-medium text-on-primary-container ">Platform Uptime</div>
                       </div>
                       <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                         <div className="text-2xl font-bold mb-1">SSO</div>
-                        <div className="text-[10px] font-headline font-medium text-on-primary-container uppercase">SAML Integrated</div>
+                        <div className="text-[10px] font-headline font-medium text-on-primary-container ">SAML Integrated</div>
                       </div>
                     </div>
                   </AnimatedContent>
@@ -588,7 +588,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 />
 
                 <div>
-                  <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">
+                  <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5">
                     Password
                   </label>
                   <div className="relative">
@@ -611,7 +611,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">
+                  <label className="block text-[10px] font-headline font-medium  tracking-wider text-on-surface-variant mb-1.5">
                     Account Classification
                   </label>
                   <div className="grid grid-cols-2 gap-3 mt-1.5">
@@ -661,7 +661,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-outline-variant/60"></div>
                 </div>
-                <span className="relative bg-surface-container px-3 text-[10px] font-headline font-medium text-on-surface-variant uppercase tracking-wider">
+                <span className="relative bg-surface-container px-3 text-[10px] font-headline font-medium text-on-surface-variant  tracking-wider">
                   OR
                 </span>
               </div>

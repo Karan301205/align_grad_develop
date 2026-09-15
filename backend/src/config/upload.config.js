@@ -16,7 +16,7 @@ module.exports = {
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ],
     image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-    video: ['video/mp4', 'video/webm', 'video/x-matroska'],
+    video: ['video/mp4', 'video/webm', 'video/x-matroska', 'video/quicktime', 'video/x-msvideo', 'video/ogg'],
     doc: [
       'application/pdf',
       'image/jpeg',

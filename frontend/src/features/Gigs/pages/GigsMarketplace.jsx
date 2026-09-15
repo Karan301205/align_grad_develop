@@ -19,7 +19,12 @@ import {
   Info,
   Users,
   MessageSquare,
-  Lock
+  Lock,
+  ExternalLink,
+  FileText,
+  MoreHorizontal,
+  Briefcase,
+  Building
 } from 'lucide-react';
 import { apiFetch } from '../../../services/apiClient';
 import { putFileToS3 } from '../../../services/uploadService';
@@ -32,6 +37,10 @@ import TextArea from '../../../components/ui/TextArea';
 import Badge from '../../../components/ui/Badge';
 import { formatAlertMessage } from '../../../utils/errorFormatter';
 import CandidateProfileModal from '../../Recruiter/components/CandidateProfileModal';
+import GigFilterSidebar from '../components/GigFilterSidebar';
+import GigCard from '../components/GigCard';
+import GigDetailPage from '../components/GigDetailPage';
+import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '../gigConstants';
 
 const RAW_GIG_CATEGORIES = [
   "Artificial Intelligence (AI)", "Machine Learning", "Generative AI", "Natural Language Processing (NLP)",
@@ -95,19 +104,19 @@ function SearchableCategorySelect({ value, onChange, placeholder = "Search or se
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
-          className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2.5 text-xs text-on-surface focus:border-primary focus:outline-none pr-8 font-sans transition-all placeholder:text-on-surface-variant/60"
+          className="w-full bg-surface-container-low border border-outline-variant rounded-none px-3 py-2.5 text-xs text-on-surface focus:border-primary focus:outline-none pr-8 font-sans transition-all placeholder:text-on-surface-variant/60"
         />
         <button
           type="button"
           onClick={() => setIsOpen(prev => !prev)}
-          className="absolute right-2 text-on-surface-variant hover:text-on-surface p-1 rounded-md cursor-pointer"
+          className="absolute right-2 text-on-surface-variant hover:text-on-surface p-1 rounded-none cursor-pointer"
         >
           <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
         </button>
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 left-0 right-0 mt-1 bg-surface-container border border-outline-variant rounded-xl shadow-2xl max-h-56 overflow-y-auto custom-scrollbar p-1">
+        <div className="absolute z-50 left-0 right-0 mt-1 bg-surface-container border border-outline-variant rounded-none shadow-2xl max-h-56 overflow-y-auto custom-scrollbar p-1">
           {isFilter && (
             <button
               type="button"
@@ -116,7 +125,7 @@ function SearchableCategorySelect({ value, onChange, placeholder = "Search or se
                 setSearchTerm('');
                 setIsOpen(false);
               }}
-              className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-all flex items-center justify-between cursor-pointer font-sans ${
+              className={`w-full text-left px-3 py-2 text-xs rounded-none transition-all flex items-center justify-between cursor-pointer font-sans ${
                 !value ? 'bg-primary/15 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-high'
               }`}
             >
@@ -135,7 +144,7 @@ function SearchableCategorySelect({ value, onChange, placeholder = "Search or se
                     onChange(searchTerm.trim());
                     setIsOpen(false);
                   }}
-                  className="mt-2 w-full px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg text-xs font-bold font-sans transition-all flex items-center justify-center gap-1 cursor-pointer"
+                  className="mt-2 w-full px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-none text-xs font-bold font-sans transition-all flex items-center justify-center gap-1 cursor-pointer"
                 >
                   Use "{searchTerm.trim()}"
                 </button>
@@ -151,7 +160,7 @@ function SearchableCategorySelect({ value, onChange, placeholder = "Search or se
                   setSearchTerm(cat);
                   setIsOpen(false);
                 }}
-                className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-all flex items-center justify-between cursor-pointer font-sans ${
+                className={`w-full text-left px-3 py-2 text-xs rounded-none transition-all flex items-center justify-between cursor-pointer font-sans ${
                   value === cat
                     ? 'bg-primary/15 text-primary font-bold'
                     : 'text-on-surface hover:bg-surface-container-high'
@@ -217,19 +226,19 @@ function MultiSearchableCategorySelect({ values = [], onChange, placeholder = "S
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={values.length > 0 ? "Add another field..." : placeholder}
-          className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2.5 text-xs text-on-surface focus:border-primary focus:outline-none pr-8 font-sans transition-all placeholder:text-on-surface-variant/60"
+          className="w-full bg-surface-container-low border border-outline-variant rounded-none px-3 py-2.5 text-xs text-on-surface focus:border-primary focus:outline-none pr-8 font-sans transition-all placeholder:text-on-surface-variant/60"
         />
         <button
           type="button"
           onClick={() => setIsOpen(prev => !prev)}
-          className="absolute right-2 text-on-surface-variant hover:text-on-surface p-1 rounded-md cursor-pointer"
+          className="absolute right-2 text-on-surface-variant hover:text-on-surface p-1 rounded-none cursor-pointer"
         >
           <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
         </button>
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 left-0 right-0 mt-1 bg-surface-container border border-outline-variant rounded-xl shadow-2xl max-h-56 overflow-y-auto custom-scrollbar p-1">
+        <div className="absolute z-50 left-0 right-0 mt-1 bg-surface-container border border-outline-variant rounded-none shadow-2xl max-h-56 overflow-y-auto custom-scrollbar p-1">
           {filteredCategories.length === 0 ? (
             <div className="p-2.5 text-center text-xs text-on-surface-variant font-sans font-normal">
               No matching field found
@@ -239,7 +248,7 @@ function MultiSearchableCategorySelect({ values = [], onChange, placeholder = "S
                   onClick={() => {
                     handleSelect(searchTerm.trim());
                   }}
-                  className="mt-2 w-full px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg text-xs font-bold font-sans transition-all flex items-center justify-center gap-1 cursor-pointer"
+                  className="mt-2 w-full px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-none text-xs font-bold font-sans transition-all flex items-center justify-center gap-1 cursor-pointer"
                 >
                   Use "{searchTerm.trim()}"
                 </button>
@@ -253,7 +262,7 @@ function MultiSearchableCategorySelect({ values = [], onChange, placeholder = "S
                   key={cat}
                   type="button"
                   onClick={() => handleSelect(cat)}
-                  className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-all flex items-center justify-between cursor-pointer font-sans ${
+                  className={`w-full text-left px-3 py-2 text-xs rounded-none transition-all flex items-center justify-between cursor-pointer font-sans ${
                     isSelected
                       ? 'bg-primary/15 text-primary font-bold'
                       : 'text-on-surface hover:bg-surface-container-high'
@@ -273,13 +282,13 @@ function MultiSearchableCategorySelect({ values = [], onChange, placeholder = "S
           {values.map(cat => (
             <span
               key={cat}
-              className="inline-flex items-center gap-1 text-[11px] font-sans px-2.5 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20 font-semibold shrink-0"
+              className="inline-flex items-center gap-1 text-[11px] font-sans px-2.5 py-1 rounded-none bg-primary/10 text-primary border border-primary/20 font-semibold shrink-0"
             >
               <span>{cat}</span>
               <button
                 type="button"
                 onClick={(e) => handleRemove(cat, e)}
-                className="hover:bg-primary/20 p-0.5 rounded-md transition-colors cursor-pointer"
+                className="hover:bg-primary/20 p-0.5 rounded-none transition-colors cursor-pointer"
               >
                 <X className="w-3 h-3 text-primary" />
               </button>
@@ -291,8 +300,38 @@ function MultiSearchableCategorySelect({ values = [], onChange, placeholder = "S
   );
 }
 
-export default function GigsMarketplace({ user, token, theme, profile, onUpdateProfile, onOpenCompanyProfile, autoSelectOpportunity, setAutoSelectOpportunity, onNavigateToTests }) {
-  const [activeSubTab, setActiveSubTab] = useState('browse'); // 'browse', 'post', 'my-gigs'
+export default function GigsMarketplace({
+  user,
+  token,
+  theme,
+  profile,
+  onUpdateProfile,
+  onOpenCompanyProfile,
+  autoSelectOpportunity,
+  setAutoSelectOpportunity,
+  onNavigateToTests,
+  onStartSkillTest,
+  onAddSkillAndUpgrade,
+  activeSubTab: externalSubTab,
+  onSubTabChange,
+  setActiveSubTab: setExternalSubTab
+}) {
+  const [internalSubTab, setInternalSubTab] = useState(externalSubTab || 'browse'); // 'browse', 'post', 'my-gigs'
+
+  useEffect(() => {
+    if (externalSubTab && externalSubTab !== internalSubTab) {
+      setInternalSubTab(externalSubTab);
+    }
+  }, [externalSubTab]);
+
+  const activeSubTab = externalSubTab || internalSubTab;
+
+  const setActiveSubTab = (newSubTab) => {
+    setInternalSubTab(newSubTab);
+    if (onSubTabChange) onSubTabChange(newSubTab);
+    if (setExternalSubTab) setExternalSubTab(newSubTab);
+  };
+
   const [gigs, setGigs] = useState([]);
   const [myGigs, setMyGigs] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -301,6 +340,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
     if (autoSelectOpportunity && autoSelectOpportunity.type === 'gig') {
       setSelectedGigId(autoSelectOpportunity.id);
       fetchGigDetails(autoSelectOpportunity.id);
+      setActiveSubTab('gig-detail');
       setAutoSelectOpportunity(null);
     }
   }, [autoSelectOpportunity, setAutoSelectOpportunity]);
@@ -308,6 +348,12 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
   const [q, setQ] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('');
   const [selectedSkills, setSelectedSkills] = useState('');
+  const [minBudget, setMinBudget] = useState('');
+  const [maxBudget, setMaxBudget] = useState('');
+  const [deliveryTimeline, setDeliveryTimeline] = useState('all');
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [minRating, setMinRating] = useState('0');
+  const [sortBy, setSortBy] = useState('newest');
 
   // Create Gig state
   const [title, setTitle] = useState('');
@@ -317,8 +363,11 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
   const [skillSearchTerm, setSkillSearchTerm] = useState('');
   const [isSkillDropdownOpen, setIsSkillDropdownOpen] = useState(false);
   const [budget, setBudget] = useState('');
+  const [currency, setCurrency] = useState('INR');
   const [deliveryTime, setDeliveryTime] = useState('');
   const [attachmentFile, setAttachmentFile] = useState(null);
+  const [gigLogoFile, setGigLogoFile] = useState(null);
+  const [gigLogoPreview, setGigLogoPreview] = useState(null);
   const [postingGig, setPostingGig] = useState(false);
 
   // Detail / Work room state
@@ -400,8 +449,12 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
   const [editSkillSearchTerm, setEditSkillSearchTerm] = useState('');
   const [isEditSkillDropdownOpen, setIsEditSkillDropdownOpen] = useState(false);
   const [editBudget, setEditBudget] = useState('');
+  const [editCurrency, setEditCurrency] = useState('INR');
   const [editDeliveryTime, setEditDeliveryTime] = useState('');
   const [editAttachmentFile, setEditAttachmentFile] = useState(null);
+  const [editGigLogo, setEditGigLogo] = useState(null);
+  const [editGigLogoFile, setEditGigLogoFile] = useState(null);
+  const [editGigLogoPreview, setEditGigLogoPreview] = useState(null);
   const [updatingGig, setUpdatingGig] = useState(false);
 
   // Keep a reference to profile to satisfy eslint
@@ -411,25 +464,49 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
     }
   }, [profile]);
 
+  // Auto-scroll to top / pitch popup when Pitch & Apply modal opens
+  React.useEffect(() => {
+    if (showApplyModal) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const el = document.getElementById('pitch-apply-modal-dialog');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [showApplyModal]);
+
   const scrollToBottom = () => {
     setTimeout(() => {
       chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
 
-  const fetchGigs = async () => {
+  const fetchGigs = async (customFilters = {}) => {
     setLoading(true);
     try {
-      let queryStr = '';
-      if (q) queryStr += `q=${encodeURIComponent(q)}`;
-      if (selectedCategoryFilter) {
-        queryStr += (queryStr ? '&' : '') + `category=${encodeURIComponent(selectedCategoryFilter)}`;
-      }
-      if (selectedSkills) {
-        queryStr += (queryStr ? '&' : '') + `skills=${encodeURIComponent(selectedSkills)}`;
-      }
+      const activeQ = customFilters.q !== undefined ? customFilters.q : q;
+      const activeCategory = customFilters.category !== undefined ? customFilters.category : selectedCategoryFilter;
+      const activeSkills = customFilters.skills !== undefined ? customFilters.skills : selectedSkills;
+      const activeMinBudget = customFilters.minBudget !== undefined ? customFilters.minBudget : minBudget;
+      const activeMaxBudget = customFilters.maxBudget !== undefined ? customFilters.maxBudget : maxBudget;
+      const activeDelivery = customFilters.deliveryTimeline !== undefined ? customFilters.deliveryTimeline : deliveryTimeline;
+      const activeVerified = customFilters.verifiedOnly !== undefined ? customFilters.verifiedOnly : verifiedOnly;
+      const activeMinRating = customFilters.minRating !== undefined ? customFilters.minRating : minRating;
+      const activeSortBy = customFilters.sortBy !== undefined ? customFilters.sortBy : sortBy;
 
-      const res = await apiFetch(`/gigs?${queryStr}`, { token });
+      const params = new URLSearchParams();
+      if (activeQ) params.append('q', activeQ);
+      if (activeCategory) params.append('category', activeCategory);
+      if (activeSkills) params.append('skills', activeSkills);
+      if (activeMinBudget) params.append('minBudget', activeMinBudget);
+      if (activeMaxBudget) params.append('maxBudget', activeMaxBudget);
+      if (activeDelivery && activeDelivery !== 'all') params.append('deliveryTimeline', activeDelivery);
+      if (activeVerified) params.append('verifiedOnly', 'true');
+      if (activeMinRating && activeMinRating !== '0') params.append('minRating', activeMinRating);
+      if (activeSortBy && activeSortBy !== 'newest') params.append('sortBy', activeSortBy);
+
+      const queryString = params.toString();
+      const res = await apiFetch(`/gigs${queryString ? `?${queryString}` : ''}`, { token });
       if (res.ok) {
         const data = await res.json();
         setGigs(data);
@@ -439,6 +516,29 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleResetFilters = () => {
+    setQ('');
+    setSelectedCategoryFilter('');
+    setSelectedSkills('');
+    setMinBudget('');
+    setMaxBudget('');
+    setDeliveryTimeline('all');
+    setVerifiedOnly(false);
+    setMinRating('0');
+    setSortBy('newest');
+    fetchGigs({
+      q: '',
+      category: '',
+      skills: '',
+      minBudget: '',
+      maxBudget: '',
+      deliveryTimeline: 'all',
+      verifiedOnly: false,
+      minRating: '0',
+      sortBy: 'newest'
+    });
   };
 
   const fetchMyGigs = async () => {
@@ -522,24 +622,6 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSubTab]);
 
-  // Auto-select first gig on browse tab
-  useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect */
-    if (activeSubTab === 'browse') {
-      if (gigs.length > 0) {
-        const stillExists = gigs.some(g => g.id === selectedGigId);
-        if (!selectedGigId || !stillExists) {
-          setSelectedGigId(gigs[0].id);
-          fetchGigDetails(gigs[0].id);
-        }
-      } else {
-        setSelectedGigId(null);
-        setGigDetails(null);
-      }
-    }
-    /* eslint-enable react-hooks/set-state-in-effect */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gigs, activeSubTab]);
 
   // Auto-select first gig on workspace tab
   useEffect(() => {
@@ -681,8 +763,12 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
     setEditSkillSearchTerm('');
     setIsEditSkillDropdownOpen(false);
     setEditBudget(String(gig.budget));
+    setEditCurrency(gig.currency || 'INR');
     setEditDeliveryTime(gig.deliveryTime);
     setEditAttachmentFile(null);
+    setEditGigLogo(gig.logo || null);
+    setEditGigLogoFile(null);
+    setEditGigLogoPreview(null);
     setShowEditModal(true);
   };
 
@@ -716,6 +802,24 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         }
       }
 
+      let finalLogoUrl = editGigLogo;
+      if (editGigLogoFile) {
+        const urlRes = await apiFetch('/upload/request-url', {
+          token,
+          method: 'POST',
+          json: {
+            fileType: 'image',
+            fileName: editGigLogoFile.name,
+            contentType: editGigLogoFile.type || 'image/png'
+          }
+        });
+        if (urlRes.ok) {
+          const { uploadUrl, publicUrl } = await urlRes.json();
+          await putFileToS3(uploadUrl, editGigLogoFile, editGigLogoFile.type || 'image/png', token);
+          finalLogoUrl = publicUrl;
+        }
+      }
+
       const gigData = {
         title: editTitle,
         description: editDescription,
@@ -724,9 +828,11 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         skills: editReqs.map(r => r.skillName),
         requirements: editReqs,
         budget: parseFloat(editBudget),
+        currency: editCurrency || 'INR',
         deliveryTime: editDeliveryTime,
         minRating: editReqs.length > 0 ? Math.max(...editReqs.map(r => r.minRating || 1)) : 1,
-        attachments: uploadedUrl ? [uploadedUrl] : []
+        attachments: uploadedUrl ? [uploadedUrl] : [],
+        logo: finalLogoUrl || null
       };
 
       const res = await apiFetch(`/gigs/${gigDetails.id}`, {
@@ -784,6 +890,24 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         }
       }
 
+      let uploadedLogoUrl = null;
+      if (gigLogoFile) {
+        const urlRes = await apiFetch('/upload/request-url', {
+          token,
+          method: 'POST',
+          json: {
+            fileType: 'image',
+            fileName: gigLogoFile.name,
+            contentType: gigLogoFile.type || 'image/png'
+          }
+        });
+        if (urlRes.ok) {
+          const { uploadUrl, publicUrl } = await urlRes.json();
+          await putFileToS3(uploadUrl, gigLogoFile, gigLogoFile.type || 'image/png', token);
+          uploadedLogoUrl = publicUrl;
+        }
+      }
+
       const gigData = {
         title,
         description,
@@ -792,9 +916,11 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         skills: reqs.map(r => r.skillName),
         requirements: reqs,
         budget: parseFloat(budget),
+        currency: currency || 'INR',
         deliveryTime,
         minRating: reqs.length > 0 ? Math.max(...reqs.map(r => r.minRating || 1)) : 1,
-        attachments: uploadedUrl ? [uploadedUrl] : []
+        attachments: uploadedUrl ? [uploadedUrl] : [],
+        logo: uploadedLogoUrl || null
       };
 
       const res = await apiFetch('/gigs', {
@@ -811,8 +937,11 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         setReqs([]);
         setSkillSearchTerm('');
         setBudget('');
+        setCurrency('INR');
         setDeliveryTime('');
         setAttachmentFile(null);
+        setGigLogoFile(null);
+        setGigLogoPreview(null);
         setActiveSubTab('my-gigs');
       } else {
         const d = await res.json();
@@ -1136,490 +1265,148 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Sub Tabs Selection Header */}
-      <div className="flex border-b border-outline-variant pb-2 gap-4">
-        <button
-          onClick={() => {
-            setActiveSubTab('browse');
-            setSelectedGigId(null);
-            setGigDetails(null);
-          }}
-          className={`px-4 py-2.5 rounded-xl text-xs font-headline font-medium tracking-wider font-bold transition-all uppercase ${activeSubTab === 'browse'
-              ? 'bg-primary/10 text-primary border-b-2 border-primary'
-              : 'text-on-surface-variant hover:text-on-surface'
-            }`}
-        >
-          Browse Gigs
-        </button>
-        {user?.role === 'RECRUITER' && (
-          <button
-            onClick={() => {
-              setActiveSubTab('post');
-              setSelectedGigId(null);
-              setGigDetails(null);
-            }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-headline font-medium tracking-wider font-bold transition-all uppercase ${activeSubTab === 'post'
-                ? 'bg-primary/10 text-primary border-b-2 border-primary'
-                : 'text-on-surface-variant hover:text-on-surface'
-              }`}
-          >
-            Post a Gig
-          </button>
-        )}
-        <button
-          onClick={() => {
-            setActiveSubTab('my-gigs');
-            fetchMyGigs();
-            setSelectedGigId(null);
-            setGigDetails(null);
-          }}
-          className={`px-4 py-2.5 rounded-xl text-xs font-headline font-medium tracking-wider font-bold transition-all uppercase flex items-center gap-1.5 ${activeSubTab === 'my-gigs'
-              ? 'bg-primary/10 text-primary border-b-2 border-primary'
-              : 'text-on-surface-variant hover:text-on-surface'
-            }`}
-        >
-          My Gigs Workspace
-        </button>
-      </div>
-
       {/* Main Workspace Body */}
       <AnimatedContent distance={40} direction="vertical">
-        {activeSubTab === 'browse' && (
-          <div className="space-y-6">
-            {/* Search filter row - Combined Title, Category & Skills Search */}
-            <div className="bg-surface-container border border-outline-variant p-2 rounded-2xl shadow-[var(--shadow-card)] flex flex-col md:flex-row items-stretch gap-2">
-              <div className="flex-1 relative flex items-center">
-                <Search className="w-4 h-4 text-on-surface-variant absolute left-4" />
-                <input
-                  type="text"
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Job title, category, keywords..."
-                  className="w-full bg-transparent pl-11 pr-4 py-3 text-xs text-on-surface focus:outline-none placeholder:text-on-surface-variant/60"
-                />
-              </div>
-              <div className="hidden md:block w-[1px] bg-outline-variant my-2" />
-              <div className="w-full md:w-64 relative flex items-center">
-                <SearchableCategorySelect
-                  value={selectedCategoryFilter}
-                  onChange={(val) => setSelectedCategoryFilter(val)}
-                  placeholder="All Categories"
-                  isFilter={true}
-                  allowCustom={false}
-                  className="w-full"
-                />
-              </div>
-              <div className="hidden md:block w-[1px] bg-outline-variant my-2" />
-              <div className="flex-1 relative flex items-center">
-                <Sparkles className="w-4 h-4 text-on-surface-variant absolute left-4" />
-                <input
-                  type="text"
-                  value={selectedSkills}
-                  onChange={(e) => setSelectedSkills(e.target.value)}
-                  placeholder="Skills (e.g. React, Python)"
-                  className="w-full bg-transparent pl-11 pr-4 py-3 text-xs text-on-surface focus:outline-none placeholder:text-on-surface-variant/60"
-                />
-              </div>
-              <button
-                onClick={fetchGigs}
-                disabled={loading}
-                className="px-6 py-3 bg-primary text-white rounded-xl hover:opacity-90 font-headline font-medium text-xs font-bold uppercase transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
-              >
-                {loading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
-                Find Gigs
-              </button>
-            </div>
+        {(() => {
+          const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
+          const displayGigs = user?.role === 'STUDENT'
+            ? gigs.filter(g => {
+                const hasApplied = g.hasApplied || (g.applicants || []).some(a => candidateIds.includes(a.candidateId?.toString()));
+                const isHired = candidateIds.some(cId => Array.from(new Set([...(g.hiredCandidateIds || []), g.selectedCandidateId].filter(Boolean))).map(id => id.toString()).includes(cId));
+                return !hasApplied && !isHired;
+              })
+            : gigs;
 
-            {/* Split Screen Feed & Detail Panel */}
-            {(() => {
-              const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
-              const displayGigs = user?.role === 'STUDENT'
-                ? gigs.filter(g => {
-                    const hasApplied = g.hasApplied || (g.applicants || []).some(a => candidateIds.includes(a.candidateId?.toString()));
-                    const isHired = candidateIds.some(cId => Array.from(new Set([...(g.hiredCandidateIds || []), g.selectedCandidateId].filter(Boolean))).map(id => id.toString()).includes(cId));
-                    return !hasApplied && !isHired;
-                  })
-                : gigs;
+          return (
+            <>
+              {activeSubTab === 'browse' && (
+                <div className="flex flex-col md:flex-row items-start gap-6">
+                  {/* Left Column: Vertical Filter Panel */}
+                  <GigFilterSidebar
+                    q={q}
+                    setQ={setQ}
+                    selectedCategoryFilter={selectedCategoryFilter}
+                    setSelectedCategoryFilter={setSelectedCategoryFilter}
+                    selectedSkills={selectedSkills}
+                    setSelectedSkills={setSelectedSkills}
+                    minBudget={minBudget}
+                    setMinBudget={setMinBudget}
+                    maxBudget={maxBudget}
+                    setMaxBudget={setMaxBudget}
+                    deliveryTimeline={deliveryTimeline}
+                    setDeliveryTimeline={setDeliveryTimeline}
+                    verifiedOnly={verifiedOnly}
+                    setVerifiedOnly={setVerifiedOnly}
+                    minRating={minRating}
+                    setMinRating={setMinRating}
+                    sortBy={sortBy}
+                    setSortBy={setSortBy}
+                    onSearch={() => fetchGigs()}
+                    onReset={handleResetFilters}
+                    loading={loading}
+                    totalGigs={displayGigs.length}
+                  />
 
-              if (loading) {
-                return (
-                  <div className="flex justify-center py-20">
-                    <RefreshCw className="w-8 h-8 text-primary animate-spin" />
+                  {/* Right Column: Stack of Gigs (Zero gap, divide-y) */}
+                  <div className="flex-1 w-full min-w-0 flex flex-col">
+                    {loading ? (
+                      <div className="flex justify-center py-20 bg-surface border border-slate-300 dark:border-slate-700 rounded-none shadow-2xs">
+                        <RefreshCw className="w-8 h-8 text-primary animate-spin" />
+                      </div>
+                    ) : displayGigs.length === 0 ? (
+                      <div className="text-center py-20 bg-surface border border-slate-300 dark:border-slate-700 rounded-none shadow-2xs">
+                        <AlertTriangle className="w-8 h-8 text-slate-400 dark:text-slate-500 mx-auto mb-3 opacity-60" />
+                        <h3 className="font-headline font-bold text-slate-900 dark:text-slate-100">No open gigs available</h3>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 font-sans">Try adjusting your search criteria or check your workspace for active gigs.</p>
+                      </div>
+                    ) : (
+                      <div className="bg-surface border border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700 rounded-none shadow-2xs">
+                        {displayGigs.map(gig => (
+                          <GigCard
+                            key={gig.id}
+                            gig={gig}
+                            isCandidate={user?.role === 'STUDENT'}
+                            candidateIds={candidateIds}
+                            onClick={(gigId) => {
+                              setSelectedGigId(gigId);
+                              fetchGigDetails(gigId);
+                              setActiveSubTab('gig-detail');
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
-                );
-              }
-
-              if (displayGigs.length === 0) {
-                return (
-                  <div className="text-center py-20 bg-surface-container border border-outline-variant rounded-2xl shadow-[var(--shadow-card)]">
-                    <AlertTriangle className="w-8 h-8 text-on-surface-variant mx-auto mb-3" />
-                    <h3 className="font-headline font-medium text-on-surface">No open gigs available</h3>
-                    <p className="text-xs text-on-surface-variant mt-1">Check your workspace for your applied and active gigs!</p>
-                  </div>
-                );
-              }
-
-              return (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-                  {/* Left Pane: Compact Gigs List (Matching Screenshot 2 Mockup) */}
-                  <div className="lg:col-span-5 flex flex-col gap-3.5 overflow-y-auto pr-2 custom-scrollbar max-h-[680px]">
-                    {displayGigs.map(gig => {
-                      const isSelected = gig.id === selectedGigId;
-                      const gigCategory = gig.category || (gig.categories && gig.categories[0]) || 'General';
-                      const hasUserApplied = user.role === 'STUDENT' && (gig.hasApplied || gig.applicants?.some(a => candidateIds.includes(a.candidateId?.toString())));
-                    return (
-                      <div
-                        key={gig.id}
-                        onClick={() => {
-                          setSelectedGigId(gig.id);
-                          fetchGigDetails(gig.id);
-                        }}
-                        className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${isSelected
-                            ? 'bg-surface-container-high border-primary shadow-md border-l-4 border-l-primary'
-                            : 'bg-surface-container border-outline-variant hover:border-on-surface-variant/40 shadow-sm hover:-translate-y-0.5'
-                          }`}
-                      >
-                        {/* Top Row: Gig Name & Amount */}
-                        <div className="flex justify-between items-start gap-2">
-                          <h3 className="text-xs font-headline font-medium text-on-surface line-clamp-1">{gig.title}</h3>
-                          <div className="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-xl text-emerald-600 dark:text-emerald-400 text-xs font-headline font-medium shrink-0">
-                            <span>₹{gig.budget}</span>
-                          </div>
-                        </div>
-
-                        {/* Middle Row: Category of Field */}
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center flex-wrap gap-1">
-                            {(() => {
-                              const catList = (gig.categories && gig.categories.length > 0)
-                                ? gig.categories
-                                : (gig.category ? [gig.category] : ['General']);
-                              return catList.map((catItem, idx) => (
-                                <span key={idx} className="text-[9px] font-headline font-medium uppercase font-bold px-2 py-0.5 rounded-lg bg-primary/10 text-primary border border-primary/20 flex items-center gap-1 shrink-0">
-                                  <Sparkles className="w-3 h-3" />
-                                  {catItem}
-                                </span>
-                              ));
-                            })()}
-                          </div>
-                          {hasUserApplied && (
-                            <span className="text-[9px] font-headline font-medium px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold rounded-md border border-emerald-500/20 flex items-center gap-1 shrink-0">
-                              <CheckCircle className="w-3 h-3 text-emerald-500" /> Applied
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Bottom Row: Time to Complete (Left) & 3-4 Tech Stack Badges (Right) */}
-                        <div className="flex justify-between items-center gap-2 pt-2 border-t border-outline-variant/30">
-                          <div className="flex items-center gap-1 text-[10px] font-sans font-normal text-on-surface-variant shrink-0">
-                            <Clock className="w-3 h-3 text-primary" />
-                            <span>Delivery: <strong className="text-on-surface">{gig.deliveryTime} {/^\d+$/.test(gig.deliveryTime?.toString().trim()) ? 'days' : ''}</strong></span>
-                          </div>
-
-                          {/* 3 or 4 Tech Stack Badges */}
-                          <div className="flex flex-wrap items-center justify-end gap-1 overflow-hidden">
-                            {(gig.skills || []).slice(0, 4).map(skill => (
-                              <span key={skill} className="px-2 py-0.5 rounded-md bg-surface-container-high border border-outline-variant/60 text-[9px] font-sans font-normal text-on-surface font-semibold">
-                                {skill}
-                              </span>
-                            ))}
-                            {(gig.skills || []).length > 4 && (
-                              <span className="text-[8px] font-sans font-normal text-on-surface-variant px-1 rounded">
-                                +{(gig.skills || []).length - 4}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
                 </div>
+              )}
 
-                {/* Right Pane: Sticky Details View */}
-                <div className="lg:col-span-7 flex flex-col bg-surface-container border border-outline-variant rounded-2xl shadow-md h-full max-h-[680px] overflow-hidden">
-                  {loadingDetails ? (
-                    <div className="flex-1 flex items-center justify-center">
-                      <RefreshCw className="w-8 h-8 text-primary animate-spin" />
-                    </div>
-                  ) : gigDetails ? (
-                    <div className="flex flex-col h-full overflow-y-auto p-6 space-y-6 custom-scrollbar">
-                      {/* Detail Header */}
-                      <div className="border-b border-outline-variant pb-4 space-y-3">
-                        <div className="flex justify-between items-start gap-4">
-                          <div>
-                            <h2 className="text-base font-headline font-medium text-on-surface">{gigDetails.title}</h2>
-                            {gigDetails.company ? (
-                              <div className="flex items-center gap-2 mt-1.5">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    if (onOpenCompanyProfile) onOpenCompanyProfile(gigDetails.company.id);
-                                  }}
-                                  className="w-7 h-7 rounded-xl bg-surface-container-low border border-outline-variant flex items-center justify-center shrink-0 overflow-hidden hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                                >
-                                  {gigDetails.company.logoUrl ? (
-                                    <img src={gigDetails.company.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                                  ) : (
-                                    <span className="text-xs text-primary font-bold">{gigDetails.company.name.charAt(0)}</span>
-                                  )}
-                                </button>
-                                <div className="text-[11px] text-on-surface-variant flex items-center gap-1">
-                                  <span>Hiring:</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      if (onOpenCompanyProfile) onOpenCompanyProfile(gigDetails.company.id);
-                                    }}
-                                    className="font-bold text-on-surface hover:text-primary hover:underline transition-colors flex items-center gap-1 cursor-pointer"
-                                  >
-                                    {gigDetails.company.name}
-                                    {gigDetails.company.verified && (
-                                      <span className="text-[8px] bg-success-container text-success px-1.5 py-0.5 rounded font-bold uppercase tracking-wider font-headline font-medium">
-                                        ✓ Verified
-                                      </span>
-                                    )}
-                                  </button>
-                                  {gigDetails.company.companySize && (
-                                    <span className="opacity-60">&bull; {gigDetails.company.companySize}</span>
-                                  )}
-                                </div>
-                              </div>
-                            ) : (
-                              <p className="text-xs text-on-surface-variant mt-1 flex items-center gap-1.5">
-                                <User className="w-3.5 h-3.5 text-primary" />
-                                <span>Posted by {gigDetails.ownerName || 'Client'}</span>
-                                <span className="px-1.5 py-0.5 bg-surface-container-high text-[9px] font-headline font-medium uppercase rounded text-on-surface-variant">
-                                  {gigDetails.ownerRole}
-                                </span>
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-right shrink-0">
-                            <div className="text-lg font-bold text-emerald-500 font-sans font-normal">₹{gigDetails.budget}</div>
-                            <span className="text-[10px] font-headline font-medium text-on-surface-variant uppercase">Budget Rate</span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2 items-center justify-between pt-2">
-                          <div className="flex items-center gap-3 text-xs font-sans font-normal text-on-surface-variant">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-4 h-4 text-primary" /> Delivery: <strong className="text-on-surface ml-1">{gigDetails.deliveryTime}</strong>
-                            </span>
-                          </div>
-
-                          {/* Application CTA */}
-                          {user.role === 'STUDENT' && gigDetails.ownerId !== user.id && (
-                            (() => {
-                              if (gigDetails.status === 'CLOSED') {
-                                return (
-                                  <div className="px-4 py-2.5 bg-rose-500/10 text-rose-500 border border-rose-500/30 rounded-xl font-headline font-medium text-xs font-bold flex items-center gap-2 shrink-0 animate-fade-in shadow-xs">
-                                    <span>Closed for Applications</span>
-                                  </div>
-                                );
-                              }
-
-                              if (gigDetails.status === 'PAUSED') {
-                                return (
-                                  <div className="px-4 py-2.5 bg-amber-500/10 text-amber-500 border border-amber-500/30 rounded-xl font-headline font-medium text-xs font-bold flex items-center gap-2 shrink-0 animate-fade-in shadow-xs">
-                                    <span>Currently Paused</span>
-                                  </div>
-                                );
-                              }
-
-                              const hasApplied = gigDetails.hasApplied || gigDetails.applicants?.some(a => a.candidateId === user.id) || gigs.find(g => g.id === gigDetails.id)?.applicants?.some(a => a.candidateId === user.id);
-
-                              if (hasApplied) {
-                                return (
-                                  <div className="px-4 py-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-xl font-headline font-medium text-xs font-bold flex items-center gap-2 shrink-0 animate-fade-in shadow-xs">
-                                    <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                                    <span>Applied &bull; Awaiting Client Response</span>
-                                  </div>
-                                );
-                              }
-
-                              // Check candidate skill ratings against per-skill gig requirements
-                              const userSkills = profile?.skills || [];
-                              const gigReqs = (gigDetails.requirements && gigDetails.requirements.length > 0)
-                                ? gigDetails.requirements
-                                : (gigDetails.skills || []).map(s => ({ skillName: s, minRating: gigDetails.minRating || 1 }));
-
-                              const missingSkillReqs = [];
-                              gigReqs.forEach(req => {
-                                const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === req.skillName.toLowerCase());
-                                const isTech = skillObj ? skillObj.type === 'technical' : true;
-                                if (isTech && req.minRating > 1) {
-                                  const userSkillObj = userSkills.find(s => s.name.toLowerCase() === req.skillName.toLowerCase());
-                                  const userRating = userSkillObj
-                                    ? ((userSkillObj.verifiedRating && userSkillObj.verifiedRating > 0) ? userSkillObj.verifiedRating : (userSkillObj.rating || 0))
-                                    : 0;
-                                  if (userRating < req.minRating) {
-                                    missingSkillReqs.push({
-                                      skillName: req.skillName,
-                                      requiredRating: req.minRating,
-                                      currentRating: userRating
-                                    });
-                                  }
-                                }
-                              });
-                              const isRatingMatched = missingSkillReqs.length === 0;
-
-                              if (!isRatingMatched) {
-                                return (
-                                  <div className="w-full mt-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl space-y-2.5 text-left animate-fade-in">
-                                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-headline font-medium text-xs">
-                                      <ShieldCheck className="w-4 h-4 shrink-0" />
-                                      <span>Rating Requirements Locked</span>
-                                    </div>
-                                    <p className="text-xs text-on-surface-variant leading-relaxed">
-                                      Your current proficiency level falls short of the required threshold for:
-                                    </p>
-                                    <ul className="space-y-1 text-xs">
-                                      {missingSkillReqs.map(m => (
-                                        <li key={m.skillName} className="flex items-center justify-between bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 font-sans font-normal text-[11px]">
-                                          <span className="font-bold text-on-surface">{m.skillName}</span>
-                                          <span className="text-amber-700 dark:text-amber-400 font-semibold">Your Rating: Lvl {m.currentRating}/10 &bull; Req: Lvl {m.requiredRating}/10</span>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        if (onNavigateToTests) onNavigateToTests();
-                                      }}
-                                      className="px-4 py-2 bg-primary text-white rounded-xl text-xs font-headline font-medium uppercase hover:opacity-90 transition-all shadow-sm flex items-center gap-1.5 cursor-pointer mt-2"
-                                    >
-                                      <Sparkles className="w-3.5 h-3.5" /> Take Skill Test to Upgrade Rating
-                                    </button>
-                                  </div>
-                                );
-                              }
-
-                              return (
-                                <button
-                                  onClick={() => {
-                                    setTargetApplyGig(gigDetails);
-                                    setShowApplyModal(true);
-                                  }}
-                                  className="px-5 py-2.5 rounded-xl font-headline font-medium text-xs font-bold uppercase transition-all shadow-md flex items-center gap-1.5 shrink-0 bg-primary text-white hover:opacity-90 active:scale-95 cursor-pointer"
-                                >
-                                  <Send className="w-3.5 h-3.5" />
-                                  Pitch & Apply
-                                </button>
-                              );
-                            })()
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Detail Description */}
-                      <div className="space-y-3">
-                        <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Task Description</h3>
-                        <p className="text-xs text-on-surface-variant leading-relaxed whitespace-pre-wrap">{gigDetails.description}</p>
-                      </div>
-
-                      {/* Required Skills */}
-                      <div className="space-y-2">
-                        <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary">Required Skill Set & Rating Thresholds</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {(() => {
-                            const reqs = (gigDetails.requirements && gigDetails.requirements.length > 0)
-                              ? gigDetails.requirements
-                              : (gigDetails.skills || []).map(s => ({ skillName: s, minRating: gigDetails.minRating || 1 }));
-
-                            return reqs.map(r => {
-                              const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === r.skillName.toLowerCase());
-                              const isTech = skillObj ? skillObj.type === 'technical' : true;
-                              return (
-                                <div key={r.skillName} className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-xl text-xs font-medium text-on-surface">
-                                  <span className="font-bold">{r.skillName}</span>
-                                  {isTech ? (
-                                    <span className="text-[10px] font-headline font-medium text-primary bg-primary/10 px-2.5 py-0.5 rounded-lg border border-primary/20">
-                                      Lvl {r.minRating || 1}/10 Req
-                                    </span>
-                                  ) : (
-                                    <span className="text-[9px] font-sans font-normal text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-lg border border-outline-variant">
-                                      Required
-                                    </span>
-                                  )}
-                                </div>
-                              );
-                            });
-                          })()}
-                        </div>
-                      </div>
-
-                      {/* Attachments */}
-                      {gigDetails.attachments?.length > 0 && (
-                        <div className="space-y-2">
-                          <h3 className="text-xs font-headline font-medium uppercase tracking-wider text-primary font-bold">Brief Attachments</h3>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                            {gigDetails.attachments.map((link, idx) => {
-                              const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(link) || link.includes('/avatar/') || link.includes('image');
-                              return (
-                                <a
-                                  key={idx}
-                                  href={link}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="group p-3 rounded-xl border border-outline-variant bg-surface-container-low hover:border-primary/60 hover:bg-surface-container transition-all flex items-center gap-3 text-xs text-on-surface-variant hover:text-primary shadow-xs"
-                                >
-                                  {isImage ? (
-                                    <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-outline-variant bg-surface-container-high">
-                                      <img src={link} alt={`Attachment ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                                    </div>
-                                  ) : (
-                                    <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                                      <Paperclip className="w-5 h-5 text-primary" />
-                                    </div>
-                                  )}
-                                  <div className="overflow-hidden">
-                                    <p className="font-bold text-on-surface text-[11px] truncate group-hover:text-primary transition-colors">
-                                      Attachment #{idx + 1}
-                                    </p>
-                                    <span className="text-[9px] font-sans font-normal text-on-surface-variant/70 block truncate">Click to view file</span>
-                                  </div>
-                                </a>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-on-surface-variant">
-                      <AlertTriangle className="w-10 h-10 mb-2 opacity-40" />
-                      <p className="text-xs font-sans font-normal">No gig selected or loaded</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })()}
-          </div>
-        )}
+              {activeSubTab === 'gig-detail' && (
+                <GigDetailPage
+                  gig={gigDetails}
+                  loading={loadingDetails}
+                  user={user}
+                  profile={profile}
+                  token={token}
+                  onBack={() => setActiveSubTab('browse')}
+                  onApply={(gig) => {
+                    setTargetApplyGig(gig);
+                    setShowApplyModal(true);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  onOpenCompanyProfile={onOpenCompanyProfile}
+                  onNavigateToTests={onNavigateToTests}
+                  onStartSkillTest={onStartSkillTest}
+                  onAddSkillAndUpgrade={onAddSkillAndUpgrade}
+                  onUpdateProfile={onUpdateProfile}
+                  onEditGig={(gig) => {
+                    setEditTitle(gig.title || '');
+                    setEditDescription(gig.description || '');
+                    setEditCategories(gig.categories || (gig.category ? [gig.category] : []));
+                    setEditReqs(gig.requirements || []);
+                    setEditBudget(gig.budget || '');
+                    setEditCurrency(gig.currency || 'INR');
+                    setEditDeliveryTime(gig.deliveryTime || '');
+                    setEditGigLogo(gig.logo || null);
+                    setEditGigLogoFile(null);
+                    setEditGigLogoPreview(null);
+                    setShowEditModal(true);
+                  }}
+                  onManageInWorkspace={(gigId) => {
+                    setSelectedGigId(gigId);
+                    fetchGigDetails(gigId);
+                    fetchMyGigs();
+                    setActiveSubTab('my-gigs');
+                  }}
+                />
+              )}
+            </>
+          );
+        })()}
 
         {activeSubTab === 'post' && (
-          <Card className="max-w-2xl mx-auto p-6 space-y-6">
-            <div className="border-b border-outline-variant pb-3">
-              <h3 className="text-sm font-headline font-medium text-on-surface flex items-center gap-1.5">
+          <div className="max-w-2xl mx-auto p-6 space-y-6 bg-surface border border-slate-300 dark:border-slate-700 rounded-none shadow-2xs font-sans">
+            <div className="border-b border-slate-300 dark:border-slate-700 pb-3">
+              <h3 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                 <Sparkles className="w-5 h-5 text-primary" /> Post a paid Task / Gig
               </h3>
-              <p className="text-xs text-on-surface-variant mt-1">Hire other verified candidates to help complete milestones.</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Hire other verified candidates to help complete milestones.</p>
             </div>
 
             <form onSubmit={handlePostGig} className="space-y-4">
               <div>
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Gig Title</label>
-                <Input
+                <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">Gig Title</label>
+                <input
+                  type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Build Neumorphic Sidebar Layout in React"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none placeholder:text-slate-400 font-sans"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Description details</label>
+                <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">Description details</label>
                 <TextArea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -1629,9 +1416,9 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-bold">Category of Field *</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="sm:col-span-2 md:col-span-1">
+                  <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">Category of Field *</label>
                   <MultiSearchableCategorySelect
                     values={categories}
                     onChange={(vals) => setCategories(vals)}
@@ -1640,38 +1427,60 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-headline font-medium">Budget rate (INR) *</label>
-                  <Input
-                    type="number"
-                    value={budget}
-                    onChange={(e) => setBudget(e.target.value)}
-                    placeholder="Enter Amount"
-                    required
-                  />
+                  <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">Currency *</label>
+                  <select
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none font-sans cursor-pointer h-[38px]"
+                  >
+                    {SUPPORTED_CURRENCIES.map(c => (
+                      <option key={c.code} value={c.code} className="bg-surface text-slate-900 dark:text-slate-100">
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5 font-headline font-medium">Expected Delivery Time *</label>
-                  <Input
+                  <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">Budget ({currency}) *</label>
+                  <div className="relative flex items-center">
+                    <span className="absolute left-3 text-xs font-bold text-slate-700 dark:text-slate-300">
+                      {getCurrencySymbol(currency)}
+                    </span>
+                    <input
+                      type="number"
+                      value={budget}
+                      onChange={(e) => setBudget(e.target.value)}
+                      placeholder="Enter Amount"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none pl-8 pr-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none placeholder:text-slate-400 font-sans"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">Delivery Time *</label>
+                  <input
+                    type="text"
                     value={deliveryTime}
                     onChange={(e) => setDeliveryTime(e.target.value)}
                     placeholder="e.g. 3 Days"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none placeholder:text-slate-400 font-sans"
                     required
                   />
                 </div>
                 {categories.length > 0 && (
-                  <div className="col-span-1 md:col-span-3 flex flex-wrap gap-2 pt-1">
+                  <div className="col-span-1 sm:col-span-2 md:col-span-4 flex flex-wrap gap-2 pt-1">
                     {categories.map(cat => (
                       <span
                         key={cat}
-                        className="inline-flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-xl bg-primary/10 text-primary border border-primary/20 font-semibold shadow-xs shrink-0"
+                        className="inline-flex items-center gap-1.5 text-xs font-sans px-3 py-1.5 rounded-none bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700 font-semibold shadow-2xs shrink-0"
                       >
                         <span>{cat}</span>
                         <button
                           type="button"
                           onClick={() => setCategories(categories.filter(v => v !== cat))}
-                          className="hover:bg-primary/20 p-0.5 rounded-md transition-colors cursor-pointer"
+                          className="hover:bg-blue-200 dark:hover:bg-blue-900 p-0.5 rounded-none transition-colors cursor-pointer"
                         >
-                          <X className="w-3.5 h-3.5 text-primary" />
+                          <X className="w-3.5 h-3.5 text-blue-800 dark:text-blue-200" />
                         </button>
                       </span>
                     ))}
@@ -1680,12 +1489,13 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </div>
 
               <div className="space-y-4 pt-2">
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold">
-                  Required Stacks & Rating Thresholds *
+                <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100">
+                  Required Skills & Rating *
                 </label>
 
                 <div className="relative">
-                  <Input
+                  <input
+                    type="text"
                     value={skillSearchTerm}
                     onChange={(e) => {
                       setSkillSearchTerm(e.target.value);
@@ -1716,17 +1526,18 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       }
                     }}
                     placeholder="Search and select skills (e.g. React, Python, AWS)..."
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none placeholder:text-slate-400 font-sans"
                   />
 
                   {isSkillDropdownOpen && skillSearchTerm.trim() !== '' && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setIsSkillDropdownOpen(false)}></div>
-                      <div className="absolute z-20 left-0 right-0 mt-1 bg-surface-container border border-outline-variant rounded-xl shadow-xl max-h-56 overflow-y-auto custom-scrollbar p-1">
+                      <div className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none shadow-xl max-h-56 overflow-y-auto custom-scrollbar p-1">
                         {ALL_SKILLS.filter(
                           s => s.skill.toLowerCase().includes(skillSearchTerm.toLowerCase()) &&
                             !reqs.some(exist => exist.skillName.toLowerCase() === s.skill.toLowerCase())
                         ).length === 0 ? (
-                          <div className="p-3 text-xs text-on-surface-variant font-sans font-normal text-center">
+                          <div className="p-3 text-xs text-slate-500 font-sans font-normal text-center">
                             No matching skills found. Press Enter to add "{skillSearchTerm.trim()}"
                           </div>
                         ) : (
@@ -1743,10 +1554,10 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                 setSkillSearchTerm('');
                                 setIsSkillDropdownOpen(false);
                               }}
-                              className="w-full text-left px-3.5 py-2 text-xs text-on-surface hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between group cursor-pointer rounded-lg font-sans"
+                              className="w-full text-left px-3.5 py-2 text-xs text-slate-900 dark:text-slate-100 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 transition-all flex items-center justify-between group cursor-pointer rounded-none font-sans"
                             >
                               <span>{s.skill}</span>
-                              <span className="text-[10px] font-sans font-normal capitalize px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/60 text-on-surface-variant">
+                              <span className="text-[10px] font-sans font-normal capitalize px-1.5 py-0.5 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400">
                                 {s.type}
                               </span>
                             </button>
@@ -1759,8 +1570,8 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
                 {/* Added Skill Requirements with Rating Sliders */}
                 {reqs.length === 0 ? (
-                  <div className="p-4 bg-surface-container-low border border-dashed border-outline-variant/80 rounded-xl text-center">
-                    <p className="text-xs text-on-surface-variant font-sans font-normal">No skill requirements added yet. Search and select skills above.</p>
+                  <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border border-dashed border-slate-300 dark:border-slate-700 rounded-none text-center">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans font-normal">No skill requirements added yet. Search and select skills above.</p>
                   </div>
                 ) : (
                   <div className="space-y-3 pt-1">
@@ -1768,16 +1579,16 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === r.skillName.toLowerCase());
                       const isTech = skillObj ? skillObj.type === 'technical' : true;
                       return (
-                        <div key={r.skillName} className="p-3.5 bg-surface-container-low border border-outline-variant/60 rounded-xl space-y-2.5">
+                        <div key={r.skillName} className="p-3.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-none space-y-2.5">
                           <div className="flex justify-between items-center text-xs">
-                            <span className="font-bold text-on-surface font-headline">{r.skillName}</span>
+                            <span className="font-bold text-slate-900 dark:text-slate-100 font-headline">{r.skillName}</span>
                             <div className="flex items-center gap-3">
                               {isTech ? (
-                                <span className="text-primary font-headline font-medium text-xs bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+                                <span className="text-blue-700 dark:text-blue-300 font-headline font-bold text-xs bg-blue-100 dark:bg-blue-950/70 px-2 py-0.5 rounded-none border border-blue-300 dark:border-blue-700">
                                   Required Level: Lvl {r.minRating}/10
                                 </span>
                               ) : (
-                                <span className="text-on-surface-variant font-headline font-medium text-[10px] uppercase tracking-wider bg-surface-container-high border border-outline-variant px-2 py-0.5 rounded">Required Skill</span>
+                                <span className="text-slate-600 dark:text-slate-400 font-headline font-medium text-[10px] tracking-wider bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-2 py-0.5 rounded-none">Required Skill</span>
                               )}
                               <button
                                 type="button"
@@ -1798,7 +1609,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                 const val = parseInt(e.target.value, 10);
                                 setReqs(prev => prev.map(item => item.skillName === r.skillName ? { ...item, minRating: val } : item));
                               }}
-                              className="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary"
+                              className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-none appearance-none cursor-pointer accent-primary"
                             />
                           )}
                         </div>
@@ -1808,9 +1619,55 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                 )}
               </div>
 
+              {/* Gig Logo Upload */}
               <div>
-                <label className="block text-xs font-headline font-medium uppercase tracking-wider text-on-surface-variant mb-1.5">Brief Attachments (Optional)</label>
-                <label className="cursor-pointer text-xs font-headline font-medium text-on-surface-variant hover:text-on-surface border border-outline-variant bg-surface-container-low p-3 rounded-xl flex items-center gap-2 shadow-sm w-full">
+                <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5 flex items-center justify-between">
+                  <span>Gig Logo (Optional)</span>
+                  {gigLogoFile && (
+                    <button
+                      type="button"
+                      onClick={() => { setGigLogoFile(null); setGigLogoPreview(null); }}
+                      className="text-[11px] text-error hover:underline cursor-pointer font-sans"
+                    >
+                      Remove Logo
+                    </button>
+                  )}
+                </label>
+                <div className="flex items-center gap-3.5 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-none">
+                  <div className="w-14 h-14 shrink-0 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none flex items-center justify-center overflow-hidden">
+                    {gigLogoPreview ? (
+                      <img src={gigLogoPreview} alt="Logo Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <Building className="w-6 h-6 text-slate-400 dark:text-slate-600" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-blue-600 text-xs font-headline font-bold text-slate-900 dark:text-slate-100 rounded-none transition-colors">
+                      <Sparkles className="w-3.5 h-3.5 text-primary" />
+                      <span>{gigLogoFile ? 'Change Logo Image' : 'Upload Gig Logo'}</span>
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            setGigLogoFile(file);
+                            setGigLogoPreview(URL.createObjectURL(file));
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-sans">
+                      Displayed on gig card in the marketplace.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">Brief Attachments (Optional)</label>
+                <label className="cursor-pointer text-xs font-headline font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 rounded-none flex items-center gap-2 shadow-xs w-full">
                   <Paperclip className="w-4 h-4 shrink-0 text-primary" />
                   <span className="truncate">{attachmentFile ? attachmentFile.name : 'Select document / archive file'}</span>
                   <input
@@ -1822,30 +1679,30 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </div>
 
               <div className="pt-4">
-                <Button
+                <button
                   type="submit"
                   disabled={postingGig}
-                  className="w-full flex justify-center items-center gap-1.5"
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-headline font-bold uppercase tracking-wider rounded-none transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {postingGig ? 'Publishing...' : 'Publish Gig to Marketplace'}
-                </Button>
+                </button>
               </div>
             </form>
-          </Card>
+          </div>
         )}
 
         {activeSubTab === 'my-gigs' && (
-          /* Main 3-Column Gig Workspace Grid */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-140px)] min-h-[640px] items-stretch overflow-hidden font-sans">
-            {/* COLUMN 1: LEFT SIDEBAR (lg:col-span-3) */}
-            <div className="lg:col-span-3 flex flex-col gap-3 h-full overflow-hidden">
-              {/* TOP BOX: GIGS IN WHICH CANDIDATE IS HIRED / ALL POSTED GIGS FOR RECRUITER */}
-              <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
-                <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-widest text-primary font-bold">
-                    {user?.role === 'STUDENT' ? 'Gigs in Which You Are Hired' : 'All My Posted Gigs'}
+          /* Main Unified 3-Column Gig Workspace Chassis */
+          <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none shadow-2xs overflow-hidden flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-slate-300 dark:divide-slate-700 h-[calc(100vh-140px)] min-h-[660px] items-stretch font-sans">
+            {/* COLUMN 1: LEFT PANEL - HOSTED GIGS */}
+            <div className="w-full lg:w-56 xl:w-64 shrink-0 flex flex-col min-h-0 bg-surface">
+              {/* Hosted Gigs Header */}
+              <div className="p-3.5 border-b border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 flex justify-between items-center shrink-0">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100">
+                    {user?.role === 'STUDENT' ? 'Gigs Hired In' : 'Hosted Gigs'}
                   </h4>
-                  <span className="text-[9px] font-headline font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                  <span className="text-[10px] font-headline font-bold px-2 py-0.5 rounded-none bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-100 border border-blue-300 dark:border-blue-700">
                     {(() => {
                       const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
                       if (user?.role === 'STUDENT') {
@@ -1855,218 +1712,297 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                         }).length;
                       }
                       return myGigs.filter(g => g.ownerId === user.id).length;
-                    })()} Gigs
+                    })()}
                   </span>
                 </div>
-
-                <div className="flex-1 overflow-y-auto space-y-2.5 custom-scrollbar pr-1">
-                  {user?.role === 'STUDENT' ? (
-                    (() => {
-                      const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
-                      const hiredGigs = myGigs.filter(g => {
-                        const allHired = Array.from(new Set([...(g.hiredCandidateIds || []), g.selectedCandidateId].filter(Boolean))).map(id => id.toString());
-                        return candidateIds.some(cId => allHired.includes(cId));
-                      });
-
-                      if (hiredGigs.length === 0) {
-                        return <p className="text-center text-xs font-sans font-normal text-on-surface-variant py-8">No active hired gigs found.</p>;
-                      }
-                      return hiredGigs.map(gig => {
-                        const isSelected = gig.id === selectedGigId;
-                        return (
-                          <div
-                            key={gig.id}
-                            onClick={() => { setSelectedGigId(gig.id); fetchGigDetails(gig.id); }}
-                            className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col gap-1.5 ${isSelected ? 'bg-surface-container-high border-primary shadow-xs border-l-4 border-l-primary' : 'bg-surface-container-low border-outline-variant hover:border-outline-variant/60'}`}
-                          >
-                            <div className="flex justify-between items-start gap-2">
-                              <h5 className="text-xs font-bold text-on-surface line-clamp-1">{gig.title}</h5>
-                              <span className={`text-[8px] font-headline font-medium uppercase px-1.5 py-0.5 rounded font-bold ${gig.status === 'COMPLETED' ? 'bg-success/15 text-success' : 'bg-primary/15 text-primary'}`}>{gig.status}</span>
-                            </div>
-                            <p className="text-[10px] font-sans font-normal text-on-surface-variant">Budget: <strong className="text-emerald-500">₹{gig.budget}</strong></p>
-                          </div>
-                        );
-                      });
-                    })()
-                  ) : (
-                    myGigs.filter(g => g.ownerId === user.id).length === 0 ? (
-                      <p className="text-center text-xs font-sans font-normal text-on-surface-variant py-8">No gigs posted yet.</p>
-                    ) : (
-                      myGigs.filter(g => g.ownerId === user.id).map(gig => {
-                        const isSelected = gig.id === selectedGigId;
-                        return (
-                          <div
-                            key={gig.id}
-                            onClick={() => { setSelectedGigId(gig.id); fetchGigDetails(gig.id); }}
-                            className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col gap-1.5 ${isSelected ? 'bg-surface-container-high border-primary shadow-xs border-l-4 border-l-primary' : 'bg-surface-container-low border-outline-variant hover:border-outline-variant/60'}`}
-                          >
-                            <div className="flex justify-between items-start gap-2">
-                              <h5 className="text-xs font-bold text-on-surface line-clamp-1">{gig.title}</h5>
-                              <span className={`text-[8px] font-headline font-medium uppercase px-1.5 py-0.5 rounded font-bold ${
-                                gig.status === 'COMPLETED'
-                                  ? 'bg-success/15 text-success'
-                                  : gig.status === 'IN_PROGRESS'
-                                  ? 'bg-primary/15 text-primary'
-                                  : gig.status === 'CLOSED'
-                                  ? 'bg-rose-500/15 text-rose-500'
-                                  : gig.status === 'PAUSED'
-                                  ? 'bg-amber-500/15 text-amber-500'
-                                  : 'bg-warning/15 text-warning'
-                              }`}>{gig.status}</span>
-                            </div>
-                            <p className="text-[10px] font-sans font-normal text-on-surface-variant">Budget: <strong className="text-emerald-500">₹{gig.budget}</strong></p>
-                          </div>
-                        );
-                      })
-                    )
-                  )}
-                </div>
+                {user?.role === 'RECRUITER' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveSubTab('post');
+                      setSelectedGigId(null);
+                      setGigDetails(null);
+                    }}
+                    title="Post a new gig"
+                    className="p-1.5 rounded-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-blue-600 hover:border-blue-500 transition-all cursor-pointer flex items-center justify-center shadow-2xs active:scale-95"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
 
-              {/* BOTTOM BOX: DETAIL OF THE GIG SELECTED */}
-              <div className="h-60 shrink-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col justify-between overflow-hidden shadow-xs">
-                {gigDetails ? (
-                  <div className="flex flex-col h-full justify-between space-y-2">
-                    <div>
-                      <div className="flex items-center justify-between gap-1 mb-1">
-                        <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary font-bold">Selected Gig Details</h4>
-                        <span className="text-[8px] font-headline font-medium uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">{gigDetails.status}</span>
-                      </div>
-                      <h3 className="text-xs font-bold text-on-surface line-clamp-1">{gigDetails.title}</h3>
-                      <p className="text-[10px] text-on-surface-variant line-clamp-2 mt-1 leading-relaxed">{gigDetails.description}</p>
-                    </div>
+              {/* Scrollable Gigs List */}
+              <div className="flex-1 overflow-y-auto divide-y divide-slate-300 dark:divide-slate-700 custom-scrollbar">
+                {user?.role === 'STUDENT' ? (
+                  (() => {
+                    const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
+                    const hiredGigs = myGigs.filter(g => {
+                      const allHired = Array.from(new Set([...(g.hiredCandidateIds || []), g.selectedCandidateId].filter(Boolean))).map(id => id.toString());
+                      return candidateIds.some(cId => allHired.includes(cId));
+                    });
 
-                    <div className="space-y-2 pt-1 border-t border-outline-variant/40">
-                      <div className="flex justify-between text-[10px] font-sans font-normal">
-                        <span className="text-on-surface-variant">Rate: <strong className="text-emerald-500">₹{gigDetails.budget}</strong></span>
-                        <span className="text-on-surface-variant">Delivery: <strong className="text-on-surface">{gigDetails.deliveryTime}</strong></span>
-                      </div>
-
+                    if (hiredGigs.length === 0) {
+                      return <p className="text-center text-xs font-sans font-normal text-slate-500 dark:text-slate-400 py-8 px-4">No active hired gigs found.</p>;
+                    }
+                    return hiredGigs.map(gig => {
+                      const isSelected = gig.id === selectedGigId;
+                      return (
+                        <div
+                          key={gig.id}
+                          onClick={() => { setSelectedGigId(gig.id); fetchGigDetails(gig.id); }}
+                          className={`p-3 transition-all cursor-pointer flex flex-col gap-1.5 ${
+                            isSelected
+                              ? 'bg-blue-50 dark:bg-blue-950/40 border-l-4 border-l-blue-600 shadow-2xs'
+                              : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start gap-2">
+                            <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100 line-clamp-1">{gig.title}</h5>
+                            <span className={`text-[9px] font-headline font-bold px-1.5 py-0.5 rounded-none shrink-0 ${gig.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-200 border border-emerald-300' : 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-200 border border-blue-300'}`}>{gig.status}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-[10px] font-sans font-normal pt-0.5">
+                            <span className="text-slate-600 dark:text-slate-400">Budget: <strong className="text-emerald-700 dark:text-emerald-300 font-bold">{getCurrencySymbol(gig.currency)}{gig.budget}</strong></span>
+                            <span className="text-slate-500 dark:text-slate-400 text-[9px]">{gig.deliveryTime || ''}</span>
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()
+                ) : (
+                  myGigs.filter(g => g.ownerId === user.id).length === 0 ? (
+                    <div className="text-center py-10 px-4">
+                      <Briefcase className="w-8 h-8 text-slate-400 dark:text-slate-500 mx-auto mb-2" />
+                      <p className="text-xs font-sans font-normal text-slate-500 dark:text-slate-400">No gigs posted yet.</p>
                       <button
                         type="button"
-                        onClick={() => setShowGigInfoModal(true)}
-                        className="w-full py-2 bg-primary text-white text-[10px] font-headline font-medium uppercase rounded-xl hover:opacity-90 transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-98"
+                        onClick={() => setActiveSubTab('post')}
+                        className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-headline font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950/70 border border-blue-300 dark:border-blue-700 rounded-none hover:bg-blue-600 hover:text-white transition-all cursor-pointer shadow-2xs"
                       >
-                        <Info className="w-3.5 h-3.5" />
-                        <span>INFO / Full Project Specifications</span>
+                        <Plus className="w-3.5 h-3.5" /> Post Your First Gig
                       </button>
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center text-center p-4">
-                    <p className="text-xs font-sans font-normal text-on-surface-variant">Select a gig above to view details</p>
-                  </div>
+                  ) : (
+                    myGigs.filter(g => g.ownerId === user.id).map(gig => {
+                      const isSelected = gig.id === selectedGigId;
+                      const pitchCount = gig.applicants?.length || 0;
+                      return (
+                        <div
+                          key={gig.id}
+                          onClick={() => { setSelectedGigId(gig.id); fetchGigDetails(gig.id); }}
+                          className={`p-3 transition-all cursor-pointer flex flex-col gap-1.5 ${
+                            isSelected
+                              ? 'bg-blue-50 dark:bg-blue-950/40 border-l-4 border-l-blue-600 shadow-2xs'
+                              : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start gap-2">
+                            <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100 line-clamp-1">{gig.title}</h5>
+                            <span className={`text-[9px] font-headline font-bold px-1.5 py-0.5 rounded-none shrink-0 ${
+                              gig.status === 'COMPLETED'
+                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-200 border border-emerald-300'
+                                : gig.status === 'IN_PROGRESS'
+                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-200 border border-blue-300'
+                                : gig.status === 'CLOSED'
+                                ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-200 border border-rose-300'
+                                : gig.status === 'PAUSED'
+                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-200 border border-amber-300'
+                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/70 dark:text-yellow-200 border border-yellow-300'
+                            }`}>{gig.status}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-[10px] font-sans font-normal pt-0.5">
+                            <span className="text-slate-600 dark:text-slate-400">Budget: <strong className="text-emerald-700 dark:text-emerald-300 font-bold">{getCurrencySymbol(gig.currency)}{gig.budget}</strong></span>
+                            <span className="text-slate-500 dark:text-slate-400 text-[9px] font-medium">
+                              {pitchCount} {pitchCount === 1 ? 'pitch' : 'pitches'}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )
                 )}
               </div>
             </div>
 
-            {/* COLUMN 2: CENTER MAIN WORKSPACE (lg:col-span-6 - CHAT SECTION WITH THE RECRUITER) */}
-            <div className="lg:col-span-6 flex flex-col bg-surface-container border border-outline-variant rounded-2xl shadow-md h-full overflow-hidden">
+            {/* COLUMN 2: CENTER PANEL - GIG CONTROL & CANDIDATE CHAT */}
+            <div className="flex-1 flex flex-col min-h-0 min-w-0 bg-surface">
               {loadingDetails ? (
                 <div className="flex-1 flex items-center justify-center">
                   <RefreshCw className="w-8 h-8 text-primary animate-spin" />
                 </div>
               ) : gigDetails ? (
                 <div className="flex flex-col h-full overflow-hidden">
-                  {/* Chat Section Header */}
-                  <div className="px-5 py-3.5 bg-surface-container-low border-b border-outline-variant flex items-center justify-between shrink-0 shadow-xs">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 text-primary font-headline font-medium flex items-center justify-center text-xs overflow-hidden shrink-0">
-                        {(() => {
-                          const activeCandId = selectedOtherCandidateId || gigDetails.selectedCandidateId || (gigDetails.applicants && gigDetails.applicants[0]?.candidateId);
-                          const activeCand = gigDetails.applicants?.find(a => a.candidateId === activeCandId)?.candidate;
-                          return activeCand?.avatar || activeCand?.profilePic ? (
-                            <img src={activeCand.avatar || activeCand.profilePic} alt={activeCand.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <span>{activeCand?.name?.charAt(0) || 'C'}</span>
-                          );
-                        })()}
-                      </div>
-                      <div>
-                        <h3 className="text-xs font-bold text-on-surface">
-                          {(() => {
-                            const activeCandId = selectedOtherCandidateId || gigDetails.selectedCandidateId || (gigDetails.applicants && gigDetails.applicants[0]?.candidateId);
-                            const activeCand = gigDetails.applicants?.find(a => a.candidateId === activeCandId)?.candidate;
-                            return activeCand?.name || (isOwner ? 'Candidate Communication Channel' : gigDetails.ownerName || 'Recruiter Client');
-                          })()}
-                        </h3>
-                        <p className="text-[9px] font-headline font-medium text-on-surface-variant uppercase">
-                          {gigDetails.title} &bull; <span className="text-emerald-500 font-bold">₹{gigDetails.budget}</span>
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {/* Profile Button for Active Candidate or Recruiter */}
-                      {(() => {
-                        const activeCandId = selectedOtherCandidateId || gigDetails.selectedCandidateId || (gigDetails.applicants && gigDetails.applicants[0]?.candidateId);
-                        const activeCand = gigDetails.applicants?.find(a => a.candidateId === activeCandId)?.candidate;
-                        return (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (isOwner) {
-                                handleOpenCandidateProfile(activeCandId, activeCand);
-                              } else {
-                                handleOpenCandidateProfile(gigDetails.ownerId, { name: gigDetails.ownerName || 'Recruiter' });
-                              }
-                            }}
-                            className="px-2 py-1 text-[9px] font-headline font-medium uppercase rounded-lg border border-outline-variant bg-surface-container text-on-surface hover:text-primary hover:border-primary/40 transition-all cursor-pointer flex items-center gap-1"
-                          >
-                            <User className="w-3 h-3 text-primary" />
-                            <span>Profile</span>
-                          </button>
-                        );
-                      })()}
-
-                      {/* Submission Button */}
-                      {(isOwner || isHiredCandidate || gigDetails.submissions?.length > 0) && (
+                  {/* GIG HEADER: Title, View Brief, Controls & Metrics (Screenshot 1 & 2) */}
+                  <div className="p-4 border-b border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 shrink-0 space-y-3">
+                    {/* Top Row: Status pill, View Brief & Recruiter Action Controls */}
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-headline font-bold tracking-wider px-2 py-0.5 rounded-none bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-100 border border-blue-300 dark:border-blue-700">
+                          <span className="w-1.5 h-1.5 rounded-none bg-blue-600 animate-pulse" />
+                          {gigDetails.status}
+                        </span>
                         <button
                           type="button"
-                          onClick={() => setShowSubmissionModal(true)}
-                          className={`px-2 py-1 text-[9px] font-headline font-medium uppercase rounded-lg border transition-all cursor-pointer flex items-center gap-1 ${
-                            gigDetails.submissions?.length > 0
-                              ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white'
-                              : 'bg-primary/10 border-primary/30 text-primary hover:bg-primary hover:text-white'
-                          }`}
+                          onClick={() => setShowGigInfoModal(true)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-headline font-bold text-slate-800 dark:text-slate-200 hover:text-blue-600 rounded-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer shadow-2xs"
                         >
-                          <Paperclip className="w-3 h-3" />
-                          <span>Submission</span>
-                          {gigDetails.submissions?.length > 0 && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
-                          )}
+                          <span>View Brief</span>
+                          <ExternalLink className="w-3 h-3 text-primary" />
                         </button>
-                      )}
+                      </div>
 
-                      {/* Recruiter Owner Action Buttons */}
+                      {/* Recruiter Owner Action Controls */}
                       {isOwner && (
-                        <>
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           {(gigDetails.status === 'OPEN' || gigDetails.status === 'PAUSED') && (
-                            <button onClick={() => handleOpenEditModal(gigDetails)} className="px-2 py-1 text-[9px] font-headline font-medium uppercase rounded-lg border border-outline-variant bg-surface-container hover:text-primary transition-all cursor-pointer">Edit</button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditModal(gigDetails)}
+                              className="px-2.5 py-1 text-[10px] font-headline font-bold rounded-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-400 dark:hover:border-slate-600 transition-all cursor-pointer shadow-2xs"
+                            >
+                              Edit
+                            </button>
                           )}
-                          <button onClick={() => handleTogglePause(gigDetails)} className="px-2 py-1 text-[9px] font-headline font-medium uppercase rounded-lg border border-outline-variant bg-surface-container hover:text-warning transition-all cursor-pointer">
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePause(gigDetails)}
+                            className="px-2.5 py-1 text-[10px] font-headline font-bold rounded-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:text-warning transition-all cursor-pointer shadow-2xs"
+                          >
                             {gigDetails.status === 'PAUSED' ? 'Resume' : 'Pause'}
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleToggleClose(gigDetails)}
-                            className={`px-2 py-1 text-[9px] font-headline font-medium uppercase rounded-lg border transition-all cursor-pointer ${
+                            className={`px-2.5 py-1 text-[10px] font-headline font-bold rounded-none border transition-all cursor-pointer shadow-2xs ${
                               gigDetails.status === 'CLOSED'
-                                ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white'
-                                : 'border-rose-500/40 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white'
+                                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-600 hover:text-white'
+                                : 'border-rose-500 bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 hover:bg-rose-600 hover:text-white'
                             }`}
                           >
                             {gigDetails.status === 'CLOSED' ? 'Re-Open' : 'Close Gig'}
                           </button>
                           {(gigDetails.status === 'OPEN' || gigDetails.status === 'PAUSED') && (
-                            <button onClick={() => handleDeleteGig(gigDetails.id)} className="px-2 py-1 text-[9px] font-headline font-medium uppercase rounded-lg border border-error/30 bg-surface-container text-error hover:bg-error hover:text-white transition-all cursor-pointer">Delete</button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteGig(gigDetails.id)}
+                              className="px-2.5 py-1 text-[10px] font-headline font-bold rounded-none border border-rose-300 dark:border-rose-700 bg-white dark:bg-slate-900 text-rose-600 hover:bg-rose-600 hover:text-white transition-all cursor-pointer shadow-2xs"
+                            >
+                              Delete
+                            </button>
                           )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Middle Row: Gig Title & Metadata */}
+                    <div>
+                      <h2 className="text-base lg:text-lg font-bold text-slate-900 dark:text-slate-100 font-headline leading-snug line-clamp-1">
+                        {gigDetails.title}
+                      </h2>
+                      <p className="text-[11px] font-sans font-normal text-slate-600 dark:text-slate-400 mt-0.5 line-clamp-1">
+                        {(gigDetails.categories?.[0] || gigDetails.category || 'Specialized Gig')} &bull; Delivery: {gigDetails.deliveryTime || 'Flexible'} &bull; Created {new Date(gigDetails.createdAt || Date.now()).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+
+                    {/* Metrics Row (Budget, Delivery for Candidate; plus Assigned, Queue for Recruiter) */}
+                    <div className={`grid gap-2 pt-1 border-t border-slate-300 dark:border-slate-700 ${isOwner ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2'}`}>
+                      <div className="bg-white dark:bg-slate-900 p-2 rounded-none border border-slate-300 dark:border-slate-700 shadow-2xs">
+                        <p className="text-[9px] font-headline font-bold tracking-wider text-slate-600 dark:text-slate-400">Budget</p>
+                        <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300 font-sans mt-0.5">{getCurrencySymbol(gigDetails.currency)}{gigDetails.budget}</p>
+                      </div>
+                      <div className="bg-white dark:bg-slate-900 p-2 rounded-none border border-slate-300 dark:border-slate-700 shadow-2xs">
+                        <p className="text-[9px] font-headline font-bold tracking-wider text-slate-600 dark:text-slate-400">Delivery</p>
+                        <p className="text-xs font-bold text-slate-900 dark:text-slate-100 font-sans mt-0.5">{gigDetails.deliveryTime || 'Flexible'}</p>
+                      </div>
+                      {isOwner && (
+                        <>
+                          <div className="bg-white dark:bg-slate-900 p-2 rounded-none border border-slate-300 dark:border-slate-700 shadow-2xs">
+                            <p className="text-[9px] font-headline font-bold tracking-wider text-slate-600 dark:text-slate-400">Assigned</p>
+                            <p className="text-xs font-bold text-blue-700 dark:text-blue-300 font-sans mt-0.5">
+                              {gigDetails.hiredCandidates?.length || (gigDetails.selectedCandidateId ? 1 : 0)} Talent
+                            </p>
+                          </div>
+                          <div className="bg-white dark:bg-slate-900 p-2 rounded-none border border-slate-300 dark:border-slate-700 shadow-2xs">
+                            <p className="text-[9px] font-headline font-bold tracking-wider text-slate-600 dark:text-slate-400">Review Queue</p>
+                            <p className="text-xs font-bold text-slate-900 dark:text-slate-100 font-sans mt-0.5">
+                              {(() => {
+                                const hiredIds = Array.from(new Set([...(gigDetails?.hiredCandidateIds || []), gigDetails?.selectedCandidateId].filter(Boolean))).map(id => id.toString());
+                                return (gigDetails?.applicants || []).filter(a => !hiredIds.includes(a.candidateId?.toString()) && !a.isHired).length;
+                              })()} Pitches
+                            </p>
+                          </div>
                         </>
                       )}
                     </div>
                   </div>
 
+                  {/* ACTIVE CANDIDATE SUBHEADER: Candidate Info, Submission & Profile Info (Screenshot 1) */}
+                  {(() => {
+                    const activeCandId = selectedOtherCandidateId || gigDetails.selectedCandidateId || (gigDetails.hiredCandidateIds && gigDetails.hiredCandidateIds[0]) || (gigDetails.applicants && gigDetails.applicants[0]?.candidateId);
+                    const activeHiredCand = (gigDetails.hiredCandidates || []).find(c => c.id === activeCandId) || (gigDetails.applicants || []).find(a => a.candidateId === activeCandId)?.candidate;
+                    const hiredName = activeHiredCand?.name || 'Assigned Freelancer';
+                    const isCandidateMe = currentUserIds.includes(activeCandId?.toString());
+                    const showOtherToggle = isOwner && (gigDetails.hiredCandidateIds?.length > 1 || (gigDetails.applicants && gigDetails.applicants.length > 1));
+
+                    return (
+                      <div className="px-4 py-2.5 bg-white dark:bg-slate-900 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between gap-2 shrink-0">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-7 h-7 rounded-none bg-blue-100 dark:bg-blue-950/70 border border-blue-300 dark:border-blue-700 text-blue-900 dark:text-blue-100 flex items-center justify-center font-bold text-xs shrink-0">
+                            {isOwner ? hiredName.charAt(0) : (gigDetails.company?.name || gigDetails.ownerName || 'C').charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                                {isOwner ? hiredName : (gigDetails.company?.name || gigDetails.ownerName || 'Recruiter Client')}
+                              </span>
+                              {/* {isCandidateMe && (
+                                <span className="text-[9px] bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700 px-1 rounded-none font-bold">
+                                  You
+                                </span>
+                              )} */}
+                              {/* <span className="text-[9px] bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 px-1 rounded-none font-bold">
+                                Hired
+                              </span> */}
+                            </div>
+                            <p className="text-[10px] text-slate-500 truncate">Direct communication channel</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {showOtherToggle && (
+                            <button
+                              type="button"
+                              onClick={() => setShowOtherCandidatesModal(true)}
+                              className="px-2.5 py-1 text-[10px] font-headline font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none text-slate-700 dark:text-slate-300 hover:bg-slate-50 flex items-center gap-1 cursor-pointer shadow-2xs"
+                            >
+                              <Users className="w-3 h-3 text-primary" />
+                              <span>Rest of Candidates</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setShowSubmissionModal(true)}
+                            className="px-2.5 py-1 text-[10px] font-headline font-bold bg-blue-50 dark:bg-blue-950/60 border border-blue-300 dark:border-blue-700 rounded-none text-blue-700 dark:text-blue-300 hover:bg-blue-100 flex items-center gap-1 cursor-pointer shadow-2xs"
+                          >
+                            <Paperclip className="w-3 h-3 text-primary" />
+                            <span>Submission</span>
+                          </button>
+                          {isOwner && activeCandId && (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenCandidateProfile(activeCandId, activeHiredCand)}
+                              className="px-2.5 py-1 text-[10px] font-headline font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none text-slate-700 dark:text-slate-300 hover:bg-slate-50 flex items-center gap-1 cursor-pointer shadow-2xs"
+                            >
+                              <User className="w-3 h-3 text-primary" />
+                              <span>Profile Info</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   {/* Chat Messages Feed Area */}
-                  <div className="flex-1 p-4 space-y-3 overflow-y-auto custom-scrollbar bg-surface-container-high/10">
+                  <div className="flex-1 p-4 space-y-3 overflow-y-auto custom-scrollbar bg-slate-50/50 dark:bg-slate-950/50">
                     {(() => {
                       const activeTargetId = selectedOtherCandidateId || gigDetails.selectedCandidateId || gigDetails.hiredCandidateIds?.[0];
                       const currentUserIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
@@ -2084,8 +2020,8 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       if (filteredMessages.length === 0) {
                         return (
                           <div className="text-center py-16">
-                            <MessageSquare className="w-8 h-8 text-on-surface-variant/40 mx-auto mb-2" />
-                            <p className="text-xs font-sans font-normal text-on-surface-variant">No direct messages yet. Send a message to start communicating.</p>
+                            <MessageSquare className="w-8 h-8 text-slate-400 dark:text-slate-500 mx-auto mb-2" />
+                            <p className="text-xs font-sans font-normal text-slate-500 dark:text-slate-400">No direct messages yet. Send a message to start communicating.</p>
                           </div>
                         );
                       }
@@ -2096,21 +2032,25 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                         return (
                           <div key={msg.id} className={`flex flex-col ${isSystem ? 'items-center w-full' : isMe ? 'items-end' : 'items-start'}`}>
                             {isSystem ? (
-                              <div className="bg-primary/5 border border-primary/20 text-on-surface-variant text-[9px] font-sans font-normal px-2.5 py-1 rounded-lg text-center max-w-md shadow-sm">
+                              <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 text-slate-700 dark:text-slate-300 text-[10px] font-sans px-3 py-1 rounded-full text-center max-w-md shadow-2xs">
                                 {msg.text}
                               </div>
                             ) : (
                               <div className="max-w-[80%] space-y-1">
-                                <div className={`p-2.5 rounded-xl text-xs leading-relaxed ${isMe ? 'bg-primary text-white rounded-tr-none' : 'bg-surface-container-low border border-outline-variant rounded-tl-none text-on-surface'}`}>
+                                <div className={`p-3 text-xs leading-relaxed shadow-xs ${
+                                  isMe
+                                    ? 'bg-blue-600 text-white rounded-2xl rounded-tr-xs'
+                                    : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-2xl rounded-tl-xs'
+                                }`}>
                                   {msg.text}
                                   {msg.fileUrl && (
-                                    <div className={`mt-2 p-1.5 rounded-lg text-[9px] font-sans font-normal flex items-center gap-1.5 ${isMe ? 'bg-black/20 text-white' : 'bg-surface-container-high text-on-surface-variant'}`}>
+                                    <div className={`mt-2 p-1.5 rounded-xl text-[10px] font-sans flex items-center gap-1.5 ${isMe ? 'bg-black/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700'}`}>
                                       <Paperclip className="w-3 h-3" />
-                                      <a href={msg.fileUrl} target="_blank" rel="noreferrer" className="underline font-bold truncate max-w-[120px]">Attachment File</a>
+                                      <a href={msg.fileUrl} target="_blank" rel="noreferrer" className="underline font-bold truncate max-w-[140px]">Attachment File</a>
                                     </div>
                                   )}
                                 </div>
-                                <p className={`text-[8px] font-sans font-normal text-on-surface-variant px-1 flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                <p className={`text-[9px] font-sans font-normal text-slate-500 dark:text-slate-400 px-1 flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
                                   {msg.sending ? (
                                     <RefreshCw className="w-2.5 h-2.5 animate-spin text-primary" />
                                   ) : (
@@ -2133,8 +2073,8 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
                     if (!isOwner && !isHiredCandidate) {
                       return (
-                        <div className="p-3.5 border-t border-outline-variant bg-surface-container-low text-center shrink-0">
-                          <p className="text-xs font-sans font-normal text-on-surface-variant flex items-center justify-center gap-1.5 font-bold">
+                        <div className="p-3.5 border-t border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-center shrink-0">
+                          <p className="text-xs font-sans font-bold text-slate-600 dark:text-slate-400 flex items-center justify-center gap-1.5">
                             <Lock className="w-3.5 h-3.5 text-amber-500" />
                             <span>Application Pending Review &bull; Direct messaging unlocks when hired</span>
                           </p>
@@ -2143,27 +2083,27 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                     }
 
                     return (
-                      <form onSubmit={handleSendMessage} className="p-3 border-t border-outline-variant bg-surface-container-low space-y-2 shrink-0">
+                      <form onSubmit={handleSendMessage} className="p-3 border-t border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 space-y-2 shrink-0">
                         <div className="flex gap-2">
                           <input
                             type="text"
                             value={chatText}
                             onChange={(e) => setChatText(e.target.value)}
-                            placeholder="Type message..."
-                            className="flex-1 bg-surface-container-high border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none placeholder:text-on-surface-variant/50"
+                            placeholder="Write a message..."
+                            className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none placeholder:text-slate-400 font-sans"
                           />
-                          <button type="submit" disabled={sendingMessage} className="px-3.5 py-2 bg-primary text-white rounded-xl shadow-md cursor-pointer font-bold text-xs">
+                          <button type="submit" disabled={sendingMessage} className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-none shadow-sm cursor-pointer font-bold text-xs active:scale-95 transition-all">
                             <Send className="w-3.5 h-3.5" />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
-                          <label className="cursor-pointer text-[9px] font-headline font-medium text-on-surface-variant hover:text-on-surface border border-outline-variant rounded px-2 py-1 bg-surface-container flex items-center gap-1 shadow-sm">
+                          <label className="cursor-pointer text-[10px] font-headline font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-none px-2 py-1 bg-white dark:bg-slate-900 flex items-center gap-1 shadow-2xs">
                             <Paperclip className="w-3 h-3 text-primary" />
                             <span>{chatAttachment ? chatAttachment.name : 'Attach File'}</span>
                             <input type="file" onChange={(e) => setChatAttachment(e.target.files[0])} className="hidden" />
                           </label>
                           {chatAttachment && (
-                            <button type="button" onClick={() => setChatAttachment(null)} className="text-[9px] text-error font-headline font-medium">Remove</button>
+                            <button type="button" onClick={() => setChatAttachment(null)} className="text-[10px] text-error font-headline font-bold">Remove</button>
                           )}
                         </div>
                       </form>
@@ -2171,22 +2111,23 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   })()}
                 </div>
               ) : (
-                <div className="flex-1 flex items-center justify-center text-center p-8">
-                  <p className="text-xs font-sans font-normal text-on-surface-variant">Select a gig from the left panel to open workspace</p>
+                <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+                  <Briefcase className="w-10 h-10 text-slate-400 dark:text-slate-500 mb-2" />
+                  <p className="text-xs font-sans font-normal text-slate-500 dark:text-slate-400">Select a gig from the left panel to open workspace</p>
                 </div>
               )}
             </div>
 
-            {/* COLUMN 3: RIGHT SIDEBAR (lg:col-span-3) */}
-            <div className="lg:col-span-3 flex flex-col gap-3 h-full overflow-hidden">
+            {/* COLUMN 3: RIGHT PANEL - CANDIDATES (Screenshot 1 & 2) */}
+            <div className="w-full lg:w-64 xl:w-72 shrink-0 flex flex-col min-h-0 bg-surface divide-y divide-slate-300 dark:divide-slate-700">
               {user?.role === 'STUDENT' || !isOwner ? (
-                /* CANDIDATE COLUMN 3: LIST OF GIGS APPLIED TO BUT NOT YET READ/HIRED BY RECRUITER */
-                <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
-                  <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
-                    <h4 className="text-[10px] font-headline font-medium uppercase tracking-widest text-primary font-bold">
-                      Applied Gigs (Pending Review)
+                /* CANDIDATE VIEW: APPLIED GIGS PENDING REVIEW */
+                <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                  <div className="p-3.5 border-b border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 flex justify-between items-center shrink-0">
+                    <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100">
+                      Applied Gigs (Pending)
                     </h4>
-                    <span className="text-[9px] font-headline font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                    <span className="text-[10px] font-headline font-bold px-2 py-0.5 rounded-none bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-100 border border-blue-300 dark:border-blue-700">
                       {(() => {
                         const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
                         const pendingGigs = myGigs.filter(g => {
@@ -2200,7 +2141,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                     </span>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto space-y-2.5 custom-scrollbar pr-1">
+                  <div className="flex-1 overflow-y-auto divide-y divide-slate-300 dark:divide-slate-700 custom-scrollbar">
                     {(() => {
                       const candidateIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
                       const pendingGigs = myGigs.filter(g => {
@@ -2212,8 +2153,8 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
                       if (pendingGigs.length === 0) {
                         return (
-                          <div className="text-center py-8">
-                            <p className="text-xs font-sans font-normal text-on-surface-variant">No pending applications.</p>
+                          <div className="text-center py-8 px-4">
+                            <p className="text-xs font-sans font-normal text-slate-500 dark:text-slate-400">No pending applications.</p>
                           </div>
                         );
                       }
@@ -2224,19 +2165,19 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           <div
                             key={gig.id}
                             onClick={() => { setSelectedGigId(gig.id); fetchGigDetails(gig.id); }}
-                            className={`p-3 rounded-xl border space-y-1.5 transition-all cursor-pointer ${
+                            className={`p-3 space-y-1.5 transition-all cursor-pointer ${
                               isSelected
-                                ? 'bg-surface-container-high border-primary shadow-xs'
-                                : 'bg-surface-container-low border-outline-variant hover:border-outline-variant/60'
+                                ? 'bg-blue-50 dark:bg-blue-950/40 border-l-4 border-l-blue-600 shadow-2xs'
+                                : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850'
                             }`}
                           >
                             <div className="flex justify-between items-start gap-2">
-                              <h5 className="text-xs font-bold text-on-surface line-clamp-1">{gig.title}</h5>
-                              <span className="text-[8px] font-headline font-medium uppercase px-1.5 py-0.5 rounded font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
+                              <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100 line-clamp-1">{gig.title}</h5>
+                              <span className="text-[9px] font-headline font-bold px-1.5 py-0.5 rounded-none bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 shrink-0">
                                 Pending Review
                               </span>
                             </div>
-                            <p className="text-[10px] font-sans font-normal text-on-surface-variant">Budget: <strong className="text-emerald-500">₹{gig.budget}</strong></p>
+                            <p className="text-[10px] font-sans font-normal text-slate-600 dark:text-slate-400">Budget: <strong className="text-emerald-700 dark:text-emerald-300 font-bold">{getCurrencySymbol(gig.currency)}{gig.budget}</strong></p>
                           </div>
                         );
                       });
@@ -2244,37 +2185,37 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   </div>
                 </div>
               ) : (
-                /* RECRUITER COLUMN 3: ACCEPTED CANDIDATES & UNREVIEWED PITCHES */
+                /* RECRUITER VIEW: ASSIGNED TALENT & UNREVIEWED PITCHES (Screenshot 1 & 2) */
                 <>
-                  {/* TOP BOX: ACCEPTED CANDIDATES */}
-                  <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
-                    <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
-                      <h4 className="text-[10px] font-headline font-medium uppercase tracking-widest text-primary font-bold">
-                        Accepted Candidates
+                  {/* TOP SECTION: ASSIGNED TALENT (HIRED CANDIDATES) */}
+                  <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                    <div className="p-3.5 border-b border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 flex justify-between items-center shrink-0">
+                      <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100">
+                        Assigned Talent
                       </h4>
                       {gigDetails?.hiredCandidates?.length > 0 && (
-                        <span className="text-[8px] font-headline font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase">
+                        <span className="text-[10px] font-headline font-bold px-2 py-0.5 rounded-none bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-100 border border-emerald-300 dark:border-emerald-700">
                           {gigDetails.hiredCandidates.length} Hired
                         </span>
                       )}
                     </div>
 
-                    <div className="flex-1 overflow-y-auto space-y-2.5 custom-scrollbar pr-1">
+                    <div className="flex-1 overflow-y-auto divide-y divide-slate-300 dark:divide-slate-700 custom-scrollbar">
                       {gigDetails?.hiredCandidates && gigDetails.hiredCandidates.length > 0 ? (
                         gigDetails.hiredCandidates.map((hc) => {
                           const isSelected = (selectedOtherCandidateId || gigDetails.selectedCandidateId) === hc.candidateId;
                           return (
-                            <div key={hc.candidateId} className="space-y-2">
+                            <div key={hc.candidateId} className="flex flex-col">
                               <div
                                 onClick={() => setSelectedOtherCandidateId(hc.candidateId)}
-                                className={`p-2.5 rounded-xl border transition-all cursor-pointer shadow-xs ${
+                                className={`p-3 transition-all cursor-pointer ${
                                   isSelected
-                                    ? 'bg-emerald-500/10 border-emerald-500/50 shadow-sm'
-                                    : 'bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10'
+                                    ? 'bg-emerald-50 dark:bg-emerald-950/40 border-l-4 border-l-emerald-600 shadow-2xs'
+                                    : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850'
                                 }`}
                               >
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 font-headline font-medium flex items-center justify-center text-xs overflow-hidden shrink-0">
+                                  <div className="w-8 h-8 rounded-none bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-200 font-headline font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
                                     {hc.candidate?.avatar || hc.candidate?.profilePic ? (
                                       <img src={hc.candidate.avatar || hc.candidate.profilePic} alt={hc.candidate.name} className="w-full h-full object-cover" />
                                     ) : (
@@ -2282,16 +2223,19 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                     )}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <h5 className="text-xs font-bold text-on-surface truncate">{hc.candidate?.name || 'Hired Freelancer'}</h5>
-                                    <p className="text-[9px] font-sans font-normal text-emerald-500 font-bold">Active Gig Freelancer</p>
+                                    <h5 className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{hc.candidate?.name || 'Hired Freelancer'}</h5>
+                                    <p className="text-[9px] font-sans font-bold text-emerald-700 dark:text-emerald-300">Active Gig Talent</p>
                                   </div>
+                                  <span className="text-[10px] font-headline font-bold px-2 py-0.5 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 shrink-0">
+                                    {getCurrencySymbol(gigDetails.currency)}{gigDetails.budget}
+                                  </span>
                                 </div>
                               </div>
 
                               {/* Feedback Room Panel when gig is COMPLETED */}
                               {gigDetails.status === 'COMPLETED' && isSelected && (
-                                <div className="p-3 bg-success/5 border border-success/20 rounded-xl space-y-2 shadow-xs">
-                                  <h5 className="text-[9px] font-headline font-medium uppercase tracking-wider text-success font-bold">Feedback Room</h5>
+                                <div className="p-3 bg-emerald-50/60 dark:bg-emerald-950/30 border-t border-emerald-300 dark:border-emerald-700 space-y-2">
+                                  <h5 className="text-[10px] font-headline font-bold tracking-wider text-emerald-800 dark:text-emerald-200">Feedback Room</h5>
                                   {(() => {
                                     const currentUserIds = [user?.id, user?.userId, user?._id, profile?.id, profile?.userId].filter(Boolean).map(id => id.toString());
                                     const myReview = gigDetails.reviews?.find(r => r.reviewerId && currentUserIds.includes(r.reviewerId.toString()));
@@ -2300,10 +2244,10 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                         <div className="text-xs space-y-1">
                                           <div className="flex items-center gap-0.5">
                                             {[1, 2, 3, 4, 5].map(star => (
-                                              <Star key={star} className={`w-3 h-3 ${star <= myReview.rating ? 'text-warning fill-warning' : 'text-outline-variant'}`} />
+                                              <Star key={star} className={`w-3 h-3 ${star <= myReview.rating ? 'text-warning fill-warning' : 'text-slate-300 dark:text-slate-700'}`} />
                                             ))}
                                           </div>
-                                          <p className="text-on-surface italic text-[10px]">"{myReview.review}"</p>
+                                          <p className="text-slate-800 dark:text-slate-200 italic text-[10px]">"{myReview.review}"</p>
                                         </div>
                                       );
                                     }
@@ -2312,12 +2256,12 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                         <div className="flex gap-1">
                                           {[1, 2, 3, 4, 5].map(star => (
                                             <button key={star} type="button" onClick={() => setRating(star)} className="hover:scale-110 transition-transform cursor-pointer">
-                                              <Star className={`w-4 h-4 ${star <= rating ? 'text-warning fill-warning' : 'text-outline-variant'}`} />
+                                              <Star className={`w-4 h-4 ${star <= rating ? 'text-warning fill-warning' : 'text-slate-300 dark:text-slate-700'}`} />
                                             </button>
                                           ))}
                                         </div>
                                         <TextArea value={review} onChange={(e) => setReview(e.target.value)} placeholder="Write feedback review..." rows={2} required />
-                                        <Button type="submit" disabled={submittingReview} className="w-full text-[9px] py-1.5">Submit Feedback</Button>
+                                        <Button type="submit" disabled={submittingReview} className="w-full text-[10px] py-1.5 rounded-none font-bold">Submit Feedback</Button>
                                       </form>
                                     );
                                   })()}
@@ -2327,33 +2271,35 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           );
                         })
                       ) : (
-                        <div className="text-center py-8">
-                          <p className="text-xs font-sans font-normal text-on-surface-variant">No candidate accepted yet.</p>
+                        <div className="text-center py-6 px-4">
+                          <Users className="w-6 h-6 text-slate-400 dark:text-slate-500 mx-auto mb-1.5" />
+                          <p className="text-xs font-sans font-normal text-slate-500 dark:text-slate-400">No candidates hired yet.</p>
+                          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Review pending pitches below to assign talent.</p>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* BOTTOM BOX: UNREVIEWED PITCHES */}
+                  {/* BOTTOM SECTION: AWAITING REVIEW (UNREVIEWED PITCHES) */}
                   {(() => {
-                    const hiredIds = gigDetails?.hiredCandidateIds || (gigDetails?.selectedCandidateId ? [gigDetails.selectedCandidateId] : []);
-                    const unreviewedApplicants = (gigDetails?.applicants || []).filter(a => !hiredIds.includes(a.candidateId) && !a.isHired);
+                    const hiredIds = Array.from(new Set([...(gigDetails?.hiredCandidateIds || []), gigDetails?.selectedCandidateId].filter(Boolean))).map(id => id.toString());
+                    const unreviewedApplicants = (gigDetails?.applicants || []).filter(a => !hiredIds.includes(a.candidateId?.toString()) && !a.isHired);
 
                     return (
-                      <div className="flex-1 min-h-0 bg-surface-container border border-outline-variant rounded-2xl p-3.5 flex flex-col overflow-hidden shadow-xs">
-                        <div className="pb-2 border-b border-outline-variant/50 flex justify-between items-center shrink-0 mb-2">
-                          <h4 className="text-[10px] font-headline font-medium uppercase tracking-widest text-primary font-bold">
-                            Unreviewed Pitches
+                      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                        <div className="p-3.5 border-b border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 flex justify-between items-center shrink-0">
+                          <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100">
+                            Awaiting Review
                           </h4>
-                          <span className="text-[9px] font-headline font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                            {unreviewedApplicants.length}
+                          <span className="text-[10px] font-headline font-bold px-2 py-0.5 rounded-none bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-100 border border-blue-300 dark:border-blue-700">
+                            {unreviewedApplicants.length} {unreviewedApplicants.length === 1 ? 'pitch' : 'pitches'}
                           </span>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto space-y-2.5 custom-scrollbar pr-1">
+                        <div className="flex-1 overflow-y-auto divide-y divide-slate-300 dark:divide-slate-700 custom-scrollbar">
                           {unreviewedApplicants.length === 0 ? (
-                            <div className="text-center py-8">
-                              <p className="text-xs font-sans font-normal text-on-surface-variant">No pending pitches to review.</p>
+                            <div className="text-center py-6 px-4">
+                              <p className="text-xs font-sans font-normal text-slate-500 dark:text-slate-400">No pending pitches to review.</p>
                             </div>
                           ) : (
                             unreviewedApplicants.map(app => (
@@ -2363,24 +2309,24 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                   setSelectedOtherCandidateId(app.candidateId);
                                   setSelectedUnreviewedPitchApp(app);
                                 }}
-                                className={`p-3 rounded-xl border space-y-2 transition-all cursor-pointer ${
+                                className={`p-3 space-y-2 transition-all cursor-pointer ${
                                   selectedOtherCandidateId === app.candidateId
-                                    ? 'bg-surface-container-high border-primary shadow-xs'
-                                    : 'bg-surface-container-low border-outline-variant hover:border-outline-variant/60'
+                                    ? 'bg-blue-50 dark:bg-blue-950/40 border-l-4 border-l-blue-600 shadow-2xs'
+                                    : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850'
                                 }`}
                               >
                                 <div className="flex justify-between items-center gap-2">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/30 text-primary font-headline font-medium flex items-center justify-center text-xs overflow-hidden shrink-0">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <div className="w-7 h-7 rounded-none bg-blue-100 dark:bg-blue-950/70 border border-blue-300 dark:border-blue-700 text-blue-900 dark:text-blue-100 font-headline font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
                                       {app.candidate?.avatar || app.candidate?.profilePic ? (
                                         <img src={app.candidate.avatar || app.candidate.profilePic} alt={app.candidate.name} className="w-full h-full object-cover" />
                                       ) : (
                                         <span>{app.candidate?.name?.charAt(0) || 'C'}</span>
                                       )}
                                     </div>
-                                    <div>
-                                      <h5 className="text-[11px] font-bold text-on-surface line-clamp-1">{app.candidate?.name || 'Candidate'}</h5>
-                                      <p className="text-[8px] font-sans font-normal text-on-surface-variant">@{app.candidate?.username || 'candidate'}</p>
+                                    <div className="min-w-0">
+                                      <h5 className="text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate">{app.candidate?.name || 'Candidate'}</h5>
+                                      <p className="text-[8px] font-sans font-normal text-slate-500 dark:text-slate-400 truncate">@{app.candidate?.username || 'candidate'}</p>
                                     </div>
                                   </div>
                                   {isOwner && (
@@ -2388,26 +2334,20 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                       <button
                                         type="button"
                                         onClick={() => handleRejectCandidate(app.candidateId)}
-                                        className="px-2 py-0.5 bg-error/10 text-error border border-error/20 text-[8px] font-headline font-medium uppercase rounded hover:bg-error/20 cursor-pointer"
+                                        className="px-2 py-0.5 bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-700 text-[9px] font-headline font-bold rounded-none hover:bg-rose-600 hover:text-white cursor-pointer transition-colors"
                                       >
                                         Reject
                                       </button>
                                       <button
                                         type="button"
                                         onClick={() => handleSelectCandidate(app.candidateId)}
-                                        className="px-2 py-0.5 bg-primary text-white text-[8px] font-headline font-medium uppercase rounded hover:opacity-90 cursor-pointer"
+                                        className="px-2 py-0.5 bg-blue-600 text-white text-[9px] font-headline font-bold rounded-none hover:bg-blue-700 cursor-pointer shadow-2xs transition-colors"
                                       >
                                         Hire
                                       </button>
                                     </div>
                                   )}
                                 </div>
-
-                                {/* {app.message && (
-                                  <p className="text-[10px] text-on-surface-variant line-clamp-2 italic bg-surface-container-high/40 p-1.5 rounded-lg border border-outline-variant/30">
-                                    "{app.message}"
-                                  </p>
-                                )} */}
 
                                 {app.attachments?.length > 0 && (
                                   <div className="flex flex-wrap gap-1 pt-1">
@@ -2418,7 +2358,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                         target="_blank"
                                         rel="noreferrer"
                                         onClick={e => e.stopPropagation()}
-                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-outline-variant bg-surface-container text-[8px] font-sans font-normal text-on-surface-variant hover:text-primary"
+                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[9px] font-sans font-normal text-slate-700 dark:text-slate-300 hover:text-blue-600"
                                       >
                                         <Paperclip className="w-2.5 h-2.5 text-primary" />
                                         <span>Attachment #{idx + 1}</span>
@@ -2436,19 +2376,31 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                 </>
               )}
             </div>
-
           </div>
         )}
       </AnimatedContent>
 
       {/* Pitch / Application modal */}
       {showApplyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent animate-fade-in pointer-events-auto">
-          <div className="w-full max-w-md bg-surface border border-outline-variant rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.55),0_10px_30px_rgba(0,0,0,0.3)] p-6 space-y-4 animate-scale-up">
-            <h3 className="text-sm font-headline font-medium text-on-surface">Apply to: {targetApplyGig?.title}</h3>
+        <div id="pitch-apply-modal-dialog" className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-xs animate-fade-in pointer-events-auto">
+          <div className="w-full max-w-lg bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-none shadow-2xl p-6 space-y-4 animate-scale-up">
+            <div className="flex items-center justify-between border-b border-slate-300 dark:border-slate-700 pb-3">
+              <div>
+                <h3 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">Apply to: {targetApplyGig?.title}</h3>
+                <p className="text-[11px] font-sans text-slate-600 dark:text-slate-400">Submit your pitch proposal and showcase work samples.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowApplyModal(false)}
+                className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-colors cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
             <div className="space-y-2">
-              <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant font-bold">Pitch Message / Cover Letter *</label>
+              <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100">Pitch Message / Cover Letter *</label>
               <TextArea
                 value={applyMessage}
                 onChange={(e) => setApplyMessage(e.target.value)}
@@ -2459,9 +2411,9 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant font-bold flex justify-between items-center">
+              <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 flex justify-between items-center">
                 <span>Attach Work Sample Image (Optional)</span>
-                <span className="text-[9px] text-on-surface-variant/70 font-normal">Max 2MB</span>
+                <span className="text-[9px] text-slate-500 dark:text-slate-400 font-normal">Max 2MB</span>
               </label>
               <input
                 type="file"
@@ -2486,26 +2438,26 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                     setApplyFile(null);
                   }
                 }}
-                className="w-full text-xs text-on-surface bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 cursor-pointer file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-headline font-medium file:bg-primary/10 file:text-primary file:font-bold hover:file:bg-primary/20"
+                className="w-full text-xs text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 cursor-pointer file:mr-3 file:py-1 file:px-2.5 file:rounded-none file:border-0 file:text-[10px] file:font-headline file:font-bold file:bg-blue-100 file:text-blue-800 hover:file:bg-blue-200"
               />
               {applyFile && (
-                <p className="text-[10px] font-sans font-normal text-emerald-500 flex items-center gap-1 font-semibold">
+                <p className="text-[10px] font-sans text-emerald-700 dark:text-emerald-300 flex items-center gap-1 font-bold">
                   ✓ Attached: {applyFile.name} ({(applyFile.size / 1024).toFixed(0)} KB)
                 </p>
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-300 dark:border-slate-700">
               <button
                 onClick={() => setShowApplyModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-headline font-medium bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface transition-all cursor-pointer"
+                className="px-4 py-2 rounded-none text-xs font-headline font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-all cursor-pointer shadow-2xs"
               >
                 Cancel
               </button>
               <button
                 onClick={handleApplyToGig}
                 disabled={applying}
-                className="px-4 py-2 bg-primary text-white text-xs font-headline font-medium uppercase rounded-xl hover:opacity-90 transition-all shadow-md active:scale-95 cursor-pointer"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-headline font-bold rounded-none transition-all shadow-sm active:scale-95 cursor-pointer"
               >
                 {applying ? 'Submitting...' : 'Send Pitch'}
               </button>
@@ -2514,238 +2466,360 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
         </div>
       )}
 
-      {/* Edit Gig Modal */}
+      {/* Edit Gig Modal (Horizontal 2-Column Responsive Dialog) */}
       {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent animate-fade-in pointer-events-auto">
-          <form onSubmit={handleUpdateGigSubmit} className="w-full max-w-md bg-surface-container border border-outline-variant rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.55),0_10px_30px_rgba(0,0,0,0.3)] p-6 space-y-4 animate-scale-up">
-            <h3 className="text-sm font-headline font-medium text-on-surface">Edit Gig Details</h3>
-
-            <div className="space-y-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs animate-fade-in pointer-events-auto">
+          <form
+            onSubmit={handleUpdateGigSubmit}
+            className="w-full max-w-4xl max-h-[88vh] flex flex-col bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-none shadow-2xl overflow-hidden animate-scale-up"
+          >
+            {/* Sticky Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 shrink-0">
               <div>
-                <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1">Title *</label>
-                <input
-                  type="text"
-                  required
-                  className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none"
-                  value={editTitle}
-                  onChange={e => setEditTitle(e.target.value)}
-                />
+                <h3 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">Edit Gig Details</h3>
+                <p className="text-[11px] font-sans text-slate-600 dark:text-slate-400">Update scope, technical requirements, and compensation parameters.</p>
               </div>
-
-              <div>
-                <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1">Description *</label>
-                <TextArea
-                  required
-                  rows={4}
-                  value={editDescription}
-                  onChange={e => setEditDescription(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1 font-bold">Required Stacks & Rating Thresholds *</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={editSkillSearchTerm}
-                    onChange={(e) => {
-                      setEditSkillSearchTerm(e.target.value);
-                      setIsEditSkillDropdownOpen(true);
-                    }}
-                    onFocus={() => setIsEditSkillDropdownOpen(true)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const matches = ALL_SKILLS.filter(
-                          s => s.skill.toLowerCase().includes(editSkillSearchTerm.toLowerCase()) &&
-                            !editReqs.some(exist => exist.skillName.toLowerCase() === s.skill.toLowerCase())
-                        );
-                        if (matches.length > 0) {
-                          const match = matches[0];
-                          const isTech = match.type === 'technical';
-                          setEditReqs(prev => [...prev, { skillName: match.skill, minRating: isTech ? 4 : 0 }]);
-                          setEditSkillSearchTerm('');
-                          setIsEditSkillDropdownOpen(false);
-                        } else if (editSkillSearchTerm.trim()) {
-                          const custom = editSkillSearchTerm.trim();
-                          if (!editReqs.some(exist => exist.skillName.toLowerCase() === custom.toLowerCase())) {
-                            setEditReqs(prev => [...prev, { skillName: custom, minRating: 4 }]);
-                          }
-                          setEditSkillSearchTerm('');
-                          setIsEditSkillDropdownOpen(false);
-                        }
-                      }
-                    }}
-                    placeholder="Search and select skills..."
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none"
-                  />
-
-                  {isEditSkillDropdownOpen && editSkillSearchTerm.trim() !== '' && (
-                    <>
-                      <div className="fixed inset-0 z-10" onClick={() => setIsEditSkillDropdownOpen(false)}></div>
-                      <div className="absolute z-20 left-0 right-0 mt-1 bg-surface-container border border-outline-variant rounded-xl shadow-xl max-h-48 overflow-y-auto custom-scrollbar p-1">
-                        {ALL_SKILLS.filter(
-                          s => s.skill.toLowerCase().includes(editSkillSearchTerm.toLowerCase()) &&
-                            !editReqs.some(exist => exist.skillName.toLowerCase() === s.skill.toLowerCase())
-                        ).length === 0 ? (
-                          <div className="p-2.5 text-[11px] text-on-surface-variant font-sans font-normal text-center">
-                            No matching skills found. Press Enter to add "{editSkillSearchTerm.trim()}"
-                          </div>
-                        ) : (
-                          ALL_SKILLS.filter(
-                            s => s.skill.toLowerCase().includes(editSkillSearchTerm.toLowerCase()) &&
-                              !editReqs.some(exist => exist.skillName.toLowerCase() === s.skill.toLowerCase())
-                          ).slice(0, 8).map(s => (
-                            <button
-                              key={s.skill}
-                              type="button"
-                              onClick={() => {
-                                const isTech = s.type === 'technical';
-                                setEditReqs(prev => [...prev, { skillName: s.skill, minRating: isTech ? 4 : 0 }]);
-                                setEditSkillSearchTerm('');
-                                setIsEditSkillDropdownOpen(false);
-                              }}
-                              className="w-full text-left px-3 py-1.5 text-xs text-on-surface hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between group cursor-pointer rounded-lg font-sans"
-                            >
-                              <span>{s.skill}</span>
-                              <span className="text-[9px] font-sans font-normal capitalize px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/60 text-on-surface-variant">
-                                {s.type}
-                              </span>
-                            </button>
-                          ))
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* Edit Skill Requirements with Rating Sliders */}
-                {editReqs.length === 0 ? (
-                  <p className="text-[10px] text-on-surface-variant/70 font-sans font-normal mt-1">No skills selected yet.</p>
-                ) : (
-                  <div className="space-y-2.5 pt-2">
-                    {editReqs.map(r => {
-                      const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === r.skillName.toLowerCase());
-                      const isTech = skillObj ? skillObj.type === 'technical' : true;
-                      return (
-                        <div key={r.skillName} className="p-2.5 bg-surface-container-low border border-outline-variant/60 rounded-xl space-y-2">
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="font-bold text-on-surface font-headline">{r.skillName}</span>
-                            <div className="flex items-center gap-2">
-                              {isTech ? (
-                                <span className="text-primary font-headline font-medium text-[10px] bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
-                                  Lvl {r.minRating}/10
-                                </span>
-                              ) : (
-                                <span className="text-on-surface-variant font-headline font-medium text-[9px] uppercase bg-surface-container-high border border-outline-variant px-1.5 py-0.5 rounded">Required</span>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => setEditReqs(prev => prev.filter(item => item.skillName !== r.skillName))}
-                                className="text-error hover:underline text-[10px] font-sans font-normal cursor-pointer"
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          </div>
-                          {isTech && (
-                            <input
-                              type="range"
-                              min="1"
-                              max="10"
-                              value={r.minRating}
-                              onChange={e => {
-                                const val = parseInt(e.target.value, 10);
-                                setEditReqs(prev => prev.map(item => item.skillName === r.skillName ? { ...item, minRating: val } : item));
-                              }}
-                              className="w-full h-1.5 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary"
-                            />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1 font-bold">Category of Field *</label>
-                <MultiSearchableCategorySelect
-                  values={editCategories}
-                  onChange={(vals) => setEditCategories(vals)}
-                  placeholder="Search or select category/field(s)..."
-                  showTags={false}
-                />
-                {editCategories.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    {editCategories.map(cat => (
-                      <span
-                        key={cat}
-                        className="inline-flex items-center gap-1.5 text-xs font-sans px-2.5 py-1 rounded-xl bg-primary/10 text-primary border border-primary/20 font-semibold shadow-xs shrink-0"
-                      >
-                        <span>{cat}</span>
-                        <button
-                          type="button"
-                          onClick={() => setEditCategories(editCategories.filter(v => v !== cat))}
-                          className="hover:bg-primary/20 p-0.5 rounded-md transition-colors cursor-pointer"
-                        >
-                          <X className="w-3.5 h-3.5 text-primary" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1 font-bold">Budget (INR) *</label>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none font-sans font-normal"
-                    value={editBudget}
-                    onChange={e => setEditBudget(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1 font-bold">Delivery Time *</label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none font-sans font-normal"
-                    value={editDeliveryTime}
-                    onChange={e => setEditDeliveryTime(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant mb-1">Update Spec Attachment (Optional)</label>
-                <input
-                  type="file"
-                  className="w-full text-xs text-on-surface bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2"
-                  onChange={e => setEditAttachmentFile(e.target.files[0])}
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-headline font-medium bg-surface-container-high border border-outline-variant text-on-surface-variant hover:text-on-surface transition-all cursor-pointer"
+                className="p-1.5 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-colors cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Scrollable 2-Column Body */}
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {/* Left Column: Scope, Classification, Budget & Attachments */}
+                <div className="space-y-4">
+                  {/* Title */}
+                  <div>
+                    <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1">
+                      Title *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none font-sans"
+                      value={editTitle}
+                      onChange={e => setEditTitle(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Category of Field */}
+                  <div>
+                    <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1">
+                      Category of Field *
+                    </label>
+                    <MultiSearchableCategorySelect
+                      values={editCategories}
+                      onChange={(vals) => setEditCategories(vals)}
+                      placeholder="Search or select category/field(s)..."
+                      showTags={false}
+                    />
+                    {editCategories.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pt-2 max-h-24 overflow-y-auto custom-scrollbar">
+                        {editCategories.map(cat => (
+                          <span
+                            key={cat}
+                            className="inline-flex items-center gap-1.5 text-[11px] font-sans px-2.5 py-0.5 rounded-none bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700 font-bold shrink-0"
+                          >
+                            <span>{cat}</span>
+                            <button
+                              type="button"
+                              onClick={() => setEditCategories(editCategories.filter(v => v !== cat))}
+                              className="hover:bg-blue-200 dark:hover:bg-blue-900 p-0.5 rounded-none transition-colors cursor-pointer"
+                            >
+                              <X className="w-3 h-3 text-blue-800 dark:text-blue-200" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Currency, Budget, Delivery Time in 3 columns */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1">
+                        Currency *
+                      </label>
+                      <select
+                        value={editCurrency}
+                        onChange={(e) => setEditCurrency(e.target.value)}
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none font-sans cursor-pointer h-[35px]"
+                      >
+                        {SUPPORTED_CURRENCIES.map(c => (
+                          <option key={c.code} value={c.code} className="bg-surface text-slate-900 dark:text-slate-100">
+                            {c.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1">
+                        Budget ({editCurrency}) *
+                      </label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3 text-xs font-bold text-slate-700 dark:text-slate-300">
+                          {getCurrencySymbol(editCurrency)}
+                        </span>
+                        <input
+                          type="number"
+                          min="1"
+                          required
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none pl-8 pr-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none font-sans"
+                          value={editBudget}
+                          onChange={e => setEditBudget(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1">
+                        Delivery Time *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. 3 days"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none font-sans"
+                        value={editDeliveryTime}
+                        onChange={e => setEditDeliveryTime(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1">
+                      Description & Deliverables *
+                    </label>
+                    <TextArea
+                      required
+                      rows={5}
+                      value={editDescription}
+                      onChange={e => setEditDescription(e.target.value)}
+                      placeholder="Detailed brief, deliverables, and scope of work..."
+                    />
+                  </div>
+
+                  {/* Spec Attachment */}
+                  <div>
+                    <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1">
+                      Update Spec Attachment (Optional)
+                    </label>
+                    <input
+                      type="file"
+                      className="w-full text-xs text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 font-sans"
+                      onChange={e => setEditAttachmentFile(e.target.files[0])}
+                    />
+                  </div>
+                </div>
+
+                {/* Right Column: Required Stacks & Rating Sliders + Logo Upload */}
+                <div className="space-y-4">
+                  {/* Required Stacks & Rating Thresholds */}
+                  <div>
+                    <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1 flex items-center justify-between">
+                      <span>Required Stacks & Rating Thresholds *</span>
+                      <span className="text-[9px] font-sans text-slate-500 dark:text-slate-400 font-normal">
+                        {editReqs.length} {editReqs.length === 1 ? 'skill' : 'skills'} added
+                      </span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={editSkillSearchTerm}
+                        onChange={(e) => {
+                          setEditSkillSearchTerm(e.target.value);
+                          setIsEditSkillDropdownOpen(true);
+                        }}
+                        onFocus={() => setIsEditSkillDropdownOpen(true)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const matches = ALL_SKILLS.filter(
+                              s => s.skill.toLowerCase().includes(editSkillSearchTerm.toLowerCase()) &&
+                                !editReqs.some(exist => exist.skillName.toLowerCase() === s.skill.toLowerCase())
+                            );
+                            if (matches.length > 0) {
+                              const match = matches[0];
+                              const isTech = match.type === 'technical';
+                              setEditReqs(prev => [...prev, { skillName: match.skill, minRating: isTech ? 4 : 0 }]);
+                              setEditSkillSearchTerm('');
+                              setIsEditSkillDropdownOpen(false);
+                            } else if (editSkillSearchTerm.trim()) {
+                              const custom = editSkillSearchTerm.trim();
+                              if (!editReqs.some(exist => exist.skillName.toLowerCase() === custom.toLowerCase())) {
+                                setEditReqs(prev => [...prev, { skillName: custom, minRating: 4 }]);
+                              }
+                              setEditSkillSearchTerm('');
+                              setIsEditSkillDropdownOpen(false);
+                            }
+                          }
+                        }}
+                        placeholder="Search and select skills..."
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none font-sans"
+                      />
+
+                      {isEditSkillDropdownOpen && editSkillSearchTerm.trim() !== '' && (
+                        <>
+                          <div className="fixed inset-0 z-10" onClick={() => setIsEditSkillDropdownOpen(false)}></div>
+                          <div className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none shadow-xl max-h-48 overflow-y-auto custom-scrollbar p-1">
+                            {ALL_SKILLS.filter(
+                              s => s.skill.toLowerCase().includes(editSkillSearchTerm.toLowerCase()) &&
+                                !editReqs.some(exist => exist.skillName.toLowerCase() === s.skill.toLowerCase())
+                            ).length === 0 ? (
+                              <div className="p-2.5 text-[11px] text-slate-500 font-sans font-normal text-center">
+                                No matching skills found. Press Enter to add "{editSkillSearchTerm.trim()}"
+                              </div>
+                            ) : (
+                              ALL_SKILLS.filter(
+                                s => s.skill.toLowerCase().includes(editSkillSearchTerm.toLowerCase()) &&
+                                  !editReqs.some(exist => exist.skillName.toLowerCase() === s.skill.toLowerCase())
+                              ).slice(0, 8).map(s => (
+                                <button
+                                  key={s.skill}
+                                  type="button"
+                                  onClick={() => {
+                                    const isTech = s.type === 'technical';
+                                    setEditReqs(prev => [...prev, { skillName: s.skill, minRating: isTech ? 4 : 0 }]);
+                                    setEditSkillSearchTerm('');
+                                    setIsEditSkillDropdownOpen(false);
+                                  }}
+                                  className="w-full text-left px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 transition-all flex items-center justify-between group cursor-pointer rounded-none font-sans"
+                                >
+                                  <span>{s.skill}</span>
+                                  <span className="text-[9px] font-sans font-normal capitalize px-1.5 py-0.5 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                                    {s.type}
+                                  </span>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Skills List with Scroll Constraints */}
+                    {editReqs.length === 0 ? (
+                      <div className="p-3 bg-slate-50 dark:bg-slate-900/50 border border-dashed border-slate-300 dark:border-slate-700 rounded-none text-center mt-2">
+                        <p className="text-[11px] text-slate-500 font-sans">No required skills selected yet.</p>
+                      </div>
+                    ) : (
+                      <div className="max-h-64 overflow-y-auto custom-scrollbar space-y-2 pt-2 pr-1">
+                        {editReqs.map(r => {
+                          const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === r.skillName.toLowerCase());
+                          const isTech = skillObj ? skillObj.type === 'technical' : true;
+                          return (
+                            <div key={r.skillName} className="p-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-none space-y-1.5">
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="font-bold text-slate-900 dark:text-slate-100 font-headline">{r.skillName}</span>
+                                <div className="flex items-center gap-2">
+                                  {isTech ? (
+                                    <span className="text-blue-700 dark:text-blue-300 font-headline font-bold text-[10px] bg-blue-100 dark:bg-blue-950/70 px-2 py-0.5 rounded-none border border-blue-300 dark:border-blue-700">
+                                      Lvl {r.minRating}/10
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-600 dark:text-slate-400 font-headline font-medium text-[9px] bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-1.5 py-0.5 rounded-none">Required</span>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditReqs(prev => prev.filter(item => item.skillName !== r.skillName))}
+                                    className="text-error hover:underline text-[10px] font-sans font-normal cursor-pointer"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              </div>
+                              {isTech && (
+                                <input
+                                  type="range"
+                                  min="1"
+                                  max="10"
+                                  value={r.minRating}
+                                  onChange={e => {
+                                    const val = parseInt(e.target.value, 10);
+                                    setEditReqs(prev => prev.map(item => item.skillName === r.skillName ? { ...item, minRating: val } : item));
+                                  }}
+                                  className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-none appearance-none cursor-pointer accent-primary"
+                                />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Edit Gig Logo */}
+                  <div>
+                    <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1 flex items-center justify-between">
+                      <span>Gig / Project Logo (Optional)</span>
+                      {(editGigLogo || editGigLogoFile) && (
+                        <button
+                          type="button"
+                          onClick={() => { setEditGigLogo(null); setEditGigLogoFile(null); setEditGigLogoPreview(null); }}
+                          className="text-[10px] text-error hover:underline cursor-pointer font-sans"
+                        >
+                          Remove Logo
+                        </button>
+                      )}
+                    </label>
+                    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-none">
+                      <div className="w-14 h-14 shrink-0 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none flex items-center justify-center overflow-hidden">
+                        {editGigLogoPreview ? (
+                          <img src={editGigLogoPreview} alt="Preview" className="w-full h-full object-cover" />
+                        ) : editGigLogo ? (
+                          <img src={editGigLogo} alt="Current" className="w-full h-full object-cover" />
+                        ) : (
+                          <Building className="w-6 h-6 text-slate-400 dark:text-slate-600" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-blue-600 text-xs font-headline font-bold text-slate-900 dark:text-slate-100 rounded-none transition-colors">
+                          <Sparkles className="w-3.5 h-3.5 text-primary" />
+                          <span>{editGigLogo || editGigLogoFile ? 'Change Logo' : 'Upload Logo'}</span>
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                            onChange={(e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                setEditGigLogoFile(file);
+                                setEditGigLogoPreview(URL.createObjectURL(file));
+                              }
+                            }}
+                            className="hidden"
+                          />
+                        </label>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-sans">Square PNG, JPG, or SVG up to 2MB</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sticky Footer */}
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 rounded-none text-xs font-headline font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-all cursor-pointer shadow-2xs"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={updatingGig}
-                className="px-4 py-2 bg-primary text-white text-xs font-headline font-medium uppercase rounded-xl hover:opacity-90 transition-all shadow-md active:scale-95 cursor-pointer"
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-headline font-bold rounded-none transition-all shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
               >
-                {updatingGig ? 'Saving...' : 'Save Changes'}
+                {updatingGig ? 'Saving Changes...' : 'Save Changes'}
               </button>
             </div>
           </form>
@@ -2754,22 +2828,22 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
       {/* Project Info Modal */}
       {showGigInfoModal && gigDetails && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-2xl max-h-[85vh] bg-surface border border-outline-variant rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-2xl max-h-[85vh] bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-none shadow-2xl flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="p-4 border-b border-outline-variant flex items-center justify-between bg-surface-container-low">
+            <div className="p-4 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-none bg-blue-100 dark:bg-blue-950/70 border border-blue-300 dark:border-blue-700 text-blue-900 dark:text-blue-100 flex items-center justify-center font-bold">
                   <Info className="w-4.5 h-4.5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-on-surface font-sans">{gigDetails.title}</h3>
-                  <p className="text-[10px] font-sans font-normal text-on-surface-variant">Full Project Brief & Specifications</p>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-sans">{gigDetails.title}</h3>
+                  <p className="text-[10px] font-sans font-normal text-slate-500 dark:text-slate-400">Full Project Brief & Specifications</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowGigInfoModal(false)}
-                className="p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-colors cursor-pointer"
+                className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2778,50 +2852,50 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             {/* Content */}
             <div className="p-5 overflow-y-auto space-y-5 custom-scrollbar font-sans text-xs">
               {/* Categories & Status */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-outline-variant/40">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-300 dark:border-slate-700">
                 <div className="flex flex-wrap gap-1.5">
                   {(gigDetails.categories || [gigDetails.category]).filter(Boolean).map(c => (
-                    <span key={c} className="px-2.5 py-0.5 rounded-lg bg-primary/10 text-primary border border-primary/20 text-[10px] font-headline font-medium">
+                    <span key={c} className="px-2.5 py-0.5 rounded-none bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700 text-[10px] font-headline font-bold">
                       {c}
                     </span>
                   ))}
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-[9px] font-headline font-medium uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                <span className="px-2.5 py-1 rounded-none text-[10px] font-headline font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700">
                   {gigDetails.status}
                 </span>
               </div>
 
               {/* Budget & Delivery */}
-              <div className="grid grid-cols-2 gap-3 p-3 bg-surface-container-low border border-outline-variant/60 rounded-xl">
+              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-none">
                 <div>
-                  <span className="text-[9px] font-headline font-medium uppercase text-on-surface-variant block font-bold">Budget Rate</span>
-                  <span className="text-sm font-bold text-emerald-500 font-sans font-normal">₹{gigDetails.budget}</span>
+                  <span className="text-[10px] font-headline font-bold text-slate-600 dark:text-slate-400 block">Budget Rate</span>
+                  <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300 font-sans">{getCurrencySymbol(gigDetails.currency)}{gigDetails.budget}</span>
                 </div>
                 <div>
-                  <span className="text-[9px] font-headline font-medium uppercase text-on-surface-variant block font-bold">Delivery Time</span>
-                  <span className="text-xs font-semibold text-on-surface">{gigDetails.deliveryTime}</span>
+                  <span className="text-[10px] font-headline font-bold text-slate-600 dark:text-slate-400 block">Delivery Time</span>
+                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{gigDetails.deliveryTime}</span>
                 </div>
               </div>
 
               {/* Description */}
               <div className="space-y-1.5">
-                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary font-bold">Detailed Requirements</h4>
-                <div className="p-3.5 bg-surface-container-high/30 rounded-xl text-on-surface border border-outline-variant/30 leading-relaxed whitespace-pre-wrap">
+                <h4 className="text-[10px] font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase">Detailed Requirements</h4>
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-900/40 rounded-none text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 leading-relaxed whitespace-pre-wrap">
                   {gigDetails.description}
                 </div>
               </div>
 
               {/* Required Stacks */}
               <div className="space-y-2">
-                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary font-bold">Required Skills & Ratings</h4>
+                <h4 className="text-[10px] font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase">Required Skills & Ratings</h4>
                 <div className="flex flex-wrap gap-2">
                   {((gigDetails.requirements && gigDetails.requirements.length > 0)
                     ? gigDetails.requirements
                     : (gigDetails.skills || []).map(s => ({ skillName: s, minRating: gigDetails.minRating || 1 }))
                   ).map(r => (
-                    <div key={r.skillName} className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container border border-outline-variant rounded-xl text-xs">
-                      <span className="font-bold text-on-surface">{r.skillName}</span>
-                      <span className="text-[9px] font-headline font-medium text-primary font-bold bg-primary/10 px-2 py-0.5 rounded">Lvl {r.minRating || 1}/10</span>
+                    <div key={r.skillName} className="inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none text-xs">
+                      <span className="font-bold text-slate-900 dark:text-slate-100">{r.skillName}</span>
+                      <span className="text-[9px] font-headline font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950/70 border border-blue-300 dark:border-blue-700 px-2 py-0.5 rounded-none">Lvl {r.minRating || 1}/10</span>
                     </div>
                   ))}
                 </div>
@@ -2829,18 +2903,18 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
               {/* Brief Attachments */}
               {gigDetails.attachments?.length > 0 && (
-                <div className="space-y-2 pt-2 border-t border-outline-variant/40">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary font-bold">Brief Attachments ({gigDetails.attachments.length})</h4>
+                <div className="space-y-2 pt-2 border-t border-slate-300 dark:border-slate-700">
+                  <h4 className="text-[10px] font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase">Brief Attachments ({gigDetails.attachments.length})</h4>
                   <div className="flex flex-wrap gap-2">
                     {gigDetails.attachments.map((url, idx) => {
                       const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(url) || url.includes('/avatar/') || url.includes('image');
                       const filename = url.split('/').pop() || `Attachment ${idx + 1}`;
                       return isImage ? (
-                        <a key={idx} href={url} target="_blank" rel="noreferrer" className="block w-20 h-20 rounded-xl border border-outline-variant overflow-hidden hover:opacity-90 transition-all">
+                        <a key={idx} href={url} target="_blank" rel="noreferrer" className="block w-20 h-20 rounded-none border border-slate-300 dark:border-slate-700 overflow-hidden hover:opacity-90 transition-all">
                           <img src={url} alt="Brief Attachment" className="w-full h-full object-cover" />
                         </a>
                       ) : (
-                        <a key={idx} href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-outline-variant bg-surface-container text-xs font-sans font-normal hover:text-primary">
+                        <a key={idx} href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-2 rounded-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans font-normal text-slate-700 dark:text-slate-300 hover:text-blue-600">
                           <Paperclip className="w-4 h-4 text-primary" />
                           <span className="max-w-[160px] truncate">{filename}</span>
                         </a>
@@ -2851,10 +2925,10 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               )}
             </div>
 
-            <div className="p-3 border-t border-outline-variant bg-surface-container-low flex justify-end">
+            <div className="p-3 border-t border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex justify-end">
               <button
                 onClick={() => setShowGigInfoModal(false)}
-                className="px-4 py-2 bg-surface-container-high border border-outline-variant hover:bg-surface-container text-on-surface text-xs font-headline font-medium rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-headline font-bold rounded-none cursor-pointer shadow-2xs"
               >
                 Close
               </button>
@@ -2866,21 +2940,21 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
       {/* View Rest of Candidates Modal */}
       {showOtherCandidatesModal && gigDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-3xl max-h-[88vh] bg-surface border border-outline-variant rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+          <div className="w-full max-w-3xl max-h-[88vh] bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-none shadow-2xl flex flex-col overflow-hidden">
             {/* Modal Header */}
-            <div className="p-4 border-b border-outline-variant flex items-center justify-between bg-surface-container-low">
+            <div className="p-4 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-none bg-blue-100 dark:bg-blue-950/70 border border-blue-300 dark:border-blue-700 text-blue-900 dark:text-blue-100 flex items-center justify-center font-bold">
                   <Users className="w-4.5 h-4.5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-on-surface font-sans">Rest of Candidates</h3>
-                  <p className="text-[10px] font-sans font-normal text-on-surface-variant">Review pitches & communicate directly with applicants</p>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-sans">Rest of Candidates</h3>
+                  <p className="text-[10px] font-sans font-normal text-slate-500 dark:text-slate-400">Review pitches & communicate directly with applicants</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowOtherCandidatesModal(false)}
-                className="p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-colors cursor-pointer"
+                className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2890,24 +2964,24 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             <div className="p-5 overflow-y-auto space-y-6 custom-scrollbar font-sans text-xs">
               {/* Section 1: Candidate Pitches */}
               <div className="space-y-3">
-                <h4 className="text-[11px] font-headline font-medium uppercase tracking-wider text-primary font-bold flex items-center gap-1.5">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5 uppercase">
                   <span>Candidate Pitches</span>
-                  <span className="text-[9px] px-2 py-0.5 bg-primary/10 rounded-full">{gigDetails.applicants?.length || 0} Total</span>
+                  <span className="text-[10px] px-2 py-0.5 bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-100 border border-blue-300 dark:border-blue-700 rounded-none font-bold">{gigDetails.applicants?.length || 0} Total</span>
                 </h4>
 
                 {gigDetails.applicants?.length === 0 ? (
-                  <div className="text-center py-6 bg-surface-container-low rounded-xl border border-outline-variant border-dashed">
-                    <p className="text-xs font-sans font-normal text-on-surface-variant">No other candidate pitches submitted yet</p>
+                  <div className="text-center py-6 bg-slate-50 dark:bg-slate-900/40 rounded-none border border-slate-300 dark:border-slate-700 border-dashed">
+                    <p className="text-xs font-sans font-normal text-slate-500 dark:text-slate-400">No other candidate pitches submitted yet</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {gigDetails.applicants?.map(app => {
                       const isHired = gigDetails.selectedCandidateId === app.candidateId;
                       return (
-                        <div key={app.id} className={`p-4 rounded-xl border transition-all space-y-3 shadow-xs ${isHired ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-surface-container-low border-outline-variant'}`}>
+                        <div key={app.id} className={`p-4 rounded-none border transition-all space-y-3 shadow-2xs ${isHired ? 'bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-600' : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700'}`}>
                           <div className="flex justify-between items-center gap-2">
                             <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 text-primary font-headline font-medium flex items-center justify-center text-xs overflow-hidden shrink-0">
+                              <div className="w-8 h-8 rounded-none bg-blue-100 dark:bg-blue-950/70 border border-blue-300 dark:border-blue-700 text-blue-900 dark:text-blue-100 font-headline font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
                                 {app.candidate?.avatar || app.candidate?.profilePic ? (
                                   <img src={app.candidate.avatar || app.candidate.profilePic} alt={app.candidate.name} className="w-full h-full object-cover" />
                                 ) : (
@@ -2916,10 +2990,10 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                               </div>
                               <div>
                                 <div className="flex items-center gap-2">
-                                  <h4 className="text-xs font-bold text-on-surface">{app.candidate?.name || 'Candidate'}</h4>
-                                  {isHired && <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[8px] font-headline font-medium rounded-full uppercase">Currently Hired</span>}
+                                  <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">{app.candidate?.name || 'Candidate'}</h4>
+                                  {isHired && <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 text-[8px] font-headline font-bold rounded-none ">Currently Hired</span>}
                                 </div>
-                                <p className="text-[9px] font-sans font-normal text-on-surface-variant">@{app.candidate?.username || 'candidate'}</p>
+                                <p className="text-[9px] font-sans font-normal text-slate-500 dark:text-slate-400">@{app.candidate?.username || 'candidate'}</p>
                               </div>
                             </div>
                             {isOwner && (
@@ -2927,26 +3001,26 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                 <button
                                   type="button"
                                   onClick={() => handleRejectCandidate(app.candidateId)}
-                                  className="px-3 py-1 bg-error/10 text-error border border-error/20 hover:bg-error/20 text-[9px] font-headline font-medium uppercase rounded-lg transition-all shadow-xs cursor-pointer"
+                                  className="px-3 py-1 bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 border border-rose-300 dark:border-rose-700 hover:bg-rose-600 hover:text-white text-[9px] font-headline font-bold rounded-none transition-all shadow-2xs cursor-pointer"
                                 >
                                   Reject
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleSelectCandidate(app.candidateId)}
-                                  className={`px-3 py-1 text-[9px] font-headline font-medium uppercase rounded-lg transition-all shadow-sm cursor-pointer ${isHired ? 'bg-emerald-600 text-white' : 'bg-primary text-white hover:opacity-90'}`}
+                                  className={`px-3 py-1 text-[9px] font-headline font-bold rounded-none transition-all shadow-2xs cursor-pointer ${isHired ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
                                 >
                                   {isHired ? 'Selected' : 'Switch Hire'}
                                 </button>
                               </div>
                             )}
                           </div>
-                          <div className="p-3 bg-surface-container-high/40 rounded-lg text-xs text-on-surface-variant leading-relaxed border border-outline-variant/20">
+                          <div className="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-none text-xs text-slate-800 dark:text-slate-200 leading-relaxed border border-slate-300 dark:border-slate-700">
                             {app.message}
                           </div>
                           {app.attachments?.length > 0 && (
-                            <div className="space-y-1.5 pt-2 border-t border-outline-variant/30">
-                              <p className="text-[10px] font-headline font-medium text-on-surface-variant uppercase font-bold flex items-center gap-1.5">
+                            <div className="space-y-1.5 pt-2 border-t border-slate-300 dark:border-slate-700">
+                              <p className="text-[10px] font-headline font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                                 <Paperclip className="w-3.5 h-3.5 text-primary" /> Pitch Attachments ({app.attachments.length}):
                               </p>
                               <div className="flex flex-wrap gap-2 pt-0.5">
@@ -2954,11 +3028,11 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                   const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(url) || url.includes('/avatar/') || url.includes('image');
                                   const filename = url.split('/').pop() || `Attachment ${idx + 1}`;
                                   return isImage ? (
-                                    <a key={idx} href={url} target="_blank" rel="noreferrer" className="block w-16 h-16 rounded-xl border border-outline-variant overflow-hidden hover:opacity-95 transition-all">
+                                    <a key={idx} href={url} target="_blank" rel="noreferrer" className="block w-16 h-16 rounded-none border border-slate-300 dark:border-slate-700 overflow-hidden hover:opacity-95 transition-all">
                                       <img src={url} alt="Pitch Attachment" className="w-full h-full object-cover" />
                                     </a>
                                   ) : (
-                                    <a key={idx} href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-outline-variant bg-surface-container text-xs font-sans font-normal text-on-surface-variant hover:text-primary">
+                                    <a key={idx} href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-sans font-normal text-slate-700 dark:text-slate-300 hover:text-blue-600">
                                       <Paperclip className="w-3.5 h-3.5 text-primary" />
                                       <span className="max-w-[140px] truncate">{filename}</span>
                                     </a>
@@ -2975,17 +3049,17 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </div>
 
               {/* Section 2: Other Candidate Chats */}
-              <div className="pt-4 border-t border-outline-variant/50 space-y-3">
-                <h4 className="text-[11px] font-headline font-medium uppercase tracking-wider text-primary font-bold">
+              <div className="pt-4 border-t border-slate-300 dark:border-slate-700 space-y-3">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase">
                   Other Candidate Chats
                 </h4>
 
                 {gigDetails.applicants?.length === 0 ? (
-                  <p className="text-xs font-sans font-normal text-on-surface-variant">No candidates to chat with.</p>
+                  <p className="text-xs font-sans font-normal text-slate-500 dark:text-slate-400">No candidates to chat with.</p>
                 ) : (
-                  <div className="border border-outline-variant rounded-xl overflow-hidden bg-surface-container-low/50">
+                  <div className="border border-slate-300 dark:border-slate-700 rounded-none overflow-hidden bg-white dark:bg-slate-900">
                     {/* Candidate Tab Selection Bar */}
-                    <div className="flex items-center gap-2 p-2 bg-surface-container border-b border-outline-variant overflow-x-auto custom-scrollbar">
+                    <div className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-300 dark:border-slate-700 overflow-x-auto custom-scrollbar">
                       {gigDetails.applicants?.map(app => {
                         const isSelectedTab = (selectedOtherCandidateId || gigDetails.applicants[0]?.candidateId) === app.candidateId;
                         return (
@@ -2993,8 +3067,8 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                             key={app.candidateId}
                             type="button"
                             onClick={() => setSelectedOtherCandidateId(app.candidateId)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-headline font-medium transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-                              isSelectedTab ? 'bg-primary text-white shadow-xs' : 'bg-surface-container-high text-on-surface-variant hover:text-on-surface'
+                            className={`px-3 py-1.5 rounded-none text-xs font-headline font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                              isSelectedTab ? 'bg-blue-600 text-white shadow-2xs' : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-blue-600'
                             }`}
                           >
                             <span>{app.candidate?.name || 'Candidate'}</span>
@@ -3013,15 +3087,15 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
                         return (
                           <div className="space-y-3">
-                            <div className="max-h-56 overflow-y-auto space-y-2 p-2 border border-outline-variant/30 rounded-xl bg-surface-container-high/10 custom-scrollbar">
+                            <div className="max-h-56 overflow-y-auto space-y-2 p-2 border border-slate-300 dark:border-slate-700 rounded-none bg-slate-50/50 dark:bg-slate-950/50 custom-scrollbar">
                               {candMessages.length === 0 ? (
-                                <p className="text-center text-xs font-sans font-normal text-on-surface-variant py-6">No direct chat history with this candidate yet. Type a message below to start.</p>
+                                <p className="text-center text-xs font-sans font-normal text-slate-500 dark:text-slate-400 py-6">No direct chat history with this candidate yet. Type a message below to start.</p>
                               ) : (
                                 candMessages.map(msg => {
                                   const isMe = msg.senderId === user.id;
                                   return (
                                     <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                                      <div className={`p-2.5 rounded-xl text-xs max-w-[80%] ${isMe ? 'bg-primary text-white rounded-tr-none' : 'bg-surface-container border border-outline-variant text-on-surface rounded-tl-none'}`}>
+                                      <div className={`p-2.5 rounded-none text-xs max-w-[80%] shadow-2xs ${isMe ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100'}`}>
                                         {msg.text}
                                         {msg.fileUrl && (
                                           <div className="mt-1 text-[9px] font-sans font-normal underline">
@@ -3029,7 +3103,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                           </div>
                                         )}
                                       </div>
-                                      <span className="text-[8px] font-sans font-normal text-on-surface-variant px-1 mt-0.5">
+                                      <span className="text-[8px] font-sans font-normal text-slate-500 dark:text-slate-400 px-1 mt-0.5">
                                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                       </span>
                                     </div>
@@ -3087,20 +3161,20 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                                   value={otherCandidateChatText}
                                   onChange={e => setOtherCandidateChatText(e.target.value)}
                                   placeholder="Type message to this candidate..."
-                                  className="flex-1 bg-surface-container-high border border-outline-variant rounded-xl px-3 py-2 text-xs text-on-surface focus:outline-none placeholder:text-on-surface-variant/50"
+                                  className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none placeholder:text-slate-400 font-sans"
                                 />
-                                <button type="submit" disabled={sendingOtherChat} className="px-3 py-2 bg-primary text-white rounded-xl font-bold text-xs cursor-pointer">
+                                <button type="submit" disabled={sendingOtherChat} className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-none font-bold text-xs cursor-pointer shadow-2xs">
                                   <Send className="w-3.5 h-3.5" />
                                 </button>
                               </div>
                               <div className="flex items-center justify-between text-[9px] font-sans font-normal">
-                                <label className="cursor-pointer text-on-surface-variant hover:text-on-surface border border-outline-variant rounded px-2 py-1 bg-surface-container flex items-center gap-1">
-                                  <Paperclip className="w-3 h-3" />
+                                <label className="cursor-pointer text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 border border-slate-300 dark:border-slate-700 rounded-none px-2 py-1 bg-white dark:bg-slate-900 flex items-center gap-1 shadow-2xs">
+                                  <Paperclip className="w-3 h-3 text-primary" />
                                   <span>{otherCandidateChatFile ? otherCandidateChatFile.name : 'Attach File'}</span>
                                   <input type="file" onChange={e => setOtherCandidateChatFile(e.target.files[0])} className="hidden" />
                                 </label>
                                 {otherCandidateChatFile && (
-                                  <button type="button" onClick={() => setOtherCandidateChatFile(null)} className="text-error">Remove</button>
+                                  <button type="button" onClick={() => setOtherCandidateChatFile(null)} className="text-error font-bold">Remove</button>
                                 )}
                               </div>
                             </form>
@@ -3113,10 +3187,10 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
               </div>
             </div>
 
-            <div className="p-3 border-t border-outline-variant bg-surface-container-low flex justify-end">
+            <div className="p-3 border-t border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex justify-end">
               <button
                 onClick={() => setShowOtherCandidatesModal(false)}
-                className="px-4 py-2 bg-surface-container-high border border-outline-variant hover:bg-surface-container text-on-surface text-xs font-headline font-medium rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-headline font-bold rounded-none cursor-pointer shadow-2xs"
               >
                 Close
               </button>
@@ -3128,11 +3202,11 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
       {/* Unreviewed Candidate Pitch Details Modal */}
       {selectedUnreviewedPitchApp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in pointer-events-auto">
-          <div className="w-full max-w-lg bg-surface-container border border-outline-variant rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-scale-up">
+          <div className="w-full max-w-lg bg-surface border border-slate-300 dark:border-slate-700 rounded-none shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-scale-up">
             {/* Modal Header */}
-            <div className="p-4 bg-surface-container-high border-b border-outline-variant flex justify-between items-center shrink-0">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/80 border-b border-slate-300 dark:border-slate-700 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/30 text-primary font-headline font-medium flex items-center justify-center text-xs overflow-hidden shrink-0">
+                <div className="w-10 h-10 rounded-none bg-blue-50 dark:bg-blue-950/60 border border-blue-400 dark:border-blue-600 text-blue-800 dark:text-blue-300 font-headline font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
                   {selectedUnreviewedPitchApp.candidate?.avatar || selectedUnreviewedPitchApp.candidate?.profilePic ? (
                     <img src={selectedUnreviewedPitchApp.candidate.avatar || selectedUnreviewedPitchApp.candidate.profilePic} alt="Candidate" className="w-full h-full object-cover" />
                   ) : (
@@ -3140,31 +3214,31 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                   )}
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-on-surface">{selectedUnreviewedPitchApp.candidate?.name || 'Candidate'}</h3>
-                  <p className="text-[10px] font-sans font-normal text-primary font-bold">@{selectedUnreviewedPitchApp.candidate?.username || 'candidate'}</p>
+                  <h3 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">{selectedUnreviewedPitchApp.candidate?.name || 'Candidate'}</h3>
+                  <p className="text-xs font-sans font-bold text-blue-700 dark:text-blue-400">@{selectedUnreviewedPitchApp.candidate?.username || 'candidate'}</p>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedUnreviewedPitchApp(null)}
-                className="p-1.5 hover:bg-surface-container-low rounded-lg text-on-surface-variant hover:text-on-surface transition-all cursor-pointer"
+                className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-none text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-all cursor-pointer border border-transparent hover:border-slate-300 dark:hover:border-slate-700"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-5 overflow-y-auto space-y-4 custom-scrollbar bg-background text-left">
+            <div className="p-5 overflow-y-auto space-y-4 custom-scrollbar bg-white dark:bg-slate-950 text-left">
               <div className="space-y-1.5">
-                <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold">Candidate Pitch Message</h4>
-                <div className="p-3.5 bg-surface-container border border-outline-variant/60 rounded-xl text-xs text-on-surface leading-relaxed whitespace-pre-wrap">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase">Candidate Pitch Message</h4>
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none text-xs text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap font-sans">
                   {selectedUnreviewedPitchApp.message}
                 </div>
               </div>
 
               {selectedUnreviewedPitchApp.attachments?.length > 0 && (
-                <div className="space-y-2 pt-2 border-t border-outline-variant/40">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-on-surface-variant font-bold flex items-center gap-1.5">
-                    <Paperclip className="w-3.5 h-3.5 text-primary" /> Pitch Attachments ({selectedUnreviewedPitchApp.attachments.length})
+                <div className="space-y-2 pt-2 border-t border-slate-300 dark:border-slate-700">
+                  <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase flex items-center gap-1.5">
+                    <Paperclip className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Pitch Attachments ({selectedUnreviewedPitchApp.attachments.length})
                   </h4>
                   <div className="flex flex-wrap gap-2 pt-1">
                     {selectedUnreviewedPitchApp.attachments.map((url, idx) => {
@@ -3176,7 +3250,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           href={url}
                           target="_blank"
                           rel="noreferrer"
-                          className="group relative block w-24 h-24 rounded-xl border border-outline-variant overflow-hidden hover:opacity-95 transition-all shadow-xs"
+                          className="group relative block w-24 h-24 rounded-none border border-slate-300 dark:border-slate-700 overflow-hidden hover:opacity-95 transition-all shadow-xs"
                         >
                           <img src={url} alt="Pitch Attachment" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
                         </a>
@@ -3186,10 +3260,10 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                           href={url}
                           target="_blank"
                           rel="noreferrer"
-                          className="group inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-outline-variant bg-surface-container hover:border-primary/60 hover:bg-surface-container-high transition-all text-xs font-sans font-normal text-on-surface-variant hover:text-primary shadow-xs"
+                          className="group inline-flex items-center gap-2 px-3 py-2 rounded-none border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 hover:border-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-xs font-sans text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 shadow-xs"
                         >
-                          <Paperclip className="w-4 h-4 text-primary shrink-0" />
-                          <span className="max-w-[180px] truncate font-semibold">{filename}</span>
+                          <Paperclip className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                          <span className="max-w-[180px] truncate font-bold">{filename}</span>
                         </a>
                       );
                     })}
@@ -3199,7 +3273,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             </div>
 
             {/* Footer Action Toolbar */}
-            <div className="p-4 bg-surface-container-low border-t border-outline-variant flex flex-wrap items-center justify-between gap-2 shrink-0">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-300 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2 shrink-0">
               <button
                 type="button"
                 disabled={loadingProfile}
@@ -3209,7 +3283,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                     selectedUnreviewedPitchApp.candidate
                   );
                 }}
-                className="px-3.5 py-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-[10px] font-headline font-medium uppercase rounded-xl flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                className="px-3.5 py-2 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 text-xs font-headline font-bold rounded-none flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-2xs disabled:opacity-50"
               >
                 {loadingProfile ? (
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -3228,7 +3302,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       setSelectedUnreviewedPitchApp(null);
                       handleRejectCandidate(candId);
                     }}
-                    className="px-3.5 py-2 bg-error/10 text-error border border-error/20 hover:bg-error/20 text-[10px] font-headline font-medium uppercase rounded-xl transition-all cursor-pointer active:scale-95"
+                    className="px-3.5 py-2 bg-rose-100 dark:bg-rose-950/70 text-rose-900 dark:text-rose-200 border border-rose-400 dark:border-rose-600 hover:bg-rose-200 dark:hover:bg-rose-900 text-xs font-headline font-bold rounded-none transition-all cursor-pointer active:scale-95 shadow-2xs"
                   >
                     Reject
                   </button>
@@ -3239,7 +3313,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                       setSelectedUnreviewedPitchApp(null);
                       handleSelectCandidate(candId);
                     }}
-                    className="px-4 py-2 bg-primary text-white text-[10px] font-headline font-medium uppercase rounded-xl hover:opacity-90 transition-all shadow-sm cursor-pointer active:scale-95"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-headline font-bold rounded-none transition-all shadow-2xs cursor-pointer active:scale-95 border border-blue-700"
                   >
                     Hire Candidate
                   </button>
@@ -3253,44 +3327,44 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
       {/* Candidate Work Submission Modal */}
       {showSubmissionModal && gigDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in pointer-events-auto">
-          <div className="w-full max-w-lg bg-surface border border-outline-variant rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-scale-up">
+          <div className="w-full max-w-lg bg-surface border border-slate-300 dark:border-slate-700 rounded-none shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-scale-up">
             {/* Modal Header */}
-            <div className="p-4 bg-surface-container-high border-b border-outline-variant flex justify-between items-center shrink-0">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/80 border-b border-slate-300 dark:border-slate-700 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/30 text-primary font-headline font-medium flex items-center justify-center text-xs overflow-hidden shrink-0">
-                  <Paperclip className="w-4.5 h-4.5 text-primary" />
+                <div className="w-9 h-9 rounded-none bg-blue-50 dark:bg-blue-950/60 border border-blue-400 dark:border-blue-600 text-blue-600 dark:text-blue-400 font-headline font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
+                  <Paperclip className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-on-surface">Candidate Work Deliverables</h3>
-                  <p className="text-[10px] font-sans font-normal text-on-surface-variant">Project: {gigDetails.title}</p>
+                  <h3 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">Candidate Work Deliverables</h3>
+                  <p className="text-xs font-sans text-slate-600 dark:text-slate-400">Project: {gigDetails.title}</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowSubmissionModal(false)}
-                className="p-1.5 hover:bg-surface-container-low rounded-lg text-on-surface-variant hover:text-on-surface transition-all cursor-pointer"
+                className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-none text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-all cursor-pointer border border-transparent hover:border-slate-300 dark:hover:border-slate-700"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-5 overflow-y-auto space-y-4 custom-scrollbar bg-background text-left font-sans">
+            <div className="p-5 overflow-y-auto space-y-4 custom-scrollbar bg-white dark:bg-slate-950 text-left font-sans">
               {isHiredCandidate && gigDetails.status === 'IN_PROGRESS' && (
                 <form onSubmit={async (e) => {
                   await handleSubmitWork(e);
                   setShowSubmissionModal(false);
-                }} className="space-y-3 pb-3 border-b border-outline-variant/40">
-                  <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary font-bold">Submission Form</h4>
+                }} className="space-y-3 pb-3 border-b border-slate-300 dark:border-slate-700">
+                  <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase">Submission Form</h4>
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant font-bold">Work Description *</label>
+                    <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200">Work Description *</label>
                     <TextArea value={submitText} onChange={(e) => setSubmitText(e.target.value)} placeholder="Describe your completed deliverables, instructions, or links..." rows={3} required />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] font-headline font-medium uppercase text-on-surface-variant font-bold">Attach Work File (PDF/PNG/JPG/DOCX/ZIP)</label>
-                    <input type="file" onChange={(e) => setSubmitFile(e.target.files[0])} className="w-full text-xs text-on-surface bg-surface-container-low border border-outline-variant rounded-xl px-3 py-2 cursor-pointer" />
+                    <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200">Attach Work File (PDF/PNG/JPG/DOCX/ZIP)</label>
+                    <input type="file" onChange={(e) => setSubmitFile(e.target.files[0])} className="w-full text-xs text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 cursor-pointer" />
                   </div>
-                  <Button type="submit" disabled={submittingWork} className="w-full text-xs py-2 font-headline font-medium uppercase">
+                  <Button type="submit" disabled={submittingWork} className="w-full text-xs py-2 bg-blue-600 hover:bg-blue-700 text-white font-headline font-bold rounded-none shadow-2xs border border-blue-700 cursor-pointer transition-all active:scale-95">
                     {submittingWork ? 'Uploading & Submitting...' : 'Submit Work Deliverables'}
                   </Button>
                 </form>
@@ -3302,9 +3376,9 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
 
                 if (!candSubmission) {
                   return !isHiredCandidate ? (
-                    <div className="text-center py-8 bg-surface-container-low rounded-xl border border-outline-variant border-dashed p-4">
-                      <Paperclip className="w-8 h-8 text-on-surface-variant/40 mx-auto mb-2" />
-                      <p className="text-xs font-sans font-normal text-on-surface-variant">No work deliverables submitted yet by this candidate.</p>
+                    <div className="text-center py-8 bg-slate-50 dark:bg-slate-900/50 rounded-none border border-slate-300 dark:border-slate-700 border-dashed p-4">
+                      <Paperclip className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                      <p className="text-xs font-sans text-slate-600 dark:text-slate-400">No work deliverables submitted yet by this candidate.</p>
                     </div>
                   ) : null;
                 }
@@ -3312,31 +3386,31 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                 return (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-[10px] font-headline font-medium uppercase tracking-wider text-primary font-bold">Submitted Deliverables</h4>
-                      <span className={`text-[9px] font-headline font-medium px-2.5 py-0.5 rounded-full uppercase border ${
+                      <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase">Submitted Deliverables</h4>
+                      <span className={`text-[10px] font-headline font-bold px-2.5 py-0.5 rounded-none border ${
                         candSubmission.status === 'ACCEPTED'
-                          ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                          ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-200 border-emerald-400 dark:border-emerald-600'
                           : candSubmission.status === 'REJECTED'
-                          ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                          : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                          ? 'bg-rose-100 dark:bg-rose-950/70 text-rose-900 dark:text-rose-200 border-rose-400 dark:border-rose-600'
+                          : 'bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 border-amber-400 dark:border-amber-600'
                       }`}>
                         {candSubmission.status || 'PENDING REVIEW'}
                       </span>
                     </div>
-                    <div className="p-3.5 bg-surface-container border border-outline-variant/60 rounded-xl text-xs text-on-surface leading-relaxed whitespace-pre-wrap">
+                    <div className="p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none text-xs text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap font-sans">
                       {candSubmission.text}
                     </div>
                     {candSubmission.fileUrl && (
-                      <div className="p-3 bg-surface-container-low border border-outline-variant rounded-xl flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 text-xs font-sans font-normal text-on-surface truncate">
-                          <Paperclip className="w-4 h-4 text-primary shrink-0" />
+                      <div className="p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 text-xs font-sans text-slate-800 dark:text-slate-200 truncate">
+                          <Paperclip className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
                           <span className="truncate">{candSubmission.fileUrl.split('/').pop() || 'Work Deliverable File'}</span>
                         </div>
                         <a
                           href={candSubmission.fileUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="px-3.5 py-1.5 bg-primary text-white text-[10px] font-headline font-medium uppercase rounded-xl hover:opacity-90 transition-all shrink-0 shadow-xs"
+                          className="px-3.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-headline font-bold rounded-none transition-all shrink-0 shadow-2xs"
                         >
                           View Work File
                         </a>
@@ -3344,14 +3418,14 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                     )}
 
                     {isOwner && (
-                      <div className="flex gap-2 pt-3 border-t border-outline-variant/40">
+                      <div className="flex gap-2 pt-3 border-t border-slate-300 dark:border-slate-700">
                         <button
                           type="button"
                           onClick={async () => {
                             await handleReviewAction('ACCEPT', candSubmission.candidateId);
                             setShowSubmissionModal(false);
                           }}
-                          className="flex-1 py-2 bg-success text-white text-xs font-headline font-medium uppercase rounded-xl hover:opacity-95 shadow-xs cursor-pointer font-bold"
+                          className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-headline font-bold rounded-none shadow-2xs cursor-pointer border border-emerald-700 transition-all active:scale-95"
                         >
                           Accept Work
                         </button>
@@ -3361,7 +3435,7 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
                             await handleReviewAction('REVISION', candSubmission.candidateId);
                             setShowSubmissionModal(false);
                           }}
-                          className="flex-1 py-2 bg-error text-white text-xs font-headline font-medium uppercase rounded-xl hover:opacity-95 shadow-xs cursor-pointer font-bold"
+                          className="flex-1 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-headline font-bold rounded-none shadow-2xs cursor-pointer border border-amber-700 transition-all active:scale-95"
                         >
                           Request Revision
                         </button>
@@ -3373,11 +3447,11 @@ export default function GigsMarketplace({ user, token, theme, profile, onUpdateP
             </div>
 
             {/* Modal Footer */}
-            <div className="p-3 border-t border-outline-variant bg-surface-container-low flex justify-end">
+            <div className="p-3 border-t border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/80 flex justify-end">
               <button
                 type="button"
                 onClick={() => setShowSubmissionModal(false)}
-                className="px-4 py-2 bg-surface-container-high border border-outline-variant hover:bg-surface-container text-on-surface text-xs font-headline font-medium rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs font-headline font-bold rounded-none cursor-pointer shadow-2xs"
               >
                 Close
               </button>
