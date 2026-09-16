@@ -801,15 +801,15 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           <div key={activeTab} className="animate-fade-in">
             {/* Show profile complete banner if incomplete */}
             {!isComplete && (
-              <div className="mb-6 p-4 bg-[#2563eb]/10 border border-[#2563eb]/25 text-[#1e40af] dark:text-[#93c5fd] rounded-xl text-xs flex flex-col gap-2">
-                <div className="flex items-center gap-2 font-bold text-sm text-[#2563eb]">
-                  <Lock className="w-4 h-4 shrink-0" />
+              <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950/60 border border-blue-600 dark:border-blue-500 text-blue-900 dark:text-blue-200 rounded-none text-xs flex flex-col gap-2 shadow-2xs">
+                <div className="flex items-center gap-2 font-headline font-bold text-sm text-blue-800 dark:text-blue-300 uppercase tracking-wider">
+                  <Lock className="w-4 h-4 shrink-0 text-blue-700 dark:text-blue-400" />
                   <span>Mandatory Profile Setup Incomplete</span>
                 </div>
-                <p className="text-on-surface">
+                <p className="text-slate-800 dark:text-slate-200 font-sans">
                   To unlock Opportunities, Job Progress, and Gigs Marketplace, please complete the required fields in your profile:
                 </p>
-                <ul className="list-disc pl-5 space-y-1 font-semibold text-on-surface">
+                <ul className="list-disc pl-5 space-y-1 font-sans font-semibold text-slate-900 dark:text-slate-100">
                   {!hasGeneralInfo && <li>Fill in all required fields in Your Profile &rarr; General tab (Name, Username, Professional Summary, Date of Birth, Phone Number, Email Address, Gender)</li>}
                 </ul>
               </div>

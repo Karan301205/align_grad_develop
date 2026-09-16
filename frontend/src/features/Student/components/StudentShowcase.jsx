@@ -395,23 +395,16 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
 
   return (
     <div className="w-full space-y-6 animate-fade-in">
-      {/* <div className="space-y-1 mb-2">
-        <h3 className="text-xl font-headline font-bold text-on-surface">Showcase Yourself</h3>
-        <p className="text-xs text-on-surface-variant leading-relaxed">
-          Make a striking first impression. Record or upload a short video (between 40 and 60 seconds) explaining your skills, experience, and why you are a great fit for opportunities.
-        </p>
-      </div> */}
-
       {errorMsg && (
-        <div className="p-4 bg-error-container border border-error/30 text-on-error-container rounded-xl flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+        <div className="p-4 bg-rose-50 dark:bg-rose-950/50 border border-rose-400 dark:border-rose-700 text-rose-900 dark:text-rose-200 rounded-none flex items-start gap-3 shadow-2xs">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
           <span className="text-sm font-semibold">{errorMsg}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-4 bg-success-container border border-success/20 text-on-success-container rounded-xl flex items-start gap-3">
-          <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />
+        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 rounded-none flex items-start gap-3 shadow-2xs">
+          <CheckCircle className="w-5 h-5 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
           <span className="text-sm font-semibold">{successMsg}</span>
         </div>
       )}
@@ -419,19 +412,19 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Column: Recording and Upload zone */}
-        <div className="lg:col-span-8 bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-6 flex flex-col justify-between min-h-[480px]">
+        <div className="lg:col-span-8 bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-6 space-y-6 flex flex-col justify-between min-h-[480px] shadow-2xs">
           
           {/* Choose Mode screen */}
           {activeMode === 'choose' && !recordedUrl && (
             <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8 py-8">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <div className="w-16 h-16 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 shadow-2xs">
                 <Video className="w-8 h-8" />
               </div>
               
               <div className="space-y-2 max-w-md">
-                <h3 className="text-lg font-bold text-on-surface">Choose how to add your video</h3>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Record directly using your webcam, or select a pre-recorded video file. Videos must be <strong className="text-primary font-semibold">at least 40 seconds</strong> and up to 1 minute long (under 50MB, ideal resolution is 720p).
+                <h3 className="text-lg font-headline font-bold text-slate-900 dark:text-slate-100">Choose how to add your video</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-sans leading-relaxed">
+                  Record directly using your webcam, or select a pre-recorded video file. Videos must be <strong className="text-blue-700 dark:text-blue-400 font-bold">at least 40 seconds</strong> and up to 1 minute long (under 50MB, ideal resolution is 720p).
                 </p>
               </div>
 
@@ -439,15 +432,15 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                 <button
                   type="button"
                   onClick={() => setShowRecordModal(true)}
-                  className="px-6 py-3 bg-primary text-on-primary rounded-xl text-sm font-bold hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  className="px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-95"
                 >
                   <Camera className="w-4 h-4" />
                   Record Video
                 </button>
                 <label
-                  className="px-6 py-3 bg-surface-container-high border border-outline-variant hover:bg-surface-container-highest rounded-xl text-sm font-bold text-on-surface hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="px-6 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold text-slate-800 dark:text-slate-200 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-700"
                 >
-                  <Upload className="w-4 h-4 text-secondary" />
+                  <Upload className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                   Upload File
                   <input 
                     type="file" 
@@ -463,19 +456,19 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
           {/* Webcam Recording Mode screen */}
           {activeMode === 'record' && !recordedUrl && (
             <div className="flex-1 flex flex-col space-y-4">
-              <div className="flex items-center justify-between border-b border-outline-variant pb-4">
-                {/* <h3 className="text-sm font-headline font-medium text-primary tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Live Camera Stream (720p)
-                </h3> */}
+              <div className="flex items-center justify-between border-b border-slate-300 dark:border-slate-700 pb-4">
+                <h3 className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+                  Live Camera Stream (720p)
+                </h3>
                 {isRecording && (
-                  <span className={`px-3 py-1 border rounded-lg text-xs font-sans font-normal flex items-center gap-1.5 ${
+                  <span className={`px-3 py-1 border rounded-none text-xs font-headline font-bold flex items-center gap-1.5 ${
                     isPaused
-                      ? 'bg-amber-500/20 text-amber-500 border-amber-500/30 font-bold'
+                      ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border-amber-400 dark:border-amber-700'
                       : recordingSeconds >= 40 
-                      ? 'bg-success-container/20 text-success border-success/30 animate-pulse' 
-                      : 'bg-error-container/20 text-error border-error/30 animate-pulse'
+                      ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-300 border-emerald-400 dark:border-emerald-700 animate-pulse' 
+                      : 'bg-rose-100 dark:bg-rose-950/70 text-rose-900 dark:text-rose-300 border-rose-400 dark:border-rose-700 animate-pulse'
                   }`}>
-                    <span className={`w-2 h-2 rounded-full ${isPaused ? 'bg-amber-500' : recordingSeconds >= 40 ? 'bg-success' : 'bg-error'}`}></span>
+                    <span className={`w-2 h-2 rounded-none ${isPaused ? 'bg-amber-500' : recordingSeconds >= 40 ? 'bg-emerald-600' : 'bg-rose-600'}`}></span>
                     {isPaused ? `Paused at ${recordingSeconds}s` : `${recordingSeconds}s / 60s`} {recordingSeconds < 40 ? `(Min 40s - ${40 - recordingSeconds}s left)` : '(Min length reached!)'}
                   </span>
                 )}
@@ -483,61 +476,61 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
 
               {/* Dynamic Interview Prompt Guide & Segmented Progress Bar */}
               {isRecording && (
-                <div className="space-y-3 bg-surface-container-low/50 border border-outline-variant p-4 rounded-xl animate-fade-in">
+                <div className="space-y-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 p-4 rounded-none animate-fade-in shadow-2xs">
                   {/* Segmented Progress Bars */}
                   <div className="grid grid-cols-6 gap-2 h-2 w-full">
                     {/* Segment 1: Self & Education (20s - 2/6 width) */}
-                    <div className="col-span-2 bg-surface-container-highest rounded-full h-full relative overflow-hidden">
+                    <div className="col-span-2 bg-slate-200 dark:bg-slate-800 rounded-none h-full relative overflow-hidden border border-slate-300 dark:border-slate-700">
                       <div 
-                        className="bg-primary h-full transition-all duration-300"
+                        className="bg-blue-700 h-full transition-all duration-300"
                         style={{ width: `${recordingSeconds >= 20 ? 100 : (recordingSeconds / 20) * 100}%` }}
                       />
                     </div>
                     {/* Segment 2: Skills (10s - 1/6 width) */}
-                    <div className="col-span-1 bg-surface-container-highest rounded-full h-full relative overflow-hidden">
+                    <div className="col-span-1 bg-slate-200 dark:bg-slate-800 rounded-none h-full relative overflow-hidden border border-slate-300 dark:border-slate-700">
                       <div 
-                        className="bg-primary h-full transition-all duration-300"
+                        className="bg-blue-700 h-full transition-all duration-300"
                         style={{ width: `${recordingSeconds >= 30 ? 100 : (recordingSeconds < 20 ? 0 : ((recordingSeconds - 20) / 10) * 100)}%` }}
                       />
                     </div>
                     {/* Segment 3: Experience & Projects (10s - 1/6 width - reaches 40s min requirement) */}
-                    <div className="col-span-1 bg-surface-container-highest rounded-full h-full relative overflow-hidden border-r-2 border-dashed border-primary/60">
+                    <div className="col-span-1 bg-slate-200 dark:bg-slate-800 rounded-none h-full relative overflow-hidden border-r-2 border-dashed border-blue-700">
                       <div 
-                        className="bg-primary h-full transition-all duration-300"
+                        className="bg-blue-700 h-full transition-all duration-300"
                         style={{ width: `${recordingSeconds >= 40 ? 100 : (recordingSeconds < 30 ? 0 : ((recordingSeconds - 30) / 10) * 100)}%` }}
                       />
                     </div>
                     {/* Segment 4: Why Hire You (20s - 2/6 width) */}
-                    <div className="col-span-2 bg-surface-container-highest rounded-full h-full relative overflow-hidden">
+                    <div className="col-span-2 bg-slate-200 dark:bg-slate-800 rounded-none h-full relative overflow-hidden border border-slate-300 dark:border-slate-700">
                       <div 
-                        className="bg-primary h-full transition-all duration-300"
+                        className="bg-blue-700 h-full transition-all duration-300"
                         style={{ width: `${recordingSeconds >= 60 ? 100 : (recordingSeconds < 40 ? 0 : ((recordingSeconds - 40) / 20) * 100)}%` }}
                       />
                     </div>
                   </div>
 
                   {/* Segment Titles & Custom Timers */}
-                  <div className="grid grid-cols-6 gap-2 text-xs font-sans font-normal text-on-surface-variant text-center select-none">
-                    <span className={`col-span-2 truncate ${recordingSeconds < 20 ? 'text-primary font-bold' : ''}`}>Self & Edu (20s)</span>
-                    <span className={`col-span-1 truncate ${recordingSeconds >= 20 && recordingSeconds < 30 ? 'text-primary font-bold' : ''}`}>Skills (10s)</span>
-                    <span className={`col-span-1 truncate ${recordingSeconds >= 30 && recordingSeconds < 40 ? 'text-primary font-bold' : ''}`}>Exp (10s) <span className="text-amber-500 font-bold">*40s Min</span></span>
-                    <span className={`col-span-2 truncate ${recordingSeconds >= 40 ? 'text-primary font-bold' : ''}`}>Why Hire (20s)</span>
+                  <div className="grid grid-cols-6 gap-2 text-xs font-sans font-medium text-slate-600 dark:text-slate-400 text-center select-none">
+                    <span className={`col-span-2 truncate ${recordingSeconds < 20 ? 'text-blue-700 dark:text-blue-400 font-bold' : ''}`}>Self & Edu (20s)</span>
+                    <span className={`col-span-1 truncate ${recordingSeconds >= 20 && recordingSeconds < 30 ? 'text-blue-700 dark:text-blue-400 font-bold' : ''}`}>Skills (10s)</span>
+                    <span className={`col-span-1 truncate ${recordingSeconds >= 30 && recordingSeconds < 40 ? 'text-blue-700 dark:text-blue-400 font-bold' : ''}`}>Exp (10s) <span className="text-amber-600 font-bold">*40s Min</span></span>
+                    <span className={`col-span-2 truncate ${recordingSeconds >= 40 ? 'text-blue-700 dark:text-blue-400 font-bold' : ''}`}>Why Hire (20s)</span>
                   </div>
 
                   {/* Current Active Guide prompt card */}
-                  <div className="bg-surface-container-high/80 p-3 rounded-lg border border-outline-variant flex items-center justify-between gap-4">
+                  <div className="bg-white dark:bg-slate-900 p-3 rounded-none border border-slate-300 dark:border-slate-700 flex items-center justify-between gap-4 shadow-2xs">
                     <div className="space-y-0.5">
-                      <span className="text-xs font-headline font-medium text-secondary">Active Topic</span>
-                      <p className="text-xs font-semibold text-on-surface leading-relaxed">
+                      <span className="text-xs font-headline font-bold text-slate-500 uppercase tracking-wider">Active Topic</span>
+                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-relaxed">
                         {recordingSeconds < 20 && "🎓 Tell us about yourself and your educational background"}
                         {recordingSeconds >= 20 && recordingSeconds < 30 && "⚡ Talk about the skills and technologies you know"}
                         {recordingSeconds >= 30 && recordingSeconds < 40 && "💼 Describe your work experience or projects you have worked on (Reaching 40s Min)"}
                         {recordingSeconds >= 40 && "🚀 Explain why we should hire you"}
                       </p>
                     </div>
-                    <div className="shrink-0 text-center bg-secondary/15 border border-secondary/20 px-3 py-1 rounded-lg min-w-[70px]">
-                      <span className="text-xs font-headline font-medium text-secondary block">Next in</span>
-                      <span className="text-xs font-headline font-medium text-on-surface">
+                    <div className="shrink-0 text-center bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 px-3 py-1 rounded-none min-w-[70px]">
+                      <span className="text-[10px] font-headline font-bold text-blue-800 dark:text-blue-300 uppercase block">Next in</span>
+                      <span className="text-xs font-headline font-extrabold text-blue-900 dark:text-blue-100">
                         {recordingSeconds < 20 && `${20 - recordingSeconds}s`}
                         {recordingSeconds >= 20 && recordingSeconds < 30 && `${30 - recordingSeconds}s`}
                         {recordingSeconds >= 30 && recordingSeconds < 40 && `${40 - recordingSeconds}s`}
@@ -548,17 +541,17 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                 </div>
               )}
 
-              <div className="relative aspect-video rounded-xl bg-black overflow-hidden border border-outline-variant shadow-inner flex items-center justify-center">
+              <div className="relative aspect-video rounded-none bg-black overflow-hidden border border-slate-300 dark:border-slate-700 shadow-inner flex items-center justify-center">
                 <video 
                   ref={liveStreamRef} 
                   autoPlay 
                   playsInline 
                   muted 
-                  className="w-full h-full object-cover transform -scale-x-100" // Mirror for natural look
+                  className="w-full h-full object-cover transform -scale-x-100"
                 />
                 {!isRecording && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-center p-6">
-                    <p className="text-xs text-white max-w-sm">Press the Record button below. Recording must be <strong>at least 40 seconds</strong> (max 60 seconds). It will stop automatically after 60 seconds.</p>
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-center p-6">
+                    <p className="text-xs text-white max-w-sm font-sans font-medium">Press the Record button below. Recording must be <strong>at least 40 seconds</strong> (max 60 seconds). It will stop automatically after 60 seconds.</p>
                   </div>
                 )}
               </div>
@@ -570,15 +563,15 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                     <button
                       type="button"
                       onClick={startRecording}
-                      className="px-6 py-2.5 bg-error text-on-error rounded-xl text-sm font-bold hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
+                      className="px-6 py-2.5 bg-rose-700 hover:bg-rose-800 text-white rounded-none text-xs font-headline font-bold transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-95"
                     >
-                      <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
+                      <span className="w-2.5 h-2.5 rounded-none bg-white animate-pulse"></span>
                       Start Recording
                     </button>
                     <button
                       type="button"
                       onClick={handleCancelRecording}
-                      className="px-4 py-2.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant rounded-xl text-sm font-semibold text-on-surface-variant transition-all"
+                      className="px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-headline font-bold text-slate-800 dark:text-slate-200 transition-all cursor-pointer shadow-2xs"
                     >
                       Cancel
                     </button>
@@ -589,7 +582,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                     <button
                       type="button"
                       onClick={resumeRecording}
-                      className="px-5 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-bold hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
+                      className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-95"
                     >
                       <Play className="w-4 h-4 fill-current" />
                       Resume Recording ({recordingSeconds}s)
@@ -599,7 +592,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                       <button
                         type="button"
                         onClick={publishFromPause}
-                        className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-500 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
+                        className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-none text-xs font-headline font-bold transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-95"
                       >
                         <Upload className="w-4 h-4" />
                         Publish Video
@@ -609,9 +602,9 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                     <button
                       type="button"
                       onClick={handleCancelRecording}
-                      className="px-4 py-2.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant rounded-xl text-sm font-semibold text-on-surface-variant transition-all flex items-center justify-center gap-1.5"
+                      className="px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-headline font-bold text-rose-700 dark:text-rose-400 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                     >
-                      <Trash2 className="w-4 h-4 text-error" />
+                      <Trash2 className="w-4 h-4 text-rose-600" />
                       Cancel Recording
                     </button>
                   </>
@@ -621,7 +614,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                     <button
                       type="button"
                       onClick={pauseRecording}
-                      className="px-6 py-2.5 bg-amber-500 text-zinc-950 rounded-xl text-sm font-bold hover:bg-amber-400 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
+                      className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-none text-xs font-headline font-bold transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-95"
                     >
                       <Pause className="w-4 h-4 fill-current" />
                       Pause Recording
@@ -630,9 +623,9 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                     <button
                       type="button"
                       onClick={handleCancelRecording}
-                      className="px-4 py-2.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant rounded-xl text-sm font-semibold text-on-surface-variant transition-all flex items-center justify-center gap-1.5"
+                      className="px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-headline font-bold text-rose-700 dark:text-rose-400 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                     >
-                      <Trash2 className="w-4 h-4 text-error" />
+                      <Trash2 className="w-4 h-4 text-rose-600" />
                       Cancel Recording
                     </button>
                   </>
@@ -644,16 +637,16 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
           {/* Preview Captured Video screen */}
           {recordedUrl && (
             <div className="flex-1 flex flex-col space-y-4">
-              <div className="flex items-center justify-between border-b border-outline-variant pb-4">
-                <h3 className="text-sm font-headline font-medium text-secondary tracking-wider">
+              <div className="flex items-center justify-between border-b border-slate-300 dark:border-slate-700 pb-4">
+                <h3 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">
                   Review Your Showcase
                 </h3>
-                <span className="px-2.5 py-0.5 bg-surface-container-high border border-outline-variant rounded text-xs font-sans font-normal text-on-surface-variant">
+                <span className="px-2.5 py-0.5 bg-blue-100 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 rounded-none text-xs font-headline font-bold text-blue-900 dark:text-blue-200">
                   Ready to Publish
                 </span>
               </div>
 
-              <div className="aspect-video rounded-xl bg-black overflow-hidden border border-outline-variant flex items-center justify-center relative">
+              <div className="aspect-video rounded-none bg-black overflow-hidden border border-slate-300 dark:border-slate-700 flex items-center justify-center relative">
                 <video 
                   ref={videoPreviewRef} 
                   src={recordedUrl} 
@@ -664,13 +657,13 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
 
               {uploadProgress > 0 && (
                 <div className="space-y-1.5 w-full">
-                  <div className="flex justify-between text-xs font-sans font-normal text-on-surface-variant">
+                  <div className="flex justify-between text-xs font-sans font-medium text-slate-700 dark:text-slate-300">
                     <span>Uploading to Cloud...</span>
-                    <span>{uploadProgress}%</span>
+                    <span className="font-bold">{uploadProgress}%</span>
                   </div>
-                  <div className="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-none overflow-hidden border border-slate-300 dark:border-slate-700">
                     <div 
-                      className="bg-primary h-full transition-all duration-300"
+                      className="bg-blue-700 h-full transition-all duration-300"
                       style={{ width: `${uploadProgress}%` }}
                     ></div>
                   </div>
@@ -682,7 +675,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                   type="button"
                   onClick={handleUpload}
                   disabled={loading}
-                  className="px-6 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-bold hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer shadow-xs"
                 >
                   <Upload className="w-4 h-4" />
                   {loading ? 'Uploading...' : 'Publish Video'}
@@ -699,7 +692,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                     }
                   }}
                   disabled={loading}
-                  className="px-4 py-2.5 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant rounded-xl text-sm font-semibold text-on-surface-variant transition-all disabled:opacity-50 flex items-center gap-1.5"
+                  className="px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-headline font-bold text-slate-800 dark:text-slate-200 transition-all disabled:opacity-40 flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   Record/Select Again
@@ -708,7 +701,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                   type="button"
                   onClick={handleCancelRecording}
                   disabled={loading}
-                  className="px-4 py-2.5 bg-transparent border border-outline-variant rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high transition-all disabled:opacity-50"
+                  className="px-4 py-2.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-headline font-bold text-slate-600 dark:text-slate-400 transition-all disabled:opacity-40 cursor-pointer shadow-2xs"
                 >
                   Cancel
                 </button>
@@ -720,17 +713,19 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
 
         {/* Right Column: Status & Current published Video showcase */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-4">
-            <h4 className="text-md font-bold text-on-surface border-b border-outline-variant pb-2">Showcase Status</h4>
+          <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-6 space-y-4 shadow-2xs">
+            <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100 border-b border-slate-300 dark:border-slate-700 pb-2 uppercase tracking-wider">
+              Showcase Status
+            </h4>
             
             {profile?.introVideoUrl ? (
               <div className="space-y-4">
-                <div className="p-3 bg-success-container border border-success/20 rounded-xl flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-success shrink-0" />
-                  <span className="text-xs font-semibold text-on-success-container">Your video showcase is active!</span>
+                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-400 dark:border-emerald-700 rounded-none flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="text-xs font-headline font-bold text-emerald-900 dark:text-emerald-200">Your video showcase is active!</span>
                 </div>
                 
-                <div className="aspect-video rounded-xl bg-black overflow-hidden border border-outline-variant">
+                <div className="aspect-video rounded-none bg-black overflow-hidden border border-slate-300 dark:border-slate-700">
                   <video 
                     src={profile.introVideoUrl} 
                     controls 
@@ -742,7 +737,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                   type="button"
                   onClick={handleDeleteVideo}
                   disabled={loading}
-                  className="w-full py-2.5 bg-error-container text-on-error-container hover:brightness-105 border border-error/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-2.5 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-300 dark:border-rose-800 rounded-none text-xs font-headline font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer shadow-2xs"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Remove Video
@@ -750,84 +745,73 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
               </div>
             ) : (
               <div className="text-center py-6 space-y-3">
-                <div className="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center mx-auto text-on-surface-variant">
+                <div className="w-12 h-12 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center mx-auto text-blue-700 dark:text-blue-400 shadow-2xs">
                   <FileVideo className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-bold text-on-surface">No active video showcase</p>
-                  <p className="text-xs text-on-surface-variant max-w-[200px] mx-auto leading-relaxed">
+                  <p className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">No active video showcase</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 font-sans max-w-[200px] mx-auto leading-relaxed">
                     Upload your self-introduction to stand out to verified recruiters.
                   </p>
                 </div>
               </div>
             )}
           </div>
-
-          {/* <div className="bg-surface-container border border-outline-variant rounded-2xl p-6 space-y-3.5">
-            <h4 className="text-xs font-headline font-medium text-on-surface-variant tracking-wider">Tips for an Excellent Intro</h4>
-            <ul className="text-xs text-on-surface-variant space-y-2.5 list-disc list-inside">
-              <li><strong>Duration:</strong> 40 to 60 seconds is mandatory.</li>
-              <li>State your name, key stacks, and recent achievements.</li>
-              <li>Ensure good lighting on your face.</li>
-              <li>Check your microphone volume and minimize background noise.</li>
-              <li>Record in <strong>720p (1280x720)</strong> resolution for optimal loading times.</li>
-            </ul>
-          </div> */}
         </div>
 
       </div>
 
       {/* Video Duration Guidelines Pop-up Modal */}
       {showRecordModal && (
-        <div className="fixed inset-0 z-90 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-surface-container border border-outline-variant rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-scale-in relative">
+        <div className="fixed inset-0 z-90 backdrop-blur-md bg-slate-900/40 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none max-w-md w-full p-6 shadow-2xl space-y-5 animate-scale-in relative">
             <button
               type="button"
               onClick={() => setShowRecordModal(false)}
-              className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all"
+              className="absolute top-4 right-4 p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-all cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+              <div className="w-10 h-10 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 shrink-0 shadow-2xs">
                 <Video className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-headline font-medium text-on-surface">Video Showcase Guidelines</h3>
-                <p className="text-xs font-sans font-normal text-on-surface-variant">Please review before recording</p>
+                <h3 className="text-base font-headline font-bold text-slate-900 dark:text-slate-100">Video Showcase Guidelines</h3>
+                <p className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">Please review before recording</p>
               </div>
             </div>
 
-            <div className="p-4 bg-primary/10 border border-primary/25 rounded-xl space-y-2">
+            <div className="p-4 bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 rounded-none space-y-2 shadow-2xs">
               <div className="flex items-start gap-2.5">
-                <Clock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <p className="text-sm font-sans font-normal text-on-surface leading-snug">
-                  Videos must be <strong className="font-semibold text-primary">at least 40 seconds</strong> and up to <strong className="font-semibold text-primary">1 minute long</strong>.
+                <Clock className="w-5 h-5 text-blue-700 dark:text-blue-400 shrink-0 mt-0.5" />
+                <p className="text-sm font-sans font-normal text-slate-900 dark:text-slate-100 leading-snug">
+                  Videos must be <strong className="font-bold text-blue-700 dark:text-blue-400">at least 40 seconds</strong> and up to <strong className="font-bold text-blue-700 dark:text-blue-400">1 minute long</strong>.
                 </p>
               </div>
             </div>
 
-            <div className="space-y-2 text-xs font-sans font-normal text-on-surface-variant leading-relaxed">
+            <div className="space-y-2 text-xs font-sans font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
               <p className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+                <span className="w-1.5 h-1.5 rounded-none bg-blue-700 shrink-0"></span>
                 Minimum recording duration is 40 seconds.
               </p>
               <p className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+                <span className="w-1.5 h-1.5 rounded-none bg-blue-700 shrink-0"></span>
                 Maximum recording duration is 60 seconds (1 minute).
               </p>
               <p className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+                <span className="w-1.5 h-1.5 rounded-none bg-blue-700 shrink-0"></span>
                 Ensure good lighting and clear audio before recording.
               </p>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-outline-variant">
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-300 dark:border-slate-700">
               <button
                 type="button"
                 onClick={() => setShowRecordModal(false)}
-                className="px-4 py-2.5 bg-surface-container-high border border-outline-variant hover:bg-surface-container-highest rounded-xl text-xs font-semibold text-on-surface-variant transition-all"
+                className="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-none text-xs font-headline font-bold text-slate-800 dark:text-slate-200 transition-all cursor-pointer shadow-2xs"
               >
                 Cancel
               </button>
@@ -837,7 +821,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                   setShowRecordModal(false);
                   startCamera();
                 }}
-                className="px-5 py-2.5 bg-primary text-on-primary rounded-xl text-xs font-bold hover:brightness-105 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
+                className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
               >
                 <Camera className="w-4 h-4" />
                 Continue to Camera

@@ -733,14 +733,13 @@ export default function StudentProfile({
 
   return (
     <div className="w-full max-w-[1400px] mx-auto space-y-8 animate-fade-in">
-      <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-success-container border border-success/30 text-on-success-container rounded-xl shadow-[var(--shadow-floating)] transition-all duration-500 ease-in-out ${showUploadSuccess
+      <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-500/40 text-emerald-900 dark:text-emerald-200 rounded-none shadow-md transition-all duration-500 ease-in-out ${showUploadSuccess
           ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
           : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
         }`}>
-        {/* <CheckCircle className="w-5 h-5 text-success animate-bounce" /> */}
         <div className="flex flex-col">
-          <span className="text-xs font-headline font-medium tracking-wider">Success</span>
-          <span className="text-[11px] opacity-90">Photo uploaded successfully!</span>
+          <span className="text-xs font-headline font-bold uppercase tracking-wider">Success</span>
+          <span className="text-xs font-sans">Photo uploaded successfully!</span>
         </div>
       </div>
       <PageHeader
@@ -748,71 +747,67 @@ export default function StudentProfile({
         subtitle="Update your professional details, social portfolios, academic history, and self-rate your proficiencies"
         action={
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <Button
+            <button
               type="button"
               onClick={handleDownloadGeneratedResume}
-              loading={generatingPdf}
-              variant="outline"
-              size="sm"
-              className="font-headline font-medium tracking-wider text-xs px-3.5 py-2 flex items-center gap-2 border-outline-variant bg-surface-container-low hover:bg-surface-container transition-all text-on-surface cursor-pointer"
+              disabled={generatingPdf}
+              className="font-headline font-bold text-xs px-4 py-2 flex items-center gap-2 border border-slate-300 dark:border-slate-700 bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 hover:border-blue-700 hover:text-blue-800 dark:hover:text-blue-300 rounded-none shadow-2xs transition-colors cursor-pointer"
             >
-              <FileText className="w-3.5 h-3.5 text-primary" />
+              <FileText className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
               <span>{generatingPdf ? 'Generating PDF...' : 'Generate Resume'}</span>
-            </Button>
-            <Button
+            </button>
+            <button
               type="submit"
               form="student-profile-form"
-              loading={submittingProfile}
-              disabled={!isSaveActive}
-              size="sm"
-              className="font-headline font-medium tracking-wider text-xs  disabled:opacity-40 disabled:pointer-events-none py-2"
+              disabled={!isSaveActive || submittingProfile}
+              className="font-headline font-bold text-xs px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-none shadow-xs disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer"
             >
-              Save Profile
-            </Button>
+              {submittingProfile ? 'Saving...' : 'Save Profile'}
+            </button>
           </div>
         }
       />
 
       {/* Overall Profile Completion Widget */}
-      <div className="bg-surface-container border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+      <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0 border border-primary/20">
+            <div className="w-12 h-12 rounded-none bg-blue-50 dark:bg-blue-950/70 text-blue-800 dark:text-blue-300 flex items-center justify-center font-headline font-extrabold text-sm shrink-0 border border-blue-400 dark:border-blue-600 shadow-2xs">
               {overallCompletion}%
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-xs sm:text-sm font-headline font-medium text-on-surface tracking-wider">
+                <h3 className="text-xs sm:text-sm font-headline font-bold text-slate-900 dark:text-slate-100 tracking-wider">
                   Overall Profile Completion
                 </h3>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full font-headline font-medium tracking-wider ${
+                <span className={`text-[10px] px-2 py-0.5 rounded-none font-headline font-bold tracking-wider uppercase border ${
                   overallCompletion === 100
-                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-300 border-emerald-400 dark:border-emerald-700'
                     : overallCompletion >= 70
-                    ? 'bg-primary/15 text-primary border border-primary/30'
-                    : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                    ? 'bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-300 border-blue-400 dark:border-blue-700'
+                    : 'bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border-amber-400 dark:border-amber-700'
                 }`}>
                   {overallCompletion === 100 ? 'All-Star (Complete)' : overallCompletion >= 70 ? 'Strong Profile' : 'In Progress'}
                 </span>
               </div>
-              <p className="text-[11px] text-on-surface-variant font-sans font-normal mt-0.5">
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-sans mt-0.5">
                 {overallCompletion === 100 ? (
                   'Your profile is 100% completed and optimized for recruiter discovery.'
                 ) : (
                   <>
-                    <span className="font-medium text-on-surface">To reach 100%:</span> Add {missingProfileItems.join(', ')}.
+                    <span className="font-bold text-slate-900 dark:text-slate-100">To reach 100%:</span> Add {missingProfileItems.join(', ')}.
                   </>
                 )}
               </p>
             </div>
           </div>
           <div className="text-right shrink-0">
-            <span className="text-base font-headline font-bold text-primary">{overallCompletion}%</span>
+            <span className="text-base sm:text-lg font-headline font-extrabold text-blue-700 dark:text-blue-400">{overallCompletion}%</span>
           </div>
         </div>
-        <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden border border-outline-variant/60">
+        <div className="w-full bg-slate-200 dark:bg-slate-800 h-2.5 rounded-none overflow-hidden border border-slate-300 dark:border-slate-700">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-primary via-emerald-600 to-emerald-500 transition-all duration-500 ease-out"
+            className="h-full rounded-none bg-gradient-to-r from-blue-700 via-blue-600 to-emerald-600 transition-all duration-500 ease-out"
             style={{ width: `${overallCompletion}%` }}
           />
         </div>
@@ -821,24 +816,24 @@ export default function StudentProfile({
       {feedbackMsg && (() => {
         const isErr = /failed|error|invalid|denied/i.test(feedbackMsg);
         return (
-          <div className={`p-4 rounded-xl border text-sm flex items-center gap-3 w-full animate-fade-in transition-all duration-300 ${
+          <div className={`p-4 rounded-none border text-xs sm:text-sm font-sans flex items-center gap-3 w-full animate-fade-in transition-all duration-300 ${
             isErr
-              ? 'border-rose-500/30 bg-rose-500/10 text-rose-800 dark:text-rose-300'
-              : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
+              ? 'border-rose-400 dark:border-rose-700 bg-rose-50 dark:bg-rose-950/50 text-rose-900 dark:text-rose-200'
+              : 'border-emerald-400 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-200'
           }`}>
             {isErr ? (
               <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
             ) : (
               <CheckCircle className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
             )}
-            <span className="font-medium text-xs sm:text-sm">{feedbackMsg}</span>
+            <span className="font-semibold">{feedbackMsg}</span>
           </div>
         );
       })()}
 
-      <form id="student-profile-form" onSubmit={handleSubmit} className="bg-surface-container border border-outline-variant rounded-2xl flex flex-col justify-between min-h-[620px] shadow-sm overflow-hidden relative">
+      <form id="student-profile-form" onSubmit={handleSubmit} className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none flex flex-col justify-between min-h-[620px] shadow-2xs overflow-hidden relative">
         {/* Top Horizontal Stepper Navigation integrated as container header */}
-        <div className="bg-surface-container-low/60 border-b border-outline-variant p-3 sm:p-4 overflow-x-auto custom-scrollbar">
+        <div className="bg-slate-50 dark:bg-slate-900/90 border-b border-slate-300 dark:border-slate-700 p-3 sm:p-4 overflow-x-auto custom-scrollbar">
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-max">
             {tabsList.map((tab, idx) => {
               const isActive = profileTab === tab.id;
@@ -849,27 +844,27 @@ export default function StudentProfile({
                   <button
                     type="button"
                     onClick={() => setProfileTab(tab.id)}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-headline font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer ${
+                    className={`px-3.5 py-2 rounded-none text-xs font-headline font-bold transition-all duration-150 flex items-center gap-2 cursor-pointer ${
                       isActive
-                        ? 'bg-primary text-on-primary shadow-sm ring-2 ring-primary/25 font-semibold scale-[1.02]'
+                        ? 'bg-blue-700 text-white shadow-xs'
                         : isPast
-                          ? 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest hover:text-primary border border-outline-variant'
-                          : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border border-outline-variant/60'
+                          ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:border-blue-600'
+                          : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
                     }`}
                   >
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-sans font-medium shrink-0 ${
+                    <span className={`w-5 h-5 rounded-none flex items-center justify-center text-[10px] font-headline font-bold shrink-0 ${
                       isActive
-                        ? 'bg-on-primary text-primary font-bold'
+                        ? 'bg-white text-blue-700'
                         : isPast
-                          ? 'bg-primary/20 text-primary font-semibold'
-                          : 'bg-surface-container-highest text-on-surface-variant'
+                          ? 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300'
+                          : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                     }`}>
                       {isPast ? '✓' : idx + 1}
                     </span>
-                    <span className="whitespace-nowrap">{tab.label}</span>
+                    <span className="whitespace-nowrap tracking-wider">{tab.label}</span>
                   </button>
                   {idx < tabsList.length - 1 && (
-                    <ChevronRight className="w-3.5 h-3.5 text-on-surface-variant/40 shrink-0 select-none" />
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-600 shrink-0 select-none" />
                   )}
                 </React.Fragment>
               );
@@ -884,19 +879,18 @@ export default function StudentProfile({
           {/* Panel 1: General */}
           {profileTab === 'general' && (
             <div className="space-y-6">
-              <div className="border-b border-outline-variant pb-3">
-                <h3 className="text-lg font-headline font-bold text-on-surface">General Information</h3>
-                {/* <p className="text-xs text-on-surface-variant font-sans font-normal mt-0.5">Manage your personal details, profile avatar, and primary contact information.</p> */}
+              <div className="border-b border-slate-300 dark:border-slate-700 pb-3 flex items-center justify-between">
+                <h3 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100 tracking-tight">General Information</h3>
               </div>
 
               {/* Profile Top Showcase Banner (Horizontal layout: Avatar + Name & Email) */}
-              <div className="p-5 sm:p-6 bg-surface-container-low border border-outline-variant rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-5 shadow-2xs">
+              <div className="p-5 sm:p-6 bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none flex flex-col sm:flex-row items-center justify-between gap-5 shadow-2xs">
                 <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 text-center sm:text-left w-full sm:w-auto">
-                  {/* Avatar circle with photo / initials */}
+                  {/* Avatar square with photo / initials */}
                   <div className="relative group shrink-0">
-                    <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-headline font-bold text-2xl sm:text-3xl overflow-hidden shrink-0 shadow-sm ring-4 ring-outline-variant/40">
+                    <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-none bg-blue-50 dark:bg-blue-950/70 border-2 border-blue-400 dark:border-blue-600 text-blue-800 dark:text-blue-300 flex items-center justify-center font-headline font-extrabold text-2xl sm:text-3xl overflow-hidden shrink-0 shadow-2xs">
                       {profilePic ? (
-                        <img src={profilePic} alt="Profile preview" className="w-full h-full object-cover" />
+                        <img src={profilePic} alt="Profile preview" className="w-full h-full object-cover rounded-none" />
                       ) : (
                         profile?.name?.charAt(0) || 'S'
                       )}
@@ -905,14 +899,14 @@ export default function StudentProfile({
 
                   {/* Name and Email side-by-side horizontally */}
                   <div className="space-y-1 min-w-0">
-                    <h3 className="text-lg sm:text-xl font-headline font-bold text-on-surface tracking-tight truncate">
+                    <h3 className="text-lg sm:text-xl font-headline font-bold text-slate-900 dark:text-slate-100 tracking-tight truncate">
                       {profile?.name || 'Your Name'}
                     </h3>
-                    <p className="text-xs sm:text-sm text-on-surface-variant font-sans font-normal truncate">
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-sans truncate">
                       {profileEmail || 'name@domain.com'}
                     </p>
                     {username && (
-                      <p className="text-xs text-primary font-sans font-medium">
+                      <p className="text-xs text-blue-700 dark:text-blue-400 font-sans font-bold">
                         @{username}
                       </p>
                     )}
@@ -921,7 +915,7 @@ export default function StudentProfile({
 
                 {/* Photo Upload / Remove Buttons */}
                 <div className="flex items-center gap-2.5 shrink-0">
-                  <label className="px-3.5 py-2 bg-primary text-on-primary hover:bg-primary/90 text-xs font-headline font-medium rounded-xl cursor-pointer transition-all shadow-xs flex items-center gap-1.5">
+                  <label className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white text-xs font-headline font-bold rounded-none cursor-pointer transition-all shadow-xs flex items-center gap-1.5">
                     <Camera className="w-3.5 h-3.5" />
                     <span>{compressing ? 'Processing...' : 'Upload Photo'}</span>
                     <input
@@ -936,7 +930,7 @@ export default function StudentProfile({
                     <button
                       type="button"
                       onClick={() => setProfilePic('')}
-                      className="px-3 py-2 bg-error-container border border-error/20 text-xs font-headline font-medium text-on-error-container rounded-xl hover:bg-error-container/80 transition-all cursor-pointer flex items-center gap-1.5"
+                      className="px-3.5 py-2 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-xs font-headline font-bold text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 rounded-none transition-all cursor-pointer flex items-center gap-1.5"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Remove</span>
@@ -945,25 +939,25 @@ export default function StudentProfile({
                 </div>
               </div>
               {photoError && (
-                <p className="text-xs text-error font-medium">{photoError}</p>
+                <p className="text-xs text-rose-600 dark:text-rose-400 font-medium">{photoError}</p>
               )}
 
               {/* Basic Information Section */}
-              <div className="pt-2 border-t border-outline-variant space-y-4">
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-[#000000]" />
-                  <h4 className="text-sm font-headline font-medium text-[#000000] tracking-wider">Basic Information</h4>
+              <div className="pt-2 border-t border-slate-300 dark:border-slate-700 space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
+                  <User className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                  <h4 className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 tracking-wider uppercase">Basic Information</h4>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Row 1, Col 1: First Name */}
                   <div>
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
-                      First Name <span className="text-red-500 font-bold">*</span>
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                      First Name <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <input
                       type="text"
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
                       value={firstName}
                       onChange={e => {
                         const val = e.target.value;
@@ -977,12 +971,12 @@ export default function StudentProfile({
 
                   {/* Row 1, Col 2: Last Name */}
                   <div>
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
-                      Last Name <span className="text-red-500 font-bold">*</span>
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                      Last Name <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <input
                       type="text"
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
                       value={lastName}
                       onChange={e => {
                         const val = e.target.value;
@@ -996,22 +990,22 @@ export default function StudentProfile({
 
                   {/* Row 2, Col 1: Username */}
                   <div>
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
-                      Username <span className="text-red-500 font-bold">*</span>
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                      Username <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <div className="relative">
                       <input
                         type="text"
-                        className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
                         value={username || ''}
                         onChange={handleUsernameChange}
                         placeholder="e.g. johndoe"
                         required
                       />
                       {usernameMsg && (
-                        <p className={`text-[10px] mt-1.5 font-medium ${usernameStatus === 'available' ? 'text-success' :
-                            usernameStatus === 'loading' ? 'text-warning animate-pulse' :
-                              'text-error'
+                        <p className={`text-[11px] mt-1.5 font-sans font-medium ${usernameStatus === 'available' ? 'text-emerald-600 dark:text-emerald-400' :
+                            usernameStatus === 'loading' ? 'text-amber-600 dark:text-amber-400 animate-pulse' :
+                              'text-rose-600 dark:text-rose-400'
                           }`}>
                           {usernameMsg}
                         </p>
@@ -1021,17 +1015,17 @@ export default function StudentProfile({
 
                   {/* Row 2, Col 2: Date of Birth */}
                   <div>
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
-                      Date of Birth <span className="text-red-500 font-bold">*</span>
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                      Date of Birth <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <input
                       type="date"
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                       value={dob}
                       onChange={e => setDob(e.target.value)}
                     />
                     {isUnderage && (
-                      <p className="text-[10px] text-error font-medium mt-1.5 animate-pulse">
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1.5 animate-pulse">
                         ✗ You must be at least 17 years old to access this platform.
                       </p>
                     )}
@@ -1039,13 +1033,13 @@ export default function StudentProfile({
 
                   {/* Row 3: Professional Summary (Full Width - Auto-Expanding) */}
                   <div className="col-span-1 md:col-span-2">
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
-                      Professional Summary <span className="text-red-500 font-bold">*</span>
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                      Professional Summary <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <textarea
                       ref={bioRef}
                       rows="3"
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal resize-none min-h-[80px] overflow-hidden leading-relaxed"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs resize-none min-h-[80px] overflow-hidden leading-relaxed"
                       value={bio}
                       onChange={e => {
                         setBio(e.target.value);
@@ -1060,12 +1054,12 @@ export default function StudentProfile({
 
                   {/* Row 4, Col 1: Phone Number */}
                   <div>
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
-                      Phone Number <span className="text-red-500 font-bold">*</span>
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                      Phone Number <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <div className="flex gap-2">
                       <select
-                        className="bg-surface-container-low border border-outline-variant rounded-xl px-2.5 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface w-24 shrink-0 font-sans font-normal"
+                        className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-2.5 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 w-24 shrink-0 font-sans font-medium shadow-2xs"
                         value={countryCode}
                         onChange={handleCountryCodeChange}
                       >
@@ -1081,7 +1075,7 @@ export default function StudentProfile({
                       <div className="relative flex-1">
                         <input
                           type="text"
-                          className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
                           value={localPhone}
                           onChange={handleLocalPhoneChange}
                           placeholder="Enter mobile number"
@@ -1089,18 +1083,18 @@ export default function StudentProfile({
                       </div>
                     </div>
                     {phoneWarning && (
-                      <p className="text-[10px] text-error mt-1.5 font-medium">{phoneWarning}</p>
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-1.5 font-sans font-semibold">{phoneWarning}</p>
                     )}
                   </div>
 
                   {/* Row 4, Col 2: Email Address */}
                   <div>
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
-                      Email Address <span className="text-red-500 font-bold">*</span>
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                      Email Address <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <input
                       type="email"
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
                       value={profileEmail}
                       onChange={e => setProfileEmail(e.target.value)}
                       placeholder="name@domain.com"
@@ -1109,11 +1103,11 @@ export default function StudentProfile({
 
                   {/* Row 5, Col 1: Gender */}
                   <div>
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
-                      Gender <span className="text-red-500 font-bold">*</span>
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                      Gender <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <select
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
                       value={gender}
                       onChange={e => setGender(e.target.value)}
                     >
@@ -1127,22 +1121,22 @@ export default function StudentProfile({
 
                   {/* Row 5, Col 2: Resume URL (Upload A Drive URL) */}
                   <div>
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
-                      Resume URL (Upload A Drive URL)
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                      Resume URL (Google Drive URL)
                     </label>
                     <input
                       type="url"
-                      className={`w-full bg-surface-container-low border rounded-xl px-4 py-3 text-xs focus:outline-none transition-all text-on-surface font-sans font-normal ${
+                      className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs ${
                         isInvalidResumeUrl
-                          ? 'border-error focus:border-error ring-1 ring-error/30'
-                          : 'border-outline-variant focus:border-primary'
+                          ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                          : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
                       }`}
                       value={resumeUrl}
                       onChange={e => setResumeUrl(e.target.value)}
                       placeholder="https://drive.google.com/your-resume.pdf"
                     />
                     {isInvalidResumeUrl && (
-                      <p className="text-[10px] text-error font-medium mt-1.5">
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1.5">
                         * Only valid Google Drive URLs are accepted.
                       </p>
                     )}
@@ -1150,11 +1144,11 @@ export default function StudentProfile({
 
                   {/* Row 6, Col 1: LinkedIn Profile Link */}
                   <div>
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
                       LinkedIn Profile Link
                     </label>
                     <div className="relative flex items-center">
-                      <div className="absolute left-3.5 pointer-events-none text-on-surface-variant flex items-center">
+                      <div className="absolute left-3.5 pointer-events-none text-slate-500 flex items-center">
                         <img
                           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAABW0lEQVR4nO2ZvUoDQRRGjyh2/oC2goW+ge+g4C5aikI6S1/BRgJ5EJ/BThP1QewUfxB0U6W5sjCNYXZnZi32jtwDXxPuzH6HzWazCRiG0ZUjYAJMAek5U2AMlKkSIwXlpSHDlDMhylPEiEwUFJVA7mJEKgVFJZDvGBHJJEH6LigmMkfb4hfgBNhwOQPechTZV/RxHaRt8apnfi1HkdIzX+Qo8g4MgE2X+hp5zVFEFCVI3wXFRObosjhl5tHdi7aAZWAF2AMugY8cROob50Hg2OvAjXaRnZiDA0vAg2aRFLaBWQ4iixEz15pFLoBnN/cEnLfMnmoVOU58/t7VKnLfsGf9GwEdvoz2JvLZsGf9uo8FrSJ/3VdMBBPxYiKYCCYiJuJHTIT2xZoS5N+IVApKSiBfMSJjBUUlkNsYkVJBUQnkkEiGCspKQ65IpHD/nmq4Zir3doo+E4Zh8IsfFdRDh8Z3YCsAAAAASUVORK5CYII="
                           alt="LinkedIn"
@@ -1163,7 +1157,7 @@ export default function StudentProfile({
                       </div>
                       <input
                         type="url"
-                        className="w-full bg-surface-container-low border border-outline-variant rounded-xl pl-10 pr-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none pl-10 pr-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
                         value={socialLinks?.linkedin || ''}
                         onChange={e => setSocialLinks({ ...socialLinks, linkedin: e.target.value, showLinkedin: true })}
                         placeholder="https://linkedin.com/in/username"
@@ -1173,11 +1167,11 @@ export default function StudentProfile({
 
                   {/* Row 6, Col 2: Personal Portfolio Link */}
                   <div>
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
                       Personal Portfolio Link
                     </label>
                     <div className="relative flex items-center">
-                      <div className="absolute left-3.5 pointer-events-none text-on-surface-variant flex items-center">
+                      <div className="absolute left-3.5 pointer-events-none text-slate-500 flex items-center">
                         <img
                           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAAByElEQVR4nO2YzStEURiHn/JR2LCQKWQUkRUlHzsr/gUslLUFZWNlZaZs5Z/QZEmxVaSoYW2hFOUrxqyUObp13MY0M/frXPe9uk/9ms095/09zZ3TnQsJ/5MeIAcUAOUy1rX7wCCCJF48CFTGWtuNAHK60IGWcot17aFeu4cACrqMF4kfevXaNwSgdKJab4xEJGyRFJAF8kAxwGlkOkXdKQN0OUksCCuvauQDmK8lsQiUBJRULlOqJpPSllGXUz6+mV+3WVZAKb/ZKhe5ElDIb6wDwCaOt5XSsbrbhDnoC3jVn2HNsDG98QOwCYwCTXrGLvAZJ5FjoIPqtOhj/km6yC3QijP9hmVsTG24invWJIuMeRDpkyyS9iDSLFlkyoNIt2SRDQ8iS5JFpj2IjEgWGfYg0ilZZAdocCmSkSyigEkXEmnDM21MbrqNM+txECkCQ3UkBgK+YlV/JWLlpo7IRQjzbFSYm1dwHyeRxzoi13EReQZm64hMAHeSRfLACtCOM23AMnAqSSQPzOCfceAkapFL/fc1KI3AUZQic5gjyENkYBHrwc8k71H+RiTEJuoiiQiJCCJjE3WRRIQKkXMBZfzmrFwkASF8AwtIav6AvpvW"
                           alt="Portfolio"
@@ -1186,7 +1180,7 @@ export default function StudentProfile({
                       </div>
                       <input
                         type="url"
-                        className="w-full bg-surface-container-low border border-outline-variant rounded-xl pl-10 pr-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none pl-10 pr-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
                         value={socialLinks?.portfolio || ''}
                         onChange={e => setSocialLinks({ ...socialLinks, portfolio: e.target.value, showPortfolio: true })}
                         placeholder="https://myportfolio.com"
@@ -1197,21 +1191,21 @@ export default function StudentProfile({
               </div>
 
               {/* Work Preferences & Location Block */}
-              <div className="pt-4 border-t border-outline-variant space-y-4">
-                <div className="flex items-center gap-2">
-                  <Briefcase className="w-4 h-4 text-[#000000]" />
-                  <h3 className="text-sm font-headline font-medium tracking-wider text-[#000000]">Work Preferences & Location</h3>
+              <div className="pt-4 border-t border-slate-300 dark:border-slate-700 space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
+                  <Briefcase className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                  <h3 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase">Work Preferences & Location</h3>
                 </div>
 
                 {/* Mode of Work and Type of Work as Dropdowns */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Mode of Work Dropdown */}
                   <div>
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
-                      Mode of Work<span className="text-red-500 font-bold"> *</span>
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                      Mode of Work <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <select
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
                       value={preferredWorkModes[0] || ''}
                       onChange={e => setPreferredWorkModes(e.target.value ? [e.target.value] : [])}
                     >
@@ -1224,11 +1218,11 @@ export default function StudentProfile({
 
                   {/* Type of Work Looking For Dropdown */}
                   <div>
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant mb-2">
-                      Type of Work Looking For<span className="text-red-500 font-bold"> *</span>
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                      Type of Work Looking For <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <select
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs focus:border-primary focus:outline-none transition-all text-on-surface font-sans font-normal"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
                       value={preferredWorkTypes[0] || ''}
                       onChange={e => setPreferredWorkTypes(e.target.value ? [e.target.value] : [])}
                     >
@@ -1244,8 +1238,8 @@ export default function StudentProfile({
                 {/* Preferred Location in India */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center flex-wrap gap-2">
-                    <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant">
-                      Preferred Location(s) in India <span className="text-red-500 font-bold">*</span>
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 uppercase">
+                      Preferred Location(s) in India <span className="text-rose-500 font-bold">*</span>
                     </label>
 
                     {/* Any Location Checkbox */}
@@ -1254,9 +1248,9 @@ export default function StudentProfile({
                         type="checkbox"
                         checked={openToAnyLocation}
                         onChange={e => setOpenToAnyLocation(e.target.checked)}
-                        className="rounded border-outline-variant text-primary focus:ring-0 w-4 h-4 cursor-pointer"
+                        className="rounded-none border-slate-300 dark:border-slate-700 text-blue-700 focus:ring-0 w-4 h-4 cursor-pointer"
                       />
-                      <span className="text-xs font-headline font-medium text-on-surface-variant">Any Location / Open to Relocate</span>
+                      <span className="text-xs font-headline font-bold text-slate-800 dark:text-slate-200">Any Location / Open to Relocate</span>
                     </label>
                   </div>
 
@@ -1265,7 +1259,7 @@ export default function StudentProfile({
                     <input
                       type="text"
                       placeholder="Search district, city or state (e.g. Hyderabad, Telangana)..."
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-xs text-on-surface focus:outline-none focus:border-primary transition-all font-sans font-normal"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 transition-all font-sans font-medium shadow-2xs"
                       value={locationSearchQuery}
                       onChange={e => {
                         setLocationSearchQuery(e.target.value);
@@ -1275,9 +1269,9 @@ export default function StudentProfile({
                     />
 
                     {isLocationDropdownOpen && (
-                      <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-surface-container-high border border-outline-variant rounded-xl shadow-xl z-30 custom-scrollbar divide-y divide-outline-variant/30">
+                      <div className="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none shadow-xl z-30 custom-scrollbar divide-y divide-slate-200 dark:divide-slate-800">
                         {INDIAN_STATES.filter(state => state.toLowerCase().includes(locationSearchQuery.toLowerCase())).length === 0 ? (
-                          <div className="p-3 text-xs text-on-surface-variant text-center font-sans font-normal">No matching districts or states found</div>
+                          <div className="p-3 text-xs text-slate-500 text-center font-sans">No matching districts or states found</div>
                         ) : (
                           INDIAN_STATES.filter(state => state.toLowerCase().includes(locationSearchQuery.toLowerCase())).map(state => {
                             const isAdded = preferredLocations.includes(state);
@@ -1285,12 +1279,12 @@ export default function StudentProfile({
                               <div
                                 key={state}
                                 onClick={() => addLocation(state)}
-                                className={`px-4 py-2.5 text-xs font-sans font-normal flex justify-between items-center cursor-pointer transition-colors ${
-                                  isAdded ? 'bg-primary/10 text-primary font-bold' : 'hover:bg-surface-container-highest text-on-surface'
+                                className={`px-4 py-2.5 text-xs font-sans flex justify-between items-center cursor-pointer transition-colors ${
+                                  isAdded ? 'bg-blue-50 dark:bg-blue-950/70 text-blue-800 dark:text-blue-300 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200'
                                 }`}
                               >
                                 <span>{state}</span>
-                                {isAdded && <span className="text-[10px] bg-primary text-on-primary px-1.5 py-0.5 rounded font-sans">Added</span>}
+                                {isAdded && <span className="text-[10px] bg-blue-700 text-white px-1.5 py-0.5 rounded-none font-sans font-bold">Added</span>}
                               </div>
                             );
                           })
@@ -1302,15 +1296,15 @@ export default function StudentProfile({
                   {/* Selected Locations Badges */}
                   <div className="flex flex-wrap gap-2 pt-1">
                     {preferredLocations.length === 0 ? (
-                      <span className="text-xs text-on-surface-variant font-sans font-normal italic">No specific locations selected yet.</span>
+                      <span className="text-xs text-slate-500 font-sans italic">No specific locations selected yet.</span>
                     ) : (
                       preferredLocations.map(loc => (
-                        <span key={loc} className="px-3 py-1 bg-surface-container border border-outline-variant rounded-xl text-xs font-sans font-normal text-on-surface flex items-center gap-1.5 shadow-2xs">
+                        <span key={loc} className="px-3 py-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-sans font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1.5 shadow-2xs">
                           <span>📍 {loc}</span>
                           <button
                             type="button"
                             onClick={() => removeLocation(loc)}
-                            className="text-on-surface-variant hover:text-error transition-colors text-xs font-bold px-1 cursor-pointer"
+                            className="text-slate-500 hover:text-rose-600 transition-colors text-xs font-bold px-1 cursor-pointer"
                           >
                             ✕
                           </button>
@@ -1337,15 +1331,15 @@ export default function StudentProfile({
             {/* Panel 3: Education */}
             {profileTab === 'education' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center border-b border-outline-variant pb-3">
-                  <h3 className="text-lg font-headline font-bold text-on-surface">Education History</h3>
+                <div className="flex justify-between items-center border-b border-slate-300 dark:border-slate-700 pb-3">
+                  <h3 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100">Education History</h3>
                   <div className="flex flex-col items-end gap-1.5">
-                    <span className="text-xs font-sans font-normal tracking-wider text-secondary">{educationList.length} Items Added</span>
+                    <span className="text-xs font-sans font-medium tracking-wider text-slate-600 dark:text-slate-400">{educationList.length} Items Added</span>
                     {educationList.length > 0 && (
                       <button
                         type="button"
                         onClick={openAddEduModal}
-                        className="px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-headline font-medium hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                        className="px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         Add Education
@@ -1356,20 +1350,20 @@ export default function StudentProfile({
 
                 {/* Empty State */}
                 {educationList.length === 0 && (
-                  <div className="p-8 sm:p-12 border border-outline-variant border-dashed rounded-2xl bg-surface-container-low/50 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in">
-                    <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface-variant">
-                      <GraduationCap className="w-6 h-6 text-primary" />
+                  <div className="p-8 sm:p-12 border border-slate-300 dark:border-slate-700 border-dashed rounded-none bg-slate-50 dark:bg-slate-900/40 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in shadow-2xs">
+                    <div className="w-12 h-12 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-300">
+                      <GraduationCap className="w-6 h-6" />
                     </div>
                     <div className="space-y-1">
-                      <h4 className="text-sm font-headline font-bold text-on-surface">You haven't added any record</h4>
-                      <p className="text-xs font-sans font-normal text-on-surface-variant max-w-sm">
+                      <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">You haven't added any record</h4>
+                      <p className="text-xs font-sans text-slate-600 dark:text-slate-400 max-w-sm">
                         Add your school, college, or university education to display your academic background.
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={openAddEduModal}
-                      className="px-4 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                      className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
                       Add Education
@@ -1383,39 +1377,39 @@ export default function StudentProfile({
                     {educationList.map((edu, idx) => (
                       <div
                         key={idx}
-                        className="p-5 sm:p-6 bg-surface-container-low border border-outline-variant hover:border-primary/40 rounded-2xl flex flex-col gap-3.5 shadow-2xs hover:shadow-sm transition-all overflow-hidden w-full max-w-full"
+                        className="p-5 sm:p-6 bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none flex flex-col gap-3.5 shadow-2xs transition-all overflow-hidden w-full max-w-full"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div className="space-y-1.5 flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="px-2.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md text-[10px] font-headline font-bold tracking-wider">
+                              <span className="px-2.5 py-0.5 bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-200 border border-blue-400 dark:border-blue-600 rounded-none text-[10px] font-headline font-bold tracking-wider">
                                 {edu.eduType || 'Degree'}
                               </span>
                             </div>
 
                             <div className="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-3">
-                              <h4 className="text-base sm:text-lg font-headline font-bold text-on-surface tracking-tight break-words">
+                              <h4 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100 tracking-tight break-words">
                                 {edu.degree || edu.eduType}
                               </h4>
                               {edu.fieldOfStudy && (
-                                <p className="text-xs sm:text-sm font-sans font-semibold text-on-surface-variant flex items-center gap-1.5">
+                                <p className="text-xs sm:text-sm font-sans font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                                   <span>{edu.fieldOfStudy}</span>
                                 </p>
                               )}
                             </div>
 
-                            <p className="text-xs sm:text-sm font-sans font-medium text-on-surface flex items-center gap-1.5">
+                            <p className="text-xs sm:text-sm font-sans font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                               🏛️ <span className="font-semibold">{edu.institute}</span>
                             </p>
 
                             <div className="flex flex-wrap items-center gap-2 pt-1">
                               {(edu.startDate || edu.endDate) && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-sans font-medium text-on-surface">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-sans font-medium text-slate-800 dark:text-slate-200 shadow-2xs">
                                   🗓️ {edu.startDate || 'N/A'} - {edu.endDate || 'N/A'}
                                 </span>
                               )}
                               {edu.gradeValue && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 border border-primary/20 rounded-lg text-xs font-headline font-semibold text-primary">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 rounded-none text-xs font-headline font-bold text-blue-900 dark:text-blue-200 shadow-2xs">
                                   ⭐ {edu.gradeType || 'Grade'}: {edu.gradeValue}
                                 </span>
                               )}
@@ -1439,7 +1433,7 @@ export default function StudentProfile({
                                 setEditingEduIdx(idx);
                                 setActiveModal('education');
                               }}
-                              className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                              className="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950 text-blue-700 dark:text-blue-300 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
                             >
                               Edit
                             </button>
@@ -1456,7 +1450,7 @@ export default function StudentProfile({
                                   closeModal();
                                 }
                               }}
-                              className="px-3 py-1.5 bg-error-container hover:bg-error-container/80 text-on-error-container border border-error/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                              className="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
                             >
                               Delete
                             </button>
@@ -1475,24 +1469,24 @@ export default function StudentProfile({
                       if (e.target === e.currentTarget) closeModal();
                     }}
                   >
-                    <div className="bg-surface-container border border-outline-variant rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+                    <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                       <button
                         type="button"
                         onClick={closeModal}
-                        className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all cursor-pointer"
+                        className="absolute top-4 right-4 p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-all cursor-pointer"
                       >
                         <X className="w-4 h-4" />
                       </button>
 
-                      <div className="flex items-center gap-3 border-b border-outline-variant pb-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                      <div className="flex items-center gap-3 border-b border-slate-300 dark:border-slate-700 pb-3">
+                        <div className="w-10 h-10 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-300 shrink-0 shadow-2xs">
                           <GraduationCap className="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 className="text-base font-headline font-bold text-on-surface">
+                          <h3 className="text-base font-headline font-bold text-slate-900 dark:text-slate-100">
                             {editingEduIdx !== null ? 'Edit Education Record' : 'Add Education Record'}
                           </h3>
-                          <p className="text-xs font-sans font-normal text-on-surface-variant">
+                          <p className="text-xs font-sans text-slate-600 dark:text-slate-400">
                             {editingEduIdx !== null ? 'Update your academic credentials' : 'Enter details of your school, college, or university'}
                           </p>
                         </div>
@@ -1501,9 +1495,9 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Education Type</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Education Type</label>
                             <select
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               value={newEdu.eduType}
                               onChange={handleEduTypeChange}
                             >
@@ -1527,10 +1521,10 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Institute</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Institute</label>
                             <input
                               type="text"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Enter your Institute Name"
                               value={newEdu.institute}
                               onChange={e => setNewEdu({ ...newEdu, institute: e.target.value })}
@@ -1541,10 +1535,10 @@ export default function StudentProfile({
                         {newEdu.eduType === 'High School' ? (
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Percentage in Class 10</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Percentage in Class 10</label>
                               <input
                                 type="text"
-                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                                 placeholder="e.g. 92%"
                                 value={class10Percent}
                                 onChange={e => handleClass10Change(e.target.value)}
@@ -1552,10 +1546,10 @@ export default function StudentProfile({
                             </div>
 
                             <div>
-                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Percentage in Class 12</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Percentage in Class 12</label>
                               <input
                                 type="text"
-                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                                 placeholder="e.g. 88%"
                                 value={class12Percent}
                                 onChange={e => handleClass12Change(e.target.value)}
@@ -1563,10 +1557,10 @@ export default function StudentProfile({
                             </div>
 
                             <div>
-                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Stream in Class 11</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Stream in Class 11</label>
                               <input
                                 type="text"
-                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                                 placeholder="e.g. Science"
                                 value={class11Stream}
                                 onChange={e => handleStreamChange(e.target.value)}
@@ -1576,10 +1570,10 @@ export default function StudentProfile({
                         ) : (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Degree</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Degree</label>
                               <input
                                 type="text"
-                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                                 placeholder="ex. Bachelor of Education"
                                 value={newEdu.degree}
                                 onChange={e => setNewEdu({ ...newEdu, degree: e.target.value })}
@@ -1587,10 +1581,10 @@ export default function StudentProfile({
                             </div>
 
                             <div>
-                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Field of Study</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Field of Study</label>
                               <input
                                 type="text"
-                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                                 placeholder="ex. Computer Science"
                                 value={newEdu.fieldOfStudy}
                                 onChange={e => setNewEdu({ ...newEdu, fieldOfStudy: e.target.value })}
@@ -1602,29 +1596,29 @@ export default function StudentProfile({
                         {newEdu.eduType !== 'High School' && (
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="md:col-span-1">
-                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Start Date</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Start Date</label>
                               <input
                                 type="date"
-                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                                 value={newEdu.startDate}
                                 onChange={e => setNewEdu({ ...newEdu, startDate: e.target.value })}
                               />
                             </div>
 
                             <div className="md:col-span-1">
-                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">End Date</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">End Date</label>
                               <input
                                 type="date"
-                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                                 value={newEdu.endDate}
                                 onChange={e => setNewEdu({ ...newEdu, endDate: e.target.value })}
                               />
                             </div>
 
                             <div className="md:col-span-1">
-                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Grade Type</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Grade Type</label>
                               <select
-                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                                 value={newEdu.gradeType}
                                 onChange={e => setNewEdu({ ...newEdu, gradeType: e.target.value })}
                               >
@@ -1637,10 +1631,10 @@ export default function StudentProfile({
                             </div>
 
                             <div className="md:col-span-1">
-                              <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Grade Value</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Grade Value</label>
                               <input
                                 type="text"
-                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                                 placeholder="e.g. 9.4 / 92%"
                                 value={newEdu.gradeValue}
                                 onChange={e => setNewEdu({ ...newEdu, gradeValue: e.target.value })}
@@ -1650,7 +1644,7 @@ export default function StudentProfile({
                         )}
                       </div>
 
-                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant">
+                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-300 dark:border-slate-700">
                         <button
                           type="button"
                           onClick={() => {
@@ -1661,7 +1655,7 @@ export default function StudentProfile({
                             setClass11Stream('');
                             closeModal();
                           }}
-                          className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-headline font-medium rounded-xl text-xs hover:bg-surface-container-highest transition-all cursor-pointer"
+                          className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-headline font-bold rounded-none text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs"
                         >
                           Cancel
                         </button>
@@ -1686,7 +1680,7 @@ export default function StudentProfile({
                             setClass11Stream('');
                             closeModal();
                           }}
-                          className="px-5 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                          className="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                         >
                           {editingEduIdx !== null ? 'Save Edit' : 'Add to List'}
                         </button>
@@ -1700,15 +1694,15 @@ export default function StudentProfile({
             {/* Panel 4: Experience */}
             {profileTab === 'experience' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center border-b border-outline-variant pb-3">
-                  <h3 className="text-lg font-headline font-bold text-on-surface">Work Experience</h3>
+                <div className="flex justify-between items-center border-b border-slate-300 dark:border-slate-700 pb-3">
+                  <h3 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100">Work Experience</h3>
                   <div className="flex flex-col items-end gap-1.5">
-                    <span className="text-xs font-sans font-normal tracking-wider text-secondary">{experienceList.length} Items Added</span>
+                    <span className="text-xs font-sans font-medium tracking-wider text-slate-600 dark:text-slate-400">{experienceList.length} Items Added</span>
                     {experienceList.length > 0 && (
                       <button
                         type="button"
                         onClick={openAddExpModal}
-                        className="px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-headline font-medium hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                        className="px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         Add Experience
@@ -1719,23 +1713,23 @@ export default function StudentProfile({
 
                 {/* Verified Gig Stats Card */}
                 {gigExperienceItems.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface-container-high/40 p-4 rounded-xl border border-outline-variant/50">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-none border border-slate-300 dark:border-slate-700 shadow-2xs">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20 shadow-inner">
+                      <div className="w-10 h-10 rounded-none bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 flex items-center justify-center border border-emerald-400 dark:border-emerald-600 shadow-2xs">
                         <Award className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-xs font-sans font-normal text-on-surface-variant">Completed Geeks</p>
-                        <p className="text-xs font-bold text-on-surface">{completedGigsCount} Verified Geeks</p>
+                        <p className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">Completed Geeks</p>
+                        <p className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100">{completedGigsCount} Verified Geeks</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-warning/10 text-warning flex items-center justify-center border border-warning/20 shadow-inner">
-                        <Star className="w-5 h-5 fill-warning/20" />
+                      <div className="w-10 h-10 rounded-none bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 flex items-center justify-center border border-amber-400 dark:border-amber-600 shadow-2xs">
+                        <Star className="w-5 h-5 fill-amber-500" />
                       </div>
                       <div>
-                        <p className="text-xs font-sans font-normal text-on-surface-variant">Average Rating</p>
-                        <p className="text-xs font-bold text-on-surface">{averageRating} / 5.0 Rating</p>
+                        <p className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">Average Rating</p>
+                        <p className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100">{averageRating} / 5.0 Rating</p>
                       </div>
                     </div>
                   </div>
@@ -1743,20 +1737,20 @@ export default function StudentProfile({
 
                 {/* Empty State */}
                 {experienceList.length === 0 && (
-                  <div className="p-8 sm:p-12 border border-outline-variant border-dashed rounded-2xl bg-surface-container-low/50 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in">
-                    <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface-variant">
-                      <Briefcase className="w-6 h-6 text-primary" />
+                  <div className="p-8 sm:p-12 border border-slate-300 dark:border-slate-700 border-dashed rounded-none bg-slate-50 dark:bg-slate-900/40 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in shadow-2xs">
+                    <div className="w-12 h-12 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-300">
+                      <Briefcase className="w-6 h-6" />
                     </div>
                     <div className="space-y-1">
-                      <h4 className="text-sm font-headline font-bold text-on-surface">You haven't added any record</h4>
-                      <p className="text-xs font-sans font-normal text-on-surface-variant max-w-sm">
+                      <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">You haven't added any record</h4>
+                      <p className="text-xs font-sans text-slate-600 dark:text-slate-400 max-w-sm">
                         Add your internships, full-time jobs, or freelance projects to showcase your professional journey.
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={openAddExpModal}
-                      className="px-4 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                      className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
                       Add Experience
@@ -1770,46 +1764,46 @@ export default function StudentProfile({
                     {experienceList.map((exp, idx) => (
                       <div
                         key={idx}
-                        className={`p-5 sm:p-6 border rounded-2xl flex flex-col gap-4 shadow-2xs hover:shadow-sm transition-all overflow-hidden w-full max-w-full ${
+                        className={`p-5 sm:p-6 border rounded-none flex flex-col gap-4 shadow-2xs transition-all overflow-hidden w-full max-w-full ${
                           exp.expType === 'Gig'
-                            ? 'bg-emerald-500/5 border-emerald-500/30'
-                            : 'bg-surface-container-low border-outline-variant hover:border-primary/40'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-400 dark:border-emerald-700'
+                            : 'bg-slate-50 dark:bg-slate-900/60 border-slate-300 dark:border-slate-700 hover:border-blue-600'
                         }`}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div className="space-y-1.5 flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="px-2.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md text-[10px] font-headline font-bold tracking-wider">
+                              <span className="px-2.5 py-0.5 bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-200 border border-blue-400 dark:border-blue-600 rounded-none text-[10px] font-headline font-bold tracking-wider">
                                 {exp.expType || 'Role'}
                               </span>
                               {exp.expType === 'Gig' && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 text-[10px] font-headline font-bold border border-emerald-500/20">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-none bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-300 text-[10px] font-headline font-bold border border-emerald-400 dark:border-emerald-600">
                                   <Award className="w-3 h-3" /> Verified Gig
                                 </span>
                               )}
                               {exp.involvesTech && (
-                                <span className="px-2 py-0.5 bg-secondary/10 text-secondary border border-secondary/20 rounded-md text-[10px] font-headline font-medium">
+                                <span className="px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-600 rounded-none text-[10px] font-headline font-bold">
                                   Tech Role
                                 </span>
                               )}
                             </div>
 
                             <div className="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-3">
-                              <h4 className="text-base sm:text-lg font-headline font-bold text-on-surface tracking-tight break-words">
+                              <h4 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100 tracking-tight break-words">
                                 {exp.designation}
                               </h4>
-                              <p className="text-xs sm:text-sm font-sans font-semibold text-on-surface-variant flex items-center gap-1.5">
+                              <p className="text-xs sm:text-sm font-sans font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                                 <span>🏢 {exp.companyName}</span>
                                 {exp.domain && <span className="opacity-75">• {exp.domain}</span>}
                               </p>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-2 pt-1">
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-sans font-medium text-on-surface">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-sans font-medium text-slate-800 dark:text-slate-200 shadow-2xs">
                                 🗓️ {exp.startDate} to {exp.currentlyWorking ? 'Present' : exp.endDate || 'N/A'}
                               </span>
                               {exp.location && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container border border-outline-variant rounded-lg text-xs font-sans font-medium text-on-surface">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-sans font-medium text-slate-800 dark:text-slate-200 shadow-2xs">
                                   📍 {exp.location}
                                 </span>
                               )}
@@ -1827,7 +1821,7 @@ export default function StudentProfile({
                                   setEditingExpIdx(idx);
                                   setActiveModal('experience');
                                 }}
-                                className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                                className="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950 text-blue-700 dark:text-blue-300 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
                               >
                                 Edit
                               </button>
@@ -1842,7 +1836,7 @@ export default function StudentProfile({
                                     closeModal();
                                   }
                                 }}
-                                className="px-3 py-1.5 bg-error-container hover:bg-error-container/80 text-on-error-container border border-error/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                                className="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
                               >
                                 Delete
                               </button>
@@ -1851,8 +1845,8 @@ export default function StudentProfile({
                         </div>
 
                         {exp.description && (
-                          <div className="pt-2 border-t border-outline-variant/40 w-full overflow-hidden">
-                            <p className="text-xs sm:text-sm font-sans font-normal text-on-surface leading-relaxed bg-surface-container/60 p-3.5 sm:p-4 rounded-xl border border-outline-variant/40 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
+                          <div className="pt-2 border-t border-slate-200 dark:border-slate-700 w-full overflow-hidden">
+                            <p className="text-xs sm:text-sm font-sans font-normal text-slate-800 dark:text-slate-200 leading-relaxed bg-white dark:bg-slate-800/80 p-3.5 sm:p-4 rounded-none border border-slate-200 dark:border-slate-700 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
                               {exp.description}
                             </p>
                           </div>
@@ -1870,24 +1864,24 @@ export default function StudentProfile({
                       if (e.target === e.currentTarget) closeModal();
                     }}
                   >
-                    <div className="bg-surface-container border border-outline-variant rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+                    <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                       <button
                         type="button"
                         onClick={closeModal}
-                        className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all cursor-pointer"
+                        className="absolute top-4 right-4 p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-all cursor-pointer"
                       >
                         <X className="w-4 h-4" />
                       </button>
 
-                      <div className="flex items-center gap-3 border-b border-outline-variant pb-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                      <div className="flex items-center gap-3 border-b border-slate-300 dark:border-slate-700 pb-3">
+                        <div className="w-10 h-10 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-300 shrink-0 shadow-2xs">
                           <Briefcase className="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 className="text-base font-headline font-bold text-on-surface">
+                          <h3 className="text-base font-headline font-bold text-slate-900 dark:text-slate-100">
                             {editingExpIdx !== null ? 'Edit Work Experience' : 'Add Work Experience'}
                           </h3>
-                          <p className="text-xs font-sans font-normal text-on-surface-variant">
+                          <p className="text-xs font-sans text-slate-600 dark:text-slate-400">
                             {editingExpIdx !== null ? 'Update your career information' : 'Enter details of your work, internship, or freelance experience'}
                           </p>
                         </div>
@@ -1896,9 +1890,9 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Experience Type</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Experience Type</label>
                             <select
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               value={newExp.expType}
                               onChange={e => setNewExp({ ...newExp, expType: e.target.value })}
                             >
@@ -1911,10 +1905,10 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Designation</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Designation</label>
                             <input
                               type="text"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Enter your role"
                               value={newExp.designation}
                               onChange={e => setNewExp({ ...newExp, designation: e.target.value })}
@@ -1924,10 +1918,10 @@ export default function StudentProfile({
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Company Name</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Company Name</label>
                             <input
                               type="text"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Enter Company Name"
                               value={newExp.companyName}
                               onChange={e => setNewExp({ ...newExp, companyName: e.target.value })}
@@ -1935,11 +1929,11 @@ export default function StudentProfile({
                           </div>
 
                           <div className="relative">
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Domain of Experience</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Domain of Experience</label>
                             <div className="relative" ref={domainContainerRef}>
                               <input
                                 type="text"
-                                className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary pr-8 font-sans font-normal"
+                                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 pr-8 font-sans font-medium shadow-2xs"
                                 placeholder="Search or select domain"
                                 value={domainSearch || newExp.domain || ''}
                                 onChange={e => {
@@ -1951,7 +1945,7 @@ export default function StudentProfile({
                               />
                               <button
                                 type="button"
-                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                                 onClick={() => setShowDomainDropdown(!showDomainDropdown)}
                               >
                                 <ChevronDown className="w-3.5 h-3.5" />
@@ -1959,11 +1953,11 @@ export default function StudentProfile({
                             </div>
 
                             {showDomainDropdown && (
-                              <div className="absolute z-50 w-full mt-1 bg-surface-container-high border border-outline-variant rounded-xl shadow-floating max-h-56 overflow-y-auto pr-1 py-1 custom-scrollbar">
+                              <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none shadow-xl max-h-56 overflow-y-auto pr-1 py-1 custom-scrollbar divide-y divide-slate-200 dark:divide-slate-800">
                                 {filteredDomains.length === 0 && domainSearch.trim() !== '' && (
                                   <button
                                     type="button"
-                                    className="w-full text-left px-3 py-2 text-xs text-on-surface hover:bg-primary/10 transition-colors font-sans font-normal"
+                                    className="w-full text-left px-3 py-2 text-xs text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-sans"
                                     onClick={() => {
                                       setNewExp({ ...newExp, domain: domainSearch });
                                       setDomainSearch('');
@@ -1977,7 +1971,7 @@ export default function StudentProfile({
                                   <button
                                     type="button"
                                     key={opt}
-                                    className="w-full text-left px-3 py-2 text-xs text-on-surface hover:bg-primary/10 transition-colors"
+                                    className="w-full text-left px-3 py-2 text-xs text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-sans font-medium"
                                     onClick={() => {
                                       setNewExp({ ...newExp, domain: opt });
                                       setDomainSearch('');
@@ -1989,7 +1983,7 @@ export default function StudentProfile({
                                 ))}
                                 <button
                                   type="button"
-                                  className="w-full text-left px-3 py-2 text-xs text-on-surface hover:bg-primary/10 border-t border-outline-variant/30 transition-colors font-bold text-secondary"
+                                  className="w-full text-left px-3 py-2 text-xs text-blue-700 dark:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-headline font-bold"
                                   onClick={() => {
                                     setNewExp({ ...newExp, domain: 'Other' });
                                     setDomainSearch('');
@@ -2005,20 +1999,20 @@ export default function StudentProfile({
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Start Date</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Start Date</label>
                             <input
                               type="date"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                               value={newExp.startDate}
                               onChange={e => setNewExp({ ...newExp, startDate: e.target.value })}
                             />
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">End Date</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">End Date</label>
                             <input
                               type="date"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                               disabled={newExp.currentlyWorking}
                               value={newExp.currentlyWorking ? '' : newExp.endDate}
                               onChange={e => setNewExp({ ...newExp, endDate: e.target.value })}
@@ -2029,19 +2023,19 @@ export default function StudentProfile({
                             <label className="flex items-center gap-2 cursor-pointer select-none">
                               <input
                                 type="checkbox"
-                                className="rounded border-outline-variant text-primary bg-surface-container-low focus:ring-0 w-3.5 h-3.5"
+                                className="rounded-none border-slate-300 dark:border-slate-700 text-blue-700 bg-white dark:bg-slate-900 focus:ring-0 w-3.5 h-3.5"
                                 checked={newExp.currentlyWorking}
                                 onChange={e => setNewExp({ ...newExp, currentlyWorking: e.target.checked, endDate: e.target.checked ? '' : newExp.endDate })}
                               />
-                              <span className="text-[11px] text-on-surface-variant font-medium">Currently Working Here</span>
+                              <span className="text-xs font-headline font-bold text-slate-800 dark:text-slate-200">Currently Working Here</span>
                             </label>
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Location</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Location</label>
                             <input
                               type="text"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="e.g. San Francisco / Remote"
                               value={newExp.location}
                               onChange={e => setNewExp({ ...newExp, location: e.target.value })}
@@ -2050,10 +2044,10 @@ export default function StudentProfile({
                         </div>
 
                         <div>
-                          <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Roles And Responsibilities</label>
+                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Roles And Responsibilities</label>
                           <textarea
                             rows="3"
-                            className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                            className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                             placeholder="List key responsibilities or accomplishments..."
                             value={newExp.description}
                             onChange={e => setNewExp({ ...newExp, description: e.target.value })}
@@ -2061,7 +2055,7 @@ export default function StudentProfile({
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant">
+                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-300 dark:border-slate-700">
                         <button
                           type="button"
                           onClick={() => {
@@ -2070,7 +2064,7 @@ export default function StudentProfile({
                             setDomainSearch('');
                             closeModal();
                           }}
-                          className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-headline font-medium rounded-xl text-xs hover:bg-surface-container-highest transition-all cursor-pointer"
+                          className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-headline font-bold rounded-none text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs"
                         >
                           Cancel
                         </button>
@@ -2093,7 +2087,7 @@ export default function StudentProfile({
                             setDomainSearch('');
                             closeModal();
                           }}
-                          className="px-5 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                          className="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                         >
                           {editingExpIdx !== null ? 'Save Edit' : 'Add to List'}
                         </button>
@@ -2107,15 +2101,15 @@ export default function StudentProfile({
             {/* Panel 5: Certificates */}
             {profileTab === 'certificates' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center border-b border-outline-variant pb-3">
-                  <h3 className="text-lg font-headline font-bold text-on-surface">Certifications</h3>
+                <div className="flex justify-between items-center border-b border-slate-300 dark:border-slate-700 pb-3">
+                  <h3 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100">Certifications</h3>
                   <div className="flex flex-col items-end gap-1.5">
-                    <span className="text-xs font-sans font-normal tracking-wider text-secondary">{certificatesList.length} Items Added</span>
+                    <span className="text-xs font-sans font-medium tracking-wider text-slate-600 dark:text-slate-400">{certificatesList.length} Items Added</span>
                     {certificatesList.length > 0 && (
                       <button
                         type="button"
                         onClick={openAddCertModal}
-                        className="px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-headline font-medium hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                        className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold active:scale-95 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         Add Certificate
@@ -2126,20 +2120,20 @@ export default function StudentProfile({
 
                 {/* Empty State */}
                 {certificatesList.length === 0 && (
-                  <div className="p-8 sm:p-12 border border-outline-variant border-dashed rounded-2xl bg-surface-container-low/50 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in">
-                    <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface-variant">
-                      <Award className="w-6 h-6 text-primary" />
+                  <div className="p-8 sm:p-12 border border-dashed border-slate-300 dark:border-slate-700 rounded-none bg-slate-50 dark:bg-slate-900/60 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in shadow-2xs">
+                    <div className="w-12 h-12 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 shadow-2xs">
+                      <Award className="w-6 h-6" />
                     </div>
                     <div className="space-y-1">
-                      <h4 className="text-sm font-headline font-bold text-on-surface">You haven't added any record</h4>
-                      <p className="text-xs font-sans font-normal text-on-surface-variant max-w-sm">
+                      <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">You haven't added any record</h4>
+                      <p className="text-xs font-sans font-normal text-slate-600 dark:text-slate-400 max-w-sm">
                         Add licenses, verified credentials, and specialized course certifications you have earned.
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={openAddCertModal}
-                      className="px-4 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                      className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
                       Add Certificate
@@ -2153,31 +2147,31 @@ export default function StudentProfile({
                     {certificatesList.map((cert, idx) => (
                       <div
                         key={idx}
-                        className="p-5 sm:p-6 bg-surface-container-low border border-outline-variant hover:border-primary/40 rounded-2xl flex flex-col gap-4 shadow-2xs hover:shadow-sm transition-all overflow-hidden w-full max-w-full"
+                        className="p-5 sm:p-6 bg-surface border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none flex flex-col gap-4 shadow-2xs hover:shadow-xs transition-all overflow-hidden w-full max-w-full"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div className="space-y-1.5 flex-1 min-w-0">
-                            <span className="inline-block px-2.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md text-[10px] font-headline font-bold tracking-wider">
+                            <span className="inline-block px-2.5 py-0.5 bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-200 border border-blue-400 dark:border-blue-600 rounded-none text-[10px] font-headline font-bold tracking-wider">
                               Certification
                             </span>
 
                             <div className="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-3">
-                              <h4 className="text-base sm:text-lg font-headline font-bold text-on-surface tracking-tight break-words">
+                              <h4 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100 tracking-tight break-words">
                                 {cert.title}
                               </h4>
-                              <p className="text-xs sm:text-sm font-sans font-semibold text-on-surface-variant flex items-center gap-1.5">
+                              <p className="text-xs sm:text-sm font-sans font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                                 <span>🏛️ Issued by: {cert.org}</span>
                               </p>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-2 pt-1">
                               {cert.startDate && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-sans font-medium text-on-surface">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-sans font-medium text-slate-800 dark:text-slate-200">
                                   🗓️ Issued: {cert.startDate}
                                 </span>
                               )}
                               {cert.certNumber && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 border border-primary/20 rounded-lg text-xs font-headline font-medium text-primary">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-950/70 border border-blue-300 dark:border-blue-700 rounded-none text-xs font-headline font-bold text-blue-800 dark:text-blue-300">
                                   ID: {cert.certNumber}
                                 </span>
                               )}
@@ -2186,7 +2180,7 @@ export default function StudentProfile({
                                   href={cert.link}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-lg text-xs font-headline font-semibold text-primary transition-all"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold text-blue-700 dark:text-blue-400 transition-all shadow-2xs"
                                 >
                                   🔗 View Link
                                 </a>
@@ -2195,7 +2189,7 @@ export default function StudentProfile({
                                 <a
                                   href={cert.attachment}
                                   download={`certificate_${cert.title.toLowerCase().replace(/\s+/g, '_')}`}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 rounded-lg text-xs font-headline font-semibold text-secondary transition-all"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold text-slate-800 dark:text-slate-200 transition-all shadow-2xs"
                                 >
                                   📥 Download File
                                 </a>
@@ -2213,7 +2207,7 @@ export default function StudentProfile({
                                 setEditingCertIdx(idx);
                                 setActiveModal('certificates');
                               }}
-                              className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                              className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-blue-600 text-slate-800 dark:text-slate-200 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
                             >
                               Edit
                             </button>
@@ -2228,7 +2222,7 @@ export default function StudentProfile({
                                   closeModal();
                                 }
                               }}
-                              className="px-3 py-1.5 bg-error-container hover:bg-error-container/80 text-on-error-container border border-error/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                              className="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
                             >
                               Delete
                             </button>
@@ -2236,8 +2230,8 @@ export default function StudentProfile({
                         </div>
 
                         {cert.description && (
-                          <div className="pt-2 border-t border-outline-variant/40 w-full overflow-hidden">
-                            <p className="text-xs sm:text-sm font-sans font-normal text-on-surface leading-relaxed bg-surface-container/60 p-3.5 sm:p-4 rounded-xl border border-outline-variant/40 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
+                          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 w-full overflow-hidden">
+                            <p className="text-xs sm:text-sm font-sans font-medium text-slate-800 dark:text-slate-200 leading-relaxed bg-slate-50 dark:bg-slate-900/60 p-3.5 sm:p-4 rounded-none border border-slate-200 dark:border-slate-800 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
                               {cert.description}
                             </p>
                           </div>
@@ -2250,29 +2244,29 @@ export default function StudentProfile({
                 {/* Pop-up Modal for Add/Edit Certification */}
                 {activeModal === 'certificates' && (
                   <div
-                    className="absolute inset-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/25 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
+                    className="absolute inset-0 z-50 backdrop-blur-md bg-slate-900/40 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
                     onClick={(e) => {
                       if (e.target === e.currentTarget) closeModal();
                     }}
                   >
-                    <div className="bg-surface-container border border-outline-variant rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+                    <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                       <button
                         type="button"
                         onClick={closeModal}
-                        className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all cursor-pointer"
+                        className="absolute top-4 right-4 p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-all cursor-pointer"
                       >
                         <X className="w-4 h-4" />
                       </button>
 
-                      <div className="flex items-center gap-3 border-b border-outline-variant pb-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                      <div className="flex items-center gap-3 border-b border-slate-300 dark:border-slate-700 pb-3">
+                        <div className="w-10 h-10 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 shrink-0 shadow-2xs">
                           <Award className="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 className="text-base font-headline font-bold text-on-surface">
+                          <h3 className="text-base font-headline font-bold text-slate-900 dark:text-slate-100">
                             {editingCertIdx !== null ? 'Edit Certification' : 'Add Certification'}
                           </h3>
-                          <p className="text-xs font-sans font-normal text-on-surface-variant">
+                          <p className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">
                             {editingCertIdx !== null ? 'Update your certificate details' : 'Enter your course, license, or credential information'}
                           </p>
                         </div>
@@ -2281,10 +2275,10 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Certificate Title</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Certificate Title</label>
                             <input
                               type="text"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Enter certificate title"
                               value={newCert.title}
                               onChange={e => setNewCert({ ...newCert, title: e.target.value })}
@@ -2292,10 +2286,10 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Provider Organisation Name</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Provider Organisation Name</label>
                             <input
                               type="text"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Enter Organisation Name"
                               value={newCert.org}
                               onChange={e => setNewCert({ ...newCert, org: e.target.value })}
@@ -2305,20 +2299,20 @@ export default function StudentProfile({
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Start Date</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Start Date</label>
                             <input
                               type="date"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                               value={newCert.startDate}
                               onChange={e => setNewCert({ ...newCert, startDate: e.target.value })}
                             />
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Certification Link</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Certification Link</label>
                             <input
                               type="url"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Enter Certification Link"
                               value={newCert.link}
                               onChange={e => setNewCert({ ...newCert, link: e.target.value })}
@@ -2326,10 +2320,10 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Certification Number</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Certification Number</label>
                             <input
                               type="text"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Enter Certification Number (optional)"
                               value={newCert.certNumber || ''}
                               onChange={e => setNewCert({ ...newCert, certNumber: e.target.value })}
@@ -2338,8 +2332,8 @@ export default function StudentProfile({
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="block text-xs font-headline font-medium text-on-surface-variant">Upload Certificate File (Optional, max 100KB)</label>
-                          <div className="flex items-center gap-4 p-3 bg-surface-container border border-outline-variant rounded-lg">
+                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Upload Certificate File (Optional, max 100KB)</label>
+                          <div className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none">
                             <input
                               type="file"
                               id="cert-file-upload"
@@ -2349,37 +2343,37 @@ export default function StudentProfile({
                             />
                             <label
                               htmlFor="cert-file-upload"
-                              className="px-3 py-1.5 bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary rounded-xl cursor-pointer hover:bg-primary/20 transition-all flex items-center gap-1.5"
+                              className="px-3.5 py-2 bg-blue-700 hover:bg-blue-800 text-white text-xs font-headline font-bold rounded-none cursor-pointer transition-all flex items-center gap-1.5 shadow-xs"
                             >
                               {processingCertFile ? 'Processing...' : 'Choose File'}
                             </label>
                             <div className="flex-1 min-w-0">
                               {newCert.attachment ? (
                                 <div className="flex items-center justify-between gap-2">
-                                  <span className="text-xs text-on-surface truncate font-sans font-normal">✓ Certificate file attached</span>
+                                  <span className="text-xs text-slate-800 dark:text-slate-200 truncate font-sans font-medium">✓ Certificate file attached</span>
                                   <button
                                     type="button"
                                     onClick={() => setNewCert(prev => ({ ...prev, attachment: '' }))}
-                                    className="text-[10px] text-error hover:underline font-sans font-normal"
+                                    className="text-xs text-rose-600 hover:underline font-headline font-bold cursor-pointer"
                                   >
                                     Remove
                                   </button>
                                 </div>
                               ) : (
-                                <span className="text-xs text-on-surface-variant font-sans font-normal">No file selected (Supports PDF or Images)</span>
+                                <span className="text-xs text-slate-500 dark:text-slate-400 font-sans font-normal">No file selected (Supports PDF or Images)</span>
                               )}
                             </div>
                           </div>
                           {certFileUploadError && (
-                            <p className="text-[10px] text-error font-medium">{certFileUploadError}</p>
+                            <p className="text-xs text-rose-600 font-medium">{certFileUploadError}</p>
                           )}
                         </div>
 
                         <div>
-                          <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Description</label>
+                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Description</label>
                           <textarea
                             rows="2"
-                            className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                            className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                             placeholder="Enter description..."
                             value={newCert.description}
                             onChange={e => setNewCert({ ...newCert, description: e.target.value })}
@@ -2387,7 +2381,7 @@ export default function StudentProfile({
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant">
+                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-300 dark:border-slate-700">
                         <button
                           type="button"
                           onClick={() => {
@@ -2396,7 +2390,7 @@ export default function StudentProfile({
                             setCertFileUploadError('');
                             closeModal();
                           }}
-                          className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-headline font-medium rounded-xl text-xs hover:bg-surface-container-highest transition-all cursor-pointer"
+                          className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-headline font-bold rounded-none text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs"
                         >
                           Cancel
                         </button>
@@ -2419,7 +2413,7 @@ export default function StudentProfile({
                             setCertFileUploadError('');
                             closeModal();
                           }}
-                          className="px-5 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                          className="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                         >
                           {editingCertIdx !== null ? 'Save Edit' : 'Add to List'}
                         </button>
@@ -2433,15 +2427,15 @@ export default function StudentProfile({
             {/* Panel 6: Projects */}
             {profileTab === 'projects' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center border-b border-outline-variant pb-3">
-                  <h3 className="text-lg font-headline font-bold text-on-surface">Projects</h3>
+                <div className="flex justify-between items-center border-b border-slate-300 dark:border-slate-700 pb-3">
+                  <h3 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100">Projects</h3>
                   <div className="flex flex-col items-end gap-1.5">
-                    <span className="text-xs font-sans font-normal tracking-wider text-secondary">{projectsList.length} Items Added</span>
+                    <span className="text-xs font-sans font-medium tracking-wider text-slate-600 dark:text-slate-400">{projectsList.length} Items Added</span>
                     {projectsList.length > 0 && (
                       <button
                         type="button"
                         onClick={openAddProjModal}
-                        className="px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-headline font-medium hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                        className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold active:scale-95 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         Add Project
@@ -2452,20 +2446,20 @@ export default function StudentProfile({
 
                 {/* Empty State */}
                 {projectsList.length === 0 && (
-                  <div className="p-8 sm:p-12 border border-outline-variant border-dashed rounded-2xl bg-surface-container-low/50 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in">
-                    <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface-variant">
-                      <FolderGit2 className="w-6 h-6 text-primary" />
+                  <div className="p-8 sm:p-12 border border-dashed border-slate-300 dark:border-slate-700 rounded-none bg-slate-50 dark:bg-slate-900/60 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in shadow-2xs">
+                    <div className="w-12 h-12 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 shadow-2xs">
+                      <FolderGit2 className="w-6 h-6" />
                     </div>
                     <div className="space-y-1">
-                      <h4 className="text-sm font-headline font-bold text-on-surface">You haven't added any record</h4>
-                      <p className="text-xs font-sans font-normal text-on-surface-variant max-w-sm">
+                      <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">You haven't added any record</h4>
+                      <p className="text-xs font-sans font-normal text-slate-600 dark:text-slate-400 max-w-sm">
                         Showcase personal, academic, or open-source projects along with live links and repository URLs.
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={openAddProjModal}
-                      className="px-4 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                      className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
                       Add Project
@@ -2479,28 +2473,28 @@ export default function StudentProfile({
                     {projectsList.map((proj, idx) => (
                       <div
                         key={idx}
-                        className="p-5 sm:p-6 bg-surface-container-low border border-outline-variant hover:border-primary/40 rounded-2xl flex flex-col gap-4 shadow-2xs hover:shadow-sm transition-all overflow-hidden w-full max-w-full"
+                        className="p-5 sm:p-6 bg-surface border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none flex flex-col gap-4 shadow-2xs hover:shadow-xs transition-all overflow-hidden w-full max-w-full"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div className="space-y-1.5 flex-1 min-w-0">
-                            <span className="inline-block px-2.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md text-[10px] font-headline font-bold tracking-wider">
+                            <span className="inline-block px-2.5 py-0.5 bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-200 border border-blue-400 dark:border-blue-600 rounded-none text-[10px] font-headline font-bold tracking-wider">
                               Project
                             </span>
 
                             <div className="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-3">
-                              <h4 className="text-base sm:text-lg font-headline font-bold text-on-surface tracking-tight break-words">
+                              <h4 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100 tracking-tight break-words">
                                 {proj.title}
                               </h4>
                               {proj.role && (
-                                <p className="text-xs sm:text-sm font-sans font-semibold text-on-surface-variant flex items-center gap-1.5">
-                                  <span>Role: <strong className="text-on-surface">{proj.role}</strong></span>
+                                <p className="text-xs sm:text-sm font-sans font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                  <span>Role: <strong className="text-slate-900 dark:text-slate-100">{proj.role}</strong></span>
                                 </p>
                               )}
                             </div>
 
                             <div className="flex flex-wrap items-center gap-2 pt-1">
                               {(proj.startDate || proj.endDate) && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface-container-high border border-outline-variant rounded-lg text-xs font-sans font-medium text-on-surface">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-sans font-medium text-slate-800 dark:text-slate-200">
                                   🗓️ {proj.startDate} - {proj.currentlyWorking ? 'Present' : proj.endDate || 'N/A'}
                                 </span>
                               )}
@@ -2509,7 +2503,7 @@ export default function StudentProfile({
                                   href={proj.codeUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-lg text-xs font-headline font-semibold text-primary transition-all"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold text-blue-700 dark:text-blue-400 transition-all shadow-2xs"
                                 >
                                   💻 Code URL
                                 </a>
@@ -2519,7 +2513,7 @@ export default function StudentProfile({
                                   href={proj.hostedUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 rounded-lg text-xs font-headline font-semibold text-secondary transition-all"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold text-slate-800 dark:text-slate-200 transition-all shadow-2xs"
                                 >
                                   🚀 Live Demo
                                 </a>
@@ -2536,7 +2530,7 @@ export default function StudentProfile({
                                 setEditingProjIdx(idx);
                                 setActiveModal('projects');
                               }}
-                              className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                              className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-blue-600 text-slate-800 dark:text-slate-200 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
                             >
                               Edit
                             </button>
@@ -2550,7 +2544,7 @@ export default function StudentProfile({
                                   closeModal();
                                 }
                               }}
-                              className="px-3 py-1.5 bg-error-container hover:bg-error-container/80 text-on-error-container border border-error/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                              className="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
                             >
                               Delete
                             </button>
@@ -2558,8 +2552,8 @@ export default function StudentProfile({
                         </div>
 
                         {proj.description && (
-                          <div className="pt-2 border-t border-outline-variant/40 w-full overflow-hidden">
-                            <p className="text-xs sm:text-sm font-sans font-normal text-on-surface leading-relaxed bg-surface-container/60 p-3.5 sm:p-4 rounded-xl border border-outline-variant/40 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
+                          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 w-full overflow-hidden">
+                            <p className="text-xs sm:text-sm font-sans font-medium text-slate-800 dark:text-slate-200 leading-relaxed bg-slate-50 dark:bg-slate-900/60 p-3.5 sm:p-4 rounded-none border border-slate-200 dark:border-slate-800 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
                               {proj.description}
                             </p>
                           </div>
@@ -2572,29 +2566,29 @@ export default function StudentProfile({
                 {/* Pop-up Modal for Add/Edit Project */}
                 {activeModal === 'projects' && (
                   <div
-                    className="absolute inset-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/25 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
+                    className="absolute inset-0 z-50 backdrop-blur-md bg-slate-900/40 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
                     onClick={(e) => {
                       if (e.target === e.currentTarget) closeModal();
                     }}
                   >
-                    <div className="bg-surface-container border border-outline-variant rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+                    <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                       <button
                         type="button"
                         onClick={closeModal}
-                        className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all cursor-pointer"
+                        className="absolute top-4 right-4 p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-all cursor-pointer"
                       >
                         <X className="w-4 h-4" />
                       </button>
 
-                      <div className="flex items-center gap-3 border-b border-outline-variant pb-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                      <div className="flex items-center gap-3 border-b border-slate-300 dark:border-slate-700 pb-3">
+                        <div className="w-10 h-10 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 shrink-0 shadow-2xs">
                           <FolderGit2 className="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 className="text-base font-headline font-bold text-on-surface">
+                          <h3 className="text-base font-headline font-bold text-slate-900 dark:text-slate-100">
                             {editingProjIdx !== null ? 'Edit Project Record' : 'Add Project Record'}
                           </h3>
-                          <p className="text-xs font-sans font-normal text-on-surface-variant">
+                          <p className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">
                             {editingProjIdx !== null ? 'Update your project information' : 'Showcase personal, academic, or professional projects'}
                           </p>
                         </div>
@@ -2603,10 +2597,10 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Title</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Title</label>
                             <input
                               type="text"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Name of your project"
                               value={newProj.title}
                               onChange={e => setNewProj({ ...newProj, title: e.target.value })}
@@ -2614,10 +2608,10 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Company / Role</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Company / Role</label>
                             <input
                               type="text"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Enter your role"
                               value={newProj.role}
                               onChange={e => setNewProj({ ...newProj, role: e.target.value })}
@@ -2627,10 +2621,10 @@ export default function StudentProfile({
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Code URL</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Code URL</label>
                             <input
                               type="url"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Enter the code URL for the project"
                               value={newProj.codeUrl}
                               onChange={e => setNewProj({ ...newProj, codeUrl: e.target.value })}
@@ -2638,10 +2632,10 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Hosted URL</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Hosted URL</label>
                             <input
                               type="url"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Enter hosted URL (optional)"
                               value={newProj.hostedUrl}
                               onChange={e => setNewProj({ ...newProj, hostedUrl: e.target.value })}
@@ -2651,20 +2645,20 @@ export default function StudentProfile({
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Start Date</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Start Date</label>
                             <input
                               type="date"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                               value={newProj.startDate}
                               onChange={e => setNewProj({ ...newProj, startDate: e.target.value })}
                             />
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">End Date</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">End Date</label>
                             <input
                               type="date"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary font-sans font-normal dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                               disabled={newProj.currentlyWorking}
                               value={newProj.currentlyWorking ? '' : newProj.endDate}
                               onChange={e => setNewProj({ ...newProj, endDate: e.target.value })}
@@ -2675,20 +2669,20 @@ export default function StudentProfile({
                             <label className="flex items-center gap-2 cursor-pointer select-none">
                               <input
                                 type="checkbox"
-                                className="rounded border-outline-variant text-primary bg-surface-container-low w-3.5 h-3.5 focus:ring-0"
+                                className="rounded-none border-slate-300 dark:border-slate-700 text-blue-700 bg-white dark:bg-slate-900 w-3.5 h-3.5 focus:ring-0"
                                 checked={newProj.currentlyWorking}
                                 onChange={e => setNewProj({ ...newProj, currentlyWorking: e.target.checked, endDate: e.target.checked ? '' : newProj.endDate })}
                               />
-                              <span className="text-[11px] text-on-surface-variant font-medium">Currently Working Here</span>
+                              <span className="text-xs font-headline font-bold text-slate-800 dark:text-slate-200">Currently Working Here</span>
                             </label>
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Description</label>
+                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Description</label>
                           <textarea
                             rows="3"
-                            className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                            className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                             placeholder="Add key features, stacks, or descriptions... (New line for bullet point)"
                             value={newProj.description}
                             onChange={e => setNewProj({ ...newProj, description: e.target.value })}
@@ -2696,7 +2690,7 @@ export default function StudentProfile({
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant">
+                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-300 dark:border-slate-700">
                         <button
                           type="button"
                           onClick={() => {
@@ -2704,7 +2698,7 @@ export default function StudentProfile({
                             setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
                             closeModal();
                           }}
-                          className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-headline font-medium rounded-xl text-xs hover:bg-surface-container-highest transition-all cursor-pointer"
+                          className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-headline font-bold rounded-none text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs"
                         >
                           Cancel
                         </button>
@@ -2726,7 +2720,7 @@ export default function StudentProfile({
                             setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
                             closeModal();
                           }}
-                          className="px-5 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                          className="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                         >
                           {editingProjIdx !== null ? 'Save Edit' : 'Add to List'}
                         </button>
@@ -2741,15 +2735,15 @@ export default function StudentProfile({
             {profileTab === 'skills' && (
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                  <label className="block text-xs font-headline font-medium tracking-wider text-on-surface-variant">Your Stacks & Skills</label>
-                  <span className="text-xs font-sans font-normal text-primary dark:text-emerald-400 bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-none font-medium flex items-center gap-1.5">
+                  <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 uppercase">Your Stacks & Skills</label>
+                  <span className="text-xs font-sans font-medium text-blue-900 dark:text-blue-200 bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 px-3 py-1.5 rounded-none flex items-center gap-1.5 shadow-2xs">
                     Skills with MCQ quizzes are verified via Skill Tests (starts at 1/10). Soft skills and technical skills without quizzes can be self-rated (1–10).
                   </span>
                 </div>
 
-                <div className="bg-surface-container-low border border-outline-variant rounded-none p-6 space-y-5">
+                <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none p-5 sm:p-6 space-y-5 shadow-2xs">
                   {/* Searchable input & add button */}
-                  <div className="pb-3 border-b border-outline-variant">
+                  <div className="pb-3 border-b border-slate-300 dark:border-slate-700">
                     <div className="flex items-center gap-2">
                       <div className="relative flex-1" ref={skillContainerRef}>
                         <input
@@ -2767,11 +2761,11 @@ export default function StudentProfile({
                               handleAddSkill();
                             }
                           }}
-                          className="w-full bg-surface-container border border-outline-variant rounded-none px-4 py-2.5 text-xs text-on-surface focus:border-primary focus:outline-none transition-all"
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none transition-all shadow-2xs font-sans font-medium"
                         />
 
                         {isSkillDropdownOpen && selectedNewSkill.trim() && (
-                          <div className="absolute top-full left-0 right-0 mt-1.5 bg-surface-container-high/95 backdrop-blur-md border border-outline-variant rounded-none shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
+                          <div className="absolute top-full left-0 right-0 mt-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none shadow-2xl z-50 max-h-60 overflow-y-auto custom-scrollbar">
                             {(() => {
                               const filtered = ALL_SKILLS.filter(
                                 s => s.skill.toLowerCase().includes(selectedNewSkill.toLowerCase()) &&
@@ -2792,10 +2786,10 @@ export default function StudentProfile({
                                         e.preventDefault();
                                         handleAddSkill(s.skill);
                                       }}
-                                      className="w-full text-left px-4 py-2.5 text-xs text-on-surface hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between group cursor-pointer"
+                                      className="w-full text-left px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-all flex items-center justify-between group cursor-pointer"
                                     >
-                                      <span className="font-medium">{s.skill}</span>
-                                      <span className="text-[10px] opacity-60 group-hover:opacity-100 font-sans font-normal capitalize px-1.5 py-0.5 rounded-none bg-surface-container-low border border-outline-variant text-on-surface-variant group-hover:border-primary/20 group-hover:text-primary transition-all">
+                                      <span className="font-bold">{s.skill}</span>
+                                      <span className="text-[10px] font-sans font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 group-hover:border-blue-400 transition-all">
                                         {s.type}
                                       </span>
                                     </button>
@@ -2808,15 +2802,15 @@ export default function StudentProfile({
                                         e.preventDefault();
                                         handleAddSkill(selectedNewSkill.trim());
                                       }}
-                                      className="w-full text-left px-4 py-2.5 text-xs text-primary bg-primary/5 hover:bg-primary/15 transition-all flex items-center justify-between border-t border-outline-variant/60 cursor-pointer font-semibold"
+                                      className="w-full text-left px-4 py-2.5 text-xs text-blue-700 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all flex items-center justify-between border-t border-slate-200 dark:border-slate-800 cursor-pointer font-bold"
                                     >
                                       <span>+ Add custom skill: "{selectedNewSkill.trim()}"</span>
-                                      <span className="text-[10px] font-sans font-normal px-1.5 py-0.5 rounded-none bg-primary/10 text-primary">custom</span>
+                                      <span className="text-[10px] font-headline font-bold uppercase px-1.5 py-0.5 rounded-none bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">custom</span>
                                     </button>
                                   )}
 
                                   {filtered.length === 0 && isExactMatch && (
-                                    <div className="px-4 py-3 text-xs text-on-surface-variant font-sans font-normal">Skill already added</div>
+                                    <div className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400 font-sans font-normal">Skill already added</div>
                                   )}
                                 </>
                               );
@@ -2829,7 +2823,7 @@ export default function StudentProfile({
                         type="button"
                         onClick={() => handleAddSkill()}
                         disabled={!selectedNewSkill.trim()}
-                        className="px-4 py-2.5 bg-primary text-on-primary font-headline font-medium rounded-none text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none cursor-pointer shadow-sm shrink-0"
+                        className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none cursor-pointer shadow-xs shrink-0"
                       >
                         <Plus className="w-4 h-4" />
                         <span>Add Skill</span>
@@ -2838,7 +2832,7 @@ export default function StudentProfile({
                   </div>
 
                   {skillsList.length === 0 ? (
-                    <p className="text-xs text-on-surface-variant font-sans font-normal">No skills added yet. Type or search a skill above.</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans font-normal">No skills added yet. Type or search a skill above.</p>
                   ) : (
                     <div className="flex flex-wrap gap-2.5 pt-1">
                       {skillsList.map(skill => {
@@ -2851,23 +2845,23 @@ export default function StudentProfile({
                         return (
                           <div 
                             key={skill.name}
-                            className="inline-flex items-center gap-2 px-3 py-2 bg-surface-container border border-outline-variant hover:border-outline rounded-none text-xs font-medium text-on-surface transition-all shadow-xs group select-none"
+                            className="inline-flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold text-slate-900 dark:text-slate-100 transition-all shadow-2xs group select-none"
                           >
-                            <span className="font-semibold text-on-surface">{skill.name}</span>
+                            <span className="font-bold text-slate-900 dark:text-slate-100">{skill.name}</span>
                             
                             {/* Rating Display / Selector */}
                             {hasMcq ? (
                               /* Skills with MCQ: Candidate cannot self-rate. Static score display with verified/unverified mark */
                               <div className="flex items-center gap-1.5" title={hasVerifiedRating ? `Verified by Skill Test (>= 70%): Level ${skill.verifiedRating}/10` : `Unverified Skill Test score: Level ${currentScore}/10`}>
-                                <span className="text-xs font-sans font-bold text-on-surface bg-surface-container-high px-2 py-0.5 rounded-none border border-outline-variant/60">
+                                <span className="text-xs font-sans font-bold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-none border border-slate-300 dark:border-slate-600">
                                   {currentScore}/10
                                 </span>
                                 {hasVerifiedRating ? (
-                                  <span className="text-[10px] bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-none font-bold tracking-wide flex items-center gap-0.5" title={`Verified: Level ${skill.verifiedRating}/10 (Cleared 70% threshold)`}>
+                                  <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-300 px-1.5 py-0.5 rounded-none font-headline font-bold tracking-wider flex items-center gap-0.5" title={`Verified: Level ${skill.verifiedRating}/10 (Cleared 70% threshold)`}>
                                     ✓ Verified
                                   </span>
                                 ) : (
-                                  <span className="text-[10px] bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-none font-bold tracking-wide" title="Unverified: Score >= 70% on the Skill Test to earn a verified rating">
+                                  <span className="text-[10px] bg-amber-100 dark:bg-amber-950/70 border border-amber-400 dark:border-amber-700 text-amber-900 dark:text-amber-300 px-1.5 py-0.5 rounded-none font-headline font-bold tracking-wider" title="Unverified: Score >= 70% on the Skill Test to earn a verified rating">
                                     Unverified
                                   </span>
                                 )}
@@ -2881,20 +2875,20 @@ export default function StudentProfile({
                                     const newRating = parseInt(e.target.value, 10);
                                     setSkillsList(prev => prev.map(s => s.name.toLowerCase() === skill.name.toLowerCase() ? { ...s, rating: newRating } : s));
                                   }}
-                                  className="text-xs font-sans font-bold text-secondary bg-secondary/10 hover:bg-secondary/20 border border-secondary/25 rounded-none px-1.5 py-0.5 pr-4 appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-secondary/50 transition-all"
+                                  className="text-xs font-sans font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 rounded-none px-1.5 py-0.5 pr-4 appearance-none cursor-pointer focus:outline-none focus:border-blue-700 transition-all"
                                 >
                                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(r => (
-                                    <option key={r} value={r} className="bg-surface text-on-surface">
+                                    <option key={r} value={r} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                                       {r}/10
                                     </option>
                                   ))}
                                 </select>
-                                <ChevronDown className="w-2.5 h-2.5 text-secondary absolute right-1 pointer-events-none opacity-70" />
+                                <ChevronDown className="w-2.5 h-2.5 text-slate-600 dark:text-slate-400 absolute right-1 pointer-events-none opacity-70" />
                               </div>
                             )}
 
                             {!isTech && (
-                              <span className="text-[9px] opacity-60 font-sans font-normal capitalize px-1 py-0.5 rounded-none bg-surface-container-high text-on-surface-variant">
+                              <span className="text-[9px] font-sans font-bold uppercase tracking-wider px-1 py-0.5 rounded-none bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                                 soft
                               </span>
                             )}
@@ -2902,7 +2896,7 @@ export default function StudentProfile({
                             <button
                               type="button"
                               onClick={() => setSkillsList(prev => prev.filter(s => s.name.toLowerCase() !== skill.name.toLowerCase()))}
-                              className="text-on-surface-variant hover:text-error transition-colors ml-0.5 p-0.5 rounded-none hover:bg-error/10 cursor-pointer"
+                              className="text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors ml-0.5 p-0.5 rounded-none hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
                               title="Remove skill"
                             >
                               <X className="w-3.5 h-3.5" />
@@ -2916,17 +2910,18 @@ export default function StudentProfile({
               </div>
             )}
 
+            {/* Panel 8: Co-Curricular */}
             {profileTab === 'cocurricular' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center border-b border-outline-variant pb-3">
-                  <h3 className="text-lg font-headline font-bold text-on-surface">Co-Curricular</h3>
+                <div className="flex justify-between items-center border-b border-slate-300 dark:border-slate-700 pb-3">
+                  <h3 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100">Co-Curricular</h3>
                   <div className="flex flex-col items-end gap-1.5">
-                    <span className="text-xs font-sans font-normal tracking-wider text-secondary">{cocurricular.length} Items Added</span>
+                    <span className="text-xs font-sans font-medium tracking-wider text-slate-600 dark:text-slate-400">{cocurricular.length} Items Added</span>
                     {cocurricular.length > 0 && (
                       <button
                         type="button"
                         onClick={openAddCocurricularModal}
-                        className="px-3 py-1.5 bg-primary text-on-primary rounded-lg text-xs font-headline font-medium hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                        className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold active:scale-95 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         Add Activity
@@ -2937,20 +2932,20 @@ export default function StudentProfile({
 
                 {/* Empty State */}
                 {cocurricular.length === 0 && (
-                  <div className="p-8 sm:p-12 border border-outline-variant border-dashed rounded-2xl bg-surface-container-low/50 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in">
-                    <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface-variant">
-                      <Activity className="w-6 h-6 text-primary" />
+                  <div className="p-8 sm:p-12 border border-dashed border-slate-300 dark:border-slate-700 rounded-none bg-slate-50 dark:bg-slate-900/60 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in shadow-2xs">
+                    <div className="w-12 h-12 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 shadow-2xs">
+                      <Activity className="w-6 h-6" />
                     </div>
                     <div className="space-y-1">
-                      <h4 className="text-sm font-headline font-bold text-on-surface">You haven't added any record</h4>
-                      <p className="text-xs font-sans font-normal text-on-surface-variant max-w-sm">
+                      <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">You haven't added any record</h4>
+                      <p className="text-xs font-sans font-normal text-slate-600 dark:text-slate-400 max-w-sm">
                         Add positions of responsibility, student clubs, hackathons, sports, or volunteer initiatives.
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={openAddCocurricularModal}
-                      className="px-4 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                      className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
                       Add Activity
@@ -2964,15 +2959,15 @@ export default function StudentProfile({
                     {cocurricular.map((act, idx) => (
                       <div
                         key={idx}
-                        className="p-5 sm:p-6 bg-surface-container-low border border-outline-variant hover:border-primary/40 rounded-2xl flex flex-col gap-4 shadow-2xs hover:shadow-sm transition-all overflow-hidden w-full max-w-full"
+                        className="p-5 sm:p-6 bg-surface border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none flex flex-col gap-4 shadow-2xs hover:shadow-xs transition-all overflow-hidden w-full max-w-full"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div className="space-y-1.5 flex-1 min-w-0">
-                            <span className="inline-block px-2.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md text-[10px] font-headline font-bold tracking-wider">
+                            <span className="inline-block px-2.5 py-0.5 bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-200 border border-blue-400 dark:border-blue-600 rounded-none text-[10px] font-headline font-bold tracking-wider">
                               Activity / POR
                             </span>
 
-                            <h4 className="text-base sm:text-lg font-headline font-bold text-on-surface tracking-tight break-words">
+                            <h4 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100 tracking-tight break-words">
                               {act.activity}
                             </h4>
 
@@ -2982,7 +2977,7 @@ export default function StudentProfile({
                                   href={act.link}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-lg text-xs font-headline font-semibold text-primary transition-all"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold text-blue-700 dark:text-blue-400 transition-all shadow-2xs"
                                 >
                                   🔗 View Link
                                 </a>
@@ -2999,7 +2994,7 @@ export default function StudentProfile({
                                 setEditingCocurricularIdx(idx);
                                 setActiveModal('cocurricular');
                               }}
-                              className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                              className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-blue-600 text-slate-800 dark:text-slate-200 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
                             >
                               Edit
                             </button>
@@ -3013,7 +3008,7 @@ export default function StudentProfile({
                                   closeModal();
                                 }
                               }}
-                              className="px-3 py-1.5 bg-error-container hover:bg-error-container/80 text-on-error-container border border-error/20 rounded-lg text-xs font-headline font-medium transition-all cursor-pointer"
+                              className="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
                             >
                               Delete
                             </button>
@@ -3021,8 +3016,8 @@ export default function StudentProfile({
                         </div>
 
                         {act.description && (
-                          <div className="pt-2 border-t border-outline-variant/40 w-full overflow-hidden">
-                            <p className="text-xs sm:text-sm font-sans font-normal text-on-surface leading-relaxed bg-surface-container/60 p-3.5 sm:p-4 rounded-xl border border-outline-variant/40 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
+                          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 w-full overflow-hidden">
+                            <p className="text-xs sm:text-sm font-sans font-medium text-slate-800 dark:text-slate-200 leading-relaxed bg-slate-50 dark:bg-slate-900/60 p-3.5 sm:p-4 rounded-none border border-slate-200 dark:border-slate-800 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
                               {act.description}
                             </p>
                           </div>
@@ -3035,29 +3030,29 @@ export default function StudentProfile({
                 {/* Pop-up Modal for Add/Edit Co-curricular */}
                 {activeModal === 'cocurricular' && (
                   <div
-                    className="absolute inset-0 z-50 backdrop-blur-md bg-white/30 dark:bg-black/25 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
+                    className="absolute inset-0 z-50 backdrop-blur-md bg-slate-900/40 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
                     onClick={(e) => {
                       if (e.target === e.currentTarget) closeModal();
                     }}
                   >
-                    <div className="bg-surface-container border border-outline-variant rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+                    <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
                       <button
                         type="button"
                         onClick={closeModal}
-                        className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-all cursor-pointer"
+                        className="absolute top-4 right-4 p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-all cursor-pointer"
                       >
                         <X className="w-4 h-4" />
                       </button>
 
-                      <div className="flex items-center gap-3 border-b border-outline-variant pb-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                      <div className="flex items-center gap-3 border-b border-slate-300 dark:border-slate-700 pb-3">
+                        <div className="w-10 h-10 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 shrink-0 shadow-2xs">
                           <Activity className="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 className="text-base font-headline font-bold text-on-surface">
+                          <h3 className="text-base font-headline font-bold text-slate-900 dark:text-slate-100">
                             {editingCocurricularIdx !== null ? 'Edit Co-Curricular Activity' : 'Add Co-Curricular Activity'}
                           </h3>
-                          <p className="text-xs font-sans font-normal text-on-surface-variant">
+                          <p className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">
                             {editingCocurricularIdx !== null ? 'Update your activity or position details' : 'Add positions of responsibility, clubs, sports, or volunteer work'}
                           </p>
                         </div>
@@ -3066,10 +3061,10 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Activity / Title</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Activity / Title</label>
                             <input
                               type="text"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="e.g. Football Captain, Debate Club Coordinator"
                               value={newCocurricular.activity}
                               onChange={e => setNewCocurricular({ ...newCocurricular, activity: e.target.value })}
@@ -3077,10 +3072,10 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Certification Link (Optional)</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Certification Link (Optional)</label>
                             <input
                               type="url"
-                              className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Enter link to certificate/proof"
                               value={newCocurricular.link}
                               onChange={e => setNewCocurricular({ ...newCocurricular, link: e.target.value })}
@@ -3089,10 +3084,10 @@ export default function StudentProfile({
                         </div>
 
                         <div>
-                          <label className="block text-xs font-headline font-medium text-on-surface-variant mb-1.5">Description (Optional)</label>
+                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Description (Optional)</label>
                           <textarea
                             rows="2"
-                            className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary"
+                            className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                             placeholder="Describe your role or accomplishment..."
                             value={newCocurricular.description}
                             onChange={e => setNewCocurricular({ ...newCocurricular, description: e.target.value })}
@@ -3100,7 +3095,7 @@ export default function StudentProfile({
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant">
+                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-300 dark:border-slate-700">
                         <button
                           type="button"
                           onClick={() => {
@@ -3108,7 +3103,7 @@ export default function StudentProfile({
                             setNewCocurricular({ activity: '', link: '', description: '' });
                             closeModal();
                           }}
-                          className="px-4 py-2 bg-surface-container-high border border-outline-variant text-on-surface font-headline font-medium rounded-xl text-xs hover:bg-surface-container-highest transition-all cursor-pointer"
+                          className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-headline font-bold rounded-none text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs"
                         >
                           Cancel
                         </button>
@@ -3130,7 +3125,7 @@ export default function StudentProfile({
                             setNewCocurricular({ activity: '', link: '', description: '' });
                             closeModal();
                           }}
-                          className="px-5 py-2 bg-primary text-on-primary font-headline font-medium rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                          className="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                         >
                           {editingCocurricularIdx !== null ? 'Save Edit' : 'Add to List'}
                         </button>
@@ -3149,48 +3144,43 @@ export default function StudentProfile({
           const nextTab = currentTabIdx < tabsList.length - 1 ? tabsList[currentTabIdx + 1] : null;
 
           return (
-            <div className="pt-6 border-t border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="pt-6 border-t border-slate-300 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-center gap-4">
               <button
                 type="button"
                 disabled={!prevTab}
                 onClick={() => prevTab && setProfileTab(prevTab.id)}
-                className="w-full sm:w-auto px-5 py-2.5 glass-button disabled:opacity-40 disabled:pointer-events-none rounded-xl text-xs font-headline font-medium text-on-surface flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full sm:w-auto px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-blue-600 text-slate-800 dark:text-slate-200 disabled:opacity-40 disabled:pointer-events-none rounded-none text-xs font-headline font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-2xs"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4 text-slate-700 dark:text-slate-300" />
                 <span>PREVIOUS</span>
               </button>
 
               <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
-                <Button
+                <button
                   type="submit"
-                  loading={submittingProfile}
-                  disabled={!isSaveActive}
-                  variant="secondary"
-                  size="sm"
-                  className="w-full sm:w-auto font-headline font-medium text-xs border border-outline-variant hover:border-primary/40 px-5 py-2.5"
+                  disabled={!isSaveActive || submittingProfile}
+                  className="w-full sm:w-auto px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-blue-600 text-slate-800 dark:text-slate-200 font-headline font-bold text-xs rounded-none shadow-2xs cursor-pointer disabled:opacity-40 disabled:pointer-events-none transition-all"
                 >
-                  Save Profile
-                </Button>
+                  {submittingProfile ? 'Saving...' : 'Save Profile'}
+                </button>
 
                 {nextTab ? (
                   <button
                     type="button"
                     onClick={() => setProfileTab(nextTab.id)}
-                    className="w-full sm:w-auto px-5 py-2.5 glass-button-primary bg-primary text-on-primary hover:bg-primary/90 rounded-xl text-xs font-headline font-medium flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    className="w-full sm:w-auto px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
                   >
                     <span>NEXT</span>
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-4 h-4 text-white" />
                   </button>
                 ) : (
-                  <Button
+                  <button
                     type="submit"
-                    loading={submittingProfile}
-                    disabled={!isSaveActive}
-                    size="sm"
-                    className="w-full sm:w-auto font-headline font-medium tracking-wider text-xs shadow-glow disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none px-6 py-2.5"
+                    disabled={!isSaveActive || submittingProfile}
+                    className="w-full sm:w-auto px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold tracking-wider disabled:opacity-40 disabled:pointer-events-none shadow-xs cursor-pointer transition-all"
                   >
-                    Finish & Save Profile
-                  </Button>
+                    {submittingProfile ? 'Saving...' : 'Finish & Save Profile'}
+                  </button>
                 )}
               </div>
             </div>
