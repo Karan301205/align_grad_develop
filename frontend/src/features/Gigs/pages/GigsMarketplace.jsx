@@ -821,10 +821,10 @@ export default function GigsMarketplace({
       }
 
       const gigData = {
-        title: editTitle,
+        title: gigDetails.title,
         description: editDescription,
-        category: editCategories[0],
-        categories: editCategories,
+        category: gigDetails.category,
+        categories: gigDetails.categories || (gigDetails.category ? [gigDetails.category] : []),
         skills: editReqs.map(r => r.skillName),
         requirements: editReqs,
         budget: parseFloat(editBudget),
@@ -1385,16 +1385,22 @@ export default function GigsMarketplace({
 
         {activeSubTab === 'post' && (
           <div className="max-w-2xl mx-auto p-6 space-y-6 bg-surface border border-slate-300 dark:border-slate-700 rounded-none shadow-2xs font-sans">
-            <div className="border-b border-slate-300 dark:border-slate-700 pb-3">
+            <div className="border-b border-slate-300 dark:border-slate-700 pb-3 space-y-1">
               <h3 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                 <Sparkles className="w-5 h-5 text-primary" /> Post a paid Task / Gig
               </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Hire other verified candidates to help complete milestones.</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400">Hire other verified candidates to help complete milestones.</p>
+              <p className="text-[11px] font-sans font-medium text-slate-600 dark:text-slate-400 flex items-center gap-1.5 pt-0.5">
+                <Info className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                <span>Note: Gig Title and Category of Field will not be editable after posting.</span>
+              </p>
             </div>
 
             <form onSubmit={handlePostGig} className="space-y-4">
               <div>
-                <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">Gig Title</label>
+                <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">
+                  Gig Title *
+                </label>
                 <input
                   type="text"
                   value={title}
@@ -1418,7 +1424,9 @@ export default function GigsMarketplace({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="sm:col-span-2 md:col-span-1">
-                  <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">Category of Field *</label>
+                  <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">
+                    Category of Field *
+                  </label>
                   <MultiSearchableCategorySelect
                     values={categories}
                     onChange={(vals) => setCategories(vals)}
@@ -1682,7 +1690,7 @@ export default function GigsMarketplace({
                 <button
                   type="submit"
                   disabled={postingGig}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-headline font-bold uppercase tracking-wider rounded-none transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-headline font-bold tracking-wider rounded-none transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {postingGig ? 'Publishing...' : 'Publish Gig to Marketplace'}
                 </button>
@@ -2494,50 +2502,55 @@ export default function GigsMarketplace({
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 {/* Left Column: Scope, Classification, Budget & Attachments */}
                 <div className="space-y-4">
-                  {/* Title */}
+                  {/* Title (Locked / Read-Only) */}
                   <div>
-                    <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1">
-                      Title *
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100">
+                        Title *
+                      </label>
+                      <span className="text-[10px] font-sans font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                        <Lock className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                        <span>Non-editable</span>
+                      </span>
+                    </div>
                     <input
                       type="text"
-                      required
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none font-sans"
+                      disabled
+                      readOnly
+                      className="w-full bg-slate-100 dark:bg-slate-800/70 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-500 dark:text-slate-400 cursor-not-allowed font-sans select-none"
                       value={editTitle}
-                      onChange={e => setEditTitle(e.target.value)}
+                      title="Title cannot be modified after publication"
                     />
                   </div>
 
-                  {/* Category of Field */}
+                  {/* Category of Field (Locked / Read-Only) */}
                   <div>
-                    <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1">
-                      Category of Field *
-                    </label>
-                    <MultiSearchableCategorySelect
-                      values={editCategories}
-                      onChange={(vals) => setEditCategories(vals)}
-                      placeholder="Search or select category/field(s)..."
-                      showTags={false}
-                    />
-                    {editCategories.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-2 max-h-24 overflow-y-auto custom-scrollbar">
-                        {editCategories.map(cat => (
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100">
+                        Category of Field *
+                      </label>
+                      <span className="text-[10px] font-sans font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                        <Lock className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                        <span>Non-editable</span>
+                      </span>
+                    </div>
+                    <div 
+                      className="w-full min-h-[38px] p-2 bg-slate-100 dark:bg-slate-800/70 border border-slate-300 dark:border-slate-700 rounded-none flex flex-wrap gap-1.5 items-center cursor-not-allowed select-none"
+                      title="Category cannot be modified after publication"
+                    >
+                      {editCategories && editCategories.length > 0 ? (
+                        editCategories.map(cat => (
                           <span
                             key={cat}
-                            className="inline-flex items-center gap-1.5 text-[11px] font-sans px-2.5 py-0.5 rounded-none bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700 font-bold shrink-0"
+                            className="inline-flex items-center text-[11px] font-sans px-2.5 py-1 rounded-none bg-slate-200/80 dark:bg-slate-700/80 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 font-medium shrink-0"
                           >
                             <span>{cat}</span>
-                            <button
-                              type="button"
-                              onClick={() => setEditCategories(editCategories.filter(v => v !== cat))}
-                              className="hover:bg-blue-200 dark:hover:bg-blue-900 p-0.5 rounded-none transition-colors cursor-pointer"
-                            >
-                              <X className="w-3 h-3 text-blue-800 dark:text-blue-200" />
-                            </button>
                           </span>
-                        ))}
-                      </div>
-                    )}
+                        ))
+                      ) : (
+                        <span className="text-xs text-slate-400 font-sans italic">No category assigned</span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Currency, Budget, Delivery Time in 3 columns */}
@@ -3237,7 +3250,7 @@ export default function GigsMarketplace({
 
               {selectedUnreviewedPitchApp.attachments?.length > 0 && (
                 <div className="space-y-2 pt-2 border-t border-slate-300 dark:border-slate-700">
-                  <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase flex items-center gap-1.5">
+                  <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                     <Paperclip className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Pitch Attachments ({selectedUnreviewedPitchApp.attachments.length})
                   </h4>
                   <div className="flex flex-wrap gap-2 pt-1">

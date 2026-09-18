@@ -738,7 +738,7 @@ export default function StudentProfile({
           : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
         }`}>
         <div className="flex flex-col">
-          <span className="text-xs font-headline font-bold uppercase tracking-wider">Success</span>
+          <span className="text-xs font-headline font-bold tracking-wider">Success</span>
           <span className="text-xs font-sans">Photo uploaded successfully!</span>
         </div>
       </div>
@@ -780,7 +780,7 @@ export default function StudentProfile({
                 <h3 className="text-xs sm:text-sm font-headline font-bold text-slate-900 dark:text-slate-100 tracking-wider">
                   Overall Profile Completion
                 </h3>
-                <span className={`text-[10px] px-2 py-0.5 rounded-none font-headline font-bold tracking-wider uppercase border ${
+                <span className={`text-[10px] px-2 py-0.5 rounded-none font-headline font-bold tracking-wider border ${
                   overallCompletion === 100
                     ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-300 border-emerald-400 dark:border-emerald-700'
                     : overallCompletion >= 70
@@ -946,13 +946,13 @@ export default function StudentProfile({
               <div className="pt-2 border-t border-slate-300 dark:border-slate-700 space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
                   <User className="w-4 h-4 text-blue-700 dark:text-blue-400" />
-                  <h4 className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 tracking-wider uppercase">Basic Information</h4>
+                  <h4 className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 tracking-wider">Basic Information</h4>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Row 1, Col 1: First Name */}
                   <div>
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       First Name <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <input
@@ -971,7 +971,7 @@ export default function StudentProfile({
 
                   {/* Row 1, Col 2: Last Name */}
                   <div>
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       Last Name <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <input
@@ -990,7 +990,7 @@ export default function StudentProfile({
 
                   {/* Row 2, Col 1: Username */}
                   <div>
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       Username <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <div className="relative">
@@ -1015,7 +1015,7 @@ export default function StudentProfile({
 
                   {/* Row 2, Col 2: Date of Birth */}
                   <div>
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       Date of Birth <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <input
@@ -1033,7 +1033,7 @@ export default function StudentProfile({
 
                   {/* Row 3: Professional Summary (Full Width - Auto-Expanding) */}
                   <div className="col-span-1 md:col-span-2">
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       Professional Summary <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <textarea
@@ -1054,7 +1054,7 @@ export default function StudentProfile({
 
                   {/* Row 4, Col 1: Phone Number */}
                   <div>
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       Phone Number <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <div className="flex gap-2">
@@ -1089,7 +1089,7 @@ export default function StudentProfile({
 
                   {/* Row 4, Col 2: Email Address */}
                   <div>
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       Email Address <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <input
@@ -1103,7 +1103,7 @@ export default function StudentProfile({
 
                   {/* Row 5, Col 1: Gender */}
                   <div>
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       Gender <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <select
@@ -1121,7 +1121,7 @@ export default function StudentProfile({
 
                   {/* Row 5, Col 2: Resume URL (Upload A Drive URL) */}
                   <div>
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       Resume URL (Google Drive URL)
                     </label>
                     <input
@@ -1144,7 +1144,7 @@ export default function StudentProfile({
 
                   {/* Row 6, Col 1: LinkedIn Profile Link */}
                   <div>
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       LinkedIn Profile Link
                     </label>
                     <div className="relative flex items-center">
@@ -1167,7 +1167,7 @@ export default function StudentProfile({
 
                   {/* Row 6, Col 2: Personal Portfolio Link */}
                   <div>
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       Personal Portfolio Link
                     </label>
                     <div className="relative flex items-center">
@@ -1194,14 +1194,14 @@ export default function StudentProfile({
               <div className="pt-4 border-t border-slate-300 dark:border-slate-700 space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
                   <Briefcase className="w-4 h-4 text-blue-700 dark:text-blue-400" />
-                  <h3 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase">Work Preferences & Location</h3>
+                  <h3 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100">Work Preferences & Location</h3>
                 </div>
 
                 {/* Mode of Work and Type of Work as Dropdowns */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Mode of Work Dropdown */}
                   <div>
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       Mode of Work <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <select
@@ -1218,7 +1218,7 @@ export default function StudentProfile({
 
                   {/* Type of Work Looking For Dropdown */}
                   <div>
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 mb-1.5">
                       Type of Work Looking For <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <select
@@ -1238,7 +1238,7 @@ export default function StudentProfile({
                 {/* Preferred Location in India */}
                 <div className="space-y-2">
                   <div className="flex justify-between items-center flex-wrap gap-2">
-                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 uppercase">
+                    <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
                       Preferred Location(s) in India <span className="text-rose-500 font-bold">*</span>
                     </label>
 
@@ -1495,7 +1495,7 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Education Type</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Education Type</label>
                             <select
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               value={newEdu.eduType}
@@ -1521,7 +1521,7 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Institute</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Institute</label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -1535,7 +1535,7 @@ export default function StudentProfile({
                         {newEdu.eduType === 'High School' ? (
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Percentage in Class 10</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Percentage in Class 10</label>
                               <input
                                 type="text"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -1546,7 +1546,7 @@ export default function StudentProfile({
                             </div>
 
                             <div>
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Percentage in Class 12</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Percentage in Class 12</label>
                               <input
                                 type="text"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -1557,7 +1557,7 @@ export default function StudentProfile({
                             </div>
 
                             <div>
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Stream in Class 11</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Stream in Class 11</label>
                               <input
                                 type="text"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -1570,7 +1570,7 @@ export default function StudentProfile({
                         ) : (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Degree</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Degree</label>
                               <input
                                 type="text"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -1581,7 +1581,7 @@ export default function StudentProfile({
                             </div>
 
                             <div>
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Field of Study</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Field of Study</label>
                               <input
                                 type="text"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -1596,7 +1596,7 @@ export default function StudentProfile({
                         {newEdu.eduType !== 'High School' && (
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="md:col-span-1">
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Start Date</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Start Date</label>
                               <input
                                 type="date"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
@@ -1606,7 +1606,7 @@ export default function StudentProfile({
                             </div>
 
                             <div className="md:col-span-1">
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">End Date</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">End Date</label>
                               <input
                                 type="date"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
@@ -1616,7 +1616,7 @@ export default function StudentProfile({
                             </div>
 
                             <div className="md:col-span-1">
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Grade Type</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Grade Type</label>
                               <select
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                                 value={newEdu.gradeType}
@@ -1631,7 +1631,7 @@ export default function StudentProfile({
                             </div>
 
                             <div className="md:col-span-1">
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Grade Value</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Grade Value</label>
                               <input
                                 type="text"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -1890,7 +1890,7 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Experience Type</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Experience Type</label>
                             <select
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               value={newExp.expType}
@@ -1905,7 +1905,7 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Designation</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Designation</label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -1918,7 +1918,7 @@ export default function StudentProfile({
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Company Name</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Company Name</label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -1929,7 +1929,7 @@ export default function StudentProfile({
                           </div>
 
                           <div className="relative">
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Domain of Experience</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Domain of Experience</label>
                             <div className="relative" ref={domainContainerRef}>
                               <input
                                 type="text"
@@ -1999,7 +1999,7 @@ export default function StudentProfile({
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Start Date</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Start Date</label>
                             <input
                               type="date"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
@@ -2009,7 +2009,7 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">End Date</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">End Date</label>
                             <input
                               type="date"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
@@ -2032,7 +2032,7 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Location</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Location</label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2044,7 +2044,7 @@ export default function StudentProfile({
                         </div>
 
                         <div>
-                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Roles And Responsibilities</label>
+                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Roles And Responsibilities</label>
                           <textarea
                             rows="3"
                             className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2275,7 +2275,7 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Certificate Title</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Certificate Title</label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2286,7 +2286,7 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Provider Organisation Name</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Provider Organisation Name</label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2299,7 +2299,7 @@ export default function StudentProfile({
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Start Date</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Start Date</label>
                             <input
                               type="date"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
@@ -2309,7 +2309,7 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Certification Link</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Certification Link</label>
                             <input
                               type="url"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2320,7 +2320,7 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Certification Number</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Certification Number</label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2332,7 +2332,7 @@ export default function StudentProfile({
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Upload Certificate File (Optional, max 100KB)</label>
+                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 tracking-wider">Upload Certificate File (Optional, max 100KB)</label>
                           <div className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none">
                             <input
                               type="file"
@@ -2370,7 +2370,7 @@ export default function StudentProfile({
                         </div>
 
                         <div>
-                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Description</label>
+                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Description</label>
                           <textarea
                             rows="2"
                             className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2597,7 +2597,7 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Title</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Title</label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2608,7 +2608,7 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Company / Role</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Company / Role</label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2621,7 +2621,7 @@ export default function StudentProfile({
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Code URL</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Code URL</label>
                             <input
                               type="url"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2632,7 +2632,7 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Hosted URL</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Hosted URL</label>
                             <input
                               type="url"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2645,7 +2645,7 @@ export default function StudentProfile({
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Start Date</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Start Date</label>
                             <input
                               type="date"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
@@ -2655,7 +2655,7 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">End Date</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">End Date</label>
                             <input
                               type="date"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
@@ -2679,7 +2679,7 @@ export default function StudentProfile({
                         </div>
 
                         <div>
-                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Description</label>
+                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Description</label>
                           <textarea
                             rows="3"
                             className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2735,7 +2735,7 @@ export default function StudentProfile({
             {profileTab === 'skills' && (
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                  <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200 uppercase">Your Stacks & Skills</label>
+                  <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">Your Stacks & Skills</label>
                   <span className="text-xs font-sans font-medium text-blue-900 dark:text-blue-200 bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 px-3 py-1.5 rounded-none flex items-center gap-1.5 shadow-2xs">
                     Skills with MCQ quizzes are verified via Skill Tests (starts at 1/10). Soft skills and technical skills without quizzes can be self-rated (1–10).
                   </span>
@@ -2789,7 +2789,7 @@ export default function StudentProfile({
                                       className="w-full text-left px-4 py-2.5 text-xs text-slate-900 dark:text-slate-100 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 dark:hover:text-blue-400 transition-all flex items-center justify-between group cursor-pointer"
                                     >
                                       <span className="font-bold">{s.skill}</span>
-                                      <span className="text-[10px] font-sans font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 group-hover:border-blue-400 transition-all">
+                                      <span className="text-[10px] font-sans font-bold tracking-wider px-1.5 py-0.5 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 group-hover:border-blue-400 transition-all">
                                         {s.type}
                                       </span>
                                     </button>
@@ -2805,7 +2805,7 @@ export default function StudentProfile({
                                       className="w-full text-left px-4 py-2.5 text-xs text-blue-700 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all flex items-center justify-between border-t border-slate-200 dark:border-slate-800 cursor-pointer font-bold"
                                     >
                                       <span>+ Add custom skill: "{selectedNewSkill.trim()}"</span>
-                                      <span className="text-[10px] font-headline font-bold uppercase px-1.5 py-0.5 rounded-none bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">custom</span>
+                                      <span className="text-[10px] font-headline font-bold px-1.5 py-0.5 rounded-none bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">custom</span>
                                     </button>
                                   )}
 
@@ -2888,7 +2888,7 @@ export default function StudentProfile({
                             )}
 
                             {!isTech && (
-                              <span className="text-[9px] font-sans font-bold uppercase tracking-wider px-1 py-0.5 rounded-none bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                              <span className="text-[9px] font-sans font-bold tracking-wider px-1 py-0.5 rounded-none bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                                 soft
                               </span>
                             )}
@@ -3061,7 +3061,7 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Activity / Title</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Activity / Title</label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -3072,7 +3072,7 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Certification Link (Optional)</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Certification Link (Optional)</label>
                             <input
                               type="url"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -3084,7 +3084,7 @@ export default function StudentProfile({
                         </div>
 
                         <div>
-                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase tracking-wider">Description (Optional)</label>
+                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Description (Optional)</label>
                           <textarea
                             rows="2"
                             className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"

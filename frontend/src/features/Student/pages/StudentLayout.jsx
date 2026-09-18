@@ -802,7 +802,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
             {/* Show profile complete banner if incomplete */}
             {!isComplete && (
               <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950/60 border border-blue-600 dark:border-blue-500 text-blue-900 dark:text-blue-200 rounded-none text-xs flex flex-col gap-2 shadow-2xs">
-                <div className="flex items-center gap-2 font-headline font-bold text-sm text-blue-800 dark:text-blue-300 uppercase tracking-wider">
+                <div className="flex items-center gap-2 font-headline font-bold text-sm text-blue-800 dark:text-blue-300 tracking-wider">
                   <Lock className="w-4 h-4 shrink-0 text-blue-700 dark:text-blue-400" />
                   <span>Mandatory Profile Setup Incomplete</span>
                 </div>
@@ -821,15 +821,11 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 loading={loading}
                 profile={profile}
                 onBack={() => {
-                  window.history.pushState({}, '', '/');
                   setSelectedBriefJobId(null);
                   setActiveTab('dashboard');
                 }}
                 onApply={handleApply}
                 onUpgrade={(upgradeData) => {
-                  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief')) {
-                    window.history.pushState({}, '', '/');
-                  }
                   setSelectedBriefJobId(null);
                   setTestSkill(upgradeData);
                 }}
@@ -857,7 +853,6 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                     setAutoSelectOpportunity={setAutoSelectOpportunity}
                     onSelectJob={(job) => {
                       setSelectedBriefJobId(job.id);
-                      window.history.pushState({}, '', `/job_brief?id=${job.id}`);
                     }}
                     goToTab={goToTab}
                   />

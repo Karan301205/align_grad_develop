@@ -450,12 +450,18 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--c-outline);
-  opacity: 0.5;
+  background: #94a3b8;
+  border-radius: 0px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--c-on-surface-variant);
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 0px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 
 @keyframes fade-in {
@@ -659,16 +665,6 @@
   box-shadow: var(--shadow-card);
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--c-outline-variant);
-}
 
 /* Toast Notification Slide-In & Fade-Out Animations */
 @keyframes toastSlideIn {
@@ -699,6 +695,20 @@
 
 .animate-toast-fade-out {
   animation: toastFadeOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Blinking Badge Animation */
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.animate-blink {
+  animation: blink 1.3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 

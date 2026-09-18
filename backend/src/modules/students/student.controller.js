@@ -214,7 +214,8 @@ exports.getJobs = async (req, res) => {
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const jobs = await prisma.job.findMany({ include: { company: true } });
+    const allJobs = await prisma.job.findMany({ include: { company: true } });
+    const jobs = allJobs.filter(job => job.status !== 'PAUSED' && !job.isPaused && job.status !== 'CLOSED');
     const applications = await prisma.application.findMany({
       where: { studentId: profile.id }
     });
@@ -690,5 +691,25 @@ exports.getStudentApplications = async (req, res) => {
   }
 };
 
+exports.getPublicJobBrief = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    if (!jobId || !/^[0-9a-fA-F]{24}$/.test(jobId)) {
+      return res.status(404).json({ error: 'Job not found or expired' });
+    }
 
+    const job = await prisma.job.findUnique({
+      where: { id: jobId },
+      include: { company: true }
+    });
 
+    if (!job || job.status === 'CLOSED') {
+      return res.status(404).json({ error: 'Job not found or expired' });
+    }
+
+    res.json(job);
+  } catch (err) {
+    console.error('Error fetching public job brief:', err);
+    res.status(500).json({ error: 'Server error fetching job brief' });
+  }
+};

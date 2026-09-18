@@ -40,14 +40,14 @@ export default function SidebarNavItem({
         onClick={handleParentClick}
         disabled={locked}
         title={collapsed ? label : undefined}
-        className={`group relative w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm cursor-pointer ${
+        className={`group relative w-full flex items-center justify-between px-3.5 py-2.5 rounded-none transition-all duration-150 text-xs sm:text-sm font-headline cursor-pointer ${
           active && !hasSubItems
-            ? 'bg-primary text-on-primary font-bold shadow-sm shadow-primary/30'
+            ? 'bg-blue-700 text-white font-bold shadow-xs'
             : active && hasSubItems
-            ? 'bg-primary/15 text-primary font-bold'
+            ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400 font-bold border-l-2 border-blue-700'
             : isHovered && hasSubItems
-            ? 'bg-surface-container-high text-primary font-medium'
-            : 'font-medium text-on-surface-variant hover:text-primary hover:bg-surface-container-high active:scale-[0.98]'
+            ? 'bg-slate-100 dark:bg-slate-800 text-blue-700 dark:text-blue-400 font-bold'
+            : 'font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/80'
         } ${locked ? 'opacity-40 cursor-not-allowed' : ''}`}
       >
         <div className="flex items-center gap-3 min-w-0">
@@ -58,7 +58,7 @@ export default function SidebarNavItem({
           <div className="flex items-center gap-1.5 shrink-0 ml-auto">
             {locked && <Lock className="w-3.5 h-3.5 opacity-60 animate-fade-in" />}
             {hasSubItems && (
-              <span className="text-on-surface-variant group-hover:text-primary transition-colors p-0.5">
+              <span className="text-slate-500 dark:text-slate-400 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors p-0.5">
                 {showSubMenu ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </span>
             )}
@@ -68,7 +68,7 @@ export default function SidebarNavItem({
 
       {/* Hover Submenu */}
       {showSubMenu && (
-        <div className="flex flex-col mt-1 ml-4 pl-3 border-l-2 border-primary/40 space-y-0.5 py-1 animate-fade-in">
+        <div className="flex flex-col mt-1 ml-3.5 pl-2.5 border-l-2 border-blue-700 dark:border-blue-500 space-y-1 py-1 animate-fade-in">
           {subItems.map((sub) => {
             const SubIcon = sub.icon;
             const isSubActive = active && activeSubId === sub.id;
@@ -80,16 +80,16 @@ export default function SidebarNavItem({
                   e.stopPropagation();
                   onSubItemClick?.(sub.id);
                 }}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-headline font-medium transition-all duration-150 text-left cursor-pointer ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-none text-xs font-headline transition-all duration-150 text-left cursor-pointer ${
                   isSubActive
-                    ? 'bg-primary text-on-primary font-bold shadow-xs shadow-primary/20 translate-x-0.5'
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest'
+                    ? 'bg-blue-700 text-white font-bold shadow-xs translate-x-0.5'
+                    : 'font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/80'
                 }`}
               >
                 {SubIcon ? (
-                  <SubIcon className={`w-3.5 h-3.5 shrink-0 ${isSubActive ? 'text-on-primary' : 'text-on-surface-variant'}`} />
+                  <SubIcon className={`w-3.5 h-3.5 shrink-0 ${isSubActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`} />
                 ) : (
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isSubActive ? 'bg-on-primary' : 'bg-on-surface-variant/60'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-none shrink-0 ${isSubActive ? 'bg-white' : 'bg-slate-400 dark:bg-slate-500'}`} />
                 )}
                 <span className="truncate">{sub.label}</span>
               </button>

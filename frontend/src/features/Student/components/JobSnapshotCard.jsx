@@ -43,6 +43,9 @@ function getCompanyColor(name) {
 
 function formatStipendDisplay(job) {
   if (!job) return 'Stipend Unspecified';
+  if (job.showSalary === false) {
+    return job.opportunityType === 'INTERNSHIP' ? 'Stipend Undisclosed' : 'Salary Undisclosed';
+  }
 
   const full = job.stipendFullTime || job.stipendFull;
   const part = job.stipendPartTime || job.stipendPart;

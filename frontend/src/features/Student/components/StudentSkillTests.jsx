@@ -365,7 +365,7 @@ export default function StudentSkillTests({
             </div>
 
             <div className="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none w-full">
-              <p className="text-[10px] font-headline font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+              <p className="text-[10px] font-headline font-bold text-slate-600 dark:text-slate-400 tracking-wider">
                 Your Score
               </p>
               <p className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">

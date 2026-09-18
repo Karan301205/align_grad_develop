@@ -9,7 +9,7 @@ import JobSnapshotCard from './JobSnapshotCard';
 import JobDetailsModal from '../../../components/JobDetailsModal';
 
 function extractStipendNumeric(job) {
-  if (!job) return 0;
+  if (!job || job.showSalary === false) return 0;
   const raw = job.stipendFullTime || job.stipendFull || job.salary || job.stipendPartTime || job.stipend || 0;
   const clean = String(raw).replace(/[^\d]/g, '');
   const num = parseInt(clean, 10);

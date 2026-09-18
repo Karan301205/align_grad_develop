@@ -16,7 +16,9 @@ import {
   BookOpen,
   Download,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  Share2,
+  Check
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import Button from './ui/Button';
@@ -49,8 +51,25 @@ const formatJoiningDate = (dateStr) => {
 
 export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isStudent, onOpenCompanyProfile }) {
   const [promptSkill, setPromptSkill] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   if (!job) return null;
+
+  const handleShareJob = () => {
+    const url = `${window.location.origin}/job_brief?id=${job.id}`;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url);
+    } else {
+      const textarea = document.createElement('textarea');
+      textarea.value = url;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
@@ -239,12 +258,33 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
               </div>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 hover:bg-surface-container-highest rounded-lg text-on-surface-variant hover:text-on-surface transition-all shrink-0 cursor-pointer"
-          >
-            <X className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleShareJob}
+              title="Share job link"
+              className="px-3 py-1.5 border border-outline-variant hover:border-primary/60 rounded-lg text-on-surface hover:text-primary text-xs font-headline font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-emerald-600 dark:text-emerald-400">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5 text-primary" />
+                  <span>Share Job</span>
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 hover:bg-surface-container-highest rounded-lg text-on-surface-variant hover:text-on-surface transition-all shrink-0 cursor-pointer"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Body */}
@@ -323,12 +363,20 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                 <span className="text-on-surface font-semibold">{job.preferredEducation || 'Any Graduate'}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-on-surface-variant">Stipend (Part-Time):</span>
-                <span className="text-on-surface font-semibold">{job.stipendPartTime || 'N/A'}</span>
+                <span className="text-on-surface-variant">
+                  {job.opportunityType === 'INTERNSHIP' ? 'Stipend (Part-Time):' : 'Salary (Part-Time):'}
+                </span>
+                <span className="text-on-surface font-semibold">
+                  {job.showSalary === false ? 'Undisclosed' : (job.stipendPartTime || 'N/A')}
+                </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-on-surface-variant">Stipend (Full-Time):</span>
-                <span className="text-on-surface font-semibold">{job.stipendFullTime || 'N/A'}</span>
+                <span className="text-on-surface-variant">
+                  {job.opportunityType === 'INTERNSHIP' ? 'Stipend (Full-Time):' : 'Salary (Full-Time):'}
+                </span>
+                <span className="text-on-surface font-semibold">
+                  {job.showSalary === false ? 'Undisclosed' : (job.stipendFullTime || 'N/A')}
+                </span>
               </div>
               {job.duration && (
                 <div className="flex justify-between items-center">
@@ -438,15 +486,27 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
         {/* Modal Footer */}
         <div className="p-4 bg-surface-container-high border-t border-outline-variant flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
 
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={Download}
-            onClick={handleDownloadPDF}
-            className="bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white font-bold border border-slate-700"
-          >
-            Download Description
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={Download}
+              onClick={handleDownloadPDF}
+              className="bg-slate-800 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white font-bold border border-slate-700"
+            >
+              Download Description
+            </Button>
+
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={copied ? Check : Share2}
+              onClick={handleShareJob}
+              className="bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 font-bold border border-slate-300 dark:border-slate-700"
+            >
+              {copied ? 'Link Copied!' : 'Share'}
+            </Button>
+          </div>
 
           <div className="flex gap-3 items-center">
             {isStudent && (

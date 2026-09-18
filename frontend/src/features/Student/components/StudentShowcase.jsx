@@ -457,7 +457,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
           {activeMode === 'record' && !recordedUrl && (
             <div className="flex-1 flex flex-col space-y-4">
               <div className="flex items-center justify-between border-b border-slate-300 dark:border-slate-700 pb-4">
-                <h3 className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+                <h3 className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 tracking-wider">
                   Live Camera Stream (720p)
                 </h3>
                 {isRecording && (
@@ -520,7 +520,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                   {/* Current Active Guide prompt card */}
                   <div className="bg-white dark:bg-slate-900 p-3 rounded-none border border-slate-300 dark:border-slate-700 flex items-center justify-between gap-4 shadow-2xs">
                     <div className="space-y-0.5">
-                      <span className="text-xs font-headline font-bold text-slate-500 uppercase tracking-wider">Active Topic</span>
+                      <span className="text-xs font-headline font-bold text-slate-500 tracking-wider">Active Topic</span>
                       <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-relaxed">
                         {recordingSeconds < 20 && "🎓 Tell us about yourself and your educational background"}
                         {recordingSeconds >= 20 && recordingSeconds < 30 && "⚡ Talk about the skills and technologies you know"}
@@ -529,7 +529,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
                       </p>
                     </div>
                     <div className="shrink-0 text-center bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 px-3 py-1 rounded-none min-w-[70px]">
-                      <span className="text-[10px] font-headline font-bold text-blue-800 dark:text-blue-300 uppercase block">Next in</span>
+                      <span className="text-[10px] font-headline font-bold text-blue-800 dark:text-blue-300 block">Next in</span>
                       <span className="text-xs font-headline font-extrabold text-blue-900 dark:text-blue-100">
                         {recordingSeconds < 20 && `${20 - recordingSeconds}s`}
                         {recordingSeconds >= 20 && recordingSeconds < 30 && `${30 - recordingSeconds}s`}
@@ -714,7 +714,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
         {/* Right Column: Status & Current published Video showcase */}
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-6 space-y-4 shadow-2xs">
-            <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100 border-b border-slate-300 dark:border-slate-700 pb-2 uppercase tracking-wider">
+            <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100 border-b border-slate-300 dark:border-slate-700 pb-2 tracking-wider">
               Showcase Status
             </h4>
             

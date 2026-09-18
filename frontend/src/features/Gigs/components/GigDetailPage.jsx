@@ -302,7 +302,7 @@ export default function GigDetailPage({
             <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-3 flex flex-col justify-center gap-2 shrink-0 w-full lg:w-[400px] xl:w-[460px] shadow-2xs">
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2">
-                  <span className="text-[20px] font-headline font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  <span className="text-[20px] font-headline font-bold text-slate-600 dark:text-slate-400 tracking-wider">
                     Pay:
                   </span>
                   <span className="text-base sm:text-lg font-headline font-bold text-emerald-900 dark:text-emerald-200 bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-700 px-2.5 py-0.5 rounded-none shadow-2xs">

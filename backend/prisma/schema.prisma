@@ -164,6 +164,8 @@ model Job {
   description          String
   companyName          String?
   opportunityType      String?  @default("JOB")
+  status               String?  @default("ACTIVE")
+  isPaused             Boolean? @default(false)
   officialWebsite      String?
   preferredEducation   String?
   desiredExperience    String?
@@ -177,6 +179,7 @@ model Job {
   edited               Boolean? @default(false)
   activeDays           Int?     @default(30)
   joiningMonth         String?
+  showSalary           Boolean? @default(true)
   openings             Int?
   selectionProcess     ProcessRound[]
   requirements         JobRequirement[]

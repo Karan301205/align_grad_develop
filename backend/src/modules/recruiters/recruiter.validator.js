@@ -36,7 +36,10 @@ const postJobSchema = {
       roundNumber: z.number().int().min(1),
       name: z.string().min(1, 'Round name is required'),
       description: z.string().min(1, 'Round description is required')
-    })).optional().nullable()
+    })).optional().nullable(),
+    status: z.string().optional().nullable(),
+    isPaused: z.boolean().optional().nullable(),
+    showSalary: z.boolean().optional().nullable()
   })
 };
 
@@ -45,6 +48,16 @@ const updateJobSchema = {
     jobId: objectIdSchema
   }),
   body: postJobSchema.body
+};
+
+const toggleJobStatusSchema = {
+  params: z.object({
+    jobId: objectIdSchema
+  }),
+  body: z.object({
+    status: z.enum(['ACTIVE', 'PAUSED', 'CLOSED']).optional().nullable(),
+    isPaused: z.boolean().optional().nullable()
+  }).optional()
 };
 
 const deleteJobSchema = {
@@ -71,6 +84,7 @@ module.exports = {
   verifyCompanySchema,
   postJobSchema,
   updateJobSchema,
+  toggleJobStatusSchema,
   deleteJobSchema,
   updateApplicationRoundsSchema
 };

@@ -22,7 +22,9 @@ import {
   Briefcase,
   Plus,
   ArrowRight,
-  X
+  X,
+  Share2,
+  Check
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { ALL_SKILLS } from '../../../constants';
@@ -61,6 +63,9 @@ function getCompanyColor(name) {
 
 function formatStipendDisplay(job) {
   if (!job) return 'Stipend Unspecified';
+  if (job.showSalary === false) {
+    return job.opportunityType === 'INTERNSHIP' ? 'Stipend Undisclosed' : 'Salary Undisclosed';
+  }
 
   const full = job.stipendFullTime || job.stipendFull;
   const part = job.stipendPartTime || job.stipendPart;
@@ -118,10 +123,40 @@ export default function JobBriefPage({
   onApply,
   onUpgrade,
   onAddSkillAndUpgrade,
-  onOpenCompanyProfile
+  onOpenCompanyProfile,
+  isPublic = false
 }) {
   const [applying, setApplying] = useState(false);
   const [testPromptModal, setTestPromptModal] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleShareJob = async () => {
+    try {
+      const shareUrl = `${window.location.origin}/job_brief?id=${job?.id || ''}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = shareUrl;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy share link:', err);
+    }
+  };
+
+  const handleBack = () => {
+    if (isPublic) {
+      window.location.href = '/?auth_prompt=signup_required';
+      return;
+    }
+    onBack?.();
+  };
 
   const openTestModal = (modalData) => {
     setTestPromptModal(modalData);
@@ -208,6 +243,10 @@ export default function JobBriefPage({
   const allRequirementsMet = evaluatedRequirements.every(r => r.isSatisfied);
 
   const handleApplyClick = async () => {
+    if (isPublic) {
+      window.location.href = '/?auth_prompt=signup_required';
+      return;
+    }
     if (isApplied || !allRequirementsMet) return;
     setApplying(true);
     try {
@@ -218,6 +257,10 @@ export default function JobBriefPage({
   };
 
   const handleDownloadPDF = () => {
+    if (isPublic) {
+      window.location.href = '/?auth_prompt=signup_required';
+      return;
+    }
     const doc = new jsPDF();
 
     doc.setFont("helvetica", "bold");
@@ -324,7 +367,7 @@ export default function JobBriefPage({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-300 dark:border-slate-700 pb-4">
         <button
           type="button"
-          onClick={onBack}
+          onClick={handleBack}
           className="inline-flex items-center gap-2 text-xs font-headline font-bold text-blue-800 hover:text-blue-950 dark:text-blue-300 dark:hover:text-blue-100 transition-colors cursor-pointer w-fit"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -457,28 +500,50 @@ export default function JobBriefPage({
               )}
             </div>
 
-            {/* Application Status Pill */}
-            {isApplied ? (
-              <div className="px-3.5 py-1.5 bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 font-headline font-bold text-xs rounded-none flex items-center gap-1.5 tracking-wider">
-                <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                <span>Applied For This Role</span>
-              </div>
-            ) : allRequirementsMet ? (
+            {/* Application Status Pill / Share / Apply Now */}
+            <div className="flex items-center gap-2 flex-wrap md:justify-end">
+              {/* Share Button */}
               <button
                 type="button"
-                onClick={handleApplyClick}
-                disabled={applying}
-                className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold text-xs rounded-none flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                onClick={handleShareJob}
+                className="px-3.5 py-2.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 hover:border-blue-700 font-headline font-bold text-xs rounded-none flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                title="Copy job share link"
               >
-                <Send className="w-4 h-4" />
-                <span>{applying ? 'Submitting Application...' : 'Apply Now'}</span>
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-emerald-600 dark:text-emerald-400">Link Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                    <span>Share</span>
+                  </>
+                )}
               </button>
-            ) : (
-              <div className="px-3 py-1.5 bg-amber-100 dark:bg-amber-950/70 border border-amber-400 dark:border-amber-700 text-amber-900 dark:text-amber-200 font-headline font-bold text-xs rounded-none flex items-center gap-1.5 tracking-wider">
-                <ShieldCheck className="w-4 h-4 text-amber-700 dark:text-amber-400" />
-                <span>Test Verification Required</span>
-              </div>
-            )}
+
+              {isApplied ? (
+                <div className="px-3.5 py-2.5 bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 font-headline font-bold text-xs rounded-none flex items-center gap-1.5 tracking-wider">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                  <span>Applied For This Role</span>
+                </div>
+              ) : (isPublic || allRequirementsMet) ? (
+                <button
+                  type="button"
+                  onClick={handleApplyClick}
+                  disabled={applying}
+                  className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold text-xs rounded-none flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>{applying ? 'Submitting Application...' : 'Apply Now'}</span>
+                </button>
+              ) : (
+                <div className="px-3 py-2.5 bg-amber-100 dark:bg-amber-950/70 border border-amber-400 dark:border-amber-700 text-amber-900 dark:text-amber-200 font-headline font-bold text-xs rounded-none flex items-center gap-1.5 tracking-wider">
+                  <ShieldCheck className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+                  <span>Test Verification Required</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -670,6 +735,10 @@ export default function JobBriefPage({
                       <button
                         type="button"
                         onClick={() => {
+                          if (isPublic) {
+                            window.location.href = '/?auth_prompt=signup_required';
+                            return;
+                          }
                           openTestModal({
                             skillName: req.skillName,
                             minRating: req.minRating,
@@ -700,7 +769,7 @@ export default function JobBriefPage({
                   <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                   <span>Application Submitted</span>
                 </div>
-              ) : allRequirementsMet ? (
+              ) : (isPublic || allRequirementsMet) ? (
                 <button
                   type="button"
                   onClick={handleApplyClick}

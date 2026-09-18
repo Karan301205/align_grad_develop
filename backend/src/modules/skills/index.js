@@ -3,7 +3,9 @@ const {
   buildStudentSkillMap,
   getMissingRequirements,
   getRequirementStatuses,
-  isProfileEligible
+  buildRecruiterDemandProfile,
+  calculateRecruiterCandidateMatch,
+  getTopMatchingTalents
 } = require('./skillMatching.service');
 
 module.exports = {
@@ -11,5 +13,7 @@ module.exports = {
   buildStudentSkillMap,
   getMissingRequirements,
   getRequirementStatuses,
-  isProfileEligible
+  buildRecruiterDemandProfile,
+  calculateRecruiterCandidateMatch,
+  getTopMatchingTalents
 };

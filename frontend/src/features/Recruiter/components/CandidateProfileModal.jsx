@@ -1,4 +1,9 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Video, Mail, Phone, Globe, Calendar, Briefcase, FolderGit2, GraduationCap, Award, FileText, Star, Link, ExternalLink, ShieldCheck, Check } from 'lucide-react';
+import ResumePdfTemplate from '../../../components/ResumePdfTemplate';
+import { openResumePdfInNewTab } from '../../../services/resumePdf';
+import { recordViewedCandidate } from '../../../utils/recentCandidateViews';
 
 const SOCIAL_PLATFORMS = [
   { key: 'linkedin', showKey: 'showLinkedin', label: 'LinkedIn', icon: Link, color: 'text-blue-600 dark:text-blue-400' },
@@ -13,6 +18,61 @@ const SOCIAL_PLATFORMS = [
 ];
 
 export default function CandidateProfileModal({ candidate, onClose }) {
+  const modalBodyRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const recordedCandIdRef = useRef(null);
+  const [generatingResume, setGeneratingResume] = useState(false);
+  const templateId = `candidate-resume-template-${candidate?.id || candidate?._id || 'view'}`;
+
+  const handleOpenGeneratedResume = async () => {
+    setGeneratingResume(true);
+    try {
+      const element = document.getElementById(templateId);
+      if (!element) {
+        alert('Resume template element not found.');
+        setGeneratingResume(false);
+        return;
+      }
+      await openResumePdfInNewTab(element, `${candidate?.name || 'Candidate'}_Resume`);
+    } catch (err) {
+      console.error('Error generating candidate resume PDF:', err);
+      alert('Failed to generate resume PDF. Please check browser console.');
+    } finally {
+      setGeneratingResume(false);
+    }
+  };
+
+  // Record view once per candidate
+  const candId = candidate?.id || candidate?._id || candidate?.userId;
+  useEffect(() => {
+    if (candId && recordedCandIdRef.current !== candId) {
+      recordedCandIdRef.current = candId;
+      recordViewedCandidate(candidate);
+    }
+  }, [candId, candidate]);
+
+  // Auto-scroll modal body to top and lock background scroll on open
+  useEffect(() => {
+    if (candidate) {
+      if (modalBodyRef.current) {
+        modalBodyRef.current.scrollTop = 0;
+      }
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape') onCloseRef.current?.();
+      };
+      window.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [candidate]);
+
   if (!candidate) return null;
 
   const socialLinks = candidate.socialLinks || {};
@@ -22,16 +82,17 @@ export default function CandidateProfileModal({ candidate, onClose }) {
     return url && typeof url === 'string' && url.trim() !== '' && isChecked;
   });
 
-  return (
+  const modalContent = (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs animate-fade-in pointer-events-auto"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6  backdrop-blur-md animate-fade-in pointer-events-auto"
+      style={{ margin: 0 }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-surface border border-slate-300 dark:border-slate-700 w-full max-w-4xl rounded-none shadow-2xl shadow-black/60 flex flex-col max-h-[90vh] overflow-hidden animate-scale-up text-left"
+        className="bg-surface border border-slate-300 dark:border-slate-700 w-full max-w-4xl rounded-none shadow-2xl shadow-black/70 flex flex-col max-h-[88vh] sm:max-h-[90vh] overflow-hidden animate-scale-up text-left relative"
       >
-        
+
         {/* Modal Header */}
         <div className="p-4 sm:p-5 bg-slate-50 dark:bg-slate-900/90 border-b border-slate-300 dark:border-slate-700 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-3.5">
@@ -54,7 +115,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
               )}
             </div>
           </div>
-          <button 
+          <button
             type="button"
             onClick={onClose}
             className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-none text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 border border-transparent hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer"
@@ -65,22 +126,22 @@ export default function CandidateProfileModal({ candidate, onClose }) {
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 sm:p-6 overflow-y-auto space-y-6 custom-scrollbar bg-slate-100/70 dark:bg-slate-950 text-left">
-          
+        <div ref={modalBodyRef} className="flex-1 min-h-0 p-5 sm:p-6 overflow-y-auto space-y-6 custom-scrollbar bg-slate-100/70 dark:bg-slate-950 text-left">
+
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
-            
+
             {/* Left Column: Personal info, contact & video showcase */}
             <div className="md:col-span-2 space-y-5">
               {/* Video Intro Section */}
               <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
-                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
                   <Video className="w-4 h-4 text-blue-700 dark:text-blue-400" /> Video Introduction
                 </h4>
                 {candidate.introVideoUrl ? (
                   <div className="aspect-video rounded-none bg-black overflow-hidden border border-slate-300 dark:border-slate-700 shadow-sm">
-                    <video 
-                      src={candidate.introVideoUrl} 
-                      controls 
+                    <video
+                      src={candidate.introVideoUrl}
+                      controls
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -93,7 +154,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Bio & Details */}
               <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
-                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase pb-2 border-b border-slate-200 dark:border-slate-800">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 pb-2 border-b border-slate-200 dark:border-slate-800">
                   Bio & Summary
                 </h4>
                 <p className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-3.5 rounded-none font-sans italic">
@@ -103,7 +164,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Contact / Metadata */}
               <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
-                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase pb-2 border-b border-slate-200 dark:border-slate-800">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 pb-2 border-b border-slate-200 dark:border-slate-800">
                   Contact & Info
                 </h4>
                 <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-3.5 rounded-none text-xs space-y-2.5 font-sans">
@@ -136,7 +197,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Social Profiles Section */}
               <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
-                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
                   <Link className="w-4 h-4 text-blue-700 dark:text-blue-400" /> Social Profiles
                 </h4>
                 {activeSocialLinks.length > 0 ? (
@@ -175,7 +236,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Work Preferences Section */}
               <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
-                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
                   <Briefcase className="w-4 h-4 text-blue-700 dark:text-blue-400" /> Work Preferences
                 </h4>
                 <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-3.5 rounded-none space-y-3.5 text-xs">
@@ -234,10 +295,10 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
             {/* Right Column: Skills, Experience, Projects, Education, Certificates */}
             <div className="md:col-span-3 space-y-5">
-              
+
               {/* Skills Grid */}
               <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
-                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase pb-2 border-b border-slate-200 dark:border-slate-800">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 pb-2 border-b border-slate-200 dark:border-slate-800">
                   Skills & Verified Ratings
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -261,7 +322,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Experience */}
               <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
-                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
                   <Briefcase className="w-4 h-4 text-blue-700 dark:text-blue-400" /> Work Experience
                 </h4>
                 {(() => {
@@ -286,14 +347,14 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                           <div className="flex items-center gap-2.5">
                             <Award className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                             <div>
-                              <p className="text-[10px] font-headline font-bold text-slate-600 dark:text-slate-400 tracking-wider uppercase">Completed Gigs</p>
+                              <p className="text-[10px] font-headline font-bold text-slate-600 dark:text-slate-400 tracking-wider">Completed Gigs</p>
                               <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{completedGigsCount} Verified Task{completedGigsCount > 1 ? 's' : ''}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2.5">
                             <Star className="w-4 h-4 text-amber-500 fill-amber-500/20 shrink-0" />
                             <div>
-                              <p className="text-[10px] font-headline font-bold text-slate-600 dark:text-slate-400 tracking-wider uppercase">Average Rating</p>
+                              <p className="text-[10px] font-headline font-bold text-slate-600 dark:text-slate-400 tracking-wider">Average Rating</p>
                               <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{averageRating} / 5.0 Rating</p>
                             </div>
                           </div>
@@ -332,7 +393,7 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Projects */}
               <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
-                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
                   <FolderGit2 className="w-4 h-4 text-blue-700 dark:text-blue-400" /> Projects
                 </h4>
                 {candidate.projects && candidate.projects.length > 0 ? (
@@ -365,34 +426,9 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                 )}
               </div>
 
-              {/* Education */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
-                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
-                  <GraduationCap className="w-4 h-4 text-blue-700 dark:text-blue-400" /> Education
-                </h4>
-                {candidate.education && candidate.education.length > 0 ? (
-                  <div className="space-y-3">
-                    {candidate.education.map((edu, idx) => (
-                      <div key={idx} className="p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-none text-xs space-y-1 shadow-2xs">
-                        <div className="flex justify-between font-headline font-bold text-slate-900 dark:text-slate-100">
-                          <span className="text-sm">{edu.degree} in {edu.fieldOfStudy}</span>
-                          <span className="text-slate-500 dark:text-slate-400 font-sans font-normal text-[11px]">{edu.startDate} - {edu.endDate}</span>
-                        </div>
-                        <p className="text-slate-700 dark:text-slate-300 font-medium">{edu.institute}</p>
-                        {edu.gradeValue && (
-                          <p className="text-xs text-blue-700 dark:text-blue-400 font-sans font-semibold">Grade: {edu.gradeValue} ({edu.gradeType})</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-slate-500 dark:text-slate-400">No education listed.</p>
-                )}
-              </div>
-
               {/* Certificates */}
               <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
-                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
                   <Award className="w-4 h-4 text-blue-700 dark:text-blue-400" /> Licenses & Certifications
                 </h4>
                 {candidate.certificates && candidate.certificates.length > 0 ? (
@@ -417,9 +453,35 @@ export default function CandidateProfileModal({ candidate, onClose }) {
                 )}
               </div>
 
+              {/* Education */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
+                  <GraduationCap className="w-4 h-4 text-blue-700 dark:text-blue-400" /> Education
+                </h4>
+                {candidate.education && candidate.education.length > 0 ? (
+                  <div className="space-y-3">
+                    {candidate.education.map((edu, idx) => (
+                      <div key={idx} className="p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-none text-xs space-y-1 shadow-2xs">
+                        <div className="flex justify-between font-headline font-bold text-slate-900 dark:text-slate-100">
+                          <span className="text-sm">{edu.degree} in {edu.fieldOfStudy}</span>
+                          <span className="text-slate-500 dark:text-slate-400 font-sans font-normal text-[11px]">{edu.startDate} - {edu.endDate}</span>
+                        </div>
+                        <p className="text-slate-700 dark:text-slate-300 font-medium">{edu.institute}</p>
+                        {edu.gradeValue && (
+                          <p className="text-xs text-blue-700 dark:text-blue-400 font-sans font-semibold">Grade: {edu.gradeValue} ({edu.gradeType})</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500 dark:text-slate-400">No education listed.</p>
+                )}
+              </div>
+
+
               {/* Extra-Curricular & Co-Curricular Activities */}
               <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
-                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 uppercase flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
+                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
                   <Award className="w-4 h-4 text-blue-700 dark:text-blue-400" /> Extra-Curricular & Co-Curricular
                 </h4>
                 {(() => {
@@ -469,28 +531,46 @@ export default function CandidateProfileModal({ candidate, onClose }) {
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 bg-slate-50 dark:bg-slate-900/90 border-t border-slate-300 dark:border-slate-700 flex justify-end gap-3 shrink-0">
-          {candidate.resumeUrl && (
-            <a
-              href={candidate.resumeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+        <div className="p-4 bg-slate-50 dark:bg-slate-900/90 border-t border-slate-300 dark:border-slate-700 flex justify-between items-center gap-3 shrink-0 flex-wrap">
+          <div>
+            {/* {candidate.resumeUrl && (
+              <a
+                href={candidate.resumeUrl.startsWith('http') ? candidate.resumeUrl : `https://${candidate.resumeUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-headline font-bold text-blue-700 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Original Uploaded Resume</span>
+              </a>
+            )} */}
+          </div>
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handleOpenGeneratedResume}
+              disabled={generatingResume}
+              className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <FileText className="w-3.5 h-3.5" /> Download Resume PDF
-            </a>
-          )}
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none text-xs font-headline font-bold text-slate-800 dark:text-slate-200 transition-all cursor-pointer shadow-2xs"
-          >
-            Close Profile
-          </button>
+              <FileText className="w-3.5 h-3.5" />
+              <span>{generatingResume ? 'Generating PDF...' : 'Download Resume PDF'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none text-xs font-headline font-bold text-slate-800 dark:text-slate-200 transition-all cursor-pointer shadow-2xs"
+            >
+              Close Profile
+            </button>
+          </div>
         </div>
 
+        {/* Off-screen Resume Template for PDF generation */}
+        <ResumePdfTemplate id={templateId} candidate={candidate} />
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }
 

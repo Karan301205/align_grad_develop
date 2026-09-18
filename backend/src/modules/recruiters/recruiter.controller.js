@@ -1,6 +1,7 @@
 const { prisma } = require('../../infrastructure/database');
 const { purgeExpiredJobs } = require('../jobs/jobLifecycle.service');
 const { deleteS3ObjectFromUrl } = require('../../services/fileCleanup.service');
+const { getTopMatchingTalents } = require('../skills/skillMatching.service');
 
 exports.getCompany = async (req, res) => {
   try {
@@ -213,7 +214,8 @@ exports.postJob = async (req, res) => {
     activeDays,
     joiningMonth,
     openings,
-    selectionProcess
+    selectionProcess,
+    showSalary
   } = req.body;
 
   if (!title || !description || !requirements) {
@@ -248,6 +250,7 @@ exports.postJob = async (req, res) => {
         activeDays: activeDays ? parseInt(activeDays, 10) : 30,
         joiningMonth: joiningMonth || 'Immediate',
         openings: openings ? parseInt(openings, 10) : null,
+        showSalary: showSalary !== undefined ? Boolean(showSalary) : true,
         selectionProcess: selectionProcess ? {
           set: selectionProcess
         } : undefined,
@@ -341,7 +344,8 @@ exports.updateJob = async (req, res) => {
     activeDays,
     joiningMonth,
     openings,
-    selectionProcess
+    selectionProcess,
+    showSalary
   } = req.body;
 
   if (!title || !description || !requirements) {
@@ -386,6 +390,7 @@ exports.updateJob = async (req, res) => {
         activeDays: activeDays ? parseInt(activeDays, 10) : 30,
         joiningMonth: joiningMonth !== undefined ? joiningMonth : job.joiningMonth,
         openings: openings ? parseInt(openings, 10) : null,
+        showSalary: showSalary !== undefined ? Boolean(showSalary) : job.showSalary,
         selectionProcess: selectionProcess ? {
           set: selectionProcess
         } : undefined,
@@ -478,3 +483,87 @@ exports.updateApplicationRounds = async (req, res) => {
   }
 };
 
+exports.toggleJobPause = async (req, res) => {
+  const { jobId } = req.params;
+  try {
+    const company = await prisma.company.findUnique({
+      where: { userId: req.user.id }
+    });
+    if (!company) {
+      return res.status(404).json({ error: 'Company profile not found' });
+    }
+
+    const job = await prisma.job.findUnique({
+      where: { id: jobId }
+    });
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+    if (job.companyId !== company.id) {
+      return res.status(403).json({ error: 'Unauthorized to modify this job' });
+    }
+
+    const currentPaused = Boolean(job.isPaused || job.status === 'PAUSED');
+    let nextPaused;
+    if (req.body && typeof req.body.isPaused === 'boolean') {
+      nextPaused = req.body.isPaused;
+    } else if (req.body && req.body.status) {
+      nextPaused = req.body.status === 'PAUSED';
+    } else {
+      nextPaused = !currentPaused;
+    }
+
+    const updatedJob = await prisma.job.update({
+      where: { id: jobId },
+      data: {
+        isPaused: nextPaused,
+        status: nextPaused ? 'PAUSED' : 'ACTIVE'
+      }
+    });
+
+    res.json(updatedJob);
+  } catch (err) {
+    console.error('Error toggling job pause status:', err);
+    res.status(500).json({ error: 'Server error updating job status' });
+  }
+};
+
+exports.getTopMatchingTalents = async (req, res) => {
+  try {
+    // Purge expired jobs first so only active jobs are used for demand matching
+    await purgeExpiredJobs(prisma);
+
+    const company = await prisma.company.findFirst({
+      where: { OR: [{ userId: req.user.id }, { id: req.user.id }] }
+    });
+    if (!company) {
+      return res.json({
+        demandProfile: { totalActiveJobs: 0, skills: {}, skillList: [] },
+        topTalents: []
+      });
+    }
+
+    const allJobs = await prisma.job.findMany({
+      where: { companyId: company.id }
+    });
+
+    // Exclude closed, paused, or expired jobs and Gigs
+    const activeJobs = allJobs.filter(job => {
+      if (job.opportunityType === 'GIG') return false;
+      if (job.status === 'CLOSED' || job.status === 'PAUSED' || job.isPaused) return false;
+      const activeDays = job.activeDays || 30;
+      const expiryTime = new Date(job.createdAt).getTime() + activeDays * 24 * 60 * 60 * 1000;
+      return Date.now() <= expiryTime;
+    });
+
+    const candidates = await prisma.profile.findMany();
+
+    const limit = req.query.limit ? parseInt(req.query.limit, 10) : 500;
+    const recommendationResult = getTopMatchingTalents(activeJobs, candidates, limit);
+
+    res.json(recommendationResult);
+  } catch (err) {
+    console.error('Error computing top matching talents:', err);
+    res.status(500).json({ error: 'Server error retrieving matching talents' });
+  }
+};

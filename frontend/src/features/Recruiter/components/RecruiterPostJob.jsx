@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { 
   Plus, 
   Trash2, 
-  HelpCircle, 
   Briefcase, 
   DollarSign, 
   Calendar, 
@@ -13,12 +12,13 @@ import {
   Check, 
   AlertCircle,
   History,
-  ArrowRight
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Info
 } from 'lucide-react';
 import { ALL_SKILLS } from '../../../constants';
 import { INDIAN_STATES } from '../../../constants/indianStates';
-import PageHeader from '../../../components/ui/PageHeader';
-import Button from '../../../components/ui/Button';
 
 function formatTimeAgo(dateString) {
   if (!dateString) return 'recently';
@@ -67,12 +67,6 @@ function mapErrorMessageToField(errMsg) {
   if (lower.includes('duration')) {
     return { field: 'duration', msg: errMsg };
   }
-  if (lower.includes('budget')) {
-    return { field: 'budget', msg: errMsg };
-  }
-  if (lower.includes('delivery')) {
-    return { field: 'deliveryTime', msg: errMsg };
-  }
 
   return { field: 'jobDesc', msg: errMsg };
 }
@@ -91,10 +85,8 @@ function scrollToField(fieldKey) {
 }
 
 export default function RecruiterPostJob({ company, user, submittingJob, handlePostJob, recentJobs = [], goToTab }) {
-  const todayString = new Date().toISOString().split('T')[0];
-
-  // Hiring Option Type
-  const [opportunityType, setOpportunityType] = useState('JOB'); // 'JOB', 'INTERNSHIP', 'GIG'
+  // Hiring Option Type: 'JOB' or 'INTERNSHIP' (Gig option removed)
+  const [opportunityType, setOpportunityType] = useState('JOB');
 
   // Form states
   const [designation, setDesignation] = useState('');
@@ -105,6 +97,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
       setCompanyName(company?.name || user?.name || '');
     }
   }, [company, user]);
+
   const [officialWebsite, setOfficialWebsite] = useState('');
   const [preferredEducation, setPreferredEducation] = useState('');
   const [desiredExperience, setDesiredExperience] = useState('0-1 Years');
@@ -121,6 +114,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
 
   const [stipendPartTime, setStipendPartTime] = useState('');
   const [stipendFullTime, setStipendFullTime] = useState('');
+  const [showSalary, setShowSalary] = useState(true);
   const [duration, setDuration] = useState('');
   const [location, setLocation] = useState('');
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
@@ -138,11 +132,6 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
   const [openings, setOpenings] = useState('');
   const [jobDesc, setJobDesc] = useState('');
   const [roleResponsibilities, setRoleResponsibilities] = useState('');
-
-  // Gig specific states
-  const [budget, setBudget] = useState('');
-  const [deliveryTime, setDeliveryTime] = useState('');
-  const [attachmentFile, setAttachmentFile] = useState(null);
 
   // Required skills thresholds
   const [reqs, setReqs] = useState([]);
@@ -183,53 +172,30 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
   const validateForm = () => {
     const newErrors = {};
 
-    if (opportunityType === 'GIG') {
-      if (!designation.trim()) {
-        newErrors.designation = 'Gig Title is required.';
-      }
-      if (!location.trim()) {
-        newErrors.location = 'Location is required.';
-      }
-      if (!budget || isNaN(budget) || parseFloat(budget) <= 0) {
-        newErrors.budget = 'Valid project budget is required.';
-      }
-      if (!deliveryTime.trim()) {
-        newErrors.deliveryTime = 'Delivery time is required.';
-      }
-      if (!jobDesc.trim()) {
-        newErrors.jobDesc = 'Gig description is required.';
-      } else if (jobDesc.trim().length < 10) {
-        newErrors.jobDesc = 'Description must be at least 10 characters long.';
-      }
-      if (reqs.length === 0) {
-        newErrors.reqs = 'Please add at least one required skill.';
-      }
-    } else {
-      if (!designation.trim()) {
-        newErrors.designation = 'Designation (Job Title) is required.';
-      }
-      if (!companyName.trim()) {
-        newErrors.companyName = 'Company Name is required.';
-      }
-      if (!location.trim()) {
-        newErrors.location = 'Location is required.';
-      }
-      if (opportunityType === 'INTERNSHIP' && !duration.trim()) {
-        newErrors.duration = 'Duration is required.';
-      }
-      if (!jobDesc.trim()) {
-        newErrors.jobDesc = 'Job / Internship Summary is required.';
-      } else if (jobDesc.trim().length < 10) {
-        newErrors.jobDesc = 'Description must be at least 10 characters long.';
-      }
-      if (!roleResponsibilities.trim()) {
-        newErrors.roleResponsibilities = 'Role Responsibilities are required.';
-      } else if (roleResponsibilities.trim().length < 10) {
-        newErrors.roleResponsibilities = 'Role responsibilities must be at least 10 characters long.';
-      }
-      if (reqs.length === 0) {
-        newErrors.reqs = 'Please add at least one required skill threshold.';
-      }
+    if (!designation.trim()) {
+      newErrors.designation = 'Designation (Job Title) is required.';
+    }
+    if (!companyName.trim()) {
+      newErrors.companyName = 'Company Name is required.';
+    }
+    if (!location.trim()) {
+      newErrors.location = 'Location is required.';
+    }
+    if (opportunityType === 'INTERNSHIP' && !duration.trim()) {
+      newErrors.duration = 'Duration is required for internships.';
+    }
+    if (!jobDesc.trim()) {
+      newErrors.jobDesc = 'Opportunity Summary is required.';
+    } else if (jobDesc.trim().length < 10) {
+      newErrors.jobDesc = 'Description must be at least 10 characters long.';
+    }
+    if (!roleResponsibilities.trim()) {
+      newErrors.roleResponsibilities = 'Role Responsibilities are required.';
+    } else if (roleResponsibilities.trim().length < 10) {
+      newErrors.roleResponsibilities = 'Role responsibilities must be at least 10 characters long.';
+    }
+    if (reqs.length === 0) {
+      newErrors.reqs = 'Please add at least one required skill threshold.';
     }
 
     setErrors(newErrors);
@@ -246,41 +212,28 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
       return;
     }
 
-    let payload;
-    if (opportunityType === 'GIG') {
-      payload = {
-        opportunityType: 'GIG',
-        title: designation,
-        description: jobDesc,
-        skills: reqs.map(r => r.skillName),
-        requirements: reqs,
-        budget: parseFloat(budget),
-        deliveryTime,
-        minRating: reqs.length > 0 ? Math.max(...reqs.map(r => r.minRating || 1)) : 4,
-        attachmentFile
-      };
-    } else {
-      payload = {
-        opportunityType,
-        title: designation,
-        designation,
-        description: jobDesc,
-        companyName,
-        officialWebsite,
-        preferredEducation,
-        desiredExperience,
-        stipendPartTime,
-        stipendFullTime,
-        duration: opportunityType === 'INTERNSHIP' ? duration : null,
-        roleResponsibilities,
-        location,
-        activeDays: activeDays ? parseInt(activeDays, 10) : 30,
-        joiningMonth: joiningMonth.trim() || 'Immediate',
-        openings: openings ? parseInt(openings, 10) : null,
-        selectionProcess: rounds,
-        requirements: reqs
-      };
-    }
+    const payload = {
+      opportunityType,
+      title: designation,
+      designation,
+      description: jobDesc,
+      companyName,
+      officialWebsite,
+      preferredEducation,
+      desiredExperience,
+      stipendPartTime,
+      stipendFullTime,
+      duration: opportunityType === 'INTERNSHIP' ? duration : null,
+      roleResponsibilities,
+      location,
+      locationUrl,
+      activeDays: activeDays ? parseInt(activeDays, 10) : 30,
+      joiningMonth: joiningMonth.trim() || 'Immediate',
+      openings: openings ? parseInt(openings, 10) : null,
+      showSalary,
+      selectionProcess: rounds,
+      requirements: reqs
+    };
 
     const res = await handlePostJob(payload);
     if (res && res.success) {
@@ -292,6 +245,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
       setDesiredExperience('0-1 Years');
       setStipendPartTime('');
       setStipendFullTime('');
+      setShowSalary(true);
       setDuration('');
       setLocation('');
       setLocationUrl('');
@@ -302,9 +256,6 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
       setRoleResponsibilities('');
       setReqs([]);
       setRounds([]);
-      setBudget('');
-      setDeliveryTime('');
-      setAttachmentFile(null);
     } else if (res && res.error) {
       const { field, msg } = mapErrorMessageToField(res.error);
       setErrors(prev => ({ ...prev, [field]: msg }));
@@ -313,31 +264,55 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
   };
 
   return (
-    <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 pb-16 text-left selection:bg-primary/20">
-      {/* Left Column: Form & Header */}
-      <div className="w-full space-y-8 min-w-0 animate-fade-in">
-        <PageHeader 
-          title="Post New Opportunity" 
-          subtitle="Specify position criteria, minimum skill rating thresholds, and selection rounds for candidate matching."
-        />
+    <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 pb-16 text-left">
+      
+      {/* Left Column: Form & Executive Header */}
+      <div className="w-full space-y-6 min-w-0 animate-fade-in">
+        
+        {/* Recruiter Executive Top Header Banner */}
+        <header className="bg-surface border border-slate-300 dark:border-slate-700 p-5 sm:p-6 rounded-none shadow-2xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-blue-100 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 text-blue-900 dark:text-blue-200 mb-2">
+              <span>Job Publishing</span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-headline font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+              Post New Opportunity
+            </h2>
+            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 font-sans font-medium mt-1">
+              Specify position criteria, minimum skill rating thresholds, and selection rounds for candidate matching.
+            </p>
+          </div>
+        </header>
 
-        <form onSubmit={onSubmit} noValidate className="space-y-8">
+        <form onSubmit={onSubmit} noValidate className="space-y-6">
           
-          {/* HIRING OPTION TYPE SELECTION */}
-          <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-4 shadow-xs">
-            <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-              <label className="text-xs font-headline font-medium  tracking-wider text-primary font-bold flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          {/* Unified Opportunity Creation Container */}
+          <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none shadow-2xs divide-y divide-slate-300 dark:divide-slate-700">
+            
+            {/* STEP 1: Opportunity Type Selection */}
+            <div className="p-6 sm:p-7 space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <label className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-none bg-blue-700"></span>
                 Select Opportunity Type *
               </label>
-              <span className="text-[10px] font-headline font-medium text-on-surface-variant/70 ">STEP 1 OF 5</span>
+              <span className="text-[10px] font-headline font-bold text-slate-500 dark:text-slate-400 tracking-wider">
+                STEP 1 OF 5
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               {[
-                { id: 'JOB', label: 'Full-Time / Part-Time Job', desc: 'Permanent career roles with competitive packages' },
-                { id: 'INTERNSHIP', label: 'Internship', desc: 'Fixed-duration positions with monthly stipends' },
-                { id: 'GIG', label: 'Gig (Short-Term Task)', desc: 'Contract task-based milestone deliverables' },
+                { 
+                  id: 'JOB', 
+                  label: 'Full-Time / Part-Time Job', 
+                  desc: 'Permanent career roles with competitive compensation packages' 
+                },
+                { 
+                  id: 'INTERNSHIP', 
+                  label: 'Internship', 
+                  desc: 'Fixed-duration positions with structured monthly stipends' 
+                },
               ].map((opt) => {
                 const isSelected = opportunityType === opt.id;
                 return (
@@ -347,54 +322,65 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                       setOpportunityType(opt.id);
                       setErrors({});
                     }}
-                    className={`p-4 sm:p-5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between gap-2 relative overflow-hidden group ${
+                    className={`p-4 sm:p-5 rounded-none border transition-all cursor-pointer flex flex-col justify-between gap-2 relative ${
                       isSelected
-                        ? 'bg-surface-container-high border-primary shadow-md ring-1 ring-primary/30 border-l-4 border-l-primary'
-                        : 'bg-surface-container-low border-outline-variant/70 hover:border-primary/50 hover:bg-surface-container shadow-xs'
+                        ? 'bg-blue-50/70 dark:bg-blue-950/40 border-2 border-blue-700 dark:border-blue-500 shadow-xs'
+                        : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:border-blue-600 shadow-2xs'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className={`text-xs font-bold ${isSelected ? 'text-primary font-headline' : 'text-on-surface group-hover:text-primary transition-colors'}`}>
+                      <span className={`text-xs font-bold font-headline ${isSelected ? 'text-blue-700 dark:text-blue-400' : 'text-slate-900 dark:text-slate-100'}`}>
                         {opt.label}
                       </span>
                       {isSelected && (
-                        <div className="w-4 h-4 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0">
-                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        <div className="w-4 h-4 rounded-none bg-blue-700 text-white flex items-center justify-center shrink-0">
+                          <Check className="w-3 h-3 stroke-[3]" />
                         </div>
                       )}
                     </div>
-                    <span className="text-[11px] font-sans text-on-surface-variant leading-relaxed">{opt.desc}</span>
+                    <span className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400 leading-relaxed">
+                      {opt.desc}
+                    </span>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          {/* SECTION 1: Role & Company Details */}
-          <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs">
-            <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-              <h3 className="text-xs font-headline font-medium  tracking-wider text-primary font-bold flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-primary" /> {opportunityType === 'GIG' ? 'Gig Details' : 'Role & Company Details'}
-              </h3>
-              <span className="text-[10px] font-headline font-medium text-on-surface-variant/70 ">STEP 2 OF 5</span>
+          {/* STEP 2: Role & Company Details */}
+          <div className="p-6 sm:p-7 space-y-6">
+            <div className="border-b border-slate-200 dark:border-slate-800 pb-3 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                  <span>Role & Company Details</span>
+                </h3>
+                <span className="text-[10px] font-headline font-bold text-slate-500 dark:text-slate-400 tracking-wider">
+                  STEP 2 OF 5
+                </span>
+              </div>
+              <p className="text-[11px] font-sans font-medium text-slate-600 dark:text-slate-400 flex items-center gap-1.5 pt-0.5">
+                <Info className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                <span>Note: This section will not be editable after posting.</span>
+              </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Designation Field */}
               <div id="field-container-designation" className="space-y-1.5">
-                <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">
-                  {opportunityType === 'GIG' ? 'Gig Title *' : 'Designation (Job Title) *'}
+                <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                  Designation (Job Title) *
                 </label>
                 <div className="relative">
                   <input
                     id="input-designation"
                     type="text"
-                    className={`w-full bg-surface-container-low border rounded-xl px-4 py-2.5 text-sm font-sans focus:outline-none transition-all text-on-surface ${
+                    className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:outline-none transition-all shadow-2xs ${
                       errors.designation
-                        ? 'border-error ring-2 ring-error/20 bg-error/5 text-error font-medium'
-                        : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20'
+                        ? 'border-rose-600 ring-1 ring-rose-600 bg-rose-50/20'
+                        : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
                     }`}
-                    placeholder={opportunityType === 'GIG' ? "e.g. Design a responsive landing page" : "e.g. Senior Full-Stack Developer"}
+                    placeholder="e.g. Senior Full-Stack Developer"
                     value={designation}
                     onChange={e => {
                       setDesignation(e.target.value);
@@ -402,79 +388,81 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                     }}
                   />
                   {errors.designation && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-error pointer-events-none">
-                      <AlertCircle className="w-5 h-5 fill-error/20 text-error" />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-rose-600 pointer-events-none">
+                      <AlertCircle className="w-4 h-4" />
                     </div>
                   )}
                 </div>
                 {errors.designation && (
-                  <p className="text-xs text-error font-medium flex items-center gap-1.5 mt-1 animate-fade-in font-sans">
+                  <p className="text-xs text-rose-600 font-sans font-medium flex items-center gap-1.5 mt-1">
                     <span>{errors.designation}</span>
                   </p>
                 )}
               </div>
 
               {/* Company Name Field */}
-              {opportunityType !== 'GIG' && (
-                <div id="field-container-companyName" className="space-y-1.5">
-                  <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">Company Name *</label>
-                  <div className="relative">
-                    <input
-                      id="input-companyName"
-                      type="text"
-                      className={`w-full bg-surface-container-low border rounded-xl px-4 py-2.5 text-sm font-sans focus:outline-none transition-all text-on-surface ${
-                        errors.companyName
-                          ? 'border-error ring-2 ring-error/20 bg-error/5 text-error font-medium'
-                          : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20'
-                      }`}
-                      placeholder="e.g. Acme Innovations"
-                      value={companyName}
-                      onChange={e => {
-                        setCompanyName(e.target.value);
-                        if (errors.companyName) setErrors(prev => ({ ...prev, companyName: null }));
-                      }}
-                    />
-                    {errors.companyName && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-error pointer-events-none">
-                        <AlertCircle className="w-5 h-5 fill-error/20 text-error" />
-                      </div>
-                    )}
-                  </div>
+              <div id="field-container-companyName" className="space-y-1.5">
+                <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                  Company Name *
+                </label>
+                <div className="relative">
+                  <input
+                    id="input-companyName"
+                    type="text"
+                    className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:outline-none transition-all shadow-2xs ${
+                      errors.companyName
+                        ? 'border-rose-600 ring-1 ring-rose-600 bg-rose-50/20'
+                        : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                    }`}
+                    placeholder="e.g. Acme Innovations"
+                    value={companyName}
+                    onChange={e => {
+                      setCompanyName(e.target.value);
+                      if (errors.companyName) setErrors(prev => ({ ...prev, companyName: null }));
+                    }}
+                  />
                   {errors.companyName && (
-                    <p className="text-xs text-error font-medium flex items-center gap-1.5 mt-1 animate-fade-in font-sans">
-                      <span>{errors.companyName}</span>
-                    </p>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-rose-600 pointer-events-none">
+                      <AlertCircle className="w-4 h-4" />
+                    </div>
                   )}
                 </div>
-              )}
+                {errors.companyName && (
+                  <p className="text-xs text-rose-600 font-sans font-medium flex items-center gap-1.5 mt-1">
+                    <span>{errors.companyName}</span>
+                  </p>
+                )}
+              </div>
 
               {/* Official Website */}
-              {opportunityType !== 'GIG' && (
-                <div id="field-container-officialWebsite" className="space-y-1.5">
-                  <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">Official Website</label>
-                  <input
-                    type="url"
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm font-sans focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-on-surface"
-                    placeholder="e.g. https://acme.com"
-                    value={officialWebsite}
-                    onChange={e => setOfficialWebsite(e.target.value)}
-                  />
-                </div>
-              )}
+              <div id="field-container-officialWebsite" className="space-y-1.5">
+                <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                  Official Website
+                </label>
+                <input
+                  type="url"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none transition-all shadow-2xs"
+                  placeholder="e.g. https://acme.com"
+                  value={officialWebsite}
+                  onChange={e => setOfficialWebsite(e.target.value)}
+                />
+              </div>
 
               {/* Location Field */}
               <div id="field-container-location" className="relative space-y-1.5">
-                <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">headquarters location</label>
+                <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                  Headquarters Location *
+                </label>
                 <div className="relative">
                   <input
                     id="input-location"
                     type="text"
-                    className={`w-full bg-surface-container-low border rounded-xl px-4 py-2.5 text-sm font-sans focus:outline-none transition-all text-on-surface pr-10 ${
+                    className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:outline-none transition-all pr-10 shadow-2xs ${
                       errors.location
-                        ? 'border-error ring-2 ring-error/20 bg-error/5 text-error font-medium'
-                        : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20'
+                        ? 'border-rose-600 ring-1 ring-rose-600 bg-rose-50/20'
+                        : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
                     }`}
-                    placeholder="Search state/UT or select (e.g. Delhi, Karnataka, Work from home)..."
+                    placeholder="Search state/UT or select (e.g. Delhi, Karnataka, Remote)..."
                     value={location}
                     onChange={e => {
                       setLocation(e.target.value);
@@ -487,28 +475,28 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                   <button
                     type="button"
                     onClick={() => setIsLocationDropdownOpen(!isLocationDropdownOpen)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface cursor-pointer p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer p-1"
                   >
                     <ChevronDown className="w-4 h-4" />
                   </button>
                 </div>
 
                 {errors.location && (
-                  <p className="text-xs text-error font-medium flex items-center gap-1.5 mt-1 animate-fade-in font-sans">
+                  <p className="text-xs text-rose-600 font-sans font-medium flex items-center gap-1.5 mt-1">
                     <span>{errors.location}</span>
                   </p>
                 )}
 
-                {/* Location Popover Dropdown */}
+                {/* Location Dropdown */}
                 {isLocationDropdownOpen && (
                   <>
                     <div 
                       className="fixed inset-0 z-10" 
                       onClick={() => setIsLocationDropdownOpen(false)}
                     ></div>
-                    <div className="absolute z-20 left-0 right-0 mt-1 bg-surface-container border border-outline-variant rounded-xl shadow-xl max-h-60 overflow-y-auto custom-scrollbar p-1.5 text-left">
+                    <div className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none shadow-xl max-h-60 overflow-y-auto custom-scrollbar p-1 text-left">
                       {filteredLocations.length === 0 ? (
-                        <div className="p-3 text-xs text-on-surface-variant text-center font-sans font-normal">
+                        <div className="p-3 text-xs text-slate-500 text-center font-sans font-medium">
                           No matching locations found
                         </div>
                       ) : (
@@ -521,10 +509,10 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                               setIsLocationDropdownOpen(false);
                               if (errors.location) setErrors(prev => ({ ...prev, location: null }));
                             }}
-                            className={`w-full text-left px-3.5 py-2 text-xs rounded-lg transition-colors cursor-pointer flex items-center justify-between font-sans ${
+                            className={`w-full text-left px-3.5 py-2 text-xs rounded-none transition-colors cursor-pointer flex items-center justify-between font-sans ${
                               location === locName
-                                ? 'bg-primary text-on-primary font-bold'
-                                : 'hover:bg-surface-container-high text-on-surface'
+                                ? 'bg-blue-700 text-white font-bold'
+                                : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100'
                             }`}
                           >
                             <span>{locName}</span>
@@ -538,223 +526,232 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
               </div>
 
               {/* Location URL */}
-              {opportunityType !== 'GIG' && (
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">Location URL</label>
-                  <input
-                    type="url"
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm font-sans focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-on-surface"
-                    placeholder="e.g. https://maps.google.com/..."
-                    value={locationUrl}
-                    onChange={e => setLocationUrl(e.target.value)}
-                  />
-                </div>
-              )}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                  Location URL
+                </label>
+                <input
+                  type="url"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none transition-all shadow-2xs"
+                  placeholder="e.g. https://maps.google.com/..."
+                  value={locationUrl}
+                  onChange={e => setLocationUrl(e.target.value)}
+                />
+              </div>
 
               {/* Openings Count */}
-              {opportunityType !== 'GIG' && (
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">No of Openings</label>
-                  <input
-                    type="number"
-                    min="1"
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm font-sans focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-on-surface"
-                    placeholder="e.g. 3"
-                    value={openings}
-                    onChange={e => setOpenings(e.target.value)}
-                  />
-                </div>
-              )}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                  No of Openings
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none transition-all shadow-2xs"
+                  placeholder="e.g. 3"
+                  value={openings}
+                  onChange={e => setOpenings(e.target.value)}
+                />
+              </div>
             </div>
           </div>
 
-          {/* SECTION 2: Prerequisites */}
-          {opportunityType !== 'GIG' && (
-            <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs">
-              <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-                <h3 className="text-xs font-headline font-medium  tracking-wider text-primary font-bold flex items-center gap-2">
-                  <ListChecks className="w-4 h-4 text-primary" /> Candidate Prerequisites & Skill Matrix
-                </h3>
-                <span className="text-[10px] font-headline font-medium text-on-surface-variant/70 ">STEP 3 OF 5</span>
-              </div>
+          {/* STEP 3: Prerequisites & Skill Matrix */}
+          <div className="p-6 sm:p-7 space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <h3 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <ListChecks className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                <span>Candidate Prerequisites & Skill Matrix</span>
+              </h3>
+              <span className="text-[10px] font-headline font-bold text-slate-500 dark:text-slate-400 tracking-wider">
+                STEP 3 OF 5
+              </span>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">Preferred Education</label>
-                  <input
-                    type="text"
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm font-sans focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-on-surface"
-                    placeholder="e.g. B.Tech / BCA / Any Graduate"
-                    value={preferredEducation}
-                    onChange={e => setPreferredEducation(e.target.value)}
-                  />
-                </div>
-
-                {/* Desired Experience */}
-                <div id="field-container-desiredExperience" className="relative space-y-1.5">
-                  <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">Desired Experience *</label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setIsExpDropdownOpen(!isExpDropdownOpen)}
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface text-left flex items-center justify-between focus:border-primary focus:outline-none transition-all cursor-pointer font-sans"
-                    >
-                      <span>{desiredExperience || 'Select Experience Range'}</span>
-                      <ChevronDown className="w-4 h-4 text-on-surface-variant shrink-0" />
-                    </button>
-                  </div>
-
-                  {isExpDropdownOpen && (
-                    <>
-                      <div 
-                        className="fixed inset-0 z-10" 
-                        onClick={() => setIsExpDropdownOpen(false)}
-                      ></div>
-                      <div className="absolute z-20 left-0 right-0 mt-1 bg-surface-container border border-outline-variant rounded-xl shadow-xl max-h-60 overflow-y-auto custom-scrollbar p-1.5 text-left">
-                        {EXPERIENCE_OPTIONS.map((expVal) => (
-                          <button
-                            key={expVal}
-                            type="button"
-                            onClick={() => {
-                              setDesiredExperience(expVal);
-                              setIsExpDropdownOpen(false);
-                            }}
-                            className={`w-full text-left px-3.5 py-2 text-xs rounded-lg transition-colors cursor-pointer flex items-center justify-between font-sans ${
-                              desiredExperience === expVal
-                                ? 'bg-primary text-on-primary font-bold'
-                                : 'hover:bg-surface-container-high text-on-surface'
-                            }`}
-                          >
-                            <span>{expVal}</span>
-                            {desiredExperience === expVal && <Check className="w-3.5 h-3.5" />}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Required Skills list */}
-              <div id="field-container-reqs" className="space-y-4 pt-2">
-                <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant font-bold">
-                  {opportunityType === 'GIG' ? 'Add Required Skills *' : 'Required Stacks & Rating Thresholds *'}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                  Preferred Education
                 </label>
+                <input
+                  type="text"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none transition-all shadow-2xs"
+                  placeholder="e.g. B.Tech / BCA / Any Graduate"
+                  value={preferredEducation}
+                  onChange={e => setPreferredEducation(e.target.value)}
+                />
+              </div>
 
-                <div className="flex gap-2.5 relative">
-                  <div className="relative flex-1">
-                    <input
-                      type="text"
-                      className={`w-full bg-surface-container-low border rounded-xl px-4 py-2.5 text-sm font-sans focus:outline-none transition-all text-on-surface ${
-                        errors.reqs
-                          ? 'border-error ring-2 ring-error/20 bg-error/5 text-error'
-                          : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20'
-                      }`}
-                      placeholder="Search and select a skill (e.g. React.js, Python, AWS)..."
-                      value={selectedReqSkill}
-                      onChange={e => {
-                        setSelectedReqSkill(e.target.value);
-                        setIsSkillDropdownOpen(true);
-                        if (errors.reqs) setErrors(prev => ({ ...prev, reqs: null }));
-                      }}
-                      onFocus={() => setIsSkillDropdownOpen(true)}
-                    />
-
-                    {/* Skills Dropdown */}
-                    {isSkillDropdownOpen && selectedReqSkill.trim() !== '' && (
-                      <div className="absolute z-20 left-0 right-0 mt-1 bg-surface-container border border-outline-variant rounded-xl shadow-xl max-h-48 overflow-y-auto custom-scrollbar p-1">
-                        {ALL_SKILLS.filter(s =>
-                          s.skill.toLowerCase().includes(selectedReqSkill.toLowerCase())
-                        ).length === 0 ? (
-                          <div className="p-3 text-xs text-on-surface-variant font-sans font-normal text-center">No matching skills found</div>
-                        ) : (
-                          ALL_SKILLS.filter(s =>
-                            s.skill.toLowerCase().includes(selectedReqSkill.toLowerCase())
-                          ).slice(0, 10).map((s) => (
-                            <button
-                              key={s.skill}
-                              type="button"
-                              onClick={() => {
-                                setSelectedReqSkill(s.skill);
-                                setIsSkillDropdownOpen(false);
-                              }}
-                              className="w-full text-left px-3.5 py-2 text-xs text-on-surface hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-between group cursor-pointer rounded-lg font-sans"
-                            >
-                              <span>{s.skill}</span>
-                              <span className="text-[10px] font-sans font-normal capitalize px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/60 text-on-surface-variant">
-                                {s.type}
-                              </span>
-                            </button>
-                          ))
-                        )}
-                      </div>
-                    )}
-                  </div>
-
+              {/* Desired Experience */}
+              <div id="field-container-desiredExperience" className="relative space-y-1.5">
+                <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                  Desired Experience *
+                </label>
+                <div className="relative">
                   <button
                     type="button"
-                    onClick={() => {
-                      const trimmed = selectedReqSkill.trim();
-                      if (!trimmed) return;
-                      const match = ALL_SKILLS.find(
-                        s => s.skill.toLowerCase() === trimmed.toLowerCase()
-                      );
-                      if (!match) {
-                        setErrors(prev => ({ ...prev, reqs: 'Please select a valid skill from the suggestions list.' }));
-                        return;
-                      }
-                      if (reqs.some(exist => exist.skillName.toLowerCase() === match.skill.toLowerCase())) {
-                        setErrors(prev => ({ ...prev, reqs: 'This skill requirement has already been added.' }));
-                        return;
-                      }
-                      const isTech = match.type === 'technical';
-                      setReqs(prev => [...prev, { skillName: match.skill, minRating: isTech ? 4 : 0 }]);
-                      setSelectedReqSkill('');
-                      if (errors.reqs) setErrors(prev => ({ ...prev, reqs: null }));
-                    }}
-                    className="px-5 py-2.5 bg-primary text-on-primary font-bold rounded-xl text-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-sm font-headline"
+                    onClick={() => setIsExpDropdownOpen(!isExpDropdownOpen)}
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-slate-100 text-left flex items-center justify-between focus:border-blue-700 focus:outline-none transition-all cursor-pointer font-sans shadow-2xs"
                   >
-                    <Plus className="w-4 h-4" /> Add Skill
+                    <span>{desiredExperience || 'Select Experience Range'}</span>
+                    <ChevronDown className="w-4 h-4 text-slate-500 shrink-0" />
                   </button>
                 </div>
 
-                {errors.reqs && (
-                  <p className="text-xs text-error font-medium flex items-center gap-1.5 mt-1 animate-fade-in font-sans">
-                    <span>{errors.reqs}</span>
-                  </p>
+                {isExpDropdownOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setIsExpDropdownOpen(false)}
+                    ></div>
+                    <div className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none shadow-xl max-h-60 overflow-y-auto custom-scrollbar p-1 text-left">
+                      {EXPERIENCE_OPTIONS.map((expVal) => (
+                        <button
+                          key={expVal}
+                          type="button"
+                          onClick={() => {
+                            setDesiredExperience(expVal);
+                            setIsExpDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-3.5 py-2 text-xs rounded-none transition-colors cursor-pointer flex items-center justify-between font-sans ${
+                            desiredExperience === expVal
+                              ? 'bg-blue-700 text-white font-bold'
+                              : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100'
+                          }`}
+                        >
+                          <span>{expVal}</span>
+                          {desiredExperience === expVal && <Check className="w-3.5 h-3.5" />}
+                        </button>
+                      ))}
+                    </div>
+                  </>
                 )}
+              </div>
+            </div>
 
-                {reqs.length === 0 ? (
-                  <div className="p-4 bg-surface-container-low border border-dashed border-outline-variant/80 rounded-xl text-center">
-                    <p className="text-xs text-on-surface-variant font-sans font-normal">No skill requirements added yet. Search and add skills above.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3 pt-1">
-                    {reqs.map(r => {
-                      const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === r.skillName.toLowerCase());
-                      const isTech = skillObj ? skillObj.type === 'technical' : true;
-                      return (
-                        <div key={r.skillName} className="p-3.5 bg-surface-container-low border border-outline-variant/60 rounded-xl space-y-2.5">
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="font-bold text-on-surface font-headline">{r.skillName}</span>
-                            <div className="flex items-center gap-3">
-                              {isTech && opportunityType !== 'GIG' ? (
-                                <span className="text-primary font-headline font-medium text-xs bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
-                                  Required Level: Lvl {r.minRating}/10
-                                </span>
-                              ) : (
-                                <span className="text-on-surface-variant font-headline font-medium text-[10px]  tracking-wider bg-surface-container-high border border-outline-variant px-2 py-0.5 rounded">Required Skill</span>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => setReqs(prev => prev.filter(item => item.skillName !== r.skillName))}
-                                className="text-error hover:underline text-[11px] font-sans font-normal cursor-pointer"
-                              >
-                                Remove
-                              </button>
-                            </div>
+            {/* Required Skills list */}
+            <div id="field-container-reqs" className="space-y-3 pt-2">
+              <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                Required Stacks & Rating Thresholds *
+              </label>
+
+              <div className="flex gap-2.5 relative">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:outline-none transition-all shadow-2xs ${
+                      errors.reqs
+                        ? 'border-rose-600 ring-1 ring-rose-600 bg-rose-50/20'
+                        : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                    }`}
+                    placeholder="Search and select a skill (e.g. React.js, Python, AWS)..."
+                    value={selectedReqSkill}
+                    onChange={e => {
+                      setSelectedReqSkill(e.target.value);
+                      setIsSkillDropdownOpen(true);
+                      if (errors.reqs) setErrors(prev => ({ ...prev, reqs: null }));
+                    }}
+                    onFocus={() => setIsSkillDropdownOpen(true)}
+                  />
+
+                  {/* Skills Dropdown */}
+                  {isSkillDropdownOpen && selectedReqSkill.trim() !== '' && (
+                    <div className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none shadow-xl max-h-48 overflow-y-auto custom-scrollbar p-1">
+                      {ALL_SKILLS.filter(s =>
+                        s.skill.toLowerCase().includes(selectedReqSkill.toLowerCase())
+                      ).length === 0 ? (
+                        <div className="p-3 text-xs text-slate-500 font-sans font-medium text-center">No matching skills found</div>
+                      ) : (
+                        ALL_SKILLS.filter(s =>
+                          s.skill.toLowerCase().includes(selectedReqSkill.toLowerCase())
+                        ).slice(0, 10).map((s) => (
+                          <button
+                            key={s.skill}
+                            type="button"
+                            onClick={() => {
+                              setSelectedReqSkill(s.skill);
+                              setIsSkillDropdownOpen(false);
+                            }}
+                            className="w-full text-left px-3.5 py-2 text-xs text-slate-900 dark:text-slate-100 hover:bg-blue-50 dark:hover:bg-blue-950/60 hover:text-blue-700 dark:hover:text-blue-400 transition-all flex items-center justify-between group cursor-pointer rounded-none font-sans"
+                          >
+                            <span>{s.skill}</span>
+                            <span className="text-[10px] font-sans font-normal capitalize px-1.5 py-0.5 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                              {s.type}
+                            </span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const trimmed = selectedReqSkill.trim();
+                    if (!trimmed) return;
+                    const match = ALL_SKILLS.find(
+                      s => s.skill.toLowerCase() === trimmed.toLowerCase()
+                    );
+                    if (!match) {
+                      setErrors(prev => ({ ...prev, reqs: 'Please select a valid skill from the suggestions list.' }));
+                      return;
+                    }
+                    if (reqs.some(exist => exist.skillName.toLowerCase() === match.skill.toLowerCase())) {
+                      setErrors(prev => ({ ...prev, reqs: 'This skill requirement has already been added.' }));
+                      return;
+                    }
+                    const isTech = match.type === 'technical';
+                    setReqs(prev => [...prev, { skillName: match.skill, minRating: isTech ? 4 : 0 }]);
+                    setSelectedReqSkill('');
+                    if (errors.reqs) setErrors(prev => ({ ...prev, reqs: null }));
+                  }}
+                  className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
+                >
+                  <Plus className="w-4 h-4" /> Add Skill
+                </button>
+              </div>
+
+              {errors.reqs && (
+                <p className="text-xs text-rose-600 font-sans font-medium flex items-center gap-1.5 mt-1">
+                  <span>{errors.reqs}</span>
+                </p>
+              )}
+
+              {reqs.length === 0 ? (
+                <div className="p-4 bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 rounded-none text-center">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 font-sans font-medium">No skill requirements added yet. Search and add skills above.</p>
+                </div>
+              ) : (
+                <div className="space-y-3 pt-1">
+                  {reqs.map(r => {
+                    const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === r.skillName.toLowerCase());
+                    const isTech = skillObj ? skillObj.type === 'technical' : true;
+                    return (
+                      <div key={r.skillName} className="p-4 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-none space-y-3 shadow-2xs">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-bold text-slate-900 dark:text-slate-100 font-headline text-sm">{r.skillName}</span>
+                          <div className="flex items-center gap-3">
+                            {isTech ? (
+                              <span className="text-white font-headline font-bold text-xs bg-blue-700 px-2.5 py-1 rounded-none shadow-2xs border border-blue-800">
+                                Required Level: Lvl {r.minRating}/10
+                              </span>
+                            ) : (
+                              <span className="text-slate-800 dark:text-slate-200 font-headline font-bold text-xs tracking-wider bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-2.5 py-1 rounded-none">
+                                Required Skill
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => setReqs(prev => prev.filter(item => item.skillName !== r.skillName))}
+                              className="text-rose-600 hover:text-rose-700 dark:text-rose-400 font-headline font-bold text-xs cursor-pointer transition-colors"
+                            >
+                              Remove
+                            </button>
                           </div>
-                          {isTech && opportunityType !== 'GIG' && (
+                        </div>
+                        {isTech && (
+                          <div className="space-y-1.5 pt-1">
                             <input
                               type="range"
                               min="1"
@@ -764,239 +761,217 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                                 const val = parseInt(e.target.value, 10);
                                 setReqs(prev => prev.map(item => item.skillName === r.skillName ? { ...item, minRating: val } : item));
                               }}
-                              className="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary"
+                              className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-none appearance-none cursor-pointer accent-blue-700 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-blue-700 [&::-webkit-slider-thumb]:rounded-none [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white dark:[&::-webkit-slider-thumb]:border-slate-900 [&::-webkit-slider-thumb]:shadow-xs [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:bg-blue-700 [&::-moz-range-thumb]:rounded-none [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white dark:[&::-moz-range-thumb]:border-slate-900 [&::-moz-range-thumb]:shadow-xs [&::-moz-range-thumb]:cursor-pointer"
+                              style={{
+                                background: `linear-gradient(to right, #1d4ed8 0%, #1d4ed8 ${((r.minRating - 1) / 9) * 100}%, #cbd5e1 ${((r.minRating - 1) / 9) * 100}%, #cbd5e1 100%)`
+                              }}
                             />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* SECTION 3: Compensation & Schedule / Gig Budget */}
-          {opportunityType === 'GIG' ? (
-            <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs">
-              <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-                <h3 className="text-xs font-headline font-medium  tracking-wider text-primary font-bold flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-primary" /> Gig Budget & Timeline
-                </h3>
-                <span className="text-[10px] font-headline font-medium text-on-surface-variant/70 ">STEP 3 OF 5</span>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {/* Budget Field */}
-                <div id="field-container-budget" className="space-y-1.5">
-                  <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">Project Budget ($ USD) *</label>
-                  <div className="relative">
-                    <input
-                      id="input-budget"
-                      type="number"
-                      min="1"
-                      className={`w-full bg-surface-container-low border rounded-xl px-4 py-2.5 text-sm font-sans focus:outline-none transition-all text-on-surface ${
-                        errors.budget
-                          ? 'border-error ring-2 ring-error/20 bg-error/5 text-error font-medium'
-                          : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20'
-                      }`}
-                      placeholder="e.g. 500"
-                      value={budget}
-                      onChange={e => {
-                        setBudget(e.target.value);
-                        if (errors.budget) setErrors(prev => ({ ...prev, budget: null }));
-                      }}
-                    />
-                    {errors.budget && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-error pointer-events-none">
-                        <AlertCircle className="w-5 h-5 fill-error/20 text-error" />
+                            <div className="flex justify-between items-center text-[10px] font-headline font-bold text-slate-700 dark:text-slate-300 tracking-wider">
+                              <span>Lvl 1 (Novice)</span>
+                              <span>Lvl 5 (Proficient)</span>
+                              <span>Lvl 10 (Master)</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  {errors.budget && (
-                    <p className="text-xs text-error font-medium flex items-center gap-1.5 mt-1 animate-fade-in font-sans">
-                      <span>{errors.budget}</span>
-                    </p>
-                  )}
+                    );
+                  })}
                 </div>
-
-                {/* Delivery Time Field */}
-                <div id="field-container-deliveryTime" className="space-y-1.5">
-                  <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">Delivery Time / Duration *</label>
-                  <div className="relative">
-                    <input
-                      id="input-deliveryTime"
-                      type="text"
-                      className={`w-full bg-surface-container-low border rounded-xl px-4 py-2.5 text-sm font-sans focus:outline-none transition-all text-on-surface ${
-                        errors.deliveryTime
-                          ? 'border-error ring-2 ring-error/20 bg-error/5 text-error font-medium'
-                          : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20'
-                      }`}
-                      placeholder="e.g. 5 Days / 2 Weeks"
-                      value={deliveryTime}
-                      onChange={e => {
-                        setDeliveryTime(e.target.value);
-                        if (errors.deliveryTime) setErrors(prev => ({ ...prev, deliveryTime: null }));
-                      }}
-                    />
-                    {errors.deliveryTime && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-error pointer-events-none">
-                        <AlertCircle className="w-5 h-5 fill-error/20 text-error" />
-                      </div>
-                    )}
-                  </div>
-                  {errors.deliveryTime && (
-                    <p className="text-xs text-error font-medium flex items-center gap-1.5 mt-1 animate-fade-in font-sans">
-                      <span>{errors.deliveryTime}</span>
-                    </p>
-                  )}
-                </div>
-
-                <div className="md:col-span-2 space-y-1.5">
-                  <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">Upload Specs Attachment (Optional)</label>
-                  <input
-                    type="file"
-                    onChange={e => setAttachmentFile(e.target.files[0])}
-                    className="w-full text-xs font-sans font-normal text-on-surface bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 focus:outline-none cursor-pointer"
-                  />
-                </div>
-              </div>
+              )}
             </div>
-          ) : (
-            <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs">
-              <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-                <h3 className="text-xs font-headline font-medium  tracking-wider text-primary font-bold flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-primary" /> Compensation & Schedule
-                </h3>
-                <span className="text-[10px] font-headline font-medium text-on-surface-variant/70 ">STEP 4 OF 5</span>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">
-                    {opportunityType === 'INTERNSHIP' ? 'Stipend/Month (Part-Time)' : 'Salary/Month (Part-Time)'}
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm font-sans focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-on-surface"
-                    placeholder={opportunityType === 'INTERNSHIP' ? "e.g. 5000 / Unpaid" : "e.g. 20000 / Competitive"}
-                    value={stipendPartTime}
-                    onChange={e => setStipendPartTime(e.target.value)}
-                  />
-                </div>
+          </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">
-                    {opportunityType === 'INTERNSHIP' ? 'Stipend/Month (Full-Time)' : 'Salary/Month (Full-Time)'}
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm font-sans focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-on-surface"
-                    placeholder={opportunityType === 'INTERNSHIP' ? "e.g. 12000 / Competitive" : "e.g. 45000 / Competitive"}
-                    value={stipendFullTime}
-                    onChange={e => setStipendFullTime(e.target.value)}
-                  />
-                </div>
-
-                {/* Duration Field */}
-                {opportunityType === 'INTERNSHIP' && (
-                  <div id="field-container-duration" className="space-y-1.5">
-                    <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">Duration *</label>
-                    <div className="relative">
-                      <input
-                        id="input-duration"
-                        type="text"
-                        className={`w-full bg-surface-container-low border rounded-xl px-4 py-2.5 text-sm font-sans focus:outline-none transition-all text-on-surface ${
-                          errors.duration
-                            ? 'border-error ring-2 ring-error/20 bg-error/5 text-error font-medium'
-                            : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20'
-                        }`}
-                        placeholder="e.g. 3 Months / 6 Months"
-                        value={duration}
-                        onChange={e => {
-                          setDuration(e.target.value);
-                          if (errors.duration) setErrors(prev => ({ ...prev, duration: null }));
-                        }}
-                      />
-                      {errors.duration && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-error pointer-events-none">
-                          <AlertCircle className="w-5 h-5 fill-error/20 text-error" />
-                        </div>
-                      )}
-                    </div>
-                    {errors.duration && (
-                      <p className="text-xs text-error font-medium flex items-center gap-1.5 mt-1 animate-fade-in font-sans">
-                        <span>{errors.duration}</span>
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Joining Month Field */}
-                <div id="field-container-joiningMonth" className="space-y-1.5">
-                  <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">Joining Month</label>
-                  <div className="relative">
-                    <input
-                      id="input-joiningMonth"
-                      type="text"
-                      list="joining-month-options"
-                      className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm font-sans focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-on-surface"
-                      placeholder="e.g. Immediate, May 2026, Next Month"
-                      value={joiningMonth}
-                      onChange={e => setJoiningMonth(e.target.value)}
-                    />
-                    <datalist id="joining-month-options">
-                      <option value="Immediate" />
-                      <option value="Within 15 Days" />
-                      <option value="Within 1 Month" />
-                      <option value="Next Month" />
-                      <option value="January" />
-                      <option value="February" />
-                      <option value="March" />
-                      <option value="April" />
-                      <option value="May" />
-                      <option value="June" />
-                      <option value="July" />
-                      <option value="August" />
-                      <option value="September" />
-                      <option value="October" />
-                      <option value="November" />
-                      <option value="December" />
-                    </datalist>
-                  </div>
-                  <p className="text-[10px] text-on-surface-variant/80 font-sans font-normal">
-                    Specify expected joining timeline for candidates (defaults to Immediate).
-                  </p>
-                </div>
-
-              </div>
-            </div>
-          )}
-
-          {/* SECTION 4: Description & Process */}
-          <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-6 shadow-xs">
-            <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-              <h3 className="text-xs font-headline font-medium  tracking-wider text-primary font-bold flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-primary" /> {opportunityType === 'GIG' ? 'Gig Tasks & Brief' : 'Description & Recruitment Process'}
+          {/* STEP 4: Compensation & Schedule */}
+          <div className="p-6 sm:p-7 space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <h3 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                <span>Compensation & Schedule</span>
               </h3>
-              <span className="text-[10px] font-headline font-medium text-on-surface-variant/70 ">STEP 5 OF 5</span>
+              <span className="text-[10px] font-headline font-bold text-slate-500 dark:text-slate-400 tracking-wider">
+                STEP 4 OF 5
+              </span>
+            </div>
+
+            {/* Candidate Salary Visibility Toggle */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  {showSalary ? (
+                    <Eye className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                  ) : (
+                    <EyeOff className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                  )}
+                  <span className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100">
+                    Candidate Salary Visibility
+                  </span>
+                  <span className={`text-[10px] font-headline font-bold px-2 py-0.5 rounded-none tracking-wider uppercase border ${
+                    showSalary 
+                      ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border-emerald-400 dark:border-emerald-600'
+                      : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-400 dark:border-slate-600'
+                  }`}>
+                    {showSalary ? 'Visible' : 'Hidden'}
+                  </span>
+                </div>
+                <p className="text-[11px] font-sans text-slate-600 dark:text-slate-400">
+                  {showSalary
+                    ? `Candidates will see the posted ${opportunityType === 'INTERNSHIP' ? 'stipend' : 'salary'} on the job post.`
+                    : `Candidates will NOT see numerical compensation on the job post (displayed as Undisclosed).`}
+                </p>
+              </div>
+
+              {/* Toggle Switch */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={showSalary}
+                  onClick={() => setShowSalary(prev => !prev)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-700 ${
+                    showSalary ? 'bg-blue-700' : 'bg-slate-300 dark:bg-slate-700'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      showSalary ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+                <span className="text-xs font-headline font-bold text-slate-700 dark:text-slate-300 min-w-[70px]">
+                  {showSalary ? 'Show Salary' : 'Hide Salary'}
+                </span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                  {opportunityType === 'INTERNSHIP' ? 'Stipend/Month (Part-Time)' : 'Salary/Month (Part-Time)'}
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none transition-all shadow-2xs"
+                  placeholder={opportunityType === 'INTERNSHIP' ? "e.g. 5000 / Unpaid" : "e.g. 20000 / Competitive"}
+                  value={stipendPartTime}
+                  onChange={e => setStipendPartTime(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                  {opportunityType === 'INTERNSHIP' ? 'Stipend/Month (Full-Time)' : 'Salary/Month (Full-Time)'}
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none transition-all shadow-2xs"
+                  placeholder={opportunityType === 'INTERNSHIP' ? "e.g. 12000 / Competitive" : "e.g. 45000 / Competitive"}
+                  value={stipendFullTime}
+                  onChange={e => setStipendFullTime(e.target.value)}
+                />
+              </div>
+
+              {/* Duration Field (for Internships) */}
+              {opportunityType === 'INTERNSHIP' && (
+                <div id="field-container-duration" className="space-y-1.5">
+                  <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                    Duration *
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="input-duration"
+                      type="text"
+                      className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:outline-none transition-all shadow-2xs ${
+                        errors.duration
+                          ? 'border-rose-600 ring-1 ring-rose-600 bg-rose-50/20'
+                          : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                      }`}
+                      placeholder="e.g. 3 Months / 6 Months"
+                      value={duration}
+                      onChange={e => {
+                        setDuration(e.target.value);
+                        if (errors.duration) setErrors(prev => ({ ...prev, duration: null }));
+                      }}
+                    />
+                    {errors.duration && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-rose-600 pointer-events-none">
+                        <AlertCircle className="w-4 h-4" />
+                      </div>
+                    )}
+                  </div>
+                  {errors.duration && (
+                    <p className="text-xs text-rose-600 font-sans font-medium flex items-center gap-1.5 mt-1">
+                      <span>{errors.duration}</span>
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Joining Month Field */}
+              <div id="field-container-joiningMonth" className="space-y-1.5">
+                <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                  Joining Month
+                </label>
+                <div className="relative">
+                  <input
+                    id="input-joiningMonth"
+                    type="text"
+                    list="joining-month-options"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none transition-all shadow-2xs"
+                    placeholder="e.g. Immediate, May 2026, Next Month"
+                    value={joiningMonth}
+                    onChange={e => setJoiningMonth(e.target.value)}
+                  />
+                  <datalist id="joining-month-options">
+                    <option value="Immediate" />
+                    <option value="Within 15 Days" />
+                    <option value="Within 1 Month" />
+                    <option value="Next Month" />
+                    <option value="January" />
+                    <option value="February" />
+                    <option value="March" />
+                    <option value="April" />
+                    <option value="May" />
+                    <option value="June" />
+                    <option value="July" />
+                    <option value="August" />
+                    <option value="September" />
+                    <option value="October" />
+                    <option value="November" />
+                    <option value="December" />
+                  </datalist>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* STEP 5: Description & Recruitment Process */}
+          <div className="p-6 sm:p-7 space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <h3 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                <span>Description & Recruitment Process</span>
+              </h3>
+              <span className="text-[10px] font-headline font-bold text-slate-500 dark:text-slate-400 tracking-wider">
+                STEP 5 OF 5
+              </span>
             </div>
 
             {/* Job Description Field */}
             <div id="field-container-jobDesc" className="space-y-1.5">
-              <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">
-                {opportunityType === 'GIG' ? 'Gig Tasks & Description *' : 'Job / Internship Summary *'}
+              <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                Opportunity Summary *
               </label>
               <div className="relative">
                 <textarea
                   id="input-jobDesc"
                   rows="4"
-                  className={`w-full bg-surface-container-low border rounded-xl px-4 py-3 text-sm font-sans focus:outline-none transition-all text-on-surface custom-scrollbar ${
+                  className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-3 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:outline-none transition-all custom-scrollbar shadow-2xs ${
                     errors.jobDesc
-                      ? 'border-error ring-2 ring-error/20 bg-error/5 text-error font-medium'
-                      : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20'
+                      ? 'border-rose-600 ring-1 ring-rose-600 bg-rose-50/20'
+                      : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
                   }`}
-                  placeholder={opportunityType === 'GIG' ? "Describe deliverables, specs, and requirements..." : "Engaging high-level summary of the opportunity..."}
+                  placeholder="Engaging high-level summary of the opportunity..."
                   value={jobDesc}
                   onChange={e => {
                     setJobDesc(e.target.value);
@@ -1004,163 +979,171 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                   }}
                 ></textarea>
                 {errors.jobDesc && (
-                  <div className="absolute right-3 top-3 text-error pointer-events-none">
-                    <AlertCircle className="w-5 h-5 fill-error/20 text-error" />
+                  <div className="absolute right-3 top-3 text-rose-600 pointer-events-none">
+                    <AlertCircle className="w-4 h-4" />
                   </div>
                 )}
               </div>
               {errors.jobDesc && (
-                <p className="text-xs text-error font-medium flex items-center gap-1.5 mt-1 animate-fade-in font-sans">
+                <p className="text-xs text-rose-600 font-sans font-medium flex items-center gap-1.5 mt-1">
                   <span>{errors.jobDesc}</span>
                 </p>
               )}
             </div>
 
             {/* Role Responsibilities Field */}
-            {opportunityType !== 'GIG' && (
-              <div id="field-container-roleResponsibilities" className="space-y-1.5">
-                <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">Role and Responsibilities *</label>
-                <div className="relative">
-                  <textarea
-                    id="input-roleResponsibilities"
-                    rows="4"
-                    className={`w-full bg-surface-container-low border rounded-xl px-4 py-3 text-sm font-sans focus:outline-none transition-all text-on-surface custom-scrollbar ${
-                      errors.roleResponsibilities
-                        ? 'border-error ring-2 ring-error/20 bg-error/5 text-error font-medium'
-                        : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20'
-                    }`}
-                    placeholder="Describe tasks, day-to-day workflows, key objectives, and deliverables..."
-                    value={roleResponsibilities}
-                    onChange={e => {
-                      setRoleResponsibilities(e.target.value);
-                      if (errors.roleResponsibilities) setErrors(prev => ({ ...prev, roleResponsibilities: null }));
-                    }}
-                  ></textarea>
-                  {errors.roleResponsibilities && (
-                    <div className="absolute right-3 top-3 text-error pointer-events-none">
-                      <AlertCircle className="w-5 h-5 fill-error/20 text-error" />
-                    </div>
-                  )}
-                </div>
+            <div id="field-container-roleResponsibilities" className="space-y-1.5">
+              <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                Role and Responsibilities *
+              </label>
+              <div className="relative">
+                <textarea
+                  id="input-roleResponsibilities"
+                  rows="4"
+                  className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-3 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:outline-none transition-all custom-scrollbar shadow-2xs ${
+                    errors.roleResponsibilities
+                      ? 'border-rose-600 ring-1 ring-rose-600 bg-rose-50/20'
+                      : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                  }`}
+                  placeholder="Describe tasks, day-to-day workflows, key objectives, and deliverables..."
+                  value={roleResponsibilities}
+                  onChange={e => {
+                    setRoleResponsibilities(e.target.value);
+                    if (errors.roleResponsibilities) setErrors(prev => ({ ...prev, roleResponsibilities: null }));
+                  }}
+                ></textarea>
                 {errors.roleResponsibilities && (
-                  <p className="text-xs text-error font-medium flex items-center gap-1.5 mt-1 animate-fade-in font-sans">
-                    <span>{errors.roleResponsibilities}</span>
-                  </p>
+                  <div className="absolute right-3 top-3 text-rose-600 pointer-events-none">
+                    <AlertCircle className="w-4 h-4" />
+                  </div>
                 )}
               </div>
-            )}
+              {errors.roleResponsibilities && (
+                <p className="text-xs text-rose-600 font-sans font-medium flex items-center gap-1.5 mt-1">
+                  <span>{errors.roleResponsibilities}</span>
+                </p>
+              )}
+            </div>
 
-            {/* Dynamic Selection Process */}
-            {opportunityType !== 'GIG' && (
-              <div className="space-y-4 pt-2">
-                <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant font-bold">Selection Process Rounds</label>
+            {/* Dynamic Selection Process Rounds */}
+            <div className="space-y-3 pt-2">
+              <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                Selection Process Rounds
+              </label>
+              
+              <div className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 space-y-4 shadow-2xs">
                 
-                <div className="bg-surface-container-low border border-outline-variant/70 rounded-xl p-4 sm:p-5 space-y-4">
-                  
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <input
-                        type="text"
-                        className="md:col-span-1 bg-surface-container border border-outline-variant/80 rounded-xl px-4 py-2.5 text-xs font-sans text-on-surface focus:border-primary focus:outline-none"
-                        placeholder="e.g. Round 1: Technical Assessment"
-                        value={newRoundName}
-                        onChange={e => setNewRoundName(e.target.value)}
-                      />
-                      <input
-                        type="text"
-                        className="md:col-span-2 bg-surface-container border border-outline-variant/80 rounded-xl px-4 py-2.5 text-xs font-sans text-on-surface focus:border-primary focus:outline-none"
-                        placeholder="e.g. 45 min test on System Architecture and DSA"
-                        value={newRoundDesc}
-                        onChange={e => setNewRoundDesc(e.target.value)}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleAddRound}
-                      className="px-4 py-2.5 bg-secondary text-on-secondary font-bold rounded-xl text-xs hover:brightness-105 transition-all flex items-center gap-1.5 w-max cursor-pointer shadow-xs font-headline"
-                    >
-                      <Plus className="w-4 h-4" /> Add Process Round
-                    </button>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <input
+                      type="text"
+                      className="md:col-span-1 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2 text-xs font-sans text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                      placeholder="e.g. Round 1: Technical Assessment"
+                      value={newRoundName}
+                      onChange={e => setNewRoundName(e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      className="md:col-span-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2 text-xs font-sans text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                      placeholder="e.g. 45 min test on System Architecture and DSA"
+                      value={newRoundDesc}
+                      onChange={e => setNewRoundDesc(e.target.value)}
+                    />
                   </div>
-
-                  {rounds.length === 0 ? (
-                    <p className="text-xs text-on-surface-variant font-sans font-normal">No selection rounds added. Add evaluation stages above.</p>
-                  ) : (
-                    <div className="space-y-2.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
-                      {rounds.map((round, idx) => (
-                        <div key={idx} className="flex items-start justify-between p-3.5 bg-surface-container border border-outline-variant/60 rounded-xl">
-                          <div className="space-y-0.5">
-                            <span className="text-[10px] font-headline font-medium text-primary font-bold  tracking-wider">Round #{round.roundNumber}</span>
-                            <h4 className="text-xs font-bold text-on-surface font-headline">{round.name}</h4>
-                            <p className="text-xs text-on-surface-variant leading-relaxed font-sans">{round.description}</p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveRound(idx)}
-                            className="p-1.5 hover:bg-surface-container-high rounded-lg text-error transition-all cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
+                  <button
+                    type="button"
+                    onClick={handleAddRound}
+                    className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs transition-all flex items-center gap-1.5 w-max cursor-pointer shadow-xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add Process Round
+                  </button>
                 </div>
-              </div>
-            )}
-          </div>
 
-          {/* SECTION 5: Listing Duration */}
-          {opportunityType !== 'GIG' && (
-            <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-6 sm:p-7 space-y-5 shadow-xs">
-              <h3 className="text-xs font-headline font-medium  tracking-wider text-primary font-bold flex items-center gap-2 border-b border-outline-variant/60 pb-3">
-                <Clock className="w-4 h-4 text-primary" /> Listing Duration Settings
-              </h3>
-              <div className="space-y-1.5">
-                <label className="block text-xs font-headline font-medium  tracking-wider text-on-surface-variant">Active Time (Days) *</label>
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  className="w-full bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 text-sm font-sans focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all text-on-surface"
-                  placeholder="e.g. 30"
-                  value={activeDays}
-                  onChange={e => {
-                    const val = parseInt(e.target.value, 10);
-                    if (isNaN(val) || val < 1) {
-                      setActiveDays('');
-                    } else {
-                      setActiveDays(val);
-                    }
-                  }}
-                />
-                <p className="text-[10px] text-on-surface-variant/80 font-sans font-normal">Specify how many days this opportunity listing will remain active before automatic archive.</p>
+                {rounds.length === 0 ? (
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-sans font-medium">
+                    No selection rounds added. Add evaluation stages above.
+                  </p>
+                ) : (
+                  <div className="space-y-2.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                    {rounds.map((round, idx) => (
+                      <div key={idx} className="flex items-start justify-between p-3.5 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-none shadow-2xs">
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] font-headline font-bold text-blue-700 dark:text-blue-400 tracking-wider">
+                            Round #{round.roundNumber}
+                          </span>
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 font-headline">{round.name}</h4>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans">{round.description}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveRound(idx)}
+                          className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none text-rose-600 transition-all cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
               </div>
             </div>
-          )}
 
-          {/* Submit Action */}
-          <div className="pt-2">
-            <Button type="submit" loading={submittingJob} fullWidth size="lg" className="py-4 shadow-md font-headline font-bold">
-              {submittingJob ? 'Publishing Opportunity...' : 'Publish Opportunity'}
-            </Button>
+            {/* Listing Duration */}
+            <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+              <label className="block text-xs font-headline font-bold tracking-wider text-slate-800 dark:text-slate-200">
+                Listing Active Duration (Days) *
+              </label>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs sm:text-sm font-sans text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none transition-all shadow-2xs"
+                placeholder="e.g. 30"
+                value={activeDays}
+                onChange={e => {
+                  const val = parseInt(e.target.value, 10);
+                  if (isNaN(val) || val < 1) {
+                    setActiveDays('');
+                  } else {
+                    setActiveDays(val);
+                  }
+                }}
+              />
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans font-medium">
+                Specify how many days this opportunity listing will remain active before automatic archive.
+              </p>
+            </div>
+
           </div>
 
-        </form>
+        </div>
+
+        {/* Submit Action Button */}
+        <div>
+          <button
+            type="submit"
+            disabled={submittingJob}
+            className="w-full py-4 bg-blue-700 hover:bg-blue-800 text-white rounded-none font-headline font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <span>{submittingJob ? 'Publishing Opportunity...' : 'Publish Opportunity'}</span>
+          </button>
+        </div>
+
+      </form>
       </div>
 
       {/* Right Column: Sticky Sidebar for Your Recent Postings */}
       <aside className="w-full sticky top-6 self-start space-y-6 z-10">
-        <div className="bg-surface-container border border-outline-variant/80 rounded-2xl p-5 space-y-4 shadow-sm">
-          <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
-            <h3 className="text-base font-bold font-headline text-primary">
+        <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-5 space-y-4 shadow-2xs">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+            <h3 className="text-sm font-bold font-headline text-slate-900 dark:text-slate-100 tracking-wider">
               Your Recent Postings
             </h3>
             <button
               type="button"
               onClick={() => goToTab && goToTab('jobs')}
-              className="text-on-surface-variant hover:text-primary transition-colors cursor-pointer p-1"
+              className="text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer p-1"
               title="View All Postings"
             >
               <History className="w-4 h-4" />
@@ -1182,21 +1165,21 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                     <div
                       key={job.id || job._id}
                       onClick={() => goToTab && goToTab('jobs')}
-                      className="bg-surface-container-low border border-outline-variant/70 rounded-xl p-3.5 space-y-1.5 hover:border-primary/50 hover:bg-surface-container-high transition-all cursor-pointer group shadow-2xs"
+                      className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-3.5 space-y-1.5 hover:border-blue-700 transition-all cursor-pointer group shadow-2xs"
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="text-xs font-bold text-on-surface group-hover:text-primary transition-colors font-headline line-clamp-1">
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-700 transition-colors font-headline line-clamp-1">
                           {job.title}
                         </h4>
-                        <span className={`text-[9px] font-headline font-medium px-2 py-0.5 rounded font-bold  tracking-wider shrink-0 ${
+                        <span className={`text-[9px] font-headline font-bold px-2 py-0.5 rounded-none tracking-wider shrink-0 border ${
                           isActive 
-                            ? 'bg-primary/10 text-primary border border-primary/20' 
-                            : 'bg-surface-container-high text-on-surface-variant border border-outline-variant'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-200 border-emerald-400 dark:border-emerald-700' 
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'
                         }`}>
                           {isActive ? 'ACTIVE' : 'EXPIRED'}
                         </span>
                       </div>
-                      <p className="text-[10px] font-sans font-normal text-on-surface-variant/80">
+                      <p className="text-[11px] font-sans font-medium text-slate-500 dark:text-slate-400">
                         Posted {formattedTime}
                       </p>
                     </div>
@@ -1204,8 +1187,8 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
                 })}
             </div>
           ) : (
-            <div className="p-4 bg-surface-container-low border border-dashed border-outline-variant/80 rounded-xl text-center">
-              <p className="text-xs text-on-surface-variant font-sans font-normal">No recent postings yet.</p>
+            <div className="p-4 bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 rounded-none text-center">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-sans font-medium">No recent postings yet.</p>
             </div>
           )}
 
@@ -1213,7 +1196,7 @@ export default function RecruiterPostJob({ company, user, submittingJob, handleP
           <button
             type="button"
             onClick={() => goToTab && goToTab('jobs')}
-            className="w-full py-2.5 px-4 bg-surface-container-low hover:bg-surface-container-high border border-primary/40 hover:border-primary rounded-xl text-xs font-bold text-primary flex items-center justify-center gap-1.5 transition-all cursor-pointer font-headline shadow-2xs"
+            className="w-full py-2.5 px-4 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-blue-700 rounded-none text-xs font-headline font-bold text-blue-700 dark:text-blue-400 flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs"
           >
             <span>View All Postings</span>
             <ArrowRight className="w-3.5 h-3.5" />

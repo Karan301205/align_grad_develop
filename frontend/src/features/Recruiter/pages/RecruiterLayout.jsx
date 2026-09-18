@@ -33,6 +33,8 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
   const [company, setCompany] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [candidates, setCandidates] = useState([]);
+  const [topTalents, setTopTalents] = useState([]);
+  const [demandProfile, setDemandProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -69,6 +71,14 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       const candRes = await apiFetch('/recruiter/candidates', { token });
       const candData = await candRes.json();
       if (candRes.ok) setCandidates(candData);
+
+      // Top Matching Talents derived from Recruiter Demand Profile
+      const talentsRes = await apiFetch('/recruiter/top-talents?limit=500', { token });
+      const talentsData = await talentsRes.json();
+      if (talentsRes.ok) {
+        setTopTalents(talentsData.topTalents || []);
+        setDemandProfile(talentsData.demandProfile || null);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -164,10 +174,36 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     }
   };
 
-  const handleDeleteJob = async (jobId) => {
-    if (!window.confirm("Are you sure you want to manually delete this job opportunity? This action cannot be undone.")) {
-      return;
+  const handleTogglePauseJob = async (jobId, currentIsPaused) => {
+    try {
+      const nextPaused = !currentIsPaused;
+      const res = await apiFetch(`/recruiter/jobs/${jobId}/status`, {
+        token,
+        method: 'PATCH',
+        json: {
+          isPaused: nextPaused,
+          status: nextPaused ? 'PAUSED' : 'ACTIVE'
+        }
+      });
+      if (res.ok) {
+        setAlertConfig({
+          message: nextPaused ? 'Job paused. It will no longer showcase to candidates.' : 'Job resumed and is now live for candidates!',
+          type: 'success'
+        });
+        fetchRecruiterData();
+        return true;
+      } else {
+        const d = await res.json();
+        setAlertConfig({ message: d.error || 'Failed to update job status', type: 'error' });
+        return false;
+      }
+    } catch (err) {
+      setAlertConfig({ message: 'Error updating job status', type: 'error' });
+      return false;
     }
+  };
+
+  const handleDeleteJob = async (jobId) => {
     try {
       const res = await apiFetch(`/recruiter/jobs/${jobId}`, {
         token,
@@ -176,12 +212,15 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       if (res.ok) {
         setAlertConfig({ message: 'Job deleted successfully.', type: 'success' });
         fetchRecruiterData();
+        return true;
       } else {
         const d = await res.json();
         setAlertConfig({ message: d.error || 'Failed to delete job', type: 'error' });
+        return false;
       }
     } catch (err) {
       setAlertConfig({ message: 'Error deleting job', type: 'error' });
+      return false;
     }
   };
 
@@ -332,9 +371,9 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
           <aside
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            className={`h-screen fixed left-0 top-0 bg-surface-container flex flex-col py-6 px-3 border-r border-outline-variant z-50 transition-all duration-300 ${
+            className={`h-screen fixed left-0 top-0 bg-surface flex flex-col py-6 px-3 border-r border-slate-300 dark:border-slate-700 z-50 transition-all duration-300 ${
               isExpanded ? 'w-64' : 'w-20'
-            } ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+            } ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 shadow-2xs`}
           >
             <div className="mb-10 flex items-center justify-between px-2.5">
               <div className="flex flex-col gap-1.5 min-w-0 w-full">
@@ -346,11 +385,11 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                   }`}
                 />
                 {isExpanded && (
-                  <p className="text-[9px] font-headline font-medium tracking-wider text-on-surface-variant opacity-70 px-1 animate-fade-in">Recruiter Hub</p>
+                  <p className="text-[10px] font-headline font-bold tracking-wider text-slate-500 dark:text-slate-400 px-1 animate-fade-in">Recruiter Hub</p>
                 )}
               </div>
               {isExpanded && (
-                <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 text-on-surface-variant hover:text-on-surface" aria-label="Close menu">
+                <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100" aria-label="Close menu">
                   <X className="w-5 h-5" />
                 </button>
               )}
@@ -374,24 +413,28 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
               ))}
             </nav>
 
-            <div className="mt-auto pt-6 border-t border-outline-variant space-y-4 px-1">
-              <div className="flex items-center gap-3 px-2.5">
-                <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold shrink-0 overflow-hidden">
-                  {company?.name?.charAt(0) || 'R'}
+            <div className="mt-auto pt-5 border-t border-slate-300 dark:border-slate-700 space-y-3 px-1">
+              <div className="flex items-center gap-3 px-2">
+                <div className="w-10 h-10 rounded-none bg-blue-700 border border-blue-800 flex items-center justify-center text-white font-headline font-bold text-sm shrink-0 overflow-hidden shadow-2xs">
+                  {company?.logoUrl ? (
+                    <img src={company.logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                  ) : (
+                    company?.name?.charAt(0) || 'R'
+                  )}
                 </div>
                 {isExpanded && (
                   <div className="min-w-0 animate-fade-in">
-                    <p className="text-sm font-bold text-on-surface truncate">{company?.name || user?.name || user?.email || 'Recruiter'}</p>
-                    <p className="text-xs text-on-surface-variant truncate">Recruiter - {user?.regNo || 'REC001'}</p>
+                    <p className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 truncate">{company?.name || user?.name || user?.email || 'Recruiter'}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans font-medium truncate">Recruiter - {user?.regNo || 'REC001'}</p>
                   </div>
                 )}
               </div>
               <button
                 onClick={handleLogout}
                 title={isExpanded ? undefined : "Log Out"}
-                className="w-full flex items-center gap-3 px-3.5 py-2.5 text-error rounded-xl font-medium hover:bg-error-container transition-all text-sm"
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-rose-600 dark:text-rose-400 rounded-none font-headline font-bold hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 dark:hover:border-rose-900/60 transition-all text-xs cursor-pointer shadow-2xs"
               >
-                <LogOut className="w-5 h-5 shrink-0" />
+                <LogOut className="w-4 h-4 shrink-0" />
                 {isExpanded && <span className="animate-fade-in truncate">Log Out</span>}
               </button>
             </div>
@@ -412,7 +455,10 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                 company={company}
                 jobs={jobs}
                 candidates={candidates}
+                topTalents={topTalents}
+                demandProfile={demandProfile}
                 goToTab={goToTab}
+                onRefresh={fetchRecruiterData}
               />
             )}
 
@@ -423,12 +469,13 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                 token={token}
                 handleUpdateJob={handleUpdateJob} 
                 handleDeleteJob={handleDeleteJob} 
+                handleTogglePauseJob={handleTogglePauseJob}
                 onRefresh={fetchRecruiterData}
               />
             )}
 
             {activeTab === 'candidates' && (
-              <RecruiterCandidates candidates={candidates} />
+              <RecruiterCandidates candidates={candidates} topTalents={topTalents} />
             )}
 
             {activeTab === 'post-job' && (

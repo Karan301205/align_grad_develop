@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 
 // Import features
 import { AuthView, CandidateAuth, RecruiterAuth } from '../features/Auth';
-import { StudentLayout } from '../features/Student';
+import { StudentLayout, PublicJobBriefPage } from '../features/Student';
 import { RecruiterLayout } from '../features/Recruiter';
 import ConnectionLoader from '../components/ConnectionLoader';
 import CompanyProfileModal from '../components/CompanyProfileModal';
+import EmeraldSignupToast from '../components/EmeraldSignupToast';
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
@@ -17,6 +18,20 @@ export default function App() {
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [autoSelectOpportunity, setAutoSelectOpportunity] = useState(null);
+  const [showSignupNotice, setShowSignupNotice] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (
+      params.get('auth_prompt') === 'signup_required' ||
+      params.get('prompt') === 'signup' ||
+      params.get('signup_prompt') === 'true'
+    ) {
+      setShowSignupNotice(true);
+      // Clean up URL search params cleanly without page reload
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   const handleOpenCompanyProfile = (companyId) => {
     setSelectedCompanyId(companyId);
@@ -87,6 +102,11 @@ export default function App() {
     return <ConnectionLoader theme={theme} onReady={() => setIsReady(true)} />;
   }
 
+  // Standalone public job brief view (unauthenticated or direct share link access)
+  if (currentPath.startsWith('/job_brief')) {
+    return <PublicJobBriefPage theme={theme} toggleTheme={toggleTheme} />;
+  }
+
   const hostname = window.location.hostname;
   const isLandingHost = hostname === 'aligngrad.com' || hostname === 'www.aligngrad.com';
   const isCareerHost = hostname === 'career.aligngrad.com';
@@ -103,9 +123,10 @@ export default function App() {
       return null;
     }
 
+    let authView = null;
     if (currentPath.startsWith('/candidate')) {
       const mode = currentPath.endsWith('signup') ? 'signup' : 'login';
-      return (
+      authView = (
         <CandidateAuth
           setToken={setToken}
           setUser={setUser}
@@ -114,10 +135,9 @@ export default function App() {
           initialMode={mode}
         />
       );
-    }
-    if (currentPath.startsWith('/recruiter')) {
+    } else if (currentPath.startsWith('/recruiter')) {
       const mode = currentPath.endsWith('signup') ? 'signup' : 'login';
-      return (
+      authView = (
         <RecruiterAuth
           setToken={setToken}
           setUser={setUser}
@@ -126,12 +146,11 @@ export default function App() {
           initialMode={mode}
         />
       );
-    }
-    if (isCareerHost) {
+    } else if (isCareerHost) {
       if (window.location.pathname === '/' || window.location.pathname === '') {
         window.history.replaceState({}, '', '/candidate/login');
       }
-      return (
+      authView = (
         <CandidateAuth
           setToken={setToken}
           setUser={setUser}
@@ -140,12 +159,11 @@ export default function App() {
           initialMode="login"
         />
       );
-    }
-    if (isHireHost) {
+    } else if (isHireHost) {
       if (window.location.pathname === '/' || window.location.pathname === '') {
         window.history.replaceState({}, '', '/recruiter/login');
       }
-      return (
+      authView = (
         <RecruiterAuth
           setToken={setToken}
           setUser={setUser}
@@ -154,8 +172,24 @@ export default function App() {
           initialMode="login"
         />
       );
+    } else {
+      authView = <AuthView setToken={setToken} setUser={setUser} theme={theme} toggleTheme={toggleTheme} />;
     }
-    return <AuthView setToken={setToken} setUser={setUser} theme={theme} toggleTheme={toggleTheme} />;
+
+    return (
+      <>
+        {showSignupNotice && (
+          <EmeraldSignupToast
+            onClose={() => setShowSignupNotice(false)}
+            onSignUpClick={() => {
+              setShowSignupNotice(false);
+              window.history.pushState({}, '', '/candidate/signup');
+            }}
+          />
+        )}
+        {authView}
+      </>
+    );
   }
 
   if (isLandingHost && !currentPath.startsWith('/candidate') && !currentPath.startsWith('/recruiter')) {

@@ -225,7 +225,7 @@ const mockClient = {
           'preferredEducation', 'desiredExperience', 'designation',
           'stipendPartTime', 'stipendFullTime', 'duration',
           'roleResponsibilities', 'location', 'locationUrl', 'joiningMonth',
-          'openings', 'edited', 'activeDays', 'opportunityType'
+          'openings', 'edited', 'activeDays', 'opportunityType', 'showSalary'
         ];
         fields.forEach(field => {
           if (data[field] !== undefined) {

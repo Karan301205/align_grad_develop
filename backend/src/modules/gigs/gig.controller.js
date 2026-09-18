@@ -846,7 +846,10 @@ exports.updateGig = async (req, res) => {
     }
 
     let updatedData = {
-      title: title !== undefined ? title : gig.title,
+      // Title and Category of Field are immutable after publication
+      title: gig.title,
+      category: gig.category,
+      categories: gig.categories,
       description: description !== undefined ? description : gig.description,
       budget: budget !== undefined ? budget : gig.budget,
       deliveryTime: deliveryTime !== undefined ? deliveryTime : gig.deliveryTime,
@@ -859,16 +862,6 @@ exports.updateGig = async (req, res) => {
 
     if (logo !== undefined) {
       updatedData.logo = logo;
-    }
-
-    if (category !== undefined) {
-      updatedData.category = category;
-    }
-    if (categories !== undefined && Array.isArray(categories)) {
-      updatedData.categories = categories;
-      if (!updatedData.category && categories.length > 0) {
-        updatedData.category = categories[0];
-      }
     }
 
     if (requirements && Array.isArray(requirements) && requirements.length > 0) {
