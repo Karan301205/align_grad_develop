@@ -251,6 +251,8 @@ export default function StudentProfile({
 
   const closeModal = () => {
     setActiveModal(null);
+    setShowDomainDropdown(false);
+    setDomainSearch('');
   };
 
   const debouncedCheckRef = React.useRef(null);
@@ -1928,25 +1930,25 @@ export default function StudentProfile({
                             />
                           </div>
 
-                          <div className="relative">
+                          <div className="relative" ref={domainContainerRef}>
                             <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Domain of Experience</label>
-                            <div className="relative" ref={domainContainerRef}>
+                            <div className="relative">
                               <input
                                 type="text"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 pr-8 font-sans font-medium shadow-2xs"
                                 placeholder="Search or select domain"
-                                value={domainSearch || newExp.domain || ''}
+                                value={domainSearch !== '' ? domainSearch : (newExp.domain || '')}
                                 onChange={e => {
                                   setDomainSearch(e.target.value);
-                                  setNewExp({ ...newExp, domain: e.target.value });
+                                  setNewExp(prev => ({ ...prev, domain: e.target.value }));
                                   setShowDomainDropdown(true);
                                 }}
                                 onFocus={() => setShowDomainDropdown(true)}
                               />
                               <button
                                 type="button"
-                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                                onClick={() => setShowDomainDropdown(!showDomainDropdown)}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
+                                onClick={() => setShowDomainDropdown(prev => !prev)}
                               >
                                 <ChevronDown className="w-3.5 h-3.5" />
                               </button>
@@ -1957,9 +1959,10 @@ export default function StudentProfile({
                                 {filteredDomains.length === 0 && domainSearch.trim() !== '' && (
                                   <button
                                     type="button"
-                                    className="w-full text-left px-3 py-2 text-xs text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-sans"
-                                    onClick={() => {
-                                      setNewExp({ ...newExp, domain: domainSearch });
+                                    className="w-full text-left px-3 py-2 text-xs text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-sans cursor-pointer"
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      setNewExp(prev => ({ ...prev, domain: domainSearch }));
                                       setDomainSearch('');
                                       setShowDomainDropdown(false);
                                     }}
@@ -1971,9 +1974,10 @@ export default function StudentProfile({
                                   <button
                                     type="button"
                                     key={opt}
-                                    className="w-full text-left px-3 py-2 text-xs text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-sans font-medium"
-                                    onClick={() => {
-                                      setNewExp({ ...newExp, domain: opt });
+                                    className="w-full text-left px-3 py-2 text-xs text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-sans font-medium cursor-pointer"
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      setNewExp(prev => ({ ...prev, domain: opt }));
                                       setDomainSearch('');
                                       setShowDomainDropdown(false);
                                     }}
@@ -1983,9 +1987,10 @@ export default function StudentProfile({
                                 ))}
                                 <button
                                   type="button"
-                                  className="w-full text-left px-3 py-2 text-xs text-blue-700 dark:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-headline font-bold"
-                                  onClick={() => {
-                                    setNewExp({ ...newExp, domain: 'Other' });
+                                  className="w-full text-left px-3 py-2 text-xs text-blue-700 dark:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-headline font-bold cursor-pointer"
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    setNewExp(prev => ({ ...prev, domain: 'Other' }));
                                     setDomainSearch('');
                                     setShowDomainDropdown(false);
                                   }}
@@ -2244,7 +2249,7 @@ export default function StudentProfile({
                 {/* Pop-up Modal for Add/Edit Certification */}
                 {activeModal === 'certificates' && (
                   <div
-                    className="absolute inset-0 z-50 backdrop-blur-md bg-slate-900/40 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
+                    className="absolute inset-0 z-50 backdrop-blur-md flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
                     onClick={(e) => {
                       if (e.target === e.currentTarget) closeModal();
                     }}
@@ -2566,7 +2571,7 @@ export default function StudentProfile({
                 {/* Pop-up Modal for Add/Edit Project */}
                 {activeModal === 'projects' && (
                   <div
-                    className="absolute inset-0 z-50 backdrop-blur-md bg-slate-900/40 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
+                    className="absolute inset-0 z-50 backdrop-blur-md flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
                     onClick={(e) => {
                       if (e.target === e.currentTarget) closeModal();
                     }}

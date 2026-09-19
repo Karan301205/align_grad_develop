@@ -294,7 +294,11 @@ const mockClient = {
           result = result.filter(g => g.status === where.status);
         }
         if (where.ownerId) {
-          result = result.filter(g => g.ownerId === where.ownerId);
+          if (where.ownerId.in && Array.isArray(where.ownerId.in)) {
+            result = result.filter(g => where.ownerId.in.includes(g.ownerId));
+          } else {
+            result = result.filter(g => g.ownerId === where.ownerId);
+          }
         }
         if (where.selectedCandidateId) {
           result = result.filter(g => g.selectedCandidateId === where.selectedCandidateId);

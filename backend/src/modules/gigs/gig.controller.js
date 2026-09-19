@@ -27,6 +27,19 @@ exports.getGigs = async (req, res) => {
     } = req.query;
     
     let whereClause = { status: "OPEN" };
+    let ownerIds = null;
+
+    if (req.user && req.user.role === 'RECRUITER') {
+      ownerIds = [req.user.id];
+      const company = await prisma.company.findFirst({
+        where: { OR: [{ userId: req.user.id }, { id: req.user.id }] }
+      });
+      if (company) {
+        if (company.id && !ownerIds.includes(company.id)) ownerIds.push(company.id);
+        if (company.userId && !ownerIds.includes(company.userId)) ownerIds.push(company.userId);
+      }
+      whereClause.ownerId = ownerIds.length === 1 ? req.user.id : { in: ownerIds };
+    }
     
     const gigs = await prisma.gig.findMany({
       where: whereClause
@@ -34,6 +47,10 @@ exports.getGigs = async (req, res) => {
     
     // Perform manual filters if needed to support both MongoDB & Mock client seamlessly
     let filteredGigs = gigs;
+
+    if (ownerIds && ownerIds.length > 0) {
+      filteredGigs = filteredGigs.filter(g => ownerIds.includes(g.ownerId));
+    }
     
     if (q) {
       const search = q.toLowerCase();
@@ -254,6 +271,13 @@ exports.getGigDetails = async (req, res) => {
       if (userProfile.id) candidateIds.push(userProfile.id);
       if (userProfile.userId) candidateIds.push(userProfile.userId);
     }
+    const userCompany = await prisma.company.findFirst({
+      where: { OR: [{ userId }, { id: userId }] }
+    });
+    if (userCompany) {
+      if (userCompany.id && !candidateIds.includes(userCompany.id)) candidateIds.push(userCompany.id);
+      if (userCompany.userId && !candidateIds.includes(userCompany.userId)) candidateIds.push(userCompany.userId);
+    }
 
     const allHiredIds = Array.from(new Set([...(gig.hiredCandidateIds || []), gig.selectedCandidateId].filter(Boolean)));
 
@@ -262,7 +286,11 @@ exports.getGigDetails = async (req, res) => {
     const isCandidate = candidateIds.some(cId => allHiredIds.includes(cId));
     const isApplicant = gig.applicants.some(a => candidateIds.includes(a.candidateId));
 
-    if (!isOwner && !isCandidate && !isApplicant && req.user.role !== 'RECRUITER') {
+    if (req.user.role === 'RECRUITER' && !isOwner) {
+      return res.status(403).json({ error: 'You do not have permission to view this gig' });
+    }
+
+    if (!isOwner && !isCandidate && !isApplicant) {
       // Allow general browsing of details but mask sensitive sections like applications/messages
       const company = await prisma.company.findFirst({
         where: { OR: [{ userId: gig.ownerId }, { id: gig.ownerId }] }

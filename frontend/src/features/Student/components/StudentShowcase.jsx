@@ -763,7 +763,7 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
 
       {/* Video Duration Guidelines Pop-up Modal */}
       {showRecordModal && (
-        <div className="fixed inset-0 z-90 backdrop-blur-md bg-slate-900/40 flex items-center justify-center p-4 animate-fade-in">
+        <div className="fixed inset-0 z-90 backdrop-blur-md  flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none max-w-md w-full p-6 shadow-2xl space-y-5 animate-scale-in relative">
             <button
               type="button"

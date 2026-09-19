@@ -1275,7 +1275,9 @@ export default function GigsMarketplace({
                 const isHired = candidateIds.some(cId => Array.from(new Set([...(g.hiredCandidateIds || []), g.selectedCandidateId].filter(Boolean))).map(id => id.toString()).includes(cId));
                 return !hasApplied && !isHired;
               })
-            : gigs;
+            : user?.role === 'RECRUITER'
+              ? gigs.filter(g => candidateIds.includes(g.ownerId?.toString()))
+              : gigs;
 
           return (
             <>
@@ -1316,8 +1318,14 @@ export default function GigsMarketplace({
                     ) : displayGigs.length === 0 ? (
                       <div className="text-center py-20 bg-surface border border-slate-300 dark:border-slate-700 rounded-none shadow-2xs">
                         <AlertTriangle className="w-8 h-8 text-slate-400 dark:text-slate-500 mx-auto mb-3 opacity-60" />
-                        <h3 className="font-headline font-bold text-slate-900 dark:text-slate-100">No open gigs available</h3>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 font-sans">Try adjusting your search criteria or check your workspace for active gigs.</p>
+                        <h3 className="font-headline font-bold text-slate-900 dark:text-slate-100">
+                          {user?.role === 'RECRUITER' ? 'No posted gigs found' : 'No open gigs available'}
+                        </h3>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 font-sans">
+                          {user?.role === 'RECRUITER'
+                            ? 'You have not posted any open gigs matching your filters. Use "Post a Gig" to create one.'
+                            : 'Try adjusting your search criteria or check your workspace for active gigs.'}
+                        </p>
                       </div>
                     ) : (
                       <div className="bg-surface border border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700 rounded-none shadow-2xs">
