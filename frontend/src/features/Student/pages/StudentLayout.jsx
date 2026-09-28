@@ -636,6 +636,14 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   ];
 
   const goToTab = (tabId) => {
+    const item = navItems.find(i => i.id === tabId);
+    if (item && item.locked) {
+      setAlertConfig({
+        message: 'Please complete your General profile and upload your Introduction video to unlock this section.',
+        type: 'warning'
+      });
+      return;
+    }
     if (selectedBriefJobId || (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief'))) {
       window.history.pushState({}, '', '/');
       setSelectedBriefJobId(null);
@@ -811,6 +819,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 </p>
                 <ul className="list-disc pl-5 space-y-1 font-sans font-semibold text-slate-900 dark:text-slate-100">
                   {!hasGeneralInfo && <li>Fill in all required fields in Your Profile &rarr; General tab (Name, Username, Professional Summary, Date of Birth, Phone Number, Email Address, Gender)</li>}
+                  {!hasIntroVideo && <li>Upload your Introduction Video in Your Profile &rarr; Introduction tab</li>}
                 </ul>
               </div>
             )}

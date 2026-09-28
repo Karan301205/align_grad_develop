@@ -23,8 +23,9 @@ export function hasIntroVideo(profile) {
 }
 
 export function isProfileComplete(profile) {
-  return hasGeneralInfo(profile);
+  return hasGeneralInfo(profile) && hasIntroVideo(profile);
 }
+
 
 /**
  * Calculates a single overall profile completeness percentage (0 to 100%)

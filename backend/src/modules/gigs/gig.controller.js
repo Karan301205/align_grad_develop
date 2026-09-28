@@ -406,6 +406,32 @@ exports.applyToGig = async (req, res) => {
       return res.status(400).json({ error: 'You have already applied to this gig' });
     }
 
+    const candidateProfile = await prisma.profile.findUnique({
+      where: { userId: candidateId }
+    });
+
+    if (!candidateProfile) {
+      return res.status(400).json({ error: 'Candidate profile not found' });
+    }
+
+    const isGeneralComplete = Boolean(
+      candidateProfile.name && candidateProfile.name.trim() &&
+      candidateProfile.username && candidateProfile.username.trim() &&
+      candidateProfile.bio && candidateProfile.bio.trim() &&
+      candidateProfile.gender && candidateProfile.gender.trim() &&
+      candidateProfile.email && candidateProfile.email.trim() &&
+      candidateProfile.dob && candidateProfile.dob.trim() &&
+      candidateProfile.phone && candidateProfile.phone.trim()
+    );
+
+    if (!isGeneralComplete) {
+      return res.status(400).json({ error: 'Please complete all required fields in your profile General tab before applying to gigs.' });
+    }
+
+    if (!candidateProfile.introVideoUrl || !candidateProfile.introVideoUrl.trim()) {
+      return res.status(400).json({ error: 'Please upload an introduction video in your profile before applying to gigs.' });
+    }
+
     // Check per-skill minimum rating requirements
     const gigReqs = (gig.requirements && gig.requirements.length > 0)
       ? gig.requirements
@@ -414,14 +440,6 @@ exports.applyToGig = async (req, res) => {
     const activeReqs = gigReqs.filter(r => r.minRating && r.minRating > 1);
 
     if (activeReqs.length > 0) {
-      const candidateProfile = await prisma.profile.findUnique({
-        where: { userId: candidateId }
-      });
-
-      if (!candidateProfile) {
-        return res.status(400).json({ error: 'Candidate profile not found' });
-      }
-
       const candidateSkills = candidateProfile.skills || [];
 
       for (const reqSkill of activeReqs) {

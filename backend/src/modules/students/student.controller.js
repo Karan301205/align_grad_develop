@@ -263,6 +263,24 @@ exports.applyJob = async (req, res) => {
       return res.status(404).json({ error: 'Profile not found' });
     }
 
+    const isGeneralComplete = Boolean(
+      profile.name && profile.name.trim() &&
+      profile.username && profile.username.trim() &&
+      profile.bio && profile.bio.trim() &&
+      profile.gender && profile.gender.trim() &&
+      profile.email && profile.email.trim() &&
+      profile.dob && profile.dob.trim() &&
+      profile.phone && profile.phone.trim()
+    );
+
+    if (!isGeneralComplete) {
+      return res.status(400).json({ error: 'Please complete all required fields in your profile General tab before applying to opportunities.' });
+    }
+
+    if (!profile.introVideoUrl || !profile.introVideoUrl.trim()) {
+      return res.status(400).json({ error: 'Please upload an introduction video in your profile before applying to opportunities.' });
+    }
+
     const job = await prisma.job.findUnique({
       where: { id: jobId }
     });
