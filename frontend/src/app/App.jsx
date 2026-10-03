@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // Import features
-import { AuthView, CandidateAuth, RecruiterAuth } from '../features/Auth';
+import { AuthView, CandidateAuth, RecruiterAuth, ResetPasswordPage } from '../features/Auth';
 import { StudentLayout, PublicJobBriefPage } from '../features/Student';
 import { RecruiterLayout } from '../features/Recruiter';
 import ConnectionLoader from '../components/ConnectionLoader';
@@ -98,6 +98,14 @@ export default function App() {
     setTestSkill(null);
   };
 
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      handleLogout();
+    };
+    window.addEventListener('aligngrade:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('aligngrade:unauthorized', handleUnauthorized);
+  }, []);
+
   if (!isReady) {
     return <ConnectionLoader theme={theme} onReady={() => setIsReady(true)} />;
   }
@@ -105,6 +113,11 @@ export default function App() {
   // Standalone public job brief view (unauthenticated or direct share link access)
   if (currentPath.startsWith('/job_brief')) {
     return <PublicJobBriefPage theme={theme} toggleTheme={toggleTheme} />;
+  }
+
+  // Standalone password reset view (unauthenticated or link access)
+  if (currentPath.startsWith('/reset-password')) {
+    return <ResetPasswordPage theme={theme} toggleTheme={toggleTheme} />;
   }
 
   const hostname = window.location.hostname;

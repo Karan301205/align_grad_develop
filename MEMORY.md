@@ -59,13 +59,14 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   │   ├── index.js      # Primary DB export ({ prisma, isMock, initDb })
 │   │   │   │   └── mock/         # In-memory sandbox DB store (mockClient.js, seed.js, loadQuestionBankMock.js)
 │   │   │   ├── storage/s3/       # AWS S3 client builder, presigned URLs, and uploadBuffer helper
+│   │   │   ├── email/            # Dedicated Nodemailer email transport & templates (Gmail SMTP)
 │   │   │   ├── ai/               # AI LLM providers (bedrockProvider.js, groqProvider.js)
 │   │   │   └── logging/          # Centralized logger adapter
 │   │   ├── shared/               # Cross-cutting utilities & helpers
 │   │   │   └── utils/
 │   │   │       └── fileSignature.js # Binary magic-bytes validator
 │   │   ├── modules/              # Domain-oriented feature modules
-│   │   │   ├── auth/             # Authentication & token issuance (controller, routes, validator, index)
+│   │   │   ├── auth/             # Authentication, token issuance & password reset (controller, routes, validator, services/passwordReset.service, index)
 │   │   │   ├── students/         # Student profiles, applications, video showcase (controller, routes, validator, index)
 │   │   │   ├── recruiters/       # Recruiter profiles, company verification, talent search (controller, routes, validator, index)
 │   │   │   ├── jobs/             # Job lifecycle, listings, requirements (jobLifecycle.service, index)
@@ -98,7 +99,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   ├── ResumePdfTemplate.jsx # Standardized A4 printable candidate resume template
 │   │   │   └── ui/               # Atomic Neumorphic primitives (Button, Card, Input, Badge, etc.)
 │   │   ├── features/             # Domain-oriented frontend features
-│   │   │   ├── auth/             # Auth pages & views (AuthView, CandidateAuth, RecruiterAuth, index)
+│   │   │   ├── auth/             # Auth pages & views (AuthView, CandidateAuth, RecruiterAuth, ResetPasswordPage, ForgotPasswordModal, passwordResetApi, index)
 │   │   │   ├── student/          # Student portal (pages/StudentLayout, components/, index)
 │   │   │   ├── recruiter/        # Recruiter portal (pages/RecruiterLayout, components/, index)
 │   │   │   ├── gigs/             # Freelance marketplace (pages/GigsMarketplace, components/GigCard, GigFilterSidebar, GigDetailPage, gigConstants, index)
@@ -156,13 +157,14 @@ As part of the pure architectural refactoring (completed on branch `file_restruc
    - `database/`: Database client wrapper (`index.js` exporting `{ prisma, isMock, initDb }`), handling dynamic mock fallback and connection pooling. Sandbox fixtures and in-memory mock client reside under `mock/` (`mockClient.js`, `seed.js`, `loadQuestionBankMock.js`).
    - `storage/s3/`: AWS S3 client instantiation, presigned upload URLs generator, and buffer uploader.
    - `ai/`: Unified LLM provider implementations (`bedrockProvider.js`, `groqProvider.js`).
+   - `email/`: Nodemailer Gmail SMTP transport (`emailTransport.js`, `emailTemplates.js`, `index.js`) for system transactional emails including branded password recovery links.
    - `logging/`: Centralized logger adapter and structured diagnostics.
 
 2. **Shared Utilities Layer (`backend/src/shared/`)**:
    - `utils/fileSignature.js`: Magic bytes validation enforcing strict binary MIME checking.
 
 3. **Domain Modules (`backend/src/modules/`)**:
-   - `auth/`: User signup, login, Google OAuth verification, token issuance (`auth.controller.js`, `auth.validator.js`, `auth.routes.js`, `index.js`).
+   - `auth/`: User signup, login, Google OAuth verification, token issuance, and password recovery (`auth.controller.js`, `auth.validator.js`, `auth.routes.js`, `services/passwordReset.service.js`, `index.js`). Password reset enforces a strict 3-attempt per 15-minute sliding window per user with SHA-256 token hashing and 10-minute expiration. Passwords support special characters including `@`.
    - `students/`: Candidate profile management, applications submission, video showcase (`student.controller.js`, `student.validator.js`, `student.routes.js`, `index.js`).
    - `recruiters/`: Recruiter authentication, company verification, talent search, job management (`recruiter.controller.js`, `recruiter.validator.js`, `recruiterCompany.validator.js`, `recruiter.routes.js`, `index.js`).
    - `jobs/`: Job lifecycle, expiration management (`jobLifecycle.service.js`, `index.js`).
@@ -205,14 +207,14 @@ As part of the pure architectural refactoring (completed on branch `file_restruc
 * **Risk**: Medium.
 
 #### [backend/src/middleware/auth.js](file:///Users/karanrawat/Desktop/a_g/backend/src/middleware/auth.js)
-* **Purpose**: Intercepts requests with JWT authorization headers, validates token integrity against `JWT_SECRET`, extracts the payload, and appends the decoded user context to the request object.
-* **Used By**: [backend/src/routes/api.js](file:///Users/karanrawat/Desktop/a_g/backend/src/routes/api.js).
-* **Dependencies**: `jsonwebtoken`, `backend/src/config/env.js`.
+* **Purpose**: Intercepts requests with JWT authorization headers, validates token integrity against `JWT_SECRET`, extracts the payload, validates ObjectId format against `/^[0-9a-fA-F]{24}$/` in live MongoDB mode to reject stale/malformed tokens (401 Unauthorized), and appends the decoded user context to the request object.
+* **Used By**: [backend/src/routes/api.js](file:///Users/karanrawat/Desktop/a_g/backend/src/routes/api.js), domain module route files.
+* **Dependencies**: `jsonwebtoken`, `backend/src/config/env.js`, `backend/src/infrastructure/database/index.js`.
 * **Safe Modifications**: Formatting error response payloads, customizing token format parser.
 * **Risk**: High (controls endpoint security and identity propagation).
 
 #### [backend/src/middleware/errorHandler.js](file:///Users/karanrawat/Desktop/a_g/backend/src/middleware/errorHandler.js)
-* **Purpose**: Captures unhandled runtime errors in Express route handlers, formats error responses to JSON, and prints diagnostics logs to console. Shields raw stack traces and database schemas in production mode with a generic message.
+* **Purpose**: Captures unhandled runtime errors in Express route handlers, gracefully formats Prisma `P2023` Malformed ObjectID errors to HTTP 400 Bad Request, formats error responses to JSON, and prints diagnostics logs to console. Shields raw stack traces and database schemas in production mode with a generic message.
 * **Used By**: [backend/src/index.js](file:///Users/karanrawat/Desktop/a_g/backend/src/index.js).
 * **Dependencies**: None.
 * **Safe Modifications**: Adjusting logging formats, custom mappings for specific exception classes.
@@ -516,7 +518,7 @@ The frontend adheres to a feature-based domain architecture:
   - `components/JobSnapshotCard.jsx`: Box card format (3 in a row) displaying post name, company name with verified badge, square company logo box with uppercase initials monogram on top-right, stipend and location in middle, required skills tags, and application/test status with dark visible colors.
   - `pages/JobBriefPage.jsx`: Full-page job brief view rendered on `/job_brief?id=<jobId>`, showing complete recruiter-provided information (Hero header, company profile trigger, official website, place for work and maps URL, full stipend/compensation, key attributes overview grid, opportunity summary, role & responsibilities, required skill thresholds with upgrade test CTAs, selection process rounds, apply action, and jsPDF Download Brief PDF). Features a dedicated Share button on the right top corner of the job card immediately to the left of the "Apply Now" button, allowing candidates and users to copy the public job brief link with visual "Link Copied!" feedback. In public mode (`isPublic=true`), clicking Apply, Download Brief, Back, or Take Test redirects the user to the landing page `/?auth_prompt=signup_required`, triggering the emerald slide-in notification.
   - `pages/PublicJobBriefPage.jsx`: Standalone public view mounted in `App.jsx` when visiting `/job_brief?id=<jobId>`. Requires no login, contains no sidebar menu, displays the AlignGrade logo header with theme toggle and Sign In CTA, and renders `JobBriefPage` in `isPublic` mode where all actions route to `/?auth_prompt=signup_required`.
-  - `components/StudentProfile.jsx`: Profile editing with 8-step horizontal top stepper (General, Introduction, Education, Experience, Certifications, Projects, Skills, Co-Curricular), profile header (avatar upload, debounced username availability checking, dynamic completeness meter with missing items dropdown, and PDF resume export button), horizontal box cards with bold dark typography for academic/work collections, and work preferences (modes, types, Indian states selector). The Skills step locks self-ratings for skills with MCQ tests to 1/10 (or their test score) with verified/unverified status indicators and no dropdown, while permitting interactive 1–10 self-rating only for untestable technical skills and soft skills.
+  - `components/StudentProfile.jsx`: Profile editing with 8-step horizontal top stepper (General, Introduction, Education, Experience, Certifications, Projects, Skills, Co-Curricular), profile header (avatar upload, debounced username availability checking, dynamic completeness meter with missing items dropdown, and PDF resume export button), horizontal box cards with bold dark typography for academic/work collections, and work preferences (modes, types, Indian states selector). The Skills step locks self-ratings for skills with MCQ tests to 1/10 (or their test score) with verified/unverified status indicators and no dropdown, while permitting interactive 1–10 self-rating only for untestable technical skills and soft skills. Includes strict input masking and constraints: First/Last Names and Higher Education (Institute, Degree, Field of Study) disallow digits on typing and paste; High School Class 10/12 Percentage accepts numbers only with single-decimal/0-100 clamping, while Class 11 Stream accepts alphabets only. Date inputs across Education, Experience, Certifications, and Projects are bounded to 1950–2099 with automatic 4-digit year truncation and chronological start <= end date enforcement. Replaced all native browser `alert(...)` popups across the profile and modal flows with top-right animated fading toast notification cards (`ToastNotification` with z-[100] elevation). Mandatory fields marked with red asterisks: Education (Type, Institute, Degree, Field of Study, Start Date, End Date, Grade Type, Grade Value; Class 10/12 % and Class 11 Stream for High School), Experience (Type, Designation, Company Name, Start Date), Certifications (Title, Provider Org), Projects (Title, Role, Start Date), and Co-Curricular (Activity/Title). Strict input rules: LinkedIn, Portfolio, Certification Link, Project Code/Hosted URLs, and Co-Curricular Links only receive valid URLs with automatic `https://` protocol normalization on blur and red validation borders; Education Grade Value strictly accepts alphabetical input only (`A+`, `B`, etc.) when Grade Type is Letter Grade and integer/numeric input otherwise; Certification Number accepts integers only; Experience Location rejects numbers/integer input.
   - `components/StudentResume.jsx`: Resume viewer and dynamically compiled PDF resume generator.
   - `components/StudentSkillTests.jsx`: Your Tests dashboard and continuous-scrolling MCQ assessment view (features high-visibility cards matching the Opportunities section with high-contrast borders and sharp typography, horizontal underline filter tabs for "All Skills", "Verified Skills", and "Unverified Skills" with active bottom-underline highlight, and an in-screen test completion modal popup overlay with darkened backdrop showing earned score with 70% verified vs unverified threshold status: unverified test completion offers Retake Test [fetches a brand-new 10-question set from the bank] and Close options, while verified completion offers only the Close option).
   - `components/StudentShowcase.jsx`: Showcase Yourself page with video duration guidelines popup (40s minimum, 60s maximum) before webcam recording.
@@ -941,6 +943,12 @@ src/index.js
 * **`POST /api/auth/login`**
   - **Purpose**: Validates email/password credentials and issues token. Accepts optional `role` parameter ('STUDENT' or 'RECRUITER') to enforce portal-specific login access and prevent cross-role authentication.
   - **Files**: `auth.controller.js`, `auth.validator.js`, `api.js`
+* **`POST /api/auth/forgot-password`**
+  - **Purpose**: Requests password reset link via Gmail SMTP. Enforces strict limit of 3 attempts per 15-minute sliding window per user. Returns anti-enumeration success message.
+  - **Files**: `auth.controller.js`, `auth.validator.js`, `services/passwordReset.service.js`, `infrastructure/email/`
+* **`POST /api/auth/reset-password`**
+  - **Purpose**: Resets password using single-use SHA-256 hashed token with 10-minute expiration and clears reset attempts.
+  - **Files**: `auth.controller.js`, `auth.validator.js`, `services/passwordReset.service.js`
 
 ### Student Endpoints (Bearer JWT Required)
 * **`GET /api/student/profile`**
@@ -1285,7 +1293,7 @@ The application enforces production-ready schema validation using `zod` at the A
   - `admin_ws/backend/src/middleware/validate.js`: Equivalent validation coordinator in the Admin Portal.
 * **Validation Schema Files**:
   - `backend/src/validators/auth.validator.js`: Validates login credentials and signup payloads (length, format).
-  - `backend/src/validators/student.validator.js`: Validates nested student profiles, experience arrays, certifications, education structures, age checks (>= 17), and technical quiz records.
+  - `backend/src/validators/student.validator.js`: Validates nested student profiles, experience arrays (non-numeric location constraints), certifications (digits-only certNumber, URL validation), education structures, age checks (>= 17), URL formats for social/project/co-curricular links, and technical quiz records.
   - `backend/src/validators/recruiter.validator.js`: Validates job postings, requirements arrays, selection processes, and company trust credentials.
   - `backend/src/validators/upload.validator.js`: Validates pre-signed file upload requests.
   - `admin_ws/backend/src/validators/job.validator.js`: Validates that incoming jobId path parameters conform to a strict 24-character hexadecimal ObjectId format.

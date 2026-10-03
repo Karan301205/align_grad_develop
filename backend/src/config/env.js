@@ -11,7 +11,14 @@ const env = {
   AWS_REGION: process.env.AWS_REGION || 'ap-south-1',
   S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || 'aligngrade-storage-2026',
   GROQ_API_KEY: process.env.GROQ_API_KEY,
-  CLAUDE_API_KEY: process.env.CLAUDE_API_KEY
+  CLAUDE_API_KEY: process.env.CLAUDE_API_KEY,
+  SMTP_HOST: process.env.SMTP_HOST || 'smtp.gmail.com',
+  SMTP_PORT: parseInt(process.env.SMTP_PORT || '465', 10),
+  SMTP_SECURE: process.env.SMTP_SECURE !== 'false',
+  SMTP_USER: process.env.SMTP_USER || 'aligngrad@gmail.com',
+  SMTP_PASS: process.env.SMTP_PASS || '',
+  SMTP_FROM_NAME: process.env.SMTP_FROM_NAME || 'AlignGrad Team',
+  CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173'
 };
 
 // Fail-fast in production if critical environment variables are missing

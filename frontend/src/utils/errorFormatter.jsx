@@ -11,7 +11,7 @@ export function cleanHumanErrorMessage(rawMsg) {
       if (Array.isArray(parsed) && parsed.length > 0) {
         const item = parsed[0];
         if (item && item.message) return item.message;
-        if (item && item.field && item.message) return `${item.field}: ${item.message}`;
+        if (item && item.field && item.message) return `**${item.field}**: ${item.message}`;
       } else if (parsed && typeof parsed === 'object') {
         if (parsed.error && typeof parsed.error === 'string' && !parsed.error.startsWith('[') && !parsed.error.startsWith('{')) {
           return parsed.error;
@@ -25,10 +25,53 @@ export function cleanHumanErrorMessage(rawMsg) {
 }
 
 /**
- * Top-Right Sliding Toast Notification Card (Screenshot 2 design)
+ * Parses markdown bold (**text**) or returns text with missing fields highlighted in bold
+ */
+export function renderFormattedMessage(msg) {
+  if (!msg) return null;
+  if (React.isValidElement(msg)) return msg;
+  const str = typeof msg === 'string' ? msg : cleanHumanErrorMessage(msg);
+  if (typeof str !== 'string') return str;
+
+  // Split by markdown bold pattern (**...**)
+  const parts = str.split(/(\*\*.*?\*\*)/g);
+  if (parts.length === 1) return str;
+
+  return parts.map((part, idx) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+      const boldText = part.slice(2, -2);
+      return (
+        <strong key={idx} className="font-bold text-slate-950 dark:text-white">
+          {boldText}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
+/**
+ * Top-Right Sliding Toast Notification Card
  */
 export const ToastNotification = ({ msg, type = 'error', onClose, duration = 4000 }) => {
   const [isExiting, setIsExiting] = useState(false);
+
+  // Auto-scroll to top smoothly whenever a slide-in notification appears
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const mainEl = document.querySelector('main');
+        if (mainEl) {
+          mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        const scrollables = document.querySelectorAll('.overflow-y-auto');
+        scrollables.forEach(el => {
+          el.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+    } catch (_) {}
+  }, [msg]);
 
   useEffect(() => {
     if (!duration || duration <= 0) return;
@@ -53,7 +96,7 @@ export const ToastNotification = ({ msg, type = 'error', onClose, duration = 400
 
   return (
     <div
-      className={`fixed top-6 right-6 z-50 pointer-events-auto flex items-center gap-3.5 px-4 py-3.5 rounded-2xl shadow-xl border backdrop-blur-md transition-all min-w-[320px] max-w-md ${
+      className={`fixed top-6 right-6 z-[100] pointer-events-auto flex items-center gap-3.5 px-4 py-3.5 rounded-2xl shadow-xl border backdrop-blur-md transition-all min-w-[320px] max-w-md ${
         isExiting ? 'animate-toast-fade-out' : 'animate-toast-slide-in'
       } ${
         isSuccess
@@ -78,11 +121,11 @@ export const ToastNotification = ({ msg, type = 'error', onClose, duration = 400
           {type === 'info' ? 'Notification' : isSuccess ? 'Success' : 'Alert'}
         </h4>
         <p className="text-xs text-slate-600 dark:text-slate-200 mt-0.5 leading-relaxed font-sans break-words">
-          {displayMsg}
+          {renderFormattedMessage(displayMsg)}
         </p>
 
         {/* Actionable Switch Portal CTA */}
-        {displayMsg.includes('Recruiter portal') && (
+        {typeof displayMsg === 'string' && displayMsg.includes('Recruiter portal') && (
           <button
             type="button"
             onClick={() => {
@@ -95,7 +138,7 @@ export const ToastNotification = ({ msg, type = 'error', onClose, duration = 400
             Go to Recruiter Portal &rarr;
           </button>
         )}
-        {displayMsg.includes('Candidate portal') && (
+        {typeof displayMsg === 'string' && displayMsg.includes('Candidate portal') && (
           <button
             type="button"
             onClick={() => {

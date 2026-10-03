@@ -14,6 +14,13 @@ model User {
   role      String   // "STUDENT" or "RECRUITER"
   regNo     String?  @unique
   createdAt DateTime @default(now())
+
+  // Password Reset Fields
+  resetPasswordToken    String?
+  resetPasswordExpires  DateTime?
+  resetPasswordAttempts Int?      @default(0)
+  resetPasswordWindow   DateTime?
+
   profile   Profile?
   company   Company?
 }

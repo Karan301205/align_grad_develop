@@ -3,6 +3,13 @@
  * Exposes generic errors in production, logs complete stack traces on server.
  */
 const errorHandler = (err, req, res, next) => {
+  // Handle Prisma malformed ObjectId errors gracefully
+  if (err.code === 'P2023' || (err.message && err.message.includes('Malformed ObjectID'))) {
+    return res.status(400).json({
+      error: 'Invalid ID format provided.'
+    });
+  }
+
   // Log full error stack details on the server for debugging
   console.error('[ERROR EXCEPTION]:', err.stack || err);
 

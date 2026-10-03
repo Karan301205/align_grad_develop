@@ -84,23 +84,23 @@ const updateProfileSchema = {
       startDate: z.string().optional().nullable(),
       endDate: z.string().optional().nullable(),
       currentlyWorking: z.boolean().optional().nullable(),
-      location: z.string().optional().nullable(),
+      location: z.string().regex(/^[^0-9]*$/, 'Location cannot contain numbers').or(z.literal('')).optional().nullable(),
       description: z.string().optional().nullable()
     })).optional().nullable(),
     certificates: z.array(z.object({
       title: z.string().optional().nullable(),
       org: z.string().optional().nullable(),
       startDate: z.string().optional().nullable(),
-      link: z.string().url().or(z.literal('')).optional().nullable(),
-      certNumber: z.string().optional().nullable(),
+      link: z.string().url('Invalid certificate URL').or(z.literal('')).optional().nullable(),
+      certNumber: z.string().regex(/^[0-9]*$/, 'Certification Number must contain only digits').or(z.literal('')).optional().nullable(),
       description: z.string().optional().nullable(),
       attachment: z.string().optional().nullable()
     })).optional().nullable(),
     projects: z.array(z.object({
       title: z.string().optional().nullable(),
       role: z.string().optional().nullable(),
-      codeUrl: z.string().url().or(z.literal('')).optional().nullable(),
-      hostedUrl: z.string().url().or(z.literal('')).optional().nullable(),
+      codeUrl: z.string().url('Invalid code URL').or(z.literal('')).optional().nullable(),
+      hostedUrl: z.string().url('Invalid hosted URL').or(z.literal('')).optional().nullable(),
       startDate: z.string().optional().nullable(),
       endDate: z.string().optional().nullable(),
       currentlyWorking: z.boolean().optional().nullable(),
@@ -108,7 +108,7 @@ const updateProfileSchema = {
     })).optional().nullable(),
     cocurricular: z.array(z.object({
       activity: z.string().optional().nullable(),
-      link: z.string().url().or(z.literal('')).optional().nullable(),
+      link: z.string().url('Invalid activity URL').or(z.literal('')).optional().nullable(),
       description: z.string().optional().nullable()
     })).optional().nullable(),
     isOnboarded: z.boolean().optional().nullable(),

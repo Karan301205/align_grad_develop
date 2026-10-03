@@ -20,6 +20,7 @@ import ClickSpark from '../../components/ui/ClickSpark';
 import DotGrid from '../../components/ui/DotGrid';
 import GoogleAuthButton from '../../components/ui/GoogleAuthButton';
 import { formatErrorMessage } from '../../utils/errorFormatter';
+import ForgotPasswordModal from './components/ForgotPasswordModal';
 
 export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, initialMode = 'login' }) {
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
@@ -30,15 +31,12 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (/\s/.test(password)) {
       setError('Password cannot contain spaces.');
-      return;
-    }
-    if (password.includes('@')) {
-      setError("Password cannot contain '@' symbol.");
       return;
     }
 
@@ -246,13 +244,13 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
                         />
                         <span className="text-[11px] text-on-surface-variant hover:text-on-surface transition-colors">Remember me</span>
                       </label>
-                      <a 
-                        href="#" 
-                        className="text-[11px] text-primary hover:underline" 
-                        onClick={(e) => { e.preventDefault(); alert("Password recovery is simulated in this build."); }}
+                      <button 
+                        type="button" 
+                        className="text-[11px] text-primary hover:underline cursor-pointer bg-transparent border-none p-0 font-medium" 
+                        onClick={() => setIsForgotPasswordOpen(true)}
                       >
                         Forgot password?
-                      </a>
+                      </button>
                     </div>
                   )}
 
@@ -308,6 +306,14 @@ export default function CandidateAuth({ setToken, setUser, theme, toggleTheme, i
             </div>
           </div>
         </footer>
+
+        <ForgotPasswordModal
+          isOpen={isForgotPasswordOpen}
+          onClose={() => setIsForgotPasswordOpen(false)}
+          initialEmail={email}
+          role="STUDENT"
+          theme={theme}
+        />
       </ClickSpark>
     </div>
   );

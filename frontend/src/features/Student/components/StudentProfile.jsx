@@ -6,11 +6,35 @@ import { putFileToS3 } from '../../../services/uploadService';
 import { DOMAIN_OPTIONS } from '../../../constants/domains';
 import Button from '../../../components/ui/Button';
 import PageHeader from '../../../components/ui/PageHeader';
-import { formatErrorMessage } from '../../../utils/errorFormatter';
+import { ToastNotification, formatAlertMessage, formatErrorMessage, renderFormattedMessage } from '../../../utils/errorFormatter';
 import { getProfileCompletionDetails } from '../../../utils/profileCompleteness';
 
 import { INDIAN_STATES } from '../../../constants/indianStates';
 import StudentShowcase from './StudentShowcase';
+
+const isValidUrl = (str) => {
+  if (!str || typeof str !== 'string' || !str.trim()) return true;
+  const trimmed = str.trim();
+  try {
+    const formatted = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    const url = new URL(formatted);
+    const parts = url.hostname.split('.');
+    if (parts.length < 2) return false;
+    const tld = parts[parts.length - 1];
+    if (tld.length < 2) return false;
+    return true;
+  } catch (_) {
+    return false;
+  }
+};
+
+const ensureUrlProtocol = (str) => {
+  if (!str) return str;
+  const trimmed = str.trim();
+  if (!trimmed) return '';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+};
 
 export default function StudentProfile({
   profile,
@@ -92,17 +116,20 @@ export default function StudentProfile({
   const [usernameMsg, setUsernameMsg] = React.useState('');
 
   const [firstName, setFirstName] = React.useState(() => {
-    const parts = (profile?.name || '').trim().split(' ');
+    const cleaned = (profile?.name || '').replace(/[0-9]/g, '');
+    const parts = cleaned.trim().split(' ');
     return parts[0] || '';
   });
   const [lastName, setLastName] = React.useState(() => {
-    const parts = (profile?.name || '').trim().split(' ');
+    const cleaned = (profile?.name || '').replace(/[0-9]/g, '');
+    const parts = cleaned.trim().split(' ');
     return parts.slice(1).join(' ') || '';
   });
 
   React.useEffect(() => {
     if (profile?.name !== undefined) {
-      const parts = (profile?.name || '').trim().split(' ');
+      const cleaned = (profile?.name || '').replace(/[0-9]/g, '');
+      const parts = cleaned.trim().split(' ');
       setFirstName(parts[0] || '');
       setLastName(parts.slice(1).join(' ') || '');
     }
@@ -213,6 +240,23 @@ export default function StudentProfile({
   const [editingProjIdx, setEditingProjIdx] = React.useState(null);
   const [editingCocurricularIdx, setEditingCocurricularIdx] = React.useState(null);
   const [activeModal, setActiveModal] = React.useState(null); // 'education' | 'experience' | 'certificates' | 'projects' | 'cocurricular' | null
+  const [alertToast, setAlertToast] = React.useState(null); // { id: number, msg: string, type: 'error' | 'success' }
+  const showAlert = (msg, type = 'error') => {
+    setAlertToast({ id: Date.now(), msg, type });
+    try {
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const mainEl = document.querySelector('main');
+        if (mainEl) {
+          mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        const scrollables = document.querySelectorAll('.overflow-y-auto');
+        scrollables.forEach(el => {
+          el.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+    } catch (_) {}
+  };
 
   const openAddEduModal = () => {
     setEditingEduIdx(null);
@@ -549,7 +593,7 @@ export default function StudentProfile({
 
     const fileSizeKB = file.size / 1024;
     if (fileSizeKB > 100) {
-      alert('Maximum file size allowed is 100 KB.');
+      showAlert('Maximum file size allowed is **100 KB**.', 'error');
       e.target.value = '';
       return;
     }
@@ -673,30 +717,56 @@ export default function StudentProfile({
     experienceList, projectsList, certificatesList, profile?.introVideoUrl
   ]);
 
+  const sanitizeDateYear = (val) => {
+    if (!val) return '';
+    const parts = val.split('-');
+    if (parts.length > 0) {
+      let year = parts[0];
+      if (year.length > 4) year = year.slice(0, 4);
+      const num = parseInt(year, 10);
+      if (!isNaN(num)) {
+        if (num > 2099) year = '2099';
+        else if (year.length === 4 && num < 1950) year = '1950';
+      }
+      parts[0] = year;
+      return parts.join('-');
+    }
+    return val;
+  };
+
   const handleClass10Change = (val) => {
-    setClass10Percent(val);
+    let cleaned = val.replace(/[^0-9.]/g, '');
+    const parts = cleaned.split('.');
+    if (parts.length > 2) cleaned = parts[0] + '.' + parts.slice(1).join('');
+    if (parseFloat(cleaned) > 100) cleaned = '100';
+    setClass10Percent(cleaned);
     const c12 = class12Percent;
-    setNewEdu({
-      ...newEdu,
-      degree: `Class 10: ${val}% | Class 12: ${c12}%`
-    });
+    setNewEdu(prev => ({
+      ...prev,
+      degree: `Class 10: ${cleaned}% | Class 12: ${c12}%`
+    }));
   };
 
   const handleClass12Change = (val) => {
-    setClass12Percent(val);
+    let cleaned = val.replace(/[^0-9.]/g, '');
+    const parts = cleaned.split('.');
+    if (parts.length > 2) cleaned = parts[0] + '.' + parts.slice(1).join('');
+    if (parseFloat(cleaned) > 100) cleaned = '100';
+    setClass12Percent(cleaned);
     const c10 = class10Percent;
-    setNewEdu({
-      ...newEdu,
-      degree: `Class 10: ${c10}% | Class 12: ${val}%`
-    });
+    setNewEdu(prev => ({
+      ...prev,
+      degree: `Class 10: ${c10}% | Class 12: ${cleaned}%`
+    }));
   };
 
   const handleStreamChange = (val) => {
-    setClass11Stream(val);
-    setNewEdu({
-      ...newEdu,
-      fieldOfStudy: `Class 11 Stream: ${val}`
-    });
+    const cleaned = val.replace(/[^a-zA-Z\s]/g, '');
+    setClass11Stream(cleaned);
+    setNewEdu(prev => ({
+      ...prev,
+      fieldOfStudy: `Class 11 Stream: ${cleaned}`
+    }));
   };
 
   const handleEduTypeChange = (e) => {
@@ -704,28 +774,37 @@ export default function StudentProfile({
     setClass10Percent('');
     setClass12Percent('');
     setClass11Stream('');
-    setNewEdu({
-      ...newEdu,
+    setNewEdu(prev => ({
+      ...prev,
       eduType: type,
+      institute: type !== 'High School' ? (prev.institute || '').replace(/[0-9]/g, '') : prev.institute,
       degree: '',
       fieldOfStudy: ''
-    });
+    }));
   };
 
   const handleSubmit = (e) => {
     if (e && e.preventDefault) e.preventDefault();
     const ageValue = calculateAge(dob);
     if (ageValue !== null && ageValue < 17) {
-      alert('You must be at least 17 years old to access this platform.');
+      showAlert('You must be at least **17 years old** to access this platform.', 'error');
       return;
     }
     const isValid = validatePhone(countryCode, localPhone);
     if (!isValid) {
-      alert('Please fix the phone number validation error before saving.');
+      showAlert('Please fix the **Phone Number** validation error before saving.', 'error');
       return;
     }
     if (resumeUrl && resumeUrl.trim() && !isValidDriveUrl(resumeUrl)) {
-      alert('Please enter a valid Google Drive URL for your resume (e.g. https://drive.google.com/...).');
+      showAlert('Please enter a valid **Google Drive URL** for your resume (e.g. https://drive.google.com/...).', 'error');
+      return;
+    }
+    if (socialLinks?.linkedin && socialLinks.linkedin.trim() && !isValidUrl(socialLinks.linkedin)) {
+      showAlert('Please enter a valid **LinkedIn Profile URL** (e.g. https://linkedin.com/in/...).', 'error');
+      return;
+    }
+    if (socialLinks?.portfolio && socialLinks.portfolio.trim() && !isValidUrl(socialLinks.portfolio)) {
+      showAlert('Please enter a valid **Personal Portfolio URL** (e.g. https://myportfolio.com).', 'error');
       return;
     }
     const activeTabObj = tabsList.find(t => t.id === profileTab);
@@ -735,6 +814,14 @@ export default function StudentProfile({
 
   return (
     <div className="w-full max-w-[1400px] mx-auto space-y-8 animate-fade-in">
+      {alertToast && (
+        <ToastNotification
+          key={alertToast.id}
+          msg={alertToast.msg}
+          type={alertToast.type}
+          onClose={() => setAlertToast(null)}
+        />
+      )}
       <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-500/40 text-emerald-900 dark:text-emerald-200 rounded-none shadow-md transition-all duration-500 ease-in-out ${showUploadSuccess
           ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
           : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'
@@ -828,7 +915,7 @@ export default function StudentProfile({
             ) : (
               <CheckCircle className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
             )}
-            <span className="font-semibold">{feedbackMsg}</span>
+            <span className="font-semibold">{renderFormattedMessage(feedbackMsg)}</span>
           </div>
         );
       })()}
@@ -962,9 +1049,14 @@ export default function StudentProfile({
                       className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
                       value={firstName}
                       onChange={e => {
-                        const val = e.target.value;
+                        const val = e.target.value.replace(/[0-9]/g, '');
                         setFirstName(val);
                         updateFullName(val, lastName);
+                      }}
+                      onKeyDown={e => {
+                        if (/[0-9]/.test(e.key)) {
+                          e.preventDefault();
+                        }
                       }}
                       placeholder="e.g. John"
                       required
@@ -981,9 +1073,14 @@ export default function StudentProfile({
                       className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
                       value={lastName}
                       onChange={e => {
-                        const val = e.target.value;
+                        const val = e.target.value.replace(/[0-9]/g, '');
                         setLastName(val);
                         updateFullName(firstName, val);
+                      }}
+                      onKeyDown={e => {
+                        if (/[0-9]/.test(e.key)) {
+                          e.preventDefault();
+                        }
                       }}
                       placeholder="e.g. Doe"
                       required
@@ -1022,9 +1119,11 @@ export default function StudentProfile({
                     </label>
                     <input
                       type="date"
+                      min="1920-01-01"
+                      max={new Date().toISOString().split('T')[0]}
                       className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                       value={dob}
-                      onChange={e => setDob(e.target.value)}
+                      onChange={e => setDob(sanitizeDateYear(e.target.value))}
                     />
                     {isUnderage && (
                       <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1.5 animate-pulse">
@@ -1159,12 +1258,26 @@ export default function StudentProfile({
                       </div>
                       <input
                         type="url"
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none pl-10 pr-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
+                        className={`w-full bg-white dark:bg-slate-900 border ${
+                          socialLinks?.linkedin && !isValidUrl(socialLinks.linkedin)
+                            ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                            : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                        } rounded-none pl-10 pr-4 py-2.5 text-xs focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs`}
                         value={socialLinks?.linkedin || ''}
                         onChange={e => setSocialLinks({ ...socialLinks, linkedin: e.target.value, showLinkedin: true })}
+                        onBlur={() => {
+                          if (socialLinks?.linkedin && isValidUrl(socialLinks.linkedin)) {
+                            setSocialLinks(prev => ({ ...prev, linkedin: ensureUrlProtocol(prev?.linkedin) }));
+                          }
+                        }}
                         placeholder="https://linkedin.com/in/username"
                       />
                     </div>
+                    {socialLinks?.linkedin && !isValidUrl(socialLinks.linkedin) && (
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1">
+                        * Please enter a valid URL (e.g. https://linkedin.com/in/username)
+                      </p>
+                    )}
                   </div>
 
                   {/* Row 6, Col 2: Personal Portfolio Link */}
@@ -1182,12 +1295,26 @@ export default function StudentProfile({
                       </div>
                       <input
                         type="url"
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none pl-10 pr-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
+                        className={`w-full bg-white dark:bg-slate-900 border ${
+                          socialLinks?.portfolio && !isValidUrl(socialLinks.portfolio)
+                            ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                            : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                        } rounded-none pl-10 pr-4 py-2.5 text-xs focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs`}
                         value={socialLinks?.portfolio || ''}
                         onChange={e => setSocialLinks({ ...socialLinks, portfolio: e.target.value, showPortfolio: true })}
+                        onBlur={() => {
+                          if (socialLinks?.portfolio && isValidUrl(socialLinks.portfolio)) {
+                            setSocialLinks(prev => ({ ...prev, portfolio: ensureUrlProtocol(prev?.portfolio) }));
+                          }
+                        }}
                         placeholder="https://myportfolio.com"
                       />
                     </div>
+                    {socialLinks?.portfolio && !isValidUrl(socialLinks.portfolio) && (
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1">
+                        * Please enter a valid URL (e.g. https://myportfolio.com)
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1407,7 +1534,7 @@ export default function StudentProfile({
                             <div className="flex flex-wrap items-center gap-2 pt-1">
                               {(edu.startDate || edu.endDate) && (
                                 <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-sans font-medium text-slate-800 dark:text-slate-200 shadow-2xs">
-                                  🗓️ {edu.startDate || 'N/A'} - {edu.endDate || 'N/A'}
+                                  🗓️ {sanitizeDateYear(edu.startDate) || 'N/A'} - {sanitizeDateYear(edu.endDate) || 'N/A'}
                                 </span>
                               )}
                               {edu.gradeValue && (
@@ -1497,7 +1624,9 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Education Type</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Education Type <span className="text-rose-500 font-bold">*</span>
+                            </label>
                             <select
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               value={newEdu.eduType}
@@ -1505,7 +1634,7 @@ export default function StudentProfile({
                             >
                               <option value="">Select level of education</option>
                               {(!educationList.some((e, i) => e.eduType === 'High School' && i !== editingEduIdx)) && (
-                                <option value="High School">High School</option>
+                                <option value="High School">High School / Intermediate</option>
                               )}
                               {(!educationList.some((e, i) => e.eduType === 'Diploma' && i !== editingEduIdx)) && (
                                 <option value="Diploma">Diploma</option>
@@ -1523,13 +1652,26 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Institute</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Institute <span className="text-rose-500 font-bold">*</span>
+                            </label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="Enter your Institute Name"
                               value={newEdu.institute}
-                              onChange={e => setNewEdu({ ...newEdu, institute: e.target.value })}
+                              onKeyDown={e => {
+                                if (newEdu.eduType !== 'High School') {
+                                  if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(e.key) || e.ctrlKey || e.metaKey) return;
+                                  if (/[0-9]/.test(e.key)) {
+                                    e.preventDefault();
+                                  }
+                                }
+                              }}
+                              onChange={e => {
+                                const val = newEdu.eduType !== 'High School' ? e.target.value.replace(/[0-9]/g, '') : e.target.value;
+                                setNewEdu(prev => ({ ...prev, institute: val }));
+                              }}
                             />
                           </div>
                         </div>
@@ -1537,34 +1679,62 @@ export default function StudentProfile({
                         {newEdu.eduType === 'High School' ? (
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Percentage in Class 10</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                                Percentage in Class 10 <span className="text-rose-500 font-bold">*</span>
+                              </label>
                               <input
                                 type="text"
+                                inputMode="decimal"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
-                                placeholder="e.g. 92%"
+                                placeholder="e.g. 92"
                                 value={class10Percent}
+                                onKeyDown={e => {
+                                  if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(e.key) || e.ctrlKey || e.metaKey) return;
+                                  if (e.key === '.' && !class10Percent.includes('.')) return;
+                                  if (!/[0-9]/.test(e.key)) {
+                                    e.preventDefault();
+                                  }
+                                }}
                                 onChange={e => handleClass10Change(e.target.value)}
                               />
                             </div>
 
                             <div>
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Percentage in Class 12</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                                Percentage in Class 12 <span className="text-rose-500 font-bold">*</span>
+                              </label>
                               <input
                                 type="text"
+                                inputMode="decimal"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
-                                placeholder="e.g. 88%"
+                                placeholder="e.g. 88"
                                 value={class12Percent}
+                                onKeyDown={e => {
+                                  if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(e.key) || e.ctrlKey || e.metaKey) return;
+                                  if (e.key === '.' && !class12Percent.includes('.')) return;
+                                  if (!/[0-9]/.test(e.key)) {
+                                    e.preventDefault();
+                                  }
+                                }}
                                 onChange={e => handleClass12Change(e.target.value)}
                               />
                             </div>
 
                             <div>
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Stream in Class 11</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                                Stream in Class 11 <span className="text-rose-500 font-bold">*</span>
+                              </label>
                               <input
                                 type="text"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                                 placeholder="e.g. Science"
                                 value={class11Stream}
+                                onKeyDown={e => {
+                                  if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(e.key) || e.ctrlKey || e.metaKey) return;
+                                  if (!/^[a-zA-Z\s]$/.test(e.key)) {
+                                    e.preventDefault();
+                                  }
+                                }}
                                 onChange={e => handleStreamChange(e.target.value)}
                               />
                             </div>
@@ -1572,24 +1742,40 @@ export default function StudentProfile({
                         ) : (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Degree</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                                Degree <span className="text-rose-500 font-bold">*</span>
+                              </label>
                               <input
                                 type="text"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
-                                placeholder="ex. Bachelor of Education"
+                                placeholder="ex. Bachelor of Technology"
                                 value={newEdu.degree}
-                                onChange={e => setNewEdu({ ...newEdu, degree: e.target.value })}
+                                onKeyDown={e => {
+                                  if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(e.key) || e.ctrlKey || e.metaKey) return;
+                                  if (/[0-9]/.test(e.key)) {
+                                    e.preventDefault();
+                                  }
+                                }}
+                                onChange={e => setNewEdu(prev => ({ ...prev, degree: e.target.value.replace(/[0-9]/g, '') }))}
                               />
                             </div>
 
                             <div>
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Field of Study</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                                Field of Study <span className="text-rose-500 font-bold">*</span>
+                              </label>
                               <input
                                 type="text"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                                 placeholder="ex. Computer Science"
                                 value={newEdu.fieldOfStudy}
-                                onChange={e => setNewEdu({ ...newEdu, fieldOfStudy: e.target.value })}
+                                onKeyDown={e => {
+                                  if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(e.key) || e.ctrlKey || e.metaKey) return;
+                                  if (/[0-9]/.test(e.key)) {
+                                    e.preventDefault();
+                                  }
+                                }}
+                                onChange={e => setNewEdu(prev => ({ ...prev, fieldOfStudy: e.target.value.replace(/[0-9]/g, '') }))}
                               />
                             </div>
                           </div>
@@ -1598,31 +1784,50 @@ export default function StudentProfile({
                         {newEdu.eduType !== 'High School' && (
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="md:col-span-1">
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Start Date</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                                Start Date <span className="text-rose-500 font-bold">*</span>
+                              </label>
                               <input
                                 type="date"
+                                min="1950-01-01"
+                                max={newEdu.endDate ? sanitizeDateYear(newEdu.endDate) : "2099-12-31"}
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                                value={newEdu.startDate}
-                                onChange={e => setNewEdu({ ...newEdu, startDate: e.target.value })}
+                                value={sanitizeDateYear(newEdu.startDate)}
+                                onChange={e => setNewEdu(prev => ({ ...prev, startDate: sanitizeDateYear(e.target.value) }))}
                               />
                             </div>
 
                             <div className="md:col-span-1">
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">End Date</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                                End Date <span className="text-rose-500 font-bold">*</span>
+                              </label>
                               <input
                                 type="date"
+                                min={newEdu.startDate ? sanitizeDateYear(newEdu.startDate) : "1950-01-01"}
+                                max="2099-12-31"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                                value={newEdu.endDate}
-                                onChange={e => setNewEdu({ ...newEdu, endDate: e.target.value })}
+                                value={sanitizeDateYear(newEdu.endDate)}
+                                onChange={e => setNewEdu(prev => ({ ...prev, endDate: sanitizeDateYear(e.target.value) }))}
                               />
                             </div>
 
                             <div className="md:col-span-1">
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Grade Type</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                                Grade Type <span className="text-rose-500 font-bold">*</span>
+                              </label>
                               <select
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                                 value={newEdu.gradeType}
-                                onChange={e => setNewEdu({ ...newEdu, gradeType: e.target.value })}
+                                onChange={e => {
+                                  const selectedType = e.target.value;
+                                  let cleanedVal = newEdu.gradeValue || '';
+                                  if (selectedType === 'Grade') {
+                                    cleanedVal = cleanedVal.replace(/[^a-zA-Z+-]/g, '').toUpperCase();
+                                  } else {
+                                    cleanedVal = cleanedVal.replace(/\D/g, '');
+                                  }
+                                  setNewEdu({ ...newEdu, gradeType: selectedType, gradeValue: cleanedVal });
+                                }}
                               >
                                 <option value="">Select Grade Type</option>
                                 <option value="Percentage">Percentage (%)</option>
@@ -1633,13 +1838,35 @@ export default function StudentProfile({
                             </div>
 
                             <div className="md:col-span-1">
-                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Grade Value</label>
+                              <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                                Grade Value <span className="text-rose-500 font-bold">*</span>
+                              </label>
                               <input
                                 type="text"
                                 className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
-                                placeholder="e.g. 9.4 / 92%"
+                                placeholder={newEdu.gradeType === 'Grade' ? 'e.g. A+' : newEdu.gradeType === 'Percentage' ? 'e.g. 85' : 'e.g. 9'}
                                 value={newEdu.gradeValue}
-                                onChange={e => setNewEdu({ ...newEdu, gradeValue: e.target.value })}
+                                onKeyDown={e => {
+                                  if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(e.key) || e.ctrlKey || e.metaKey) return;
+                                  if (newEdu.gradeType === 'Grade') {
+                                    if (!/^[a-zA-Z+-]$/.test(e.key)) {
+                                      e.preventDefault();
+                                    }
+                                  } else {
+                                    if (!/[0-9]/.test(e.key)) {
+                                      e.preventDefault();
+                                    }
+                                  }
+                                }}
+                                onChange={e => {
+                                  let val = e.target.value;
+                                  if (newEdu.gradeType === 'Grade') {
+                                    val = val.replace(/[^a-zA-Z+-]/g, '').toUpperCase();
+                                  } else {
+                                    val = val.replace(/\D/g, '');
+                                  }
+                                  setNewEdu({ ...newEdu, gradeValue: val });
+                                }}
                               />
                             </div>
                           </div>
@@ -1664,17 +1891,49 @@ export default function StudentProfile({
                         <button
                           type="button"
                           onClick={() => {
-                            if (!newEdu.eduType || !newEdu.institute || !newEdu.degree) {
-                              alert('Please fill out Education Type, Institute, and Degree/Class details.');
+                            if (!newEdu.eduType || !newEdu.institute || !newEdu.institute.trim()) {
+                              showAlert('Please fill out **Education Type** and **Institute**.', 'error');
                               return;
                             }
+                            if (newEdu.eduType === 'High School') {
+                              if (!class10Percent || !class12Percent || !class11Stream) {
+                                showAlert('Please fill out **Percentage in Class 10**, **Percentage in Class 12**, and **Stream in Class 11**.', 'error');
+                                return;
+                              }
+                            } else {
+                              if (!newEdu.degree || !newEdu.degree.trim() || !newEdu.fieldOfStudy || !newEdu.fieldOfStudy.trim()) {
+                                showAlert('Please fill out **Degree** and **Field of Study**.', 'error');
+                                return;
+                              }
+                              if (!newEdu.startDate || !newEdu.endDate) {
+                                showAlert('Please select both **Start Date** and **End Date**.', 'error');
+                                return;
+                              }
+                              if (!newEdu.gradeType) {
+                                showAlert('Please select **Grade Type**.', 'error');
+                                return;
+                              }
+                              if (!newEdu.gradeValue || !newEdu.gradeValue.trim()) {
+                                showAlert('Please enter **Grade Value**.', 'error');
+                                return;
+                              }
+                            }
+                            if (newEdu.startDate && newEdu.endDate && newEdu.startDate > newEdu.endDate) {
+                              showAlert('**End Date** cannot be earlier than **Start Date**.', 'error');
+                              return;
+                            }
+                            const recordToSave = {
+                              ...newEdu,
+                              startDate: sanitizeDateYear(newEdu.startDate),
+                              endDate: sanitizeDateYear(newEdu.endDate)
+                            };
                             if (editingEduIdx !== null) {
                               const updatedList = [...educationList];
-                              updatedList[editingEduIdx] = newEdu;
+                              updatedList[editingEduIdx] = recordToSave;
                               setEducationList(updatedList);
                               setEditingEduIdx(null);
                             } else {
-                              setEducationList([...educationList, newEdu]);
+                              setEducationList([...educationList, recordToSave]);
                             }
                             setNewEdu({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
                             setClass10Percent('');
@@ -1892,7 +2151,9 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Experience Type</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Experience Type <span className="text-rose-500 font-bold">*</span>
+                            </label>
                             <select
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               value={newExp.expType}
@@ -1907,7 +2168,9 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Designation</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Designation <span className="text-rose-500 font-bold">*</span>
+                            </label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -1920,7 +2183,9 @@ export default function StudentProfile({
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Company Name</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Company Name <span className="text-rose-500 font-bold">*</span>
+                            </label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2004,12 +2269,16 @@ export default function StudentProfile({
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Start Date</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Start Date <span className="text-rose-500 font-bold">*</span>
+                            </label>
                             <input
                               type="date"
+                              min="1950-01-01"
+                              max={newExp.endDate ? sanitizeDateYear(newExp.endDate) : "2099-12-31"}
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                              value={newExp.startDate}
-                              onChange={e => setNewExp({ ...newExp, startDate: e.target.value })}
+                              value={sanitizeDateYear(newExp.startDate)}
+                              onChange={e => setNewExp(prev => ({ ...prev, startDate: sanitizeDateYear(e.target.value) }))}
                             />
                           </div>
 
@@ -2017,10 +2286,12 @@ export default function StudentProfile({
                             <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">End Date</label>
                             <input
                               type="date"
+                              min={newExp.startDate ? sanitizeDateYear(newExp.startDate) : "1950-01-01"}
+                              max="2099-12-31"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                               disabled={newExp.currentlyWorking}
-                              value={newExp.currentlyWorking ? '' : newExp.endDate}
-                              onChange={e => setNewExp({ ...newExp, endDate: e.target.value })}
+                              value={newExp.currentlyWorking ? '' : sanitizeDateYear(newExp.endDate)}
+                              onChange={e => setNewExp(prev => ({ ...prev, endDate: sanitizeDateYear(e.target.value) }))}
                             />
                           </div>
 
@@ -2043,7 +2314,13 @@ export default function StudentProfile({
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
                               placeholder="e.g. San Francisco / Remote"
                               value={newExp.location}
-                              onChange={e => setNewExp({ ...newExp, location: e.target.value })}
+                              onKeyDown={e => {
+                                if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(e.key) || e.ctrlKey || e.metaKey) return;
+                                if (/[0-9]/.test(e.key)) {
+                                  e.preventDefault();
+                                }
+                              }}
+                              onChange={e => setNewExp({ ...newExp, location: e.target.value.replace(/[0-9]/g, '') })}
                             />
                           </div>
                         </div>
@@ -2076,17 +2353,30 @@ export default function StudentProfile({
                         <button
                           type="button"
                           onClick={() => {
-                            if (!newExp.expType || !newExp.designation || !newExp.companyName) {
-                              alert('Please fill out Experience Type, Designation, and Company Name.');
+                            if (!newExp.expType || !newExp.designation || !newExp.designation.trim() || !newExp.companyName || !newExp.companyName.trim() || !newExp.startDate) {
+                              showAlert('Please fill out all mandatory fields: **Experience Type**, **Designation**, **Company Name**, and **Start Date**.', 'error');
                               return;
                             }
+                            if (newExp.location && /[0-9]/.test(newExp.location)) {
+                              showAlert('**Location** cannot contain numbers.', 'error');
+                              return;
+                            }
+                            if (newExp.startDate && newExp.endDate && !newExp.currentlyWorking && newExp.startDate > newExp.endDate) {
+                              showAlert('**End Date** cannot be earlier than **Start Date**.', 'error');
+                              return;
+                            }
+                            const recordToSave = {
+                              ...newExp,
+                              startDate: sanitizeDateYear(newExp.startDate),
+                              endDate: newExp.currentlyWorking ? '' : sanitizeDateYear(newExp.endDate)
+                            };
                             if (editingExpIdx !== null) {
                               const updatedList = [...experienceList];
-                              updatedList[editingExpIdx] = newExp;
+                              updatedList[editingExpIdx] = recordToSave;
                               setExperienceList(updatedList);
                               setEditingExpIdx(null);
                             } else {
-                              setExperienceList([...experienceList, newExp]);
+                              setExperienceList([...experienceList, recordToSave]);
                             }
                             setNewExp({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
                             setDomainSearch('');
@@ -2280,7 +2570,9 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Certificate Title</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Certificate Title <span className="text-rose-500 font-bold">*</span>
+                            </label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2291,7 +2583,9 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Provider Organisation Name</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Provider Organisation Name <span className="text-rose-500 font-bold">*</span>
+                            </label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2307,9 +2601,11 @@ export default function StudentProfile({
                             <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Start Date</label>
                             <input
                               type="date"
+                              min="1950-01-01"
+                              max="2099-12-31"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                              value={newCert.startDate}
-                              onChange={e => setNewCert({ ...newCert, startDate: e.target.value })}
+                              value={sanitizeDateYear(newCert.startDate)}
+                              onChange={e => setNewCert(prev => ({ ...prev, startDate: sanitizeDateYear(e.target.value) }))}
                             />
                           </div>
 
@@ -2317,21 +2613,42 @@ export default function StudentProfile({
                             <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Certification Link</label>
                             <input
                               type="url"
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
-                              placeholder="Enter Certification Link"
+                              className={`w-full bg-white dark:bg-slate-900 border ${
+                                newCert.link && !isValidUrl(newCert.link)
+                                  ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                                  : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                              } rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none font-sans font-medium shadow-2xs`}
+                              placeholder="https://example.com/certificate"
                               value={newCert.link}
                               onChange={e => setNewCert({ ...newCert, link: e.target.value })}
+                              onBlur={() => {
+                                if (newCert.link && isValidUrl(newCert.link)) {
+                                  setNewCert(prev => ({ ...prev, link: ensureUrlProtocol(prev.link) }));
+                                }
+                              }}
                             />
+                            {newCert.link && !isValidUrl(newCert.link) && (
+                              <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1">
+                                * Please enter a valid URL (e.g. https://example.com)
+                              </p>
+                            )}
                           </div>
 
                           <div>
                             <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Certification Number</label>
                             <input
                               type="text"
+                              inputMode="numeric"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
-                              placeholder="Enter Certification Number (optional)"
+                              placeholder="Enter Certification Number (integers only)"
                               value={newCert.certNumber || ''}
-                              onChange={e => setNewCert({ ...newCert, certNumber: e.target.value })}
+                              onKeyDown={e => {
+                                if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter'].includes(e.key) || e.ctrlKey || e.metaKey) return;
+                                if (!/[0-9]/.test(e.key)) {
+                                  e.preventDefault();
+                                }
+                              }}
+                              onChange={e => setNewCert({ ...newCert, certNumber: e.target.value.replace(/\D/g, '') })}
                             />
                           </div>
                         </div>
@@ -2402,17 +2719,29 @@ export default function StudentProfile({
                         <button
                           type="button"
                           onClick={() => {
-                            if (!newCert.title || !newCert.org) {
-                              alert('Please enter Certificate Title and Provider Organisation.');
+                            if (!newCert.title || !newCert.title.trim() || !newCert.org || !newCert.org.trim()) {
+                              showAlert('Please enter **Certificate Title** and **Provider Organisation Name**.', 'error');
                               return;
                             }
+                            if (newCert.link && newCert.link.trim() && !isValidUrl(newCert.link)) {
+                              showAlert('Please enter a valid **Certification Link** (e.g. https://...).', 'error');
+                              return;
+                            }
+                            if (newCert.certNumber && /\D/.test(newCert.certNumber)) {
+                              showAlert('**Certification Number** must contain only integers.', 'error');
+                              return;
+                            }
+                            const recordToSave = {
+                              ...newCert,
+                              link: newCert.link ? ensureUrlProtocol(newCert.link) : ''
+                            };
                             if (editingCertIdx !== null) {
                               const updatedList = [...certificatesList];
-                              updatedList[editingCertIdx] = newCert;
+                              updatedList[editingCertIdx] = recordToSave;
                               setCertificatesList(updatedList);
                               setEditingCertIdx(null);
                             } else {
-                              setCertificatesList([...certificatesList, newCert]);
+                              setCertificatesList([...certificatesList, recordToSave]);
                             }
                             setNewCert({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
                             setCertFileUploadError('');
@@ -2602,7 +2931,9 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Title</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Title <span className="text-rose-500 font-bold">*</span>
+                            </label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2613,7 +2944,9 @@ export default function StudentProfile({
                           </div>
 
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Company / Role</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Company / Role <span className="text-rose-500 font-bold">*</span>
+                            </label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2629,33 +2962,65 @@ export default function StudentProfile({
                             <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Code URL</label>
                             <input
                               type="url"
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
-                              placeholder="Enter the code URL for the project"
+                              className={`w-full bg-white dark:bg-slate-900 border ${
+                                newProj.codeUrl && !isValidUrl(newProj.codeUrl)
+                                  ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                                  : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                              } rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none font-sans font-medium shadow-2xs`}
+                              placeholder="https://github.com/username/project"
                               value={newProj.codeUrl}
                               onChange={e => setNewProj({ ...newProj, codeUrl: e.target.value })}
+                              onBlur={() => {
+                                if (newProj.codeUrl && isValidUrl(newProj.codeUrl)) {
+                                  setNewProj(prev => ({ ...prev, codeUrl: ensureUrlProtocol(prev.codeUrl) }));
+                                }
+                              }}
                             />
+                            {newProj.codeUrl && !isValidUrl(newProj.codeUrl) && (
+                              <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1">
+                                * Please enter a valid URL (e.g. https://github.com/...)
+                              </p>
+                            )}
                           </div>
 
                           <div>
                             <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Hosted URL</label>
                             <input
                               type="url"
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
-                              placeholder="Enter hosted URL (optional)"
+                              className={`w-full bg-white dark:bg-slate-900 border ${
+                                newProj.hostedUrl && !isValidUrl(newProj.hostedUrl)
+                                  ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                                  : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                              } rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none font-sans font-medium shadow-2xs`}
+                              placeholder="https://myproject.com (optional)"
                               value={newProj.hostedUrl}
                               onChange={e => setNewProj({ ...newProj, hostedUrl: e.target.value })}
+                              onBlur={() => {
+                                if (newProj.hostedUrl && isValidUrl(newProj.hostedUrl)) {
+                                  setNewProj(prev => ({ ...prev, hostedUrl: ensureUrlProtocol(prev.hostedUrl) }));
+                                }
+                              }}
                             />
+                            {newProj.hostedUrl && !isValidUrl(newProj.hostedUrl) && (
+                              <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1">
+                                * Please enter a valid URL (e.g. https://myproject.com)
+                              </p>
+                            )}
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Start Date</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Start Date <span className="text-rose-500 font-bold">*</span>
+                            </label>
                             <input
                               type="date"
+                              min="1950-01-01"
+                              max={newProj.endDate ? sanitizeDateYear(newProj.endDate) : "2099-12-31"}
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                              value={newProj.startDate}
-                              onChange={e => setNewProj({ ...newProj, startDate: e.target.value })}
+                              value={sanitizeDateYear(newProj.startDate)}
+                              onChange={e => setNewProj(prev => ({ ...prev, startDate: sanitizeDateYear(e.target.value) }))}
                             />
                           </div>
 
@@ -2663,10 +3028,12 @@ export default function StudentProfile({
                             <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">End Date</label>
                             <input
                               type="date"
+                              min={newProj.startDate ? sanitizeDateYear(newProj.startDate) : "1950-01-01"}
+                              max="2099-12-31"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                               disabled={newProj.currentlyWorking}
-                              value={newProj.currentlyWorking ? '' : newProj.endDate}
-                              onChange={e => setNewProj({ ...newProj, endDate: e.target.value })}
+                              value={newProj.currentlyWorking ? '' : sanitizeDateYear(newProj.endDate)}
+                              onChange={e => setNewProj(prev => ({ ...prev, endDate: sanitizeDateYear(e.target.value) }))}
                             />
                           </div>
 
@@ -2710,17 +3077,36 @@ export default function StudentProfile({
                         <button
                           type="button"
                           onClick={() => {
-                            if (!newProj.title || !newProj.role) {
-                              alert('Please fill out Project Title and Role.');
+                            if (!newProj.title || !newProj.title.trim() || !newProj.role || !newProj.role.trim() || !newProj.startDate) {
+                              showAlert('Please fill out **Project Title**, **Role**, and **Start Date**.', 'error');
                               return;
                             }
+                            if (newProj.codeUrl && newProj.codeUrl.trim() && !isValidUrl(newProj.codeUrl)) {
+                              showAlert('Please enter a valid **Code URL** (e.g. https://github.com/...).', 'error');
+                              return;
+                            }
+                            if (newProj.hostedUrl && newProj.hostedUrl.trim() && !isValidUrl(newProj.hostedUrl)) {
+                              showAlert('Please enter a valid **Hosted URL** (e.g. https://...).', 'error');
+                              return;
+                            }
+                            if (newProj.startDate && newProj.endDate && !newProj.currentlyWorking && newProj.startDate > newProj.endDate) {
+                              showAlert('**End Date** cannot be earlier than **Start Date**.', 'error');
+                              return;
+                            }
+                            const recordToSave = {
+                              ...newProj,
+                              codeUrl: newProj.codeUrl ? ensureUrlProtocol(newProj.codeUrl) : '',
+                              hostedUrl: newProj.hostedUrl ? ensureUrlProtocol(newProj.hostedUrl) : '',
+                              startDate: sanitizeDateYear(newProj.startDate),
+                              endDate: newProj.currentlyWorking ? '' : sanitizeDateYear(newProj.endDate)
+                            };
                             if (editingProjIdx !== null) {
                               const updatedList = [...projectsList];
-                              updatedList[editingProjIdx] = newProj;
+                              updatedList[editingProjIdx] = recordToSave;
                               setProjectsList(updatedList);
                               setEditingProjIdx(null);
                             } else {
-                              setProjectsList([...projectsList, newProj]);
+                              setProjectsList([...projectsList, recordToSave]);
                             }
                             setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
                             closeModal();
@@ -3035,7 +3421,7 @@ export default function StudentProfile({
                 {/* Pop-up Modal for Add/Edit Co-curricular */}
                 {activeModal === 'cocurricular' && (
                   <div
-                    className="absolute inset-0 z-50 backdrop-blur-md bg-slate-900/40 flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
+                    className="absolute inset-0 z-50 backdrop-blur-md flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
                     onClick={(e) => {
                       if (e.target === e.currentTarget) closeModal();
                     }}
@@ -3066,7 +3452,9 @@ export default function StudentProfile({
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Activity / Title</label>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Activity / Title <span className="text-rose-500 font-bold">*</span>
+                            </label>
                             <input
                               type="text"
                               className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -3080,11 +3468,25 @@ export default function StudentProfile({
                             <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Certification Link (Optional)</label>
                             <input
                               type="url"
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
-                              placeholder="Enter link to certificate/proof"
+                              className={`w-full bg-white dark:bg-slate-900 border ${
+                                newCocurricular.link && !isValidUrl(newCocurricular.link)
+                                  ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                                  : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                              } rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none font-sans font-medium shadow-2xs`}
+                              placeholder="https://example.com/certificate"
                               value={newCocurricular.link}
                               onChange={e => setNewCocurricular({ ...newCocurricular, link: e.target.value })}
+                              onBlur={() => {
+                                if (newCocurricular.link && isValidUrl(newCocurricular.link)) {
+                                  setNewCocurricular(prev => ({ ...prev, link: ensureUrlProtocol(prev.link) }));
+                                }
+                              }}
                             />
+                            {newCocurricular.link && !isValidUrl(newCocurricular.link) && (
+                              <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1">
+                                * Please enter a valid URL (e.g. https://...)
+                              </p>
+                            )}
                           </div>
                         </div>
 
@@ -3115,17 +3517,25 @@ export default function StudentProfile({
                         <button
                           type="button"
                           onClick={() => {
-                            if (!newCocurricular.activity) {
-                              alert('Please enter Activity / Title.');
+                            if (!newCocurricular.activity || !newCocurricular.activity.trim()) {
+                              showAlert('Please enter **Activity / Title**.', 'error');
                               return;
                             }
+                            if (newCocurricular.link && newCocurricular.link.trim() && !isValidUrl(newCocurricular.link)) {
+                              showAlert('Please enter a valid **Certification Link** (e.g. https://...).', 'error');
+                              return;
+                            }
+                            const recordToSave = {
+                              ...newCocurricular,
+                              link: newCocurricular.link ? ensureUrlProtocol(newCocurricular.link) : ''
+                            };
                             if (editingCocurricularIdx !== null) {
                               const updatedList = [...cocurricular];
-                              updatedList[editingCocurricularIdx] = newCocurricular;
+                              updatedList[editingCocurricularIdx] = recordToSave;
                               setCocurricular(updatedList);
                               setEditingCocurricularIdx(null);
                             } else {
-                              setCocurricular([...cocurricular, newCocurricular]);
+                              setCocurricular([...cocurricular, recordToSave]);
                             }
                             setNewCocurricular({ activity: '', link: '', description: '' });
                             closeModal();

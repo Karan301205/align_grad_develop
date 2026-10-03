@@ -1,7 +1,7 @@
-// In-memory mock implementation of the Prisma client surface used by the
-// controllers. Only the query shapes the controllers actually use are emulated.
-// Extracted verbatim from config/db.js; operates on the seeded `mockDb` store.
+const crypto = require('crypto');
 const { mockDb } = require('./seed');
+
+const generateHexId = () => crypto.randomBytes(12).toString('hex');
 
 // Apply a Prisma-style `data` object to a mock row in place, emulating atomic
 // `{ increment: n }` operators (used by Question counter updates in Phase 4).
@@ -39,7 +39,7 @@ const mockClient = {
       });
     },
     create: async ({ data }) => {
-      const newUser = { id: `u_${Date.now()}`, ...data, createdAt: new Date() };
+      const newUser = { id: generateHexId(), ...data, createdAt: new Date() };
       mockDb.users.push(newUser);
       return newUser;
     },
@@ -71,7 +71,7 @@ const mockClient = {
       return mockDb.companies || [];
     },
     create: async ({ data }) => {
-      const newComp = { id: `comp_${Date.now()}`, verified: false, ...data };
+      const newComp = { id: generateHexId(), verified: false, ...data };
       if (!mockDb.companies) mockDb.companies = [];
       mockDb.companies.push(newComp);
       return newComp;
@@ -82,7 +82,7 @@ const mockClient = {
         Object.assign(mockDb.companies[idx], data);
         return mockDb.companies[idx];
       }
-      return { id: where.id || "c_mock", ...data };
+      return { id: where.id || generateHexId(), ...data };
     }
   },
   profile: {
@@ -109,7 +109,7 @@ const mockClient = {
       return mockDb.profiles;
     },
     create: async ({ data }) => {
-      const newProfile = { id: `p_${Date.now()}`, skills: [], tests: [], ...data };
+      const newProfile = { id: generateHexId(), skills: [], tests: [], ...data };
       mockDb.profiles.push(newProfile);
       return newProfile;
     },
@@ -156,7 +156,7 @@ const mockClient = {
       return null;
     },
     create: async ({ data }) => {
-      const newCompany = { id: `c_${Date.now()}`, verified: false, jobs: [], ...data };
+      const newCompany = { id: generateHexId(), verified: false, jobs: [], ...data };
       mockDb.companies.push(newCompany);
       return newCompany;
     },
@@ -199,7 +199,7 @@ const mockClient = {
       });
     },
     create: async ({ data }) => {
-      const newJob = { id: `j_${Date.now()}`, createdAt: new Date(), ...data };
+      const newJob = { id: generateHexId(), createdAt: new Date(), ...data };
       if (newJob.requirements && newJob.requirements.set) {
         newJob.requirements = newJob.requirements.set;
       }
@@ -252,7 +252,7 @@ const mockClient = {
   },
   application: {
     create: async ({ data }) => {
-      const newApp = { id: `a_${Date.now()}`, status: "APPLIED", createdAt: new Date(), ...data };
+      const newApp = { id: generateHexId(), status: "APPLIED", createdAt: new Date(), ...data };
       mockDb.applications.push(newApp);
       return newApp;
     },
@@ -275,7 +275,7 @@ const mockClient = {
   },
   testAttempt: {
     create: async ({ data }) => {
-      const newAttempt = { id: `t_${Date.now()}`, createdAt: new Date(), ...data };
+      const newAttempt = { id: generateHexId(), createdAt: new Date(), ...data };
       mockDb.testAttempts.push(newAttempt);
       return newAttempt;
     },
@@ -372,7 +372,7 @@ const mockClient = {
     },
     create: async ({ data }) => {
       const newGig = {
-        id: `gig_${Date.now()}`,
+        id: generateHexId(),
         status: "OPEN",
         attachments: [],
         createdAt: new Date(),
@@ -424,7 +424,7 @@ const mockClient = {
   gigApplicant: {
     create: async ({ data }) => {
       const newApplicant = {
-        id: `applicant_${Date.now()}`,
+        id: generateHexId(),
         createdAt: new Date(),
         ...data
       };
@@ -452,7 +452,7 @@ const mockClient = {
   gigMessage: {
     create: async ({ data }) => {
       const newMessage = {
-        id: `msg_${Date.now()}`,
+        id: generateHexId(),
         createdAt: new Date(),
         ...data
       };
@@ -466,7 +466,7 @@ const mockClient = {
   gigSubmission: {
     create: async ({ data }) => {
       const newSubmission = {
-        id: `sub_${Date.now()}`,
+        id: generateHexId(),
         status: "PENDING",
         createdAt: new Date(),
         ...data
@@ -492,7 +492,7 @@ const mockClient = {
   gigReview: {
     create: async ({ data }) => {
       const newReview = {
-        id: `rev_${Date.now()}`,
+        id: generateHexId(),
         createdAt: new Date(),
         ...data
       };
@@ -522,7 +522,7 @@ const mockClient = {
     count: async () => mockDb.skillDefinitions.length,
     create: async ({ data }) => {
       const row = {
-        id: `sd_${Date.now()}_${mockDb.skillDefinitions.length}`,
+        id: generateHexId(),
         status: 'WAITING',
         aliases: [],
         createdAt: new Date(),
@@ -576,7 +576,7 @@ const mockClient = {
     count: async (args = {}) => (await mockClient.question.findMany(args)).length,
     create: async ({ data }) => {
       const row = {
-        id: `q_${Date.now()}_${mockDb.questions.length}`,
+        id: generateHexId(),
         difficulty: 'Medium', explanation: '', tags: [], version: 1, status: 'ACTIVE', reviewState: 'NONE',
         source: 'temp-bank-groq', usageCount: 0, correctCount: 0, wrongCount: 0, skipCount: 0,
         lastUsed: null, lastReviewed: null, lastRegenerated: null,
@@ -621,7 +621,7 @@ const mockClient = {
   },
   testSession: {
     create: async ({ data }) => {
-      const row = { id: `ts_${Date.now()}_${mockDb.testSessions.length}`, used: false, score: null, passed: null, createdAt: new Date(), ...data };
+      const row = { id: generateHexId(), used: false, score: null, passed: null, createdAt: new Date(), ...data };
       mockDb.testSessions.push(row);
       return row;
     },
@@ -635,7 +635,7 @@ const mockClient = {
   },
   assessmentRecord: {
     create: async ({ data }) => {
-      const row = { id: `ar_${Date.now()}_${mockDb.assessmentRecords.length}`, createdAt: new Date(), ...data };
+      const row = { id: generateHexId(), createdAt: new Date(), ...data };
       mockDb.assessmentRecords.push(row);
       return row;
     },
@@ -664,7 +664,7 @@ const mockClient = {
     },
     count: async (args = {}) => (await mockClient.skillRoadmap.findMany(args)).length,
     create: async ({ data }) => {
-      const row = { id: `sr_${Date.now()}_${mockDb.skillRoadmaps.length}`, createdAt: new Date(), updatedAt: new Date(), ...data };
+      const row = { id: generateHexId(), createdAt: new Date(), updatedAt: new Date(), ...data };
       mockDb.skillRoadmaps.push(row);
       return row;
     },
@@ -722,7 +722,7 @@ const mockClient = {
     },
     count: async (args = {}) => (await mockClient.community.findMany(args)).length,
     create: async ({ data }) => {
-      const comm = { id: data.id || `comm_${Date.now()}_${mockDb.communities.length}`, createdAt: new Date(), updatedAt: new Date(), deleted: false, ...data };
+      const comm = { id: data.id || generateHexId(), createdAt: new Date(), updatedAt: new Date(), deleted: false, ...data };
       mockDb.communities.push(comm);
       return comm;
     },
@@ -748,7 +748,7 @@ const mockClient = {
       return items;
     },
     create: async ({ data }) => {
-      const mem = { id: `cm_${Date.now()}_${mockDb.communityMembers.length}`, joinedAt: new Date(), updatedAt: new Date(), ...data };
+      const mem = { id: generateHexId(), joinedAt: new Date(), updatedAt: new Date(), ...data };
       mockDb.communityMembers.push(mem);
       return mem;
     }
@@ -756,7 +756,7 @@ const mockClient = {
   communityInvite: {
     findUnique: async ({ where }) => mockDb.communityInvites.find(i => i.token === where.token || i.id === where.id) || null,
     create: async ({ data }) => {
-      const inv = { id: `ci_${Date.now()}_${mockDb.communityInvites.length}`, createdAt: new Date(), ...data };
+      const inv = { id: generateHexId(), createdAt: new Date(), ...data };
       mockDb.communityInvites.push(inv);
       return inv;
     },
@@ -788,7 +788,7 @@ const mockClient = {
     },
     count: async (args = {}) => (await mockClient.post.findMany(args)).length,
     create: async ({ data }) => {
-      const post = { id: `post_${Date.now()}_${mockDb.posts.length}`, edited: false, deleted: false, createdAt: new Date(), updatedAt: new Date(), ...data };
+      const post = { id: generateHexId(), edited: false, deleted: false, createdAt: new Date(), updatedAt: new Date(), ...data };
       mockDb.posts.push(post);
       return post;
     },
@@ -807,7 +807,7 @@ const mockClient = {
       return items;
     },
     create: async ({ data }) => {
-      const item = { id: `med_${Date.now()}_${mockDb.medias.length}`, createdAt: new Date(), ...data };
+      const item = { id: generateHexId(), createdAt: new Date(), ...data };
       mockDb.medias.push(item);
       return item;
     }
@@ -827,7 +827,7 @@ const mockClient = {
       return items;
     },
     create: async ({ data }) => {
-      const r = { id: `react_${Date.now()}_${mockDb.postReactions.length}`, createdAt: new Date(), ...data };
+      const r = { id: generateHexId(), createdAt: new Date(), ...data };
       mockDb.postReactions.push(r);
       return r;
     },
@@ -851,13 +851,13 @@ const mockClient = {
       if (where.postId && where.postId.in) items = items.filter(c => where.postId.in.includes(c.postId));
       else if (where.postId) items = items.filter(c => c.postId === where.postId);
       if (orderBy && orderBy.createdAt === 'asc') {
-        items = [...items].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        items = [...items].sort((a, b) => new Date(a.createdAt) - new Date(a.createdAt));
       }
       return items;
     },
     count: async ({ where = {} }) => (await mockClient.postComment.findMany({ where })).length,
     create: async ({ data }) => {
-      const comm = { id: `cmt_${Date.now()}_${mockDb.postComments.length}`, deleted: false, createdAt: new Date(), ...data };
+      const comm = { id: generateHexId(), deleted: false, createdAt: new Date(), ...data };
       mockDb.postComments.push(comm);
       return comm;
     },
@@ -890,7 +890,7 @@ const mockClient = {
     },
     count: async (args = {}) => (await mockClient.savedPost.findMany(args)).length,
     create: async ({ data }) => {
-      const sp = { id: `sp_${Date.now()}_${mockDb.savedPosts.length}`, createdAt: new Date(), ...data };
+      const sp = { id: generateHexId(), createdAt: new Date(), ...data };
       mockDb.savedPosts.push(sp);
       return sp;
     },
@@ -915,7 +915,7 @@ const mockClient = {
       return items;
     },
     create: async ({ data }) => {
-      const pv = { id: `pv_${Date.now()}_${mockDb.postViews.length}`, createdAt: new Date(), ...data };
+      const pv = { id: generateHexId(), createdAt: new Date(), ...data };
       mockDb.postViews.push(pv);
       return pv;
     }

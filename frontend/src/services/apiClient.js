@@ -31,5 +31,10 @@ export function apiFetch(path, { token, method = 'GET', json, body, headers = {}
     method,
     headers: finalHeaders,
     ...(finalBody !== undefined ? { body: finalBody } : {})
+  }).then(response => {
+    if (response.status === 401 && token && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('aligngrade:unauthorized'));
+    }
+    return response;
   });
 }

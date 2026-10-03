@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { prisma } = require('../../infrastructure/database');
 const { recordFailedAttempt, resetFailedAttempts } = require('../../middleware/rateLimiter');
 const env = require('../../config/env');
+const { passwordResetService } = require('./services');
 
 exports.signup = async (req, res) => {
   const { email, password, role, name } = req.body;
@@ -263,5 +264,33 @@ exports.googleAuth = async (req, res) => {
   } catch (err) {
     console.error('Google Auth Controller Error:', err);
     res.status(500).json({ error: 'Server error during Google authentication' });
+  }
+};
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email, role } = req.body;
+    const result = await passwordResetService.requestPasswordReset({ email, role });
+    res.json(result);
+  } catch (err) {
+    if (err.statusCode === 429) {
+      if (err.retryAfter) {
+        res.setHeader('Retry-After', err.retryAfter);
+      }
+      return res.status(429).json({ error: err.message });
+    }
+    console.error('[AuthController] forgotPassword error:', err);
+    res.status(err.statusCode || 500).json({ error: err.message || 'Server error processing password reset request' });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    const result = await passwordResetService.resetPassword({ token, newPassword: password });
+    res.json(result);
+  } catch (err) {
+    console.error('[AuthController] resetPassword error:', err);
+    res.status(err.statusCode || 500).json({ error: err.message || 'Server error resetting password' });
   }
 };

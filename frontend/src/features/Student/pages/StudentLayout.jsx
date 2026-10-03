@@ -639,7 +639,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     const item = navItems.find(i => i.id === tabId);
     if (item && item.locked) {
       setAlertConfig({
-        message: 'Please complete your General profile and upload your Introduction video to unlock this section.',
+        message: 'Please complete your **General profile** and upload your **Introduction video** to unlock this section.',
         type: 'warning'
       });
       return;
@@ -653,12 +653,15 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   };
 
   // Smoothly scroll the main content area back to the top whenever the
-  // active menu section changes, instead of jumping abruptly.
+  // active menu section changes or an alert is displayed, instead of jumping abruptly.
   useEffect(() => {
     if (mainRef.current) {
       mainRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [activeTab]);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [activeTab, alertConfig]);
 
   // Auto-dismiss feedback message after 2 seconds
   useEffect(() => {
