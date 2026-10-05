@@ -162,9 +162,10 @@ exports.getCompanyById = async (req, res) => {
 };
 
 exports.verifyCompany = async (req, res) => {
-  const { docUrl } = req.body;
-  if (!docUrl) {
-    return res.status(400).json({ error: 'Please provide document URL' });
+  const { docUrl, verificationDocs } = req.body;
+  const primaryDocUrl = docUrl || (verificationDocs && verificationDocs[0] ? verificationDocs[0].docUrl : null);
+  if (!primaryDocUrl && (!verificationDocs || verificationDocs.length === 0)) {
+    return res.status(400).json({ error: 'Please provide document URL or verification documents' });
   }
 
   try {
@@ -172,7 +173,7 @@ exports.verifyCompany = async (req, res) => {
       where: { userId: req.user.id }
     });
 
-    if (existingCompany && existingCompany.docUrl && existingCompany.docUrl !== docUrl) {
+    if (existingCompany && existingCompany.docUrl && primaryDocUrl && existingCompany.docUrl !== primaryDocUrl) {
       try {
         await deleteS3ObjectFromUrl(existingCompany.docUrl, 'company verification document');
       } catch (deleteErr) {
@@ -180,12 +181,19 @@ exports.verifyCompany = async (req, res) => {
       }
     }
 
+    const updateData = {
+      verified: true
+    };
+    if (primaryDocUrl) {
+      updateData.docUrl = primaryDocUrl;
+    }
+    if (Array.isArray(verificationDocs) && verificationDocs.length > 0) {
+      updateData.verificationDocs = verificationDocs;
+    }
+
     const company = await prisma.company.update({
       where: { userId: req.user.id },
-      data: {
-        docUrl,
-        verified: true // Simulate instant trust validation upon upload
-      }
+      data: updateData
     });
     res.json(company);
   } catch (err) {
@@ -199,6 +207,7 @@ exports.postJob = async (req, res) => {
     title, 
     description, 
     opportunityType,
+    workMode,
     requirements,
     companyName,
     officialWebsite,
@@ -234,6 +243,7 @@ exports.postJob = async (req, res) => {
       data: {
         companyId: company.id,
         opportunityType: opportunityType || "JOB",
+        workMode: workMode || "Work from office",
         title,
         description,
         companyName,
@@ -329,6 +339,7 @@ exports.updateJob = async (req, res) => {
     title, 
     description, 
     opportunityType,
+    workMode,
     requirements,
     companyName,
     officialWebsite,
@@ -374,6 +385,7 @@ exports.updateJob = async (req, res) => {
       where: { id: jobId },
       data: {
         opportunityType: opportunityType !== undefined ? opportunityType : job.opportunityType,
+        workMode: workMode !== undefined ? workMode : job.workMode,
         title,
         description,
         companyName,

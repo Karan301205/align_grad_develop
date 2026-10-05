@@ -56,22 +56,6 @@ export function renderFormattedMessage(msg) {
 export const ToastNotification = ({ msg, type = 'error', onClose, duration = 4000 }) => {
   const [isExiting, setIsExiting] = useState(false);
 
-  // Auto-scroll to top smoothly whenever a slide-in notification appears
-  useEffect(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        const mainEl = document.querySelector('main');
-        if (mainEl) {
-          mainEl.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-        const scrollables = document.querySelectorAll('.overflow-y-auto');
-        scrollables.forEach(el => {
-          el.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-      }
-    } catch (_) {}
-  }, [msg]);
 
   useEffect(() => {
     if (!duration || duration <= 0) return;
@@ -93,6 +77,7 @@ export const ToastNotification = ({ msg, type = 'error', onClose, duration = 400
   const displayMsg = cleanHumanErrorMessage(msg);
   const isSuccess = type === 'success' || type === 'info';
   const isError = type === 'error';
+  const isWarning = type === 'warning';
 
   return (
     <div
@@ -103,13 +88,15 @@ export const ToastNotification = ({ msg, type = 'error', onClose, duration = 400
           ? 'bg-emerald-50 dark:bg-emerald-950/90 border-emerald-500/40 text-emerald-950 dark:text-emerald-50'
           : isError
           ? 'bg-rose-50 dark:bg-rose-950/90 border-rose-500/40 text-rose-950 dark:text-rose-50'
+          : isWarning
+          ? 'bg-amber-50 dark:bg-amber-950/90 border-amber-500/40 text-amber-950 dark:text-amber-50'
           : 'bg-surface-container-high border-outline-variant text-on-surface'
       }`}
     >
       {/* Icon Badge */}
       <div
         className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-white shadow-sm ${
-          isSuccess ? 'bg-emerald-500' : isError ? 'bg-rose-500' : 'bg-primary'
+          isSuccess ? 'bg-emerald-500' : isError ? 'bg-rose-500' : isWarning ? 'bg-amber-500' : 'bg-primary'
         }`}
       >
         {isSuccess ? <Check className="w-5 h-5 stroke-[3]" /> : <AlertCircle className="w-5 h-5 stroke-[2.5]" />}
@@ -118,7 +105,7 @@ export const ToastNotification = ({ msg, type = 'error', onClose, duration = 400
       {/* Message Content */}
       <div className="flex-1 min-w-0 text-left space-y-1">
         <h4 className="font-headline font-medium text-sm text-slate-900 dark:text-white leading-tight">
-          {type === 'info' ? 'Notification' : isSuccess ? 'Success' : 'Alert'}
+          {type === 'info' ? 'Notification' : isSuccess ? 'Success' : isWarning ? 'Notice' : 'Alert'}
         </h4>
         <p className="text-xs text-slate-600 dark:text-slate-200 mt-0.5 leading-relaxed font-sans break-words">
           {renderFormattedMessage(displayMsg)}

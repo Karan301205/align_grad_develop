@@ -61,7 +61,6 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const [profileTab, setProfileTab] = useState('general');
   const [wasComplete, setWasComplete] = useState(null);
   const [alertConfig, setAlertConfig] = useState(null);
-  const [isHovered, setIsHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [gigsSubTab, setGigsSubTab] = useState('browse');
   const [isGigsOpen, setIsGigsOpen] = useState(true);
@@ -694,18 +693,11 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         <div className="md:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setSidebarOpen(false)}></div>
       )}
 
-      {/* Desktop hover backdrop blur overlay */}
-      {isHovered && (
-        <div className="hidden md:block fixed inset-0 left-20 bg-black/5 backdrop-blur-[2px] z-40 transition-all duration-300 pointer-events-none animate-fade-in"></div>
-      )}
-
       {/* Sidebar */}
       {(() => {
-        const isExpandedState = isExpanded || isHovered || sidebarOpen;
+        const isExpandedState = isExpanded || sidebarOpen;
         return (
           <aside
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
             className={`h-screen fixed left-0 top-0 bg-surface-container flex flex-col py-6 px-3 border-r border-outline-variant z-50 transition-all duration-300 ${
               isExpandedState ? 'w-64' : 'w-20'
             } ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}

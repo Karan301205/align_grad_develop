@@ -26,6 +26,30 @@ export function isProfileComplete(profile) {
   return hasGeneralInfo(profile) && hasIntroVideo(profile);
 }
 
+export function isCompanyProfileComplete(company) {
+  if (!company) return false;
+
+  const hasBasicFields = Boolean(
+    company.name?.trim() &&
+    company.industry?.trim() &&
+    company.companySize?.trim() &&
+    company.location?.trim() &&
+    company.website?.trim() &&
+    company.description?.trim() &&
+    company.recruiterName?.trim() &&
+    company.recruiterDesignation?.trim() &&
+    company.officialEmail?.trim()
+  );
+
+  const hasVerification = Boolean(
+    company.verified ||
+    (Array.isArray(company.verificationDocs) && company.verificationDocs.length >= 2) ||
+    company.docUrl
+  );
+
+  return hasBasicFields && hasVerification;
+}
+
 
 /**
  * Calculates a single overall profile completeness percentage (0 to 100%)

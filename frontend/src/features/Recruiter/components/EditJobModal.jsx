@@ -23,6 +23,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
   const [joiningMonth, setJoiningMonth] = useState(job.joiningMonth || 'Immediate');
   const [jobDesc, setJobDesc] = useState(job.description || '');
   const [roleResponsibilities, setRoleResponsibilities] = useState(job.roleResponsibilities || '');
+  const [workMode, setWorkMode] = useState(job.workMode || 'Work from office');
 
   // Required skills thresholds
   const [reqs, setReqs] = useState(job.requirements || []);
@@ -78,6 +79,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
       designation: job.designation || job.title || designation,
       companyName: job.companyName || companyName,
       officialWebsite: job.officialWebsite || officialWebsite,
+      workMode,
       preferredEducation,
       desiredExperience,
       stipendPartTime,
@@ -218,7 +220,21 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               <ListChecks className="w-4 h-4" /> Candidate Prerequisites
             </h4>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-[10px] font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">Type of Job *</label>
+                <select
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-semibold text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                  value={workMode}
+                  onChange={e => setWorkMode(e.target.value)}
+                  required
+                >
+                  <option value="Work from office">Work from office</option>
+                  <option value="Remote">Remote</option>
+                  <option value="Hybrid">Hybrid</option>
+                </select>
+              </div>
+
               <div>
                 <label className="block text-[10px] font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">Preferred Education</label>
                 <input

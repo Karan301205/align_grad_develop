@@ -226,7 +226,7 @@ function MultiSearchableCategorySelect({ values = [], onChange, placeholder = "S
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={values.length > 0 ? "Add another field..." : placeholder}
-          className="w-full bg-surface-container-low border border-outline-variant rounded-none px-3 py-2.5 text-xs text-on-surface focus:border-primary focus:outline-none pr-8 font-sans transition-all placeholder:text-on-surface-variant/60"
+          className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none pr-8 font-sans transition-all placeholder:text-slate-400 h-[38px]"
         />
         <button
           type="button"
@@ -1421,11 +1421,12 @@ export default function GigsMarketplace({
 
               <div>
                 <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">Description details</label>
-                <TextArea
+                <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Provide detailed project requirements, expectations, and instructions..."
                   rows={4}
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none placeholder:text-slate-400 font-sans resize-y"
                   required
                 />
               </div>
@@ -1440,6 +1441,7 @@ export default function GigsMarketplace({
                     onChange={(vals) => setCategories(vals)}
                     placeholder="Search or select category/field(s)..."
                     showTags={false}
+                    className="w-full"
                   />
                 </div>
                 <div>
@@ -1476,9 +1478,18 @@ export default function GigsMarketplace({
                   <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1.5">Delivery Time *</label>
                   <input
                     type="text"
+                    inputMode="numeric"
                     value={deliveryTime}
-                    onChange={(e) => setDeliveryTime(e.target.value)}
-                    placeholder="e.g. 3 Days"
+                    onChange={(e) => {
+                      const cleaned = e.target.value.replace(/[^0-9]/g, '');
+                      setDeliveryTime(cleaned);
+                    }}
+                    onKeyDown={(e) => {
+                      if (!/[0-9]/.test(e.key) && !['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    placeholder="e.g. 3"
                     className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none placeholder:text-slate-400 font-sans"
                     required
                   />
@@ -1649,8 +1660,8 @@ export default function GigsMarketplace({
                     </button>
                   )}
                 </label>
-                <div className="flex items-center gap-3.5 p-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-none">
-                  <div className="w-14 h-14 shrink-0 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none flex items-center justify-center overflow-hidden">
+                <div className="flex items-center gap-3.5 p-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none">
+                  <div className="w-14 h-14 shrink-0 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none flex items-center justify-center overflow-hidden">
                     {gigLogoPreview ? (
                       <img src={gigLogoPreview} alt="Logo Preview" className="w-full h-full object-cover" />
                     ) : (
@@ -1658,7 +1669,7 @@ export default function GigsMarketplace({
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-blue-600 text-xs font-headline font-bold text-slate-900 dark:text-slate-100 rounded-none transition-colors">
+                    <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 hover:border-blue-600 text-xs font-headline font-bold text-slate-900 dark:text-slate-100 rounded-none transition-colors">
                       <Sparkles className="w-3.5 h-3.5 text-primary" />
                       <span>{gigLogoFile ? 'Change Logo Image' : 'Upload Gig Logo'}</span>
                       <input
@@ -2605,11 +2616,20 @@ export default function GigsMarketplace({
                       </label>
                       <input
                         type="text"
+                        inputMode="numeric"
                         required
-                        placeholder="e.g. 3 days"
+                        placeholder="e.g. 3"
                         className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none font-sans"
                         value={editDeliveryTime}
-                        onChange={e => setEditDeliveryTime(e.target.value)}
+                        onChange={e => {
+                          const cleaned = e.target.value.replace(/[^0-9]/g, '');
+                          setEditDeliveryTime(cleaned);
+                        }}
+                        onKeyDown={e => {
+                          if (!/[0-9]/.test(e.key) && !['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
                       />
                     </div>
                   </div>
@@ -2619,12 +2639,13 @@ export default function GigsMarketplace({
                     <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100 mb-1">
                       Description & Deliverables *
                     </label>
-                    <TextArea
+                    <textarea
                       required
                       rows={5}
                       value={editDescription}
                       onChange={e => setEditDescription(e.target.value)}
                       placeholder="Detailed brief, deliverables, and scope of work..."
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none placeholder:text-slate-400 font-sans resize-y"
                     />
                   </div>
 

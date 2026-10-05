@@ -149,10 +149,18 @@ model Company {
   recruiterName        String?
   recruiterDesignation String?
   socialLinks          CompanySocialLinks?
-  photos               String[]            @default([])
+  photos               String[]                 @default([])
   docUrl               String?
-  verified             Boolean             @default(false)
+  verificationDocs     CompanyVerificationDoc[]
+  verified             Boolean                  @default(false)
   jobs                 Job[]
+}
+
+type CompanyVerificationDoc {
+  docType    String
+  docUrl     String
+  fileName   String?
+  uploadedAt DateTime? @default(now())
 }
 
 type CompanySocialLinks {
@@ -171,6 +179,7 @@ model Job {
   description          String
   companyName          String?
   opportunityType      String?  @default("JOB")
+  workMode             String?  @default("Work from office")
   status               String?  @default("ACTIVE")
   isPaused             Boolean? @default(false)
   officialWebsite      String?

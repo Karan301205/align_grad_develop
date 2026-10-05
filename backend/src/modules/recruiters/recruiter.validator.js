@@ -5,7 +5,16 @@ const objectIdSchema = z.string().regex(objectIdRegex, 'Invalid ID format');
 
 const verifyCompanySchema = {
   body: z.object({
-    docUrl: z.string().url('Invalid document S3 URL')
+    docUrl: z.string().url('Invalid document S3 URL').optional(),
+    verificationDocs: z.array(
+      z.object({
+        docType: z.string().min(1, 'Document type is required'),
+        docUrl: z.string().url('Invalid document URL'),
+        fileName: z.string().optional()
+      })
+    ).optional()
+  }).refine(data => data.docUrl || (data.verificationDocs && data.verificationDocs.length > 0), {
+    message: 'Either docUrl or verificationDocs must be provided'
   })
 };
 
@@ -14,6 +23,7 @@ const postJobSchema = {
     title: z.string().min(3, 'Title must be at least 3 characters long'),
     description: z.string().min(10, 'Description must be at least 10 characters long'),
     opportunityType: z.string().optional().nullable(),
+    workMode: z.string().optional().nullable(),
     companyName: z.string().optional().nullable(),
     officialWebsite: z.string().url().or(z.literal('')).optional().nullable(),
     preferredEducation: z.string().optional().nullable(),
