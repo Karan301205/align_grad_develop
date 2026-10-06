@@ -1,4 +1,5 @@
 const { getDbSafe } = require('../config/database');
+const env = require('../config/env');
 
 exports.getAllRecruiters = async (req, res, next) => {
   try {
@@ -8,6 +9,10 @@ exports.getAllRecruiters = async (req, res, next) => {
     }
 
     if (!db) {
+      const mockDocUrl = env.S3_BUCKET_NAME 
+        ? `https://${env.S3_BUCKET_NAME}.s3.${env.AWS_REGION}.amazonaws.com/docs/google_verify.pdf`
+        : '/docs/google_verify.pdf';
+
       // Mock fallback data if DB is offline
       return res.json({
         success: true,
@@ -17,7 +22,7 @@ exports.getAllRecruiters = async (req, res, next) => {
             email: 'hr@google.com',
             companyName: 'Google',
             verified: true,
-            docUrl: 'https://aligngrade-storage-2026.s3.amazonaws.com/docs/google_verify.pdf',
+            docUrl: mockDocUrl,
             jobs: [
               { id: 'job_1', title: 'SWE Intern', description: 'Google Cloud console team internship.', salaryRange: '₹50,000 - ₹80,000 / month' },
               { id: 'job_2', title: 'Associate Product Manager', description: 'Work on consumer facing services.', salaryRange: '₹12,00,000 - ₹18,00,000 / year' }

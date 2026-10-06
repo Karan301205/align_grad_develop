@@ -76,7 +76,8 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   │   └── question-bank/ # Selection, scoring, repositories, health, CLI tools
 │   │   │   ├── skills/           # Technical skills taxonomy & match scoring engine (technicalSkills.js, skillMatching.service.js, index)
 │   │   │   ├── uploads/          # Presigned upload URLs & S3 file cleanup (controller, routes, validator, fileCleanup.service, index)
-│   │   │   └── community/        # Community networks, feeds, posts, reactions, comments (controller, routes, validator, services/, index)
+│   │   │   ├── community/        # Community networks, feeds, posts, reactions, comments (controller, routes, validator, services/, index)
+│   │   │   └── payments/         # Razorpay checkout, HMAC verification, plan upgrades (controller, routes, validator, index)
 │   │   └── index.js              # Application entrypoint setting up Express, DB, and mounting /api routes
 │   ├── package.json
 │   ├── package-lock.json
@@ -96,6 +97,7 @@ Below is the complete, comprehensive directory structure of the AlignGrade proje
 │   │   │   ├── ConnectionLoader.jsx
 │   │   │   ├── EmeraldSignupToast.jsx # Emerald slide-in notification for unauthenticated redirects
 │   │   │   ├── JobDetailsModal.jsx
+│   │   │   ├── PaymentModal.jsx      # Reusable Razorpay payment modal with plan benefits & checkout trigger
 │   │   │   ├── ResumePdfTemplate.jsx # Standardized A4 printable candidate resume template
 │   │   │   └── ui/               # Atomic Neumorphic primitives (Button, Card, Input, Badge, etc.)
 │   │   ├── features/             # Domain-oriented frontend features
@@ -173,9 +175,10 @@ As part of the pure architectural refactoring (completed on branch `file_restruc
    - `skills/`: Technical skills registry and match scoring engine (`technicalSkills.js`, `skillMatching.service.js`, `index.js`).
    - `uploads/`: Presigned upload URL generation and S3 file cleanup (`upload.controller.js`, `upload.validator.js`, `fileCleanup.service.js`, `upload.routes.js`, `index.js`).
    - `community/`: LinkedIn-style feed, multi-media posts, nested comments, reactions, bookmarks (`community.controller.js`, `community.validator.js`, `community.routes.js`, `services/`, `index.js`).
+   - `payments/`: Razorpay payment gateway integration, order creation, HMAC SHA-256 signature verification, student lifetime access upgrade, and recruiter repeatable 5-job pack quota unlocks (`payment.controller.js`, `payment.routes.js`, `payment.validator.js`, `index.js`).
 
 4. **Route Aggregator (`backend/src/routes/index.js`)**:
-   - Thin aggregator mounting all domain routes under identical URI namespaces: `/api/auth`, `/api/student`, `/api/recruiter`, `/api/upload`, `/api/gigs`, `/api/community`.
+   - Thin aggregator mounting all domain routes under identical URI namespaces: `/api/auth`, `/api/student`, `/api/recruiter`, `/api/upload`, `/api/gigs`, `/api/community`, `/api/payments`.
    - `backend/src/routes/api.js` re-exports `backend/src/routes/index.js` for backwards compatibility.
 
 #### [backend/prisma/schema.prisma](file:///Users/karanrawat/Desktop/a_g/backend/prisma/schema.prisma)
@@ -1045,6 +1048,17 @@ src/index.js
   - **Purpose**: Generates S3 pre-signed upload URL for files (resume, video, doc).
   - **Files**: `upload.controller.js`, `api.js`
 
+### Payment & Subscription Endpoints (Bearer JWT Required)
+* **`POST /api/payments/create-order`**
+  - **Purpose**: Initiates Razorpay payment order for `STUDENT_LIFETIME` (₹2,500) or `RECRUITER_5_PACK` (₹2,500). Returns order ID and gateway public key.
+  - **Files**: `payment.controller.js`, `payment.routes.js`, `payment.validator.js`
+* **`POST /api/payments/verify`**
+  - **Purpose**: Validates Razorpay HMAC SHA-256 signature server-side. On success, upgrades student to `PREMIUM` (lifetime) or increments recruiter company `jobPostingQuota` by +5.
+  - **Files**: `payment.controller.js`, `payment.routes.js`, `payment.validator.js`
+* **`GET /api/payments/status`**
+  - **Purpose**: Retrieves user plan tier, purchase timestamp, and recruiter job quota usage (quota, total posted, remaining jobs).
+  - **Files**: `payment.controller.js`, `payment.routes.js`
+
 ### Admin Portal Endpoints (Runs on Port 5002)
 * **`GET /api/dashboard/stats`**
   - **Purpose**: Gathers global platform statistics (totals and recent users).
@@ -1078,7 +1092,23 @@ src/index.js
   - `password`: Hashed String
   - `role`: String ("STUDENT" or "RECRUITER")
   - `regNo`: String (Unique registration number, e.g. CAN001, REC001)
+  - `plan`: String ("FREE" or "PREMIUM", default "FREE")
+  - `planPurchasedAt`: DateTime (Optional)
   - `createdAt`: DateTime
+* **`Company`** (Recruiter Company)
+  - `jobPostingQuota`: Integer (Default 1, incremented by 5 for each ₹2,500 pack purchased)
+* **`PaymentTransaction`**
+  - `id`: ObjectId String (Primary Key)
+  - `userId`: ObjectId String (References User)
+  - `orderId`: String (Unique Razorpay Order ID)
+  - `paymentId`: String (Optional Razorpay Payment ID)
+  - `signature`: String (Optional HMAC SHA-256 verification hash)
+  - `amount`: Integer (in paise, 250000 = ₹2,500.00)
+  - `currency`: String (Default "INR")
+  - `planType`: String ("STUDENT_LIFETIME" or "RECRUITER_5_PACK")
+  - `status`: String ("CREATED" | "PAID" | "FAILED")
+  - `createdAt`: DateTime
+  - `updatedAt`: DateTime
 * **`Profile`** (Student Details)
   - `id`: ObjectId String (Primary Key)
   - `userId`: ObjectId String (Unique Reference)
@@ -1196,13 +1226,38 @@ src/index.js
 
 ## 7. Environment Variables
 
-* **`DATABASE_URL`**: MongoDB connection string with replica set enabled (`mongodb://...`). Defaults to local in development but is bypassed by the mock datastore if not matching a remote cluster.
-* **`JWT_SECRET`**: Phrase used to sign and verify authorization tokens.
+The project separates environment configuration cleanly across its four application boundaries without cross-contamination. Production environments strictly prohibit hardcoded domains, API endpoints, or secret fallbacks.
+
+### Main Client Frontend (`main_website/frontend/` or `frontend/`)
+* **`VITE_API_BASE_URL`**: Base URL for the main Express backend API (e.g. `http://localhost:5001/api` in dev). Validated on startup in production; trailing slashes are stripped automatically.
+* **`VITE_LANDING_URL`**: Public landing and marketing portal origin (e.g. `http://localhost:5173` in local dev, `https://aligngrad.com` in production).
+* **`VITE_CANDIDATE_URL`**: Candidate portal origin or path (e.g. `http://localhost:5173/candidate` in local dev, `https://career.aligngrad.com` in production).
+* **`VITE_RECRUITER_URL`**: Recruiter portal origin or path (e.g. `http://localhost:5173/recruiter` in local dev, `https://hire.aligngrad.com` in production).
+* **`VITE_GOOGLE_CLIENT_ID`**: OAuth 2.0 Web Client ID for Google Single Sign-On.
+* **`VITE_SUPABASE_URL`**: Supabase service URL (if enabled).
+* **`VITE_SUPABASE_ANON_KEY`**: Supabase anonymous public key (if enabled).
+
+### Admin Portal Frontend (`admin_ws/frontend/`)
+* **`VITE_ADMIN_API_BASE_URL`**: Base URL for the Admin Express backend API (e.g. `http://localhost:5002/api` in dev). Validated on startup in production; trailing slashes are stripped automatically. No fallback to production domain (`admin.aligngrad.com`).
+
+### Main Backend (`main_website/backend/` or `backend/`)
+* **`DATABASE_URL`**: MongoDB connection string with replica set enabled (`mongodb://...`). Required; fails fast if unconfigured in production.
+* **`JWT_SECRET`**: Phrase used to sign and verify authorization tokens. Required; fails fast in production if missing or using insecure default.
 * **`PORT`**: Network port the backend Express server binds to (default: `5001`).
-* **`AWS_ACCESS_KEY_ID`**: Access credential of S3 user.
-* **`AWS_SECRET_ACCESS_KEY`**: Secret key of S3 user.
-* **`AWS_REGION`**: AWS target region location (e.g. `ap-south-1`).
-* **`S3_BUCKET_NAME`**: Name of the target S3 bucket where file objects are saved.
+* **`CLIENT_URL`**: Primary client frontend origin (used for CORS origin matching and transactional email reset links). Required; fails fast in production.
+* **`AWS_ACCESS_KEY_ID`**: Access credential for AWS IAM user. Required in production.
+* **`AWS_SECRET_ACCESS_KEY`**: Secret key for AWS IAM user. Required in production.
+* **`AWS_REGION`**: AWS target region (default: `ap-south-1`).
+* **`S3_BUCKET_NAME`**: Name of the target S3 bucket for assets, resumes, and uploads. Required in production.
+* **`SMTP_HOST`**, **`SMTP_PORT`**, **`SMTP_USER`**, **`SMTP_PASS`**, **`SMTP_FROM`**: SMTP server credentials and sender address for transactional emails (password resets, notifications).
+* **`RAZORPAY_KEY_ID`**, **`RAZORPAY_KEY_SECRET`**, **`RAZORPAY_WEBHOOK_SECRET`**: API keys and webhook signing secret for payment integration.
+
+### Admin Portal Backend (`admin_ws/backend/`)
+* **`DATABASE_URL`**: MongoDB connection string for administrative data queries. Required; fails fast in production.
+* **`JWT_SECRET`**: Phrase used to sign and verify admin authorization tokens. Required; fails fast in production.
+* **`PORT`**: Network port the admin backend binds to (default: `5002`).
+* **`AWS_ACCESS_KEY_ID`**, **`AWS_SECRET_ACCESS_KEY`**, **`AWS_REGION`**: AWS credentials for platform storage tracking.
+* **`S3_BUCKET_NAME`**: Bucket name for administrative asset and document audits. Required in production.
 
 ---
 
@@ -1306,11 +1361,16 @@ The application uses secure, centralized configuration files to load secrets and
 
 * **Ignored Secrets Configuration**:
   - All sensitive `.env` files are ignored by git (`.gitignore` root rule). Only `.env.example` templates containing placeholders are tracked.
-* **Fail-Fast Boot Execution**:
-  - `backend/src/config/env.js`: Centralized configuration module loading and validating required secrets (`DATABASE_URL`, `JWT_SECRET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`). If any key is missing in production mode (`NODE_ENV=production`), the application throws a fatal configuration error on startup to fail-fast.
-  - `admin_ws/backend/src/config/env.js`: Centralized configuration module enforcing matching fail-fast validation in the Admin Portal.
+* **Fail-Fast Boot Execution & Production Validation**:
+  - `backend/src/config/env.js`: Centralized configuration module loading and validating required secrets and URLs (`DATABASE_URL`, `JWT_SECRET`, `CLIENT_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME`). If any key is missing or empty in production mode (`NODE_ENV=production`), the application throws a fatal configuration error on startup to fail-fast.
+  - `admin_ws/backend/src/config/env.js`: Centralized configuration module enforcing matching fail-fast validation (`DATABASE_URL`, `JWT_SECRET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME`) in the Admin Portal.
+  - Frontends (`frontend/src/config/index.js` and `admin_ws/frontend/src/api/adminApi.js`) validate `VITE_API_BASE_URL` and `VITE_ADMIN_API_BASE_URL` on initialization when running in production (`import.meta.env.PROD`), throwing immediate descriptive errors if unconfigured.
 * **Hardcoded Secret Elimination**:
   - Removed all hardcoded fallback secrets inside controller files and auth middlewares, routing JWT token signs/verifications strictly through `env.JWT_SECRET`.
+* **Centralized Domain & URL Configuration**:
+  - **No Silent Domain Fallbacks**: Completely eliminated hardcoded production fallbacks (`https://admin.aligngrad.com/api`, `https://career.aligngrad.com`, `https://hire.aligngrad.com`, `https://aligngrad.com`, `aligngrade-storage-2026.s3.amazonaws.com`).
+  - **Dynamic Portal Host Detection**: `frontend/src/app/App.jsx` resolves candidate and recruiter portal hosts dynamically using `new URL(VITE_CANDIDATE_URL).hostname` and `new URL(VITE_RECRUITER_URL).hostname`. When accessed from `localhost` in local development or single-origin deployments, it cleanly falls back to path-based client-side routing (`/candidate`, `/recruiter`, `/login`, `/register`).
+  - **URL & Path Normalization**: All base URLs have trailing slashes trimmed automatically (`.replace(/\/+$/, '')`). API client request dispatchers (`apiClient.js` and `adminApi.js`) enforce leading slash normalization on subpaths, preventing double slashes or malformed routes.
 
 ---
 

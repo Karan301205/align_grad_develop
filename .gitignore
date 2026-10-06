@@ -39,5 +39,30 @@ Thumbs.db
 # ─── AI / Agent Artifacts ──────────────────────────────────
 .gemini/
 .claude/
+.agents/
+.superpowers/
 scratch/
 test-*.js
+
+# ─── Project Docs & Notes ──────────────────────────────────
+AlignGrade_Scale_Plan.md
+ANTIGRAVITY_HANDOFF.md
+auth.txt
+CLAUDE.md
+commit.md
+CONTINUATION.md
+fileds.txt
+HANDOFF_TEMP_QUESTION_BANK.md
+MEMORY.md
+my_resume.pdf
+README.md
+task.md
+docs/
+design_stitch/
+
+# ─── Certificates & Keys ───────────────────────────────────
+*.pem
+cloudfront_private_key.pem
+cloudfront_public_key.pem
+
+
