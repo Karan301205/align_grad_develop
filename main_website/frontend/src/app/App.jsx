@@ -133,7 +133,15 @@ export default function App() {
   const isHireHost = Boolean(RECRUITER_HOSTNAME && hostname === RECRUITER_HOSTNAME);
 
   if (!token) {
-    // Cross-subdomain redirect enforcement when switching roles (active when URLs are configured)
+    // Cross-subdomain redirect enforcement when navigating or switching roles (active when URLs are configured)
+    if (isLandingHost && currentPath.startsWith('/candidate') && CANDIDATE_URL) {
+      window.location.href = `${CANDIDATE_URL}${currentPath}`;
+      return null;
+    }
+    if (isLandingHost && currentPath.startsWith('/recruiter') && RECRUITER_URL) {
+      window.location.href = `${RECRUITER_URL}${currentPath}`;
+      return null;
+    }
     if (isCareerHost && currentPath.startsWith('/recruiter') && RECRUITER_URL) {
       window.location.href = `${RECRUITER_URL}${currentPath}`;
       return null;
