@@ -4,7 +4,8 @@ const crypto = require('crypto');
 const path = require('path');
 const { PutObjectCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
-const { getS3Settings, createS3Client } = require('../../config/s3');
+const { getS3Settings, createS3Client, getS3FileUrl } = require('../../config/s3');
+const env = require('../../config/env');
 
 // Presigned S3 URL generator for course videos and thumbnails
 exports.getUploadUrl = async (req, res, next) => {
@@ -18,7 +19,7 @@ exports.getUploadUrl = async (req, res, next) => {
     if (!accessKeyId || !secretAccessKey) {
       return res.json({
         success: true,
-        uploadUrl: `https://${bucketName}.s3.${region}.amazonaws.com/mock-upload/${Date.now()}-${fileName}`,
+        uploadUrl: getS3FileUrl(`mock-upload/${Date.now()}-${fileName}`, bucketName, region),
         key: `${folder}/${Date.now()}-${fileName}`,
         bucket: bucketName
       });
@@ -59,7 +60,7 @@ exports.getAllCourses = async (req, res, next) => {
             description: 'Master modern venture creation, procedure models, and enterprise problem-solving.',
             category: 'Business & Career',
             instructor: 'Dr. K. S. Sharma',
-            thumbnailUrl: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&auto=format&fit=crop&q=80',
+            thumbnailUrl: env.DEFAULT_COURSE_THUMBNAIL_URL || '',
             isPublished: true,
             modules: []
           }

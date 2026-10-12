@@ -1,5 +1,5 @@
 const { ListObjectsV2Command } = require('@aws-sdk/client-s3');
-const { getS3Settings, createS3Client } = require('../config/s3');
+const { getS3Settings, createS3Client, getS3FileUrl } = require('../config/s3');
 const { getMockS3Files } = require('../mocks/storage.mock');
 const { formatBytes } = require('../utils/formatBytes');
 
@@ -75,7 +75,7 @@ async function computeS3Storage() {
       lastModified: file.lastModified,
       category: categories[categoryKey].name,
       cost: fileCost,
-      url: `https://${bucketName}.s3.${region}.amazonaws.com/${file.key}`
+      url: getS3FileUrl(file.key, bucketName, region)
     };
   });
 

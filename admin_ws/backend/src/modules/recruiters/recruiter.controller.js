@@ -1,5 +1,6 @@
 const { getDbSafe } = require('../../config/database');
 const env = require('../../config/env');
+const { getS3FileUrl } = require('../../config/s3');
 
 exports.getAllRecruiters = async (req, res, next) => {
   try {
@@ -9,9 +10,7 @@ exports.getAllRecruiters = async (req, res, next) => {
     }
 
     if (!db) {
-      const mockDocUrl = env.S3_BUCKET_NAME 
-        ? `https://${env.S3_BUCKET_NAME}.s3.${env.AWS_REGION}.amazonaws.com/docs/google_verify.pdf`
-        : '/docs/google_verify.pdf';
+      const mockDocUrl = getS3FileUrl('docs/google_verify.pdf');
 
       // Mock fallback data if DB is offline
       return res.json({

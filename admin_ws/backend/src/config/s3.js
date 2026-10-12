@@ -22,4 +22,16 @@ function createS3Client({ region, accessKeyId, secretAccessKey } = getS3Settings
   });
 }
 
-module.exports = { getS3Settings, createS3Client };
+// Resolves the public URL for an S3 object key using env.AWS_S3_BASE_URL or bucket settings
+function getS3FileUrl(key, bucket = env.S3_BUCKET_NAME, region = env.AWS_REGION) {
+  if (!key) return '';
+  const cleanKey = key.startsWith('/') ? key.slice(1) : key;
+  if (env.AWS_S3_BASE_URL) {
+    const base = env.AWS_S3_BASE_URL.replace(/\/+$/, '');
+    return `${base}/${cleanKey}`;
+  }
+  if (!bucket) return `/${cleanKey}`;
+  return `https://${bucket}.s3.${region}.amazonaws.com/${cleanKey}`;
+}
+
+module.exports = { getS3Settings, createS3Client, getS3FileUrl };

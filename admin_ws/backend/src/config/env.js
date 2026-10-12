@@ -7,7 +7,14 @@ const isProd = process.env.NODE_ENV === 'production';
 
 // Fail-fast in production mode: critical variables must be explicitly defined and not use fallbacks
 if (isProd) {
-  const critical = ['DATABASE_URL', 'JWT_SECRET', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'S3_BUCKET_NAME'];
+  const critical = [
+    'DATABASE_URL',
+    'JWT_SECRET',
+    'ADMIN_FRONTEND_URL',
+    'AWS_ACCESS_KEY_ID',
+    'AWS_SECRET_ACCESS_KEY',
+    'S3_BUCKET_NAME'
+  ];
   const missing = critical.filter(key => !process.env[key] || process.env[key].trim() === '');
   if (missing.length > 0) {
     throw new Error(`[CRITICAL ADMIN CONFIG ERROR] Environment variable(s) required in production mode are missing: ${missing.join(', ')}`);
@@ -20,13 +27,17 @@ if (isProd) {
 const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '5002', 10),
-  DATABASE_URL: process.env.DATABASE_URL || (isProd ? '' : 'mongodb://localhost:2717/alignGrad'),
+  DATABASE_URL: process.env.DATABASE_URL || '',
   JWT_SECRET: process.env.JWT_SECRET || (isProd ? '' : 'admin_portal_secret_jwt_key_2026'),
-  REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
+  ADMIN_FRONTEND_URL: process.env.ADMIN_FRONTEND_URL || '',
+  REDIS_URL: process.env.REDIS_URL || '',
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
   AWS_REGION: process.env.AWS_REGION || 'ap-south-1',
-  S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || (isProd ? '' : 'aligngrade-storage-2026')
+  S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || (isProd ? '' : 'aligngrade-storage-2026'),
+  AWS_S3_BASE_URL: process.env.AWS_S3_BASE_URL || '',
+  DEFAULT_DEMO_VIDEO_URL: process.env.DEFAULT_DEMO_VIDEO_URL || '',
+  DEFAULT_COURSE_THUMBNAIL_URL: process.env.DEFAULT_COURSE_THUMBNAIL_URL || ''
 };
 
 module.exports = env;

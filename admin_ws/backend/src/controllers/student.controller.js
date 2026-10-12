@@ -1,4 +1,5 @@
 const { getDbSafe } = require('../config/database');
+const env = require('../config/env');
 
 exports.getAllStudents = async (req, res, next) => {
   try {
@@ -28,7 +29,7 @@ exports.getAllStudents = async (req, res, next) => {
             certificates: [{ title: 'AWS Cloud Practitioner', org: 'Amazon Web Services' }],
             projects: [{ title: 'E-commerce API', role: 'Backend Lead', description: 'Developed REST API with express.' }],
             cocurricular: [{ activity: 'Hackathon Coordinator', description: 'Organized national level coding event.' }],
-            introVideoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4'
+            introVideoUrl: env.DEFAULT_DEMO_VIDEO_URL || ''
           },
           {
             id: 'mock_2',

@@ -1,16 +1,17 @@
 // Validate required environment configuration
 const rawAdminApiBase = import.meta.env.VITE_ADMIN_API_BASE_URL;
 
-if (!rawAdminApiBase && import.meta.env.PROD) {
-  throw new Error('[Admin Portal Config Error] VITE_ADMIN_API_BASE_URL is required in production mode but is not defined.');
-}
-
-if (!rawAdminApiBase && import.meta.env.DEV) {
-  console.warn('[Admin Portal Config Warning] VITE_ADMIN_API_BASE_URL is not set. Defaulting to local: http://localhost:5002/api');
+if (!rawAdminApiBase) {
+  const errorMsg = '[Admin Portal Config Error] VITE_ADMIN_API_BASE_URL is not defined in environment variables. Please set it in your .env file to connect to the Admin backend.';
+  if (import.meta.env.PROD) {
+    throw new Error(errorMsg);
+  } else {
+    console.warn(errorMsg);
+  }
 }
 
 // Consistent trailing-slash normalization
-const ADMIN_API_BASE = (rawAdminApiBase || (import.meta.env.DEV ? 'http://localhost:5002/api' : '')).replace(/\/+$/, '');
+const ADMIN_API_BASE = (rawAdminApiBase || '').replace(/\/+$/, '');
 
 function buildUrl(path) {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
