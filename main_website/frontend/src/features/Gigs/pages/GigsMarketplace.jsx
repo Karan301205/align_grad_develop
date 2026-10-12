@@ -24,7 +24,8 @@ import {
   FileText,
   MoreHorizontal,
   Briefcase,
-  Building
+  Building,
+  ArrowRight
 } from 'lucide-react';
 import { apiFetch } from '../../../services/apiClient';
 import { putFileToS3 } from '../../../services/uploadService';
@@ -40,6 +41,7 @@ import CandidateProfileModal from '../../Recruiter/components/CandidateProfileMo
 import GigFilterSidebar from '../components/GigFilterSidebar';
 import GigCard from '../components/GigCard';
 import GigDetailPage from '../components/GigDetailPage';
+import PaymentModal from '../../../components/PaymentModal';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '../gigConstants';
 
 const RAW_GIG_CATEGORIES = [
@@ -335,6 +337,13 @@ export default function GigsMarketplace({
   const [gigs, setGigs] = useState([]);
   const [myGigs, setMyGigs] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Subscription Paywall States
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [localIsPremium, setLocalIsPremium] = useState(false);
+  const isPremium = localIsPremium || (profile?.plan ? profile.plan === 'PREMIUM' : user?.plan === 'PREMIUM');
+  const isCandidate = user?.role === 'STUDENT';
+  const isGated = isCandidate && !isPremium;
 
   useEffect(() => {
     if (autoSelectOpportunity && autoSelectOpportunity.type === 'gig') {
@@ -1307,6 +1316,8 @@ export default function GigsMarketplace({
                     onReset={handleResetFilters}
                     loading={loading}
                     totalGigs={displayGigs.length}
+                    isLocked={isGated}
+                    onUnlock={() => setIsPaymentModalOpen(true)}
                   />
 
                   {/* Right Column: Stack of Gigs (Zero gap, divide-y) */}
@@ -1327,6 +1338,81 @@ export default function GigsMarketplace({
                             : 'Try adjusting your search criteria or check your workspace for active gigs.'}
                         </p>
                       </div>
+                    ) : isGated && displayGigs.length > 5 ? (
+                      <>
+                        {/* Top 5 Free Visible Gigs */}
+                        <div className="bg-surface border border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700 rounded-none shadow-2xs">
+                          {displayGigs.slice(0, 5).map(gig => (
+                            <GigCard
+                              key={gig.id}
+                              gig={gig}
+                              isCandidate={user?.role === 'STUDENT'}
+                              candidateIds={candidateIds}
+                              onClick={(gigId) => {
+                                setSelectedGigId(gigId);
+                                fetchGigDetails(gigId);
+                                setActiveSubTab('gig-detail');
+                              }}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Complete Locked Section with Top-to-Bottom Fading Effect from gig 6 onward */}
+                        <div className="relative w-full overflow-hidden border border-t-0 border-slate-300 dark:border-slate-700 bg-surface">
+                          {/* Underlying locked gigs peaking through */}
+                          <div className="p-4 sm:p-5 pb-24 space-y-4 filter blur-[2px] opacity-40 select-none pointer-events-none">
+                            {(displayGigs.slice(5).length >= 2
+                              ? displayGigs.slice(5, 8)
+                              : [...displayGigs.slice(5), ...displayGigs.slice(0, 2 - displayGigs.slice(5).length)]
+                            ).map((gig, idx) => (
+                              <GigCard
+                                key={`${gig.id}-locked-${idx}`}
+                                gig={gig}
+                                isCandidate={user?.role === 'STUDENT'}
+                                candidateIds={candidateIds}
+                                onClick={() => {}}
+                              />
+                            ))}
+                          </div>
+
+                          {/* Full-width Top-to-Bottom Gradient Fading Paywall Overlay */}
+                          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 sm:p-10 text-center bg-gradient-to-b from-white/30 via-white/85 to-white dark:from-slate-900/30 dark:via-slate-900/85 dark:to-slate-900 backdrop-blur-[1px]">
+                            <div className="max-w-xl mx-auto flex flex-col items-center gap-3">
+                              <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center shadow-sm">
+                                <Lock className="w-5 h-5 text-emerald-700 dark:text-emerald-400 stroke-[2.2]" />
+                              </div>
+
+                              <h3 className="font-headline font-bold text-slate-900 dark:text-slate-100 text-2xl sm:text-3xl tracking-tight">
+                                Buy the subscription to see all gigs
+                              </h3>
+
+                              <p className="text-xs sm:text-sm font-sans text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">
+                                Top 5 gigs are free. Upgrade to{' '}
+                                <span className="font-semibold text-emerald-700 dark:text-emerald-400">Student Pro</span>{' '}
+                                for lifetime access to all {displayGigs.length} freelance gigs and every future listing.
+                              </p>
+
+                              <button
+                                type="button"
+                                onClick={() => setIsPaymentModalOpen(true)}
+                                className="mt-2 px-8 py-3.5 bg-emerald-800 hover:bg-emerald-900 active:scale-95 text-white text-sm font-headline font-bold rounded-none transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer"
+                              >
+                                <Sparkles className="w-4 h-4" />
+                                <span>Unlock for ₹2,500</span>
+                                <ArrowRight className="w-4 h-4" />
+                              </button>
+
+                              <p className="text-[11px] font-sans text-slate-400 dark:text-slate-500 flex items-center gap-2 mt-1">
+                                <span>One-Time · Lifetime Access</span>
+                                <span>•</span>
+                                <span>No Monthly Fees</span>
+                                <span>•</span>
+                                <span>Direct Escrow Milestone Payouts</span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </>
                     ) : (
                       <div className="bg-surface border border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700 rounded-none shadow-2xs">
                         {displayGigs.map(gig => (
@@ -3509,6 +3595,20 @@ export default function GigsMarketplace({
           onClose={() => setSelectedCandidateForProfile(null)}
         />
       )}
+
+      {/* Razorpay Payment Modal */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        planType="STUDENT_LIFETIME"
+        token={token}
+        user={user}
+        onSuccess={() => {
+          setLocalIsPremium(true);
+          if (onUpdateProfile) onUpdateProfile({ plan: 'PREMIUM' });
+          fetchGigs();
+        }}
+      />
 
       {/* Top-Right Sliding Toast Notification */}
       {alertConfig && (

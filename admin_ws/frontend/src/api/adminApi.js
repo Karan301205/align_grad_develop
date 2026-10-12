@@ -38,6 +38,25 @@ function getJson(path) {
   });
 }
 
+function sendJson(path, method, body) {
+  const headers = { ...getHeaders(), 'Content-Type': 'application/json' };
+  return fetch(buildUrl(path), {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined
+  }).then(res => {
+    if (res.status === 401) {
+      localStorage.removeItem('adminToken');
+      window.dispatchEvent(new Event('admin-unauthorized'));
+    }
+    return res.json();
+  });
+}
+
+function postJson(path, body) { return sendJson(path, 'POST', body); }
+function putJson(path, body) { return sendJson(path, 'PUT', body); }
+function deleteJson(path) { return sendJson(path, 'DELETE'); }
+
 export const adminApi = {
   login: (email, password) => {
     return fetch(buildUrl('/auth/login'), {
@@ -61,5 +80,20 @@ export const adminApi = {
   getJobs: () => getJson('/job'),
   getStorage: () => getJson('/storage/explorer'),
   getAnalytics: () => getJson('/analytics'),
-  getJobApplicants: (jobId) => getJson(`/job/${jobId}/applicants`)
+  getJobApplicants: (jobId) => getJson(`/job/${jobId}/applicants`),
+
+  // Course & Lecture Video Management
+  getCourses: () => getJson('/courses'),
+  getCourse: (id) => getJson(`/courses/${id}`),
+  createCourse: (data) => postJson('/courses', data),
+  updateCourse: (id, data) => putJson(`/courses/${id}`, data),
+  deleteCourse: (id) => deleteJson(`/courses/${id}`),
+  getUploadUrl: (data) => postJson('/courses/upload-url', data),
+  addModule: (courseId, data) => postJson(`/courses/${courseId}/modules`, data),
+  updateModule: (courseId, moduleId, data) => putJson(`/courses/${courseId}/modules/${moduleId}`, data),
+  deleteModule: (courseId, moduleId) => deleteJson(`/courses/${courseId}/modules/${moduleId}`),
+  addLesson: (courseId, moduleId, data) => postJson(`/courses/${courseId}/modules/${moduleId}/lessons`, data),
+  updateLesson: (courseId, moduleId, lessonId, data) => putJson(`/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`, data),
+  deleteLesson: (courseId, moduleId, lessonId) => deleteJson(`/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`)
 };
+

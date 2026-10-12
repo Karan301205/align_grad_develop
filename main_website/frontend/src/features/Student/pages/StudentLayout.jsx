@@ -21,7 +21,8 @@ import {
   DollarSign,
   Users,
   Zap,
-  Search
+  Search,
+  GraduationCap
 } from 'lucide-react';
 import GigsMarketplace from '../../Gigs/GigsMarketplace';
 import { apiFetch } from '../../../services/apiClient';
@@ -44,6 +45,7 @@ import StudentResume from '../components/StudentResume';
 import StudentSkillTests from '../components/StudentSkillTests';
 import StudentShowcase from '../components/StudentShowcase';
 import StudentProgress from '../components/StudentProgress';
+import StudentCourses from '../components/StudentCourses';
 import JobBriefPage from './JobBriefPage';
 
 
@@ -615,6 +617,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     { id: 'profile', icon: User, label: 'Your Profile', locked: false },
     { id: 'tests', icon: BookOpen, label: 'Your Tests', locked: false },
     { id: 'progress', icon: ClipboardList, label: 'Your Job Progress', locked: !isComplete },
+    { id: 'courses', icon: GraduationCap, label: 'Courses', locked: false },
     {
       id: 'gigs',
       icon: Zap,
@@ -983,6 +986,13 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
               <StudentProgress
                 applications={applications}
                 loading={loadingApplications}
+              />
+            )}
+
+            {activeTab === 'courses' && (
+              <StudentCourses
+                user={user}
+                token={token}
               />
             )}
 

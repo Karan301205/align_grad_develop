@@ -23,8 +23,10 @@ import {
   FileCheck,
   RefreshCw,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Video
 } from 'lucide-react';
+import AdminCourses from '../components/AdminCourses';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -265,6 +267,7 @@ export default function App() {
   // Sidebar navigation mapping
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
+    { id: 'courses', label: 'Course Management', icon: Video },
     { id: 'students', label: 'Students Directory', icon: Users },
     { id: 'recruiters', label: 'Recruiters Directory', icon: Building2 },
     { id: 'jobs', label: 'Active Jobs', icon: Briefcase },
@@ -1275,8 +1278,13 @@ export default function App() {
           </div>
         )}
 
+        {/* Courses Management Tab */}
+        {activeTab === 'courses' && (
+          <AdminCourses />
+        )}
+
         {/* Fallback component rendering for non-implemented placeholder views */}
-        {activeTab !== 'dashboard' && activeTab !== 'students' && activeTab !== 'recruiters' && activeTab !== 'jobs' && activeTab !== 'storage' && activeTab !== 'analytics' && (
+        {activeTab !== 'dashboard' && activeTab !== 'courses' && activeTab !== 'students' && activeTab !== 'recruiters' && activeTab !== 'jobs' && activeTab !== 'storage' && activeTab !== 'analytics' && (
           <div className="p-10 rounded-2xl bg-slate-950/20 border border-slate-900/60 text-center space-y-4 max-w-xl mx-auto">
             <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto border border-indigo-500/20">
               <LayoutDashboard className="w-8 h-8" />

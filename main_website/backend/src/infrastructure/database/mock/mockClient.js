@@ -944,7 +944,97 @@ const mockClient = {
       }
       return pt;
     }
+  },
+  course: {
+    findMany: async ({ where = {}, orderBy = {} } = {}) => {
+      let items = [...(mockDb.courses || [])];
+      if (where.isPublished !== undefined) items = items.filter(c => c.isPublished === where.isPublished);
+      if (where.category) items = items.filter(c => c.category === where.category);
+      return items;
+    },
+    findUnique: async ({ where }) => {
+      return (mockDb.courses || []).find(c => c.id === where.id) || null;
+    },
+    create: async ({ data }) => {
+      const newCourse = {
+        id: generateHexId(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        modules: [],
+        tags: [],
+        isPublished: true,
+        ...data
+      };
+      if (!mockDb.courses) mockDb.courses = [];
+      mockDb.courses.push(newCourse);
+      return newCourse;
+    },
+    update: async ({ where, data }) => {
+      const course = (mockDb.courses || []).find(c => c.id === where.id);
+      if (!course) return null;
+      applyData(course, data);
+      return course;
+    },
+    delete: async ({ where }) => {
+      const idx = (mockDb.courses || []).findIndex(c => c.id === where.id);
+      if (idx !== -1) {
+        return mockDb.courses.splice(idx, 1)[0];
+      }
+      return null;
+    }
+  },
+  courseEnrollment: {
+    findUnique: async ({ where }) => {
+      if (where.userId_courseId) {
+        return (mockDb.courseEnrollments || []).find(
+          e => e.userId === where.userId_courseId.userId && e.courseId === where.userId_courseId.courseId
+        ) || null;
+      }
+      return (mockDb.courseEnrollments || []).find(e => e.id === where.id) || null;
+    },
+    findMany: async ({ where = {} } = {}) => {
+      let items = [...(mockDb.courseEnrollments || [])];
+      if (where.userId) items = items.filter(e => e.userId === where.userId);
+      if (where.courseId) items = items.filter(e => e.courseId === where.courseId);
+      return items;
+    },
+    create: async ({ data }) => {
+      const enrollment = {
+        id: generateHexId(),
+        completedLessonIds: [],
+        enrolledAt: new Date(),
+        updatedAt: new Date(),
+        ...data
+      };
+      if (!mockDb.courseEnrollments) mockDb.courseEnrollments = [];
+      mockDb.courseEnrollments.push(enrollment);
+      return enrollment;
+    },
+    upsert: async ({ where, create, update }) => {
+      let existing = null;
+      if (where.userId_courseId) {
+        existing = (mockDb.courseEnrollments || []).find(
+          e => e.userId === where.userId_courseId.userId && e.courseId === where.userId_courseId.courseId
+        );
+      }
+      if (existing) {
+        applyData(existing, update);
+        return existing;
+      } else {
+        const item = {
+          id: generateHexId(),
+          completedLessonIds: [],
+          enrolledAt: new Date(),
+          updatedAt: new Date(),
+          ...create
+        };
+        if (!mockDb.courseEnrollments) mockDb.courseEnrollments = [];
+        mockDb.courseEnrollments.push(item);
+        return item;
+      }
+    }
   }
 };
 
 module.exports = { mockClient };
+

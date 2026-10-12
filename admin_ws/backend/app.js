@@ -29,6 +29,7 @@ app.use('/api/recruiter', authMiddleware, require('./src/modules/recruiters').ro
 app.use('/api/job', authMiddleware, require('./src/modules/jobs').routes);
 app.use('/api/storage', authMiddleware, require('./src/modules/storage').routes);
 app.use('/api/analytics', authMiddleware, require('./src/modules/analytics').routes);
+app.use('/api/courses', authMiddleware, require('./src/modules/courses').routes);
 
 // Error handling
 app.use(errorHandler);

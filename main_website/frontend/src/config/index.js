@@ -5,17 +5,20 @@
 
 const rawApiBase = import.meta.env.VITE_API_BASE_URL;
 
-// Validation: In production, missing API base URL is a fatal configuration error
-if (!rawApiBase && import.meta.env.PROD) {
-  throw new Error('[AlignGrade Config Error] VITE_API_BASE_URL is required in production mode but is not defined.');
-}
+// Detect if running on localhost / loopback in browser
+const isLocalhost = typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-if (!rawApiBase && import.meta.env.DEV) {
-  console.warn('[AlignGrade Config Warning] VITE_API_BASE_URL is not defined in development. Using local default: http://localhost:5001/api');
+// In local browser testing on localhost, route to local backend (port 5001) unless explicitly configured with another localhost port
+let effectiveApiBase = rawApiBase;
+if (isLocalhost && (!rawApiBase || (!rawApiBase.includes('localhost') && !rawApiBase.includes('127.0.0.1')))) {
+  effectiveApiBase = 'http://localhost:5001/api';
+} else if (!effectiveApiBase && import.meta.env.DEV) {
+  effectiveApiBase = 'http://localhost:5001/api';
 }
 
 // Normalize API base by stripping trailing slashes
-export const API_BASE = (rawApiBase || (import.meta.env.DEV ? 'http://localhost:5001/api' : '')).replace(/\/+$/, '');
+export const API_BASE = (effectiveApiBase || '').replace(/\/+$/, '');
 
 // Domain & Portal Configurations (Optional in single-domain or dev mode; used for multi-subdomain deployments)
 const rawLandingUrl = import.meta.env.VITE_LANDING_URL || '';

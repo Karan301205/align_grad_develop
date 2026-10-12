@@ -29,7 +29,9 @@ const mockDb = {
   postComments: [],
   savedPosts: [],
   postViews: [],
-  paymentTransactions: []
+  paymentTransactions: [],
+  courses: [],
+  courseEnrollments: []
 };
 
 // Seed initial jobs in mock db to make it instantly usable

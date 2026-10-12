@@ -12,7 +12,8 @@ import {
   Star,
   ArrowUpDown,
   SlidersHorizontal,
-  Plus
+  Plus,
+  Lock
 } from 'lucide-react';
 
 const RAW_GIG_CATEGORIES = [
@@ -91,7 +92,9 @@ export default function GigFilterSidebar({
   onSearch,
   onReset,
   loading = false,
-  totalGigs = 0
+  totalGigs = 0,
+  isLocked = false,
+  onUnlock
 }) {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
@@ -130,6 +133,7 @@ export default function GigFilterSidebar({
   );
 
   const handleKeyDown = (e) => {
+    if (isLocked) return;
     if (e.key === 'Enter') {
       e.preventDefault();
       onSearch?.();
@@ -137,6 +141,7 @@ export default function GigFilterSidebar({
   };
 
   const handleAddSkill = (skillToAdd) => {
+    if (isLocked) return;
     const trimmed = (skillToAdd || skillInput).trim();
     if (!trimmed) return;
     if (!skillList.some(s => s.toLowerCase() === trimmed.toLowerCase())) {
@@ -147,11 +152,13 @@ export default function GigFilterSidebar({
   };
 
   const handleRemoveSkill = (skillToRemove) => {
+    if (isLocked) return;
     const updated = skillList.filter(s => s.toLowerCase() !== skillToRemove.toLowerCase()).join(', ');
     setSelectedSkills(updated);
   };
 
   const handlePresetBudget = (preset) => {
+    if (isLocked) return;
     setMinBudget(preset.min);
     setMaxBudget(preset.max);
   };
@@ -170,7 +177,7 @@ export default function GigFilterSidebar({
             Filters & Refine
           </h3>
         </div>
-        {hasActiveFilters && (
+        {hasActiveFilters && !isLocked && (
           <button
             type="button"
             onClick={onReset}
@@ -180,6 +187,28 @@ export default function GigFilterSidebar({
           </button>
         )}
       </div>
+
+      {/* Locked Filter Notice Banner */}
+      {isLocked && (
+        <div
+          onClick={onUnlock}
+          className="p-3 bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-none cursor-pointer group transition-all hover:bg-emerald-100/90 dark:hover:bg-emerald-950/60 shadow-2xs"
+        >
+          <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-headline font-bold text-xs">
+            <Lock className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
+            <span>Gigs Filter Locked</span>
+          </div>
+          <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-1 leading-snug font-sans">
+            Gigs filtering is exclusive to Student Pro. Upgrade to unlock all {totalGigs || ''} gigs and custom filters.
+          </p>
+          <div className="mt-2 text-[11px] font-headline font-bold text-emerald-800 dark:text-emerald-300 group-hover:underline flex items-center gap-1">
+            <span>Unlock for ₹2,500</span> &rarr;
+          </div>
+        </div>
+      )}
+
+      {/* Filter Body with locked state */}
+      <div className={isLocked ? "space-y-6 pointer-events-none opacity-45 select-none" : "space-y-6"}>
 
       {/* Filter 1: Sort By */}
       <div className="space-y-2">
@@ -520,6 +549,8 @@ export default function GigFilterSidebar({
             Clear All Filters
           </button>
         )}
+      </div>
+
       </div>
 
       {/* Telemetry info */}

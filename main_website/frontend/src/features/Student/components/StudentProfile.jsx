@@ -114,6 +114,16 @@ export default function StudentProfile({
   const [isSkillDropdownOpen, setIsSkillDropdownOpen] = React.useState(false);
   const [usernameStatus, setUsernameStatus] = React.useState(''); // 'loading', 'available', 'taken', 'invalid', ''
   const [usernameMsg, setUsernameMsg] = React.useState('');
+  const [fieldErrors, setFieldErrors] = React.useState({});
+
+  const clearFieldError = (fieldName) => {
+    setFieldErrors(prev => {
+      if (!prev || !prev[fieldName]) return prev;
+      const next = { ...prev };
+      delete next[fieldName];
+      return next;
+    });
+  };
 
   const [firstName, setFirstName] = React.useState(() => {
     const cleaned = (profile?.name || '').replace(/[0-9]/g, '');
@@ -675,13 +685,9 @@ export default function StudentProfile({
   ]);
 
   const isSaveActive = React.useMemo(() => {
-    const ageValue = calculateAge(dob);
-    if (ageValue !== null && ageValue < 17) return false;
-    if (resumeUrl && !isValidDriveUrl(resumeUrl)) return false;
-
     const isFirstTime = !profile || !profile.name;
     return isFirstTime || hasChanges;
-  }, [profile, hasChanges, dob, resumeUrl]);
+  }, [profile, hasChanges]);
 
   const { overallCompletion, missingProfileItems } = React.useMemo(() => {
     const details = getProfileCompletionDetails({
@@ -785,28 +791,89 @@ export default function StudentProfile({
 
   const handleSubmit = (e) => {
     if (e && e.preventDefault) e.preventDefault();
+
+    const errors = {};
+
+    // 1. First Name *
+    if (!firstName || !firstName.trim()) {
+      errors.firstName = true;
+    }
+
+    // 2. Last Name *
+    if (!lastName || !lastName.trim()) {
+      errors.lastName = true;
+    }
+
+    // 3. Username *
+    if (!username || !username.trim() || usernameStatus === 'invalid' || usernameStatus === 'taken') {
+      errors.username = true;
+    }
+
+    // 4. Date of Birth * (Must be at least 17 years old)
     const ageValue = calculateAge(dob);
-    if (ageValue !== null && ageValue < 17) {
-      showAlert('You must be at least **17 years old** to access this platform.', 'error');
-      return;
+    if (!dob || !dob.trim() || (ageValue !== null && ageValue < 17)) {
+      errors.dob = true;
     }
-    const isValid = validatePhone(countryCode, localPhone);
-    if (!isValid) {
-      showAlert('Please enter the valid **Phone Number** before saving.', 'error');
-      return;
+
+    // 5. Professional Summary *
+    if (!bio || !bio.trim()) {
+      errors.bio = true;
     }
+
+    // 6. Phone Number *
+    const isPhoneValid = validatePhone(countryCode, localPhone);
+    if (!localPhone || !localPhone.trim() || !isPhoneValid) {
+      errors.phone = true;
+    }
+
+    // 7. Email Address *
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!profileEmail || !profileEmail.trim() || !emailRegex.test(profileEmail.trim())) {
+      errors.email = true;
+    }
+
+    // 8. Gender *
+    if (!gender || !gender.trim()) {
+      errors.gender = true;
+    }
+
+    // Format checks on optional URL fields
     if (resumeUrl && resumeUrl.trim() && !isValidDriveUrl(resumeUrl)) {
-      showAlert('Please enter a valid **Google Drive URL** for your resume (e.g. https://drive.google.com/...).', 'error');
-      return;
+      errors.resumeUrl = true;
     }
     if (socialLinks?.linkedin && socialLinks.linkedin.trim() && !isValidUrl(socialLinks.linkedin)) {
-      showAlert('Please enter a valid **LinkedIn Profile URL** (e.g. https://linkedin.com/in/...).', 'error');
-      return;
+      errors.linkedin = true;
     }
     if (socialLinks?.portfolio && socialLinks.portfolio.trim() && !isValidUrl(socialLinks.portfolio)) {
-      showAlert('Please enter a valid **Personal Portfolio URL** (e.g. https://myportfolio.com).', 'error');
+      errors.portfolio = true;
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      if (profileTab !== 'general') {
+        setProfileTab('general');
+      }
+      if (errors.dob && dob && ageValue !== null && ageValue < 17) {
+        showAlert('You must be at least **17 years old** to access this platform.', 'error');
+      } else if (errors.phone && localPhone && !isPhoneValid) {
+        showAlert('Please enter a valid **Phone Number** before saving.', 'error');
+      } else if (errors.resumeUrl) {
+        showAlert('Please enter a valid **Google Drive URL** for your resume (e.g. https://drive.google.com/...).', 'error');
+      } else if (errors.linkedin) {
+        showAlert('Please enter a valid **LinkedIn Profile URL** (e.g. https://linkedin.com/in/...).', 'error');
+      } else if (errors.portfolio) {
+        showAlert('Please enter a valid **Personal Portfolio URL** (e.g. https://myportfolio.com).', 'error');
+      } else {
+        showAlert('Please fill in all mandatory fields marked with an asterisk (*).', 'error');
+      }
+      const formEl = document.getElementById('student-profile-form');
+      if (formEl) {
+        formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
       return;
     }
+
+    setFieldErrors({});
     const activeTabObj = tabsList.find(t => t.id === profileTab);
     const sectionName = activeTabObj ? activeTabObj.label : 'Profile';
     handleUpdateProfile(e, sectionName);
@@ -920,7 +987,7 @@ export default function StudentProfile({
         );
       })()}
 
-      <form id="student-profile-form" onSubmit={handleSubmit} className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none flex flex-col justify-between min-h-[620px] shadow-2xs overflow-hidden relative">
+      <form id="student-profile-form" noValidate onSubmit={handleSubmit} className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none flex flex-col justify-between min-h-[620px] shadow-2xs overflow-hidden relative">
         {/* Top Horizontal Stepper Navigation integrated as container header */}
         <div className="bg-slate-50 dark:bg-slate-900/90 border-b border-slate-300 dark:border-slate-700 p-3 sm:p-4 overflow-x-auto custom-scrollbar">
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-max">
@@ -1046,12 +1113,17 @@ export default function StudentProfile({
                     </label>
                     <input
                       type="text"
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
+                      className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs focus:outline-none ${
+                        fieldErrors.firstName
+                          ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                          : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                      }`}
                       value={firstName}
                       onChange={e => {
                         const val = e.target.value.replace(/[0-9]/g, '');
                         setFirstName(val);
                         updateFullName(val, lastName);
+                        clearFieldError('firstName');
                       }}
                       onKeyDown={e => {
                         if (/[0-9]/.test(e.key)) {
@@ -1059,8 +1131,12 @@ export default function StudentProfile({
                         }
                       }}
                       placeholder="e.g. John"
-                      required
                     />
+                    {fieldErrors.firstName && (
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1.5 animate-pulse">
+                        * First Name is required.
+                      </p>
+                    )}
                   </div>
 
                   {/* Row 1, Col 2: Last Name */}
@@ -1070,12 +1146,17 @@ export default function StudentProfile({
                     </label>
                     <input
                       type="text"
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
+                      className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs focus:outline-none ${
+                        fieldErrors.lastName
+                          ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                          : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                      }`}
                       value={lastName}
                       onChange={e => {
                         const val = e.target.value.replace(/[0-9]/g, '');
                         setLastName(val);
                         updateFullName(firstName, val);
+                        clearFieldError('lastName');
                       }}
                       onKeyDown={e => {
                         if (/[0-9]/.test(e.key)) {
@@ -1083,8 +1164,12 @@ export default function StudentProfile({
                         }
                       }}
                       placeholder="e.g. Doe"
-                      required
                     />
+                    {fieldErrors.lastName && (
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1.5 animate-pulse">
+                        * Last Name is required.
+                      </p>
+                    )}
                   </div>
 
                   {/* Row 2, Col 1: Username */}
@@ -1095,20 +1180,30 @@ export default function StudentProfile({
                     <div className="relative">
                       <input
                         type="text"
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
+                        className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs focus:outline-none ${
+                          fieldErrors.username
+                            ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                            : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                        }`}
                         value={username || ''}
-                        onChange={handleUsernameChange}
+                        onChange={e => {
+                          handleUsernameChange(e);
+                          clearFieldError('username');
+                        }}
                         placeholder="e.g. johndoe"
-                        required
                       />
-                      {usernameMsg && (
+                      {usernameMsg ? (
                         <p className={`text-[11px] mt-1.5 font-sans font-medium ${usernameStatus === 'available' ? 'text-emerald-600 dark:text-emerald-400' :
                             usernameStatus === 'loading' ? 'text-amber-600 dark:text-amber-400 animate-pulse' :
                               'text-rose-600 dark:text-rose-400'
                           }`}>
                           {usernameMsg}
                         </p>
-                      )}
+                      ) : fieldErrors.username ? (
+                        <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1.5 animate-pulse">
+                          * Username is required.
+                        </p>
+                      ) : null}
                     </div>
                   </div>
 
@@ -1121,15 +1216,26 @@ export default function StudentProfile({
                       type="date"
                       min="1920-01-01"
                       max={new Date().toISOString().split('T')[0]}
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                      className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs focus:outline-none dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100 ${
+                        (fieldErrors.dob || isUnderage)
+                          ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                          : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                      }`}
                       value={dob}
-                      onChange={e => setDob(sanitizeDateYear(e.target.value))}
+                      onChange={e => {
+                        setDob(sanitizeDateYear(e.target.value));
+                        clearFieldError('dob');
+                      }}
                     />
-                    {isUnderage && (
+                    {isUnderage ? (
                       <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1.5 animate-pulse">
                         ✗ You must be at least 17 years old to access this platform.
                       </p>
-                    )}
+                    ) : fieldErrors.dob ? (
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1.5 animate-pulse">
+                        * Date of Birth is required.
+                      </p>
+                    ) : null}
                   </div>
 
                   {/* Row 3: Professional Summary (Full Width - Auto-Expanding) */}
@@ -1140,10 +1246,15 @@ export default function StudentProfile({
                     <textarea
                       ref={bioRef}
                       rows="3"
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs resize-none min-h-[80px] overflow-hidden leading-relaxed"
+                      className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs resize-none min-h-[80px] overflow-hidden leading-relaxed focus:outline-none ${
+                        fieldErrors.bio
+                          ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                          : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                      }`}
                       value={bio}
                       onChange={e => {
                         setBio(e.target.value);
+                        clearFieldError('bio');
                         if (bioRef.current) {
                           bioRef.current.style.height = 'auto';
                           bioRef.current.style.height = `${Math.max(80, bioRef.current.scrollHeight)}px`;
@@ -1151,6 +1262,11 @@ export default function StudentProfile({
                       }}
                       placeholder="Software Engineer specializing in Full-Stack development, building responsive web applications..."
                     />
+                    {fieldErrors.bio && (
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1.5 animate-pulse">
+                        * Professional Summary is required.
+                      </p>
+                    )}
                   </div>
 
                   {/* Row 4, Col 1: Phone Number */}
@@ -1176,16 +1292,27 @@ export default function StudentProfile({
                       <div className="relative flex-1">
                         <input
                           type="text"
-                          className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
+                          className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs focus:outline-none ${
+                            (fieldErrors.phone || phoneWarning)
+                              ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                              : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                          }`}
                           value={localPhone}
-                          onChange={handleLocalPhoneChange}
+                          onChange={e => {
+                            handleLocalPhoneChange(e);
+                            clearFieldError('phone');
+                          }}
                           placeholder="Enter mobile number"
                         />
                       </div>
                     </div>
-                    {phoneWarning && (
+                    {phoneWarning ? (
                       <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-1.5 font-sans font-semibold">{phoneWarning}</p>
-                    )}
+                    ) : fieldErrors.phone ? (
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-1.5 font-sans font-semibold animate-pulse">
+                        * Valid Phone Number is required.
+                      </p>
+                    ) : null}
                   </div>
 
                   {/* Row 4, Col 2: Email Address */}
@@ -1195,11 +1322,23 @@ export default function StudentProfile({
                     </label>
                     <input
                       type="email"
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
+                      className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs focus:outline-none ${
+                        fieldErrors.email
+                          ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                          : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                      }`}
                       value={profileEmail}
-                      onChange={e => setProfileEmail(e.target.value)}
+                      onChange={e => {
+                        setProfileEmail(e.target.value);
+                        clearFieldError('email');
+                      }}
                       placeholder="name@domain.com"
                     />
+                    {fieldErrors.email && (
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-1.5 font-sans font-semibold animate-pulse">
+                        * Valid Email Address is required.
+                      </p>
+                    )}
                   </div>
 
                   {/* Row 5, Col 1: Gender */}
@@ -1208,9 +1347,16 @@ export default function StudentProfile({
                       Gender <span className="text-rose-500 font-bold">*</span>
                     </label>
                     <select
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-4 py-2.5 text-xs focus:border-blue-700 focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs"
+                      className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs focus:outline-none ${
+                        fieldErrors.gender
+                          ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                          : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                      }`}
                       value={gender}
-                      onChange={e => setGender(e.target.value)}
+                      onChange={e => {
+                        setGender(e.target.value);
+                        clearFieldError('gender');
+                      }}
                     >
                       <option value="">Select Gender</option>
                       <option value="Male">Male</option>
@@ -1218,6 +1364,11 @@ export default function StudentProfile({
                       <option value="Non-binary">Non-binary</option>
                       <option value="Prefer not to say">Prefer not to say</option>
                     </select>
+                    {fieldErrors.gender && (
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-1.5 font-sans font-semibold animate-pulse">
+                        * Gender selection is required.
+                      </p>
+                    )}
                   </div>
 
                   {/* Row 5, Col 2: Resume URL (Upload A Drive URL) */}
@@ -1227,16 +1378,19 @@ export default function StudentProfile({
                     </label>
                     <input
                       type="url"
-                      className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs ${
-                        isInvalidResumeUrl
+                      className={`w-full bg-white dark:bg-slate-900 border rounded-none px-4 py-2.5 text-xs transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs focus:outline-none ${
+                        (isInvalidResumeUrl || fieldErrors.resumeUrl)
                           ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
                           : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
                       }`}
                       value={resumeUrl}
-                      onChange={e => setResumeUrl(e.target.value)}
+                      onChange={e => {
+                        setResumeUrl(e.target.value);
+                        clearFieldError('resumeUrl');
+                      }}
                       placeholder="https://drive.google.com/your-resume.pdf"
                     />
-                    {isInvalidResumeUrl && (
+                    {(isInvalidResumeUrl || fieldErrors.resumeUrl) && (
                       <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1.5">
                         * Only valid Google Drive URLs are accepted.
                       </p>
@@ -1258,13 +1412,16 @@ export default function StudentProfile({
                       </div>
                       <input
                         type="url"
-                        className={`w-full bg-white dark:bg-slate-900 border ${
-                          socialLinks?.linkedin && !isValidUrl(socialLinks.linkedin)
+                        className={`w-full bg-white dark:bg-slate-900 border rounded-none pl-10 pr-4 py-2.5 text-xs transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs focus:outline-none ${
+                          (fieldErrors.linkedin || (socialLinks?.linkedin && !isValidUrl(socialLinks.linkedin)))
                             ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
                             : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
-                        } rounded-none pl-10 pr-4 py-2.5 text-xs focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs`}
+                        }`}
                         value={socialLinks?.linkedin || ''}
-                        onChange={e => setSocialLinks({ ...socialLinks, linkedin: e.target.value, showLinkedin: true })}
+                        onChange={e => {
+                          setSocialLinks({ ...socialLinks, linkedin: e.target.value, showLinkedin: true });
+                          clearFieldError('linkedin');
+                        }}
                         onBlur={() => {
                           if (socialLinks?.linkedin && isValidUrl(socialLinks.linkedin)) {
                             setSocialLinks(prev => ({ ...prev, linkedin: ensureUrlProtocol(prev?.linkedin) }));
@@ -1273,7 +1430,7 @@ export default function StudentProfile({
                         placeholder="https://linkedin.com/in/username"
                       />
                     </div>
-                    {socialLinks?.linkedin && !isValidUrl(socialLinks.linkedin) && (
+                    {(fieldErrors.linkedin || (socialLinks?.linkedin && !isValidUrl(socialLinks.linkedin))) && (
                       <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1">
                         * Please enter a valid URL (e.g. https://linkedin.com/in/username)
                       </p>
@@ -1295,13 +1452,16 @@ export default function StudentProfile({
                       </div>
                       <input
                         type="url"
-                        className={`w-full bg-white dark:bg-slate-900 border ${
-                          socialLinks?.portfolio && !isValidUrl(socialLinks.portfolio)
+                        className={`w-full bg-white dark:bg-slate-900 border rounded-none pl-10 pr-4 py-2.5 text-xs transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs focus:outline-none ${
+                          (fieldErrors.portfolio || (socialLinks?.portfolio && !isValidUrl(socialLinks.portfolio)))
                             ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
                             : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
-                        } rounded-none pl-10 pr-4 py-2.5 text-xs focus:outline-none transition-all text-slate-900 dark:text-slate-100 font-sans font-medium shadow-2xs`}
+                        }`}
                         value={socialLinks?.portfolio || ''}
-                        onChange={e => setSocialLinks({ ...socialLinks, portfolio: e.target.value, showPortfolio: true })}
+                        onChange={e => {
+                          setSocialLinks({ ...socialLinks, portfolio: e.target.value, showPortfolio: true });
+                          clearFieldError('portfolio');
+                        }}
                         onBlur={() => {
                           if (socialLinks?.portfolio && isValidUrl(socialLinks.portfolio)) {
                             setSocialLinks(prev => ({ ...prev, portfolio: ensureUrlProtocol(prev?.portfolio) }));
@@ -1310,7 +1470,7 @@ export default function StudentProfile({
                         placeholder="https://myportfolio.com"
                       />
                     </div>
-                    {socialLinks?.portfolio && !isValidUrl(socialLinks.portfolio) && (
+                    {(fieldErrors.portfolio || (socialLinks?.portfolio && !isValidUrl(socialLinks.portfolio))) && (
                       <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1">
                         * Please enter a valid URL (e.g. https://myportfolio.com)
                       </p>

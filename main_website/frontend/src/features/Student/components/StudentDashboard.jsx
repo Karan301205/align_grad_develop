@@ -214,6 +214,8 @@ export default function StudentDashboard({
         setStatusFilter={setStatusFilter}
         totalJobs={sortedJobs.length}
         onReset={handleResetFilters}
+        isLocked={!isPremium}
+        onUnlock={() => setIsPaymentModalOpen(true)}
       />
 
       {/* Jobs Container: Sharp Corners with Sub-Tabs & 3-in-a-Row Box Grid */}
@@ -277,11 +279,11 @@ export default function StudentDashboard({
               Reset All Filters
             </button>
           </div>
-        ) : !isPremium && mainTab === 'all' && sortedJobs.length > 6 ? (
+        ) : !isPremium && mainTab === 'all' ? (
           <>
-            {/* Top 6 Free Visible Opportunities */}
+            {/* Top 3 Free Visible Opportunities (Row 1) */}
             <div className="p-5 sm:p-6 pb-4 bg-surface grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {sortedJobs.slice(0, 6).map((job) => (
+              {(sortedJobs.length > 3 ? sortedJobs.slice(0, 3) : sortedJobs).map((job) => (
                 <JobSnapshotCard
                   key={job.id}
                   job={job}
@@ -291,12 +293,16 @@ export default function StudentDashboard({
             </div>
 
             {/* Complete Horizontal Locked Section with Top-to-Bottom Fading Effect */}
-            <div className="relative w-full overflow-hidden  border-slate-200 dark:border-slate-800 bg-surface">
+            <div className="relative w-full overflow-hidden border-t border-slate-200 dark:border-slate-800 bg-surface">
               {/* Underlying locked jobs peaking through across all columns */}
               <div className="p-5 sm:p-6 pb-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 filter blur-[2px] opacity-40 select-none pointer-events-none">
-                {(sortedJobs.slice(6).length >= 3 
-                  ? sortedJobs.slice(6) 
-                  : [...sortedJobs.slice(6), ...sortedJobs.slice(0, 3 - sortedJobs.slice(6).length)]
+                {(sortedJobs.slice(3).length >= 3 
+                  ? sortedJobs.slice(3, 6) 
+                  : sortedJobs.length > 3
+                    ? [...sortedJobs.slice(3), ...sortedJobs.slice(0, 3 - sortedJobs.slice(3).length)]
+                    : sortedJobs.length > 0
+                      ? [...sortedJobs, ...sortedJobs, ...sortedJobs].slice(0, 3)
+                      : []
                 ).map((job, idx) => (
                   <JobSnapshotCard
                     key={`${job.id}-locked-${idx}`}
@@ -318,7 +324,7 @@ export default function StudentDashboard({
                   </h3>
 
                   <p className="text-xs sm:text-sm font-sans text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">
-                    Top 6 jobs are free. Upgrade to{' '}
+                    Top 3 jobs are free. Upgrade to{' '}
                     <span className="font-semibold text-emerald-700 dark:text-emerald-400">Student Pro</span>{' '}
                     for lifetime access to all {sortedJobs.length} opportunities and every future listing.
                   </p>

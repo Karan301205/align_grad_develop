@@ -589,3 +589,55 @@ model PaymentTransaction {
 
   @@index([userId])
 }
+
+// --- Courses & Learning System Models ---
+
+model Course {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  description  String
+  category     String         @default("General")
+  instructor   String?        @default("AlignGrade Instructor")
+  thumbnailUrl String?
+  thumbnailKey String?
+  isPublished  Boolean        @default(true)
+  modules      CourseModule[]
+  tags         String[]       @default([])
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([isPublished])
+  @@index([category])
+}
+
+type CourseModule {
+  id      String
+  title   String
+  order   Int            @default(0)
+  lessons CourseLesson[]
+}
+
+type CourseLesson {
+  id          String
+  title       String
+  description String?
+  videoKey    String
+  videoUrl    String?
+  duration    String?        @default("10:00")
+  order       Int            @default(0)
+}
+
+model CourseEnrollment {
+  id                   String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId               String    @db.ObjectId
+  courseId             String    @db.ObjectId
+  completedLessonIds   String[]  @default([])
+  lastAccessedLessonId String?
+  enrolledAt           DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+}
+

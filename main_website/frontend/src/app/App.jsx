@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { AuthView, CandidateAuth, RecruiterAuth, ResetPasswordPage } from '../features/Auth';
 import { StudentLayout, PublicJobBriefPage } from '../features/Student';
 import { RecruiterLayout } from '../features/Recruiter';
+import { PrivacyPolicyPage, TermsAndConditionsPage } from '../features/legal';
 import ConnectionLoader from '../components/ConnectionLoader';
 import CompanyProfileModal from '../components/CompanyProfileModal';
 import EmeraldSignupToast from '../components/EmeraldSignupToast';
@@ -125,6 +126,15 @@ export default function App() {
   // Standalone password reset view (unauthenticated or link access)
   if (currentPath.startsWith('/reset-password')) {
     return <ResetPasswordPage theme={theme} toggleTheme={toggleTheme} />;
+  }
+
+  // Standalone public legal views
+  if (currentPath.startsWith('/privacy')) {
+    return <PrivacyPolicyPage theme={theme} toggleTheme={toggleTheme} />;
+  }
+
+  if (currentPath.startsWith('/terms')) {
+    return <TermsAndConditionsPage theme={theme} toggleTheme={toggleTheme} />;
   }
 
   const hostname = window.location.hostname.toLowerCase();
