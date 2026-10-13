@@ -315,7 +315,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                     Turn Your Skills Into <span className="text-emerald-600 dark:text-emerald-400 font-bold xl:text-7xl">Money</span> And Your Hustle Into a <span className="text-primary font-bold xl:text-7xl">Career !!</span>.
                   </h1>
                   <p className="font-sans text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-7 max-w-xl">
-                    Launch lucrative freelance side hustles, unlock guaranteed stipend internships, and get hired for premium engineering roles. We eliminate resume fluff: prove your abilities through 10-question tests and connect with recruiters who pay for rightful talent.
+                   Turn your skills into income with paid gigs, stipend internships, and verified job opportunities through 10-question skill assessments.
                   </p>
                 </AnimatedContent>
 
@@ -502,7 +502,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                       Not Just Tech Skills. <span className="text-primary font-bold">Every Skill Has Value.</span>
                     </h3>
                     <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
-                      AlignGrade connects technical and non-technical talent with paid gigs, short-term tasks, and career opportunities. Whether you code, design, write, market, or manage, showcase your strengths and find opportunities where your skills can make an impact.
+                      AlignGrade connects talent with paid gigs, internships, and career opportunities to showcase skills, verify expertise, and grow professionally.
                     </p>
 
                     {/* Highlight Chips */}
@@ -524,7 +524,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 <AnimatedContent distance={40} direction="vertical" duration={0.8} delay={0.2} className="w-full">
                   <div className="relative group rounded-[2.25rem] overflow-hidden border-3 sm:border-4 border-white dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900 aspect-[7/4] w-full transition-all hover:shadow-2xl">
                     <img
-                      src="/playbook_stipend_offer.jpg"
+                      src="/non-tech.jpg"
                       alt="Student candidate exploring verified paid opportunities"
                       className="w-full h-full object-cover object-center group-hover:scale-103 transition-transform duration-500"
                     />
@@ -573,7 +573,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                     </h3>
 
                     <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
-                      Explore per-day paid tasks, freelance gigs, internships, and full-time roles on AlignGrade. Showcase your technical expertise, communication, creativity, and problem-solving skills while discovering opportunities that match your strengths and career goals.
+                      Discover paid daily tasks, freelance gigs, internships, and full-time jobs that match your skills, strengths, and career goals.
                     </p>
 
                     {/* Highlight Chips */}
@@ -671,7 +671,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
 
                     {/* Description */}
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-5 sm:mb-6">
-                      AlignGrade helps candidates demonstrate their abilities through structured technical skill assessments and detailed profiles. Recruiters can define the skills and proficiency levels their roles require, then discover candidates whose skills align with those requirements. From technical expertise to communication and problem-solving, help talent stand out through more than resume keywords alone.
+                      AlignGrade helps candidates verify their skills through assessments and detailed profiles, connecting them with recruiters seeking the right technical expertise, communication, and problem-solving abilities beyond resume keywords.
                     </p>
 
                     {/* Three Clear Stages */}

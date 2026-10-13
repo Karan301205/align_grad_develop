@@ -9,8 +9,8 @@ async function startServer() {
       console.warn('[DB WARNING] Could not establish live MongoDB connection. Analytics will use fallback data.', err.message);
     });
 
-    app.listen(env.PORT, () => {
-      console.log(`Admin Portal Backend running on port ${env.PORT}`);
+    app.listen(env.PORT, '0.0.0.0', () => {
+      console.log(`Admin Portal Backend running on port ${env.PORT} (0.0.0.0)`);
     });
   } catch (err) {
     console.error('Failed to start server:', err);

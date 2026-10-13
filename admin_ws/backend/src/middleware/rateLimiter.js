@@ -38,7 +38,7 @@ const rateLimiter = (options) => {
 };
 
 // Periodic memory cleanup task to prevent leakages
-setInterval(() => {
+const cleanupTimer = setInterval(() => {
   const now = Date.now();
   for (const [key, value] of ipStore.entries()) {
     if (now > value.resetTime) {
@@ -46,6 +46,9 @@ setInterval(() => {
     }
   }
 }, 60 * 1000); // run every 1 minute
+if (cleanupTimer.unref) {
+  cleanupTimer.unref();
+}
 
 module.exports = {
   rateLimiter
