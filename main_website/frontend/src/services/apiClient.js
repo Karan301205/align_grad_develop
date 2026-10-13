@@ -27,7 +27,11 @@ export function apiFetch(path, { token, method = 'GET', json, body, headers = {}
     finalBody = JSON.stringify(json);
   }
 
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const trimmedPath = path.startsWith('/') ? path : `/${path}`;
+  // Prevent double '/api' if caller passes '/api/...' and API_BASE ends with '/api'
+  const normalizedPath = (API_BASE.endsWith('/api') && trimmedPath.startsWith('/api/'))
+    ? trimmedPath.slice(4)
+    : (API_BASE.endsWith('/api') && trimmedPath === '/api' ? '' : trimmedPath);
 
   return fetch(`${API_BASE}${normalizedPath}`, {
     method,

@@ -427,7 +427,7 @@ export default function GigsMarketplace({
     }
     setLoadingProfile(true);
     try {
-      const res = await apiFetch('/api/recruiter/candidates', { token });
+      const res = await apiFetch('/recruiter/candidates', { token });
       if (res.ok) {
         const allCandidates = await res.json();
         const found = Array.isArray(allCandidates)

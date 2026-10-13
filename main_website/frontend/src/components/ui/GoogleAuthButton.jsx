@@ -4,6 +4,8 @@ import { GOOGLE_CLIENT_ID } from '../../config';
 
 export default function GoogleAuthButton({ role = 'STUDENT', onSuccess, onError }) {
   const buttonRef = useRef(null);
+  const callbacksRef = useRef({ onSuccess, onError, role });
+  callbacksRef.current = { onSuccess, onError, role };
 
   useEffect(() => {
     const clientId = GOOGLE_CLIENT_ID;
@@ -15,7 +17,7 @@ export default function GoogleAuthButton({ role = 'STUDENT', onSuccess, onError 
 
     const handleGoogleCallback = async (response) => {
       if (!response.credential) {
-        onError?.('Google login failed.');
+        callbacksRef.current.onError?.('Google login failed.');
         return;
       }
 
@@ -24,21 +26,21 @@ export default function GoogleAuthButton({ role = 'STUDENT', onSuccess, onError 
           method: 'POST',
           json: {
             credential: response.credential,
-            role
+            role: callbacksRef.current.role
           }
         });
         const data = await res.json();
         if (!res.ok) {
           throw new Error(data.error || 'Google Authentication failed');
         }
-        onSuccess(data);
+        callbacksRef.current.onSuccess?.(data);
       } catch (err) {
-        onError?.(err.message || 'Google Sign-In failed');
+        callbacksRef.current.onError?.(err.message || 'Google Sign-In failed');
       }
     };
 
     const initializeGoogle = () => {
-      if (window.google?.accounts?.id) {
+      if (window.google?.accounts?.id && buttonRef.current) {
         try {
           window.google.accounts.id.initialize({
             client_id: clientId,
@@ -46,18 +48,20 @@ export default function GoogleAuthButton({ role = 'STUDENT', onSuccess, onError 
             auto_select: false
           });
 
-          if (buttonRef.current) {
-            buttonRef.current.innerHTML = '';
-            window.google.accounts.id.renderButton(buttonRef.current, {
-              type: 'standard',
-              theme: 'outline',
-              size: 'large',
-              text: 'continue_with',
-              shape: 'rectangular',
-              logo_alignment: 'left',
-              width: '100%'
-            });
-          }
+          buttonRef.current.innerHTML = '';
+          const containerWidth = buttonRef.current.offsetWidth || 350;
+          // Google Identity Services requires an integer width between 200 and 400
+          const validWidth = Math.min(400, Math.max(200, Math.floor(containerWidth)));
+
+          window.google.accounts.id.renderButton(buttonRef.current, {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            text: 'continue_with',
+            shape: 'rectangular',
+            logo_alignment: 'left',
+            width: validWidth
+          });
         } catch (e) {
           console.error('Google accounts ID init error:', e);
         }
@@ -80,7 +84,7 @@ export default function GoogleAuthButton({ role = 'STUDENT', onSuccess, onError 
         existingScript.addEventListener('load', initializeGoogle);
       }
     }
-  }, [role, onSuccess, onError]);
+  }, []);
 
   return (
     <div className="w-full">

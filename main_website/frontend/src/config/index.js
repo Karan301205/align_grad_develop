@@ -17,8 +17,13 @@ if (isLocalhost && (!rawApiBase || (!rawApiBase.includes('localhost') && !rawApi
   effectiveApiBase = 'http://localhost:5001/api';
 }
 
-// Normalize API base by stripping trailing slashes
-export const API_BASE = (effectiveApiBase || '').replace(/\/+$/, '');
+// Normalize API base by stripping trailing slashes and ensuring '/api' path exists
+let normalizedApiBase = (effectiveApiBase || '').replace(/\/+$/, '');
+if (normalizedApiBase && !normalizedApiBase.endsWith('/api')) {
+  normalizedApiBase += '/api';
+}
+
+export const API_BASE = normalizedApiBase;
 
 // Domain & Portal Configurations (Optional in single-domain or dev mode; used for multi-subdomain deployments)
 const rawLandingUrl = import.meta.env.VITE_LANDING_URL || '';
