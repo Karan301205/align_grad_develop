@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Briefcase,
   RefreshCw,
@@ -41,6 +41,11 @@ export default function StudentDashboard({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [localIsPremium, setLocalIsPremium] = useState(false);
+  const paymentCardRef = useRef(null);
+
+  const scrollToPaymentCard = () => {
+    paymentCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   const isPremium = localIsPremium || (profile?.plan ? profile.plan === 'PREMIUM' : user?.plan === 'PREMIUM');
 
@@ -215,7 +220,7 @@ export default function StudentDashboard({
         totalJobs={sortedJobs.length}
         onReset={handleResetFilters}
         isLocked={!isPremium}
-        onUnlock={() => setIsPaymentModalOpen(true)}
+        onUnlock={scrollToPaymentCard}
       />
 
       {/* Jobs Container: Sharp Corners with Sub-Tabs & 3-in-a-Row Box Grid */}
@@ -293,9 +298,9 @@ export default function StudentDashboard({
             </div>
 
             {/* Complete Horizontal Locked Section with Top-to-Bottom Fading Effect */}
-            <div className="relative w-full overflow-hidden border-t border-slate-200 dark:border-slate-800 bg-surface">
+            <div ref={paymentCardRef} id="jobs-payment-card" className="relative w-full overflow-hidden border-t border-slate-200 dark:border-slate-800 bg-surface scroll-mt-6">
               {/* Underlying locked jobs peaking through across all columns */}
-              <div className="p-5 sm:p-6 pb-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 filter blur-[2px] opacity-40 select-none pointer-events-none">
+              <div className="p-5 sm:p-6 pb-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 filter blur-[0.5px] opacity-75 select-none pointer-events-none">
                 {(sortedJobs.slice(3).length >= 3 
                   ? sortedJobs.slice(3, 6) 
                   : sortedJobs.length > 3
@@ -313,7 +318,7 @@ export default function StudentDashboard({
               </div>
 
               {/* Full-width Top-to-Bottom Gradient Fading Paywall Overlay */}
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 sm:p-10 text-center bg-gradient-to-b from-white/30 via-white/85 to-white dark:from-slate-900/30 dark:via-slate-900/85 dark:to-slate-900 backdrop-blur-[1px]">
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 sm:p-10 text-center bg-gradient-to-b from-white/20 via-white/60 to-white/90 dark:from-slate-900/10 dark:via-slate-900/50 dark:to-slate-900/80 backdrop-blur-[1px]">
                 <div className="max-w-xl mx-auto flex flex-col items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center shadow-sm">
                     <Lock className="w-5 h-5 text-emerald-700 dark:text-emerald-400 stroke-[2.2]" />
@@ -331,7 +336,10 @@ export default function StudentDashboard({
 
                   <button
                     type="button"
-                    onClick={() => setIsPaymentModalOpen(true)}
+                    onClick={() => {
+                      scrollToPaymentCard();
+                      setIsPaymentModalOpen(true);
+                    }}
                     className="mt-2 px-8 py-3.5 bg-emerald-800 hover:bg-emerald-900 active:scale-95 text-white text-sm font-headline font-bold rounded-none transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer"
                   >
                     <Sparkles className="w-4 h-4" />

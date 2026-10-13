@@ -344,6 +344,11 @@ export default function GigsMarketplace({
   const isPremium = localIsPremium || (profile?.plan ? profile.plan === 'PREMIUM' : user?.plan === 'PREMIUM');
   const isCandidate = user?.role === 'STUDENT';
   const isGated = isCandidate && !isPremium;
+  const paymentCardRef = useRef(null);
+
+  const scrollToPaymentCard = () => {
+    paymentCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   useEffect(() => {
     if (autoSelectOpportunity && autoSelectOpportunity.type === 'gig') {
@@ -1317,7 +1322,7 @@ export default function GigsMarketplace({
                     loading={loading}
                     totalGigs={displayGigs.length}
                     isLocked={isGated}
-                    onUnlock={() => setIsPaymentModalOpen(true)}
+                    onUnlock={scrollToPaymentCard}
                   />
 
                   {/* Right Column: Stack of Gigs (Zero gap, divide-y) */}
@@ -1358,9 +1363,9 @@ export default function GigsMarketplace({
                         </div>
 
                         {/* Complete Locked Section with Top-to-Bottom Fading Effect from gig 6 onward */}
-                        <div className="relative w-full overflow-hidden border border-t-0 border-slate-300 dark:border-slate-700 bg-surface">
+                        <div ref={paymentCardRef} id="gigs-payment-card" className="relative w-full overflow-hidden border border-t-0 border-slate-300 dark:border-slate-700 bg-surface scroll-mt-6">
                           {/* Underlying locked gigs peaking through */}
-                          <div className="p-4 sm:p-5 pb-24 space-y-4 filter blur-[2px] opacity-40 select-none pointer-events-none">
+                          <div className="p-4 sm:p-5 pb-24 space-y-4 filter blur-[0.5px] opacity-75 select-none pointer-events-none">
                             {(displayGigs.slice(5).length >= 2
                               ? displayGigs.slice(5, 8)
                               : [...displayGigs.slice(5), ...displayGigs.slice(0, 2 - displayGigs.slice(5).length)]
@@ -1376,7 +1381,7 @@ export default function GigsMarketplace({
                           </div>
 
                           {/* Full-width Top-to-Bottom Gradient Fading Paywall Overlay */}
-                          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 sm:p-10 text-center bg-gradient-to-b from-white/30 via-white/85 to-white dark:from-slate-900/30 dark:via-slate-900/85 dark:to-slate-900 backdrop-blur-[1px]">
+                          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 sm:p-10 text-center bg-gradient-to-b from-white/10 via-white/50 to-white/80 dark:from-slate-900/10 dark:via-slate-900/50 dark:to-slate-900/80 backdrop-blur-[1px]">
                             <div className="max-w-xl mx-auto flex flex-col items-center gap-3">
                               <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center shadow-sm">
                                 <Lock className="w-5 h-5 text-emerald-700 dark:text-emerald-400 stroke-[2.2]" />
@@ -1394,7 +1399,10 @@ export default function GigsMarketplace({
 
                               <button
                                 type="button"
-                                onClick={() => setIsPaymentModalOpen(true)}
+                                onClick={() => {
+                                  scrollToPaymentCard();
+                                  setIsPaymentModalOpen(true);
+                                }}
                                 className="mt-2 px-8 py-3.5 bg-emerald-800 hover:bg-emerald-900 active:scale-95 text-white text-sm font-headline font-bold rounded-none transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer"
                               >
                                 <Sparkles className="w-4 h-4" />

@@ -45,7 +45,9 @@ import {
   Layers,
   Bot,
   BarChart3,
-  Video
+  Video,
+  MessagesSquare,
+  UserCheck
 } from 'lucide-react';
 import { apiFetch } from '../../../services/apiClient';
 import Button from '../../../components/ui/Button';
@@ -71,13 +73,13 @@ const COURSE_DOMAINS = [
     badgeClass: 'bg-blue-500/10 text-primary border-blue-500/20'
   },
   {
-    id: 'data-analytics',
-    title: 'Data Analytics & Science',
+    id: 'communication-soft-skills',
+    title: 'Communication & Soft Skills',
     level: 'Comprehensive',
     modules: '6 Modules • 36 Lessons',
-    description: 'Extract business intelligence through Python data pipelines, advanced SQL querying, automated dashboards, and statistical models.',
-    skills: ['Python', 'SQL Mastery', 'Tableau', 'Pandas', 'Predictive Modeling'],
-    icon: BarChart3,
+    description: 'Master professional workplace communication, executive storytelling, active listening, business writing, and cross-functional team collaboration.',
+    skills: ['Active Listening', 'Public Speaking', 'Executive Presence', 'Business Writing', 'Team Collaboration'],
+    icon: MessagesSquare,
     badge: 'High Demand',
     badgeClass: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
   },
@@ -93,13 +95,13 @@ const COURSE_DOMAINS = [
     badgeClass: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20'
   },
   {
-    id: 'digital-marketing',
-    title: 'Digital Marketing & Growth',
+    id: 'interview-readiness',
+    title: 'Interview Readiness',
     level: 'All Levels',
     modules: '5 Modules • 30 Lessons',
-    description: 'Scale acquisition and revenue with modern performance marketing, organic SEO architecture, funnel optimization, and attribution analytics.',
-    skills: ['Performance Marketing', 'SEO Strategy', 'Funnel Optimization', 'Ad Networks', 'Growth Analytics'],
-    icon: TrendingUp,
+    description: 'Gain interview confidence with sessions on resume building, communication skills, mock interviews, and behavioral preparation.',
+    skills: ['Communication', 'Resume Building', 'Interview Preparation', 'Soft Skills', 'Behavioral Skills'],
+    icon: UserCheck,
     badge: 'Career Accelerator',
     badgeClass: 'bg-amber-500/10 text-amber-600 border-amber-500/20'
   }
@@ -775,7 +777,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 <AnimatedContent distance={30} direction="vertical" duration={0.8} delay={0.28}>
                   <div className="relative group rounded-[2rem] sm:rounded-[2.25rem] overflow-hidden border-3 sm:border-4 border-white dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900 transition-all hover:shadow-2xl">
                     <img
-                      src="/skill_scorecard_badge.jpg"
+                      src="/candidate_skill_verification.jpg"
                       alt="Candidate Verified Skill Proficiency and Recruiter Alignment Scorecard"
                       className="w-full h-auto object-cover object-center group-hover:scale-102 transition-transform duration-500"
                     />
@@ -798,15 +800,15 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
           <div className="max-w-7xl mx-auto">
             {/* Header Plate */}
             <AnimatedContent distance={30} direction="vertical" duration={0.7} delay={0.1}>
-              <div className="backdrop-blur-md bg-surface-container-lowest/80 dark:bg-surface-container-lowest/80 rounded-3xl p-6 sm:p-8 border border-outline-variant/50 shadow-xs text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+              <div className="bg-white dark:bg-slate-900 text-3xl rounded-3xl p-5 backdrop-blur-md bg-surface-container-lowest/80 dark:bg-surface-container-lowest/80 rounded-3xl p-6 sm:p-8 border border-outline-variant/50 shadow-xs text-center max-w-3xl mx-auto mb-10 sm:mb-12">
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary bg-primary-container/90 px-3 py-1 rounded-full shadow-2xs">
                   <BookOpen className="w-3.5 h-3.5" /> Multi-Domain Academy &amp; Roadmaps
                 </span>
-                <h2 className="text-3xl sm:text-4xl lg:text-[38px] font-headline font-medium text-heading mt-3 mb-3 leading-tight">
+                <h2 className="sm:text-4xl lg:text-[38px] font-headline font-medium text-heading mt-3 mb-3 leading-tight">
                   Master In-Demand Skills. <span className="text-primary font-bold">Learn Across Core Domains.</span>
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
-                  AlignGrade empowers candidates to bridge skill gaps and master high-paying disciplines. Explore modular video courses across Full Stack Development, Data Analytics, AI Agents, and Digital Marketing to build verified competency and unlock direct placement opportunities.
+                  Build in-demand skills with AlignGrade’s video courses in Full Stack Development, Data Analytics, AI Agents, and Digital Marketing. Strengthen your expertise, verify your skills, and unlock career opportunities.
                 </p>
               </div>
             </AnimatedContent>
@@ -815,7 +817,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-12 sm:mb-16">
               {COURSE_DOMAINS.map((domain, idx) => (
                 <AnimatedContent key={domain.id} distance={30} direction="vertical" duration={0.7} delay={0.15 + idx * 0.08}>
-                  <div className="h-full p-5 rounded-3xl bg-surface-container-lowest/90 dark:bg-slate-900/90 backdrop-blur-md border border-outline-variant hover:border-primary/50 transition-all hover:shadow-md flex flex-col justify-between group">
+                  <div className="bg-white dark:bg-slate-900 h-full p-5 rounded-3xl bg-surface-container-lowest/90 dark:bg-slate-900/90 backdrop-blur-md border border-outline-variant hover:border-primary/50 transition-all hover:shadow-md flex flex-col justify-between group">
                     <div>
                       {/* Top Row: Icon + Badge */}
                       <div className="flex items-center justify-between mb-3.5">
@@ -857,10 +859,10 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
             </div>
 
             {/* ─── DUAL VISUAL SHOWCASE: Course Learning & Platform Experience ─── */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+            {/* <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center"> */}
               {/* Visual 1: Course Learning Image (Cohort & Hands-On Engineering) */}
-              <div className="lg:col-span-6 flex flex-col gap-4">
-                <AnimatedContent distance={35} direction="vertical" duration={0.8} delay={0.2}>
+              {/* <div className="lg:col-span-6 flex flex-col gap-4"> */}
+                {/* <AnimatedContent distance={35} direction="vertical" duration={0.8} delay={0.2}>
                   <div className="relative group rounded-[2rem] sm:rounded-[2.25rem] overflow-hidden border-3 sm:border-4 border-white dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900 transition-all hover:shadow-2xl">
                     <img
                       src="/course_learning_students.jpg"
@@ -874,9 +876,9 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                       </span>
                     </div>
                   </div>
-                </AnimatedContent>
+                </AnimatedContent> */}
 
-                <AnimatedContent distance={20} direction="vertical" duration={0.7} delay={0.25}>
+                {/* <AnimatedContent distance={20} direction="vertical" duration={0.7} delay={0.25}>
                   <div className="p-4 sm:p-5 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 shadow-xs">
                     <h4 className="font-headline text-sm sm:text-base font-semibold text-heading mb-1.5 flex items-center gap-2">
                       <Layers className="w-4 h-4 text-primary" />
@@ -886,11 +888,11 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                       Build full-stack software, automate intelligence with autonomous AI agents, extract insights with data analytics, and drive growth with digital marketing.
                     </p>
                   </div>
-                </AnimatedContent>
-              </div>
+                </AnimatedContent> */}
+              {/* </div> */}
 
               {/* Visual 2: Course Platform Experience (Video Lectures & Progress Tracking) */}
-              <div className="lg:col-span-6 flex flex-col gap-4">
+              {/* <div className="lg:col-span-6 flex flex-col gap-4">
                 <AnimatedContent distance={35} direction="vertical" duration={0.8} delay={0.28}>
                   <div className="relative group rounded-[2rem] sm:rounded-[2.25rem] overflow-hidden border-3 sm:border-4 border-white dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900 transition-all hover:shadow-2xl">
                     <img
@@ -918,8 +920,8 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                     </p>
                   </div>
                 </AnimatedContent>
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
 
             {/* Bottom Actions Bar */}
             <div className="mt-10 sm:mt-12 text-center flex flex-wrap items-center justify-center gap-3.5">
@@ -956,29 +958,6 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
               <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                 From self-declaration to high-income payouts. A cheat-resistant, standardized 4-step engine that aligns candidate abilities with recruiter budgets.
               </p>
-            </div>
-
-            {/* Featured Badge Highlight Banner (White Card with White Border) */}
-            <div className="bg-white dark:bg-slate-900 border-2 sm:border-3 border-white dark:border-slate-800 rounded-3xl p-6 sm:p-8 mb-6 shadow-md flex flex-col md:flex-row items-center gap-6">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 shrink-0 rounded-2xl overflow-hidden border-2 border-white dark:border-slate-700 shadow-sm">
-                <img
-                  src="/skill_income_shield.jpg"
-                  alt="Verified skill badge and income growth shield"
-                  className="w-full h-full object-cover object-center"
-                />
-              </div>
-              <div className="space-y-2 text-center md:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-bold uppercase tracking-wider">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>The Verified Income Passport</span>
-                </div>
-                <h3 className="text-lg sm:text-xl font-headline font-medium text-heading">
-                  Prove Your Knowledge Once. Unlock Unlimited Gigs &amp; High-Paying Jobs.
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
-                  Recruiters hate reading 500 fake resumes. When candidates earn the Verified Shield (70%+ score), their applications skip HR screening entirely. You are instantly fast-tracked for paid project milestones, lucrative side hustles, and direct full-time offers.
-                </p>
-              </div>
             </div>
 
             {/* 4 Step Cards (White Cards with White Borders) */}
@@ -1046,56 +1025,6 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
               </p>
             </div>
 
-            {/* Community Earning Spotlight Bento Card (White Card with White Border) */}
-            <div className="mb-6 rounded-3xl border-2 sm:border-3 border-white dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md overflow-hidden grid grid-cols-1 lg:grid-cols-12">
-              <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between">
-                <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4">
-                    <Users className="w-3.5 h-3.5" /> High-Earning Student Network
-                  </div>
-                  <h3 className="text-2xl sm:text-3xl font-headline font-medium text-heading mb-3 leading-snug">
-                    Over 50,000+ Students &amp; Freelancers Monetizing Skills Together
-                  </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
-                    No gatekeeping. No waiting for college campus drives. Students and junior engineers from 800+ colleges across India are cracking 10-question skill benchmarks, securing escrow-guaranteed freelance payouts, and launching high-income engineering careers.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                  <div className="p-3 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700">
-                    <div className="text-lg sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-headline">₹4.8 Cr+</div>
-                    <div className="text-[11px] text-slate-500 font-medium mt-0.5">Escrow Paid Out</div>
-                  </div>
-                  <div className="p-3 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700">
-                    <div className="text-lg sm:text-2xl font-bold text-heading font-headline">12,400+</div>
-                    <div className="text-[11px] text-slate-500 font-medium mt-0.5">Milestone Gigs Done</div>
-                  </div>
-                  <div className="p-3 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700">
-                    <div className="text-lg sm:text-2xl font-bold text-primary font-headline">4.9 / 5</div>
-                    <div className="text-[11px] text-slate-500 font-medium mt-0.5">Candidate Rating</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:col-span-5 relative min-h-[260px] lg:min-h-full overflow-hidden group border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800">
-                <img
-                  src="/landing_community_earn.jpg"
-                  alt="Students collaborating and earning money through side hustles"
-                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-l from-black/85 via-black/25 to-transparent"></div>
-                <div className="absolute bottom-4 left-4 right-4 text-white">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/90 text-[10px] font-bold text-white mb-2 shadow-xs">
-                    <ShieldCheck className="w-3 h-3" /> 100% Escrow Protected
-                  </div>
-                  <p className="text-xs font-semibold leading-snug text-white/95 drop-shadow-sm">
-                    "AlignGrade gave me the income freedom I needed to focus on building without financial stress."
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* 3 Testimonial Cards (White Cards with White Borders) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 sm:border-3 border-white dark:border-slate-800 shadow-md hover:shadow-xl transition-all flex flex-col justify-between">
                 <div>
@@ -1250,56 +1179,171 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
         </section>
 
         {/* ─── 11. FINAL HIGH-CONVERSION CTA BANNER ─── */}
-        <section className="relative z-10 py-20 px-4 sm:px-8 border-b border-outline-variant text-center bg-transparent">
-          <div className="max-w-4xl mx-auto relative z-10">
-            {/* White Header Plate with White Border */}
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border-2 sm:border-3 border-white dark:border-slate-800 shadow-md max-w-3xl mx-auto mb-10 text-center">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full shadow-2xs">
-                Unlock Your Earning Potential
-              </span>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-headline font-medium text-heading mt-4 mb-4">
-                Step Into the Era of Skill Monetization &amp; Rightful Hiring
-              </h2>
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-                Whether you want to earn extra side hustle money from freelance contracts, build recurring monthly stipend income, or hire top pre-screened engineers without resume screening headaches — AlignGrade is your home.
-              </p>
-            </div>
+        <section className="relative z-10 py-12 sm:py-16 px-4 sm:px-8 border-b border-outline-variant bg-transparent">
+          <div className="max-w-7xl mx-auto relative z-10">
+            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-6 sm:p-8 lg:p-10 border-2 sm:border-3 border-white dark:border-slate-800 shadow-md">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
+                
+                {/* ─── LEFT COLUMN: Headline & Rich Value Proposition ─── */}
+                <div className="lg:col-span-6 xl:col-span-7 flex flex-col justify-between space-y-5 text-left">
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider shadow-2xs">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Unlock Your Earning Potential</span>
+                    </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto">
-              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 sm:border-3 border-white dark:border-slate-800 text-left shadow-md hover:shadow-xl transition-all flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1 text-emerald-600">
-                    <Wallet className="w-3.5 h-3.5" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">CANDIDATES &amp; STUDENTS</span>
-                  </div>
-                  <h3 className="text-base font-bold text-heading mb-2">Prove Skills &amp; Start Earning</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mb-4">100% Free forever. Take 10-question tests, earn verified shields, and unlock 5,000+ gigs, side hustles, and jobs.</p>
-                </div>
-                <button
-                  onClick={() => navigateToCandidate('signup')}
-                  className="w-full py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/95 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
-                >
-                  <span>Start Earning Money</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-headline font-medium text-heading leading-[1.2] tracking-tight">
+                      Step Into the Era of Skill Monetization &amp; Rightful Hiring
+                    </h2>
 
-              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border-2 sm:border-3 border-white dark:border-slate-800 text-left shadow-md hover:shadow-xl transition-all flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-1.5 mb-1 text-primary">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">RECRUITERS &amp; COMPANIES</span>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
+                      Whether you want to earn extra side hustle money from freelance contracts, build recurring monthly stipend income, or hire top pre-screened engineers without resume screening headaches — AlignGrade is your home.
+                    </p>
+
+                    {/* 3 Core Value Pillars */}
+                    <div className="space-y-2.5 pt-1">
+                      <div className="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                          <ShieldCheck className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs sm:text-sm font-headline font-semibold text-heading">
+                            Anti-Cheat Skill Verification
+                          </h4>
+                          <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed mt-0.5">
+                            10-question adaptive assessments validate genuine proficiency, rendering resume inflation and pedigree bias obsolete.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                        <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                          <Coins className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs sm:text-sm font-headline font-semibold text-heading">
+                            Escrow-Protected Monetization
+                          </h4>
+                          <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed mt-0.5">
+                            Every freelance milestone and paid student stipend is funded upfront into escrow for guaranteed, on-time payouts.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                        <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+                          <Building2 className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs sm:text-sm font-headline font-semibold text-heading">
+                            Threshold-Gated Rightful Hiring
+                          </h4>
+                          <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed mt-0.5">
+                            Recruiters set minimum score bars. Only candidates who prove requisite knowledge apply, slashing time-to-hire to 48 hours.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-base font-bold text-heading mb-2">Hire Pre-Screened Talent</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mb-4">Post roles, specify required thresholds, and shortlist verified candidates with zero resume inflation in 48 hours.</p>
+
+                  {/* Quick Proof Metrics Row */}
+                  <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <div>
+                      <div className="text-base sm:text-lg font-bold font-headline text-emerald-600">₹4.8 Cr+</div>
+                      <div className="text-[10px] text-slate-500 font-medium">Escrow Paid Out</div>
+                    </div>
+                    <div>
+                      <div className="text-base sm:text-lg font-bold font-headline text-heading">12,400+</div>
+                      <div className="text-[10px] text-slate-500 font-medium">Verified Gigs Done</div>
+                    </div>
+                    <div>
+                      <div className="text-base sm:text-lg font-bold font-headline text-primary">800+</div>
+                      <div className="text-[10px] text-slate-500 font-medium">Colleges &amp; Employers</div>
+                    </div>
+                  </div>
                 </div>
-                <button
-                  onClick={() => navigateToRecruiter('signup')}
-                  className="w-full py-2.5 rounded-xl bg-surface-container-high border border-outline text-heading text-xs font-semibold hover:bg-surface-container-highest transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
-                >
-                  <span>Discover Rightful Talent</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-primary" />
-                </button>
+
+                {/* ─── RIGHT COLUMN: Candidate & Recruiter Cards ─── */}
+                <div className="lg:col-span-6 xl:col-span-5 flex flex-col gap-4 justify-between">
+                  {/* Card 1: Candidates & Students */}
+                  <div className="p-5 sm:p-6 rounded-3xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700/80 text-left shadow-xs hover:shadow-md hover:border-emerald-500/40 transition-all flex flex-col justify-between group">
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-2 text-emerald-600">
+                        <Wallet className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">CANDIDATES &amp; STUDENTS</span>
+                      </div>
+                      <h3 className="text-base font-headline font-semibold text-heading mb-1.5 group-hover:text-emerald-600 transition-colors">
+                        Prove Skills &amp; Start Earning
+                      </h3>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        100% Free forever. Take 10-question tests, earn verified shields, and unlock 5,000+ gigs, side hustles, and jobs.
+                      </p>
+
+                      <ul className="space-y-1.5 mb-4 pt-2.5 border-t border-slate-200/60 dark:border-slate-700/60">
+                        <li className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>70%+ score unlocks direct interview access</span>
+                        </li>
+                        <li className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>Escrow-backed milestone payouts</span>
+                        </li>
+                        <li className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>Verified work experience on public profile</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={() => navigateToCandidate('signup')}
+                      className="w-full py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/95 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs group-hover:shadow-md"
+                    >
+                      <span>Start Earning Money</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Card 2: Recruiters & Companies */}
+                  <div className="p-5 sm:p-6 rounded-3xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700/80 text-left shadow-xs hover:shadow-md hover:border-primary/40 transition-all flex flex-col justify-between group">
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-2 text-primary">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">RECRUITERS &amp; COMPANIES</span>
+                      </div>
+                      <h3 className="text-base font-headline font-semibold text-heading mb-1.5 group-hover:text-primary transition-colors">
+                        Hire Pre-Screened Talent
+                      </h3>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                        Post roles, specify required thresholds, and shortlist verified candidates with zero resume inflation in 48 hours.
+                      </p>
+
+                      <ul className="space-y-1.5 mb-4 pt-2.5 border-t border-slate-200/60 dark:border-slate-700/60">
+                        <li className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                          <span>Set mandatory test score gates (e.g. 8/10 in React)</span>
+                        </li>
+                        <li className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                          <span>Pre-screened candidates ready for instant interview</span>
+                        </li>
+                        <li className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                          <span>Zero resume spam or unvetted applications</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={() => navigateToRecruiter('signup')}
+                      className="w-full py-2.5 rounded-xl bg-surface-container-high border border-outline text-heading text-xs font-semibold hover:bg-surface-container-highest transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs group-hover:shadow-md"
+                    >
+                      <span>Discover Rightful Talent</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-primary" />
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
