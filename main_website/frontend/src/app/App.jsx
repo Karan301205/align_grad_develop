@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { AuthView, CandidateAuth, RecruiterAuth, ResetPasswordPage } from '../features/Auth';
 import { StudentLayout, PublicJobBriefPage } from '../features/Student';
 import { RecruiterLayout } from '../features/Recruiter';
+import { RecruiterLandingPage } from '../features/RecruiterLanding';
+import { CommonLandingPage } from '../features/CommonLanding';
 import { PrivacyPolicyPage, TermsAndConditionsPage } from '../features/legal';
 import ConnectionLoader from '../components/ConnectionLoader';
 import CompanyProfileModal from '../components/CompanyProfileModal';
@@ -13,7 +15,10 @@ import {
   CANDIDATE_HOSTNAME,
   RECRUITER_HOSTNAME,
   CANDIDATE_URL,
-  RECRUITER_URL
+  RECRUITER_URL,
+  COMMON_LANDING_PATH,
+  CANDIDATE_LANDING_PATH,
+  RECRUITER_LANDING_PATH
 } from '../config';
 
 export default function App() {
@@ -135,6 +140,21 @@ export default function App() {
 
   if (currentPath.startsWith('/terms')) {
     return <TermsAndConditionsPage theme={theme} toggleTheme={toggleTheme} />;
+  }
+
+  // Standalone public dedicated recruiter landing page
+  if (currentPath.startsWith(RECRUITER_LANDING_PATH)) {
+    return <RecruiterLandingPage theme={theme} toggleTheme={toggleTheme} />;
+  }
+
+  // Standalone public candidate landing page
+  if (currentPath.startsWith(CANDIDATE_LANDING_PATH)) {
+    return <AuthView setToken={setToken} setUser={setUser} theme={theme} toggleTheme={toggleTheme} />;
+  }
+
+  // Standalone public common landing page (primary platform gateway for visitors)
+  if (!token && (currentPath === COMMON_LANDING_PATH || currentPath === '/' || currentPath === '')) {
+    return <CommonLandingPage theme={theme} toggleTheme={toggleTheme} />;
   }
 
   const hostname = window.location.hostname.toLowerCase();

@@ -56,6 +56,8 @@ import ThemeToggle from '../../../components/ui/ThemeToggle';
 import ClickSpark from '../../../components/ui/ClickSpark';
 import AnimatedContent from '../../../components/ui/AnimatedContent';
 import GoogleAuthButton from '../../../components/ui/GoogleAuthButton';
+import CountUp from '../../../effects/CountUp';
+import TrueFocus from '../../../effects/TrueFocus';
 import { formatErrorMessage } from '../../../utils/errorFormatter';
 import { CANDIDATE_URL, RECRUITER_URL } from '../../../config';
 
@@ -307,17 +309,46 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 <AnimatedContent distance={30} direction="vertical" duration={0.6}>
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-blue-200/60 dark:border-blue-900/50 shadow-2xs mb-5 w-fit">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">High-Income Skill Economy:</span>
                     <span className="text-xs font-medium text-slate-700 dark:text-slate-200">Unlock Side Hustles &amp; Gigs</span>
                   </div>
                 </AnimatedContent>
 
                 <AnimatedContent distance={40} direction="vertical" duration={0.7} delay={0.1}>
-                  <h1 className="font-headline text-3xl sm:text-4xl lg:text-5xl xl:text-[45px] font-medium tracking-tight text-heading leading-[1.14] mb-5">
-                    Turn Your Skills Into <span className="text-emerald-600 dark:text-emerald-400 font-bold xl:text-7xl">Money</span> And Your Hustle Into a <span className="text-primary font-bold xl:text-7xl">Career !!</span>.
-                  </h1>
+                  <TrueFocus
+                    manualMode={false}
+                    blurAmount={1.5}
+                    borderColor={['#059669', '#2563eb']}
+                    glowColor={['rgba(16, 185, 129, 0.55)', 'rgba(37, 99, 235, 0.55)']}
+                    animationDuration={0.6}
+                    pauseBetweenAnimations={1.5}
+                    className="mb-5"
+                  >
+                    <h1 className="font-headline text-3xl sm:text-4xl lg:text-5xl xl:text-[45px] font-medium tracking-tight text-heading leading-[1.14]">
+                      Turn Your Skills Into{' '}
+                      <TrueFocus.Target
+                        index={0}
+                        borderColor="#059669"
+                        glowColor="rgba(16, 185, 129, 0.6)"
+                        className="text-emerald-600 dark:text-emerald-400 font-bold"
+                        style={{ fontSize: 'calc(1em + 25px)' }}
+                      >
+                        Money
+                      </TrueFocus.Target>{' '}
+                      And Your Hustle Into a{' '}
+                      <TrueFocus.Target
+                        index={1}
+                        borderColor="#2563eb"
+                        glowColor="rgba(37, 99, 235, 0.6)"
+                        className="text-primary font-bold"
+                        style={{ fontSize: 'calc(1em + 25px)' }}
+                      >
+                        Career !!
+                      </TrueFocus.Target>
+                      .
+                    </h1>
+                  </TrueFocus>
                   <p className="font-sans text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-7 max-w-xl">
-                   Turn your skills into income with paid gigs, stipend internships, and verified job opportunities through 10-question skill assessments.
+                    Turn your skills into income with paid gigs, stipend internships, and verified job opportunities through 10-question skill assessments.
                   </p>
                 </AnimatedContent>
 
@@ -329,7 +360,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                       className="px-6 py-3.5 rounded-xl bg-primary text-white font-medium text-sm flex items-center justify-center gap-2 shadow-md hover:bg-primary/95 transition-all cursor-pointer group"
                     >
                       <Wallet className="w-4 h-4 text-emerald-300" />
-                      <span>Start Earning: Explore 5,000+ Opportunities</span>
+                      <span>Explore 5,000+ Opportunities</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                     <button
@@ -488,7 +519,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
 
             {/* ─── 3. THE MODERN PLAYBOOK & ECOSYSTEM SHOWCASE ─── */}
             <div className="mt-16 sm:mt-24 space-y-8 sm:space-y-12">
-              
+
               {/* ─── ROW 1: Skills & Inclusivity Card (Left) + Image (Right) ─── */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
                 {/* CONTAINER 1: Skills & Inclusivity Card */}
@@ -611,19 +642,27 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
               <AnimatedContent distance={30} direction="vertical" duration={0.8} delay={0.35}>
                 <div className="backdrop-blur-md bg-white/90 dark:bg-slate-900/90 rounded-3xl p-5 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-sm grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 sm:mt-16">
                   <div className="text-center p-3">
-                    <div className="font-headline text-2xl sm:text-3xl font-bold text-emerald-600">₹14.2 Cr+</div>
+                    <div className="font-headline text-2xl sm:text-3xl font-bold text-emerald-600">
+                      ₹<CountUp to={14.2} from={0} duration={2} /> Cr+
+                    </div>
                     <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">Total Income Earned</div>
                   </div>
                   <div className="text-center p-3">
-                    <div className="font-headline text-2xl sm:text-3xl font-bold text-primary">5,000+</div>
+                    <div className="font-headline text-2xl sm:text-3xl font-bold text-primary">
+                      <CountUp to={5000} from={0} separator="," duration={2} />+
+                    </div>
                     <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">Active Opportunities &amp; Gigs</div>
                   </div>
                   <div className="text-center p-3">
-                    <div className="font-headline text-2xl sm:text-3xl font-bold text-primary">140+</div>
+                    <div className="font-headline text-2xl sm:text-3xl font-bold text-primary">
+                      <CountUp to={140} from={0} duration={2} />+
+                    </div>
                     <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">Verified Skill Roadmaps</div>
                   </div>
                   <div className="text-center p-3">
-                    <div className="font-headline text-2xl sm:text-3xl font-bold text-primary">94.2%</div>
+                    <div className="font-headline text-2xl sm:text-3xl font-bold text-primary">
+                      <CountUp to={94.2} from={0} duration={2} />%
+                    </div>
                     <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5">Recruiter Alignment Rate</div>
                   </div>
                 </div>
@@ -656,78 +695,69 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
         <section id="recruiters" className="relative z-10 py-5 sm:py-7 px-4 sm:px-8 border-b border-outline-variant bg-transparent">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-              
+
               {/* LEFT COLUMN: Explanatory Content & 3 Clear Stages */}
               <div className="lg:col-span-6 flex flex-col justify-center">
                 <AnimatedContent distance={25} direction="vertical" duration={0.7} delay={0.15}>
                   <div>
                     {/* Eyebrow */}
                     <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-primary text-[11px] font-bold uppercase tracking-wider mb-3">
-                      <Sparkles className="w-3.5 h-3.5" /> SKILLS. TESTED. VERIFIED. MATCHED.
+                      <Sparkles className="w-3.5 h-3.5" /> SKILLS VERIFIED. JOBS MATCHED.
                     </div>
 
                     {/* Main Heading */}
                     <h2 className="text-3xl sm:text-4xl lg:text-[38px] font-headline font-medium text-heading mb-3 leading-tight">
-                      Don't Just List Your Skills. <span className="text-primary font-bold">Prove Them.</span>
+                      Verify Your Skills. <span className="text-primary font-bold">Unlock Relevant Jobs.</span>
                     </h2>
 
                     {/* Description */}
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-5 sm:mb-6">
-                      AlignGrade helps candidates verify their skills through assessments and detailed profiles, connecting them with recruiters seeking the right technical expertise, communication, and problem-solving abilities beyond resume keywords.
+                      Prove your expertise through 10-question skill assessments. Get verified on AlignGrade and receive job recommendations that match your skills and proficiency levels.
                     </p>
 
                     {/* Three Clear Stages */}
                     <div className="space-y-3">
-                      {/* 01 — Assess Your Skills */}
+                      {/* 01 — Verify Your Skills */}
                       <div className="p-3.5 sm:p-4 rounded-2xl bg-surface-container-lowest/90 dark:bg-slate-900/90 backdrop-blur-md border border-outline-variant/80 shadow-xs flex items-start gap-3.5 transition-all hover:border-blue-500/40 group">
                         <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-primary flex items-center justify-center shrink-0 font-headline font-bold text-xs border border-blue-500/20 group-hover:bg-primary group-hover:text-white transition-colors">
                           01
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                            <h3 className="font-headline text-sm sm:text-base font-semibold text-heading">Assess Your Skills</h3>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-primary border border-blue-500/20">
-                              10 Questions
-                            </span>
-                          </div>
+                          <h3 className="font-headline text-sm sm:text-base font-semibold text-heading mb-0.5">
+                            Verify Your Skills
+                          </h3>
                           <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                            Candidates complete 10-question assessments for supported technical skills to demonstrate their knowledge.
+                            Complete 10-question assessments to demonstrate your knowledge and earn verified skill recognition.
                           </p>
                         </div>
                       </div>
 
-                      {/* 02 — Verify Your Proficiency */}
+                      {/* 02 — Unlock Relevant Opportunities */}
                       <div className="p-3.5 sm:p-4 rounded-2xl bg-surface-container-lowest/90 dark:bg-slate-900/90 backdrop-blur-md border border-outline-variant/80 shadow-xs flex items-start gap-3.5 transition-all hover:border-emerald-500/40 group">
                         <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 font-headline font-bold text-xs border border-emerald-500/20 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                           02
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                            <h3 className="font-headline text-sm sm:text-base font-semibold text-heading">Verify Your Proficiency</h3>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                              70% Threshold
-                            </span>
-                          </div>
+                          <h3 className="font-headline text-sm sm:text-base font-semibold text-heading mb-0.5">
+                            Unlock Relevant Opportunities
+                          </h3>
                           <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                            Assessment results establish verified status when the candidate meets the platform's 70% passing threshold.
+                            Verified skills help you discover job opportunities aligned with your expertise and proficiency.
                           </p>
                         </div>
                       </div>
 
-                      {/* 03 — Match Skills to Opportunities */}
+                      {/* 03 — Get Matched with Recruiters */}
                       <div className="p-3.5 sm:p-4 rounded-2xl bg-surface-container-lowest/90 dark:bg-slate-900/90 backdrop-blur-md border border-outline-variant/80 shadow-xs flex items-start gap-3.5 transition-all hover:border-primary/40 group">
                         <div className="w-9 h-9 rounded-xl bg-primary-container text-primary flex items-center justify-center shrink-0 font-headline font-bold text-xs border border-primary/20 group-hover:bg-primary group-hover:text-white transition-colors">
                           03
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                            <h3 className="font-headline text-sm sm:text-base font-semibold text-heading">Match Skills to Opportunities</h3>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                              Recruiter Alignment
-                            </span>
-                          </div>
+                          <h3 className="font-headline text-sm sm:text-base font-semibold text-heading mb-0.5">
+                            Get Matched with Recruiters
+                          </h3>
                           <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                            Recruiters define required skills and proficiency levels. AlignGrade helps identify candidates whose available skill ratings and verification results align with those requirements.
+                            Showcase your verified abilities and connect with recruiters looking for candidates with your skills.
                           </p>
                         </div>
                       </div>
@@ -739,14 +769,14 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                         onClick={() => navigateToCandidate('signup')}
                         className="px-5 py-2.5 rounded-xl bg-primary text-white text-xs sm:text-sm font-semibold hover:bg-primary/95 transition-all flex items-center gap-2 cursor-pointer shadow-sm group"
                       >
-                        <span>Take a Skill Assessment</span>
+                        <span>Verify Your Skills</span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                       </button>
                       <button
-                        onClick={() => navigateToRecruiter('signup')}
+                        onClick={() => navigateToCandidate('signup')}
                         className="px-5 py-2.5 rounded-xl bg-surface-container-high border border-outline text-heading text-xs sm:text-sm font-semibold hover:bg-surface-container-highest transition-all flex items-center gap-2 cursor-pointer shadow-xs"
                       >
-                        <span>Discover Verified Talent</span>
+                        <span>Explore Matched Jobs</span>
                         <ChevronRight className="w-4 h-4 text-primary" />
                       </button>
                     </div>
@@ -860,9 +890,9 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
 
             {/* ─── DUAL VISUAL SHOWCASE: Course Learning & Platform Experience ─── */}
             {/* <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center"> */}
-              {/* Visual 1: Course Learning Image (Cohort & Hands-On Engineering) */}
-              {/* <div className="lg:col-span-6 flex flex-col gap-4"> */}
-                {/* <AnimatedContent distance={35} direction="vertical" duration={0.8} delay={0.2}>
+            {/* Visual 1: Course Learning Image (Cohort & Hands-On Engineering) */}
+            {/* <div className="lg:col-span-6 flex flex-col gap-4"> */}
+            {/* <AnimatedContent distance={35} direction="vertical" duration={0.8} delay={0.2}>
                   <div className="relative group rounded-[2rem] sm:rounded-[2.25rem] overflow-hidden border-3 sm:border-4 border-white dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900 transition-all hover:shadow-2xl">
                     <img
                       src="/course_learning_students.jpg"
@@ -878,7 +908,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                   </div>
                 </AnimatedContent> */}
 
-                {/* <AnimatedContent distance={20} direction="vertical" duration={0.7} delay={0.25}>
+            {/* <AnimatedContent distance={20} direction="vertical" duration={0.7} delay={0.25}>
                   <div className="p-4 sm:p-5 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 shadow-xs">
                     <h4 className="font-headline text-sm sm:text-base font-semibold text-heading mb-1.5 flex items-center gap-2">
                       <Layers className="w-4 h-4 text-primary" />
@@ -889,10 +919,10 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                     </p>
                   </div>
                 </AnimatedContent> */}
-              {/* </div> */}
+            {/* </div> */}
 
-              {/* Visual 2: Course Platform Experience (Video Lectures & Progress Tracking) */}
-              {/* <div className="lg:col-span-6 flex flex-col gap-4">
+            {/* Visual 2: Course Platform Experience (Video Lectures & Progress Tracking) */}
+            {/* <div className="lg:col-span-6 flex flex-col gap-4">
                 <AnimatedContent distance={35} direction="vertical" duration={0.8} delay={0.28}>
                   <div className="relative group rounded-[2rem] sm:rounded-[2.25rem] overflow-hidden border-3 sm:border-4 border-white dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900 transition-all hover:shadow-2xl">
                     <img
@@ -1134,11 +1164,10 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                       setFaqTab(t.id);
                       setOpenFaqIndex(0);
                     }}
-                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                      faqTab === t.id
+                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${faqTab === t.id
                         ? 'bg-primary text-white shadow-xs'
                         : 'text-slate-600 dark:text-slate-300 hover:text-heading'
-                    }`}
+                      }`}
                   >
                     {t.label}
                   </button>
@@ -1161,9 +1190,8 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                     >
                       <span>{faq.q}</span>
                       <ChevronDown
-                        className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${
-                          isOpen ? 'rotate-180 text-primary' : ''
-                        }`}
+                        className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-primary' : ''
+                          }`}
                       />
                     </button>
                     {isOpen && (
@@ -1183,7 +1211,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-6 sm:p-8 lg:p-10 border-2 sm:border-3 border-white dark:border-slate-800 shadow-md">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
-                
+
                 {/* ─── LEFT COLUMN: Headline & Rich Value Proposition ─── */}
                 <div className="lg:col-span-6 xl:col-span-7 flex flex-col justify-between space-y-5 text-left">
                   <div className="space-y-4">
@@ -1249,15 +1277,21 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                   {/* Quick Proof Metrics Row */}
                   <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-3 border-t border-slate-100 dark:border-slate-800">
                     <div>
-                      <div className="text-base sm:text-lg font-bold font-headline text-emerald-600">₹4.8 Cr+</div>
+                      <div className="text-base sm:text-lg font-bold font-headline text-emerald-600">
+                        ₹<CountUp to={4.8} from={0} duration={2} /> Cr+
+                      </div>
                       <div className="text-[10px] text-slate-500 font-medium">Escrow Paid Out</div>
                     </div>
                     <div>
-                      <div className="text-base sm:text-lg font-bold font-headline text-heading">12,400+</div>
+                      <div className="text-base sm:text-lg font-bold font-headline text-heading">
+                        <CountUp to={12400} from={0} separator="," duration={2} />+
+                      </div>
                       <div className="text-[10px] text-slate-500 font-medium">Verified Gigs Done</div>
                     </div>
                     <div>
-                      <div className="text-base sm:text-lg font-bold font-headline text-primary">800+</div>
+                      <div className="text-base sm:text-lg font-bold font-headline text-primary">
+                        <CountUp to={800} from={0} duration={2} />+
+                      </div>
                       <div className="text-[10px] text-slate-500 font-medium">Colleges &amp; Employers</div>
                     </div>
                   </div>
@@ -1519,22 +1553,20 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                     <button
                       type="button"
                       onClick={() => setRole('STUDENT')}
-                      className={`py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                        role === 'STUDENT'
+                      className={`py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${role === 'STUDENT'
                           ? 'bg-primary-container border-primary text-on-primary-container ring-1 ring-primary'
                           : 'bg-surface-container-low border-outline-variant text-slate-600 dark:text-slate-300 hover:text-heading'
-                      }`}
+                        }`}
                     >
                       Candidate / Student
                     </button>
                     <button
                       type="button"
                       onClick={() => setRole('RECRUITER')}
-                      className={`py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                        role === 'RECRUITER'
+                      className={`py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${role === 'RECRUITER'
                           ? 'bg-primary-container border-primary text-on-primary-container ring-1 ring-primary'
                           : 'bg-surface-container-low border-outline-variant text-slate-600 dark:text-slate-300 hover:text-heading'
-                      }`}
+                        }`}
                     >
                       Recruiter / Employer
                     </button>

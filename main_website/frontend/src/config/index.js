@@ -34,6 +34,11 @@ export const LANDING_URL = rawLandingUrl.replace(/\/+$/, '');
 export const CANDIDATE_URL = rawCandidateUrl.replace(/\/+$/, '');
 export const RECRUITER_URL = rawRecruiterUrl.replace(/\/+$/, '');
 
+// Landing Page Route Placeholders (configurable via environment variables)
+export const COMMON_LANDING_PATH = import.meta.env.VITE_COMMON_LANDING_PATH || '/';
+export const CANDIDATE_LANDING_PATH = import.meta.env.VITE_CANDIDATE_LANDING_PATH || '/for-candidates';
+export const RECRUITER_LANDING_PATH = import.meta.env.VITE_RECRUITER_LANDING_PATH || '/for-recruiters';
+
 // Safely extract hostname for host-checking logic
 function extractHostname(urlStr) {
   if (!urlStr) return '';

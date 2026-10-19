@@ -1,0 +1,130 @@
+.fold-text {
+  display: inline-block;
+  color: var(--fold-text-color, currentColor);
+  font-size: var(--fold-text-font-size, inherit);
+  font-weight: var(--fold-text-font-weight, inherit);
+  line-height: var(--fold-text-line-height, 1.15);
+  letter-spacing: -0.02em;
+  white-space: pre-wrap;
+  user-select: text;
+}
+
+/* Screen reader text: strictly hidden from layout and view to prevent duplication */
+.fold-text-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  display: none !important;
+}
+
+.fold-text-visual {
+  display: inline;
+}
+
+.fold-text-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* 1.2x font size for highlighted words */
+.fold-highlight,
+.fold-text-word.fold-highlight,
+[data-fold-highlight='true'] {
+  font-size: 1.2em !important;
+  line-height: inherit !important;
+  font-weight: 800 !important;
+  display: inline-block !important;
+  vertical-align: baseline !important;
+}
+
+.fold-text-segment {
+  display: inline-block;
+  perspective: var(--fold-perspective, 700px);
+  vertical-align: baseline;
+}
+
+.fold-text-segment[data-fold-split='line'] {
+  display: block;
+}
+
+.fold-text-piece {
+  --fold-shade: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.58) 0%,
+    rgba(0, 0, 0, 0.22) 42%,
+    rgba(255, 255, 255, 0.26) 100%
+  );
+  position: relative;
+  display: inline-block;
+  backface-visibility: hidden;
+  transform-origin: 50% 0%;
+}
+
+.fold-text-piece[data-fold-hinge='bottom'] {
+  --fold-shade: linear-gradient(0deg, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0.22) 42%, rgba(255, 255, 255, 0.26) 100%);
+  transform-origin: 50% 100%;
+}
+
+.fold-text-piece[data-fold-hinge='left'] {
+  --fold-shade: linear-gradient(90deg, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0.22) 42%, rgba(255, 255, 255, 0.26) 100%);
+  transform-origin: 0% 50%;
+}
+
+.fold-text-piece[data-fold-hinge='right'] {
+  --fold-shade: linear-gradient(
+    270deg,
+    rgba(0, 0, 0, 0.58) 0%,
+    rgba(0, 0, 0, 0.22) 42%,
+    rgba(255, 255, 255, 0.26) 100%
+  );
+  transform-origin: 100% 50%;
+}
+
+.fold-text-piece[data-fold-style='blinds'] {
+  perspective: var(--fold-perspective, 700px);
+}
+
+.fold-text-slat {
+  position: relative;
+  display: inline-block;
+  backface-visibility: hidden;
+}
+
+.fold-text-slat[data-fold-slat='b'] {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+}
+
+.fold-text-piece::after,
+.fold-text-slat::after {
+  content: attr(data-fold-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-image: var(--fold-shade);
+  -webkit-background-clip: text;
+  background-clip: text;
+  opacity: var(--fold-crease, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fold-text-piece,
+  .fold-text-slat {
+    transform: none !important;
+  }
+
+  .fold-text-piece::after,
+  .fold-text-slat::after {
+    opacity: 0 !important;
+  }
+}

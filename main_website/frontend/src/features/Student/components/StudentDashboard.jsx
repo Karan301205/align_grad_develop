@@ -318,7 +318,7 @@ export default function StudentDashboard({
               </div>
 
               {/* Full-width Top-to-Bottom Gradient Fading Paywall Overlay */}
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 sm:p-10 text-center bg-gradient-to-b from-white/20 via-white/60 to-white/90 dark:from-slate-900/10 dark:via-slate-900/50 dark:to-slate-900/80 backdrop-blur-[1px]">
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 sm:p-10 text-center bg-gradient-to-b from-white/30 via-white/70 to-white/100 dark:from-slate-900/20 dark:via-slate-900/50 dark:to-slate-900/80 backdrop-blur-[1px]">
                 <div className="max-w-xl mx-auto flex flex-col items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center shadow-sm">
                     <Lock className="w-5 h-5 text-emerald-700 dark:text-emerald-400 stroke-[2.2]" />

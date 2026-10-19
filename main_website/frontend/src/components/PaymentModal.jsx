@@ -21,28 +21,32 @@ export default function PaymentModal({
   const planDetails = isStudent
     ? {
         title: 'AlignGrade Student Pro',
-        subtitle: 'Lifetime Career Acceleration',
+        subtitle: 'Lifetime Career Acceleration & Verified Opportunities',
         badge: 'One-Time Payment • Lifetime Access',
         price: '₹2,500',
+        billingLabel: 'One-time lifetime payment • Zero recurring fees',
         features: [
-          'Unlock all job openings across the platform (remove blur & gating)',
-          'Apply directly to unlimited verified opportunities',
-          'Full skill-test certifications with verified badges',
-          'Priority candidate ranking for recruiter talent discovery',
-          'Lifetime access with zero recurring monthly fees'
+          'Unlock job openings across the platform, including gated listings.',
+          'Apply to eligible job opportunities.',
+          'Access skill assessments and earn verified skill badges.',
+          'Showcase verified skills to recruiters searching for matching talent.',
+          'Discover relevant jobs, internships, and freelance gigs.',
+          'Keep premium access for life, with no recurring subscription fee.'
         ]
       }
     : {
         title: 'Recruiter 5-Job Pack',
-        subtitle: 'Scale Your Hiring Pipeline',
+        subtitle: 'Scale Your Hiring Pipeline with Verified Talent',
         badge: '5 Job Postings • ₹2,500 Pack',
         price: '₹2,500',
+        billingLabel: '5 Job Posting Credits • Repeatable Quota',
         features: [
-          'Post 5 additional verified job openings',
-          'Automated AI skill gating & candidate match scoring',
-          'Direct access to top verified student profiles',
-          'Full applicant review & hiring workflow tools',
-          'Repeatable — purchase again whenever quota is exhausted'
+          'Publish up to 5 job openings using your purchased posting credits.',
+          'Define required skills and minimum proficiency levels for each role.',
+          'Discover candidates whose verified skills align with your requirements.',
+          'Review candidate profiles, skill ratings, and assessment results.',
+          'Manage applicants and track recruitment progress.',
+          'Use skill-based matching to make more informed hiring decisions.'
         ]
       };
 
@@ -82,7 +86,7 @@ export default function PaymentModal({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-xs dark:bg-black/60 animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget && !loading) {
           onClose();
@@ -90,98 +94,146 @@ export default function PaymentModal({
       }}
     >
       <div 
-        className="bg-surface-container border border-outline-variant rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col relative animate-zoom-in"
+        className="bg-surface-container border border-outline-variant rounded-2xl md:rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col md:flex-row relative animate-zoom-in"
         style={{
-          boxShadow: '0 20px 40px -15px rgba(0, 53, 39, 0.25)'
+          boxShadow: '0 25px 50px -12px rgba(0, 53, 39, 0.25)'
         }}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
           disabled={loading}
-          className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-full transition-all cursor-pointer z-10"
+          aria-label="Close payment modal"
+          className="absolute top-4 right-4 p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-full transition-all cursor-pointer z-20"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Modal Top Banner */}
-        <div className="p-6 pb-4 bg-gradient-to-b from-emerald-500/10 via-emerald-500/5 to-transparent border-b border-outline-variant">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-headline font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>{planDetails.badge}</span>
-          </div>
-
-          <h3 className="text-xl font-headline font-bold text-on-surface tracking-tight">
-            {planDetails.title}
-          </h3>
-          <p className="text-xs font-sans text-on-surface-variant mt-0.5">
-            {planDetails.subtitle}
-          </p>
-
-          <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-headline font-black text-emerald-700 dark:text-emerald-400">
-              {planDetails.price}
-            </span>
-            <span className="text-xs font-sans text-on-surface-variant">
-              {isStudent ? 'one-time lifetime payment' : 'for 5 job postings'}
-            </span>
-          </div>
-        </div>
-
-        {/* Features Checklist */}
-        <div className="p-6 space-y-3">
-          <p className="text-xs font-headline font-semibold text-on-surface uppercase tracking-wider">
-            Included in this plan:
-          </p>
-          <ul className="space-y-2.5">
-            {planDetails.features.map((feature, idx) => (
-              <li key={idx} className="flex items-start gap-2.5 text-xs font-sans text-on-surface">
-                <div className="mt-0.5 rounded-full p-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex-shrink-0">
-                  <Check className="w-3 h-3 stroke-[2.5]" />
-                </div>
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
-
-          {error && (
-            <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              <span>{error}</span>
+        {/* Left Column: Plan Benefits & Unlocked Points */}
+        <div className="flex-1 p-6 md:p-8 flex flex-col justify-between bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent">
+          <div>
+            {/* Plan Badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-headline font-semibold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800/80 mb-3.5">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>{planDetails.badge}</span>
             </div>
-          )}
-        </div>
 
-        {/* Footer Actions */}
-        <div className="p-6 pt-0 flex flex-col gap-3">
-          <button
-            onClick={handleInitiatePayment}
-            disabled={loading}
-            className="w-full py-3 px-4 bg-emerald-800 hover:bg-emerald-900 active:scale-[0.99] text-white font-headline font-semibold text-sm rounded-xl transition-all shadow-md shadow-emerald-950/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Opening Razorpay Gateway...</span>
-              </>
-            ) : (
-              <>
-                <Lock className="w-4 h-4" />
-                <span>Pay {planDetails.price} with Razorpay</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
+            {/* Title & Subtitle */}
+            <h3 className="text-2xl md:text-3xl font-headline font-bold text-on-surface tracking-tight">
+              {planDetails.title}
+            </h3>
+            <p className="text-sm font-sans text-on-surface-variant mt-1.5 leading-relaxed">
+              {planDetails.subtitle}
+            </p>
 
-          <div className="flex items-center justify-center gap-2 text-[11px] font-sans text-on-surface-variant">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>256-bit encrypted checkout via Razorpay</span>
-            <span className="text-outline-variant">•</span>
-            <span className="text-amber-600 dark:text-amber-400 font-medium">Test Mode</span>
+            {/* Section Divider & Header */}
+            <div className="mt-6 mb-4 flex items-center gap-2">
+              <span className="text-xs font-headline font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
+                What gets unlocked with this plan:
+              </span>
+              <div className="h-px flex-1 bg-outline-variant" />
+            </div>
+
+            {/* Points List */}
+            <ul className="space-y-3">
+              {planDetails.features.map((feature, idx) => (
+                <li key={idx} className="flex items-start gap-3 text-xs sm:text-sm font-sans text-on-surface leading-snug">
+                  <div className="mt-0.5 rounded-full p-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex-shrink-0 shadow-xs">
+                    <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                  </div>
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-[11px] font-sans text-amber-800 dark:text-amber-300 text-center">
-            💡 <strong>Testing Tip:</strong> In the Razorpay popup, select <strong>Netbanking</strong> (e.g. HDFC/SBI) → click the green <strong>"Success"</strong> button to simulate instant test payment!
+          {/* Instant Activation Guarantee */}
+          <div className="mt-6 pt-4 border-t border-outline-variant/60 flex items-center gap-2 text-xs font-sans text-on-surface-variant">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            <span>Instant activation upon successful payment verification.</span>
+          </div>
+        </div>
+
+        {/* Right Column: Pricing & Checkout Action */}
+        <div className="w-full md:w-80 lg:w-96 p-6 md:p-8 bg-surface-container-low/70 dark:bg-surface-container-high/30 border-t md:border-t-0 md:border-l border-outline-variant flex flex-col justify-between">
+          <div>
+            <p className="text-xs font-headline font-semibold text-on-surface-variant uppercase tracking-wider mb-2">
+              Payment Summary
+            </p>
+
+            {/* Price Card */}
+            <div className="p-4 rounded-xl bg-surface-container border border-outline-variant/80 shadow-xs mb-4">
+              <div className="text-xs font-sans text-on-surface-variant mb-1">
+                Total Amount Due
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl sm:text-4xl font-headline font-black text-emerald-700 dark:text-emerald-400 tracking-tight">
+                  {planDetails.price}
+                </span>
+                <span className="text-xs font-sans font-medium text-on-surface-variant">
+                  INR
+                </span>
+              </div>
+              <div className="mt-1 text-xs font-sans text-on-surface-variant">
+                {planDetails.billingLabel}
+              </div>
+            </div>
+
+            {/* Plan Specs Breakdown */}
+            <div className="space-y-2 py-3 border-y border-outline-variant/70 text-xs font-sans mb-4">
+              <div className="flex items-center justify-between text-on-surface">
+                <span className="text-on-surface-variant">Selected Plan</span>
+                <span className="font-headline font-semibold">{planDetails.title}</span>
+              </div>
+              <div className="flex items-center justify-between text-on-surface">
+                <span className="text-on-surface-variant">Billing Type</span>
+                <span className="font-sans font-medium">{isStudent ? 'One-time Lifetime' : 'Pay-per-pack (5 jobs)'}</span>
+              </div>
+              <div className="flex items-center justify-between text-on-surface">
+                <span className="text-on-surface-variant">Taxes & Platform Fees</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-semibold">Included</span>
+              </div>
+            </div>
+
+            {error && (
+              <div className="p-3 mb-4 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3 pt-2">
+            {/* Pay Button */}
+            <button
+              onClick={handleInitiatePayment}
+              disabled={loading}
+              className="w-full py-3.5 px-4 bg-emerald-800 hover:bg-emerald-900 active:scale-[0.99] text-white font-headline font-semibold text-sm rounded-xl transition-all shadow-md shadow-emerald-950/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group"
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Opening Razorpay Gateway...</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  <span>Pay {planDetails.price} with Razorpay</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                </>
+              )}
+            </button>
+
+            {/* Security Badges */}
+            <div className="flex items-center justify-center gap-2 text-[11px] font-sans text-on-surface-variant">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>256-bit encrypted checkout via Razorpay</span>
+              <span className="text-outline-variant">•</span>
+              
+            </div>
+
+            {/* Testing Tip Box */}
+            
           </div>
         </div>
       </div>
