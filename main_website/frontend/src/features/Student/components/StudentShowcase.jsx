@@ -19,7 +19,7 @@ import {
 import { apiFetch } from '../../../services/apiClient';
 import PageHeader from '../../../components/ui/PageHeader';
 
-export default function StudentShowcase({ profile, token, onVideoSaved }) {
+export default function StudentShowcase({ profile, token, onVideoSaved, onNotify }) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -342,6 +342,11 @@ export default function StudentShowcase({ profile, token, onVideoSaved }) {
 
       setUploadProgress(100);
       setSuccessMsg('Your video showcase is online! Recruiters can now play it on your profile.');
+      // Layout-level slide-in toast: it outlives this panel, which unmounts when a
+      // newly completed profile auto-redirects the candidate to the dashboard.
+      if (onNotify) {
+        onNotify('Your **Introduction video** was uploaded successfully! Recruiters can now watch it on your profile.', 'success');
+      }
       onVideoSaved(publicUrl);
       setActiveMode('choose');
       setRecordedBlob(null);

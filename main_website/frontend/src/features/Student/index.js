@@ -1,4 +1,5 @@
 export { default as StudentLayout } from './pages/StudentLayout';
+export { default as CandidateDashboard } from './components/CandidateDashboard';
 export { default as StudentDashboard } from './components/StudentDashboard';
 export { default as StudentProfile } from './components/StudentProfile';
 export { default as StudentProgress } from './components/StudentProgress';

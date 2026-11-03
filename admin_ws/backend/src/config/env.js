@@ -37,7 +37,16 @@ const env = {
   S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || (isProd ? '' : 'aligngrade-storage-2026'),
   AWS_S3_BASE_URL: process.env.AWS_S3_BASE_URL || '',
   DEFAULT_DEMO_VIDEO_URL: process.env.DEFAULT_DEMO_VIDEO_URL || '',
-  DEFAULT_COURSE_THUMBNAIL_URL: process.env.DEFAULT_COURSE_THUMBNAIL_URL || ''
+  DEFAULT_COURSE_THUMBNAIL_URL: process.env.DEFAULT_COURSE_THUMBNAIL_URL || '',
+  // SMTP transport for recruiter verification decision emails
+  SMTP_HOST: process.env.SMTP_HOST || '',
+  SMTP_PORT: parseInt(process.env.SMTP_PORT || '465', 10),
+  SMTP_SECURE: (process.env.SMTP_SECURE || 'true').toLowerCase() === 'true',
+  SMTP_USER: process.env.SMTP_USER || '',
+  SMTP_PASS: process.env.SMTP_PASS || '',
+  SMTP_FROM_NAME: process.env.SMTP_FROM_NAME || 'AlignGrad',
+  // Recruiter login page linked from verification emails (main_website frontend)
+  RECRUITER_PORTAL_URL: process.env.RECRUITER_PORTAL_URL || ''
 };
 
 module.exports = env;

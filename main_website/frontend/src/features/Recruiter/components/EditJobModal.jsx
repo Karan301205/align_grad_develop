@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Briefcase, DollarSign, Calendar, MapPin, ListChecks, X, Globe, Users, Clock, Lock, Eye, EyeOff } from 'lucide-react';
 import { ALL_SKILLS } from '../../../constants';
 import Button from '../../../components/ui/Button';
+import ScreeningQuestionBuilder from './ScreeningQuestionBuilder';
 
 export default function EditJobModal({ job, onClose, onUpdate }) {
   if (!job) return null;
@@ -34,6 +35,9 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
   const [rounds, setRounds] = useState(job.selectionProcess || []);
   const [newRoundName, setNewRoundName] = useState('');
   const [newRoundDesc, setNewRoundDesc] = useState('');
+
+  // Screening questions
+  const [screeningQuestions, setScreeningQuestions] = useState(job.screeningQuestions || []);
 
   const [saving, setSaving] = useState(false);
 
@@ -95,6 +99,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
       roleResponsibilities,
       requirements: reqs,
       selectionProcess: rounds,
+      screeningQuestions,
     };
 
     const success = await onUpdate(job.id, updatedPayload);
@@ -625,6 +630,14 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                 }}
               />
             </div>
+          </div>
+
+          {/* SECTION 6: Screening Questions */}
+          <div className="bg-slate-50/80 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none p-5 space-y-4">
+            <ScreeningQuestionBuilder
+              questions={screeningQuestions}
+              onChange={setScreeningQuestions}
+            />
           </div>
 
           {/* Action Row */}

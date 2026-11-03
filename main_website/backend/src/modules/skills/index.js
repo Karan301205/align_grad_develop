@@ -7,6 +7,18 @@ const {
   calculateRecruiterCandidateMatch,
   getTopMatchingTalents
 } = require('./skillMatching.service');
+const {
+  rankProjectsByRequirements,
+  evaluateProjectRelevance,
+  extractTargetSkillSet,
+  normalizeSkill
+} = require('./projectRelevance.service');
+const {
+  calculateSkillAlignment,
+  calculatePreferenceMatch,
+  calculateContextSignals,
+  calculateCandidateJobRecommendation
+} = require('./candidateRecommendation.service');
 
 module.exports = {
   TECHNICAL_SKILLS,
@@ -15,5 +27,13 @@ module.exports = {
   getRequirementStatuses,
   buildRecruiterDemandProfile,
   calculateRecruiterCandidateMatch,
-  getTopMatchingTalents
+  getTopMatchingTalents,
+  rankProjectsByRequirements,
+  evaluateProjectRelevance,
+  extractTargetSkillSet,
+  normalizeSkill,
+  calculateSkillAlignment,
+  calculatePreferenceMatch,
+  calculateContextSignals,
+  calculateCandidateJobRecommendation
 };

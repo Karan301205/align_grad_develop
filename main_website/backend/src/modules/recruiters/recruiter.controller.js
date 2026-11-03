@@ -2,6 +2,12 @@ const { prisma } = require('../../infrastructure/database');
 const { purgeExpiredJobs } = require('../jobs/jobLifecycle.service');
 const { deleteS3ObjectFromUrl } = require('../../services/fileCleanup.service');
 const { getTopMatchingTalents } = require('../skills/skillMatching.service');
+const { rankProjectsByRequirements } = require('../skills/projectRelevance.service');
+const {
+  VERIFICATION_STATUS,
+  resolveVerificationStatus,
+  withVerificationStatus
+} = require('./companyVerification');
 
 exports.getCompany = async (req, res) => {
   try {
@@ -15,22 +21,22 @@ exports.getCompany = async (req, res) => {
           data: {
             userId: req.user.id,
             name: defaultName,
-            about: 'Recruiter profile at AlignGrade',
             website: '',
-            verified: false
+            verified: false,
+            verificationStatus: VERIFICATION_STATUS.NOT_SUBMITTED
           }
         });
       } catch (createErr) {
         company = {
           userId: req.user.id,
           name: defaultName,
-          about: 'Recruiter profile at AlignGrade',
           website: '',
-          verified: false
+          verified: false,
+          verificationStatus: VERIFICATION_STATUS.NOT_SUBMITTED
         };
       }
     }
-    res.json(company);
+    res.json(withVerificationStatus(company));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error fetching company' });
@@ -46,6 +52,16 @@ exports.updateCompany = async (req, res) => {
       return res.status(404).json({ error: 'Company not found' });
     }
 
+    const status = resolveVerificationStatus(existingCompany);
+    if (status === VERIFICATION_STATUS.PENDING || status === VERIFICATION_STATUS.APPROVED) {
+      return res.status(409).json({
+        error: status === VERIFICATION_STATUS.PENDING
+          ? 'Your company profile is under admin review and cannot be edited right now.'
+          : 'Your company profile has been approved and is locked.',
+        verificationStatus: status
+      });
+    }
+
     if (req.body.logoUrl && existingCompany.logoUrl && existingCompany.logoUrl !== req.body.logoUrl) {
       try {
         await deleteS3ObjectFromUrl(existingCompany.logoUrl, 'company logo');
@@ -58,7 +74,7 @@ exports.updateCompany = async (req, res) => {
       where: { userId: req.user.id },
       data: req.body
     });
-    res.json(updated);
+    res.json(withVerificationStatus(updated));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error updating company profile' });
@@ -178,8 +194,21 @@ exports.verifyCompany = async (req, res) => {
     const existingCompany = await prisma.company.findUnique({
       where: { userId: req.user.id }
     });
+    if (!existingCompany) {
+      return res.status(404).json({ error: 'Company profile not found' });
+    }
 
-    if (existingCompany && existingCompany.docUrl && primaryDocUrl && existingCompany.docUrl !== primaryDocUrl) {
+    const currentStatus = resolveVerificationStatus(existingCompany);
+    if (currentStatus === VERIFICATION_STATUS.PENDING || currentStatus === VERIFICATION_STATUS.APPROVED) {
+      return res.status(409).json({
+        error: currentStatus === VERIFICATION_STATUS.PENDING
+          ? 'Your verification documents are already under admin review.'
+          : 'Your company is already verified.',
+        verificationStatus: currentStatus
+      });
+    }
+
+    if (existingCompany.docUrl && primaryDocUrl && existingCompany.docUrl !== primaryDocUrl) {
       try {
         await deleteS3ObjectFromUrl(existingCompany.docUrl, 'company verification document');
       } catch (deleteErr) {
@@ -187,8 +216,15 @@ exports.verifyCompany = async (req, res) => {
       }
     }
 
+    // Verification is granted only by an administrator (admin_ws); submitting
+    // documents queues the company for review.
     const updateData = {
-      verified: true
+      verified: false,
+      verificationStatus: VERIFICATION_STATUS.PENDING,
+      verificationSubmittedAt: new Date(),
+      verificationNote: null,
+      verificationReviewedAt: null,
+      verificationReviewedBy: null
     };
     if (primaryDocUrl) {
       updateData.docUrl = primaryDocUrl;
@@ -201,7 +237,7 @@ exports.verifyCompany = async (req, res) => {
       where: { userId: req.user.id },
       data: updateData
     });
-    res.json(company);
+    res.json(withVerificationStatus(company));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error during verification' });
@@ -230,6 +266,7 @@ exports.postJob = async (req, res) => {
     joiningMonth,
     openings,
     selectionProcess,
+    screeningQuestions,
     showSalary
   } = req.body;
 
@@ -291,6 +328,16 @@ exports.postJob = async (req, res) => {
         selectionProcess: selectionProcess ? {
           set: selectionProcess
         } : undefined,
+        screeningQuestions: screeningQuestions !== undefined ? {
+          set: (Array.isArray(screeningQuestions) ? screeningQuestions : []).map(q => ({
+            id: q.id || require('crypto').randomUUID(),
+            type: q.type || 'MCQ',
+            question: q.question,
+            options: Array.isArray(q.options) ? q.options : [],
+            correctAnswer: q.type === 'MCQ' ? (q.correctAnswer || null) : null,
+            required: q.required !== undefined ? Boolean(q.required) : true
+          }))
+        } : undefined,
         requirements: {
           set: requirements
         }
@@ -329,9 +376,16 @@ exports.getCompanyJobs = async (req, res) => {
         const studentProfile = await prisma.profile.findUnique({
           where: { id: app.studentId }
         });
+        let studentWithRankedProjects = studentProfile;
+        if (studentProfile && Array.isArray(studentProfile.projects) && studentProfile.projects.length > 0) {
+          studentWithRankedProjects = {
+            ...studentProfile,
+            projects: rankProjectsByRequirements(studentProfile.projects, job.requirements || [])
+          };
+        }
         return {
           ...app,
-          student: studentProfile
+          student: studentWithRankedProjects
         };
       }));
 
@@ -383,6 +437,7 @@ exports.updateJob = async (req, res) => {
     joiningMonth,
     openings,
     selectionProcess,
+    screeningQuestions,
     showSalary
   } = req.body;
 
@@ -433,6 +488,16 @@ exports.updateJob = async (req, res) => {
         selectionProcess: selectionProcess ? {
           set: selectionProcess
         } : undefined,
+        screeningQuestions: screeningQuestions !== undefined ? {
+          set: (Array.isArray(screeningQuestions) ? screeningQuestions : []).map(q => ({
+            id: q.id || require('crypto').randomUUID(),
+            type: q.type || 'MCQ',
+            question: q.question,
+            options: Array.isArray(q.options) ? q.options : [],
+            correctAnswer: q.type === 'MCQ' ? (q.correctAnswer || null) : null,
+            required: q.required !== undefined ? Boolean(q.required) : true
+          }))
+        } : undefined,
         requirements: {
           set: requirements
         },
@@ -479,7 +544,7 @@ exports.deleteJob = async (req, res) => {
 
 exports.updateApplicationRounds = async (req, res) => {
   const { applicationId } = req.params;
-  const { roundStatuses } = req.body;
+  const { roundStatuses, status: explicitStatus } = req.body;
 
   try {
     const application = await prisma.application.findUnique({
@@ -490,7 +555,7 @@ exports.updateApplicationRounds = async (req, res) => {
       return res.status(404).json({ error: 'Application not found' });
     }
 
-    let calculatedStatus = 'APPLIED';
+    let calculatedStatus = explicitStatus || application.status || 'APPLIED';
 
     if (roundStatuses && roundStatuses.length > 0) {
       const hasRejected = roundStatuses.some(r => r.status.toUpperCase() === 'REJECTED');
@@ -500,7 +565,7 @@ exports.updateApplicationRounds = async (req, res) => {
         calculatedStatus = 'REJECTED';
       } else if (allCleared) {
         calculatedStatus = 'SELECTED';
-      } else {
+      } else if (!explicitStatus) {
         calculatedStatus = 'IN_PROGRESS';
       }
     }

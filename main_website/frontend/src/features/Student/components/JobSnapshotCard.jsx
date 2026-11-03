@@ -164,6 +164,24 @@ export default function JobSnapshotCard({ job, onClick }) {
           <MapPin className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400 shrink-0" />
           <span className="truncate">{locationText}</span>
         </span>
+        {job.recommendationScore !== undefined && job.recommendationScore !== null && (
+          <>
+            <span className="text-slate-300 dark:text-slate-600 font-light">|</span>
+            <span
+              className={`inline-flex items-center gap-1 font-headline font-bold text-[11px] px-2 py-0.5 rounded-none border shadow-2xs ${
+                job.recommendationScore >= 80
+                  ? 'bg-emerald-50 dark:bg-emerald-950/70 border-emerald-400 dark:border-emerald-600 text-emerald-900 dark:text-emerald-200'
+                  : job.recommendationScore >= 60
+                    ? 'bg-blue-50 dark:bg-blue-950/70 border-blue-400 dark:border-blue-600 text-blue-900 dark:text-blue-200'
+                    : 'bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300'
+              }`}
+              title={job.matchLabel || `${job.recommendationScore}% Match`}
+            >
+              <Sparkles className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+              <span>{job.recommendationScore}% Match</span>
+            </span>
+          </>
+        )}
       </div>
 
       {/* 3. Skills Row */}

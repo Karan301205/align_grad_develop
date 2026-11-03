@@ -6,3 +6,5 @@ export { default as RecruiterCompany } from './components/RecruiterCompany';
 export { default as RecruiterDashboard } from './components/RecruiterDashboard';
 export { default as CandidateProfileModal } from './components/CandidateProfileModal';
 export { default as EditJobModal } from './components/EditJobModal';
+export { default as RecruiterApplications } from './components/RecruiterApplications';
+export { default as ScreeningQuestionBuilder } from './components/ScreeningQuestionBuilder';

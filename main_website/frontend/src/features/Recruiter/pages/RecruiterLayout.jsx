@@ -21,7 +21,11 @@ import { putFileToS3 } from '../../../services/uploadService';
 import SidebarNavItem from '../../../components/ui/SidebarNavItem';
 import ThemeToggle from '../../../components/ui/ThemeToggle';
 import { formatAlertMessage } from '../../../utils/errorFormatter';
-import { isCompanyProfileComplete } from '../../../utils/profileCompleteness';
+import {
+  COMPANY_VERIFICATION_STATUS,
+  getCompanyVerificationStatus,
+  getPortalLockedMessage
+} from '../../../utils/companyVerification';
 
 // Import subcomponents
 import RecruiterDashboard from '../components/RecruiterDashboard';
@@ -29,6 +33,7 @@ import RecruiterJobs from '../components/RecruiterJobs';
 import RecruiterCandidates from '../components/RecruiterCandidates';
 import RecruiterPostJob from '../components/RecruiterPostJob';
 import RecruiterCompany from '../components/RecruiterCompany';
+import RecruiterApplications from '../components/RecruiterApplications';
 import GigsMarketplace from '../../Gigs/GigsMarketplace';
 import CommunityLayout from '../../Community/CommunityLayout';
 
@@ -42,7 +47,11 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [gigsSubTab, setGigsSubTab] = useState('browse');
+  // Open gig on the Gigs 'gig-detail' sub-tab; kept here because GigsMarketplace
+  // unmounts on tab switches.
+  const [selectedGigId, setSelectedGigId] = useState(null);
   const [isGigsOpen, setIsGigsOpen] = useState(true);
+  const [selectedApplicationsJob, setSelectedApplicationsJob] = useState(null);
   const mainRef = useRef(null);
 
   // Job Posting state
@@ -64,23 +73,28 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       const compRes = await apiFetch('/recruiter/company', { token });
       const compData = await compRes.json();
       if (compRes.ok) setCompany(compData);
+      const companyApproved = compRes.ok &&
+        getCompanyVerificationStatus(compData) === COMPANY_VERIFICATION_STATUS.APPROVED;
 
       // Company Jobs
       const jobsRes = await apiFetch('/recruiter/jobs', { token });
       const jobsData = await jobsRes.json();
       if (jobsRes.ok) setJobs(jobsData);
 
-      // All Candidates
-      const candRes = await apiFetch('/recruiter/candidates', { token });
-      const candData = await candRes.json();
-      if (candRes.ok) setCandidates(candData);
+      // Candidate data is only available once an admin has approved the company
+      if (companyApproved) {
+        // All Candidates
+        const candRes = await apiFetch('/recruiter/candidates', { token });
+        const candData = await candRes.json();
+        if (candRes.ok) setCandidates(candData);
 
-      // Top Matching Talents derived from Recruiter Demand Profile
-      const talentsRes = await apiFetch('/recruiter/top-talents?limit=500', { token });
-      const talentsData = await talentsRes.json();
-      if (talentsRes.ok) {
-        setTopTalents(talentsData.topTalents || []);
-        setDemandProfile(talentsData.demandProfile || null);
+        // Top Matching Talents derived from Recruiter Demand Profile
+        const talentsRes = await apiFetch('/recruiter/top-talents?limit=500', { token });
+        const talentsData = await talentsRes.json();
+        if (talentsRes.ok) {
+          setTopTalents(talentsData.topTalents || []);
+          setDemandProfile(talentsData.demandProfile || null);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -282,7 +296,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
 
       if (res.ok) {
         if (!silent) {
-          setAlertConfig({ message: 'Verification documents confirmed! Trust established.', type: 'success' });
+          setAlertConfig({ message: 'Verification documents submitted for admin review.', type: 'success' });
         }
         if (primaryDocUrl) setDocLink(primaryDocUrl);
         await fetchRecruiterData();
@@ -331,25 +345,27 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     setReqs(prev => prev.map(r => r.skillName === skillName ? { ...r, minRating: parseInt(val) } : r));
   };
 
-  const isCompanyComplete = isCompanyProfileComplete(company);
+  const companyVerificationStatus = getCompanyVerificationStatus(company);
+  const isCompanyApproved = companyVerificationStatus === COMPANY_VERIFICATION_STATUS.APPROVED;
+  const portalLockedMessage = getPortalLockedMessage(companyVerificationStatus);
 
-  // If company profile is incomplete, automatically default to the verification (company profile) section
+  // Until an admin approves the company, keep the recruiter on the company profile section
   useEffect(() => {
-    if (!loading && !isCompanyComplete && activeTab !== 'verification') {
+    if (!loading && !isCompanyApproved && activeTab !== 'verification') {
       setActiveTab('verification');
     }
-  }, [loading, isCompanyComplete, activeTab]);
+  }, [loading, isCompanyApproved, activeTab]);
 
   const navItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', locked: !isCompanyComplete },
-    { id: 'jobs', icon: Briefcase, label: 'Active Jobs', locked: !isCompanyComplete },
-    { id: 'candidates', icon: User, label: 'Candidates', locked: !isCompanyComplete },
-    { id: 'post-job', icon: Plus, label: 'Post New Job', locked: !isCompanyComplete },
+    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', locked: !isCompanyApproved },
+    { id: 'jobs', icon: Briefcase, label: 'Active Jobs', locked: !isCompanyApproved },
+    { id: 'candidates', icon: User, label: 'Candidates', locked: !isCompanyApproved },
+    { id: 'post-job', icon: Plus, label: 'Post New Job', locked: !isCompanyApproved },
     {
       id: 'gigs',
       icon: Zap,
       label: 'Gigs Marketplace',
-      locked: !isCompanyComplete,
+      locked: !isCompanyApproved,
       subItems: [
         { id: 'browse', label: 'Browse Gigs', icon: Search },
         { id: 'post', label: 'Post a Gig', icon: Plus },
@@ -357,8 +373,8 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       ],
       activeSubId: gigsSubTab,
       onSubItemClick: (subId) => {
-        if (!isCompanyComplete) {
-          setAlertConfig({ message: 'Please complete the company profile.', type: 'warning' });
+        if (!isCompanyApproved) {
+          setAlertConfig({ message: portalLockedMessage, type: 'warning' });
           return;
         }
         setGigsSubTab(subId);
@@ -370,8 +386,8 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
   ];
 
   const goToTab = (tabId) => {
-    if (tabId !== 'verification' && !isCompanyComplete) {
-      setAlertConfig({ message: 'Please complete the company profile.', type: 'warning' });
+    if (tabId !== 'verification' && !isCompanyApproved) {
+      setAlertConfig({ message: portalLockedMessage, type: 'warning' });
       return;
     }
     setActiveTab(tabId);
@@ -509,7 +525,11 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       })()}
 
       {/* Main stage */}
-      <main ref={mainRef} className="md:ml-20 flex-1 h-screen pt-24 md:pt-10 p-6 md:p-10 bg-background overflow-y-auto custom-scrollbar scroll-smooth">
+      {/* Desktop: content margin tracks the sidebar width so expanding it pushes content instead of overlapping it */}
+      <main
+        ref={mainRef}
+        className={`${isExpanded ? 'md:ml-64' : 'md:ml-20'} transition-[margin] duration-300 ease-in-out flex-1 min-w-0 h-screen pt-24 md:pt-10 p-6 md:p-10 bg-background overflow-y-auto custom-scrollbar scroll-smooth`}
+      >
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <RefreshCw className="w-8 h-8 animate-spin text-primary" />
@@ -536,6 +556,24 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                 handleUpdateJob={handleUpdateJob} 
                 handleDeleteJob={handleDeleteJob} 
                 handleTogglePauseJob={handleTogglePauseJob}
+                onRefresh={fetchRecruiterData}
+                onViewApplications={(job) => {
+                  setSelectedApplicationsJob(job);
+                  setActiveTab('applications');
+                }}
+              />
+            )}
+
+            {activeTab === 'applications' && (
+              <RecruiterApplications
+                job={selectedApplicationsJob}
+                allJobs={jobs}
+                company={company}
+                token={token}
+                onBack={() => {
+                  setSelectedApplicationsJob(null);
+                  setActiveTab('jobs');
+                }}
                 onRefresh={fetchRecruiterData}
               />
             )}
@@ -567,6 +605,8 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                 onUpdateProfile={fetchRecruiterData}
                 activeSubTab={gigsSubTab}
                 onSubTabChange={setGigsSubTab}
+                selectedGigId={selectedGigId}
+                onSelectedGigChange={setSelectedGigId}
               />
             )}
 

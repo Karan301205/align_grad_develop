@@ -104,7 +104,9 @@ const updateProfileSchema = {
       startDate: z.string().optional().nullable(),
       endDate: z.string().optional().nullable(),
       currentlyWorking: z.boolean().optional().nullable(),
-      description: z.string().optional().nullable()
+      description: z.string().optional().nullable(),
+      skills: z.array(z.string().trim().max(50)).optional().nullable().default([]),
+      videoUrl: z.string().url('Invalid video URL').or(z.literal('')).optional().nullable()
     })).optional().nullable(),
     cocurricular: z.array(z.object({
       activity: z.string().optional().nullable(),
@@ -122,7 +124,15 @@ const updateProfileSchema = {
 const applyJobSchema = {
   params: z.object({
     jobId: objectIdSchema
-  })
+  }),
+  body: z.object({
+    answers: z.array(z.object({
+      questionId: z.string().optional().nullable(),
+      questionText: z.string().min(1, 'Question text is required'),
+      type: z.enum(['MCQ', 'LONG_ANSWER']).default('LONG_ANSWER'),
+      answer: z.string().min(1, 'Answer is required')
+    })).optional().default([])
+  }).optional()
 };
 
 const submitTestSchema = {

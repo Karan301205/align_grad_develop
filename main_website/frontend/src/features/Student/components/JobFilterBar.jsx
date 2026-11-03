@@ -28,6 +28,7 @@ const STIPEND_PRESETS = [
 ];
 
 const SORT_OPTIONS = [
+  { id: 'recommended', label: 'Sort: Best Match (Recommended)' },
   { id: 'newest', label: 'Sort: Newest First' },
   { id: 'stipend_desc', label: 'Sort: Stipend High → Low' },
   { id: 'stipend_asc', label: 'Sort: Stipend Low → High' },

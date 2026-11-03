@@ -5,6 +5,29 @@ const gigRequirementSchema = z.object({
   minRating: z.number().int().min(0).max(10)
 });
 
+const screeningQuestionSchema = z.object({
+  id: z.string().optional(),
+  type: z.enum(['MCQ', 'LONG_ANSWER']),
+  question: z.string().min(1, 'Question text is required'),
+  options: z.array(z.string()).optional().default([]),
+  correctAnswer: z.string().optional().nullable(),
+  required: z.boolean().optional().default(true)
+}).refine(data => {
+  if (data.type === 'MCQ') {
+    return Array.isArray(data.options) && data.options.length >= 2 && typeof data.correctAnswer === 'string' && data.correctAnswer.trim().length > 0;
+  }
+  return true;
+}, {
+  message: 'MCQ questions require at least 2 options and a specified correct answer'
+});
+
+const questionAnswerSchema = z.object({
+  questionId: z.string().optional().nullable(),
+  questionText: z.string().min(1, 'Question text is required'),
+  type: z.enum(['MCQ', 'LONG_ANSWER']).default('LONG_ANSWER'),
+  answer: z.string().min(1, 'Answer is required')
+});
+
 const createGigSchema = {
   body: z.object({
     title: z.string().min(5, 'Title must be at least 5 characters long').max(100, 'Title must not exceed 100 characters'),
@@ -13,6 +36,7 @@ const createGigSchema = {
     categories: z.array(z.string()).optional(),
     skills: z.array(z.string().min(1, 'Skill name must not be empty')).min(1, 'At least one skill is required'),
     requirements: z.array(gigRequirementSchema).optional(),
+    screeningQuestions: z.array(screeningQuestionSchema).optional().default([]),
     budget: z.number().positive('Budget must be a positive number'),
     currency: z.string().max(10).optional(),
     deliveryTime: z.string().min(1, 'Delivery time designation is required').max(100),
@@ -25,7 +49,8 @@ const createGigSchema = {
 const applyGigSchema = {
   body: z.object({
     message: z.string().max(1000, 'Cover message must not exceed 1000 characters').optional().nullable(),
-    attachments: z.array(z.string().url('Invalid attachment URL')).optional()
+    attachments: z.array(z.string().url('Invalid attachment URL')).optional(),
+    answers: z.array(questionAnswerSchema).optional().default([])
   })
 };
 
@@ -63,6 +88,7 @@ const updateGigSchema = {
     categories: z.array(z.string()).optional(),
     skills: z.array(z.string().min(1, 'Skill name must not be empty')).min(1, 'At least one skill is required').optional(),
     requirements: z.array(gigRequirementSchema).optional(),
+    screeningQuestions: z.array(screeningQuestionSchema).optional(),
     budget: z.number().positive('Budget must be a positive number').optional(),
     currency: z.string().max(10).optional(),
     deliveryTime: z.string().min(1, 'Delivery time designation is required').max(100).optional(),

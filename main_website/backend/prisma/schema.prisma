@@ -21,6 +21,16 @@ model User {
   resetPasswordAttempts Int?      @default(0)
   resetPasswordWindow   DateTime?
 
+  // Email Verification Fields
+  emailVerified          Boolean?  @default(false)
+  verificationPinHash    String?
+  verificationPinExpiry  DateTime?
+  verificationAttempts   Int?      @default(0)
+  verificationResends    Int?      @default(0)
+  lastVerificationSent   DateTime?
+  pendingName            String?
+  pendingPasswordHash    String?
+
   // Subscription & Payments
   plan                  String    @default("FREE")
   planPurchasedAt       DateTime?
@@ -136,6 +146,8 @@ type Project {
   endDate          String?
   currentlyWorking Boolean?
   description      String?
+  skills           String[] @default([])
+  videoUrl         String?
 }
 
 model Company {
@@ -158,6 +170,14 @@ model Company {
   docUrl               String?
   verificationDocs     CompanyVerificationDoc[]
   verified             Boolean                  @default(false)
+  // Admin review lifecycle: "NOT_SUBMITTED" | "PENDING" | "APPROVED" | "REJECTED".
+  // `verified` mirrors status === "APPROVED"; legacy rows without a status are
+  // resolved by recruiters/companyVerification.js.
+  verificationStatus      String?
+  verificationNote        String?
+  verificationSubmittedAt DateTime?
+  verificationReviewedAt  DateTime?
+  verificationReviewedBy  String?
   jobPostingQuota      Int                      @default(1)
   jobs                 Job[]
 }
@@ -205,8 +225,26 @@ model Job {
   openings             Int?
   selectionProcess     ProcessRound[]
   requirements         JobRequirement[]
+  screeningQuestions   ScreeningQuestion[]
   applications         Application[]
   createdAt            DateTime @default(now())
+}
+
+type ScreeningQuestion {
+  id            String   @default(uuid())
+  type          String   // "MCQ" | "LONG_ANSWER"
+  question      String
+  options       String[] @default([]) // Choices for MCQ
+  correctAnswer String?  // Correct choice or answer string for MCQ
+  required      Boolean? @default(true)
+}
+
+type QuestionAnswer {
+  questionId   String?
+  questionText String
+  type         String   // "MCQ" | "LONG_ANSWER"
+  answer       String
+  isCorrect    Boolean? // Calculated server-side for MCQ
 }
 
 type ProcessRound {
@@ -235,6 +273,7 @@ model Application {
   studentId     String                   @db.ObjectId
   status        String                   @default("APPLIED")
   roundStatuses ApplicationRoundStatus[]
+  answers       QuestionAnswer[]
   createdAt     DateTime                 @default(now())
 }
 
@@ -261,6 +300,7 @@ model Gig {
   categories          String[]        @default([])
   skills              String[]
   requirements        GigRequirement[]
+  screeningQuestions  ScreeningQuestion[]
   budget              Float
   currency            String          @default("INR")
   deliveryTime        String
@@ -280,13 +320,14 @@ model Gig {
 }
 
 model GigApplicant {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  gigId       String   @db.ObjectId
-  gig         Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
-  candidateId String   @db.ObjectId
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  gigId       String           @db.ObjectId
+  gig         Gig              @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  candidateId String           @db.ObjectId
   message     String?
-  attachments String[] @default([])
-  createdAt   DateTime @default(now())
+  attachments String[]         @default([])
+  answers     QuestionAnswer[]
+  createdAt   DateTime         @default(now())
 }
 
 model GigMessage {
@@ -618,13 +659,18 @@ type CourseModule {
 }
 
 type CourseLesson {
-  id          String
-  title       String
-  description String?
-  videoKey    String
-  videoUrl    String?
-  duration    String?        @default("10:00")
-  order       Int            @default(0)
+  id           String
+  title        String
+  subTopic     String?
+  description  String?
+  videoKey     String
+  videoUrl     String?
+  duration     String?        @default("10:00")
+  notes        String?
+  documentUrl  String?
+  documentName String?
+  quiz         Json?
+  order        Int            @default(0)
 }
 
 model CourseEnrollment {

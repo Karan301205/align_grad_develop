@@ -233,10 +233,23 @@ export default function ResumePdfTemplate({
                           </a>
                         </>
                       )}
+                      {proj.videoUrl && (
+                        <>
+                          {' | '}
+                          <a href={proj.videoUrl.startsWith('http') ? proj.videoUrl : `https://${proj.videoUrl}`} target="_blank" rel="noopener noreferrer" className="underline font-bold text-purple-900">
+                            VIDEO DEMO
+                          </a>
+                        </>
+                      )}
                     </p>
                     {(proj.startDate || proj.endDate) && (
                       <p className="text-neutral-500 text-[9px] mt-0.5">
                         {proj.startDate} - {proj.currentlyWorking ? 'Present' : proj.endDate}
+                      </p>
+                    )}
+                    {proj.skills && proj.skills.length > 0 && (
+                      <p className="text-[9px] font-medium text-neutral-600 mt-0.5">
+                        <strong className="text-neutral-800">Technologies:</strong> {proj.skills.join(' • ')}
                       </p>
                     )}
                     {proj.description && (

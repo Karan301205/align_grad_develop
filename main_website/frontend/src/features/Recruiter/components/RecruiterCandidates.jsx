@@ -24,7 +24,8 @@ import {
   SlidersHorizontal,
   ArrowUpDown,
   ChevronDown,
-  Check
+  Check,
+  Play
 } from 'lucide-react';
 import ResumePdfTemplate from '../../../components/ResumePdfTemplate';
 import { openResumePdfInNewTab } from '../../../services/resumePdf';
@@ -279,6 +280,7 @@ export default function RecruiterCandidates({ candidates = [], topTalents = null
   const [sortBy, setSortBy] = useState('recommended');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [generatingResumeId, setGeneratingResumeId] = useState(null);
+  const [selectedCandidateProjVideo, setSelectedCandidateProjVideo] = useState(null);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -1278,23 +1280,80 @@ export default function RecruiterCandidates({ candidates = [], topTalents = null
                       {activeCandidate.projects.map((proj, idx) => (
                         <div key={idx} className="p-3.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none space-y-1 shadow-2xs">
                           <div className="flex justify-between items-start flex-wrap gap-2">
-                            <p className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">{proj.title}</p>
-                            {proj.link && (
-                              <a
-                                href={proj.link.startsWith('http') ? proj.link : `https://${proj.link}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs font-headline font-bold text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1"
-                              >
-                                <span>Live Project</span>
-                                <ExternalLink className="w-3 h-3" />
-                              </a>
-                            )}
+                            <div>
+                              <p className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">{proj.title}</p>
+                              {proj.role && <p className="text-xs text-blue-700 dark:text-blue-400 font-semibold">{proj.role}</p>}
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {proj.videoUrl && (
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedCandidateProjVideo({ url: proj.videoUrl, title: proj.title })}
+                                  className="text-xs font-headline font-bold text-purple-700 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 flex items-center gap-1 cursor-pointer"
+                                >
+                                  <Play className="w-3 h-3 fill-current" />
+                                  <span>Demo Video</span>
+                                </button>
+                              )}
+                              {(proj.hostedUrl || proj.link) && (
+                                <a
+                                  href={(proj.hostedUrl || proj.link).startsWith('http') ? (proj.hostedUrl || proj.link) : `https://${proj.hostedUrl || proj.link}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs font-headline font-bold text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1"
+                                >
+                                  <span>Live Demo</span>
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              )}
+                              {proj.codeUrl && (
+                                <a
+                                  href={proj.codeUrl.startsWith('http') ? proj.codeUrl : `https://${proj.codeUrl}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs font-headline font-bold text-slate-700 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-400 hover:underline flex items-center gap-1"
+                                >
+                                  <span>Code</span>
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              )}
+                            </div>
                           </div>
                           {proj.description && (
                             <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-sans pt-1">
                               {proj.description}
                             </p>
+                          )}
+                          {proj.skills && proj.skills.length > 0 && (
+                            <div className="flex flex-wrap items-center gap-1.5 pt-2">
+                              <span className="text-[10px] font-headline font-bold text-slate-500 dark:text-slate-400 tracking-wider">
+                                SKILLS:
+                              </span>
+                              {proj.skills.map((skill, sIdx) => {
+                                const isMatchedFilter = selectedSkills && selectedSkills.some(
+                                  req => req.name.toLowerCase() === skill.toLowerCase()
+                                );
+                                if (isMatchedFilter) {
+                                  return (
+                                    <span
+                                      key={sIdx}
+                                      className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-100 border border-emerald-500 font-headline font-bold rounded-none shadow-2xs"
+                                    >
+                                      <Check className="w-2.5 h-2.5 text-emerald-700 dark:text-emerald-300" />
+                                      <span>{skill}</span>
+                                    </span>
+                                  );
+                                }
+                                return (
+                                  <span
+                                    key={sIdx}
+                                    className="text-[10px] px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-none font-sans font-medium"
+                                  >
+                                    {skill}
+                                  </span>
+                                );
+                              })}
+                            </div>
                           )}
                         </div>
                       ))}
@@ -1403,6 +1462,48 @@ export default function RecruiterCandidates({ candidates = [], topTalents = null
           candidate={cand}
         />
       ))}
+
+      {/* Project Video Demo Player Modal */}
+      {selectedCandidateProjVideo && (
+        <div
+          className="fixed inset-0 z-[120] backdrop-blur-md bg-black/75 flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setSelectedCandidateProjVideo(null)}
+        >
+          <div
+            className="bg-surface border border-slate-700 rounded-none max-w-3xl w-full p-4 sm:p-6 shadow-2xl space-y-3 relative animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-300 dark:border-slate-700">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-none bg-purple-50 dark:bg-purple-950/70 border border-purple-400 dark:border-purple-600 flex items-center justify-center text-purple-700 dark:text-purple-400">
+                  <Video className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-headline font-bold text-slate-900 dark:text-slate-100">
+                    {selectedCandidateProjVideo.title || 'Project Walkthrough'}
+                  </h3>
+                  <span className="text-[11px] font-sans text-slate-500 dark:text-slate-400">Candidate Project Demo Video</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedCandidateProjVideo(null)}
+                className="p-1.5 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="w-full bg-black rounded-none overflow-hidden aspect-video flex items-center justify-center">
+              <video
+                src={selectedCandidateProjVideo.url}
+                controls
+                autoPlay
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

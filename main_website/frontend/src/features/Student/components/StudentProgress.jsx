@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -6,15 +6,40 @@ import {
   MapPin, 
   DollarSign, 
   ClipboardList,
-  ChevronRight,
-  Briefcase
+  ChevronRight
 } from 'lucide-react';
+import { getApplicationStage } from '../../../utils/hiringProgress';
 
-export default function StudentProgress({ applications = [], loading = false }) {
+export default function StudentProgress({ applications = [], loading = false, initialStageFilter = 'ALL' }) {
   const [selectedAppId, setSelectedAppId] = useState(null);
+  const [stageFilter, setStageFilter] = useState(initialStageFilter || 'ALL');
+
+  useEffect(() => {
+    if (initialStageFilter) {
+      setStageFilter(initialStageFilter);
+    }
+  }, [initialStageFilter]);
+
+  // Stage counts for filter tabs
+  const stageCounts = useMemo(() => {
+    const counts = { ALL: applications.length, APPLIED: 0, SHORTLISTED: 0, INTERVIEW: 0, HIRED: 0, REJECTED: 0 };
+    applications.forEach(app => {
+      const stage = getApplicationStage(app);
+      if (counts[stage] !== undefined) {
+        counts[stage] += 1;
+      }
+    });
+    return counts;
+  }, [applications]);
+
+  // Filtered applications based on selected stage
+  const filteredApplications = useMemo(() => {
+    if (stageFilter === 'ALL') return applications;
+    return applications.filter(app => getApplicationStage(app) === stageFilter);
+  }, [applications, stageFilter]);
 
   // Auto-select first application if none explicitly selected or if selected application disappears
-  const activeApp = (selectedAppId ? applications.find(a => a.id === selectedAppId) : null) || (applications.length > 0 ? applications[0] : null);
+  const activeApp = (selectedAppId ? filteredApplications.find(a => a.id === selectedAppId) : null) || (filteredApplications.length > 0 ? filteredApplications[0] : null);
 
   const getInitials = (name) => {
     if (!name) return '??';
@@ -212,7 +237,7 @@ export default function StudentProgress({ applications = [], loading = false }) 
                 Applied Roles
               </h3>
               <span className="px-1.5 py-0.2 bg-blue-100 dark:bg-blue-950/70 border border-blue-400 text-blue-900 dark:text-blue-200 text-[10px] font-bold rounded-none">
-                {applications.length}
+                {filteredApplications.length}
               </span>
             </div>
             <span className="text-[11px] text-slate-500 dark:text-slate-400 font-sans hidden sm:inline">
@@ -220,53 +245,85 @@ export default function StudentProgress({ applications = [], loading = false }) 
             </span>
           </div>
 
+          {/* Stage Filter Chips */}
+          <div className="p-2 sm:px-3 bg-surface border-b border-slate-200 dark:border-slate-800 flex items-center gap-1.5 overflow-x-auto custom-scrollbar shrink-0">
+            {[
+              { id: 'ALL', label: 'All' },
+              { id: 'APPLIED', label: 'Applied' },
+              { id: 'SHORTLISTED', label: 'Shortlisted' },
+              { id: 'INTERVIEW', label: 'In Progress' },
+              { id: 'HIRED', label: 'Selected' },
+              { id: 'REJECTED', label: 'Rejected' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setStageFilter(tab.id)}
+                className={`px-2 py-1 text-[11px] font-headline font-bold rounded-none border transition-all shrink-0 cursor-pointer ${
+                  stageFilter === tab.id
+                    ? 'bg-blue-700 text-white border-blue-700 shadow-2xs'
+                    : 'bg-surface-container text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800'
+                }`}
+              >
+                <span>{tab.label}</span>
+                <span className="ml-1 opacity-80 text-[10px]">({stageCounts[tab.id] || 0})</span>
+              </button>
+            ))}
+          </div>
+
           {/* Edge-to-Edge Stacked Applied Jobs */}
           <div className="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800 custom-scrollbar max-h-[640px]">
-            {applications.map((app) => {
-              const isActive = activeApp?.id === app.id;
-              const hasRejected = (app.roundStatuses || []).some(r => r.status?.toUpperCase() === 'REJECTED');
-              const displayStatus = hasRejected ? 'REJECTED' : app.status;
-              const rawCompanyName = app.job?.companyName || app.job?.company?.name || '';
-              const companyDisplayName = rawCompanyName.replace(/^c_/i, '');
-              const logoUrl = app.job?.company?.logoUrl || app.job?.logoUrl || app.job?.companyLogo;
+            {filteredApplications.length === 0 ? (
+              <div className="p-8 text-center text-xs text-slate-500 dark:text-slate-400 font-sans">
+                No applications currently in {stageFilter.toLowerCase().replace('_', ' ')} stage.
+              </div>
+            ) : (
+              filteredApplications.map((app) => {
+                const isActive = activeApp?.id === app.id;
+                const hasRejected = (app.roundStatuses || []).some(r => r.status?.toUpperCase() === 'REJECTED');
+                const displayStatus = hasRejected ? 'REJECTED' : app.status;
+                const rawCompanyName = app.job?.companyName || app.job?.company?.name || '';
+                const companyDisplayName = rawCompanyName.replace(/^c_/i, '');
+                const logoUrl = app.job?.company?.logoUrl || app.job?.logoUrl || app.job?.companyLogo;
 
-              return (
-                <div
-                  key={app.id}
-                  onClick={() => setSelectedAppId(app.id)}
-                  className={`p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer transition-colors ${
-                    isActive 
-                      ? 'bg-white dark:bg-slate-900 border-l-4 border-l-blue-700 shadow-2xs' 
-                      : 'bg-transparent hover:bg-slate-100/80 dark:hover:bg-slate-900/50 border-l-4 border-l-transparent'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
-                      {logoUrl ? (
-                        <img src={logoUrl} alt={companyDisplayName} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="font-headline font-bold text-xs text-slate-800 dark:text-slate-200">
-                          {getInitials(companyDisplayName)}
-                        </span>
-                      )}
+                return (
+                  <div
+                    key={app.id}
+                    onClick={() => setSelectedAppId(app.id)}
+                    className={`p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer transition-colors ${
+                      isActive 
+                        ? 'bg-white dark:bg-slate-900 border-l-4 border-l-blue-700 shadow-2xs' 
+                        : 'bg-transparent hover:bg-slate-100/80 dark:hover:bg-slate-900/50 border-l-4 border-l-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+                        {logoUrl ? (
+                          <img src={logoUrl} alt={companyDisplayName} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="font-headline font-bold text-xs text-slate-800 dark:text-slate-200">
+                            {getInitials(companyDisplayName)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 truncate">
+                          {app.job?.title || 'Job Opening'}
+                        </p>
+                        <p className="text-[11px] font-sans text-slate-600 dark:text-slate-400 truncate mt-0.5">
+                          {companyDisplayName || 'Company'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 truncate">
-                        {app.job?.title || 'Job Opening'}
-                      </p>
-                      <p className="text-[11px] font-sans text-slate-600 dark:text-slate-400 truncate mt-0.5">
-                        {companyDisplayName || 'Company'}
-                      </p>
+
+                    <div className="shrink-0 flex items-center gap-1.5">
+                      {getStatusBadge(displayStatus)}
+                      <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isActive ? 'text-blue-700 dark:text-blue-400 translate-x-0.5' : 'text-slate-400 dark:text-slate-600'}`} />
                     </div>
                   </div>
-
-                  <div className="shrink-0 flex items-center gap-1.5">
-                    {getStatusBadge(displayStatus)}
-                    <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isActive ? 'text-blue-700 dark:text-blue-400 translate-x-0.5' : 'text-slate-400 dark:text-slate-600'}`} />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
 

@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Video, Mail, Phone, Globe, Calendar, Briefcase, FolderGit2, GraduationCap, Award, FileText, Star, Link, ExternalLink, ShieldCheck, Check } from 'lucide-react';
+import { X, Video, Play, Mail, Phone, Globe, Calendar, Briefcase, FolderGit2, GraduationCap, Award, FileText, Star, Link, ExternalLink, ShieldCheck, Check, Sparkles, ArrowUpDown } from 'lucide-react';
 import ResumePdfTemplate from '../../../components/ResumePdfTemplate';
 import { openResumePdfInNewTab } from '../../../services/resumePdf';
 import { recordViewedCandidate } from '../../../utils/recentCandidateViews';
+import { rankProjectsForJob } from '../../../utils/projectRelevance';
 
 const SOCIAL_PLATFORMS = [
   { key: 'linkedin', showKey: 'showLinkedin', label: 'LinkedIn', icon: Link, color: 'text-blue-600 dark:text-blue-400' },
@@ -17,13 +18,33 @@ const SOCIAL_PLATFORMS = [
   { key: 'kaggle', showKey: 'showKaggle', label: 'Kaggle', icon: Globe, color: 'text-sky-600 dark:text-sky-400' },
 ];
 
-export default function CandidateProfileModal({ candidate, onClose }) {
+export default function CandidateProfileModal({ candidate, onClose, job }) {
   const modalBodyRef = useRef(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   const recordedCandIdRef = useRef(null);
   const [generatingResume, setGeneratingResume] = useState(false);
+  const [sortByRelevance, setSortByRelevance] = useState(true);
+  const [selectedProjVideo, setSelectedProjVideo] = useState(null);
   const templateId = `candidate-resume-template-${candidate?.id || candidate?._id || 'view'}`;
+
+  const targetRequirements = useMemo(() => job?.requirements || [], [job?.requirements]);
+  const hasJobContext = Boolean(targetRequirements.length > 0);
+
+  const { rankedProjects, matchedProjectsCount, maxMatches } = useMemo(() => {
+    if (!candidate?.projects || candidate.projects.length === 0) {
+      return { rankedProjects: [], matchedProjectsCount: 0, maxMatches: 0 };
+    }
+    return rankProjectsForJob(candidate.projects, targetRequirements);
+  }, [candidate?.projects, targetRequirements]);
+
+  const displayedProjects = useMemo(() => {
+    if (!candidate?.projects) return [];
+    if (hasJobContext && sortByRelevance) {
+      return rankedProjects;
+    }
+    return candidate.projects;
+  }, [candidate?.projects, hasJobContext, sortByRelevance, rankedProjects]);
 
   const handleOpenGeneratedResume = async () => {
     setGeneratingResume(true);
@@ -393,33 +414,139 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
               {/* Projects */}
               <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs space-y-3">
-                <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5 pb-2 border-b border-slate-200 dark:border-slate-800">
-                  <FolderGit2 className="w-4 h-4 text-blue-700 dark:text-blue-400" /> Projects
-                </h4>
-                {candidate.projects && candidate.projects.length > 0 ? (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className="text-xs font-headline font-bold tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                      <FolderGit2 className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                      <span>Projects</span>
+                    </h4>
+                    {hasJobContext && sortByRelevance && matchedProjectsCount > 0 && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-headline font-bold px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-600 text-emerald-900 dark:text-emerald-200 rounded-none">
+                        <Sparkles className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />
+                        <span>{matchedProjectsCount} Matching Job Skills</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {hasJobContext && candidate.projects && candidate.projects.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setSortByRelevance(prev => !prev)}
+                      className="inline-flex items-center gap-1 text-[11px] font-sans font-medium px-2 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-none transition-all cursor-pointer shadow-2xs self-start sm:self-auto"
+                      title={sortByRelevance ? "Currently ordered by relevance for this job. Click to show original order." : "Click to arrange by relevance for this job."}
+                    >
+                      <ArrowUpDown className="w-3 h-3 text-blue-700 dark:text-blue-400" />
+                      <span>{sortByRelevance ? 'Sorted: Job Relevance' : 'Sorted: Chronological'}</span>
+                    </button>
+                  )}
+                </div>
+
+                {hasJobContext && sortByRelevance && job?.title && (
+                  <div className="p-2.5 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-none text-[11px] text-blue-900 dark:text-blue-200 flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400 shrink-0" />
+                    <span>
+                      Projects automatically arranged by relevance for <strong>{job.title}</strong> based on candidate's skill tags.
+                    </span>
+                  </div>
+                )}
+
+                {displayedProjects && displayedProjects.length > 0 ? (
                   <div className="space-y-3">
-                    {candidate.projects.map((proj, idx) => (
-                      <div key={idx} className="p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-none text-xs space-y-1.5 shadow-2xs">
-                        <div className="flex justify-between font-headline font-bold text-slate-900 dark:text-slate-100">
-                          <span className="text-sm">{proj.title}</span>
-                          <span className="text-slate-500 dark:text-slate-400 font-sans font-normal text-[11px]">{proj.startDate} - {proj.currentlyWorking ? 'Present' : proj.endDate}</span>
-                        </div>
-                        {proj.role && <p className="text-blue-700 dark:text-blue-400 font-semibold text-xs">{proj.role}</p>}
-                        {proj.description && <p className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed font-sans">{proj.description}</p>}
-                        <div className="flex gap-4 pt-1 font-headline font-bold text-xs">
-                          {proj.codeUrl && (
-                            <a href={proj.codeUrl.startsWith('http') ? proj.codeUrl : `https://${proj.codeUrl}`} target="_blank" rel="noopener noreferrer" className="text-slate-700 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-400 flex items-center gap-1">
-                              Code Repo <ExternalLink className="w-3 h-3" />
-                            </a>
+                    {displayedProjects.map((proj, idx) => {
+                      const isMatch = hasJobContext && sortByRelevance && proj.matchCount > 0;
+                      return (
+                        <div
+                          key={idx}
+                          className={`p-3.5 rounded-none text-xs space-y-2 shadow-2xs transition-all ${
+                            isMatch
+                              ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-2 border-emerald-500/70 dark:border-emerald-500/50'
+                              : 'bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700'
+                          }`}
+                        >
+                          {isMatch && (
+                            <div className="flex items-center justify-between pb-1.5 border-b border-emerald-200 dark:border-emerald-900/60">
+                              <span className="inline-flex items-center gap-1 text-[10px] font-headline font-bold px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200 border border-emerald-400 dark:border-emerald-600 rounded-none">
+                                <Sparkles className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />
+                                <span>Relevance Match • {proj.matchCount} {proj.matchCount === 1 ? 'Skill Match' : 'Skills Match'}</span>
+                              </span>
+                              {proj.isTopMatch && (
+                                <span className="text-[10px] font-headline font-bold text-emerald-700 dark:text-emerald-400">
+                                  Top Relevant Project
+                                </span>
+                              )}
+                            </div>
                           )}
-                          {proj.hostedUrl && (
-                            <a href={proj.hostedUrl.startsWith('http') ? proj.hostedUrl : `https://${proj.hostedUrl}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1">
-                              Live Demo <ExternalLink className="w-3 h-3" />
-                            </a>
+
+                          <div className="flex justify-between font-headline font-bold text-slate-900 dark:text-slate-100">
+                            <span className="text-sm">{proj.title}</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-sans font-normal text-[11px]">
+                              {proj.startDate} - {proj.currentlyWorking ? 'Present' : proj.endDate}
+                            </span>
+                          </div>
+
+                          {proj.role && <p className="text-blue-700 dark:text-blue-400 font-semibold text-xs">{proj.role}</p>}
+                          {proj.description && <p className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed font-sans">{proj.description}</p>}
+
+                          {/* Skill Tags */}
+                          {proj.skills && proj.skills.length > 0 && (
+                            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                              <span className="text-[10px] font-headline font-bold text-slate-500 dark:text-slate-400 tracking-wider">
+                                SKILLS:
+                              </span>
+                              {proj.skills.map((skill, sIdx) => {
+                                const isSkillMatched = hasJobContext && (proj.matchedSkills || []).some(
+                                  m => m.toLowerCase() === skill.toLowerCase()
+                                );
+
+                                if (isSkillMatched) {
+                                  return (
+                                    <span
+                                      key={sIdx}
+                                      className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-100 border border-emerald-500 font-headline font-bold rounded-none shadow-2xs"
+                                    >
+                                      <Check className="w-3 h-3 text-emerald-700 dark:text-emerald-300" />
+                                      <span>{skill}</span>
+                                    </span>
+                                  );
+                                }
+
+                                return (
+                                  <span
+                                    key={sIdx}
+                                    className="text-[11px] px-2 py-0.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-none font-sans font-medium"
+                                  >
+                                    {skill}
+                                  </span>
+                                );
+                              })}
+                            </div>
                           )}
+
+                          <div className="flex flex-wrap gap-4 pt-1 font-headline font-bold text-xs">
+                            {proj.codeUrl && (
+                              <a href={proj.codeUrl.startsWith('http') ? proj.codeUrl : `https://${proj.codeUrl}`} target="_blank" rel="noopener noreferrer" className="text-slate-700 dark:text-slate-300 hover:text-blue-700 dark:hover:text-blue-400 flex items-center gap-1">
+                                Code Repo <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                            {proj.hostedUrl && (
+                              <a href={proj.hostedUrl.startsWith('http') ? proj.hostedUrl : `https://${proj.hostedUrl}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1">
+                                Live Demo <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                            {proj.videoUrl && (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedProjVideo({ url: proj.videoUrl, title: proj.title })}
+                                className="text-purple-700 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 flex items-center gap-1 cursor-pointer"
+                              >
+                                <Play className="w-3 h-3 fill-current" />
+                                <span>Demo Video</span>
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-xs text-slate-500 dark:text-slate-400">No projects listed.</p>
@@ -567,6 +694,48 @@ export default function CandidateProfileModal({ candidate, onClose }) {
 
         {/* Off-screen Resume Template for PDF generation */}
         <ResumePdfTemplate id={templateId} candidate={candidate} />
+
+        {/* Project Video Demo Player Modal */}
+        {selectedProjVideo && (
+          <div
+            className="fixed inset-0 z-[120] backdrop-blur-md bg-black/75 flex items-center justify-center p-4 animate-fade-in"
+            onClick={() => setSelectedProjVideo(null)}
+          >
+            <div
+              className="bg-surface border border-slate-700 rounded-none max-w-3xl w-full p-4 sm:p-6 shadow-2xl space-y-3 relative animate-scale-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-slate-300 dark:border-slate-700">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-none bg-purple-50 dark:bg-purple-950/70 border border-purple-400 dark:border-purple-600 flex items-center justify-center text-purple-700 dark:text-purple-400">
+                    <Video className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-headline font-bold text-slate-900 dark:text-slate-100">
+                      {selectedProjVideo.title || 'Project Walkthrough'}
+                    </h3>
+                    <span className="text-[11px] font-sans text-slate-500 dark:text-slate-400">Candidate Project Demo Video</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedProjVideo(null)}
+                  className="p-1.5 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-all cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="w-full bg-black rounded-none overflow-hidden aspect-video flex items-center justify-center">
+                <video
+                  src={selectedProjVideo.url}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

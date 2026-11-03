@@ -4,6 +4,7 @@ const authMiddleware = require('../../middleware/auth');
 const { relaxedLimit } = require('../../middleware/rateLimiter');
 const validate = require('../../middleware/validate');
 const gigController = require('./gig.controller');
+const { requireApprovedRecruiter } = require('../recruiters/companyVerification');
 const {
   createGigSchema,
   updateGigSchema,
@@ -15,7 +16,7 @@ const {
 
 // Gigs Marketplace Routes
 router.get('/', authMiddleware, relaxedLimit, gigController.getGigs);
-router.post('/', authMiddleware, relaxedLimit, validate(createGigSchema), gigController.createGig);
+router.post('/', authMiddleware, relaxedLimit, requireApprovedRecruiter, validate(createGigSchema), gigController.createGig);
 router.put('/:gigId', authMiddleware, relaxedLimit, validate(updateGigSchema), gigController.updateGig);
 router.patch('/:gigId/status', authMiddleware, relaxedLimit, gigController.updateGigStatus);
 router.delete('/:gigId', authMiddleware, relaxedLimit, gigController.deleteGig);

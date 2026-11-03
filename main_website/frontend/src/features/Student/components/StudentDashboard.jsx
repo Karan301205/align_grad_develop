@@ -11,6 +11,7 @@ import JobFilterBar from './JobFilterBar';
 import JobSnapshotCard from './JobSnapshotCard';
 import JobDetailsModal from '../../../components/JobDetailsModal';
 import PaymentModal from '../../../components/PaymentModal';
+import { FREE_PLAN_JOB_LIMIT, isPremiumCandidate, compareByRecommendation } from '../../../utils/jobAccess';
 
 function extractStipendNumeric(job) {
   if (!job || job.showSalary === false) return 0;
@@ -35,7 +36,8 @@ export default function StudentDashboard({
   autoSelectOpportunity, 
   setAutoSelectOpportunity,
   onSelectJob,
-  goToTab
+  goToTab,
+  initialSubTab = 'all'
 }) {
   const [selectedJob, setSelectedJob] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -47,14 +49,23 @@ export default function StudentDashboard({
     paymentCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  const isPremium = localIsPremium || (profile?.plan ? profile.plan === 'PREMIUM' : user?.plan === 'PREMIUM');
+  const isPremium = localIsPremium || isPremiumCandidate(profile, user);
 
-  // Sub-tabs inside right container ('all' | 'applied')
-  const [mainTab, setMainTab] = useState('all');
+  // Sub-tabs inside right container ('all' | 'recommended' | 'applied')
+  const [mainTab, setMainTab] = useState(initialSubTab || 'all');
+
+  useEffect(() => {
+    if (initialSubTab) {
+      setMainTab(initialSubTab);
+      if (initialSubTab === 'recommended') {
+        setSortBy('recommended');
+      }
+    }
+  }, [initialSubTab]);
 
   // Filter States (matching JobFilterSidebar)
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('newest');
+  const [sortBy, setSortBy] = useState('recommended');
   const [roleFilter, setRoleFilter] = useState('all');
   const [locationFilter, setLocationFilter] = useState('all');
   const [selectedSkills, setSelectedSkills] = useState('');
@@ -82,7 +93,7 @@ export default function StudentDashboard({
 
   const handleResetFilters = () => {
     setSearchQuery('');
-    setSortBy('newest');
+    setSortBy('recommended');
     setRoleFilter('all');
     setLocationFilter('all');
     setSelectedSkills('');
@@ -94,7 +105,9 @@ export default function StudentDashboard({
 
   const handleJobClick = (job) => {
     if (onSelectJob) {
-      onSelectJob(job);
+      // Hand over this grid's order so the brief's Previous/Next follow it.
+      // StudentLayout applies the free-plan cap to this list.
+      onSelectJob(job, sortedJobs.map(j => j.id));
     } else {
       window.history.pushState({}, '', `/job_brief?id=${job.id}`);
       window.dispatchEvent(new PopStateEvent('popstate'));
@@ -102,11 +115,13 @@ export default function StudentDashboard({
   };
 
   const totalApplied = jobs.filter(j => j.applied).length;
+  const totalRecommended = jobs.filter(j => (j.recommendationScore ?? 0) >= 50 && !j.applied).length;
 
   // Filter Jobs
   const filteredJobs = jobs.filter(job => {
     // 1. Right container sub-tab
     if (mainTab === 'applied' && !job.applied) return false;
+    if (mainTab === 'recommended' && job.applied) return false;
 
     // 2. Status filter
     if (statusFilter === 'applied' && !job.applied) return false;
@@ -161,6 +176,14 @@ export default function StudentDashboard({
 
   // Sort Filtered Jobs
   const sortedJobs = [...filteredJobs].sort((a, b) => {
+    if (sortBy === 'recommended' || mainTab === 'recommended') {
+      return compareByRecommendation(a, b);
+    }
+    if (sortBy === 'newest') {
+      const timeA = new Date(a.createdAt || 0).getTime();
+      const timeB = new Date(b.createdAt || 0).getTime();
+      return timeB - timeA;
+    }
     if (sortBy === 'stipend_desc') {
       return extractStipendNumeric(b) - extractStipendNumeric(a);
     }
@@ -170,10 +193,7 @@ export default function StudentDashboard({
     if (sortBy === 'title_asc') {
       return (a.title || '').localeCompare(b.title || '');
     }
-    // newest first (default)
-    const timeA = new Date(a.createdAt || 0).getTime();
-    const timeB = new Date(b.createdAt || 0).getTime();
-    return timeB - timeA;
+    return compareByRecommendation(a, b);
   });
 
   return (
@@ -243,6 +263,48 @@ export default function StudentDashboard({
               </span>
             </button>
 
+            {/* <button
+              type="button"
+              onClick={() => {
+                setMainTab('recommended');
+                setSortBy('recommended');
+              }}
+              className={`pb-3 border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+                mainTab === 'recommended'
+                  ? 'border-blue-700 text-blue-800 dark:text-blue-300 font-extrabold'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>Recommended For You</span>
+              {totalRecommended > 0 && (
+                <span className="px-1.5 py-0.2 bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-600 text-emerald-900 dark:text-emerald-200 text-[10px] font-bold rounded-none">
+                  {totalRecommended}
+                </span>
+              )}
+            </button> */}
+
+            <button
+              type="button"
+              onClick={() => {
+                setMainTab('recommended');
+                setSortBy('recommended');
+              }}
+              className={`pb-3 border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+                mainTab === 'recommended'
+                  ? 'border-blue-700 text-blue-800 dark:text-blue-300 font-extrabold'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>Recommended For You</span>
+              {totalRecommended > 0 && (
+                <span className="px-1.5 py-0.2 bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-600 text-emerald-900 dark:text-emerald-200 text-[10px] font-bold rounded-none">
+                  {totalRecommended}
+                </span>
+              )}
+            </button>
+
             <button
               type="button"
               onClick={() => setMainTab('applied')}
@@ -284,11 +346,11 @@ export default function StudentDashboard({
               Reset All Filters
             </button>
           </div>
-        ) : !isPremium && mainTab === 'all' ? (
+        ) : !isPremium && (mainTab === 'all' || mainTab === 'recommended') ? (
           <>
             {/* Top 3 Free Visible Opportunities (Row 1) */}
             <div className="p-5 sm:p-6 pb-4 bg-surface grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {(sortedJobs.length > 3 ? sortedJobs.slice(0, 3) : sortedJobs).map((job) => (
+              {sortedJobs.slice(0, FREE_PLAN_JOB_LIMIT).map((job) => (
                 <JobSnapshotCard
                   key={job.id}
                   job={job}
@@ -329,7 +391,7 @@ export default function StudentDashboard({
                   </h3>
 
                   <p className="text-xs sm:text-sm font-sans text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">
-                    Top 3 jobs are free. Upgrade to{' '}
+                    Top {FREE_PLAN_JOB_LIMIT} jobs are free. Upgrade to{' '}
                     <span className="font-semibold text-emerald-700 dark:text-emerald-400">Student Pro</span>{' '}
                     for lifetime access to all {sortedJobs.length} opportunities and every future listing.
                   </p>
@@ -392,6 +454,7 @@ export default function StudentDashboard({
           onApply={handleApply}
           onUpgrade={setTestSkill}
           isStudent={true}
+          candidateProjects={profile?.projects || []}
           onOpenCompanyProfile={onOpenCompanyProfile}
         />
       )}

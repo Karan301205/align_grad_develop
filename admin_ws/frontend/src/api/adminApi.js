@@ -57,6 +57,7 @@ function sendJson(path, method, body) {
 function postJson(path, body) { return sendJson(path, 'POST', body); }
 function putJson(path, body) { return sendJson(path, 'PUT', body); }
 function deleteJson(path) { return sendJson(path, 'DELETE'); }
+function patchJson(path, body) { return sendJson(path, 'PATCH', body); }
 
 export const adminApi = {
   login: (email, password) => {
@@ -78,6 +79,9 @@ export const adminApi = {
   getDashboardStats: () => getJson('/dashboard/stats'),
   getStudents: () => getJson('/student'),
   getRecruiters: () => getJson('/recruiter'),
+  // decision: 'APPROVE' | 'REJECT'; reason required for rejections
+  reviewRecruiterVerification: (recruiterId, decision, reason) =>
+    patchJson(`/recruiter/${recruiterId}/verification`, { decision, reason }),
   getJobs: () => getJson('/job'),
   getStorage: () => getJson('/storage/explorer'),
   getAnalytics: () => getJson('/analytics'),

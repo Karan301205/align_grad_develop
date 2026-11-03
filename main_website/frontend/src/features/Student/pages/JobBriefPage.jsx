@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { ALL_SKILLS } from '../../../constants';
+import OpportunityPager from '../../../components/OpportunityPager';
+import AddSkillWithoutTestModal from '../../../components/AddSkillWithoutTestModal';
 
 const BG_COLORS = [
   'bg-blue-800',
@@ -123,12 +125,20 @@ export default function JobBriefPage({
   onApply,
   onUpgrade,
   onAddSkillAndUpgrade,
+  // ({ skillName, rating }) => Promise<{ success }>: adds a skill that has no test, without a test
+  onAddSkillWithoutTest,
   onOpenCompanyProfile,
-  isPublic = false
+  isPublic = false,
+  // { position, total, onPrev, onNext, freeLimitReached, totalInList, freeLimit, onUpgrade } from StudentLayout
+  navigation = null
 }) {
   const [applying, setApplying] = useState(false);
   const [testPromptModal, setTestPromptModal] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [showScreeningModal, setShowScreeningModal] = useState(false);
+  const [screeningAnswers, setScreeningAnswers] = useState([]);
+  // { skillName, rating, isSubmitting } for skills that have no test in the bank
+  const [addSkillModal, setAddSkillModal] = useState(null);
 
   const handleShareJob = async () => {
     try {
@@ -224,6 +234,11 @@ export default function JobBriefPage({
 
   // Skill evaluation logic against candidate profile
   const candidateSkills = profile?.skills || [];
+  // Per-requirement server status from GET /student/jobs. hasQuiz=false (or a
+  // non-technical skill) means the question bank has no test for that skill.
+  const requirementStatusByName = new Map(
+    (job.requirementStatuses || []).map(s => [String(s.skillName || '').toLowerCase(), s])
+  );
   const evaluatedRequirements = (job.requirements || []).map(req => {
     const userSkill = candidateSkills.find(
       s => s.name.toLowerCase() === req.skillName.toLowerCase()
@@ -231,16 +246,23 @@ export default function JobBriefPage({
     const userRating = userSkill
       ? (userSkill.verifiedRating || userSkill.rating || 0)
       : 0;
-    const isSatisfied = userRating >= req.minRating;
+    const serverStatus = requirementStatusByName.get(req.skillName.toLowerCase());
+    const hasTest = serverStatus ? (serverStatus.isTech !== false && serverStatus.hasQuiz !== false) : true;
+    // Skills without a test can't be verified, so (like the server's
+    // AUTO_VERIFIED_NO_QUIZ rule) having them on the profile is enough.
+    const isSatisfied = userRating >= req.minRating || (!hasTest && Boolean(userSkill));
     return {
       ...req,
       userRating,
       isSatisfied,
+      hasTest,
       hasSkill: Boolean(userSkill)
     };
   });
 
   const allRequirementsMet = evaluatedRequirements.every(r => r.isSatisfied);
+  // True when every outstanding requirement is a skill that only needs adding (no test exists).
+  const pendingOnlyNeedsSkills = !allRequirementsMet && evaluatedRequirements.every(r => r.isSatisfied || !r.hasTest);
 
   const handleApplyClick = async () => {
     if (isPublic) {
@@ -248,9 +270,45 @@ export default function JobBriefPage({
       return;
     }
     if (isApplied || !allRequirementsMet) return;
+
+    if (job.screeningQuestions && Array.isArray(job.screeningQuestions) && job.screeningQuestions.length > 0) {
+      setScreeningAnswers(job.screeningQuestions.map(q => ({
+        questionId: q.id,
+        questionText: q.question,
+        type: q.type || 'LONG_ANSWER',
+        answer: ''
+      })));
+      setShowScreeningModal(true);
+      return;
+    }
+
     setApplying(true);
     try {
-      await onApply?.(job.id);
+      await onApply?.(job.id, []);
+    } finally {
+      setApplying(false);
+    }
+  };
+
+  const handleConfirmScreeningApply = async () => {
+    if (job.screeningQuestions && Array.isArray(job.screeningQuestions)) {
+      for (const sq of job.screeningQuestions) {
+        if (sq.required !== false) {
+          const ans = screeningAnswers.find(a => (a.questionId && a.questionId === sq.id) || a.questionText === sq.question);
+          if (!ans || !String(ans.answer || '').trim()) {
+            alert(`Please answer the required question: "${sq.question}"`);
+            return;
+          }
+        }
+      }
+    }
+
+    setApplying(true);
+    try {
+      const res = await onApply?.(job.id, screeningAnswers);
+      if (res && res.success !== false) {
+        setShowScreeningModal(false);
+      }
     } finally {
       setApplying(false);
     }
@@ -373,17 +431,6 @@ export default function JobBriefPage({
           <ArrowLeft className="w-4 h-4" />
           <span> Back to Opportunities</span>
         </button>
-
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={handleDownloadPDF}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:border-blue-700 hover:text-blue-800 dark:hover:text-blue-300 text-xs font-headline font-bold rounded-none transition-colors cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
-            <span>Download Brief PDF</span>
-          </button>
-        </div>
       </div>
 
       {/* Main Job Hero Card */}
@@ -540,7 +587,7 @@ export default function JobBriefPage({
               ) : (
                 <div className="px-3 py-2.5 bg-amber-100 dark:bg-amber-950/70 border border-amber-400 dark:border-amber-700 text-amber-900 dark:text-amber-200 font-headline font-bold text-xs rounded-none flex items-center gap-1.5 tracking-wider">
                   <ShieldCheck className="w-4 h-4 text-amber-700 dark:text-amber-400" />
-                  <span>Test Verification Required</span>
+                  <span>{pendingOnlyNeedsSkills ? 'Required Skills Missing' : 'Test Verification Required'}</span>
                 </div>
               )}
             </div>
@@ -607,8 +654,10 @@ export default function JobBriefPage({
 
       {/* Main Two-Column Detailed Body */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column (2 Cols): Summary, Responsibilities & Selection Rounds */}
-        <div className="lg:col-span-2 space-y-6">
+        {/* Left Column (2 Cols): Summary, Responsibilities & Selection Rounds.
+            min-w-0 lets the grid track shrink so long unbroken text (e.g. pasted URLs)
+            wraps inside the cards instead of stretching under the right column. */}
+        <div className="lg:col-span-2 space-y-6 min-w-0">
           {/* Opportunity Summary / Description */}
           <div className="bg-surface-container border border-slate-300 dark:border-slate-700 rounded-none p-6 space-y-3">
             <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
@@ -617,7 +666,7 @@ export default function JobBriefPage({
                 Opportunity Summary
               </h2>
             </div>
-            <p className="text-sm text-slate-800 dark:text-slate-200 font-sans leading-relaxed whitespace-pre-line">
+            <p className="text-sm text-slate-800 dark:text-slate-200 font-sans leading-relaxed whitespace-pre-line [overflow-wrap:anywhere]">
               {job.description || 'No detailed opportunity summary provided by the recruiter.'}
             </p>
           </div>
@@ -631,7 +680,7 @@ export default function JobBriefPage({
                   Role & Responsibilities
                 </h2>
               </div>
-              <div className="text-sm text-slate-800 dark:text-slate-200 font-sans leading-relaxed whitespace-pre-line">
+              <div className="text-sm text-slate-800 dark:text-slate-200 font-sans leading-relaxed whitespace-pre-line [overflow-wrap:anywhere]">
                 {job.roleResponsibilities}
               </div>
             </div>
@@ -656,11 +705,11 @@ export default function JobBriefPage({
                     <div className="w-8 h-8 rounded-none bg-blue-700 text-white font-headline font-extrabold text-sm flex items-center justify-center shrink-0">
                       {round.roundNumber || idx + 1}
                     </div>
-                    <div className="space-y-1">
-                      <h3 className="font-headline font-bold text-sm text-slate-900 dark:text-slate-100">
+                    <div className="space-y-1 min-w-0">
+                      <h3 className="font-headline font-bold text-sm text-slate-900 dark:text-slate-100 [overflow-wrap:anywhere]">
                         {round.name || `Round ${idx + 1}`}
                       </h3>
-                      <p className="text-xs font-sans text-slate-700 dark:text-slate-300 leading-relaxed">
+                      <p className="text-xs font-sans text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line [overflow-wrap:anywhere]">
                         {round.description || 'Details will be communicated prior to the round.'}
                       </p>
                     </div>
@@ -672,7 +721,7 @@ export default function JobBriefPage({
         </div>
 
         {/* Right Column (1 Col): Skill Verification Thresholds & Gating */}
-        <div className="space-y-6">
+        <div className="space-y-6 min-w-0">
           <div className="bg-surface-container border border-slate-300 dark:border-slate-700 rounded-none p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
               <div className="flex items-center gap-2">
@@ -721,7 +770,12 @@ export default function JobBriefPage({
 
                       {req.isSatisfied ? (
                         <span className="text-emerald-800 dark:text-emerald-300 font-headline font-bold text-[11px] flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Met
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          {!req.hasTest && req.userRating < req.minRating ? 'Met · No test yet' : 'Met'}
+                        </span>
+                      ) : !req.hasTest ? (
+                        <span className="text-blue-800 dark:text-blue-300 font-headline font-bold text-[11px] flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5" /> No Test Available
                         </span>
                       ) : (
                         <span className="text-amber-800 dark:text-amber-300 font-headline font-bold text-[11px] flex items-center gap-1">
@@ -730,8 +784,30 @@ export default function JobBriefPage({
                       )}
                     </div>
 
+                    {/* No test in the bank for this skill: add it to the profile instead of starting a test */}
+                    {!req.isSatisfied && !req.hasTest && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isPublic) {
+                            window.location.href = '/?auth_prompt=signup_required';
+                            return;
+                          }
+                          setAddSkillModal({
+                            skillName: req.skillName,
+                            rating: Math.min(10, Math.max(1, parseInt(req.minRating, 10) || 1)),
+                            isSubmitting: false
+                          });
+                        }}
+                        className="w-full mt-2 py-1.5 px-3 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold text-xs rounded-none transition-colors cursor-pointer flex items-center justify-center gap-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add {req.skillName} to Profile</span>
+                      </button>
+                    )}
+
                     {/* Action button if not satisfied */}
-                    {!req.isSatisfied && (
+                    {!req.isSatisfied && req.hasTest && (
                       <button
                         type="button"
                         onClick={() => {
@@ -786,7 +862,9 @@ export default function JobBriefPage({
                     <span>Application Locked</span>
                   </div>
                   <p className="text-[11px] text-slate-600 dark:text-slate-400 font-sans">
-                    Complete the required skill tests above to unlock your application for this position.
+                    {pendingOnlyNeedsSkills
+                      ? 'Add the required skills above to your profile to unlock your application for this position.'
+                      : 'Complete the required skill tests above to unlock your application for this position.'}
                   </p>
                 </div>
               )}
@@ -794,6 +872,28 @@ export default function JobBriefPage({
           </div>
         </div>
       </div>
+
+      {/* Previous / Next job at the bottom of the brief (free plan: limited to the first few jobs of the list) */}
+      {!isPublic && <OpportunityPager navigation={navigation} itemLabel="Job" />}
+
+      {/* Add-skill confirmation for skills that have no test in the question bank */}
+      <AddSkillWithoutTestModal
+        modal={addSkillModal}
+        context="job"
+        onCancel={() => setAddSkillModal(null)}
+        onConfirm={async () => {
+          if (!onAddSkillWithoutTest) {
+            setAddSkillModal(null);
+            return;
+          }
+          setAddSkillModal(prev => ({ ...prev, isSubmitting: true }));
+          try {
+            await onAddSkillWithoutTest({ skillName: addSkillModal.skillName, rating: addSkillModal.rating });
+          } finally {
+            setAddSkillModal(null);
+          }
+        }}
+      />
 
       {/* Skill Verification & Addition Gating Modal */}
       {testPromptModal && (
@@ -946,6 +1046,129 @@ export default function JobBriefPage({
                     <ArrowRight className="w-3.5 h-3.5" />
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Candidate Screening Questions Modal */}
+      {showScreeningModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-none max-w-lg w-full p-6 shadow-2xl space-y-4 text-left animate-scale-up max-h-[90vh] overflow-y-auto custom-scrollbar">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+              <div>
+                <span className="inline-block px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-600 text-emerald-900 dark:text-emerald-200 mb-1">
+                  Required Screening Step
+                </span>
+                <h3 className="text-base font-headline font-bold text-slate-900 dark:text-slate-100">
+                  Screening Questions ({job.screeningQuestions?.length || 0})
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-sans mt-0.5">
+                  Please provide answers to the recruiter's questions before submitting your application.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowScreeningModal(false)}
+                className="p-1.5 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Questions List */}
+            <div className="space-y-4">
+              {(job.screeningQuestions || []).map((sq, sqIdx) => {
+                const currentAns = screeningAnswers.find(a => (a.questionId && a.questionId === sq.id) || a.questionText === sq.question);
+                const answerVal = currentAns ? currentAns.answer : '';
+
+                return (
+                  <div key={sq.id || sqIdx} className="p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-none space-y-2">
+                    <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100">
+                      {sqIdx + 1}. {sq.question} {sq.required !== false && <span className="text-red-500">*</span>}
+                    </label>
+
+                    {sq.type === 'MCQ' ? (
+                      <div className="space-y-1.5 pt-1">
+                        {(sq.options || []).map((opt, optIdx) => {
+                          const isSelected = answerVal === opt;
+                          return (
+                            <label
+                              key={optIdx}
+                              className={`flex items-center gap-2 p-2 rounded-none border text-xs font-sans cursor-pointer transition-colors ${
+                                isSelected
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-600 text-emerald-900 dark:text-emerald-200 font-medium'
+                                  : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name={`modal_sq_${sq.id || sqIdx}`}
+                                value={opt}
+                                checked={isSelected}
+                                onChange={() => {
+                                  setScreeningAnswers(prev => {
+                                    const filtered = prev.filter(a => a.questionId !== sq.id && a.questionText !== sq.question);
+                                    return [...filtered, {
+                                      questionId: sq.id,
+                                      questionText: sq.question,
+                                      type: 'MCQ',
+                                      answer: opt
+                                    }];
+                                  });
+                                }}
+                                className="accent-emerald-700 w-3.5 h-3.5"
+                              />
+                              <span>{opt}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <textarea
+                        value={answerVal}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setScreeningAnswers(prev => {
+                            const filtered = prev.filter(a => a.questionId !== sq.id && a.questionText !== sq.question);
+                            return [...filtered, {
+                              questionId: sq.id,
+                              questionText: sq.question,
+                              type: 'LONG_ANSWER',
+                              answer: val
+                            }];
+                          });
+                        }}
+                        rows={3}
+                        placeholder="Type your response here..."
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs font-sans text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 shadow-2xs"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setShowScreeningModal(false)}
+                disabled={applying}
+                className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-headline font-bold text-xs rounded-none transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmScreeningApply}
+                disabled={applying}
+                className="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold text-xs rounded-none transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs disabled:opacity-50"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>{applying ? 'Submitting Application...' : 'Submit Application'}</span>
               </button>
             </div>
           </div>

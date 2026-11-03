@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, AlertCircle, ChevronRight, ChevronLeft, Plus, ChevronDown, Star, Award, Briefcase, DollarSign, X, Camera, Trash2, User, GraduationCap, FolderGit2, Activity, FileText } from 'lucide-react';
+import { CheckCircle, AlertCircle, ChevronRight, ChevronLeft, Plus, ChevronDown, Star, Award, Briefcase, DollarSign, X, Camera, Trash2, User, GraduationCap, FolderGit2, Activity, FileText, Video, Play, Upload, Clock } from 'lucide-react';
 import { ALL_SKILLS, hasSkillMcq } from '../../../constants';
 import { apiFetch } from '../../../services/apiClient';
 import { putFileToS3 } from '../../../services/uploadService';
@@ -98,15 +98,16 @@ export default function StudentProfile({
   handleUpdateProfile,
   handleRatingChange,
   handleDownloadGeneratedResume,
-  generatingPdf
+  generatingPdf,
+  onNotify
 }) {
   const tabsList = [
     { id: 'general', label: 'General' },
     { id: 'showcase', label: 'Introduction' },
+    { id: 'projects', label: 'Projects' },
     { id: 'education', label: 'Education' },
     { id: 'experience', label: 'Experience' },
     { id: 'certificates', label: 'Certifications' },
-    { id: 'projects', label: 'Projects' },
     { id: 'skills', label: 'Skills' },
     { id: 'cocurricular', label: 'Co-Curricular' }
   ];
@@ -250,6 +251,168 @@ export default function StudentProfile({
   const [editingProjIdx, setEditingProjIdx] = React.useState(null);
   const [editingCocurricularIdx, setEditingCocurricularIdx] = React.useState(null);
   const [activeModal, setActiveModal] = React.useState(null); // 'education' | 'experience' | 'certificates' | 'projects' | 'cocurricular' | null
+  const [projSkillInput, setProjSkillInput] = React.useState('');
+  const [showProjSkillDropdown, setShowProjSkillDropdown] = React.useState(false);
+
+  const handleAddProjSkill = (skillToAdd) => {
+    const target = (skillToAdd || projSkillInput || '').trim();
+    if (!target) return;
+    const current = Array.isArray(newProj.skills) ? newProj.skills : [];
+    if (current.some(s => s.toLowerCase() === target.toLowerCase())) {
+      setProjSkillInput('');
+      setShowProjSkillDropdown(false);
+      return;
+    }
+    setNewProj(prev => ({
+      ...prev,
+      skills: [...(prev.skills || []), target]
+    }));
+    setProjSkillInput('');
+    setShowProjSkillDropdown(false);
+  };
+
+  const handleRemoveProjSkill = (skillToRemove) => {
+    setNewProj(prev => ({
+      ...prev,
+      skills: (prev.skills || []).filter(s => s.toLowerCase() !== skillToRemove.toLowerCase())
+    }));
+  };
+
+  const [projVideoUploading, setProjVideoUploading] = React.useState(false);
+  const [projVideoProgress, setProjVideoProgress] = React.useState(0);
+  const [projVideoError, setProjVideoError] = React.useState('');
+  const [activeVideoModalUrl, setActiveVideoModalUrl] = React.useState(null);
+  const projVideoFileInputRef = React.useRef(null);
+
+  const handleProjectVideoSelect = (e) => {
+    setProjVideoError('');
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    e.target.value = '';
+
+    if (!file.type || !file.type.startsWith('video/')) {
+      const err = 'Invalid video format. Please upload an MP4, WebM, or MOV video.';
+      setProjVideoError(err);
+      showAlert(err, 'error');
+      return;
+    }
+
+    // Must match uploadConfig.limits.projectVideo on the backend.
+    const MAX_SIZE_BYTES = 100 * 1024 * 1024;
+    if (file.size > MAX_SIZE_BYTES) {
+      const err = `Video size exceeds the maximum limit of 100 MB. Your file is ${(file.size / (1024 * 1024)).toFixed(1)} MB.`;
+      setProjVideoError(err);
+      showAlert(err, 'error');
+      return;
+    }
+
+    const videoEl = document.createElement('video');
+    videoEl.preload = 'metadata';
+    const objectUrl = URL.createObjectURL(file);
+    videoEl.src = objectUrl;
+
+    videoEl.onloadedmetadata = () => {
+      URL.revokeObjectURL(objectUrl);
+      const duration = videoEl.duration;
+      if (duration > 90.5) {
+        const mins = Math.floor(duration / 60);
+        const secs = Math.round(duration % 60);
+        const err = `Video exceeds maximum allowed duration of 1.5 minutes (90 seconds). Selected video is ${mins}m ${secs}s.`;
+        setProjVideoError(err);
+        showAlert(err, 'error');
+        return;
+      }
+      uploadProjectVideo(file);
+    };
+
+    videoEl.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      const err = 'Failed to inspect video metadata. Please select a valid video file.';
+      setProjVideoError(err);
+      showAlert(err, 'error');
+    };
+  };
+
+  const uploadProjectVideo = async (file) => {
+    setProjVideoUploading(true);
+    setProjVideoProgress(10);
+    setProjVideoError('');
+
+    try {
+      const fileExt = file.name ? file.name.split('.').pop() : 'mp4';
+      const fileName = `proj_${Date.now()}.${fileExt}`;
+      const contentType = file.type || 'video/mp4';
+
+      const res = await apiFetch('/student/video-upload-url', {
+        token,
+        method: 'POST',
+        json: {
+          fileName,
+          contentType,
+          category: 'project'
+        }
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to request secure video upload URL.');
+      }
+
+      const { signedUrl, publicUrl } = await res.json();
+      setProjVideoProgress(25);
+
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', signedUrl);
+        xhr.setRequestHeader('Content-Type', contentType);
+        if (token) {
+          xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        }
+
+        xhr.upload.onprogress = (evt) => {
+          if (evt.lengthComputable) {
+            const pct = Math.round((evt.loaded / evt.total) * 100);
+            setProjVideoProgress(25 + Math.round((pct / 100) * 70));
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            let msg = `Upload failed with status ${xhr.status}`;
+            try {
+              const body = JSON.parse(xhr.responseText);
+              if (body.error) msg = body.error;
+            } catch (_) {}
+            reject(new Error(msg));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error('Network error during video upload.'));
+        xhr.send(file);
+      });
+
+      setProjVideoProgress(100);
+      setNewProj(prev => ({ ...prev, videoUrl: publicUrl }));
+      showAlert('Project walkthrough video uploaded successfully!', 'success');
+    } catch (err) {
+      console.error('Project video upload error:', err);
+      const msg = err.message || 'Failed to upload project video.';
+      setProjVideoError(msg);
+      showAlert(msg, 'error');
+    } finally {
+      setProjVideoUploading(false);
+    }
+  };
+
+  const handleRemoveProjectVideo = () => {
+    setNewProj(prev => ({ ...prev, videoUrl: '' }));
+    setProjVideoError('');
+    setProjVideoProgress(0);
+  };
+
   const [alertToast, setAlertToast] = React.useState(null); // { id: number, msg: string, type: 'error' | 'success' }
   const showAlert = (msg, type = 'error') => {
     setAlertToast({ id: Date.now(), msg, type });
@@ -293,7 +456,12 @@ export default function StudentProfile({
 
   const openAddProjModal = () => {
     setEditingProjIdx(null);
-    setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
+    setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '', skills: [], videoUrl: '' });
+    setProjSkillInput('');
+    setShowProjSkillDropdown(false);
+    setProjVideoUploading(false);
+    setProjVideoProgress(0);
+    setProjVideoError('');
     setActiveModal('projects');
   };
 
@@ -307,6 +475,11 @@ export default function StudentProfile({
     setActiveModal(null);
     setShowDomainDropdown(false);
     setDomainSearch('');
+    setProjSkillInput('');
+    setShowProjSkillDropdown(false);
+    setProjVideoUploading(false);
+    setProjVideoProgress(0);
+    setProjVideoError('');
   };
 
   const debouncedCheckRef = React.useRef(null);
@@ -1613,11 +1786,713 @@ export default function StudentProfile({
                   profile={profile}
                   token={token}
                   onVideoSaved={(url) => setProfile(prev => ({ ...prev, introVideoUrl: url }))}
+                  onNotify={onNotify}
                 />
               </div>
             )}
 
-            {/* Panel 3: Education */}
+            {/* Panel 3: Projects (Moved after Introduction) */}
+            {profileTab === 'projects' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center border-b border-slate-300 dark:border-slate-700 pb-3">
+                  <h3 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100">Projects</h3>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-xs font-sans font-medium tracking-wider text-slate-600 dark:text-slate-400">{projectsList.length} Items Added</span>
+                    {projectsList.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={openAddProjModal}
+                        className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold active:scale-95 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Add Project
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Empty State */}
+                {projectsList.length === 0 && (
+                  <div className="p-8 sm:p-12 border border-dashed border-slate-300 dark:border-slate-700 rounded-none bg-slate-50 dark:bg-slate-900/60 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in shadow-2xs">
+                    <div className="w-12 h-12 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 shadow-2xs">
+                      <FolderGit2 className="w-6 h-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">You haven't added any record</h4>
+                      <p className="text-xs font-sans font-normal text-slate-600 dark:text-slate-400 max-w-sm">
+                        Showcase personal, academic, or open-source projects along with live links, repository URLs, and video walkthroughs (up to 1.5 mins).
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={openAddProjModal}
+                      className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Project
+                    </button>
+                  </div>
+                )}
+
+                {/* Existing items */}
+                {projectsList.length > 0 && (
+                  <div className="flex flex-col gap-4">
+                    {projectsList.map((proj, idx) => (
+                      <div
+                        key={idx}
+                        className="p-5 sm:p-6 bg-surface border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none flex flex-col gap-4 shadow-2xs hover:shadow-xs transition-all overflow-hidden w-full max-w-full"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="space-y-1.5 flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="inline-block px-2.5 py-0.5 bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-200 border border-blue-400 dark:border-blue-600 rounded-none text-[10px] font-headline font-bold tracking-wider">
+                                Project
+                              </span>
+                              {proj.videoUrl && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-950/70 text-purple-900 dark:text-purple-200 border border-purple-400 dark:border-purple-600 rounded-none text-[10px] font-headline font-bold">
+                                  <Video className="w-3 h-3 text-purple-700 dark:text-purple-400" />
+                                  <span>Video Demo</span>
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-3">
+                              <h4 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100 tracking-tight break-words">
+                                {proj.title}
+                              </h4>
+                              {proj.role && (
+                                <p className="text-xs sm:text-sm font-sans font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                  <span>Role: <strong className="text-slate-900 dark:text-slate-100">{proj.role}</strong></span>
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              {(proj.startDate || proj.endDate) && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-sans font-medium text-slate-800 dark:text-slate-200">
+                                  🗓️ {proj.startDate} - {proj.currentlyWorking ? 'Present' : proj.endDate || 'N/A'}
+                                </span>
+                              )}
+                              {proj.codeUrl && (
+                                <a
+                                  href={proj.codeUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold text-blue-700 dark:text-blue-400 transition-all shadow-2xs"
+                                >
+                                  💻 Code URL
+                                </a>
+                              )}
+                              {proj.hostedUrl && (
+                                <a
+                                  href={proj.hostedUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold text-slate-800 dark:text-slate-200 transition-all shadow-2xs"
+                                >
+                                  🚀 Live Demo
+                                </a>
+                              )}
+                              {proj.videoUrl && (
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveVideoModalUrl(proj.videoUrl)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 border border-purple-400 dark:border-purple-600 rounded-none text-xs font-headline font-bold text-purple-800 dark:text-purple-300 transition-all shadow-2xs cursor-pointer"
+                                >
+                                  <Play className="w-3.5 h-3.5 fill-current" />
+                                  <span>Watch Demo Video</span>
+                                </button>
+                              )}
+                            </div>
+
+                            {proj.skills && proj.skills.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-1.5 pt-2">
+                                <span className="text-[10px] font-headline font-bold text-slate-500 dark:text-slate-400 tracking-wider">
+                                  SKILLS:
+                                </span>
+                                {proj.skills.map((skill, sIdx) => (
+                                  <span
+                                    key={sIdx}
+                                    className="text-[11px] px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-none font-sans font-medium"
+                                  >
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 sm:self-start">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const item = projectsList[idx];
+                                setNewProj({
+                                  title: '',
+                                  role: '',
+                                  codeUrl: '',
+                                  hostedUrl: '',
+                                  startDate: '',
+                                  endDate: '',
+                                  currentlyWorking: false,
+                                  description: '',
+                                  skills: [],
+                                  videoUrl: '',
+                                  ...item
+                                });
+                                setProjSkillInput('');
+                                setShowProjSkillDropdown(false);
+                                setProjVideoUploading(false);
+                                setProjVideoProgress(0);
+                                setProjVideoError('');
+                                setEditingProjIdx(idx);
+                                setActiveModal('projects');
+                              }}
+                              className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-blue-600 text-slate-800 dark:text-slate-200 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setProjectsList(projectsList.filter((_, i) => i !== idx));
+                                if (editingProjIdx === idx) {
+                                  setEditingProjIdx(null);
+                                  setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '', skills: [], videoUrl: '' });
+                                  closeModal();
+                                }
+                              }}
+                              className="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+
+                        {proj.description && (
+                          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 w-full overflow-hidden">
+                            <p className="text-xs sm:text-sm font-sans font-medium text-slate-800 dark:text-slate-200 leading-relaxed bg-slate-50 dark:bg-slate-900/60 p-3.5 sm:p-4 rounded-none border border-slate-200 dark:border-slate-800 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
+                              {proj.description}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Pop-up Modal for Add/Edit Project */}
+                {activeModal === 'projects' && (
+                  <div
+                    className="absolute inset-0 z-50 backdrop-blur-md flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget) closeModal();
+                    }}
+                  >
+                    <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+                      <button
+                        type="button"
+                        onClick={closeModal}
+                        className="absolute top-4 right-4 p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-all cursor-pointer"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+
+                      <div className="flex items-center gap-3 border-b border-slate-300 dark:border-slate-700 pb-3">
+                        <div className="w-10 h-10 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 shrink-0 shadow-2xs">
+                          <FolderGit2 className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-headline font-bold text-slate-900 dark:text-slate-100">
+                            {editingProjIdx !== null ? 'Edit Project Record' : 'Add Project Record'}
+                          </h3>
+                          <p className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">
+                            {editingProjIdx !== null ? 'Update your project information' : 'Showcase personal, academic, or professional projects'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Title <span className="text-rose-500 font-bold">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
+                              placeholder="Name of your project"
+                              value={newProj.title}
+                              onChange={e => setNewProj({ ...newProj, title: e.target.value })}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Company / Role <span className="text-rose-500 font-bold">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
+                              placeholder="Enter your role"
+                              value={newProj.role}
+                              onChange={e => setNewProj({ ...newProj, role: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Code URL</label>
+                            <input
+                              type="url"
+                              className={`w-full bg-white dark:bg-slate-900 border ${
+                                newProj.codeUrl && !isValidUrl(newProj.codeUrl)
+                                  ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                                  : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                              } rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none font-sans font-medium shadow-2xs`}
+                              placeholder="https://github.com/username/project"
+                              value={newProj.codeUrl}
+                              onChange={e => setNewProj({ ...newProj, codeUrl: e.target.value })}
+                              onBlur={() => {
+                                if (newProj.codeUrl && isValidUrl(newProj.codeUrl)) {
+                                  setNewProj(prev => ({ ...prev, codeUrl: ensureUrlProtocol(prev.codeUrl) }));
+                                }
+                              }}
+                            />
+                            {newProj.codeUrl && !isValidUrl(newProj.codeUrl) && (
+                              <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1">
+                                * Please enter a valid URL (e.g. https://github.com/...)
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Hosted URL</label>
+                            <input
+                              type="url"
+                              className={`w-full bg-white dark:bg-slate-900 border ${
+                                newProj.hostedUrl && !isValidUrl(newProj.hostedUrl)
+                                  ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
+                                  : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
+                              } rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none font-sans font-medium shadow-2xs`}
+                              placeholder="https://myproject.com (optional)"
+                              value={newProj.hostedUrl}
+                              onChange={e => setNewProj({ ...newProj, hostedUrl: e.target.value })}
+                              onBlur={() => {
+                                if (newProj.hostedUrl && isValidUrl(newProj.hostedUrl)) {
+                                  setNewProj(prev => ({ ...prev, hostedUrl: ensureUrlProtocol(prev.hostedUrl) }));
+                                }
+                              }}
+                            />
+                            {newProj.hostedUrl && !isValidUrl(newProj.hostedUrl) && (
+                              <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1">
+                                * Please enter a valid URL (e.g. https://myproject.com)
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                              Start Date <span className="text-rose-500 font-bold">*</span>
+                            </label>
+                            <input
+                              type="date"
+                              min="1950-01-01"
+                              max={newProj.endDate ? sanitizeDateYear(newProj.endDate) : "2099-12-31"}
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                              value={sanitizeDateYear(newProj.startDate)}
+                              onChange={e => setNewProj(prev => ({ ...prev, startDate: sanitizeDateYear(e.target.value) }))}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">End Date</label>
+                            <input
+                              type="date"
+                              min={newProj.startDate ? sanitizeDateYear(newProj.startDate) : "1950-01-01"}
+                              max="2099-12-31"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                              disabled={newProj.currentlyWorking}
+                              value={newProj.currentlyWorking ? '' : sanitizeDateYear(newProj.endDate)}
+                              onChange={e => setNewProj(prev => ({ ...prev, endDate: sanitizeDateYear(e.target.value) }))}
+                            />
+                          </div>
+
+                          <div className="flex items-end pb-2">
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                className="rounded-none border-slate-300 dark:border-slate-700 text-blue-700 bg-white dark:bg-slate-900 w-3.5 h-3.5 focus:ring-0"
+                                checked={newProj.currentlyWorking}
+                                onChange={e => setNewProj({ ...newProj, currentlyWorking: e.target.checked, endDate: e.target.checked ? '' : newProj.endDate })}
+                              />
+                              <span className="text-xs font-headline font-bold text-slate-800 dark:text-slate-200">Currently Working Here</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                            Description <span className="text-rose-500 font-bold">*</span>
+                          </label>
+                          <textarea
+                            rows="3"
+                            className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
+                            placeholder="Add key features, stacks, or descriptions... (New line for bullet point)"
+                            value={newProj.description}
+                            onChange={e => setNewProj({ ...newProj, description: e.target.value })}
+                          />
+                        </div>
+
+                        {/* Project Demo Video Upload Section */}
+                        <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Video className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                              <label className="text-xs font-headline font-bold text-slate-800 dark:text-slate-200 tracking-wider">
+                                Project Walkthrough Video
+                              </label>
+                            </div>
+                            <span className="text-[11px] font-sans font-medium text-purple-700 dark:text-purple-400">
+                              Max 1.5 mins • Max 100 MB
+                            </span>
+                          </div>
+
+                          <p className="text-[11px] font-sans text-slate-500 dark:text-slate-400">
+                            Add a short walkthrough video (up to 90 seconds) demonstrating your project UI, architecture, and codebase.
+                          </p>
+
+                          {/* Hidden file input */}
+                          <input
+                            ref={projVideoFileInputRef}
+                            type="file"
+                            accept="video/mp4,video/webm,video/quicktime,video/x-matroska"
+                            className="hidden"
+                            onChange={handleProjectVideoSelect}
+                          />
+
+                          {/* Video preview or uploader state */}
+                          {newProj.videoUrl ? (
+                            <div className="p-3 bg-slate-50 dark:bg-slate-900/70 border border-purple-300 dark:border-purple-800 rounded-none space-y-3">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-950 text-purple-900 dark:text-purple-200 border border-purple-400 dark:border-purple-600 text-[10px] font-headline font-bold">
+                                    Video Attached
+                                  </span>
+                                  <span className="text-xs font-sans text-slate-600 dark:text-slate-400 truncate">
+                                    {newProj.videoUrl}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveVideoModalUrl(newProj.videoUrl)}
+                                    className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-purple-600 text-purple-700 dark:text-purple-400 text-xs font-headline font-bold rounded-none shadow-2xs cursor-pointer flex items-center gap-1"
+                                  >
+                                    <Play className="w-3 h-3" /> Preview
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => projVideoFileInputRef.current?.click()}
+                                    className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-blue-600 text-slate-700 dark:text-slate-300 text-xs font-headline font-bold rounded-none shadow-2xs cursor-pointer"
+                                  >
+                                    Change
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={handleRemoveProjectVideo}
+                                    className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 text-xs font-headline font-bold rounded-none shadow-2xs cursor-pointer flex items-center gap-1"
+                                  >
+                                    <Trash2 className="w-3 h-3" /> Remove
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="w-full bg-black aspect-video max-h-52 rounded-none overflow-hidden border border-slate-200 dark:border-slate-800">
+                                <video
+                                  src={newProj.videoUrl}
+                                  controls
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <div
+                                onClick={() => !projVideoUploading && projVideoFileInputRef.current?.click()}
+                                className={`p-4 border-2 border-dashed ${
+                                  projVideoUploading
+                                    ? 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/20 cursor-wait'
+                                    : 'border-slate-300 dark:border-slate-700 hover:border-purple-500 dark:hover:border-purple-500 bg-slate-50 dark:bg-slate-900/50 hover:bg-purple-50/20 cursor-pointer'
+                                } rounded-none flex flex-col items-center justify-center text-center space-y-2 transition-all`}
+                              >
+                                <div className="w-10 h-10 rounded-none bg-purple-50 dark:bg-purple-950/70 border border-purple-400 dark:border-purple-600 flex items-center justify-center text-purple-700 dark:text-purple-400 shadow-2xs">
+                                  {projVideoUploading ? (
+                                    <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent animate-spin rounded-full" />
+                                  ) : (
+                                    <Upload className="w-5 h-5" />
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="text-xs font-headline font-bold text-slate-800 dark:text-slate-200">
+                                    {projVideoUploading ? `Uploading Project Video... (${projVideoProgress}%)` : 'Upload Project Walkthrough Video'}
+                                  </p>
+                                  <p className="text-[11px] font-sans text-slate-500 dark:text-slate-400">
+                                    Supports MP4, WebM, MOV • Max duration 1.5 mins (90 seconds) • Max file size 100 MB
+                                  </p>
+                                </div>
+
+                                {projVideoUploading && (
+                                  <div className="w-full max-w-xs bg-slate-200 dark:bg-slate-700 h-1.5 rounded-none overflow-hidden mt-2">
+                                    <div
+                                      className="bg-purple-600 h-full transition-all duration-300"
+                                      style={{ width: `${projVideoProgress}%` }}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Direct Video URL Fallback */}
+                              <div className="flex items-center gap-2 pt-1">
+                                <input
+                                  type="url"
+                                  className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-purple-700 font-sans font-medium shadow-2xs"
+                                  placeholder="Or paste direct video URL (e.g. S3 link, Loom, MP4 URL)..."
+                                  value={newProj.videoUrl || ''}
+                                  onChange={(e) => setNewProj(prev => ({ ...prev, videoUrl: e.target.value }))}
+                                  onBlur={() => {
+                                    if (newProj.videoUrl && isValidUrl(newProj.videoUrl)) {
+                                      setNewProj(prev => ({ ...prev, videoUrl: ensureUrlProtocol(prev.videoUrl) }));
+                                    }
+                                  }}
+                                />
+                                {newProj.videoUrl && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveVideoModalUrl(newProj.videoUrl)}
+                                    className="px-3 py-1.5 bg-purple-50 dark:bg-purple-950/70 border border-purple-400 dark:border-purple-600 text-purple-700 dark:text-purple-300 text-xs font-headline font-bold rounded-none cursor-pointer flex items-center gap-1 shadow-2xs"
+                                  >
+                                    <Play className="w-3 h-3" /> Test
+                                  </button>
+                                )}
+                              </div>
+
+                              {projVideoError && (
+                                <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold">
+                                  * {projVideoError}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Skills & Technologies Tagging */}
+                        <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                          <div className="flex items-center justify-between">
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 tracking-wider">
+                              Skills & Technologies Tagged
+                            </label>
+                            <span className="text-[11px] font-sans font-medium text-blue-700 dark:text-blue-400">
+                              {(newProj.skills || []).length} Tagged
+                            </span>
+                          </div>
+
+                          <div className="relative">
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
+                                placeholder="Type a skill tag (e.g. Python, HTML, CSS, React) and press Enter"
+                                value={projSkillInput}
+                                onChange={e => {
+                                  setProjSkillInput(e.target.value);
+                                  setShowProjSkillDropdown(Boolean(e.target.value.trim()));
+                                }}
+                                onFocus={() => {
+                                  if (projSkillInput.trim()) setShowProjSkillDropdown(true);
+                                }}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter' || e.key === ',') {
+                                    e.preventDefault();
+                                    handleAddProjSkill(projSkillInput);
+                                  }
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleAddProjSkill(projSkillInput)}
+                                className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-headline font-bold text-xs rounded-none transition-all cursor-pointer shadow-2xs"
+                              >
+                                + Add Tag
+                              </button>
+                            </div>
+
+                            {/* Autocomplete Dropdown */}
+                            {showProjSkillDropdown && projSkillInput.trim() && (
+                              <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 shadow-xl max-h-48 overflow-y-auto z-50 rounded-none custom-scrollbar">
+                                {(() => {
+                                  const query = projSkillInput.toLowerCase().trim();
+                                  const matches = ALL_SKILLS.filter(s => 
+                                    s.skill.toLowerCase().includes(query) &&
+                                    !(newProj.skills || []).some(existing => existing.toLowerCase() === s.skill.toLowerCase())
+                                  ).slice(0, 8);
+
+                                  if (matches.length === 0) {
+                                    return (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleAddProjSkill(projSkillInput)}
+                                        className="w-full text-left px-3 py-2 text-xs text-blue-700 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-sans font-medium cursor-pointer"
+                                      >
+                                        Add custom skill: "{projSkillInput.trim()}"
+                                      </button>
+                                    );
+                                  }
+
+                                  return matches.map((item, idx) => (
+                                    <button
+                                      key={idx}
+                                      type="button"
+                                      onClick={() => handleAddProjSkill(item.skill)}
+                                      className="w-full text-left px-3 py-2 text-xs text-slate-800 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-950/60 font-sans flex items-center justify-between border-b border-slate-100 dark:border-slate-800 last:border-b-0 cursor-pointer"
+                                    >
+                                      <span>{item.skill}</span>
+                                      <span className="text-[10px] text-slate-400 uppercase">{item.type}</span>
+                                    </button>
+                                  ));
+                                })()}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* 1-Click Suggestions from Candidate's Profile Skills */}
+                          {skillsList && skillsList.length > 0 && (() => {
+                            const availableProfileSkills = skillsList.filter(
+                              s => s && s.name && !(newProj.skills || []).some(
+                                existing => existing.toLowerCase() === s.name.toLowerCase()
+                              )
+                            );
+                            if (availableProfileSkills.length === 0) return null;
+                            return (
+                              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                <span className="text-[11px] font-sans font-medium text-slate-500 dark:text-slate-400">
+                                  Quick add from your skills:
+                                </span>
+                                {availableProfileSkills.slice(0, 8).map(s => (
+                                  <button
+                                    key={s.name}
+                                    type="button"
+                                    onClick={() => handleAddProjSkill(s.name)}
+                                    className="text-[11px] px-2 py-0.5 bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-blue-950/60 text-slate-700 hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-300 border border-slate-300 dark:border-slate-700 hover:border-blue-500 rounded-none cursor-pointer transition-colors"
+                                  >
+                                    + {s.name}
+                                  </button>
+                                ))}
+                              </div>
+                            );
+                          })()}
+
+                          {/* Tagged Skills Chips */}
+                          {(newProj.skills || []).length > 0 ? (
+                            <div className="flex flex-wrap gap-1.5 pt-1.5">
+                              {newProj.skills.map((skill, sIdx) => (
+                                <span
+                                  key={sIdx}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 text-blue-900 dark:text-blue-200 text-xs font-sans font-semibold rounded-none shadow-2xs"
+                                >
+                                  <span>{skill}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveProjSkill(skill)}
+                                    className="text-blue-700 dark:text-blue-300 hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer"
+                                    title="Remove tag"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 italic">
+                              No skills attached yet. Attaching skills helps recruiters match this project to job openings automatically.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-300 dark:border-slate-700">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingProjIdx(null);
+                            setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '', skills: [], videoUrl: '' });
+                            setProjSkillInput('');
+                            setShowProjSkillDropdown(false);
+                            closeModal();
+                          }}
+                          className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-headline font-bold rounded-none text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!newProj.title || !newProj.title.trim() || !newProj.role || !newProj.role.trim() || !newProj.startDate || !newProj.description || !newProj.description.trim()) {
+                              showAlert('Please fill out **Project Title**, **Role**, **Start Date**, and **Description**.', 'error');
+                              return;
+                            }
+                            if (newProj.codeUrl && newProj.codeUrl.trim() && !isValidUrl(newProj.codeUrl)) {
+                              showAlert('Please enter a valid **Code URL** (e.g. https://github.com/...).', 'error');
+                              return;
+                            }
+                            if (newProj.hostedUrl && newProj.hostedUrl.trim() && !isValidUrl(newProj.hostedUrl)) {
+                              showAlert('Please enter a valid **Hosted URL** (e.g. https://...).', 'error');
+                              return;
+                            }
+                            if (newProj.videoUrl && newProj.videoUrl.trim() && !isValidUrl(newProj.videoUrl)) {
+                              showAlert('Please enter a valid **Video URL** (e.g. https://...).', 'error');
+                              return;
+                            }
+                            if (newProj.startDate && newProj.endDate && !newProj.currentlyWorking && newProj.startDate > newProj.endDate) {
+                              showAlert('**End Date** cannot be earlier than **Start Date**.', 'error');
+                              return;
+                            }
+                            const recordToSave = {
+                              ...newProj,
+                              codeUrl: newProj.codeUrl ? ensureUrlProtocol(newProj.codeUrl) : '',
+                              hostedUrl: newProj.hostedUrl ? ensureUrlProtocol(newProj.hostedUrl) : '',
+                              videoUrl: newProj.videoUrl ? ensureUrlProtocol(newProj.videoUrl) : '',
+                              startDate: sanitizeDateYear(newProj.startDate),
+                              endDate: newProj.currentlyWorking ? '' : sanitizeDateYear(newProj.endDate),
+                              skills: Array.isArray(newProj.skills) ? newProj.skills : []
+                            };
+                            if (editingProjIdx !== null) {
+                              const updatedList = [...projectsList];
+                              updatedList[editingProjIdx] = recordToSave;
+                              setProjectsList(updatedList);
+                              setEditingProjIdx(null);
+                            } else {
+                              setProjectsList([...projectsList, recordToSave]);
+                            }
+                            setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '', skills: [], videoUrl: '' });
+                            setProjSkillInput('');
+                            setShowProjSkillDropdown(false);
+                            closeModal();
+                          }}
+                          className="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                        >
+                          {editingProjIdx !== null ? 'Save Edit' : 'Add to List'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Panel 4: Education */}
             {profileTab === 'education' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-slate-300 dark:border-slate-700 pb-3">
@@ -2112,7 +2987,7 @@ export default function StudentProfile({
               </div>
             )}
 
-            {/* Panel 4: Experience */}
+            {/* Panel 5: Experience */}
             {profileTab === 'experience' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-slate-300 dark:border-slate-700 pb-3">
@@ -2486,7 +3361,9 @@ export default function StudentProfile({
                         </div>
 
                         <div>
-                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Roles And Responsibilities</label>
+                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
+                            Roles And Responsibilities <span className="text-rose-500 font-bold">*</span>
+                          </label>
                           <textarea
                             rows="3"
                             className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
@@ -2513,8 +3390,8 @@ export default function StudentProfile({
                         <button
                           type="button"
                           onClick={() => {
-                            if (!newExp.expType || !newExp.designation || !newExp.designation.trim() || !newExp.companyName || !newExp.companyName.trim() || !newExp.startDate) {
-                              showAlert('Please fill out all mandatory fields: **Experience Type**, **Designation**, **Company Name**, and **Start Date**.', 'error');
+                            if (!newExp.expType || !newExp.designation || !newExp.designation.trim() || !newExp.companyName || !newExp.companyName.trim() || !newExp.startDate || !newExp.description || !newExp.description.trim()) {
+                              showAlert('Please fill out all mandatory fields: **Experience Type**, **Designation**, **Company Name**, **Start Date**, and **Roles And Responsibilities**.', 'error');
                               return;
                             }
                             if (newExp.location && /[0-9]/.test(newExp.location)) {
@@ -2553,7 +3430,7 @@ export default function StudentProfile({
               </div>
             )}
 
-            {/* Panel 5: Certificates */}
+            {/* Panel 6: Certifications */}
             {profileTab === 'certificates' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b border-slate-300 dark:border-slate-700 pb-3">
@@ -2918,369 +3795,6 @@ export default function StudentProfile({
               </div>
             )}
 
-            {/* Panel 6: Projects */}
-            {profileTab === 'projects' && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center border-b border-slate-300 dark:border-slate-700 pb-3">
-                  <h3 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100">Projects</h3>
-                  <div className="flex flex-col items-end gap-1.5">
-                    <span className="text-xs font-sans font-medium tracking-wider text-slate-600 dark:text-slate-400">{projectsList.length} Items Added</span>
-                    {projectsList.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={openAddProjModal}
-                        className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-none text-xs font-headline font-bold active:scale-95 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        Add Project
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Empty State */}
-                {projectsList.length === 0 && (
-                  <div className="p-8 sm:p-12 border border-dashed border-slate-300 dark:border-slate-700 rounded-none bg-slate-50 dark:bg-slate-900/60 flex flex-col items-center justify-center text-center space-y-4 animate-fade-in shadow-2xs">
-                    <div className="w-12 h-12 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 shadow-2xs">
-                      <FolderGit2 className="w-6 h-6" />
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">You haven't added any record</h4>
-                      <p className="text-xs font-sans font-normal text-slate-600 dark:text-slate-400 max-w-sm">
-                        Showcase personal, academic, or open-source projects along with live links and repository URLs.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={openAddProjModal}
-                      className="px-5 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add Project
-                    </button>
-                  </div>
-                )}
-
-                {/* Existing items */}
-                {projectsList.length > 0 && (
-                  <div className="flex flex-col gap-4">
-                    {projectsList.map((proj, idx) => (
-                      <div
-                        key={idx}
-                        className="p-5 sm:p-6 bg-surface border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none flex flex-col gap-4 shadow-2xs hover:shadow-xs transition-all overflow-hidden w-full max-w-full"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                          <div className="space-y-1.5 flex-1 min-w-0">
-                            <span className="inline-block px-2.5 py-0.5 bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-200 border border-blue-400 dark:border-blue-600 rounded-none text-[10px] font-headline font-bold tracking-wider">
-                              Project
-                            </span>
-
-                            <div className="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-3">
-                              <h4 className="text-base sm:text-lg font-headline font-bold text-slate-900 dark:text-slate-100 tracking-tight break-words">
-                                {proj.title}
-                              </h4>
-                              {proj.role && (
-                                <p className="text-xs sm:text-sm font-sans font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                                  <span>Role: <strong className="text-slate-900 dark:text-slate-100">{proj.role}</strong></span>
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-2 pt-1">
-                              {(proj.startDate || proj.endDate) && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-sans font-medium text-slate-800 dark:text-slate-200">
-                                  🗓️ {proj.startDate} - {proj.currentlyWorking ? 'Present' : proj.endDate || 'N/A'}
-                                </span>
-                              )}
-                              {proj.codeUrl && (
-                                <a
-                                  href={proj.codeUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold text-blue-700 dark:text-blue-400 transition-all shadow-2xs"
-                                >
-                                  💻 Code URL
-                                </a>
-                              )}
-                              {proj.hostedUrl && (
-                                <a
-                                  href={proj.hostedUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 hover:border-blue-600 rounded-none text-xs font-headline font-bold text-slate-800 dark:text-slate-200 transition-all shadow-2xs"
-                                >
-                                  🚀 Live Demo
-                                </a>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0 sm:self-start">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const item = projectsList[idx];
-                                setNewProj({ ...item });
-                                setEditingProjIdx(idx);
-                                setActiveModal('projects');
-                              }}
-                              className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-blue-600 text-slate-800 dark:text-slate-200 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setProjectsList(projectsList.filter((_, i) => i !== idx));
-                                if (editingProjIdx === idx) {
-                                  setEditingProjIdx(null);
-                                  setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
-                                  closeModal();
-                                }
-                              }}
-                              className="px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 rounded-none text-xs font-headline font-bold transition-all cursor-pointer shadow-2xs"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-
-                        {proj.description && (
-                          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 w-full overflow-hidden">
-                            <p className="text-xs sm:text-sm font-sans font-medium text-slate-800 dark:text-slate-200 leading-relaxed bg-slate-50 dark:bg-slate-900/60 p-3.5 sm:p-4 rounded-none border border-slate-200 dark:border-slate-800 whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] w-full">
-                              {proj.description}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Pop-up Modal for Add/Edit Project */}
-                {activeModal === 'projects' && (
-                  <div
-                    className="absolute inset-0 z-50 backdrop-blur-md flex items-start sm:items-center justify-center p-4 animate-fade-in overflow-y-auto"
-                    onClick={(e) => {
-                      if (e.target === e.currentTarget) closeModal();
-                    }}
-                  >
-                    <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-scale-in relative max-h-[90vh] overflow-y-auto custom-scrollbar">
-                      <button
-                        type="button"
-                        onClick={closeModal}
-                        className="absolute top-4 right-4 p-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-all cursor-pointer"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-
-                      <div className="flex items-center gap-3 border-b border-slate-300 dark:border-slate-700 pb-3">
-                        <div className="w-10 h-10 rounded-none bg-blue-50 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 shrink-0 shadow-2xs">
-                          <FolderGit2 className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h3 className="text-base font-headline font-bold text-slate-900 dark:text-slate-100">
-                            {editingProjIdx !== null ? 'Edit Project Record' : 'Add Project Record'}
-                          </h3>
-                          <p className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">
-                            {editingProjIdx !== null ? 'Update your project information' : 'Showcase personal, academic, or professional projects'}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
-                              Title <span className="text-rose-500 font-bold">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
-                              placeholder="Name of your project"
-                              value={newProj.title}
-                              onChange={e => setNewProj({ ...newProj, title: e.target.value })}
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
-                              Company / Role <span className="text-rose-500 font-bold">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
-                              placeholder="Enter your role"
-                              value={newProj.role}
-                              onChange={e => setNewProj({ ...newProj, role: e.target.value })}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Code URL</label>
-                            <input
-                              type="url"
-                              className={`w-full bg-white dark:bg-slate-900 border ${
-                                newProj.codeUrl && !isValidUrl(newProj.codeUrl)
-                                  ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
-                                  : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
-                              } rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none font-sans font-medium shadow-2xs`}
-                              placeholder="https://github.com/username/project"
-                              value={newProj.codeUrl}
-                              onChange={e => setNewProj({ ...newProj, codeUrl: e.target.value })}
-                              onBlur={() => {
-                                if (newProj.codeUrl && isValidUrl(newProj.codeUrl)) {
-                                  setNewProj(prev => ({ ...prev, codeUrl: ensureUrlProtocol(prev.codeUrl) }));
-                                }
-                              }}
-                            />
-                            {newProj.codeUrl && !isValidUrl(newProj.codeUrl) && (
-                              <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1">
-                                * Please enter a valid URL (e.g. https://github.com/...)
-                              </p>
-                            )}
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Hosted URL</label>
-                            <input
-                              type="url"
-                              className={`w-full bg-white dark:bg-slate-900 border ${
-                                newProj.hostedUrl && !isValidUrl(newProj.hostedUrl)
-                                  ? 'border-rose-500 focus:border-rose-600 ring-1 ring-rose-500/30'
-                                  : 'border-slate-300 dark:border-slate-700 focus:border-blue-700'
-                              } rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none font-sans font-medium shadow-2xs`}
-                              placeholder="https://myproject.com (optional)"
-                              value={newProj.hostedUrl}
-                              onChange={e => setNewProj({ ...newProj, hostedUrl: e.target.value })}
-                              onBlur={() => {
-                                if (newProj.hostedUrl && isValidUrl(newProj.hostedUrl)) {
-                                  setNewProj(prev => ({ ...prev, hostedUrl: ensureUrlProtocol(prev.hostedUrl) }));
-                                }
-                              }}
-                            />
-                            {newProj.hostedUrl && !isValidUrl(newProj.hostedUrl) && (
-                              <p className="text-[11px] text-rose-600 dark:text-rose-400 font-sans font-semibold mt-1">
-                                * Please enter a valid URL (e.g. https://myproject.com)
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">
-                              Start Date <span className="text-rose-500 font-bold">*</span>
-                            </label>
-                            <input
-                              type="date"
-                              min="1950-01-01"
-                              max={newProj.endDate ? sanitizeDateYear(newProj.endDate) : "2099-12-31"}
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                              value={sanitizeDateYear(newProj.startDate)}
-                              onChange={e => setNewProj(prev => ({ ...prev, startDate: sanitizeDateYear(e.target.value) }))}
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">End Date</label>
-                            <input
-                              type="date"
-                              min={newProj.startDate ? sanitizeDateYear(newProj.startDate) : "1950-01-01"}
-                              max="2099-12-31"
-                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs dark:[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                              disabled={newProj.currentlyWorking}
-                              value={newProj.currentlyWorking ? '' : sanitizeDateYear(newProj.endDate)}
-                              onChange={e => setNewProj(prev => ({ ...prev, endDate: sanitizeDateYear(e.target.value) }))}
-                            />
-                          </div>
-
-                          <div className="flex items-end pb-2">
-                            <label className="flex items-center gap-2 cursor-pointer select-none">
-                              <input
-                                type="checkbox"
-                                className="rounded-none border-slate-300 dark:border-slate-700 text-blue-700 bg-white dark:bg-slate-900 w-3.5 h-3.5 focus:ring-0"
-                                checked={newProj.currentlyWorking}
-                                onChange={e => setNewProj({ ...newProj, currentlyWorking: e.target.checked, endDate: e.target.checked ? '' : newProj.endDate })}
-                              />
-                              <span className="text-xs font-headline font-bold text-slate-800 dark:text-slate-200">Currently Working Here</span>
-                            </label>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-wider">Description</label>
-                          <textarea
-                            rows="3"
-                            className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-700 font-sans font-medium shadow-2xs"
-                            placeholder="Add key features, stacks, or descriptions... (New line for bullet point)"
-                            value={newProj.description}
-                            onChange={e => setNewProj({ ...newProj, description: e.target.value })}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-300 dark:border-slate-700">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingProjIdx(null);
-                            setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
-                            closeModal();
-                          }}
-                          className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-headline font-bold rounded-none text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-2xs"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!newProj.title || !newProj.title.trim() || !newProj.role || !newProj.role.trim() || !newProj.startDate) {
-                              showAlert('Please fill out **Project Title**, **Role**, and **Start Date**.', 'error');
-                              return;
-                            }
-                            if (newProj.codeUrl && newProj.codeUrl.trim() && !isValidUrl(newProj.codeUrl)) {
-                              showAlert('Please enter a valid **Code URL** (e.g. https://github.com/...).', 'error');
-                              return;
-                            }
-                            if (newProj.hostedUrl && newProj.hostedUrl.trim() && !isValidUrl(newProj.hostedUrl)) {
-                              showAlert('Please enter a valid **Hosted URL** (e.g. https://...).', 'error');
-                              return;
-                            }
-                            if (newProj.startDate && newProj.endDate && !newProj.currentlyWorking && newProj.startDate > newProj.endDate) {
-                              showAlert('**End Date** cannot be earlier than **Start Date**.', 'error');
-                              return;
-                            }
-                            const recordToSave = {
-                              ...newProj,
-                              codeUrl: newProj.codeUrl ? ensureUrlProtocol(newProj.codeUrl) : '',
-                              hostedUrl: newProj.hostedUrl ? ensureUrlProtocol(newProj.hostedUrl) : '',
-                              startDate: sanitizeDateYear(newProj.startDate),
-                              endDate: newProj.currentlyWorking ? '' : sanitizeDateYear(newProj.endDate)
-                            };
-                            if (editingProjIdx !== null) {
-                              const updatedList = [...projectsList];
-                              updatedList[editingProjIdx] = recordToSave;
-                              setProjectsList(updatedList);
-                              setEditingProjIdx(null);
-                            } else {
-                              setProjectsList([...projectsList, recordToSave]);
-                            }
-                            setNewProj({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '' });
-                            closeModal();
-                          }}
-                          className="px-5 py-2 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-                        >
-                          {editingProjIdx !== null ? 'Save Edit' : 'Add to List'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* Panel 7: Skills */}
             {profileTab === 'skills' && (
@@ -3761,8 +4275,48 @@ export default function StudentProfile({
             </div>
           );
         })()}
-        </div>
+          </div>
       </form>
+
+      {/* Project Video Demo Player Modal */}
+      {activeVideoModalUrl && (
+        <div
+          className="fixed inset-0 z-[120] backdrop-blur-md bg-black/75 flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setActiveVideoModalUrl(null)}
+        >
+          <div
+            className="bg-surface border border-slate-700 rounded-none max-w-3xl w-full p-4 sm:p-6 shadow-2xl space-y-3 relative animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-300 dark:border-slate-700">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-none bg-purple-50 dark:bg-purple-950/70 border border-purple-400 dark:border-purple-600 flex items-center justify-center text-purple-700 dark:text-purple-400">
+                  <Video className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-headline font-bold text-slate-900 dark:text-slate-100">Project Walkthrough Demo</h3>
+                  <span className="text-[11px] font-sans text-slate-500 dark:text-slate-400">Max 1.5 mins walkthrough video demo</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveVideoModalUrl(null)}
+                className="p-1.5 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-none transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="w-full bg-black rounded-none overflow-hidden aspect-video flex items-center justify-center">
+              <video
+                src={activeVideoModalUrl}
+                controls
+                autoPlay
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

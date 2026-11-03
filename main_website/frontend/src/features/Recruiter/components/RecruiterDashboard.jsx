@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Briefcase,
+  User,
+  Users,
   UserPlus,
   Calendar,
+  Award,
   CheckCircle2,
   ArrowRight,
   MoreVertical,
@@ -16,6 +19,7 @@ import {
   UserCheck
 } from 'lucide-react';
 import CandidateProfileModal from './CandidateProfileModal';
+import { calculateHiringProgressSnapshot } from '../../../utils/hiringProgress';
 import {
   getRecentlyViewedCandidates,
   recordViewedCandidate,
@@ -31,6 +35,7 @@ export default function RecruiterDashboard({
   goToTab
 }) {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [selectedCandidateJob, setSelectedCandidateJob] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const carouselRef = useRef(null);
 
@@ -50,6 +55,7 @@ export default function RecruiterDashboard({
   });
   const activeJobsCount = activeJobs.length;
   const totalCandidatesCount = candidates.length;
+  const hiringSnapshot = calculateHiringProgressSnapshot(jobs);
 
   // Track last 5 recently viewed candidates for current recruiter
   const recruiterId = company?.userId || company?.id || 'recruiter';
@@ -108,81 +114,11 @@ export default function RecruiterDashboard({
             />
           </div>
 
-          {/* Notifications Button */}
-          {/* <button
-            type="button"
-            className="w-9 h-9 rounded-none border border-slate-300 dark:border-slate-700 bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-300 transition-all shrink-0 cursor-pointer shadow-2xs"
-            aria-label="Notifications"
-          >
-            <Bell className="w-4 h-4 text-slate-700 dark:text-slate-300" />
-          </button> */}
-
-          {/* Recruiter Avatar */}
-          {/* <div className="w-9 h-9 rounded-none bg-blue-700 text-white border border-blue-800 overflow-hidden shrink-0 flex items-center justify-center font-bold text-sm shadow-2xs font-headline">
-            {company?.logo ? (
-              <img src={company.logo} alt="Recruiter Avatar" className="w-full h-full object-cover" />
-            ) : (
-              company?.name?.charAt(0) || 'R'
-            )}
-          </div> */}
+        
         </div>
       </header>
 
-      {/* KPI Cards Bento Grid (Vibrant 3-Column Layout) */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6"> */}
 
-        {/* Card 1: Active Jobs */}
-        {/* <div
-          onClick={() => goToTab && goToTab('jobs')}
-          className="bg-surface border border-slate-300 dark:border-slate-700 hover:border-blue-700 rounded-none p-5 sm:p-6 shadow-2xs transition-all group cursor-pointer border-t-4 border-t-blue-700 relative overflow-hidden"
-        >
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/60 border border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300 rounded-none flex items-center justify-center group-hover:bg-blue-700 group-hover:text-white group-hover:border-blue-700 transition-all shadow-2xs">
-              <Briefcase className="w-6 h-6" />
-            </div>
-          </div>
-          <p className="text-xs font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-            Active Jobs
-          </p>
-          <p className="text-3xl sm:text-4xl font-headline font-extrabold text-slate-900 dark:text-slate-100">
-            {activeJobsCount}
-          </p>
-        </div> */}
-
-        {/* Card 2: New Candidates */}
-        {/* <div
-          onClick={() => goToTab && goToTab('candidates')}
-          className="bg-surface border border-slate-300 dark:border-slate-700 hover:border-emerald-600 rounded-none p-5 sm:p-6 shadow-2xs transition-all group cursor-pointer border-t-4 border-t-emerald-600 relative overflow-hidden"
-        >
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 rounded-none flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 transition-all shadow-2xs">
-              <UserPlus className="w-6 h-6" />
-            </div>
-          </div>
-          <p className="text-xs font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-            New Candidates
-          </p>
-          <p className="text-3xl sm:text-4xl font-headline font-extrabold text-slate-900 dark:text-slate-100">
-            {totalCandidatesCount}
-          </p>
-        </div> */}
-
-        {/* Card 3: Interviews Today */}
-        {/* <div className="bg-surface border border-slate-300 dark:border-slate-700 hover:border-amber-600 rounded-none p-5 sm:p-6 shadow-2xs transition-all group cursor-pointer border-t-4 border-t-amber-600 relative overflow-hidden">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-12 h-12 bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 rounded-none flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white group-hover:border-amber-600 transition-all shadow-2xs">
-              <Calendar className="w-6 h-6" />
-            </div>
-          </div>
-          <p className="text-xs font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-            Interviews Today
-          </p>
-          <p className="text-3xl sm:text-4xl font-headline font-extrabold text-slate-900 dark:text-slate-100">
-            {recentApplications.length}
-          </p>
-        </div>
-
-      </div> */}
 
       {/* Top Verified Talent Carousel Section */}
       <section className="space-y-4">
@@ -511,7 +447,11 @@ export default function RecruiterDashboard({
       {/* Candidate Profile Modal */}
       <CandidateProfileModal
         candidate={selectedCandidate}
-        onClose={() => setSelectedCandidate(null)}
+        job={selectedCandidateJob}
+        onClose={() => {
+          setSelectedCandidate(null);
+          setSelectedCandidateJob(null);
+        }}
       />
     </div>
   );

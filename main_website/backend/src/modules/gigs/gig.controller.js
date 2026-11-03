@@ -1,4 +1,22 @@
 const { prisma } = require('../../infrastructure/database');
+const { buildStudentSkillMap, getRequirementStatuses } = require('../skills');
+
+// Per-requirement status for a candidate (same shape as jobs' requirementStatuses):
+// `hasQuiz: false` / `isTech: false` tells the client the question bank has no
+// test for that skill, so it can offer "add without a test" instead of a test.
+async function buildGigRequirementStatuses(gig, candidateProfile) {
+  const gigReqs = (gig.requirements && gig.requirements.length > 0)
+    ? gig.requirements
+    : (gig.skills || []).map(s => ({ skillName: s, minRating: gig.minRating || 1 }));
+  if (gigReqs.length === 0) return [];
+  const activeQuestions = await prisma.question.findMany({
+    where: { status: 'ACTIVE' },
+    select: { skillName: true },
+    distinct: ['skillName']
+  });
+  const skillsWithQuestionsSet = new Set(activeQuestions.map(q => q.skillName.toLowerCase()));
+  return getRequirementStatuses({ requirements: gigReqs }, buildStudentSkillMap(candidateProfile), skillsWithQuestionsSet);
+}
 
 const parseDeliveryDays = (timelineStr) => {
   if (!timelineStr) return 999;
@@ -149,7 +167,7 @@ exports.createGig = async (req, res) => {
     if (req.user.role !== 'RECRUITER') {
       return res.status(403).json({ error: 'Only recruiters can create gigs' });
     }
-    const { title, description, category, categories, skills, requirements, budget, currency, deliveryTime, minRating, attachments, logo } = req.body;
+    const { title, description, category, categories, skills, requirements, screeningQuestions, budget, currency, deliveryTime, minRating, attachments, logo } = req.body;
     const parsedMinRating = minRating !== undefined ? (parseInt(minRating, 10) || 1) : 1;
     
     // Normalize requirements array if provided, else build from skills
@@ -183,6 +201,16 @@ exports.createGig = async (req, res) => {
             minRating: parseInt(r.minRating, 10) || 1
           }))
         },
+        screeningQuestions: Array.isArray(screeningQuestions) && screeningQuestions.length > 0 ? {
+          set: screeningQuestions.map(q => ({
+            id: q.id || require('crypto').randomUUID(),
+            type: q.type || 'MCQ',
+            question: q.question,
+            options: Array.isArray(q.options) ? q.options : [],
+            correctAnswer: q.type === 'MCQ' ? (q.correctAnswer || null) : null,
+            required: q.required !== undefined ? Boolean(q.required) : true
+          }))
+        } : undefined,
         budget: parseFloat(budget),
         currency: currency ? currency.toUpperCase() : 'INR',
         deliveryTime,
@@ -290,6 +318,10 @@ exports.getGigDetails = async (req, res) => {
       return res.status(403).json({ error: 'You do not have permission to view this gig' });
     }
 
+    const requirementStatuses = req.user.role === 'STUDENT'
+      ? await buildGigRequirementStatuses(gig, userProfile)
+      : undefined;
+
     if (!isOwner && !isCandidate && !isApplicant) {
       // Allow general browsing of details but mask sensitive sections like applications/messages
       const company = await prisma.company.findFirst({
@@ -303,6 +335,7 @@ exports.getGigDetails = async (req, res) => {
         categories: gig.categories,
         skills: gig.skills,
         requirements: gig.requirements,
+        screeningQuestions: gig.screeningQuestions || [],
         minRating: gig.minRating,
         attachments: gig.attachments,
         budget: gig.budget,
@@ -313,7 +346,8 @@ exports.getGigDetails = async (req, res) => {
         ownerName: gig.ownerName,
         ownerRole: gig.ownerRole,
         company,
-        hasApplied: isApplicant
+        hasApplied: isApplicant,
+        requirementStatuses
       });
     }
 
@@ -361,7 +395,8 @@ exports.getGigDetails = async (req, res) => {
       hiredCandidates: enrichedHired,
       applicants: enrichedApplicants,
       company,
-      hasApplied: isApplicant
+      hasApplied: isApplicant,
+      requirementStatuses
     });
   } catch (err) {
     console.error('Error fetching gig details:', err);
@@ -373,7 +408,7 @@ exports.getGigDetails = async (req, res) => {
 exports.applyToGig = async (req, res) => {
   try {
     const { gigId } = req.params;
-    const { message, attachments } = req.body;
+    const { message, attachments, answers } = req.body;
     const candidateId = req.user.id;
 
     if (req.user.role !== 'STUDENT') {
@@ -459,12 +494,48 @@ exports.applyToGig = async (req, res) => {
       }
     }
 
+    // Process & validate Screening Questions
+    let evaluatedAnswers = [];
+    if (gig.screeningQuestions && Array.isArray(gig.screeningQuestions) && gig.screeningQuestions.length > 0) {
+      const incomingAnswers = Array.isArray(answers) ? answers : [];
+
+      for (const sq of gig.screeningQuestions) {
+        const userAns = incomingAnswers.find(a => 
+          (a.questionId && a.questionId === sq.id) || 
+          (a.questionText && a.questionText.trim().toLowerCase() === sq.question.trim().toLowerCase())
+        );
+        const answerText = userAns ? String(userAns.answer || '').trim() : '';
+
+        if (sq.required && !answerText) {
+          return res.status(400).json({
+            error: `Please answer the required screening question: "${sq.question}"`
+          });
+        }
+
+        let isCorrect = null;
+        if (sq.type === 'MCQ' && sq.correctAnswer) {
+          isCorrect = answerText.toLowerCase() === sq.correctAnswer.trim().toLowerCase();
+        }
+
+        if (answerText) {
+          evaluatedAnswers.push({
+            questionId: sq.id || null,
+            questionText: sq.question,
+            type: sq.type || 'LONG_ANSWER',
+            answer: answerText,
+            isCorrect
+          });
+        }
+      }
+    }
+
     const applicant = await prisma.gigApplicant.create({
       data: {
         gigId,
         candidateId,
         message,
-        attachments: attachments || []
+        attachments: attachments || [],
+        answers: evaluatedAnswers.length > 0 ? { set: evaluatedAnswers } : undefined
       }
     });
     
@@ -871,7 +942,7 @@ exports.reviewGig = async (req, res) => {
 exports.updateGig = async (req, res) => {
   try {
     const { gigId } = req.params;
-    const { title, description, category, categories, skills, requirements, budget, currency, deliveryTime, minRating, attachments, logo } = req.body;
+    const { title, description, category, categories, skills, requirements, screeningQuestions, budget, currency, deliveryTime, minRating, attachments, logo } = req.body;
     const userId = req.user.id;
 
     if (req.user.role !== 'RECRUITER') {
@@ -908,6 +979,19 @@ exports.updateGig = async (req, res) => {
 
     if (logo !== undefined) {
       updatedData.logo = logo;
+    }
+
+    if (screeningQuestions !== undefined) {
+      updatedData.screeningQuestions = {
+        set: (Array.isArray(screeningQuestions) ? screeningQuestions : []).map(q => ({
+          id: q.id || require('crypto').randomUUID(),
+          type: q.type || 'MCQ',
+          question: q.question,
+          options: Array.isArray(q.options) ? q.options : [],
+          correctAnswer: q.type === 'MCQ' ? (q.correctAnswer || null) : null,
+          required: q.required !== undefined ? Boolean(q.required) : true
+        }))
+      };
     }
 
     if (requirements && Array.isArray(requirements) && requirements.length > 0) {

@@ -1,21 +1,50 @@
 import { useState } from 'react';
-import { Briefcase, User, ShieldCheck, FileText, RefreshCw, X, Pencil, Trash2, PauseCircle, PlayCircle, AlertTriangle, Share2, Check } from 'lucide-react';
+import { 
+  Briefcase, 
+  User, 
+  Users,
+  UserCheck,
+  Calendar,
+  Award,
+  ShieldCheck, 
+  FileText, 
+  RefreshCw, 
+  X, 
+  Pencil, 
+  Trash2, 
+  PauseCircle, 
+  PlayCircle, 
+  AlertTriangle, 
+  Share2, 
+  Check 
+} from 'lucide-react';
 import JobDetailsModal from '../../../components/JobDetailsModal';
 import EditJobModal from './EditJobModal';
 import EmptyState from '../../../components/ui/EmptyState';
 import { apiFetch } from '../../../services/apiClient';
 import CandidateProfileModal from './CandidateProfileModal';
+import RecruiterApplications from './RecruiterApplications';
+import { calculateHiringProgressSnapshot, getApplicationStage, STAGE_CONFIG } from '../../../utils/hiringProgress';
 
-export default function RecruiterJobs({ jobs = [], company, handleUpdateJob, handleDeleteJob, handleTogglePauseJob, onRefresh, token }) {
+export default function RecruiterJobs({ jobs = [], company, handleUpdateJob, handleDeleteJob, handleTogglePauseJob, onRefresh, token, onViewApplications }) {
   const [selectedJob, setSelectedJob] = useState(null);
   const [editingJob, setEditingJob] = useState(null);
   const [managingApp, setManagingApp] = useState(null);
-  const [viewingApplicantsJob, setViewingApplicantsJob] = useState(null);
+  const [viewingApplicationsJob, setViewingApplicationsJob] = useState(null);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [jobToDelete, setJobToDelete] = useState(null);
   const [jobToTogglePause, setJobToTogglePause] = useState(null);
   const [actionInProgress, setActionInProgress] = useState(false);
   const [copiedJobId, setCopiedJobId] = useState(null);
+  const [applicantStageFilter, setApplicantStageFilter] = useState('ALL');
+
+  const handleOpenApplications = (job) => {
+    if (onViewApplications) {
+      onViewApplications(job);
+    } else {
+      setViewingApplicationsJob(job);
+    }
+  };
 
   const handleShareJob = (jobId) => {
     const url = `${window.location.origin}/job_brief?id=${jobId}`;
@@ -35,7 +64,8 @@ export default function RecruiterJobs({ jobs = [], company, handleUpdateJob, han
     }, 2000);
   };
 
-  const totalApplicants = jobs.reduce((acc, job) => acc + (job.applications?.length || 0), 0);
+  const hiringSnapshot = calculateHiringProgressSnapshot(jobs);
+  const totalApplicants = hiringSnapshot.totalApplicants;
   const activeRolesCount = jobs.filter(j => j.status !== 'PAUSED' && !j.isPaused).length;
   const pausedRolesCount = jobs.filter(j => j.status === 'PAUSED' || j.isPaused).length;
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -223,20 +253,41 @@ export default function RecruiterJobs({ jobs = [], company, handleUpdateJob, han
             </p>
           </div>
 
-          {job.applications && job.applications.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setViewingApplicantsJob(job)}
-              className="px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white border border-blue-800 rounded-none text-xs font-headline font-bold tracking-wide transition-all shadow-2xs active:scale-95 cursor-pointer flex items-center gap-1.5"
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>View Applicants ({job.applications.length})</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => handleOpenApplications(job)}
+            className={`px-3.5 py-1.5 rounded-none text-xs font-headline font-bold tracking-wide transition-all shadow-2xs active:scale-95 cursor-pointer flex items-center gap-1.5 ${
+              job.applications?.length
+                ? 'bg-blue-700 hover:bg-blue-800 text-white border border-blue-800'
+                : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700'
+            }`}
+          >
+            <UserCheck className="w-3.5 h-3.5" />
+            <span>View Applications</span>
+            {Boolean(job.applications?.length) && (
+              <span className="ml-1 px-1.5 py-0.2 text-[10px] bg-blue-800 text-white rounded-none">
+                {job.applications.length}
+              </span>
+            )}
+          </button>
+
         </div>
       </div>
     );
   };
+
+  if (viewingApplicationsJob) {
+    return (
+      <RecruiterApplications
+        job={viewingApplicationsJob}
+        allJobs={jobs}
+        company={company}
+        token={token}
+        onBack={() => setViewingApplicationsJob(null)}
+        onRefresh={onRefresh}
+      />
+    );
+  }
 
   return (
     <>
@@ -267,58 +318,165 @@ export default function RecruiterJobs({ jobs = [], company, handleUpdateJob, han
           </button>
         </header>
 
-        {/* Metrics Row (Sharp Corner Bento Theme) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {/* Active Roles Metric */}
-          <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-5 sm:p-6 shadow-2xs transition-all border-t-4 border-t-blue-700 relative overflow-hidden">
-            <div className="flex justify-between items-start mb-3">
-              <div className="w-11 h-11 bg-blue-50 dark:bg-blue-950/60 border border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300 rounded-none flex items-center justify-center shadow-2xs">
-                <Briefcase className="w-5 h-5" />
-              </div>
+        {/* Recruiter Hiring Progress Snapshot */}
+        <section className="space-y-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 bg-blue-700 dark:bg-blue-400 inline-block rounded-none" />
+              <h3 className="text-sm sm:text-base font-headline font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+                Recruiter Hiring Progress Snapshot
+              </h3>
               <span className="px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-blue-100 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 text-blue-900 dark:text-blue-200">
-                Live Postings
+                Live Pipeline
               </span>
             </div>
-            <p className="text-xs font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-              Active Roles
-            </p>
-            <div className="flex items-baseline gap-2">
-              <p className="text-3xl sm:text-4xl font-headline font-extrabold text-slate-900 dark:text-slate-100">
-                {activeRolesCount}
-              </p>
-              <span className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">
-                roles open {pausedRolesCount > 0 && `(${pausedRolesCount} paused)`}
-              </span>
-            </div>
-            <p className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400 mt-2">
-              Positions currently open and actively matching candidates
+            <p className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">
+              Track candidate progression across all opportunities at a glance
             </p>
           </div>
 
-          {/* Total Applicants Metric */}
-          <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-5 sm:p-6 shadow-2xs transition-all border-t-4 border-t-emerald-600 relative overflow-hidden">
-            <div className="flex justify-between items-start mb-3">
-              <div className="w-11 h-11 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 rounded-none flex items-center justify-center shadow-2xs">
-                <User className="w-5 h-5" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {/* Card 1: Active Roles */}
+            <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs transition-all border-t-4 border-t-blue-700 relative overflow-hidden flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-3">
+                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-950/60 border border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300 rounded-none flex items-center justify-center shadow-2xs">
+                    <Briefcase className="w-5 h-5" />
+                  </div>
+                  <span className="px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-blue-100 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 text-blue-900 dark:text-blue-200">
+                    Live Postings
+                  </span>
+                </div>
+                <p className="text-[11px] font-headline font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300 mb-1">
+                  Active Roles
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-2xl sm:text-3xl font-headline font-extrabold text-slate-900 dark:text-slate-100">
+                    {activeRolesCount}
+                  </p>
+                  <span className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">
+                    open {pausedRolesCount > 0 && `(${pausedRolesCount} paused)`}
+                  </span>
+                </div>
               </div>
-              <span className="px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-600 text-emerald-900 dark:text-emerald-200">
-                Candidate Pool
-              </span>
-            </div>
-            <p className="text-xs font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1">
-              Total Applicants
-            </p>
-            <div className="flex items-baseline gap-2">
-              <p className="text-3xl sm:text-4xl font-headline font-extrabold text-slate-900 dark:text-slate-100">
-                {totalApplicants}
+              <p className="text-[11px] font-sans font-medium text-slate-600 dark:text-slate-400 mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-800">
+                Positions open & matching
               </p>
-              <span className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">candidates</span>
             </div>
-            <p className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400 mt-2">
-              Verified candidate applications submitted across all roles
-            </p>
+
+            {/* Card 2: Total Applicants */}
+            <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs transition-all border-t-4 border-t-sky-600 relative overflow-hidden flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-3">
+                  <div className="w-10 h-10 bg-sky-50 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-700 text-sky-800 dark:text-sky-300 rounded-none flex items-center justify-center shadow-2xs">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <span className="px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-sky-100 dark:bg-sky-950/70 border border-sky-400 dark:border-sky-600 text-sky-900 dark:text-sky-200">
+                    Candidate Pool
+                  </span>
+                </div>
+                <p className="text-[11px] font-headline font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300 mb-1">
+                  Total Applicants
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-2xl sm:text-3xl font-headline font-extrabold text-slate-900 dark:text-slate-100">
+                    {hiringSnapshot.totalApplicants}
+                  </p>
+                  <span className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">
+                    candidates
+                  </span>
+                </div>
+              </div>
+              <p className="text-[11px] font-sans font-medium text-slate-600 dark:text-slate-400 mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-800">
+                Submissions across all roles
+              </p>
+            </div>
+
+            {/* Card 3: Shortlisted Candidates */}
+            <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs transition-all border-t-4 border-t-indigo-600 relative overflow-hidden flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-3">
+                  <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-300 dark:border-indigo-700 text-indigo-800 dark:text-indigo-300 rounded-none flex items-center justify-center shadow-2xs">
+                    <UserCheck className="w-5 h-5" />
+                  </div>
+                  <span className="px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-indigo-100 dark:bg-indigo-950/70 border border-indigo-400 dark:border-indigo-600 text-indigo-900 dark:text-indigo-200">
+                    Screened
+                  </span>
+                </div>
+                <p className="text-[11px] font-headline font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300 mb-1">
+                  Shortlisted
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-2xl sm:text-3xl font-headline font-extrabold text-slate-900 dark:text-slate-100">
+                    {hiringSnapshot.shortlisted}
+                  </p>
+                  <span className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">
+                    screened
+                  </span>
+                </div>
+              </div>
+              <p className="text-[11px] font-sans font-medium text-slate-600 dark:text-slate-400 mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-800">
+                Passed screening & prerequisites
+              </p>
+            </div>
+
+            {/* Card 4: Interviews */}
+            <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs transition-all border-t-4 border-t-amber-500 relative overflow-hidden flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-3">
+                  <div className="w-10 h-10 bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 rounded-none flex items-center justify-center shadow-2xs">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <span className="px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-amber-100 dark:bg-amber-950/70 border border-amber-400 dark:border-amber-600 text-amber-900 dark:text-amber-200">
+                    In Evaluation
+                  </span>
+                </div>
+                <p className="text-[11px] font-headline font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300 mb-1">
+                  Interviews
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-2xl sm:text-3xl font-headline font-extrabold text-slate-900 dark:text-slate-100">
+                    {hiringSnapshot.interviews}
+                  </p>
+                  <span className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">
+                    active
+                  </span>
+                </div>
+              </div>
+              <p className="text-[11px] font-sans font-medium text-slate-600 dark:text-slate-400 mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-800">
+                Active or scheduled evaluations
+              </p>
+            </div>
+
+            {/* Card 5: Hires */}
+            <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-4 sm:p-5 shadow-2xs transition-all border-t-4 border-t-emerald-600 relative overflow-hidden flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-3">
+                  <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 rounded-none flex items-center justify-center shadow-2xs">
+                    <Award className="w-5 h-5" />
+                  </div>
+                  <span className="px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-600 text-emerald-900 dark:text-emerald-200">
+                    Hired
+                  </span>
+                </div>
+                <p className="text-[11px] font-headline font-bold tracking-wider uppercase text-slate-700 dark:text-slate-300 mb-1">
+                  Hires
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-2xl sm:text-3xl font-headline font-extrabold text-slate-900 dark:text-slate-100">
+                    {hiringSnapshot.hires}
+                  </p>
+                  <span className="text-xs font-sans font-medium text-slate-600 dark:text-slate-400">
+                    selected
+                  </span>
+                </div>
+              </div>
+              <p className="text-[11px] font-sans font-medium text-slate-600 dark:text-slate-400 mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-800">
+                Final rounds cleared & accepted
+              </p>
+            </div>
           </div>
-        </div>
+        </section>
 
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-300 dark:border-slate-700">
@@ -488,6 +646,28 @@ export default function RecruiterJobs({ jobs = [], company, handleUpdateJob, han
             </div>
 
             <div className="space-y-4">
+              <div className="bg-slate-50 dark:bg-slate-900/60 p-4 border border-slate-300 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                <div>
+                  <label className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 block">
+                    Pipeline Progression Status
+                  </label>
+                  <span className="text-[11px] font-sans text-slate-600 dark:text-slate-400">
+                    Current stage: <strong className="text-slate-900 dark:text-slate-100">{managingApp.status || 'APPLIED'}</strong>
+                  </span>
+                </div>
+                <select
+                  value={managingApp.status || 'APPLIED'}
+                  onChange={(e) => setManagingApp({ ...managingApp, status: e.target.value })}
+                  className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-sans font-bold text-slate-900 dark:text-slate-100 px-3 py-2 focus:outline-none focus:border-blue-700 cursor-pointer"
+                >
+                  <option value="APPLIED">Applied (Screening Pending)</option>
+                  <option value="SHORTLISTED">Shortlisted</option>
+                  <option value="IN_PROGRESS">In Progress / Interview</option>
+                  <option value="SELECTED">Hired / Selected</option>
+                  <option value="REJECTED">Rejected</option>
+                </select>
+              </div>
+
               <p className="text-xs text-slate-700 dark:text-slate-300 font-sans font-medium leading-relaxed">
                 Update the status and add feedback for each round. Completing or rejecting a round updates the candidate's real-time dashboard.
               </p>
@@ -509,7 +689,7 @@ export default function RecruiterJobs({ jobs = [], company, handleUpdateJob, han
                           updated[idx].status = e.target.value;
                           setManagingApp({ ...managingApp, roundStatuses: updated });
                         }}
-                        className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-sans font-semibold text-slate-900 dark:text-slate-100 px-3 py-1.5 focus:outline-none focus:border-blue-700"
+                        className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none text-xs font-sans font-semibold text-slate-900 dark:text-slate-100 px-3 py-1.5 focus:outline-none focus:border-blue-700 cursor-pointer"
                       >
                         <option value="PENDING">Pending</option>
                         <option value="IN_PROGRESS">In Progress</option>
@@ -554,6 +734,7 @@ export default function RecruiterJobs({ jobs = [], company, handleUpdateJob, han
                       token,
                       method: 'PUT',
                       json: {
+                        status: managingApp.status,
                         roundStatuses: managingApp.roundStatuses
                       }
                     });
@@ -578,110 +759,10 @@ export default function RecruiterJobs({ jobs = [], company, handleUpdateJob, han
         </div>
       )}
 
-      {/* Applicants List Modal */}
-      {viewingApplicantsJob && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in text-left">
-          <div className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none w-full max-w-2xl p-6 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div className="flex justify-between items-center border-b border-slate-300 dark:border-slate-700 pb-3">
-              <div>
-                <span className="inline-block px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-blue-100 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 text-blue-900 dark:text-blue-200 mb-1.5">
-                  Candidate Submissions
-                </span>
-                <h4 className="text-xl font-headline font-bold text-slate-900 dark:text-slate-100">
-                  Applicants for {viewingApplicantsJob.title}
-                </h4>
-                <p className="text-xs text-slate-700 dark:text-slate-300 font-sans font-medium mt-0.5">
-                  Total applications: <span className="font-bold text-slate-900 dark:text-slate-100">{viewingApplicantsJob.applications?.length || 0}</span>
-                </p>
-              </div>
-              <button
-                onClick={() => setViewingApplicantsJob(null)}
-                className="p-1.5 rounded-none border border-slate-300 dark:border-slate-700 bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {(!viewingApplicantsJob.applications || viewingApplicantsJob.applications.length === 0) ? (
-                <p className="text-sm text-slate-700 dark:text-slate-300 text-center font-sans font-medium py-6">
-                  No candidates have applied yet.
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {viewingApplicantsJob.applications.map((app, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-none border border-slate-300 dark:border-slate-700 text-left"
-                    >
-                      <div className="space-y-1.5">
-                        <p className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">
-                          {app.student?.name || 'Anonymous Student'}
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {app.student?.skills?.map((s, idx) => (
-                            <span
-                              key={idx}
-                              className="text-[10px] bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded-none font-sans font-semibold"
-                            >
-                              {s.name}: Lvl {s.rating}/10
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2 sm:self-center shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedCandidate(app.student)}
-                          className="px-2.5 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-headline font-bold rounded-none transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                        >
-                          <User className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
-                          <span>View Profile</span>
-                        </button>
-
-                        <a
-                          href={app.student?.resumeUrl || '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-2.5 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs font-headline font-bold rounded-none transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                        >
-                          <FileText className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
-                          <span>View Resume</span>
-                        </a>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setViewingApplicantsJob(null);
-                            setManagingApp(app);
-                          }}
-                          className="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white border border-blue-800 text-xs font-headline font-bold rounded-none transition-all active:scale-95 cursor-pointer shadow-2xs"
-                        >
-                          Manage Progress
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end pt-2 border-t border-slate-300 dark:border-slate-700">
-              <button
-                onClick={() => setViewingApplicantsJob(null)}
-                className="px-4 py-2 text-xs font-headline font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none transition-all cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Selected Candidate Profile Modal */}
       <CandidateProfileModal
         candidate={selectedCandidate}
+        job={selectedJob}
         onClose={() => setSelectedCandidate(null)}
       />
 

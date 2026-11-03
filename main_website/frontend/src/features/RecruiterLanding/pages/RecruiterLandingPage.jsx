@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowRight,
   ShieldCheck,
@@ -23,15 +23,24 @@ import {
   TrendingUp,
   Cpu,
   Clock,
-  ArrowUpRight
+  ArrowUpRight,
+  Eye,
+  EyeOff,
+  AlertTriangle,
+  Mail
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import Button from '../../../components/ui/Button';
 import ThemeToggle from '../../../components/ui/ThemeToggle';
 import ClickSpark from '../../../components/ui/ClickSpark';
 import AnimatedContent from '../../../components/ui/AnimatedContent';
+import GoogleAuthButton from '../../../components/ui/GoogleAuthButton';
 import CountUp from '../../../effects/CountUp';
 import TrueFocus from '../../../effects/TrueFocus';
-import { RECRUITER_URL } from '../../../config';
+import { apiFetch } from '../../../services/apiClient';
+import ForgotPasswordModal from '../../Auth/components/ForgotPasswordModal';
+import VerificationPinModal from '../../Auth/components/VerificationPinModal';
+import { RECRUITER_URL, CANDIDATE_URL } from '../../../config';
 
 // ─── Recruiter Tailored FAQs ───
 const RECRUITER_FAQS = [
@@ -65,17 +74,107 @@ const RECRUITER_FAQS = [
   }
 ];
 
-export default function RecruiterLandingPage({ theme, toggleTheme }) {
+export default function RecruiterLandingPage({
+  setToken,
+  setUser,
+  theme,
+  toggleTheme,
+  initialAuthMode = 'signup'
+}) {
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
+  // Embedded Recruiter Auth States - Register Company is default state
+  const [isLogin, setIsLogin] = useState(initialAuthMode === 'login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [isVerificationOpen, setIsVerificationOpen] = useState(false);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState('');
+
+  useEffect(() => {
+    setIsLogin(initialAuthMode === 'login');
+  }, [initialAuthMode]);
+
+  const handleAuthSubmit = async (e) => {
+    e.preventDefault();
+    if (/\s/.test(password)) {
+      setError('Password cannot contain spaces.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    const path = isLogin ? '/auth/login' : '/auth/signup';
+    const cleanEmail = email.toLowerCase().trim();
+    const payload = isLogin
+      ? { email: cleanEmail, password, role: 'RECRUITER' }
+      : { email: cleanEmail, password, role: 'RECRUITER', name: name.trim() };
+
+    try {
+      const res = await apiFetch(path, {
+        method: 'POST',
+        json: payload
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (data.needsVerification) {
+          setPendingVerificationEmail(cleanEmail);
+          setIsVerificationOpen(true);
+          return;
+        }
+        // If user submitted on Register Company mode but email already exists, auto-switch to Sign In
+        if (!isLogin && res.status === 409) {
+          setIsLogin(true);
+          setError('An account with this email already exists. Switched to Sign In — please enter your password.');
+          return;
+        }
+        throw new Error(data.error || 'Authentication failed');
+      }
+
+      if (!isLogin && data.needsVerification) {
+        setPendingVerificationEmail(cleanEmail);
+        setIsVerificationOpen(true);
+        return;
+      }
+
+      if (data.user && data.user.role !== 'RECRUITER') {
+        throw new Error('Access denied. This account is registered as a candidate. Please sign in through the Candidate portal.');
+      }
+      if (setToken) setToken(data.token);
+      if (setUser) setUser(data.user);
+      window.history.pushState({}, '', '/');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerificationSuccess = (data) => {
+    setIsVerificationOpen(false);
+    if (data.user && data.user.role !== 'RECRUITER') {
+      setError('Access denied. This account is registered as a candidate.');
+      return;
+    }
+    if (setToken) setToken(data.token);
+    if (setUser) setUser(data.user);
+    window.history.pushState({}, '', '/');
+  };
+
   const navigateToRecruiterAuth = (mode = 'login') => {
-    const isLocal = typeof window !== 'undefined' && 
-      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    if (!isLocal && RECRUITER_URL) {
-      window.location.href = `${RECRUITER_URL}/recruiter/${mode}`;
-    } else {
-      window.history.pushState({}, '', `/recruiter/${mode}`);
-      window.dispatchEvent(new PopStateEvent('popstate'));
+    setIsLogin(mode === 'login');
+    setError('');
+    const formElem = document.getElementById('recruiter-auth-card');
+    if (formElem) {
+      formElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const emailInput = formElem.querySelector('input[type="email"]');
+      if (emailInput) setTimeout(() => emailInput.focus(), 300);
     }
   };
 
@@ -111,59 +210,51 @@ export default function RecruiterLandingPage({ theme, toggleTheme }) {
             </span>
           </div>
 
-          <nav className="hidden lg:flex items-center gap-8 text-sm font-medium">
-            <a
-              href="#how-it-works"
-              onClick={(e) => scrollToSection(e, 'how-it-works')}
-              className="text-slate-600 dark:text-slate-300 hover:text-[#003527] dark:hover:text-emerald-400 transition-colors"
-            >
-              How It Works
-            </a>
-            <a
-              href="#verification"
-              onClick={(e) => scrollToSection(e, 'verification')}
-              className="text-slate-600 dark:text-slate-300 hover:text-[#003527] dark:hover:text-emerald-400 transition-colors"
-            >
-              Skill Verification
-            </a>
-            <a
-              href="#categories"
-              onClick={(e) => scrollToSection(e, 'categories')}
-              className="text-slate-600 dark:text-slate-300 hover:text-[#003527] dark:hover:text-emerald-400 transition-colors"
-            >
-              Talent Discovery
-            </a>
-            <a
-              href="#pricing"
-              onClick={(e) => scrollToSection(e, 'pricing')}
-              className="text-slate-600 dark:text-slate-300 hover:text-[#003527] dark:hover:text-emerald-400 transition-colors"
-            >
-              Pricing
-            </a>
-            <a
-              href="#faq"
-              onClick={(e) => scrollToSection(e, 'faq')}
-              className="text-slate-600 dark:text-slate-300 hover:text-[#003527] dark:hover:text-emerald-400 transition-colors"
-            >
-              FAQ
-            </a>
-          </nav>
+          <div className="flex items-center gap-6 sm:gap-8">
+            <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-sm font-medium">
+              <a
+                href="#how-it-works"
+                onClick={(e) => scrollToSection(e, 'how-it-works')}
+                className="text-slate-600 dark:text-slate-300 hover:text-[#003527] dark:hover:text-emerald-400 transition-colors"
+              >
+                How It Works
+              </a>
+              <a
+                href="#verification"
+                onClick={(e) => scrollToSection(e, 'verification')}
+                className="text-slate-600 dark:text-slate-300 hover:text-[#003527] dark:hover:text-emerald-400 transition-colors"
+              >
+                Skill Verification
+              </a>
+              <a
+                href="#categories"
+                onClick={(e) => scrollToSection(e, 'categories')}
+                className="text-slate-600 dark:text-slate-300 hover:text-[#003527] dark:hover:text-emerald-400 transition-colors"
+              >
+                Talent Discovery
+              </a>
+              <a
+                href="#pricing"
+                onClick={(e) => scrollToSection(e, 'pricing')}
+                className="text-slate-600 dark:text-slate-300 hover:text-[#003527] dark:hover:text-emerald-400 transition-colors"
+              >
+                Pricing
+              </a>
+              <a
+                href="#faq"
+                onClick={(e) => scrollToSection(e, 'faq')}
+                className="text-slate-600 dark:text-slate-300 hover:text-[#003527] dark:hover:text-emerald-400 transition-colors"
+              >
+                FAQ
+              </a>
+            </nav>
 
-          <div className="flex items-center gap-3">
             <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-
-            <button
-              onClick={() => navigateToRecruiterAuth('login')}
-              className="px-5 py-2.5 rounded-xl bg-[#003527] hover:bg-[#002a1f] text-white text-xs font-semibold shadow-sm hover:shadow-md transition-all flex items-center gap-2 cursor-pointer group"
-            >
-              <span>Recruiter Login</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </button>
           </div>
         </header>
 
         {/* ─── 2. RECRUITER HERO SECTION ─── */}
-        <section className="relative z-10 pt-8 sm:pt-14 pb-14 md:pb-20 px-4 sm:px-8 border-b border-outline-variant/60 overflow-hidden">
+        <section className="relative z-10 pt-6 sm:pt-10 pb-10 sm:pb-14 px-4 sm:px-8 border-b border-outline-variant/60 overflow-hidden">
           {/* Subtle ambient lighting */}
           <div className="ambient-glow -top-32 -left-32 opacity-40"></div>
           <div
@@ -233,7 +324,7 @@ export default function RecruiterLandingPage({ theme, toggleTheme }) {
                       className="px-6 py-3.5 rounded-xl bg-[#003527] hover:bg-[#00281e] text-white font-medium text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer group"
                     >
                       <Building2 className="w-4 h-4 text-emerald-300" />
-                      <span>Recruiter Login</span>
+                      <span>Sign In to Workspace</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                     <a
@@ -248,123 +339,278 @@ export default function RecruiterLandingPage({ theme, toggleTheme }) {
                 </AnimatedContent>
               </div>
 
-              {/* RIGHT COLUMN: CENTRAL HERO RECRUITER IMAGE + SATELLITE CARDS */}
-              <div className="lg:col-span-6 flex items-center justify-center pt-6 lg:pt-0">
-                <AnimatedContent distance={50} direction="vertical" duration={0.8} delay={0.25} className="w-full">
-                  <div className="relative w-full max-w-[500px] sm:max-w-[540px] mx-auto min-h-[440px] sm:min-h-[480px] flex items-center justify-center p-4">
-                    {/* Soft background ambient halo */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-emerald-300/20 via-blue-300/15 to-emerald-200/20 rounded-full blur-3xl pointer-events-none"></div>
+              {/* RIGHT COLUMN: INTEGRATED RECRUITER LOGIN & SIGNUP FORM */}
+              <div className="lg:col-span-6 flex items-center justify-center pt-4 lg:pt-0">
+                <AnimatedContent distance={40} direction="vertical" duration={0.8} delay={0.25} className="w-full">
+                  <div id="recruiter-auth-card" className="w-full max-w-[460px] mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative transition-all duration-300">
+                    {/* Mode Switcher Tabs - Register Company is default with smooth indicator */}
+                    <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800/80 p-1 mb-5 border border-slate-200/60 dark:border-slate-700/60 relative">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsLogin(false);
+                          setError('');
+                        }}
+                        className={`relative flex-1 py-2 text-xs font-headline font-bold rounded-lg transition-colors cursor-pointer z-10 ${
+                          !isLogin
+                            ? 'text-[#003527] dark:text-emerald-400'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        {!isLogin && (
+                          <motion.div
+                            layoutId="recruiterAuthTabIndicator"
+                            className="absolute inset-0 bg-white dark:bg-slate-900 rounded-lg shadow-xs"
+                            transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                          />
+                        )}
+                        <span className="relative z-10">Register Company</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsLogin(true);
+                          setError('');
+                        }}
+                        className={`relative flex-1 py-2 text-xs font-headline font-bold rounded-lg transition-colors cursor-pointer z-10 ${
+                          isLogin
+                            ? 'text-[#003527] dark:text-emerald-400'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        {isLogin && (
+                          <motion.div
+                            layoutId="recruiterAuthTabIndicator"
+                            className="absolute inset-0 bg-white dark:bg-slate-900 rounded-lg shadow-xs"
+                            transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                          />
+                        )}
+                        <span className="relative z-10">Sign In</span>
+                      </button>
+                    </div>
 
-                    {/* SATELLITE 1: TOP-LEFT (Full-Stack Engineer) */}
-                    <div className="absolute top-0 sm:top-2 left-0 sm:left-2 z-20 group">
-                      <div className="relative">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-white dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900 transition-all duration-300 group-hover:scale-105">
-                          <img
-                            src="/hero_satellite_coder.jpg"
-                            alt="Full-Stack Developer profile"
-                            className="w-full h-full object-cover object-center"
+                    {/* Smooth Transitioning Header */}
+                    <div className="mb-5 min-h-[52px]">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={isLogin ? 'header-login' : 'header-register'}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          transition={{ duration: 0.2, ease: 'easeInOut' }}
+                        >
+                          <h2 className="font-headline text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                            {isLogin ? 'Recruiter Sign In' : 'Register Company Workspace'}
+                          </h2>
+                          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+                            {isLogin
+                              ? 'Sign in to access your talent dashboard, manage posts, and audit ratings.'
+                              : 'Set up your company workspace and hire certified technical students.'}
+                          </p>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+
+                    {/* Error Banner */}
+                    {error && (
+                      <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                        <span className="flex-1 font-medium">{error}</span>
+                        <button
+                          type="button"
+                          onClick={() => setError('')}
+                          className="text-rose-400 hover:text-rose-600 cursor-pointer text-xs ml-1"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Stacked Form with Icons Matching Screenshot */}
+                    <form onSubmit={handleAuthSubmit}>
+                      {/* Company Name (Animated on Register Mode) */}
+                      <AnimatePresence initial={false}>
+                        {!isLogin && (
+                          <motion.div
+                            key="company-name-field"
+                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
+                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden"
+                          >
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                              Company / Organization Name
+                            </label>
+                            <div className="relative">
+                              <Building2 className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                              <input
+                                type="text"
+                                required={!isLogin}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="e.g. Acme Technologies"
+                                className="w-full bg-slate-50 dark:bg-slate-800/80 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 border border-slate-300 dark:border-slate-700 focus:border-[#003527] dark:focus:border-emerald-500 focus:outline-none transition-colors"
+                              />
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Work Email Address */}
+                      <div className="mb-4">
+                        <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                          Work Email Address
+                        </label>
+                        <div className="relative">
+                          <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                          <input
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="recruiter@company.com"
+                            className="w-full bg-slate-50 dark:bg-slate-800/80 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 border border-slate-300 dark:border-slate-700 focus:border-[#003527] dark:focus:border-emerald-500 focus:outline-none transition-colors"
                           />
                         </div>
-                        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2 py-0.5 rounded-full border border-slate-200/90 dark:border-slate-700 shadow-sm flex items-center gap-1 text-[10px] font-bold text-slate-800 dark:text-slate-100">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                          <span>React • 94%</span>
-                        </div>
                       </div>
-                    </div>
 
-                    {/* SATELLITE 2: TOP-RIGHT (AI & ML Engineer) */}
-                    <div className="absolute top-0 sm:top-2 right-0 sm:right-2 z-20 group">
-                      <div className="relative">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-white dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900 transition-all duration-300 group-hover:scale-105">
-                          <img
-                            src="/hero_satellite_intern.jpg"
-                            alt="AI Systems Candidate"
-                            className="w-full h-full object-cover object-center"
+                      {/* Password */}
+                      <div className="mb-4">
+                        <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                          Password
+                        </label>
+                        <div className="relative">
+                          <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                            className="w-full bg-slate-50 dark:bg-slate-800/80 rounded-xl pl-10 pr-11 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 border border-slate-300 dark:border-slate-700 focus:border-[#003527] dark:focus:border-emerald-500 focus:outline-none transition-colors"
                           />
-                        </div>
-                        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2 py-0.5 rounded-full border border-slate-200/90 dark:border-slate-700 shadow-sm flex items-center gap-1 text-[10px] font-bold text-slate-800 dark:text-slate-100">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                          <span>Python • 89%</span>
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
                         </div>
                       </div>
+
+                      {/* Remember Me / Forgot Password (Sign In mode) */}
+                      <AnimatePresence initial={false}>
+                        {isLogin && (
+                          <motion.div
+                            key="remember-forgot-row"
+                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
+                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden"
+                          >
+                            <div className="flex justify-between items-center text-xs">
+                              <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                                <input
+                                  type="checkbox"
+                                  className="rounded border-slate-300 dark:border-slate-700 text-[#003527] accent-[#003527] w-3.5 h-3.5 cursor-pointer"
+                                  checked={rememberMe}
+                                  onChange={(e) => setRememberMe(e.target.checked)}
+                                />
+                                <span className="text-slate-600 dark:text-slate-400 font-sans">Remember me</span>
+                              </label>
+                              <button
+                                type="button"
+                                className="text-[#003527] dark:text-emerald-400 hover:underline cursor-pointer font-headline font-bold bg-transparent border-none p-0 text-xs"
+                                onClick={() => setIsForgotPasswordOpen(true)}
+                              >
+                                Forgot password?
+                              </button>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Submit Button */}
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-3 sm:py-3.5 rounded-xl bg-[#003527] hover:bg-[#00281e] disabled:opacity-60 text-white font-headline font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer"
+                      >
+                        {loading ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <AnimatePresence mode="wait">
+                            <motion.span
+                              key={isLogin ? 'submit-signin' : 'submit-register'}
+                              initial={{ opacity: 0, y: 3 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -3 }}
+                              transition={{ duration: 0.15 }}
+                              className="flex items-center gap-2"
+                            >
+                              <span>{isLogin ? 'Sign In to Workspace' : 'Register Company Workspace'}</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </motion.span>
+                          </AnimatePresence>
+                        )}
+                      </button>
+                    </form>
+
+                    {/* OR Divider */}
+                    <div className="relative my-4 flex items-center justify-center">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
+                      </div>
+                      <span className="relative bg-white dark:bg-slate-900 px-3 text-[10px] font-headline font-bold uppercase tracking-wider text-slate-400">
+                        OR
+                      </span>
                     </div>
 
-                    {/* SATELLITE 3: BOTTOM-LEFT (UI/UX Designer) */}
-                    <div className="absolute bottom-2 sm:bottom-4 left-0 sm:left-2 z-20 group">
-                      <div className="relative">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-white dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900 transition-all duration-300 group-hover:scale-105">
-                          <img
-                            src="/hero_satellite_designer.jpg"
-                            alt="UI Designer"
-                            className="w-full h-full object-cover object-center"
-                          />
-                        </div>
-                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2 py-0.5 rounded-full border border-slate-200/90 dark:border-slate-700 shadow-sm flex items-center gap-1 text-[10px] font-bold text-slate-800 dark:text-slate-100">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                          <span>Figma • 91%</span>
-                        </div>
-                      </div>
-                    </div>
+                    {/* Google Auth Button */}
+                    <GoogleAuthButton
+                      role="RECRUITER"
+                      onSuccess={(data) => {
+                        if (setToken) setToken(data.token);
+                        if (setUser) setUser(data.user);
+                        window.history.pushState({}, '', '/');
+                      }}
+                      onError={(msg) => setError(msg)}
+                    />
 
-                    {/* SATELLITE 4: BOTTOM-RIGHT (Cloud & DevOps) */}
-                    <div className="absolute bottom-2 sm:bottom-4 right-0 sm:right-2 z-20 group">
-                      <div className="relative">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-white dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900 transition-all duration-300 group-hover:scale-105">
-                          <img
-                            src="/hero_satellite_analyst.jpg"
-                            alt="Cloud Engineer"
-                            className="w-full h-full object-cover object-center"
-                          />
-                        </div>
-                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2 py-0.5 rounded-full border border-slate-200/90 dark:border-slate-700 shadow-sm flex items-center gap-1 text-[10px] font-bold text-slate-800 dark:text-slate-100">
-                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                          <span>AWS • 87%</span>
-                        </div>
-                      </div>
+                    {/* Bottom Links with Smooth Cross-Fade */}
+                    <div className="border-t border-slate-200 dark:border-slate-800 pt-4 mt-4 text-center text-xs">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsLogin(!isLogin);
+                          setError('');
+                        }}
+                        className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer"
+                      >
+                        <AnimatePresence mode="wait">
+                          <motion.span
+                            key={isLogin ? 'link-login' : 'link-register'}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                          >
+                            {isLogin ? (
+                              <span>
+                                New employer? <strong className="text-[#003527] dark:text-emerald-400 underline font-bold">Register your company</strong>
+                              </span>
+                            ) : (
+                              <span>
+                                Already registered? <strong className="text-[#003527] dark:text-emerald-400 underline font-bold">Sign in to workspace</strong>
+                              </span>
+                            )}
+                          </motion.span>
+                        </AnimatePresence>
+                      </button>
                     </div>
-
-                    {/* CENTRAL MAIN IMAGE: INDIAN RECRUITER & HIRING LEAD */}
-                    <div className="relative z-10 w-64 sm:w-76 lg:w-80 aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 bg-white dark:bg-slate-900 transition-transform duration-300 hover:scale-[1.02]">
-                      <img
-                        src="/recruiter_hero_lead.jpg"
-                        alt="Indian hiring manager and tech lead reviewing candidate skill verification scorecards"
-                        className="w-full h-full object-cover object-center"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-                      <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white text-[11px] font-medium">
-                        <span className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20">
-                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>Pre-Screened</span>
-                        </span>
-                        <span className="bg-[#003527]/90 text-emerald-200 font-bold px-2 py-0.5 rounded-full shadow-xs border border-emerald-500/30">
-                          Verified Talent
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* OVERLAPPING FLOATING RECRUITMENT PIPELINE CARD */}
-                    <div className="absolute -bottom-4 sm:-bottom-3 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl px-3.5 py-2 sm:px-4 sm:py-2.5 shadow-xl border border-slate-200/90 dark:border-slate-700 flex items-center gap-2.5 sm:gap-3">
-                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shrink-0">
-                        <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </div>
-                      <div className="text-left">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-heading">Recruitment Pipeline</span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
-                            Active
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 mt-0.5 text-[10px] text-slate-600 dark:text-slate-300">
-                          <span className="flex items-center gap-1">
-                            <Check className="w-3 h-3 text-emerald-600 stroke-[3]" /> 48h Time-to-Shortlist
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Check className="w-3 h-3 text-emerald-600 stroke-[3]" /> Zero Keyword Spam
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
                   </div>
                 </AnimatedContent>
               </div>
@@ -372,7 +618,7 @@ export default function RecruiterLandingPage({ theme, toggleTheme }) {
             </div>
 
             {/* ─── 3. SECTION A & B: VALUE PROPOSITION & HIRING FORMATS ─── */}
-            <div id="categories" className="mt-16 sm:mt-24 space-y-8 sm:space-y-12">
+            <div id="categories" className="mt-8 sm:mt-10 space-y-8 sm:space-y-12">
 
               {/* ─── ROW 1: Value Prop Card (Left) + Indian Team Image (Right) ─── */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
@@ -1326,6 +1572,21 @@ export default function RecruiterLandingPage({ theme, toggleTheme }) {
           </div>
         </footer>
 
+        <ForgotPasswordModal
+          isOpen={isForgotPasswordOpen}
+          onClose={() => setIsForgotPasswordOpen(false)}
+          initialEmail={email}
+          role="RECRUITER"
+          theme={theme}
+        />
+
+        <VerificationPinModal
+          isOpen={isVerificationOpen}
+          onClose={() => setIsVerificationOpen(false)}
+          email={pendingVerificationEmail || email}
+          role="RECRUITER"
+          onSuccess={handleVerificationSuccess}
+        />
       </ClickSpark>
     </div>
   );

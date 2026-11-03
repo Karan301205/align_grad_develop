@@ -18,12 +18,14 @@ import {
   AlertCircle,
   Sparkles,
   Share2,
-  Check
+  Check,
+  FolderGit2
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import Button from './ui/Button';
 import Badge from './ui/Badge';
 import { ALL_SKILLS } from '../constants';
+import { rankProjectsForJob } from '../utils/projectRelevance';
 
 const formatJoiningDate = (dateStr) => {
   if (!dateStr) return 'Not specified';
@@ -49,9 +51,48 @@ const formatJoiningDate = (dateStr) => {
   return dateStr;
 };
 
-export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isStudent, onOpenCompanyProfile }) {
+export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isStudent, onOpenCompanyProfile, candidateProjects = [] }) {
   const [promptSkill, setPromptSkill] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [showScreeningModal, setShowScreeningModal] = useState(false);
+  const [screeningAnswers, setScreeningAnswers] = useState([]);
+
+  useEffect(() => {
+    if (job?.screeningQuestions && Array.isArray(job.screeningQuestions)) {
+      setScreeningAnswers(job.screeningQuestions.map(q => ({
+        questionId: q.id,
+        questionText: q.question,
+        type: q.type || 'LONG_ANSWER',
+        answer: ''
+      })));
+    } else {
+      setScreeningAnswers([]);
+    }
+  }, [job]);
+
+  const handleConfirmScreeningApply = () => {
+    if (job.screeningQuestions && Array.isArray(job.screeningQuestions)) {
+      for (const sq of job.screeningQuestions) {
+        if (sq.required !== false) {
+          const ans = screeningAnswers.find(a => (a.questionId && a.questionId === sq.id) || a.questionText === sq.question);
+          if (!ans || !String(ans.answer || '').trim()) {
+            alert(`Please answer the required question: "${sq.question}"`);
+            return;
+          }
+        }
+      }
+    }
+    onApply(job.id, screeningAnswers);
+    setShowScreeningModal(false);
+    onClose();
+  };
+
+  const projectAlignment = React.useMemo(() => {
+    if (!isStudent || !job?.requirements || !Array.isArray(candidateProjects)) {
+      return { rankedProjects: [], matchedProjectsCount: 0, maxMatches: 0, targetSkillsCount: 0 };
+    }
+    return rankProjectsForJob(candidateProjects, job.requirements);
+  }, [isStudent, job?.requirements, candidateProjects]);
 
   if (!job) return null;
 
@@ -453,6 +494,86 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
 
           </div>
 
+          {/* Candidate Experience Alignment: Relevant Projects */}
+          {isStudent && (
+            <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-outline-variant">
+                <h5 className="font-bold text-on-surface text-xs flex items-center gap-1.5">
+                  <FolderGit2 className="w-4 h-4 text-primary" />
+                  <span>Your Project Alignment for this Role</span>
+                </h5>
+                {projectAlignment.matchedProjectsCount > 0 ? (
+                  <span className="text-[10px] bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded font-bold flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> {projectAlignment.matchedProjectsCount} Relevant {projectAlignment.matchedProjectsCount === 1 ? 'Project' : 'Projects'}
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-on-surface-variant font-medium">
+                    {candidateProjects.length} Projects in Profile
+                  </span>
+                )}
+              </div>
+
+              {projectAlignment.matchedProjectsCount > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-[11px] text-on-surface-variant leading-relaxed">
+                    ✨ The projects below match this job's required skills and will automatically appear at the top of your profile for the recruiter:
+                  </p>
+                  <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                    {projectAlignment.rankedProjects.filter(p => p.matchCount > 0).map((proj, pIdx) => (
+                      <div key={pIdx} className="p-3 bg-surface-container border border-outline-variant rounded-lg text-xs space-y-1.5">
+                        <div className="flex justify-between items-baseline">
+                          <span className="font-bold text-on-surface">{proj.title}</span>
+                          <span className="text-[10px] text-primary font-semibold">
+                            {proj.matchCount} {proj.matchCount === 1 ? 'skill match' : 'skills match'}
+                          </span>
+                        </div>
+                        {proj.role && <p className="text-[11px] text-secondary font-medium">{proj.role}</p>}
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {proj.matchedSkills.map((s, sIdx) => (
+                            <span
+                              key={sIdx}
+                              className="text-[10px] px-2 py-0.5 bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 rounded font-semibold flex items-center gap-1"
+                            >
+                              <Check className="w-2.5 h-2.5" /> {s}
+                            </span>
+                          ))}
+                          {(proj.skills || []).filter(s => !proj.matchedSkills.some(m => m.toLowerCase() === s.toLowerCase())).map((s, sIdx) => (
+                            <span
+                              key={sIdx}
+                              className="text-[10px] px-2 py-0.5 bg-surface-container-high border border-outline-variant text-on-surface-variant rounded font-normal"
+                            >
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : candidateProjects.length > 0 ? (
+                <div className="p-3 bg-surface-container border border-outline-variant rounded-lg text-xs space-y-1">
+                  <p className="text-on-surface font-semibold flex items-center gap-1 text-[11px]">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span>No projects currently match this job's required skills</span>
+                  </p>
+                  <p className="text-[11px] text-on-surface-variant leading-relaxed">
+                    Tag your portfolio projects with relevant skills in your profile to have them automatically featured at the top when applying.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3 bg-surface-container border border-outline-variant rounded-lg text-xs space-y-1">
+                  <p className="text-on-surface font-semibold flex items-center gap-1 text-[11px]">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span>No portfolio projects added yet</span>
+                  </p>
+                  <p className="text-[11px] text-on-surface-variant leading-relaxed">
+                    Add projects with skill tags in your Profile to showcase hands-on experience to recruiters.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Selection Process Timeline */}
           {job.selectionProcess && job.selectionProcess.length > 0 && (
             <div className="space-y-4">
@@ -518,10 +639,14 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                     size="sm"
                     icon={Send}
                     onClick={() => {
-                      onApply(job.id);
-                      onClose();
+                      if (job.screeningQuestions && Array.isArray(job.screeningQuestions) && job.screeningQuestions.length > 0) {
+                        setShowScreeningModal(true);
+                      } else {
+                        onApply(job.id, []);
+                        onClose();
+                      }
                     }}
-                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold shadow-md"
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold shadow-md cursor-pointer"
                   >
                     Apply for Role
                   </Button>
@@ -644,6 +769,124 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                   onClick={() => setPromptSkill(null)}
                 >
                   Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Candidate Screening Questions Dialog */}
+        {showScreeningModal && (
+          <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-none max-w-lg w-full p-6 shadow-2xl space-y-4 text-left animate-scale-up max-h-[90vh] overflow-y-auto custom-scrollbar">
+              <div className="flex items-start justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div>
+                  <span className="inline-block px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-600 text-emerald-900 dark:text-emerald-200 mb-1">
+                    Screening Questions
+                  </span>
+                  <h3 className="text-base font-headline font-bold text-slate-900 dark:text-slate-100">
+                    Candidate Questionnaire ({job.screeningQuestions?.length || 0})
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 font-sans mt-0.5">
+                    Please answer the questions below to finalize your application.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowScreeningModal(false)}
+                  className="p-1.5 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 rounded-none transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {(job.screeningQuestions || []).map((sq, sqIdx) => {
+                  const currentAns = screeningAnswers.find(a => (a.questionId && a.questionId === sq.id) || a.questionText === sq.question);
+                  const answerVal = currentAns ? currentAns.answer : '';
+
+                  return (
+                    <div key={sq.id || sqIdx} className="p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-none space-y-2">
+                      <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100">
+                        {sqIdx + 1}. {sq.question} {sq.required !== false && <span className="text-red-500">*</span>}
+                      </label>
+
+                      {sq.type === 'MCQ' ? (
+                        <div className="space-y-1.5 pt-1">
+                          {(sq.options || []).map((opt, optIdx) => {
+                            const isSelected = answerVal === opt;
+                            return (
+                              <label
+                                key={optIdx}
+                                className={`flex items-center gap-2 p-2 rounded-none border text-xs font-sans cursor-pointer transition-colors ${
+                                  isSelected
+                                    ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-600 text-emerald-900 dark:text-emerald-200 font-medium'
+                                    : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400'
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name={`jd_modal_sq_${sq.id || sqIdx}`}
+                                  value={opt}
+                                  checked={isSelected}
+                                  onChange={() => {
+                                    setScreeningAnswers(prev => {
+                                      const filtered = prev.filter(a => a.questionId !== sq.id && a.questionText !== sq.question);
+                                      return [...filtered, {
+                                        questionId: sq.id,
+                                        questionText: sq.question,
+                                        type: 'MCQ',
+                                        answer: opt
+                                      }];
+                                    });
+                                  }}
+                                  className="accent-emerald-700 w-3.5 h-3.5"
+                                />
+                                <span>{opt}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <textarea
+                          value={answerVal}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setScreeningAnswers(prev => {
+                              const filtered = prev.filter(a => a.questionId !== sq.id && a.questionText !== sq.question);
+                              return [...filtered, {
+                                questionId: sq.id,
+                                questionText: sq.question,
+                                type: 'LONG_ANSWER',
+                                answer: val
+                              }];
+                            });
+                          }}
+                          rows={3}
+                          placeholder="Type your response here..."
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs font-sans text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 shadow-2xs"
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowScreeningModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  icon={Send}
+                  onClick={handleConfirmScreeningApply}
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold shadow-md cursor-pointer"
+                >
+                  Submit Application
                 </Button>
               </div>
             </div>

@@ -20,8 +20,6 @@ import {
   ExternalLink,
   ShieldCheck,
   RefreshCw,
-  Bookmark,
-  Maximize2,
   Download,
   Paperclip,
   HelpCircle,
@@ -55,8 +53,10 @@ export default function StudentCourses({ user, token }) {
   const [loadingVideo, setLoadingVideo] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [activeTab, setActiveTab] = useState('notes'); // notes, transcript, quiz, overview
-  const [bookmarked, setBookmarked] = useState(false);
-  const [markingComplete, setMarkingComplete] = useState(false);
+  // Share of the current uploaded video actually played (0-100), for the auto-complete status.
+  const [watchPercent, setWatchPercent] = useState(0);
+  // `${courseId}:${lessonId}` keys with a completion request in flight or done this session.
+  const completionRequestedRef = useRef(new Set());
 
   // End-of-video MCQ Quiz state
   const [quizAnswers, setQuizAnswers] = useState({});
@@ -215,7 +215,7 @@ Downloaded from AlignGrade Interactive Academy
 
   const handleSubmitQuiz = () => {
     setQuizSubmitted(true);
-    handleMarkComplete();
+    completeLesson(selectedLesson?.id);
   };
 
   const handleVideoEnded = () => {
@@ -232,12 +232,17 @@ Downloaded from AlignGrade Interactive Academy
     }));
   };
 
-  // Mark lesson completed
-  const handleMarkComplete = async () => {
-    if (!activeCourseId || !selectedLesson || !token) return;
-    setMarkingComplete(true);
+  // Marks a lesson completed. There is no manual button: this runs automatically
+  // once half of an uploaded video has been watched, when a lesson has no
+  // measurable video (opened = done), or when the lesson quiz is submitted.
+  const completeLesson = async (lessonId) => {
+    if (!activeCourseId || !lessonId || !token) return;
+    if ((courseDetail?.enrollment?.completedLessonIds || []).includes(lessonId)) return;
+    const requestKey = `${activeCourseId}:${lessonId}`;
+    if (completionRequestedRef.current.has(requestKey)) return;
+    completionRequestedRef.current.add(requestKey);
     try {
-      const res = await apiFetch(`/courses/${activeCourseId}/lessons/${selectedLesson.id}/complete`, {
+      const res = await apiFetch(`/courses/${activeCourseId}/lessons/${lessonId}/complete`, {
         method: 'POST',
         token
       });
@@ -248,11 +253,31 @@ Downloaded from AlignGrade Interactive Academy
           ...prev,
           enrollment: data.enrollment
         }));
+      } else {
+        completionRequestedRef.current.delete(requestKey); // allow a retry
       }
     } catch (err) {
       console.error('Error marking lesson complete:', err);
-    } finally {
-      setMarkingComplete(false);
+      completionRequestedRef.current.delete(requestKey);
+    }
+  };
+
+  // Uploaded videos auto-complete at 50% watched. `video.played` holds the merged
+  // ranges actually played, so skipping ahead or re-watching the same part
+  // doesn't count towards the threshold.
+  const AUTO_COMPLETE_WATCHED_FRACTION = 0.5;
+  const handleVideoProgress = (e) => {
+    const video = e.currentTarget;
+    const duration = video.duration;
+    if (!selectedLesson || !Number.isFinite(duration) || duration <= 0) return;
+    let watchedSeconds = 0;
+    for (let i = 0; i < video.played.length; i++) {
+      watchedSeconds += video.played.end(i) - video.played.start(i);
+    }
+    const percent = Math.min(100, Math.floor((watchedSeconds / duration) * 100));
+    setWatchPercent(prev => (prev === percent ? prev : percent));
+    if (watchedSeconds >= duration * AUTO_COMPLETE_WATCHED_FRACTION) {
+      completeLesson(selectedLesson.id);
     }
   };
 
@@ -278,6 +303,26 @@ Downloaded from AlignGrade Interactive Academy
   const completedIds = courseDetail?.enrollment?.completedLessonIds || [];
   const completedCount = completedIds.length;
   const progressPercent = totalLessonsCount > 0 ? Math.round((completedCount / totalLessonsCount) * 100) : 0;
+
+  // How the selected lesson gets completed (see completeLesson).
+  const lessonEmbedUrl = getYouTubeEmbedUrl(videoStreamUrl || selectedLesson?.videoUrl);
+  const hasTrackableVideo = Boolean(videoStreamUrl) && !lessonEmbedUrl; // uploaded video in <video>
+  const lessonHasQuiz = (selectedLesson?.quiz?.questions?.length || 0) > 0;
+
+  useEffect(() => {
+    setWatchPercent(0);
+  }, [selectedLesson?.id, videoStreamUrl]);
+
+  // Lessons with nothing to measure: no video at all, or a legacy YouTube embed
+  // whose playback can't be tracked. They complete when opened, except no-video
+  // lessons with a quiz, which complete when the quiz is submitted.
+  useEffect(() => {
+    if (!activeCourseId || !selectedLesson || loadingVideo || videoError) return;
+    if (hasTrackableVideo) return;
+    if (lessonHasQuiz && !lessonEmbedUrl) return;
+    completeLesson(selectedLesson.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCourseId, selectedLesson?.id, loadingVideo, videoError, hasTrackableVideo, lessonHasQuiz, lessonEmbedUrl]);
 
   // Filter courses for catalog view
   const categories = ['All', ...new Set(courses.map(c => c.category).filter(Boolean))];
@@ -476,28 +521,6 @@ Downloaded from AlignGrade Interactive Academy
                 <span className="truncate">Lesson: {selectedLesson?.title || 'Select a lesson'}</span>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => setBookmarked(prev => !prev)}
-                  className={`p-2 rounded-xl border border-outline-variant transition-all cursor-pointer ${
-                    bookmarked ? 'bg-blue-500/10 text-blue-600 border-blue-500/30' : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface'
-                  }`}
-                  title={bookmarked ? "Remove Bookmark" : "Bookmark Lesson"}
-                >
-                  <Bookmark className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
-                </button>
-                <button
-                  onClick={() => {
-                    if (videoRef.current?.requestFullscreen) {
-                      videoRef.current.requestFullscreen();
-                    }
-                  }}
-                  className="p-2 rounded-xl border border-outline-variant bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all cursor-pointer"
-                  title="Fullscreen"
-                >
-                  <Maximize2 className="w-4 h-4" />
-                </button>
-              </div>
             </div>
 
             {/* Lesson Title Heading */}
@@ -506,19 +529,43 @@ Downloaded from AlignGrade Interactive Academy
                 {selectedLesson?.title || 'Lesson Overview'}
               </h1>
 
-              {/* Mark as Completed Button */}
-              <button
-                onClick={handleMarkComplete}
-                disabled={markingComplete}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-semibold text-xs transition-all cursor-pointer shadow-xs shrink-0 ${
-                  isCurrentCompleted
-                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'
-                    : 'bg-primary text-on-primary hover:opacity-90'
-                }`}
-              >
-                <CheckCircle className="w-3.5 h-3.5" />
-                <span>{isCurrentCompleted ? 'Completed' : 'Mark Complete'}</span>
-              </button>
+              {/* Completion status (automatic; no manual button) */}
+              {selectedLesson && !loadingVideo && (
+                <div
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-semibold text-xs shrink-0 border ${
+                    isCurrentCompleted
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                      : 'bg-surface-container text-on-surface-variant border-outline-variant'
+                  }`}
+                >
+                  {isCurrentCompleted ? (
+                    <>
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      <span>Completed</span>
+                    </>
+                  ) : videoError ? (
+                    <>
+                      <X className="w-3.5 h-3.5" />
+                      <span>Video unavailable</span>
+                    </>
+                  ) : hasTrackableVideo ? (
+                    <>
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>{watchPercent}% watched</span>
+                    </>
+                  ) : lessonHasQuiz && !lessonEmbedUrl ? (
+                    <>
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>Completes when you submit the quiz</span>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Marking complete…</span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Main Video Chassis Container with Floating Navigation Arrows */}
@@ -547,6 +594,7 @@ Downloaded from AlignGrade Interactive Academy
                   className="w-full h-full object-contain bg-black"
                   src={videoStreamUrl}
                   onError={() => setVideoError(true)}
+                  onTimeUpdate={handleVideoProgress}
                   onEnded={handleVideoEnded}
                 >
                   Your browser does not support the video tag.

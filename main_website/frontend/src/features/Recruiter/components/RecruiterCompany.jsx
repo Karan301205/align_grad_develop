@@ -17,14 +17,16 @@ import {
   FileText, 
   ExternalLink, 
   AlertCircle,
-  Lock
+  Lock,
+  Clock,
+  XCircle
 } from 'lucide-react';
 import { apiFetch } from '../../../services/apiClient';
 import { putFileToS3 } from '../../../services/uploadService';
 import { MAJOR_INDUSTRIES } from '../../../constants/industries';
 import { INDIAN_STATES } from '../../../constants/indianStates';
 import { ToastNotification } from '../../../utils/errorFormatter';
-import { isCompanyProfileComplete } from '../../../utils/profileCompleteness';
+import { COMPANY_VERIFICATION_STATUS, getCompanyVerificationStatus } from '../../../utils/companyVerification';
 
 const VERIFICATION_DOC_TYPES = [
   'Certificate of Incorporation',
@@ -57,7 +59,13 @@ export default function RecruiterCompany({
   handleUpdateCompany,
   setAlertConfig
 }) {
-  const isProfileLocked = isCompanyProfileComplete(company);
+  const verificationStatus = getCompanyVerificationStatus(company);
+  const isApproved = verificationStatus === COMPANY_VERIFICATION_STATUS.APPROVED;
+  const isUnderReview = verificationStatus === COMPANY_VERIFICATION_STATUS.PENDING;
+  const isRejected = verificationStatus === COMPANY_VERIFICATION_STATUS.REJECTED;
+  // Editing is locked while an admin reviews the submission and after approval;
+  // a rejected profile becomes editable again so it can be corrected and resubmitted.
+  const isProfileLocked = isApproved || isUnderReview;
 
   // Profile form states
   const [name, setName] = useState('');
@@ -286,7 +294,12 @@ export default function RecruiterCompany({
   const handleSubmitProfile = async (e) => {
     e.preventDefault();
     if (isProfileLocked) {
-      showAlert('Company profile is already completed and verified. Editing is locked.', 'info');
+      showAlert(
+        isUnderReview
+          ? 'Your company profile is under admin review and cannot be edited right now.'
+          : 'Company profile is already verified. Editing is locked.',
+        'info'
+      );
       return;
     }
 
@@ -372,13 +385,17 @@ export default function RecruiterCompany({
     };
 
     try {
-      // 1. Submit the 2 verification legal documents silently
-      if (stagedDocs.length === 2) {
-        await handleVerification(stagedDocs, true);
+      // 1. Save company profile details first — the server locks the profile
+      //    once it is submitted for review.
+      const profileSaved = await handleUpdateCompany(profilePayload, 'Company profile saved. Submitting for admin review...');
+      if (!profileSaved) return;
+
+      // 2. Submit the 2 legal verification documents, queueing the company for admin review
+      const submitted = await handleVerification(stagedDocs, true);
+      if (submitted) {
+        setFieldErrors({});
+        showAlert('Company profile submitted for admin review. You will receive an email once it has been reviewed.', 'success');
       }
-      // 2. Submit company profile updates with unified confirmation notification
-      await handleUpdateCompany(profilePayload, 'Company profile and verification documents saved successfully!');
-      setFieldErrors({});
     } catch (err) {
       console.error(err);
       showAlert(err.message || 'Error saving company profile', 'error');
@@ -405,8 +422,8 @@ export default function RecruiterCompany({
         </div>
       </header>
 
-      {/* Profile Completed & Locked Read-Only Notice */}
-      {isProfileLocked && (
+      {/* Admin Review Status Notice */}
+      {isApproved && (
         <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-600 dark:border-emerald-500 p-4 sm:p-5 rounded-none shadow-xs flex items-start gap-3.5">
           <div className="w-9 h-9 rounded-none bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
             <Lock className="w-4 h-4 stroke-[2.5]" />
@@ -414,14 +431,61 @@ export default function RecruiterCompany({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="text-xs sm:text-sm font-headline font-bold text-emerald-950 dark:text-emerald-100">
-                Company Profile Completed & Locked (Read-Only Mode)
+                Company Profile Approved & Locked (Read-Only Mode)
               </h3>
               <span className="px-2 py-0.5 text-[9px] font-headline font-bold uppercase tracking-wider bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-200 rounded-none">
                 Verified
               </span>
             </div>
             <p className="text-xs text-emerald-800 dark:text-emerald-300 font-sans mt-1 leading-relaxed">
-              Your company profile and legal verification documents are verified and locked. Profile fields cannot be modified to ensure trusted credibility across candidate search and job publishing.
+              Your company profile and legal verification documents have been approved by the AlignGrad team. Profile fields are locked to keep your credibility trusted across candidate search and job publishing.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {isUnderReview && (
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-500 dark:border-amber-500 p-4 sm:p-5 rounded-none shadow-xs flex items-start gap-3.5">
+          <div className="w-9 h-9 rounded-none bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+            <Clock className="w-4 h-4 stroke-[2.5]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs sm:text-sm font-headline font-bold text-amber-950 dark:text-amber-100">
+                Company Profile Under Admin Review
+              </h3>
+              <span className="px-2 py-0.5 text-[9px] font-headline font-bold uppercase tracking-wider bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200 rounded-none">
+                Pending
+              </span>
+            </div>
+            <p className="text-xs text-amber-800 dark:text-amber-300 font-sans mt-1 leading-relaxed">
+              Thanks for submitting your company details and verification documents. Our team is reviewing them now, and you will receive an email at your registered address once your profile is approved or if changes are needed. Posting jobs, gigs and browsing candidates unlock after approval.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {isRejected && (
+        <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-500 dark:border-rose-500 p-4 sm:p-5 rounded-none shadow-xs flex items-start gap-3.5">
+          <div className="w-9 h-9 rounded-none bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+            <XCircle className="w-4 h-4 stroke-[2.5]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs sm:text-sm font-headline font-bold text-rose-950 dark:text-rose-100">
+                Company Profile Not Approved
+              </h3>
+              <span className="px-2 py-0.5 text-[9px] font-headline font-bold uppercase tracking-wider bg-rose-200 dark:bg-rose-900 text-rose-900 dark:text-rose-200 rounded-none">
+                Action Required
+              </span>
+            </div>
+            {company?.verificationNote && (
+              <p className="text-xs text-rose-900 dark:text-rose-200 font-sans mt-1.5 leading-relaxed whitespace-pre-line">
+                <span className="font-bold">Reason from the review team:</span> {company.verificationNote}
+              </p>
+            )}
+            <p className="text-xs text-rose-800 dark:text-rose-300 font-sans mt-1 leading-relaxed">
+              Please update your company details or verification documents below and resubmit them for review.
             </p>
           </div>
         </div>
@@ -1031,10 +1095,20 @@ export default function RecruiterCompany({
                 <span className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 tracking-wider">
                   Company Status
                 </span>
-                {company?.verified || isProfileLocked ? (
+                {isApproved ? (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-headline font-bold tracking-wider rounded-none bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-400 dark:border-emerald-600 text-emerald-900 dark:text-emerald-200 shadow-2xs">
                     <CheckCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                     <span>Verified</span>
+                  </span>
+                ) : isUnderReview ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-headline font-bold tracking-wider rounded-none bg-amber-100 dark:bg-amber-950/70 border border-amber-400 dark:border-amber-600 text-amber-900 dark:text-amber-200 shadow-2xs">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <span>Under Review</span>
+                  </span>
+                ) : isRejected ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-headline font-bold tracking-wider rounded-none bg-rose-100 dark:bg-rose-950/70 border border-rose-400 dark:border-rose-600 text-rose-900 dark:text-rose-200 shadow-2xs">
+                    <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                    <span>Rejected</span>
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-headline font-bold tracking-wider rounded-none bg-rose-100 dark:bg-rose-950/70 border border-rose-400 dark:border-rose-600 text-rose-900 dark:text-rose-200 shadow-2xs">
@@ -1048,7 +1122,7 @@ export default function RecruiterCompany({
                 <span className="text-slate-600 dark:text-slate-400 font-medium">
                   Verification Requirement:
                 </span>
-                {stagedDocs.length === 2 || company?.verified || isProfileLocked ? (
+                {stagedDocs.length === 2 || isProfileLocked ? (
                   <span className="text-emerald-600 dark:text-emerald-400 font-bold inline-flex items-center gap-1">
                     <Check className="w-3.5 h-3.5 stroke-[2.5]" /> Requirement Met (2/2 Uploaded)
                   </span>
@@ -1208,7 +1282,7 @@ export default function RecruiterCompany({
             )}
 
             {/* Trust Established Banner */}
-            {(company?.verified || isProfileLocked) && (
+            {isApproved && (
               <div className="p-4 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800 rounded-none flex items-start gap-3 shadow-2xs mt-3">
                 <CheckCircle className="w-5 h-5 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <div className="space-y-0.5">
@@ -1361,8 +1435,17 @@ export default function RecruiterCompany({
         <div>
           {isProfileLocked ? (
             <div className="w-full py-4 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-none font-headline font-bold text-xs sm:text-sm flex items-center justify-center gap-2 select-none shadow-2xs">
-              <Lock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <span>Company Profile Completed & Verified (Editing Locked)</span>
+              {isUnderReview ? (
+                <>
+                  <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <span>Submitted for Admin Review (Editing Locked)</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>Company Profile Approved & Verified (Editing Locked)</span>
+                </>
+              )}
             </div>
           ) : (
             <button 
@@ -1373,10 +1456,10 @@ export default function RecruiterCompany({
               {savingProfile ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Saving Profile & Verification Changes...</span>
+                  <span>Submitting Profile for Review...</span>
                 </>
               ) : (
-                <span>Save Profile Changes</span>
+                <span>{isRejected ? 'Resubmit for Admin Review' : 'Save & Submit for Admin Review'}</span>
               )}
             </button>
           )}

@@ -37,6 +37,7 @@ const env = {
   SMTP_USER: process.env.SMTP_USER || '',
   SMTP_PASS: process.env.SMTP_PASS || '',
   SMTP_FROM_NAME: process.env.SMTP_FROM_NAME || 'AlignGrad Team',
+  VERIFICATION_PIN_EXPIRY_MINUTES: parseInt(process.env.VERIFICATION_PIN_EXPIRY_MINUTES || '10', 10),
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || '',
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || ''
 };

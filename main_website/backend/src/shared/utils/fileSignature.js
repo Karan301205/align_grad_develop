@@ -18,7 +18,8 @@ const validateMagicBytes = (buffer, fileType) => {
       // JPEG: FFD8FF, PNG: 89504E47, WEBP: 52494646 (RIFF), GIF: 47494638 (GIF8)
       return hex === '89504E47' || hex.startsWith('FFD8FF') || hex === '52494646' || hex === '47494638';
 
-    case 'video': {
+    case 'video':
+    case 'projectVideo': {
       // WebM / MKV: 1A45DFA3
       if (hex === '1A45DFA3') return true;
       // Ogg video: 4F676753 (OggS)

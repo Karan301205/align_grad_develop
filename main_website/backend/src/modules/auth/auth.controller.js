@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { prisma } = require('../../infrastructure/database');
 const { recordFailedAttempt, resetFailedAttempts } = require('../../middleware/rateLimiter');
 const env = require('../../config/env');
-const { passwordResetService } = require('./services');
+const { passwordResetService, emailVerificationService } = require('./services');
 
 exports.signup = async (req, res) => {
   const { email, password, role, name } = req.body;
@@ -11,80 +11,52 @@ exports.signup = async (req, res) => {
     return res.status(400).json({ error: 'Please provide all required fields: name, email, password, and role' });
   }
 
-  const normalizedEmail = String(email).toLowerCase().trim();
-  const requestedRole = String(role).toUpperCase();
-
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-    if (existingUser) {
-      const registeredAs = existingUser.role === 'STUDENT' ? 'Candidate' : 'Recruiter';
-      const attemptingAs = requestedRole === 'STUDENT' ? 'Candidate' : 'Recruiter';
-      if (existingUser.role !== requestedRole) {
-        return res.status(409).json({
-          error: `An account with email '${normalizedEmail}' is already registered as a ${registeredAs}. Please sign in through the ${registeredAs} portal or use a different email for your ${attemptingAs} account.`,
-          existingRole: existingUser.role
-        });
-      }
-      return res.status(409).json({
-        error: `An account with email '${normalizedEmail}' already exists. Please sign in instead.`,
-        existingRole: existingUser.role
-      });
-    }
-
-    const count = await prisma.user.count({
-      where: { role: requestedRole }
-    });
-    const prefix = requestedRole === 'STUDENT' ? 'CAN' : 'REC';
-    const regNo = `${prefix}${String(count + 1).padStart(3, '0')}`;
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: {
-        email: normalizedEmail,
-        password: hashedPassword,
-        role: requestedRole,
-        regNo
-      }
+    const result = await emailVerificationService.initiateVerification({
+      email,
+      password,
+      role,
+      name
     });
 
-    if (user.role === 'STUDENT') {
-      await prisma.profile.create({
-        data: {
-          userId: user.id,
-          name: name.trim(),
-          email: normalizedEmail,
-          skills: []
-        }
-      });
-    } else {
-      await prisma.company.create({
-        data: {
-          userId: user.id,
-          name: name.trim(),
-          verified: false
-        }
-      });
-    }
-
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    res.status(201).json({
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        name: name.trim(),
-        regNo: user.regNo
-      }
+    res.status(200).json({
+      success: true,
+      message: result.message,
+      email: result.email,
+      role: result.role,
+      needsVerification: true
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error during registration' });
+    console.error('[AuthController] signup error:', err.message);
+    res.status(err.statusCode || 500).json({ error: err.message || 'Server error during registration' });
+  }
+};
+
+exports.verifyPin = async (req, res) => {
+  const { email, pin, role } = req.body;
+  try {
+    const result = await emailVerificationService.verifyPin({ email, pin, role });
+    res.status(200).json(result);
+  } catch (err) {
+    if (err.statusCode === 429 && err.retryAfter) {
+      res.setHeader('Retry-After', err.retryAfter);
+    }
+    console.error('[AuthController] verifyPin error:', err.message);
+    res.status(err.statusCode || 500).json({ error: err.message || 'Server error during verification' });
+  }
+};
+
+exports.resendPin = async (req, res) => {
+  const { email, role } = req.body;
+  try {
+    const result = await emailVerificationService.resendPin({ email, role });
+    res.status(200).json(result);
+  } catch (err) {
+    if (err.statusCode === 429 && err.retryAfter) {
+      res.setHeader('Retry-After', err.retryAfter);
+    }
+    console.error('[AuthController] resendPin error:', err.message);
+    res.status(err.statusCode || 500).json({ error: err.message || 'Server error requesting verification code' });
   }
 };
 
@@ -111,6 +83,16 @@ exports.login = async (req, res) => {
       return res.status(403).json({ 
         error: `Access denied. This account is registered as a ${registeredAs}. Please sign in through the ${registeredAs} portal.`,
         expectedPortal: registeredAs
+      });
+    }
+
+    if (user.emailVerified === false) {
+      recordFailedAttempt(normalizedEmail, ip);
+      return res.status(403).json({
+        error: 'Your email address is not verified yet. Please enter the verification code sent to your email or request a new code.',
+        needsVerification: true,
+        email: user.email,
+        role: user.role
       });
     }
 
@@ -202,7 +184,8 @@ exports.googleAuth = async (req, res) => {
           email: normalizedEmail,
           password: hashedPassword,
           role: requestedRole,
-          regNo
+          regNo,
+          emailVerified: true
         }
       });
 
@@ -233,6 +216,19 @@ exports.googleAuth = async (req, res) => {
       return res.status(403).json({ 
         error: `Your Google account (${normalizedEmail}) is registered as a ${registeredAs}. Please sign in through the ${registeredAs} portal.`,
         expectedPortal: registeredAs
+      });
+    }
+
+    if (!isNewUser && user.emailVerified === false) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          emailVerified: true,
+          verificationPinHash: null,
+          verificationPinExpiry: null,
+          verificationAttempts: 0,
+          verificationResends: 0
+        }
       });
     }
 

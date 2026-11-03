@@ -14,6 +14,17 @@ function applyData(row, data = {}) {
   return row;
 }
 
+// Minimal Prisma-style `where` matcher for the shapes controllers use:
+// { field: value }, { field: { in: [...] } } and { OR: [ ...clauses ] }.
+function mockRowMatches(row, where = {}) {
+  if (!where || Object.keys(where).length === 0) return true;
+  return Object.entries(where).every(([key, cond]) => {
+    if (key === 'OR') return Array.isArray(cond) && cond.some(clause => mockRowMatches(row, clause));
+    if (cond && typeof cond === 'object' && Array.isArray(cond.in)) return cond.in.includes(row[key]);
+    return row[key] === cond;
+  });
+}
+
 const mockClient = {
   user: {
     findUnique: async ({ where }) => {
@@ -48,42 +59,22 @@ const mockClient = {
         return mockDb.users.filter(u => u.role === args.where.role).length;
       }
       return mockDb.users.length;
-    }
-  },
-  company: {
-    findFirst: async (args = {}) => {
-      let result = mockDb.companies || [];
-      if (args && args.where) {
-        if (args.where.userId) {
-          result = result.filter(c => c.userId === args.where.userId);
-        }
-        if (args.where.OR) {
-          result = result.filter(c => args.where.OR.some(clause => (clause.userId && c.userId === clause.userId) || (clause.id && c.id === clause.id)));
-        }
-      }
-      return result[0] || (mockDb.companies && mockDb.companies[0]) || null;
-    },
-    findUnique: async ({ where }) => {
-      const comp = (mockDb.companies || []).find(c => (where.id && c.id === where.id) || (where.userId && c.userId === where.userId));
-      return comp || (mockDb.companies && mockDb.companies[0]) || null;
-    },
-    findMany: async () => {
-      return mockDb.companies || [];
-    },
-    create: async ({ data }) => {
-      const newComp = { id: generateHexId(), verified: false, ...data };
-      if (!mockDb.companies) mockDb.companies = [];
-      mockDb.companies.push(newComp);
-      return newComp;
     },
     update: async ({ where, data }) => {
-      const idx = (mockDb.companies || []).findIndex(c => (where.id && c.id === where.id) || (where.userId && c.userId === where.userId));
+      const idx = mockDb.users.findIndex(u => (where.id && u.id === where.id) || (where.email && u.email === where.email));
       if (idx !== -1) {
-        applyData(mockDb.companies[idx], data);
-        return mockDb.companies[idx];
+        applyData(mockDb.users[idx], data);
+        return mockDb.users[idx];
       }
-      const newC = applyData({ id: where.id || generateHexId() }, data);
-      return newC;
+      return null;
+    },
+    delete: async ({ where }) => {
+      const idx = mockDb.users.findIndex(u => (where.id && u.id === where.id) || (where.email && u.email === where.email));
+      if (idx !== -1) {
+        const [deleted] = mockDb.users.splice(idx, 1);
+        return deleted;
+      }
+      return null;
     }
   },
   profile: {
@@ -147,6 +138,9 @@ const mockClient = {
     }
   },
   company: {
+    // Like Prisma: null when nothing matches (no fallback to another company).
+    findFirst: async ({ where = {} } = {}) => (mockDb.companies || []).find(c => mockRowMatches(c, where)) || null,
+    findMany: async ({ where = {} } = {}) => (mockDb.companies || []).filter(c => mockRowMatches(c, where)),
     findUnique: async ({ where }) => {
       const field = Object.keys(where)[0];
       const company = mockDb.companies.find(c => c[field] === where[field]);
@@ -207,6 +201,9 @@ const mockClient = {
       if (newJob.selectionProcess && newJob.selectionProcess.set) {
         newJob.selectionProcess = newJob.selectionProcess.set;
       }
+      if (newJob.screeningQuestions && newJob.screeningQuestions.set) {
+        newJob.screeningQuestions = newJob.screeningQuestions.set;
+      }
       mockDb.jobs.push(newJob);
       return newJob;
     },
@@ -239,6 +236,9 @@ const mockClient = {
         if (data.selectionProcess) {
           mockDb.jobs[idx].selectionProcess = data.selectionProcess.set || data.selectionProcess;
         }
+        if (data.screeningQuestions) {
+          mockDb.jobs[idx].screeningQuestions = data.screeningQuestions.set || data.screeningQuestions;
+        }
         return mockDb.jobs[idx];
       }
       throw new Error("Job not found");
@@ -254,8 +254,15 @@ const mockClient = {
   application: {
     create: async ({ data }) => {
       const newApp = { id: generateHexId(), status: "APPLIED", createdAt: new Date(), ...data };
+      if (newApp.answers && newApp.answers.set) {
+        newApp.answers = newApp.answers.set;
+      }
       mockDb.applications.push(newApp);
       return newApp;
+    },
+    findUnique: async ({ where }) => {
+      const app = mockDb.applications.find(a => a.id === where.id);
+      return app ? { ...app } : null;
     },
     findMany: async ({ where }) => {
       let filtered = mockDb.applications;
@@ -265,6 +272,20 @@ const mockClient = {
         const job = mockDb.jobs.find(j => j.id === a.jobId);
         return { ...a, job };
       });
+    },
+    update: async ({ where, data }) => {
+      const idx = mockDb.applications.findIndex(a => a.id === where.id);
+      if (idx !== -1) {
+        const existing = mockDb.applications[idx];
+        const updated = {
+          ...existing,
+          ...data,
+          roundStatuses: data.roundStatuses?.set || data.roundStatuses || existing.roundStatuses
+        };
+        mockDb.applications[idx] = updated;
+        return { ...updated };
+      }
+      throw new Error("Application not found");
     },
     deleteMany: async ({ where }) => {
       const initialCount = mockDb.applications.length;
@@ -379,16 +400,19 @@ const mockClient = {
         createdAt: new Date(),
         ...data
       };
+      if (newGig.screeningQuestions && newGig.screeningQuestions.set) {
+        newGig.screeningQuestions = newGig.screeningQuestions.set;
+      }
       mockDb.gigs.push(newGig);
       return newGig;
     },
     update: async ({ where, data }) => {
       const idx = mockDb.gigs.findIndex(g => g.id === where.id);
       if (idx !== -1) {
-        const fields = ["status", "selectedCandidateId", "hiredCandidateIds", "title", "description", "budget", "currency", "deliveryTime", "attachments", "category", "categories", "skills", "requirements", "minRating", "logo"];
+        const fields = ["status", "selectedCandidateId", "hiredCandidateIds", "title", "description", "budget", "currency", "deliveryTime", "attachments", "category", "categories", "skills", "requirements", "minRating", "logo", "screeningQuestions"];
         fields.forEach(field => {
           if (data[field] !== undefined) {
-            mockDb.gigs[idx][field] = data[field];
+            mockDb.gigs[idx][field] = data[field]?.set !== undefined ? data[field].set : data[field];
           }
         });
         return mockDb.gigs[idx];
@@ -429,6 +453,9 @@ const mockClient = {
         createdAt: new Date(),
         ...data
       };
+      if (newApplicant.answers && newApplicant.answers.set) {
+        newApplicant.answers = newApplicant.answers.set;
+      }
       mockDb.gigApplicants.push(newApplicant);
       return newApplicant;
     },

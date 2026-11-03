@@ -41,7 +41,7 @@ async function sendMail({ to, subject, html, text }) {
 
   try {
     const info = await mailer.sendMail(mailOptions);
-    console.log(`[EmailService] Password reset email dispatched to ${to} (MessageId: ${info.messageId})`);
+    console.log(`[EmailService] Email dispatched to ${to} (Subject: "${subject}", MessageId: ${info.messageId})`);
     return info;
   } catch (error) {
     console.error(`[EmailService] Failed to send email to ${to}:`, error.message);

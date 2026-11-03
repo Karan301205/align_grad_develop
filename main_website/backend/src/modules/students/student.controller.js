@@ -1,6 +1,11 @@
 const { prisma } = require('../../infrastructure/database');
 const { TECHNICAL_SKILLS } = require('../../constants/technicalSkills');
-const { buildStudentSkillMap, getMissingRequirements, getRequirementStatuses } = require('../../services/skillMatching.service');
+const {
+  buildStudentSkillMap,
+  getMissingRequirements,
+  getRequirementStatuses,
+  calculateCandidateJobRecommendation
+} = require('../skills');
 const { purgeExpiredJobs } = require('../jobs/jobLifecycle.service');
 const { deleteS3ObjectFromUrl } = require('../../services/fileCleanup.service');
 const testSessionRepo = require('../../services/questionBank/repositories/testSessionRepository');
@@ -64,7 +69,35 @@ function reconcileSkills(incoming, existing, skillsWithMCQs = new Set()) {
       return skill;
     });
 }
-exports._reconcileSkills = reconcileSkills;
+function sanitizeProjects(projects) {
+  if (!Array.isArray(projects)) return projects;
+  return projects.map(proj => {
+    if (!proj || typeof proj !== 'object') return proj;
+    let cleanSkills = [];
+    if (Array.isArray(proj.skills)) {
+      const seen = new Set();
+      for (const skill of proj.skills) {
+        if (typeof skill === 'string') {
+          const trimmed = skill.trim();
+          const lower = trimmed.toLowerCase();
+          if (trimmed.length > 0 && !seen.has(lower)) {
+            seen.add(lower);
+            cleanSkills.push(trimmed);
+          }
+        }
+      }
+    }
+    const cleanVideoUrl = typeof proj.videoUrl === 'string' && proj.videoUrl.trim().length > 0
+      ? proj.videoUrl.trim()
+      : null;
+    return {
+      ...proj,
+      skills: cleanSkills,
+      videoUrl: cleanVideoUrl
+    };
+  });
+}
+exports._sanitizeProjects = sanitizeProjects;
 
 exports.updateProfile = async (req, res) => {
   const { 
@@ -164,7 +197,7 @@ exports.updateProfile = async (req, res) => {
           education,
           experience,
           certificates,
-          projects,
+          projects: projects !== undefined ? sanitizeProjects(projects) : undefined,
           cocurricular,
           introVideoUrl,
           isOnboarded: isOnboarded !== undefined ? isOnboarded : undefined,
@@ -195,7 +228,7 @@ exports.updateProfile = async (req, res) => {
           education,
           experience,
           certificates,
-          projects,
+          projects: projects ? sanitizeProjects(projects) : [],
           cocurricular,
           introVideoUrl,
           isOnboarded: isOnboarded !== undefined ? isOnboarded : undefined
@@ -241,17 +274,27 @@ exports.getJobs = async (req, res) => {
       const requirementStatuses = getRequirementStatuses(job, studentSkills, skillsWithQuestionsSet);
 
       const applied = applications.some(app => app.jobId === job.id);
+      const recommendation = calculateCandidateJobRecommendation(job, profile, studentSkills, applications);
 
       return {
         ...job,
         matched: missingRequirements.length === 0,
         missingRequirements,
         requirementStatuses,
-        applied
+        applied,
+        recommendationScore: recommendation.recommendationScore,
+        matchLabel: recommendation.matchLabel,
+        matchBreakdown: recommendation.matchBreakdown
       };
     });
 
-    matchedJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    // Default sort: Recommended Best Match desc, then newest
+    matchedJobs.sort((a, b) => {
+      if ((b.recommendationScore || 0) !== (a.recommendationScore || 0)) {
+        return (b.recommendationScore || 0) - (a.recommendationScore || 0);
+      }
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
 
     res.json(matchedJobs);
   } catch (err) {
@@ -328,6 +371,43 @@ exports.applyJob = async (req, res) => {
           { roundNumber: 1, name: 'Resume Screening', status: 'PENDING', feedback: '' }
         ];
 
+    const { answers } = req.body || {};
+
+    // Process & validate Screening Questions
+    let evaluatedAnswers = [];
+    if (job.screeningQuestions && Array.isArray(job.screeningQuestions) && job.screeningQuestions.length > 0) {
+      const incomingAnswers = Array.isArray(answers) ? answers : [];
+
+      for (const sq of job.screeningQuestions) {
+        const userAns = incomingAnswers.find(a => 
+          (a.questionId && a.questionId === sq.id) || 
+          (a.questionText && a.questionText.trim().toLowerCase() === sq.question.trim().toLowerCase())
+        );
+        const answerText = userAns ? String(userAns.answer || '').trim() : '';
+
+        if (sq.required && !answerText) {
+          return res.status(400).json({
+            error: `Please answer the required screening question: "${sq.question}"`
+          });
+        }
+
+        let isCorrect = null;
+        if (sq.type === 'MCQ' && sq.correctAnswer) {
+          isCorrect = answerText.toLowerCase() === sq.correctAnswer.trim().toLowerCase();
+        }
+
+        if (answerText) {
+          evaluatedAnswers.push({
+            questionId: sq.id || null,
+            questionText: sq.question,
+            type: sq.type || 'LONG_ANSWER',
+            answer: answerText,
+            isCorrect
+          });
+        }
+      }
+    }
+
     const app = await prisma.application.create({
       data: {
         studentId: profile.id,
@@ -335,7 +415,10 @@ exports.applyJob = async (req, res) => {
         status: 'APPLIED',
         roundStatuses: {
           set: roundStatuses
-        }
+        },
+        answers: evaluatedAnswers.length > 0 ? {
+          set: evaluatedAnswers
+        } : undefined
       }
     });
 
@@ -610,7 +693,7 @@ exports.saveIntroVideo = async (req, res) => {
 };
 
 exports.requestVideoUploadUrl = async (req, res) => {
-  const { fileName, contentType } = req.body;
+  const { fileName, contentType, category } = req.body;
   if (!fileName || !contentType) {
     return res.status(400).json({ error: 'fileName and contentType are required' });
   }
@@ -624,10 +707,14 @@ exports.requestVideoUploadUrl = async (req, res) => {
     }
 
     const fileExt = fileName.split('.').pop() || 'webm';
-    const key = `videos/${profile.id}/showcase_${Date.now()}.${fileExt}`;
+    const isProjectVideo = category === 'project';
+    const prefix = isProjectVideo ? 'proj' : 'showcase';
+    // Project walkthroughs get a larger size limit (see config/upload.config.js).
+    const fileType = isProjectVideo ? 'projectVideo' : 'video';
+    const key = `videos/${profile.id}/${prefix}_${Date.now()}.${fileExt}`;
 
     const { getPublicUrl } = require('../../infrastructure/storage/s3');
-    const uploadUrl = `${req.protocol}://${req.get('host')}/api/upload/secure-put?fileType=video&key=${encodeURIComponent(key)}&contentType=${encodeURIComponent(contentType)}`;
+    const uploadUrl = `${req.protocol}://${req.get('host')}/api/upload/secure-put?fileType=${fileType}&key=${encodeURIComponent(key)}&contentType=${encodeURIComponent(contentType)}`;
     const publicUrl = getPublicUrl(key);
 
     res.json({

@@ -20,10 +20,13 @@ import {
   Plus,
   ArrowRight,
   X,
-  Lock
+  Lock,
+  AlertCircle
 } from 'lucide-react';
 import { ALL_SKILLS } from '../../../constants';
 import { getCurrencySymbol } from '../gigConstants';
+import OpportunityPager from '../../../components/OpportunityPager';
+import AddSkillWithoutTestModal from '../../../components/AddSkillWithoutTestModal';
 
 export default function GigDetailPage({
   gig,
@@ -37,11 +40,17 @@ export default function GigDetailPage({
   onNavigateToTests,
   onStartSkillTest,
   onAddSkillAndUpgrade,
+  // ({ skillName, rating }) => Promise: adds a skill that has no test, without a test
+  onAddSkillWithoutTest,
   onUpdateProfile,
   onEditGig,
-  onManageInWorkspace
+  onManageInWorkspace,
+  // Previous/Next state from GigsMarketplace (getBriefNavigation + handlers), or null
+  navigation = null
 }) {
   const [testPromptModal, setTestPromptModal] = useState(null);
+  // { skillName, rating, isSubmitting } for required skills with no test in the question bank
+  const [addSkillModal, setAddSkillModal] = useState(null);
 
   const openTestModal = (modalData) => {
     setTestPromptModal(modalData);
@@ -114,6 +123,11 @@ export default function GigDetailPage({
     ? gig.requirements
     : (gig.skills || []).map(s => ({ skillName: s, minRating: gig.minRating || 1 }));
 
+  // Server per-requirement status (GET /gigs/:id, candidates only): hasQuiz=false or
+  // isTech=false means the question bank has no test for that skill.
+  const requirementStatusByName = new Map(
+    (gig.requirementStatuses || []).map(st => [String(st.skillName || '').toLowerCase(), st])
+  );
   const evaluatedRequirements = gigReqs.map(req => {
     const skillObj = ALL_SKILLS.find(s => s.skill.toLowerCase() === req.skillName.toLowerCase());
     const isTech = skillObj ? skillObj.type === 'technical' : true;
@@ -123,7 +137,10 @@ export default function GigDetailPage({
       : 0;
     const reqMinRating = req.minRating || 1;
     const hasSkill = Boolean(userSkillObj);
-    const isSatisfied = hasSkill && userRating >= reqMinRating;
+    const serverStatus = requirementStatusByName.get(req.skillName.toLowerCase());
+    const hasTest = serverStatus ? (serverStatus.isTech !== false && serverStatus.hasQuiz !== false) : true;
+    // A skill with no test can't be verified, so having it on the profile is enough.
+    const isSatisfied = hasSkill && (userRating >= reqMinRating || !hasTest);
 
     return {
       skillName: req.skillName,
@@ -131,23 +148,37 @@ export default function GigDetailPage({
       isTech,
       userRating,
       hasSkill,
+      hasTest,
       isSatisfied
     };
   });
 
   const missingSkillReqs = evaluatedRequirements.filter(r => !r.isSatisfied);
   const isRatingMatched = missingSkillReqs.length === 0;
+  const firstTestableMissing = missingSkillReqs.find(r => r.hasTest);
+  // Every outstanding requirement only needs the skill added (no test exists for it).
+  const pendingOnlyNeedsSkills = missingSkillReqs.length > 0 && !firstTestableMissing;
 
-  const handleOpenFirstTest = () => {
-    if (missingSkillReqs.length > 0) {
-      const first = missingSkillReqs[0];
+  const openAddSkillModal = (req) => {
+    setAddSkillModal({
+      skillName: req.skillName,
+      rating: Math.min(10, Math.max(1, parseInt(req.minRating, 10) || 1)),
+      isSubmitting: false
+    });
+  };
+
+  // The single "unlock" action at the bottom of the page.
+  const handleUnlock = () => {
+    if (firstTestableMissing) {
       openTestModal({
-        skillName: first.skillName,
-        minRating: first.minRating,
-        userRating: first.userRating,
-        hasSkill: first.hasSkill,
+        skillName: firstTestableMissing.skillName,
+        minRating: firstTestableMissing.minRating,
+        userRating: firstTestableMissing.userRating,
+        hasSkill: firstTestableMissing.hasSkill,
         isSubmitting: false
       });
+    } else if (missingSkillReqs.length > 0) {
+      openAddSkillModal(missingSkillReqs[0]);
     } else {
       onNavigateToTests?.();
     }
@@ -191,31 +222,6 @@ export default function GigDetailPage({
 
         {/* Quick Action in Top Nav */}
         <div className="flex items-center gap-2 shrink-0">
-          {isCandidate && !isOwner && gig.status === 'OPEN' && !hasApplied && isRatingMatched && (
-            <button
-              type="button"
-              onClick={() => {
-                onApply(gig);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="px-4 py-1.5 bg-primary hover:brightness-110 text-on-primary rounded-none font-headline font-bold text-xs tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs mr-2"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Pitch & Apply</span>
-            </button>
-          )}
-
-          {isCandidate && !isOwner && gig.status === 'OPEN' && !hasApplied && !isRatingMatched && (
-            <button
-              type="button"
-              onClick={handleOpenFirstTest}
-              className="px-3.5 py-1.5 bg-primary hover:brightness-110 text-on-primary rounded-none font-headline font-bold text-xs tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs mr-2"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Take Test</span>
-            </button>
-          )}
-
           {isOwner && (
             <div className="flex items-center gap-2">
               <button
@@ -316,67 +322,9 @@ export default function GigDetailPage({
                 </div>
               </div>
 
-              {/* Action Buttons Integrated Right Here */}
+              {/* Owner actions (candidates apply from the single section at the bottom of the page) */}
+              {isOwner && (
               <div className="pt-1.5 border-t border-slate-200 dark:border-slate-800">
-                {/* Candidate Actions */}
-                {isCandidate && !isOwner && (
-                  (() => {
-                    if (gig.status === 'CLOSED') {
-                      return (
-                        <div className="w-full py-2 px-2.5 bg-red-100 dark:bg-red-950/70 text-red-900 dark:text-red-200 border border-red-400 dark:border-red-700 rounded-none font-headline text-xs font-bold tracking-wider text-center">
-                          Closed for Applications
-                        </div>
-                      );
-                    }
-
-                    if (gig.status === 'PAUSED') {
-                      return (
-                        <div className="w-full py-2 px-2.5 bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 border border-amber-400 dark:border-amber-700 rounded-none font-headline text-xs font-bold tracking-wider text-center">
-                          Currently Paused
-                        </div>
-                      );
-                    }
-
-                    if (hasApplied) {
-                      return (
-                        <div className="w-full py-2 px-2.5 bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-200 border border-emerald-400 dark:border-emerald-700 rounded-none font-headline text-[11px] font-bold tracking-wider flex items-center justify-center gap-1.5">
-                          <CheckCircle className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
-                          <span className="truncate">Pitch Submitted &bull; Awaiting Client</span>
-                        </div>
-                      );
-                    }
-
-                    if (!isRatingMatched) {
-                      return (
-                        <button
-                          type="button"
-                          onClick={handleOpenFirstTest}
-                          className="w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-none font-headline text-xs font-bold tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                        >
-                          <Sparkles className="w-3.5 h-3.5" />
-                          Take Skill Test to Unlock
-                        </button>
-                      );
-                    }
-
-                    return (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onApply(gig);
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                        className="w-full py-2 px-3 bg-primary hover:brightness-110 text-on-primary rounded-none font-headline text-xs font-bold tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
-                      >
-                        <Send className="w-3.5 h-3.5" />
-                        Pitch & Apply for Gig
-                      </button>
-                    );
-                  })()
-                )}
-
-                {/* Recruiter / Owner Actions */}
-                {isOwner && (
                   <div className="grid grid-cols-2 gap-2 w-full">
                     <button
                       type="button"
@@ -395,8 +343,8 @@ export default function GigDetailPage({
                       Manage
                     </button>
                   </div>
-                )}
               </div>
+              )}
             </div>
           </div>
         </div>
@@ -409,7 +357,7 @@ export default function GigDetailPage({
               <span>Proficiency Thresholds Required</span>
             </div>
             <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
-              This client requires test-verified proficiency ratings on the following skills before accepting pitches:
+              This client requires the following skills at these levels before accepting pitches:
             </p>
             <ul className="space-y-1 text-xs">
               {missingSkillReqs.map(m => (
@@ -421,16 +369,6 @@ export default function GigDetailPage({
                 </li>
               ))}
             </ul>
-            <div className="pt-1">
-              <button
-                type="button"
-                onClick={handleOpenFirstTest}
-                className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-none text-xs font-headline font-bold tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                Take Skill Test to Unlock
-              </button>
-            </div>
           </div>
         )}
 
@@ -481,7 +419,12 @@ export default function GigDetailPage({
 
                         {r.isSatisfied ? (
                           <span className="text-emerald-800 dark:text-emerald-300 font-headline font-bold text-[11px] flex items-center gap-1">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Met
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            {!r.hasTest && r.userRating < r.minRating ? 'Met · No test yet' : 'Met'}
+                          </span>
+                        ) : !r.hasTest ? (
+                          <span className="text-blue-800 dark:text-blue-300 font-headline font-bold text-[11px] flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5" /> No Test Available
                           </span>
                         ) : (
                           <span className="text-amber-800 dark:text-amber-300 font-headline font-bold text-[11px] flex items-center gap-1">
@@ -490,7 +433,18 @@ export default function GigDetailPage({
                         )}
                       </div>
 
-                      {!r.isSatisfied && (
+                      {!r.isSatisfied && !r.hasTest && (
+                        <button
+                          type="button"
+                          onClick={() => openAddSkillModal(r)}
+                          className="w-full mt-1 py-1.5 px-2.5 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold text-xs rounded-none transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add {r.skillName} to Profile</span>
+                        </button>
+                      )}
+
+                      {!r.isSatisfied && r.hasTest && (
                         <button
                           type="button"
                           onClick={() => {
@@ -564,50 +518,88 @@ export default function GigDetailPage({
           </div>
         )}
 
-        {/* Bottom CTA for Long Descriptions */}
-        {isCandidate && !isOwner && gig.status === 'OPEN' && !hasApplied && isRatingMatched && (
-          <div className="p-3.5 sm:p-4 bg-surface border border-slate-300 dark:border-slate-700 rounded-none flex flex-col sm:flex-row items-center justify-between gap-3 mt-2 shadow-2xs">
-            <div className="space-y-0.5 text-center sm:text-left">
-              <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">Ready to work on this gig?</h4>
-              <p className="text-xs font-sans text-slate-600 dark:text-slate-400">Send your pitch and portfolio directly to {gig.company?.name ? gig.company.name.replace(/^c_/i, '') : gig.ownerName || 'the client'}.</p>
+        {/* The one application section for candidates (status, apply, or unlock) */}
+        {isCandidate && !isOwner && (
+          gig.status === 'CLOSED' ? (
+            <div className="p-3.5 sm:p-4 bg-red-100 dark:bg-red-950/70 text-red-900 dark:text-red-200 border border-red-400 dark:border-red-700 rounded-none font-headline text-xs font-bold tracking-wider text-center mt-2">
+              Closed for Applications
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                onApply(gig);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="px-5 py-2 bg-primary hover:brightness-110 text-on-primary rounded-none font-headline text-xs font-bold tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-2xs shrink-0"
-            >
-              <Send className="w-3.5 h-3.5" />
-              Pitch & Apply for Gig
-            </button>
-          </div>
-        )}
-
-        {/* Bottom CTA if Locked */}
-        {isCandidate && !isOwner && gig.status === 'OPEN' && !hasApplied && !isRatingMatched && (
-          <div className="p-3.5 sm:p-4 bg-surface border border-amber-400 dark:border-amber-700 rounded-none flex flex-col sm:flex-row items-center justify-between gap-3 mt-2 shadow-2xs">
-            <div className="space-y-0.5 text-center sm:text-left">
-              <h4 className="text-sm font-headline font-bold text-amber-950 dark:text-amber-200 flex items-center gap-2">
-                <Lock className="w-4 h-4 text-amber-700 dark:text-amber-400" />
-                Application Locked
-              </h4>
-              <p className="text-xs font-sans text-slate-600 dark:text-slate-400">
-                Complete the required skill tests above to unlock your application for this gig.
-              </p>
+          ) : gig.status === 'PAUSED' ? (
+            <div className="p-3.5 sm:p-4 bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 border border-amber-400 dark:border-amber-700 rounded-none font-headline text-xs font-bold tracking-wider text-center mt-2">
+              Currently Paused
             </div>
-            <button
-              type="button"
-              onClick={handleOpenFirstTest}
-              className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-none font-headline text-xs font-bold tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-2xs shrink-0"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              Take Skill Test to Unlock
-            </button>
-          </div>
+          ) : hasApplied ? (
+            <div className="p-3.5 sm:p-4 bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-200 border border-emerald-400 dark:border-emerald-700 rounded-none font-headline text-xs font-bold tracking-wider flex items-center justify-center gap-1.5 mt-2">
+              <CheckCircle className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
+              <span>Pitch Submitted &bull; Awaiting Client</span>
+            </div>
+          ) : gig.status === 'OPEN' && isRatingMatched ? (
+            <div className="p-3.5 sm:p-4 bg-surface border border-slate-300 dark:border-slate-700 rounded-none flex flex-col sm:flex-row items-center justify-between gap-3 mt-2 shadow-2xs">
+              <div className="space-y-0.5 text-center sm:text-left">
+                <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">Ready to work on this gig?</h4>
+                <p className="text-xs font-sans text-slate-600 dark:text-slate-400">Send your pitch and portfolio directly to {gig.company?.name ? gig.company.name.replace(/^c_/i, '') : gig.ownerName || 'the client'}.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  onApply(gig);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="px-5 py-2 bg-primary hover:brightness-110 text-on-primary rounded-none font-headline text-xs font-bold tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-2xs shrink-0"
+              >
+                <Send className="w-3.5 h-3.5" />
+                Pitch & Apply for Gig
+              </button>
+            </div>
+          ) : gig.status === 'OPEN' ? (
+            <div className="p-3.5 sm:p-4 bg-surface border border-amber-400 dark:border-amber-700 rounded-none flex flex-col sm:flex-row items-center justify-between gap-3 mt-2 shadow-2xs">
+              <div className="space-y-0.5 text-center sm:text-left">
+                <h4 className="text-sm font-headline font-bold text-amber-950 dark:text-amber-200 flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+                  Application Locked
+                </h4>
+                <p className="text-xs font-sans text-slate-600 dark:text-slate-400">
+                  {pendingOnlyNeedsSkills
+                    ? 'Add the required skills above to your profile to unlock your application for this gig.'
+                    : 'Complete the required skill tests above to unlock your application for this gig.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleUnlock}
+                className={`px-5 py-2 text-white rounded-none font-headline text-xs font-bold tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-2xs shrink-0 ${
+                  pendingOnlyNeedsSkills ? 'bg-blue-700 hover:bg-blue-800' : 'bg-amber-600 hover:bg-amber-700'
+                }`}
+              >
+                {pendingOnlyNeedsSkills ? <Plus className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+                {pendingOnlyNeedsSkills ? 'Add Required Skills' : 'Take Skill Test to Unlock'}
+              </button>
+            </div>
+          ) : null
         )}
       </div>
+
+      {/* Previous / Next gig (free plan: limited to the gigs the marketplace leaves unlocked) */}
+      <OpportunityPager navigation={navigation} itemLabel="Gig" />
+
+      {/* Add-skill confirmation for skills that have no test in the question bank */}
+      <AddSkillWithoutTestModal
+        modal={addSkillModal}
+        context="gig"
+        onCancel={() => setAddSkillModal(null)}
+        onConfirm={async () => {
+          if (!onAddSkillWithoutTest) {
+            setAddSkillModal(null);
+            return;
+          }
+          setAddSkillModal(prev => ({ ...prev, isSubmitting: true }));
+          try {
+            await onAddSkillWithoutTest({ skillName: addSkillModal.skillName, rating: addSkillModal.rating });
+          } finally {
+            setAddSkillModal(null);
+          }
+        }}
+      />
 
       {/* Skill Verification & Addition Gating Modal */}
       {testPromptModal && (

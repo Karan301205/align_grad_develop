@@ -26,6 +26,7 @@ import DotGrid from '../../../components/ui/DotGrid';
 import GoogleAuthButton from '../../../components/ui/GoogleAuthButton';
 import { formatErrorMessage } from '../../../utils/errorFormatter';
 import ForgotPasswordModal from '../components/ForgotPasswordModal';
+import VerificationPinModal from '../components/VerificationPinModal';
 import { LANDING_URL, CANDIDATE_URL } from '../../../config';
 
 export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, initialMode = 'login' }) {
@@ -38,6 +39,8 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [isVerificationOpen, setIsVerificationOpen] = useState(false);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,8 +64,20 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data.needsVerification) {
+          setPendingVerificationEmail(cleanEmail);
+          setIsVerificationOpen(true);
+          return;
+        }
         throw new Error(data.error || 'Authentication failed');
       }
+
+      if (!isLogin && data.needsVerification) {
+        setPendingVerificationEmail(cleanEmail);
+        setIsVerificationOpen(true);
+        return;
+      }
+
       if (data.user && data.user.role !== 'RECRUITER') {
         throw new Error('Access denied. This account is registered as a candidate. Please sign in through the Candidate portal.');
       }
@@ -73,6 +88,16 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVerificationSuccess = (data) => {
+    setIsVerificationOpen(false);
+    if (data.user && data.user.role !== 'RECRUITER') {
+      setError('Access denied. This account is registered as a candidate.');
+      return;
+    }
+    setToken(data.token);
+    setUser(data.user);
   };
 
   const handleModeToggle = (loginMode) => {
@@ -330,14 +355,6 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
                         <span>Already registered? <strong className="text-primary hover:underline font-bold">Sign in</strong></span>
                       )}
                     </button>
-                    
-                    <button
-                      type="button"
-                      onClick={navigateToCandidate}
-                      className="text-[11px] text-slate-500 hover:text-primary transition-colors cursor-pointer"
-                    >
-                      Looking for jobs or side hustles? Switch to <span className="underline font-semibold">Candidate Portal</span>
-                    </button>
                   </div>
                 </div>
 
@@ -363,6 +380,14 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
           initialEmail={email}
           role="RECRUITER"
           theme={theme}
+        />
+
+        <VerificationPinModal
+          isOpen={isVerificationOpen}
+          onClose={() => setIsVerificationOpen(false)}
+          email={pendingVerificationEmail || email}
+          role="RECRUITER"
+          onSuccess={handleVerificationSuccess}
         />
       </ClickSpark>
     </div>

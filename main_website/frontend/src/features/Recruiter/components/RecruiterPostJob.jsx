@@ -22,6 +22,7 @@ import {
 import { ALL_SKILLS } from '../../../constants';
 import { ToastNotification } from '../../../utils/errorFormatter';
 import PaymentModal from '../../../components/PaymentModal';
+import ScreeningQuestionBuilder from './ScreeningQuestionBuilder';
 
 const WORK_MODE_OPTIONS = [
   'Work from office',
@@ -227,6 +228,9 @@ export default function RecruiterPostJob({
   const [newRoundName, setNewRoundName] = useState('');
   const [newRoundDesc, setNewRoundDesc] = useState('');
 
+  // Screening questions
+  const [screeningQuestions, setScreeningQuestions] = useState([]);
+
   // Field validation errors state & local toast fallback
   const [errors, setErrors] = useState({});
   const [localAlert, setLocalAlert] = useState(null);
@@ -293,6 +297,26 @@ export default function RecruiterPostJob({
     if (reqs.length === 0) {
       newErrors.reqs = 'Please add at least one required skill threshold.';
     }
+    if (Array.isArray(screeningQuestions) && screeningQuestions.length > 0) {
+      for (let i = 0; i < screeningQuestions.length; i++) {
+        const sq = screeningQuestions[i];
+        if (!sq.question || !sq.question.trim()) {
+          newErrors.screeningQuestions = `Screening question #${i + 1} requires a question prompt.`;
+          break;
+        }
+        if (sq.type === 'MCQ') {
+          const validOpts = (sq.options || []).filter(o => o && o.trim().length > 0);
+          if (validOpts.length < 2) {
+            newErrors.screeningQuestions = `Screening MCQ #${i + 1} must have at least 2 non-empty choices.`;
+            break;
+          }
+          if (!sq.correctAnswer || !sq.correctAnswer.trim()) {
+            newErrors.screeningQuestions = `Screening MCQ #${i + 1} requires a selected correct answer.`;
+            break;
+          }
+        }
+      }
+    }
     if (officialWebsite?.trim() && !isValidUrl(officialWebsite)) {
       newErrors.officialWebsite = 'Official Website must be a valid link (e.g. https://company.com).';
     }
@@ -342,6 +366,7 @@ export default function RecruiterPostJob({
       openings: openings ? parseInt(openings, 10) : null,
       showSalary,
       selectionProcess: rounds,
+      screeningQuestions,
       requirements: reqs
     };
 
@@ -364,6 +389,7 @@ export default function RecruiterPostJob({
       setRoleResponsibilities('');
       setReqs([]);
       setRounds([]);
+      setScreeningQuestions([]);
     } else if (res && res.error) {
       if (res.code === 'UPGRADE_REQUIRED') {
         setIsPaymentModalOpen(true);
@@ -388,7 +414,7 @@ export default function RecruiterPostJob({
               <span>Job Publishing</span>
             </div>
             <h2 className="text-2xl md:text-3xl font-headline font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-              Post New Opportunity
+              Post a job
             </h2>
             <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 font-sans font-medium mt-1">
               Specify position criteria, minimum skill rating thresholds, and selection rounds for candidate matching.
@@ -1413,6 +1439,20 @@ export default function RecruiterPostJob({
 
             </div>
 
+          </div>
+
+          {/* SECTION 6: Candidate Screening Questions */}
+          <div id="field-container-screeningQuestions" className="bg-surface border border-slate-300 dark:border-slate-700 rounded-none p-6 space-y-4 shadow-2xs">
+            <ScreeningQuestionBuilder
+              questions={screeningQuestions}
+              onChange={setScreeningQuestions}
+            />
+            {errors.screeningQuestions && (
+              <p className="text-xs font-sans text-rose-600 dark:text-rose-400 font-semibold flex items-center gap-1.5 mt-2">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                {errors.screeningQuestions}
+              </p>
+            )}
           </div>
 
           {/* Submit Action Button */}

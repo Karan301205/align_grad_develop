@@ -15,13 +15,16 @@ const validate = (schema) => {
       }
       next();
     } catch (err) {
-      if (err.errors) {
-        const errorDetails = err.errors.map(e => ({
+      // zod v4 exposes validation problems on `issues` (`errors` on older versions)
+      const issues = err.issues || err.errors;
+      if (Array.isArray(issues)) {
+        const errorDetails = issues.map(e => ({
           field: e.path.join('.'),
           message: e.message
         }));
         return res.status(400).json({
-          error: 'Validation failed',
+          success: false,
+          error: errorDetails[0]?.message || 'Validation failed',
           details: errorDetails
         });
       }

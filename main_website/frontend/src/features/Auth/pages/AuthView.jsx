@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AlertTriangle,
   Eye,
   EyeOff,
   ShieldCheck,
   Lock,
+  Mail,
   User,
+  UserPlus,
+  LogIn,
   Briefcase,
   X,
   CheckCircle2,
@@ -58,8 +61,11 @@ import AnimatedContent from '../../../components/ui/AnimatedContent';
 import GoogleAuthButton from '../../../components/ui/GoogleAuthButton';
 import CountUp from '../../../effects/CountUp';
 import TrueFocus from '../../../effects/TrueFocus';
+import { motion, AnimatePresence } from 'motion/react';
+import ForgotPasswordModal from '../components/ForgotPasswordModal';
+import VerificationPinModal from '../components/VerificationPinModal';
 import { formatErrorMessage } from '../../../utils/errorFormatter';
-import { CANDIDATE_URL, RECRUITER_URL } from '../../../config';
+import { CANDIDATE_URL } from '../../../config';
 
 // ─── Course Domains & Curriculum Tracks ───
 const COURSE_DOMAINS = [
@@ -163,10 +169,16 @@ const FAQS = {
   ]
 };
 
-export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
+export default function AuthView({
+  setToken,
+  setUser,
+  theme,
+  toggleTheme,
+  initialAuthMode = 'signup'
+}) {
   // Navigation & Drawer States
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(initialAuthMode === 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -175,19 +187,34 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [isVerificationOpen, setIsVerificationOpen] = useState(false);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState('');
+
+  useEffect(() => {
+    setIsLogin(initialAuthMode === 'login');
+  }, [initialAuthMode]);
 
   // FAQ Tab & Accordion State
   const [faqTab, setFaqTab] = useState('candidates');
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
   // Auth Handling
-  const handleSubmit = async (e) => {
+  const handleAuthSubmit = async (e) => {
     e.preventDefault();
+    if (/\s/.test(password)) {
+      setError('Password cannot contain spaces.');
+      return;
+    }
+
     setError('');
     setLoading(true);
 
     const path = isLogin ? '/auth/login' : '/auth/signup';
-    const payload = isLogin ? { email, password, role } : { email, password, role, name };
+    const cleanEmail = email.toLowerCase().trim();
+    const payload = isLogin
+      ? { email: cleanEmail, password, role: 'STUDENT' }
+      : { email: cleanEmail, password, role: 'STUDENT', name: name.trim() };
 
     try {
       const res = await apiFetch(path, {
@@ -196,10 +223,32 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data.needsVerification) {
+          setPendingVerificationEmail(cleanEmail);
+          setIsVerificationOpen(true);
+          return;
+        }
+        // Auto-switch to Sign In if account already exists on Sign Up attempt
+        if (!isLogin && res.status === 409) {
+          setIsLogin(true);
+          setError('An account with this email already exists. Switched to Sign In — please enter your password.');
+          return;
+        }
         throw new Error(data.error || 'Authentication failed');
       }
-      setToken(data.token);
-      setUser(data.user);
+
+      if (!isLogin && data.needsVerification) {
+        setPendingVerificationEmail(cleanEmail);
+        setIsVerificationOpen(true);
+        return;
+      }
+
+      if (data.user && data.user.role !== 'STUDENT') {
+        throw new Error('Access denied. This account is registered as a recruiter. Please sign in through the Recruiter portal.');
+      }
+      if (setToken) setToken(data.token);
+      if (setUser) setUser(data.user);
+      window.history.pushState({}, '', '/');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -207,32 +256,42 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
     }
   };
 
+  const handleVerificationSuccess = (data) => {
+    setIsVerificationOpen(false);
+    if (data.user && data.user.role !== 'STUDENT') {
+      setError('Access denied. This account is registered as a recruiter.');
+      return;
+    }
+    if (setToken) setToken(data.token);
+    if (setUser) setUser(data.user);
+    window.history.pushState({}, '', '/');
+  };
+
+  const handleSubmit = handleAuthSubmit;
+
   const triggerAuthFlow = (mode = 'login', defaultRole = 'STUDENT') => {
     setIsLogin(mode === 'login');
     setRole(defaultRole);
-    setIsDrawerOpen(true);
     setError('');
-  };
-
-  const navigateToCandidate = (mode = 'login') => {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (!isLocal && CANDIDATE_URL) {
-      window.location.href = `${CANDIDATE_URL}/candidate/${mode}`;
-    } else {
-      window.history.pushState({}, '', `/candidate/${mode}`);
-      window.dispatchEvent(new PopStateEvent('popstate'));
+    const formElem = document.getElementById('candidate-auth-card');
+    if (formElem) {
+      formElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const targetInput = formElem.querySelector('input');
+      if (targetInput) setTimeout(() => targetInput.focus(), 300);
     }
   };
 
-  const navigateToRecruiter = (mode = 'login') => {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (!isLocal && RECRUITER_URL) {
-      window.location.href = `${RECRUITER_URL}/recruiter/${mode}`;
-    } else {
-      window.history.pushState({}, '', `/recruiter/${mode}`);
-      window.dispatchEvent(new PopStateEvent('popstate'));
+  const navigateToCandidate = (mode = 'signup') => {
+    setIsLogin(mode === 'login');
+    setError('');
+    const formElem = document.getElementById('candidate-auth-card');
+    if (formElem) {
+      formElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const targetInput = formElem.querySelector('input');
+      if (targetInput) setTimeout(() => targetInput.focus(), 300);
     }
   };
+
 
   const navigateToRoute = (path) => {
     window.history.pushState({}, '', path);
@@ -267,29 +326,12 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
               <span>Courses &amp; Learning</span>
               <span className="px-1.5 py-0.5 text-[10px] font-bold bg-primary-container text-on-primary-container rounded-full">New</span>
             </a>
-            <a href="#recruiters" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">For Recruiters</a>
+            <a href="#how-it-works" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">How It Works</a>
             <a href="#verification" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">Skill Engine</a>
             <a href="#faq" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">FAQ</a>
           </nav>
 
-          <div className="flex items-center gap-3">
-            <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-
-            <button
-              onClick={() => navigateToCandidate('login')}
-              className="btn-secondary px-3.5 py-2 rounded-xl text-xs font-medium cursor-pointer transition-all hover:border-primary/40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xs"
-            >
-              Candidate Portal
-            </button>
-
-            <button
-              onClick={() => navigateToRecruiter('login')}
-              className="btn-primary px-4 py-2 rounded-xl text-xs font-medium cursor-pointer shadow-sm hover:shadow-md transition-all flex items-center gap-1.5"
-            >
-              <span>Recruiter Hub</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          
         </header>
 
         {/* ─── 2. HERO SECTION ─── */}
@@ -357,18 +399,18 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 mb-7">
                     <button
                       onClick={() => navigateToCandidate('signup')}
-                      className="px-6 py-3.5 rounded-xl bg-primary text-white font-medium text-sm flex items-center justify-center gap-2 shadow-md hover:bg-primary/95 transition-all cursor-pointer group"
+                      className="px-6 py-3.5 rounded-xl bg-primary hover:bg-primary/95 text-white font-medium text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer group"
                     >
-                      <Wallet className="w-4 h-4 text-emerald-300" />
-                      <span>Explore 5,000+ Opportunities</span>
+                      <UserPlus className="w-4 h-4" />
+                      <span>Candidate Sign Up</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                     <button
-                      onClick={() => navigateToRecruiter('signup')}
+                      onClick={() => navigateToCandidate('login')}
                       className="px-6 py-3.5 rounded-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-300/80 dark:border-slate-700 font-medium text-sm text-heading hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                     >
-                      <Building2 className="w-4 h-4 text-primary" />
-                      <span>Hire Verified Talent</span>
+                      <LogIn className="w-4 h-4 text-primary" />
+                      <span>Candidate Login</span>
                     </button>
                   </div>
 
@@ -390,127 +432,283 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                 </AnimatedContent>
               </div>
 
-              {/* RIGHT COLUMN: CENTRAL HERO EARNING IMAGE + 4 SURROUNDING SATELLITE IMAGES */}
-              <div className="lg:col-span-6 flex items-center justify-center pt-6 lg:pt-0">
-                <AnimatedContent distance={50} direction="vertical" duration={0.8} delay={0.25} className="w-full">
-                  <div className="relative w-full max-w-[500px] sm:max-w-[540px] mx-auto min-h-[440px] sm:min-h-[480px] flex items-center justify-center p-4">
-                    {/* Soft background ambient halo */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-300/25 via-emerald-300/20 to-indigo-300/25 rounded-full blur-3xl pointer-events-none"></div>
+              {/* RIGHT COLUMN: INTEGRATED CANDIDATE SIGN UP & LOGIN CARD */}
+              <div className="lg:col-span-6 flex items-center justify-center pt-4 lg:pt-0">
+                <AnimatedContent distance={40} direction="vertical" duration={0.8} delay={0.25} className="w-full">
+                  <div
+                    id="candidate-auth-card"
+                    className="w-full max-w-[460px] mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative transition-all duration-300"
+                  >
+                    {/* Mode Switcher Tabs - Candidate Sign Up is default with smooth indicator */}
+                    <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800/80 p-1 mb-5 border border-slate-200/60 dark:border-slate-700/60 relative">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsLogin(false);
+                          setError('');
+                        }}
+                        className={`relative flex-1 py-2 text-xs font-headline font-bold rounded-lg transition-colors cursor-pointer z-10 ${
+                          !isLogin
+                            ? 'text-primary dark:text-blue-400'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        {!isLogin && (
+                          <motion.div
+                            layoutId="candidateAuthTabIndicator"
+                            className="absolute inset-0 bg-white dark:bg-slate-900 rounded-lg shadow-xs"
+                            transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                          />
+                        )}
+                        <span className="relative z-10">Candidate Sign Up</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsLogin(true);
+                          setError('');
+                        }}
+                        className={`relative flex-1 py-2 text-xs font-headline font-bold rounded-lg transition-colors cursor-pointer z-10 ${
+                          isLogin
+                            ? 'text-primary dark:text-blue-400'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        {isLogin && (
+                          <motion.div
+                            layoutId="candidateAuthTabIndicator"
+                            className="absolute inset-0 bg-white dark:bg-slate-900 rounded-lg shadow-xs"
+                            transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
+                          />
+                        )}
+                        <span className="relative z-10">Sign In</span>
+                      </button>
+                    </div>
 
-                    {/* Decorative subtle dot mesh accents behind the cluster (learn.aligngrad.com reference style) */}
-                    <div className="absolute top-2 right-4 w-28 h-28 opacity-30 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#2563EB 1.5px, transparent 1.5px)', backgroundSize: '12px 12px' }}></div>
-                    <div className="absolute bottom-2 left-4 w-28 h-28 opacity-30 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#10B981 1.5px, transparent 1.5px)', backgroundSize: '12px 12px' }}></div>
+                    {/* Smooth Transitioning Header */}
+                    <div className="mb-5 min-h-[52px]">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={isLogin ? 'header-candidate-login' : 'header-candidate-signup'}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          transition={{ duration: 0.2, ease: 'easeInOut' }}
+                        >
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                              {isLogin ? 'Candidate Access' : 'Create Free Account'}
+                            </span>
+                          </div>
+                          <h2 className="font-headline text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                            {isLogin ? 'Candidate Sign In' : 'Create Candidate Account'}
+                          </h2>
+                          
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
 
-                    {/* SATELLITE 1: TOP-LEFT (Coder with headphones) */}
-                    <div className="absolute top-0 sm:top-2 left-0 sm:left-2 z-20 group">
-                      <div className="relative">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-white dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl">
-                          <img
-                            src="/hero_satellite_coder.jpg"
-                            alt="Student earning from Full-Stack freelance gigs"
-                            className="w-full h-full object-cover object-center"
+                    {/* Error Banner */}
+                    {error && (
+                      <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                        <span className="flex-1 font-medium">{error}</span>
+                        <button
+                          type="button"
+                          onClick={() => setError('')}
+                          className="text-rose-400 hover:text-rose-600 cursor-pointer text-xs ml-1"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Form Fields */}
+                    <form onSubmit={handleAuthSubmit}>
+                      {/* Full Name (Sign Up only) */}
+                      <AnimatePresence initial={false}>
+                        {!isLogin && (
+                          <motion.div
+                            key="name-field"
+                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
+                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden"
+                          >
+                            <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                              Your Full Name
+                            </label>
+                            <div className="relative">
+                              <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                              <input
+                                type="text"
+                                required={!isLogin}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="e.g. Leo Carter"
+                                className="w-full bg-slate-50 dark:bg-slate-800/80 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 border border-slate-300 dark:border-slate-700 focus:border-primary dark:focus:border-blue-500 focus:outline-none transition-colors"
+                              />
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Email Address */}
+                      <div className="mb-4">
+                        <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                          Email Address
+                        </label>
+                        <div className="relative">
+                          <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                          <input
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="name@domain.com"
+                            className="w-full bg-slate-50 dark:bg-slate-800/80 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 border border-slate-300 dark:border-slate-700 focus:border-primary dark:focus:border-blue-500 focus:outline-none transition-colors"
                           />
                         </div>
-                        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2 py-0.5 rounded-full border border-slate-200/90 dark:border-slate-700 shadow-sm flex items-center gap-1 text-[10px] font-bold text-slate-800 dark:text-slate-100">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                          <span>₹85k / Gig</span>
-                        </div>
                       </div>
-                    </div>
 
-                    {/* SATELLITE 2: TOP-RIGHT (Male Intern / Engineer) */}
-                    <div className="absolute top-0 sm:top-2 right-0 sm:right-2 z-20 group">
-                      <div className="relative">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-white dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl">
-                          <img
-                            src="/hero_satellite_intern.jpg"
-                            alt="Student hired for high-stipend AI and engineering roles"
-                            className="w-full h-full object-cover object-center"
+                      {/* Password */}
+                      <div className="mb-4">
+                        <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                          Password
+                        </label>
+                        <div className="relative">
+                          <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                            className="w-full bg-slate-50 dark:bg-slate-800/80 rounded-xl pl-10 pr-11 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 border border-slate-300 dark:border-slate-700 focus:border-primary dark:focus:border-blue-500 focus:outline-none transition-colors"
                           />
-                        </div>
-                        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2 py-0.5 rounded-full border border-slate-200/90 dark:border-slate-700 shadow-sm flex items-center gap-1 text-[10px] font-bold text-slate-800 dark:text-slate-100">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                          <span>₹60k / Mo</span>
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
                         </div>
                       </div>
+
+                      {/* Remember Me / Forgot Password (Sign In mode) */}
+                      <AnimatePresence initial={false}>
+                        {isLogin && (
+                          <motion.div
+                            key="remember-forgot-row"
+                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
+                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden"
+                          >
+                            <div className="flex justify-between items-center text-xs">
+                              <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                                <input
+                                  type="checkbox"
+                                  className="rounded border-slate-300 dark:border-slate-700 text-primary accent-primary w-3.5 h-3.5 cursor-pointer"
+                                  checked={rememberMe}
+                                  onChange={(e) => setRememberMe(e.target.checked)}
+                                />
+                                <span className="text-slate-600 dark:text-slate-400 font-sans">Remember me</span>
+                              </label>
+                              <button
+                                type="button"
+                                className="text-primary hover:underline cursor-pointer font-headline font-bold bg-transparent border-none p-0 text-xs"
+                                onClick={() => setIsForgotPasswordOpen(true)}
+                              >
+                                Forgot password?
+                              </button>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Submit Button */}
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-3 sm:py-3.5 rounded-xl bg-primary hover:bg-primary/95 disabled:opacity-60 text-white font-headline font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer"
+                      >
+                        {loading ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <AnimatePresence mode="wait">
+                            <motion.span
+                              key={isLogin ? 'submit-signin' : 'submit-signup'}
+                              initial={{ opacity: 0, y: 3 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -3 }}
+                              transition={{ duration: 0.15 }}
+                              className="flex items-center gap-2"
+                            >
+                              <span>{isLogin ? 'Sign In to Workspace' : 'Claim Verified Score & Start Earning'}</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </motion.span>
+                          </AnimatePresence>
+                        )}
+                      </button>
+                    </form>
+
+                    {/* OR Divider */}
+                    <div className="relative my-4 flex items-center justify-center">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
+                      </div>
+                      <span className="relative bg-white dark:bg-slate-900 px-3 text-[10px] font-headline font-bold uppercase tracking-wider text-slate-400">
+                        OR
+                      </span>
                     </div>
 
-                    {/* SATELLITE 3: BOTTOM-LEFT (UI/UX Designer in mint sweater) */}
-                    <div className="absolute bottom-2 sm:bottom-4 left-0 sm:left-2 z-20 group">
-                      <div className="relative">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-white dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl">
-                          <img
-                            src="/hero_satellite_designer.jpg"
-                            alt="Creative UI/UX Designer earning client payouts"
-                            className="w-full h-full object-cover object-center"
-                          />
-                        </div>
-                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2 py-0.5 rounded-full border border-slate-200/90 dark:border-slate-700 shadow-sm flex items-center gap-1 text-[10px] font-bold text-slate-800 dark:text-slate-100">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                          <span>UI/UX Gig</span>
-                        </div>
-                      </div>
-                    </div>
+                    {/* Google Auth Button */}
+                    <GoogleAuthButton
+                      role="STUDENT"
+                      onSuccess={(data) => {
+                        if (setToken) setToken(data.token);
+                        if (setUser) setUser(data.user);
+                        window.history.pushState({}, '', '/');
+                      }}
+                      onError={(msg) => setError(msg)}
+                    />
 
-                    {/* SATELLITE 4: BOTTOM-RIGHT (Cloud & Data Engineer) */}
-                    <div className="absolute bottom-2 sm:bottom-4 right-0 sm:right-2 z-20 group">
-                      <div className="relative">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-white dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl">
-                          <img
-                            src="/hero_satellite_analyst.jpg"
-                            alt="Data and Cloud engineer securing verified contract"
-                            className="w-full h-full object-cover object-center"
-                          />
-                        </div>
-                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2 py-0.5 rounded-full border border-slate-200/90 dark:border-slate-700 shadow-sm flex items-center gap-1 text-[10px] font-bold text-slate-800 dark:text-slate-100">
-                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                          <span>Cloud Dev</span>
-                        </div>
-                      </div>
+                    {/* Bottom Links with Smooth Cross-Fade */}
+                    <div className="border-t border-slate-200 dark:border-slate-800 pt-4 mt-4 text-center text-xs">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsLogin(!isLogin);
+                          setError('');
+                        }}
+                        className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer"
+                      >
+                        <AnimatePresence mode="wait">
+                          <motion.span
+                            key={isLogin ? 'link-login' : 'link-signup'}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                          >
+                            {isLogin ? (
+                              <span>
+                                New candidate? <strong className="text-primary underline font-bold">Register your account</strong>
+                              </span>
+                            ) : (
+                              <span>
+                                Already registered? <strong className="text-primary underline font-bold">Sign In</strong>
+                              </span>
+                            )}
+                          </motion.span>
+                        </AnimatePresence>
+                      </button>
                     </div>
-
-                    {/* CENTRAL MAIN IMAGE: "IMAGE NUMBER 1" */}
-                    <div className="relative z-10 w-64 sm:w-76 lg:w-80 aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 bg-white dark:bg-slate-900 transition-transform duration-300 hover:scale-[1.02]">
-                      <img
-                        src="/hero_earning_main.jpg"
-                        alt="Happy student celebrating freelance income on laptop"
-                        className="w-full h-full object-cover object-center"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-                      <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white text-[11px] font-medium">
-                        <span className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20">
-                          <Coins className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>Direct Payouts</span>
-                        </span>
-                        <span className="bg-emerald-500/90 text-white font-bold px-2 py-0.5 rounded-full shadow-xs">
-                          100% Escrow
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* OVERLAPPING FLOATING CAREER JOURNEY CARD (inspired by learn.aligngrad.com) */}
-                    <div className="absolute -bottom-4 sm:-bottom-3 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl px-3.5 py-2 sm:px-4 sm:py-2.5 shadow-xl border border-slate-200/90 dark:border-slate-700 flex items-center gap-2.5 sm:gap-3">
-                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 shrink-0">
-                        <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </div>
-                      <div className="text-left">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-heading">Your Earning Pathway</span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300">
-                            Verified Gigs
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 mt-0.5 text-[10px] text-slate-600 dark:text-slate-300">
-                          <span className="flex items-center gap-1">
-                            <Check className="w-3 h-3 text-emerald-600 stroke-[3]" /> 15-Min Test
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Check className="w-3 h-3 text-emerald-600 stroke-[3]" /> Direct Payouts
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
                   </div>
                 </AnimatedContent>
               </div>
@@ -692,7 +890,7 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
         </section> */}
 
         {/* ─── 4. SKILL MATCHING & VERIFICATION ─── */}
-        <section id="recruiters" className="relative z-10 py-5 sm:py-7 px-4 sm:px-8 border-b border-outline-variant bg-transparent">
+        <section id="how-it-works" className="relative z-10 py-5 sm:py-7 px-4 sm:px-8 border-b border-outline-variant bg-transparent">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
@@ -1333,46 +1531,48 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
                       onClick={() => navigateToCandidate('signup')}
                       className="w-full py-2.5 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/95 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs group-hover:shadow-md"
                     >
-                      <span>Start Earning Money</span>
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span>Candidate Sign Up</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
 
-                  {/* Card 2: Recruiters & Companies */}
+                  {/* Card 2: Returning Candidates */}
                   <div className="p-5 sm:p-6 rounded-3xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700/80 text-left shadow-xs hover:shadow-md hover:border-primary/40 transition-all flex flex-col justify-between group">
                     <div>
                       <div className="flex items-center gap-1.5 mb-2 text-primary">
-                        <ShieldCheck className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider">RECRUITERS &amp; COMPANIES</span>
+                        <LogIn className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">RETURNING CANDIDATES</span>
                       </div>
                       <h3 className="text-base font-headline font-semibold text-heading mb-1.5 group-hover:text-primary transition-colors">
-                        Hire Pre-Screened Talent
+                        Access Your Candidate Portal
                       </h3>
                       <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
-                        Post roles, specify required thresholds, and shortlist verified candidates with zero resume inflation in 48 hours.
+                        Sign in to track verified test scorecards, manage active interview invitations, and explore high-payout opportunities.
                       </p>
 
                       <ul className="space-y-1.5 mb-4 pt-2.5 border-t border-slate-200/60 dark:border-slate-700/60">
                         <li className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
                           <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                          <span>Set mandatory test score gates (e.g. 8/10 in React)</span>
+                          <span>View verified assessment scores and badges</span>
                         </li>
                         <li className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
                           <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                          <span>Pre-screened candidates ready for instant interview</span>
+                          <span>Review job invites and track application status</span>
                         </li>
                         <li className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
                           <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                          <span>Zero resume spam or unvetted applications</span>
+                          <span>Direct access to wallet and milestone escrow earnings</span>
                         </li>
                       </ul>
                     </div>
 
                     <button
-                      onClick={() => navigateToRecruiter('signup')}
+                      onClick={() => navigateToCandidate('login')}
                       className="w-full py-2.5 rounded-xl bg-surface-container-high border border-outline text-heading text-xs font-semibold hover:bg-surface-container-highest transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs group-hover:shadow-md"
                     >
-                      <span>Discover Rightful Talent</span>
+                      <LogIn className="w-3.5 h-3.5 text-primary" />
+                      <span>Candidate Login</span>
                       <ArrowRight className="w-3.5 h-3.5 text-primary" />
                     </button>
                   </div>
@@ -1480,152 +1680,21 @@ export default function AuthView({ setToken, setUser, theme, toggleTheme }) {
           </div>
         </footer>
 
-        {/* ─── 13. AUTH DRAWER / MODAL OVERLAY ─── */}
-        {isDrawerOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-            <div className="relative w-full max-w-md bg-surface-container border border-outline-variant rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-              <div className="flex justify-between items-center border-b border-outline-variant pb-4">
-                <div>
-                  <h3 className="text-xl font-headline font-medium text-heading">
-                    {isLogin ? 'Welcome Back' : 'Create Account'}
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {isLogin ? 'Sign in to access your AlignGrade dashboard' : 'Join AlignGrade to verify skills & unlock opportunities'}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setIsDrawerOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-heading rounded-lg hover:bg-surface-container-high transition-colors cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        <ForgotPasswordModal
+          isOpen={isForgotPasswordOpen}
+          onClose={() => setIsForgotPasswordOpen(false)}
+          initialEmail={email}
+          role="STUDENT"
+          theme={theme}
+        />
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {!isLogin && (
-                  <Input
-                    label="Full Name / Organization Name"
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Rahul Sharma / TechFlow"
-                  />
-                )}
-
-                <Input
-                  label="Email Address"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@domain.com"
-                />
-
-                <div>
-                  <label className="block text-[11px] font-headline font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      className="w-full bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl pl-4 pr-11 py-2.5 text-sm text-heading placeholder-slate-400 transition-all"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-heading transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-headline font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                    Account Classification
-                  </label>
-                  <div className="grid grid-cols-2 gap-3 mt-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setRole('STUDENT')}
-                      className={`py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${role === 'STUDENT'
-                          ? 'bg-primary-container border-primary text-on-primary-container ring-1 ring-primary'
-                          : 'bg-surface-container-low border-outline-variant text-slate-600 dark:text-slate-300 hover:text-heading'
-                        }`}
-                    >
-                      Candidate / Student
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRole('RECRUITER')}
-                      className={`py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${role === 'RECRUITER'
-                          ? 'bg-primary-container border-primary text-on-primary-container ring-1 ring-primary'
-                          : 'bg-surface-container-low border-outline-variant text-slate-600 dark:text-slate-300 hover:text-heading'
-                        }`}
-                    >
-                      Recruiter / Employer
-                    </button>
-                  </div>
-                </div>
-
-                {isLogin && (
-                  <div className="flex justify-between items-center py-1">
-                    <label className="flex items-center gap-2 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        className="rounded border-outline-variant text-primary bg-surface-container-low focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5"
-                        checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
-                      />
-                      <span className="text-xs text-slate-600 dark:text-slate-400 hover:text-heading transition-colors">Remember me</span>
-                    </label>
-                  </div>
-                )}
-
-                <Button type="submit" loading={loading} fullWidth className="mt-4">
-                  {isLogin ? 'Sign In to Dashboard' : 'Create Account'}
-                </Button>
-              </form>
-
-              <div className="relative my-4 flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-outline-variant"></div>
-                </div>
-                <span className="relative bg-surface-container px-3 text-[10px] font-headline font-medium text-slate-500 uppercase tracking-wider">
-                  OR
-                </span>
-              </div>
-
-              <GoogleAuthButton
-                role={role}
-                onSuccess={(data) => {
-                  setToken(data.token);
-                  setUser(data.user);
-                }}
-                onError={(msg) => setError(msg)}
-              />
-
-              <div className="border-t border-outline-variant pt-4 text-center">
-                <button
-                  type="button"
-                  className="text-xs text-slate-600 dark:text-slate-400 hover:text-heading transition-colors cursor-pointer"
-                  onClick={() => setIsLogin(!isLogin)}
-                >
-                  {isLogin ? (
-                    <span>Don't have an account? <strong className="text-primary hover:underline font-bold">Sign up</strong></span>
-                  ) : (
-                    <span>Already have an account? <strong className="text-primary hover:underline font-bold">Sign in</strong></span>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <VerificationPinModal
+          isOpen={isVerificationOpen}
+          onClose={() => setIsVerificationOpen(false)}
+          email={pendingVerificationEmail || email}
+          role="STUDENT"
+          onSuccess={handleVerificationSuccess}
+        />
       </ClickSpark>
     </div>
   );

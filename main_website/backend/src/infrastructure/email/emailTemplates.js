@@ -115,6 +115,114 @@ The AlignGrad Team`;
   return { subject, html, text };
 }
 
+/**
+ * Generates the HTML and plaintext email template for email verification PIN
+ * @param {Object} params
+ * @param {string} params.name - User's name or display label
+ * @param {string} params.pin - 6-digit verification PIN
+ * @param {string} params.role - "STUDENT" or "RECRUITER"
+ * @param {number} [params.expireMinutes=10] - Expiration time in minutes
+ * @returns {{ subject: string, html: string, text: string }}
+ */
+function getVerificationPinTemplate({ name, pin, role, expireMinutes = 10 }) {
+  const portalLabel = role === 'RECRUITER' ? 'Recruiter Portal' : 'Candidate Workspace';
+  const subject = `AlignGrad — Your Verification Code (${portalLabel})`;
+
+  const text = `Hello ${name || 'User'},
+
+Welcome to AlignGrad! To complete your registration for the ${portalLabel}, please use the following 6-digit verification code:
+
+${pin}
+
+This code is valid for ${expireMinutes} minutes. For security, please do not share this code with anyone.
+
+If you did not initiate this registration, please ignore this email.
+
+Best regards,
+The AlignGrad Team`;
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F9F8F6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #F9F8F6; padding: 40px 15px;">
+    <tr>
+      <td align="center">
+        <table width="100%" max-width="580" border="0" cellspacing="0" cellpadding="0" style="max-width: 580px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+          <!-- Header Banner -->
+          <tr>
+            <td style="background-color: #003527; padding: 28px 36px; text-align: left;">
+              <span style="display: inline-block; font-size: 22px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">
+                Align<span style="color: #6ee7b7;">Grad</span>
+              </span>
+              <span style="display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #a7f3d0; margin-top: 4px; font-weight: 600;">
+                ${portalLabel}
+              </span>
+            </td>
+          </tr>
+
+          <!-- Body Content -->
+          <tr>
+            <td style="padding: 36px 36px 28px 36px;">
+              <h1 style="font-size: 20px; font-weight: 600; color: #0f172a; margin: 0 0 16px 0;">
+                Verify Your Email Address
+              </h1>
+              <p style="font-size: 14px; color: #475569; margin: 0 0 20px 0;">
+                Hello <strong>${name || 'there'}</strong>,
+              </p>
+              <p style="font-size: 14px; color: #475569; margin: 0 0 28px 0;">
+                Thank you for joining AlignGrad. Enter the following 6-digit verification code in your browser to activate your account:
+              </p>
+
+              <!-- PIN Display Box -->
+              <table border="0" cellspacing="0" cellpadding="0" style="width: 100%; margin: 0 0 28px 0;">
+                <tr>
+                  <td align="center" style="background-color: #f0fdf4; border: 1.5px dashed #059669; border-radius: 10px; padding: 22px 16px;">
+                    <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 36px; font-weight: 700; letter-spacing: 12px; color: #003527; display: inline-block; padding-left: 12px;">
+                      ${pin}
+                    </span>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Notice Box -->
+              <div style="background-color: #f8fafc; border-left: 4px solid #003527; padding: 14px 16px; border-radius: 4px; margin-bottom: 24px;">
+                <p style="font-size: 12px; color: #64748b; margin: 0;">
+                  ⏳ <strong>Security Note:</strong> This verification code will expire in <strong>${expireMinutes} minutes</strong> and can only be used once. For your protection, never share this code with anyone.
+                </p>
+              </div>
+
+              <p style="font-size: 12px; color: #94a3b8; margin: 0;">
+                If you did not attempt to sign up on AlignGrad, you can safely ignore this email.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f8fafc; border-top: 1px solid #f1f5f9; padding: 20px 36px; text-align: center;">
+              <p style="font-size: 11px; color: #cbd5e1; margin: 0;">
+                © 2026 AlignGrad. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
+
+  return { subject, html, text };
+}
+
 module.exports = {
-  getPasswordResetTemplate
+  getPasswordResetTemplate,
+  getVerificationPinTemplate
 };

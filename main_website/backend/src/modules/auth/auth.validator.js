@@ -41,9 +41,26 @@ const resetPasswordSchema = {
   })
 };
 
+const verifyPinSchema = {
+  body: z.object({
+    email: z.string().trim().toLowerCase().email('Please enter a valid email address'),
+    pin: z.string().trim().regex(/^\d{6}$/, 'Verification code must be exactly 6 digits'),
+    role: z.enum(['STUDENT', 'RECRUITER']).optional()
+  })
+};
+
+const resendPinSchema = {
+  body: z.object({
+    email: z.string().trim().toLowerCase().email('Please enter a valid email address'),
+    role: z.enum(['STUDENT', 'RECRUITER']).optional()
+  })
+};
+
 module.exports = {
   signupSchema,
   loginSchema,
   forgotPasswordSchema,
-  resetPasswordSchema
+  resetPasswordSchema,
+  verifyPinSchema,
+  resendPinSchema
 };

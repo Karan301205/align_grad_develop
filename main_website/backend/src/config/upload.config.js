@@ -7,7 +7,8 @@ module.exports = {
     resume: parseInt(process.env.UPLOAD_LIMIT_RESUME) || 10 * 1024 * 1024, // 10MB
     image: parseInt(process.env.UPLOAD_LIMIT_IMAGE) || 2 * 1024 * 1024, // 2MB
     doc: parseInt(process.env.UPLOAD_LIMIT_DOC) || 10 * 1024 * 1024, // 10MB
-    video: parseInt(process.env.UPLOAD_LIMIT_VIDEO) || 50 * 1024 * 1024 // 50MB
+    video: parseInt(process.env.UPLOAD_LIMIT_VIDEO) || 50 * 1024 * 1024, // 50MB (intro video)
+    projectVideo: parseInt(process.env.UPLOAD_LIMIT_PROJECT_VIDEO) || 100 * 1024 * 1024 // 100MB (project walkthrough)
   },
   // Allowed MIME types
   allowedMimeTypes: {
@@ -17,6 +18,7 @@ module.exports = {
     ],
     image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
     video: ['video/mp4', 'video/webm', 'video/x-matroska', 'video/quicktime', 'video/x-msvideo', 'video/ogg'],
+    projectVideo: ['video/mp4', 'video/webm', 'video/x-matroska', 'video/quicktime', 'video/x-msvideo', 'video/ogg'],
     doc: [
       'application/pdf',
       'image/jpeg',

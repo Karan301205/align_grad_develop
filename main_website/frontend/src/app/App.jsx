@@ -96,7 +96,12 @@ export default function App() {
 
   useEffect(() => {
     if (token) {
-      if (window.location.pathname.startsWith('/candidate') || window.location.pathname.startsWith('/recruiter')) {
+      if (
+        window.location.pathname.startsWith('/candidate') ||
+        window.location.pathname.startsWith('/recruiter') ||
+        window.location.pathname.startsWith(RECRUITER_LANDING_PATH) ||
+        window.location.pathname.startsWith(CANDIDATE_LANDING_PATH)
+      ) {
         window.history.pushState({}, '', '/');
       }
     }
@@ -142,14 +147,32 @@ export default function App() {
     return <TermsAndConditionsPage theme={theme} toggleTheme={toggleTheme} />;
   }
 
-  // Standalone public dedicated recruiter landing page
-  if (currentPath.startsWith(RECRUITER_LANDING_PATH)) {
-    return <RecruiterLandingPage theme={theme} toggleTheme={toggleTheme} />;
+  // Standalone public dedicated recruiter landing page with embedded auth (Register Company default for visitors)
+  if (!token && (currentPath.startsWith(RECRUITER_LANDING_PATH) || currentPath.startsWith('/recruiter'))) {
+    const initialMode = currentPath.includes('login') ? 'login' : 'signup';
+    return (
+      <RecruiterLandingPage
+        setToken={setToken}
+        setUser={setUser}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        initialAuthMode={initialMode}
+      />
+    );
   }
 
-  // Standalone public candidate landing page
-  if (currentPath.startsWith(CANDIDATE_LANDING_PATH)) {
-    return <AuthView setToken={setToken} setUser={setUser} theme={theme} toggleTheme={toggleTheme} />;
+  // Standalone public dedicated candidate landing page with embedded auth (Sign Up default for visitors)
+  if (!token && (currentPath.startsWith(CANDIDATE_LANDING_PATH) || currentPath.startsWith('/candidate'))) {
+    const initialMode = currentPath.includes('login') ? 'login' : 'signup';
+    return (
+      <AuthView
+        setToken={setToken}
+        setUser={setUser}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        initialAuthMode={initialMode}
+      />
+    );
   }
 
   // Standalone public common landing page (primary platform gateway for visitors)
@@ -183,51 +206,51 @@ export default function App() {
 
     let authView = null;
     if (currentPath.startsWith('/candidate')) {
-      const mode = currentPath.endsWith('signup') ? 'signup' : 'login';
+      const mode = currentPath.includes('login') ? 'login' : 'signup';
       authView = (
-        <CandidateAuth
+        <AuthView
           setToken={setToken}
           setUser={setUser}
           theme={theme}
           toggleTheme={toggleTheme}
-          initialMode={mode}
+          initialAuthMode={mode}
         />
       );
     } else if (currentPath.startsWith('/recruiter')) {
-      const mode = currentPath.endsWith('signup') ? 'signup' : 'login';
+      const mode = currentPath.includes('login') ? 'login' : 'signup';
       authView = (
-        <RecruiterAuth
+        <RecruiterLandingPage
           setToken={setToken}
           setUser={setUser}
           theme={theme}
           toggleTheme={toggleTheme}
-          initialMode={mode}
+          initialAuthMode={mode}
         />
       );
     } else if (isCareerHost) {
       if (window.location.pathname === '/' || window.location.pathname === '') {
-        window.history.replaceState({}, '', '/candidate/login');
+        window.history.replaceState({}, '', CANDIDATE_LANDING_PATH);
       }
       authView = (
-        <CandidateAuth
+        <AuthView
           setToken={setToken}
           setUser={setUser}
           theme={theme}
           toggleTheme={toggleTheme}
-          initialMode="login"
+          initialAuthMode="signup"
         />
       );
     } else if (isHireHost) {
       if (window.location.pathname === '/' || window.location.pathname === '') {
-        window.history.replaceState({}, '', '/recruiter/login');
+        window.history.replaceState({}, '', RECRUITER_LANDING_PATH);
       }
       authView = (
-        <RecruiterAuth
+        <RecruiterLandingPage
           setToken={setToken}
           setUser={setUser}
           theme={theme}
           toggleTheme={toggleTheme}
-          initialMode="login"
+          initialAuthMode="signup"
         />
       );
     } else {
@@ -254,7 +277,7 @@ export default function App() {
     return <AuthView setToken={setToken} setUser={setUser} theme={theme} toggleTheme={toggleTheme} />;
   }
 
-  if (isCareerHost && user.role !== 'STUDENT') {
+  if (isCareerHost && user?.role !== 'STUDENT') {
     return (
       <div className="min-h-screen bg-background text-on-surface font-sans flex items-center justify-center p-6">
         <div className="max-w-md w-full glass-card rounded-2xl p-8 text-center space-y-4">
@@ -274,7 +297,7 @@ export default function App() {
     );
   }
 
-  if (isHireHost && user.role === 'STUDENT') {
+  if (isHireHost && user?.role === 'STUDENT') {
     return (
       <div className="min-h-screen bg-background text-on-surface font-sans flex items-center justify-center p-6">
         <div className="max-w-md w-full glass-card rounded-2xl p-8 text-center space-y-4">
@@ -296,7 +319,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background text-on-surface font-sans flex">
-      {user.role === 'STUDENT' ? (
+      {user?.role === 'STUDENT' ? (
         <StudentLayout
           user={user}
           token={token}
@@ -330,7 +353,7 @@ export default function App() {
         onClose={() => setIsCompanyModalOpen(false)}
         token={token}
         onViewOpportunity={(id, type) => {
-          if (user.role === 'STUDENT') {
+          if (user?.role === 'STUDENT') {
             setAutoSelectOpportunity({ id, type });
             if (type === 'gig') {
               setActiveTab('gigs');

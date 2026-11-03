@@ -170,8 +170,138 @@ mockDb.profiles.push({
   ],
   education: [],
   experience: [],
-  certificates: [],
+  projects: [
+    {
+      title: "Fullstack E-Commerce Portal",
+      role: "Lead Fullstack Developer",
+      codeUrl: "https://github.com/example/ecommerce",
+      hostedUrl: "https://ecommerce-demo.example.com",
+      startDate: "2024-01-01",
+      endDate: "2024-06-01",
+      currentlyWorking: false,
+      description: "Built responsive frontend with React and CSS, integrated backend APIs with Node.js and Python.",
+      skills: ["React", "CSS", "Python", "HTML"]
+    }
+  ]
+});
+
+// Seed additional student candidates for hiring pipeline testing
+mockDb.users.push({
+  id: "student_priya",
+  email: "priya@domain.com",
+  role: "STUDENT",
+  regNo: "CAN002",
+  createdAt: new Date()
+});
+mockDb.profiles.push({
+  id: "profile_priya",
+  userId: "student_priya",
+  name: "Priya Sharma",
+  username: "priya_sharma",
+  profilePic: null,
+  bio: "Frontend Developer experienced in React and UI/UX design.",
+  skills: [
+    { name: "React", rating: 8, verifiedRating: 8 },
+    { name: "CSS", rating: 8, verifiedRating: 8 }
+  ],
+  education: [],
+  experience: [],
   projects: []
+});
+
+mockDb.users.push({
+  id: "student_alex",
+  email: "alex@domain.com",
+  role: "STUDENT",
+  regNo: "CAN003",
+  createdAt: new Date()
+});
+mockDb.profiles.push({
+  id: "profile_alex",
+  userId: "student_alex",
+  name: "Alex Chen",
+  username: "alex_chen",
+  profilePic: null,
+  bio: "Senior React Engineer with extensive component library experience.",
+  skills: [
+    { name: "React", rating: 10, verifiedRating: 9 },
+    { name: "Tailwind CSS", rating: 9, verifiedRating: 8 }
+  ],
+  education: [],
+  experience: [],
+  projects: []
+});
+
+mockDb.users.push({
+  id: "student_rohan",
+  email: "rohan@domain.com",
+  role: "STUDENT",
+  regNo: "CAN004",
+  createdAt: new Date()
+});
+mockDb.profiles.push({
+  id: "profile_rohan",
+  userId: "student_rohan",
+  name: "Rohan Verma",
+  username: "rohan_verma",
+  profilePic: null,
+  bio: "Computer Science student passionate about web development.",
+  skills: [
+    { name: "React", rating: 7, verifiedRating: 7 },
+    { name: "HTML", rating: 8, verifiedRating: null }
+  ],
+  education: [],
+  experience: [],
+  projects: []
+});
+
+// Seed realistic candidate applications covering all pipeline stages
+mockDb.applications.push({
+  id: "app_1_shortlisted",
+  jobId: "job_react_developer",
+  studentId: "profile_leo",
+  status: "SHORTLISTED",
+  createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+  roundStatuses: [
+    { roundNumber: 1, name: "Resume Screening", status: "CLEARED", feedback: "Strong project portfolio and verified React score." },
+    { roundNumber: 2, name: "Technical Interview", status: "PENDING", feedback: "" }
+  ]
+});
+
+mockDb.applications.push({
+  id: "app_2_interview",
+  jobId: "job_react_developer",
+  studentId: "profile_priya",
+  status: "IN_PROGRESS",
+  createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+  roundStatuses: [
+    { roundNumber: 1, name: "Resume Screening", status: "CLEARED", feedback: "Qualified screening criteria." },
+    { roundNumber: 2, name: "Technical Interview", status: "SCHEDULED", feedback: "Interview set for Thursday at 2:00 PM." }
+  ]
+});
+
+mockDb.applications.push({
+  id: "app_3_hired",
+  jobId: "job_react_developer",
+  studentId: "profile_alex",
+  status: "SELECTED",
+  createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+  roundStatuses: [
+    { roundNumber: 1, name: "Resume Screening", status: "CLEARED", feedback: "Exceptional technical background." },
+    { roundNumber: 2, name: "Technical Interview", status: "CLEARED", feedback: "Cleared with distinction. Offer accepted." }
+  ]
+});
+
+mockDb.applications.push({
+  id: "app_4_applied",
+  jobId: "job_react_developer",
+  studentId: "profile_rohan",
+  status: "APPLIED",
+  createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+  roundStatuses: [
+    { roundNumber: 1, name: "Resume Screening", status: "PENDING", feedback: "" },
+    { roundNumber: 2, name: "Technical Interview", status: "PENDING", feedback: "" }
+  ]
 });
 
 // Initial gigs array left empty to start fresh

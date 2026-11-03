@@ -24,9 +24,30 @@ import {
   RefreshCw,
   LogOut,
   ChevronRight,
-  Video
+  Video,
+  XCircle,
+  ExternalLink
 } from 'lucide-react';
 import AdminCourses from '../components/AdminCourses';
+
+// Company verification statuses written by main_website (recruiter submits)
+// and this portal (admin approves/rejects).
+const VERIFICATION_BADGES = {
+  PENDING: { label: 'Pending Review', badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20', dot: 'bg-amber-500 animate-pulse' },
+  APPROVED: { label: 'Verified', badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', dot: 'bg-emerald-500' },
+  REJECTED: { label: 'Rejected', badge: 'bg-rose-500/10 text-rose-400 border-rose-500/20', dot: 'bg-rose-500' },
+  NOT_SUBMITTED: { label: 'Not Submitted', badge: 'bg-slate-500/10 text-slate-400 border-slate-500/20', dot: 'bg-slate-500' }
+};
+
+const getVerificationBadge = (status) => VERIFICATION_BADGES[status] || VERIFICATION_BADGES.NOT_SUBMITTED;
+
+const formatReviewDate = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? ''
+    : date.toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+};
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -56,6 +77,10 @@ export default function App() {
   const [recruiters, setRecruiters] = useState([]);
   const [loadingRecruiters, setLoadingRecruiters] = useState(false);
   const [selectedRecruiter, setSelectedRecruiter] = useState(null);
+  const [showRejectForm, setShowRejectForm] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(null); // 'APPROVE' | 'REJECT' | null
+  const [reviewFeedback, setReviewFeedback] = useState(null); // { type: 'success' | 'warning' | 'error', message }
   const [jobs, setJobs] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -245,6 +270,53 @@ export default function App() {
         setAuthError(err.message || 'Server error. Please try again.');
         setAuthLoading(false);
       });
+  };
+
+  // Reset the review form whenever a different recruiter profile is opened/closed
+  React.useEffect(() => {
+    setShowRejectForm(false);
+    setRejectReason('');
+    setReviewFeedback(null);
+    setReviewSubmitting(null);
+  }, [selectedRecruiter?.id]);
+
+  const handleReviewRecruiter = async (decision) => {
+    if (!selectedRecruiter) return;
+    const reason = rejectReason.trim();
+    if (decision === 'REJECT' && reason.length < 5) {
+      setReviewFeedback({ type: 'error', message: 'Please enter a rejection reason (at least 5 characters). It is included in the email to the recruiter.' });
+      return;
+    }
+
+    setReviewSubmitting(decision);
+    setReviewFeedback(null);
+    try {
+      const data = await adminApi.reviewRecruiterVerification(
+        selectedRecruiter.id,
+        decision,
+        decision === 'REJECT' ? reason : undefined
+      );
+      if (!data.success) {
+        setReviewFeedback({ type: 'error', message: data.error || 'Failed to update verification status.' });
+        return;
+      }
+
+      const updated = data.recruiter;
+      setRecruiters(prev => prev.map(r => (r.id === updated.id ? updated : r)));
+      setSelectedRecruiter(updated);
+      setShowRejectForm(false);
+      setRejectReason('');
+
+      const outcome = decision === 'APPROVE' ? 'approved' : 'rejected';
+      setReviewFeedback(data.emailSent
+        ? { type: 'success', message: `Company ${outcome}. A notification email was sent to ${updated.email}.` }
+        : { type: 'warning', message: `Company ${outcome}, but the notification email could not be sent (${data.emailError || 'unknown error'}). Please contact ${updated.email} manually.` });
+    } catch (err) {
+      console.error('Error reviewing recruiter verification:', err);
+      setReviewFeedback({ type: 'error', message: 'Network error while updating verification status.' });
+    } finally {
+      setReviewSubmitting(null);
+    }
   };
 
   const viewJobApplicants = (job) => {
@@ -799,7 +871,12 @@ export default function App() {
             <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
               <div className="flex justify-between items-center pb-2">
                 <h3 className="text-sm font-bold text-white tracking-wide">Recruiters Directory</h3>
-                <span className="text-[10px] text-indigo-400 font-headline font-medium  tracking-wider">{recruiters.length} Registered</span>
+                <span className="text-[10px] text-indigo-400 font-headline font-medium  tracking-wider">
+                  {recruiters.length} Registered
+                  {recruiters.some(r => r.verificationStatus === 'PENDING') && (
+                    <span className="text-amber-400"> · {recruiters.filter(r => r.verificationStatus === 'PENDING').length} Awaiting Review</span>
+                  )}
+                </span>
               </div>
 
               {loadingRecruiters ? (
@@ -835,11 +912,8 @@ export default function App() {
                             <td className="py-4 font-bold text-white">{recruiter.companyName}</td>
                             <td className="py-4 text-slate-400 font-sans font-normal">{recruiter.email}</td>
                             <td className="py-4">
-                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${recruiter.verified
-                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                  : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                                }`}>
-                                {recruiter.verified ? 'Verified' : 'Pending Verification'}
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${getVerificationBadge(recruiter.verificationStatus).badge}`}>
+                                {getVerificationBadge(recruiter.verificationStatus).label}
                               </span>
                             </td>
                             <td className="py-4 text-slate-400 font-sans font-normal">{recruiter.jobs ? recruiter.jobs.length : 0} Jobs</td>
@@ -848,7 +922,7 @@ export default function App() {
                                 onClick={() => setSelectedRecruiter(recruiter)}
                                 className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] tracking-wide transition-colors"
                               >
-                                View Profile
+                                {recruiter.verificationStatus === 'PENDING' ? 'Review Profile' : 'View Profile'}
                               </button>
                             </td>
                           </tr>
@@ -1467,9 +1541,19 @@ export default function App() {
                             <span className="text-[9px] text-indigo-400 font-headline font-medium">{proj.role}</span>
                           </div>
                           {proj.description && <p className="text-slate-400 text-[10px] leading-relaxed mt-1 font-medium">{proj.description}</p>}
+                          {proj.skills && proj.skills.length > 0 && (
+                            <div className="flex flex-wrap gap-1 pt-1">
+                              {proj.skills.map((skill, sIdx) => (
+                                <span key={sIdx} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 font-medium">
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                           <div className="flex gap-3 pt-1 text-[10px] font-sans font-normal font-bold">
                             {proj.codeUrl && <a href={proj.codeUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-400 underline">Code Link</a>}
                             {proj.hostedUrl && <a href={proj.hostedUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-400 underline">Live Link</a>}
+                            {proj.videoUrl && <a href={proj.videoUrl} target="_blank" rel="noopener noreferrer" className="text-purple-400 underline">Video Demo</a>}
                           </div>
                         </div>
                       ))}
@@ -1566,27 +1650,181 @@ export default function App() {
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-6">
 
-              {/* Verification Info */}
-              <div className="p-5 rounded-xl bg-slate-950 border border-slate-900/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <span className="block text-[9px] text-slate-500  font-headline font-medium">Company Verification Status</span>
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2.5 h-2.5 rounded-full ${selectedRecruiter.verified ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
-                    <span className="text-xs font-bold text-slate-200">
-                      {selectedRecruiter.verified ? 'Verified Recruiter Profile' : 'Pending Verification'}
-                    </span>
+              {/* Verification Review */}
+              <div className="p-5 rounded-xl bg-slate-950 border border-slate-900/80 space-y-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <span className="block text-[9px] text-slate-500  font-headline font-medium">Company Verification Status</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2.5 h-2.5 rounded-full ${getVerificationBadge(selectedRecruiter.verificationStatus).dot}`}></span>
+                      <span className="text-xs font-bold text-slate-200">
+                        {getVerificationBadge(selectedRecruiter.verificationStatus).label}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-sans font-normal md:text-right space-y-0.5">
+                    {formatReviewDate(selectedRecruiter.verificationSubmittedAt) && (
+                      <div>Submitted {formatReviewDate(selectedRecruiter.verificationSubmittedAt)}</div>
+                    )}
+                    {formatReviewDate(selectedRecruiter.verificationReviewedAt) && (
+                      <div>
+                        Reviewed {formatReviewDate(selectedRecruiter.verificationReviewedAt)}
+                        {selectedRecruiter.verificationReviewedBy ? ` by ${selectedRecruiter.verificationReviewedBy}` : ''}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {selectedRecruiter.docUrl && (
-                  <a
-                    href={selectedRecruiter.docUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 rounded-xl bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 text-indigo-400 font-bold text-xs transition-all flex items-center gap-2"
-                  >
-                    <Download className="w-3.5 h-3.5" /> View Verification Document
-                  </a>
+                {selectedRecruiter.verificationStatus === 'REJECTED' && selectedRecruiter.verificationNote && (
+                  <div className="p-3 rounded-lg bg-rose-500/5 border border-rose-500/20 text-xs text-rose-300 font-sans font-normal whitespace-pre-line">
+                    <span className="block text-[9px] text-rose-400 font-headline font-medium mb-1">Rejection Reason Sent to Recruiter</span>
+                    {selectedRecruiter.verificationNote}
+                  </div>
+                )}
+
+                {/* Company details submitted by the recruiter */}
+                {selectedRecruiter.company ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 pt-1">
+                    {[
+                      ['Recruiter', [selectedRecruiter.company.recruiterName, selectedRecruiter.company.recruiterDesignation].filter(Boolean).join(' · ')],
+                      ['Official Email', selectedRecruiter.company.officialEmail],
+                      ['Industry', selectedRecruiter.company.industry],
+                      ['Company Size', selectedRecruiter.company.companySize],
+                      ['Headquarters', selectedRecruiter.company.location],
+                      ['Founded', selectedRecruiter.company.foundedYear]
+                    ].map(([label, value]) => (
+                      <div key={label} className="space-y-0.5 min-w-0">
+                        <span className="block text-[9px] text-slate-500 font-headline font-medium">{label}</span>
+                        <span className="block text-xs text-slate-200 font-sans font-normal truncate">{value || '—'}</span>
+                      </div>
+                    ))}
+                    {[
+                      ['Website', selectedRecruiter.company.website],
+                      ['LinkedIn', selectedRecruiter.company.linkedin]
+                    ].map(([label, value]) => (
+                      <div key={label} className="space-y-0.5 min-w-0">
+                        <span className="block text-[9px] text-slate-500 font-headline font-medium">{label}</span>
+                        {value && /^https?:\/\//i.test(value) ? (
+                          <a href={value} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-sans font-normal truncate max-w-full">
+                            <span className="truncate">{value}</span> <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                        ) : (
+                          <span className="block text-xs text-slate-200 font-sans font-normal truncate">{value || '—'}</span>
+                        )}
+                      </div>
+                    ))}
+                    {selectedRecruiter.company.description && (
+                      <div className="sm:col-span-2 space-y-0.5">
+                        <span className="block text-[9px] text-slate-500 font-headline font-medium">About the Company</span>
+                        <p className="text-xs text-slate-300 font-sans font-normal leading-relaxed whitespace-pre-line">{selectedRecruiter.company.description}</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500 font-sans font-normal">This recruiter has not created a company profile yet.</p>
+                )}
+
+                {/* Legal verification documents */}
+                <div className="space-y-2">
+                  <span className="block text-[9px] text-slate-500 font-headline font-medium">Verification Documents ({selectedRecruiter.verificationDocs?.length || 0})</span>
+                  {selectedRecruiter.verificationDocs?.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedRecruiter.verificationDocs.map((doc, idx) => (
+                        <a
+                          key={`${doc.docUrl}-${idx}`}
+                          href={doc.docUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-2 rounded-xl bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 text-indigo-400 font-bold text-xs transition-all flex items-center gap-2"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>{doc.docType}</span>
+                          {doc.fileName && <span className="text-[10px] text-slate-500 font-normal">({doc.fileName})</span>}
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-500 font-sans font-normal">No verification documents uploaded.</p>
+                  )}
+                </div>
+
+                {reviewFeedback && (
+                  <div className={`p-3 rounded-lg border text-xs font-sans font-normal ${reviewFeedback.type === 'success'
+                    ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-300'
+                    : reviewFeedback.type === 'warning'
+                      ? 'bg-amber-500/5 border-amber-500/20 text-amber-300'
+                      : 'bg-rose-500/5 border-rose-500/20 text-rose-300'
+                    }`}>
+                    {reviewFeedback.message}
+                  </div>
+                )}
+
+                {/* Review actions (available whenever the recruiter has a company profile) */}
+                {selectedRecruiter.hasCompanyProfile && (
+                  <div className="pt-3 border-t border-slate-900/80 space-y-3">
+                    {!(selectedRecruiter.verificationDocs?.length > 0) && (
+                      <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/20 text-xs text-amber-300 font-sans font-normal">
+                        This recruiter has not submitted verification documents yet. You can still approve or reject the profile; the recruiter will be notified by email either way.
+                      </div>
+                    )}
+                    {showRejectForm && (
+                      <div className="space-y-1.5">
+                        <label className="block text-[9px] text-slate-500 font-headline font-medium">
+                          Reason for rejection (emailed to the recruiter)
+                        </label>
+                        <textarea
+                          value={rejectReason}
+                          onChange={(e) => setRejectReason(e.target.value)}
+                          rows={3}
+                          maxLength={1000}
+                          placeholder="e.g. The GST certificate is unreadable. Please upload a clear copy."
+                          className="w-full p-3 rounded-xl bg-slate-900 border border-slate-800 focus:border-rose-500/50 outline-none text-xs text-slate-200 font-sans font-normal resize-y"
+                        />
+                      </div>
+                    )}
+                    <div className="flex flex-wrap justify-end gap-2">
+                      {selectedRecruiter.verificationStatus !== 'REJECTED' && (
+                        showRejectForm ? (
+                          <>
+                            <button
+                              onClick={() => { setShowRejectForm(false); setRejectReason(''); }}
+                              disabled={Boolean(reviewSubmitting)}
+                              className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300 hover:text-white transition-all disabled:opacity-50"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => handleReviewRecruiter('REJECT')}
+                              disabled={Boolean(reviewSubmitting)}
+                              className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all flex items-center gap-2 disabled:opacity-50"
+                            >
+                              <XCircle className="w-3.5 h-3.5" />
+                              {reviewSubmitting === 'REJECT' ? 'Rejecting...' : 'Confirm Rejection & Email'}
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => { setShowRejectForm(true); setReviewFeedback(null); }}
+                            disabled={Boolean(reviewSubmitting)}
+                            className="px-4 py-2 rounded-xl bg-rose-600/10 hover:bg-rose-600/20 border border-rose-500/30 text-rose-400 text-xs font-bold transition-all flex items-center gap-2 disabled:opacity-50"
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                            {selectedRecruiter.verificationStatus === 'APPROVED' ? 'Revoke Approval' : 'Reject'}
+                          </button>
+                        )
+                      )}
+                      {selectedRecruiter.verificationStatus !== 'APPROVED' && !showRejectForm && (
+                        <button
+                          onClick={() => handleReviewRecruiter('APPROVE')}
+                          disabled={Boolean(reviewSubmitting)}
+                          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all flex items-center gap-2 disabled:opacity-50"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          {reviewSubmitting === 'APPROVE' ? 'Approving...' : 'Approve & Email Recruiter'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
 

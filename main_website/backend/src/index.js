@@ -3,6 +3,8 @@ const cors = require('cors');
 const env = require('./config/env');
 const apiRoutes = require('./routes/index');
 const { prisma, initDb } = require('./infrastructure/database');
+const uploadConfig = require('./config/upload.config');
+const authMiddleware = require('./middleware/auth');
 
 const app = express();
 
@@ -10,7 +12,11 @@ app.set('trust proxy', 1);
 const PORT = env.PORT;
 
 app.use(cors());
-app.use(['/api/upload/secure-put', '/upload/secure-put'], express.raw({ limit: '60mb', type: '*/*' }));
+// Raw-body parser for the upload proxy. The cap follows the largest per-type
+// limit in upload.config.js (securePut enforces the exact per-type limit), and
+// auth runs first so unauthenticated requests are rejected before buffering.
+const SECURE_PUT_RAW_LIMIT = Math.max(...Object.values(uploadConfig.limits));
+app.use(['/api/upload/secure-put', '/upload/secure-put'], authMiddleware, express.raw({ limit: SECURE_PUT_RAW_LIMIT, type: '*/*' }));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ limit: '1mb', extended: true }));
 

@@ -3,6 +3,22 @@ const { z } = require('zod');
 const objectIdRegex = /^[0-9a-fA-F]{24}$/;
 const objectIdSchema = z.string().regex(objectIdRegex, 'Invalid ID format');
 
+const screeningQuestionSchema = z.object({
+  id: z.string().optional(),
+  type: z.enum(['MCQ', 'LONG_ANSWER']),
+  question: z.string().min(1, 'Question text is required'),
+  options: z.array(z.string()).optional().default([]),
+  correctAnswer: z.string().optional().nullable(),
+  required: z.boolean().optional().default(true)
+}).refine(data => {
+  if (data.type === 'MCQ') {
+    return Array.isArray(data.options) && data.options.length >= 2 && typeof data.correctAnswer === 'string' && data.correctAnswer.trim().length > 0;
+  }
+  return true;
+}, {
+  message: 'MCQ questions require at least 2 options and a specified correct answer'
+});
+
 const verifyCompanySchema = {
   body: z.object({
     docUrl: z.string().url('Invalid document S3 URL').optional(),
@@ -47,6 +63,7 @@ const postJobSchema = {
       name: z.string().min(1, 'Round name is required'),
       description: z.string().min(1, 'Round description is required')
     })).optional().nullable(),
+    screeningQuestions: z.array(screeningQuestionSchema).optional().nullable().default([]),
     status: z.string().optional().nullable(),
     isPaused: z.boolean().optional().nullable(),
     showSalary: z.boolean().optional().nullable()
@@ -81,6 +98,7 @@ const updateApplicationRoundsSchema = {
     applicationId: objectIdSchema
   }),
   body: z.object({
+    status: z.enum(['APPLIED', 'SHORTLISTED', 'IN_PROGRESS', 'SCHEDULED', 'INTERVIEW', 'SELECTED', 'HIRED', 'REJECTED']).optional(),
     roundStatuses: z.array(z.object({
       roundNumber: z.number().int().min(1),
       name: z.string().min(1, 'Round name is required'),

@@ -38,10 +38,12 @@ import TextArea from '../../../components/ui/TextArea';
 import Badge from '../../../components/ui/Badge';
 import { formatAlertMessage } from '../../../utils/errorFormatter';
 import CandidateProfileModal from '../../Recruiter/components/CandidateProfileModal';
+import ScreeningQuestionBuilder from '../../Recruiter/components/ScreeningQuestionBuilder';
 import GigFilterSidebar from '../components/GigFilterSidebar';
 import GigCard from '../components/GigCard';
 import GigDetailPage from '../components/GigDetailPage';
 import PaymentModal from '../../../components/PaymentModal';
+import { FREE_PLAN_GIG_LIMIT, getBriefNavigation } from '../../../utils/jobAccess';
 import { SUPPORTED_CURRENCIES, getCurrencySymbol } from '../gigConstants';
 
 const RAW_GIG_CATEGORIES = [
@@ -314,9 +316,14 @@ export default function GigsMarketplace({
   onNavigateToTests,
   onStartSkillTest,
   onAddSkillAndUpgrade,
+  onAddSkillWithoutTest,
   activeSubTab: externalSubTab,
   onSubTabChange,
-  setActiveSubTab: setExternalSubTab
+  setActiveSubTab: setExternalSubTab,
+  // Selected gig kept by the parent layout, so the open gig survives this
+  // component unmounting (tab switches, profile reloads).
+  selectedGigId: persistedGigId,
+  onSelectedGigChange
 }) {
   const [internalSubTab, setInternalSubTab] = useState(externalSubTab || 'browse'); // 'browse', 'post', 'my-gigs'
 
@@ -382,10 +389,15 @@ export default function GigsMarketplace({
   const [attachmentFile, setAttachmentFile] = useState(null);
   const [gigLogoFile, setGigLogoFile] = useState(null);
   const [gigLogoPreview, setGigLogoPreview] = useState(null);
+  const [gigScreeningQuestions, setGigScreeningQuestions] = useState([]);
   const [postingGig, setPostingGig] = useState(false);
 
   // Detail / Work room state
-  const [selectedGigId, setSelectedGigId] = useState(null);
+  const [selectedGigId, setSelectedGigIdState] = useState(persistedGigId || null);
+  const setSelectedGigId = (gigId) => {
+    setSelectedGigIdState(gigId);
+    if (onSelectedGigChange) onSelectedGigChange(gigId);
+  };
   const [gigDetails, setGigDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
@@ -393,6 +405,7 @@ export default function GigsMarketplace({
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [applyMessage, setApplyMessage] = useState('');
   const [applyFile, setApplyFile] = useState(null);
+  const [applyAnswers, setApplyAnswers] = useState([]);
   const [applying, setApplying] = useState(false);
   const [targetApplyGig, setTargetApplyGig] = useState(null);
 
@@ -591,19 +604,36 @@ export default function GigsMarketplace({
         updateGigDetailsState(data);
       } else {
         const localGig = gigs.find(g => g.id === gigId) || myGigs.find(g => g.id === gigId);
-        if (localGig) {
-          setGigDetails(localGig);
-        }
+        // Never leave a different gig's details on screen.
+        setGigDetails(localGig || null);
       }
     } catch (err) {
       console.error(err);
       const localGig = gigs.find(g => g.id === gigId) || myGigs.find(g => g.id === gigId);
-      if (localGig) {
-        setGigDetails(localGig);
-      }
+      setGigDetails(localGig || null);
     } finally {
       setLoadingDetails(false);
     }
+  };
+
+  // On mount: the parent layout remembers the 'gig-detail' sub-tab, but gig details
+  // live here and are lost when this component unmounts. Reload the remembered gig,
+  // or fall back to the browse list instead of showing "Gig Not Found".
+  useEffect(() => {
+    if (activeSubTab !== 'gig-detail') return;
+    if (selectedGigId) {
+      fetchGigDetails(selectedGigId);
+    } else {
+      setActiveSubTab('browse');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const openGigDetail = (gigId) => {
+    setSelectedGigId(gigId);
+    fetchGigDetails(gigId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const fetchGigDetailsSilently = async (gigId) => {
@@ -883,6 +913,28 @@ export default function GigsMarketplace({
       setAlertConfig({ message: 'Please add at least one required skill.', type: 'error' });
       return;
     }
+
+    if (Array.isArray(gigScreeningQuestions) && gigScreeningQuestions.length > 0) {
+      for (let i = 0; i < gigScreeningQuestions.length; i++) {
+        const sq = gigScreeningQuestions[i];
+        if (!sq.question || !sq.question.trim()) {
+          setAlertConfig({ message: `Screening question #${i + 1} requires a question prompt.`, type: 'error' });
+          return;
+        }
+        if (sq.type === 'MCQ') {
+          const validOpts = (sq.options || []).filter(o => o && o.trim().length > 0);
+          if (validOpts.length < 2) {
+            setAlertConfig({ message: `Screening MCQ #${i + 1} must have at least 2 choices.`, type: 'error' });
+            return;
+          }
+          if (!sq.correctAnswer || !sq.correctAnswer.trim()) {
+            setAlertConfig({ message: `Screening MCQ #${i + 1} requires a selected correct answer.`, type: 'error' });
+            return;
+          }
+        }
+      }
+    }
+
     setPostingGig(true);
     try {
       let uploadedUrl = null;
@@ -933,6 +985,7 @@ export default function GigsMarketplace({
         currency: currency || 'INR',
         deliveryTime,
         minRating: reqs.length > 0 ? Math.max(...reqs.map(r => r.minRating || 1)) : 1,
+        screeningQuestions: gigScreeningQuestions,
         attachments: uploadedUrl ? [uploadedUrl] : [],
         logo: uploadedLogoUrl || null
       };
@@ -950,6 +1003,7 @@ export default function GigsMarketplace({
         setCategories([]);
         setReqs([]);
         setSkillSearchTerm('');
+        setGigScreeningQuestions([]);
         setBudget('');
         setCurrency('INR');
         setDeliveryTime('');
@@ -974,6 +1028,19 @@ export default function GigsMarketplace({
       setAlertConfig({ message: 'Please write a pitch message or attach a work sample.', type: 'error' });
       return;
     }
+
+    if (targetApplyGig?.screeningQuestions && targetApplyGig.screeningQuestions.length > 0) {
+      for (const sq of targetApplyGig.screeningQuestions) {
+        if (sq.required !== false) {
+          const ans = applyAnswers.find(a => (a.questionId && a.questionId === sq.id) || (a.questionText === sq.question));
+          if (!ans || !String(ans.answer || '').trim()) {
+            setAlertConfig({ message: `Please answer the required screening question: "${sq.question}"`, type: 'error' });
+            return;
+          }
+        }
+      }
+    }
+
     setApplying(true);
     try {
       let uploadedUrl = null;
@@ -1005,7 +1072,8 @@ export default function GigsMarketplace({
         method: 'POST',
         json: {
           message: applyMessage,
-          attachments: uploadedUrl ? [uploadedUrl] : []
+          attachments: uploadedUrl ? [uploadedUrl] : [],
+          answers: applyAnswers
         }
       });
       if (res.ok) {
@@ -1013,6 +1081,7 @@ export default function GigsMarketplace({
         setShowApplyModal(false);
         setApplyMessage('');
         setApplyFile(null);
+        setApplyAnswers([]);
         fetchGigs();
         fetchMyGigs();
       } else {
@@ -1293,6 +1362,22 @@ export default function GigsMarketplace({
               ? gigs.filter(g => candidateIds.includes(g.ownerId?.toString()))
               : gigs;
 
+          // Previous/Next on the gig detail page follows this list; free-plan
+          // candidates are capped to the gigs the paywall leaves unlocked.
+          const gigNavState = getBriefNavigation({
+            selectedJobId: selectedGigId,
+            sequenceIds: displayGigs.map(g => g.id),
+            jobs: displayGigs,
+            isPremium: !isGated,
+            freeLimit: FREE_PLAN_GIG_LIMIT
+          });
+          const gigNavigation = gigNavState && {
+            ...gigNavState,
+            onPrev: gigNavState.prevId ? () => openGigDetail(gigNavState.prevId) : null,
+            onNext: gigNavState.nextId ? () => openGigDetail(gigNavState.nextId) : null,
+            onUpgrade: () => setIsPaymentModalOpen(true)
+          };
+
           return (
             <>
               {activeSubTab === 'browse' && (
@@ -1343,11 +1428,11 @@ export default function GigsMarketplace({
                             : 'Try adjusting your search criteria or check your workspace for active gigs.'}
                         </p>
                       </div>
-                    ) : isGated && displayGigs.length > 5 ? (
+                    ) : isGated && displayGigs.length > FREE_PLAN_GIG_LIMIT ? (
                       <>
                         {/* Top 5 Free Visible Gigs */}
                         <div className="bg-surface border border-slate-300 dark:border-slate-700 divide-y divide-slate-300 dark:divide-slate-700 rounded-none shadow-2xs">
-                          {displayGigs.slice(0, 5).map(gig => (
+                          {displayGigs.slice(0, FREE_PLAN_GIG_LIMIT).map(gig => (
                             <GigCard
                               key={gig.id}
                               gig={gig}
@@ -1366,9 +1451,9 @@ export default function GigsMarketplace({
                         <div ref={paymentCardRef} id="gigs-payment-card" className="relative w-full overflow-hidden border border-t-0 border-slate-300 dark:border-slate-700 bg-surface scroll-mt-6">
                           {/* Underlying locked gigs peaking through */}
                           <div className="p-4 sm:p-5 pb-24 space-y-4 filter blur-[0.5px] opacity-75 select-none pointer-events-none">
-                            {(displayGigs.slice(5).length >= 2
-                              ? displayGigs.slice(5, 8)
-                              : [...displayGigs.slice(5), ...displayGigs.slice(0, 2 - displayGigs.slice(5).length)]
+                            {(displayGigs.slice(FREE_PLAN_GIG_LIMIT).length >= 2
+                              ? displayGigs.slice(FREE_PLAN_GIG_LIMIT, FREE_PLAN_GIG_LIMIT + 3)
+                              : [...displayGigs.slice(FREE_PLAN_GIG_LIMIT), ...displayGigs.slice(0, 2 - displayGigs.slice(FREE_PLAN_GIG_LIMIT).length)]
                             ).map((gig, idx) => (
                               <GigCard
                                 key={`${gig.id}-locked-${idx}`}
@@ -1392,7 +1477,7 @@ export default function GigsMarketplace({
                               </h3>
 
                               <p className="text-xs sm:text-sm font-sans text-slate-600 dark:text-slate-400 max-w-md leading-relaxed">
-                                Top 5 gigs are free. Upgrade to{' '}
+                                Top {FREE_PLAN_GIG_LIMIT} gigs are free. Upgrade to{' '}
                                 <span className="font-semibold text-emerald-700 dark:text-emerald-400">Student Pro</span>{' '}
                                 for lifetime access to all {displayGigs.length} freelance gigs and every future listing.
                               </p>
@@ -1452,6 +1537,16 @@ export default function GigsMarketplace({
                   onBack={() => setActiveSubTab('browse')}
                   onApply={(gig) => {
                     setTargetApplyGig(gig);
+                    if (gig.screeningQuestions && Array.isArray(gig.screeningQuestions)) {
+                      setApplyAnswers(gig.screeningQuestions.map(q => ({
+                        questionId: q.id,
+                        questionText: q.question,
+                        type: q.type || 'LONG_ANSWER',
+                        answer: ''
+                      })));
+                    } else {
+                      setApplyAnswers([]);
+                    }
                     setShowApplyModal(true);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
@@ -1459,6 +1554,8 @@ export default function GigsMarketplace({
                   onNavigateToTests={onNavigateToTests}
                   onStartSkillTest={onStartSkillTest}
                   onAddSkillAndUpgrade={onAddSkillAndUpgrade}
+                  onAddSkillWithoutTest={onAddSkillWithoutTest}
+                  navigation={activeSubTab === 'gig-detail' ? gigNavigation : null}
                   onUpdateProfile={onUpdateProfile}
                   onEditGig={(gig) => {
                     setEditTitle(gig.title || '');
@@ -1797,6 +1894,14 @@ export default function GigsMarketplace({
                     className="hidden"
                   />
                 </label>
+              </div>
+
+              {/* Candidate Screening Questions Section */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none space-y-3">
+                <ScreeningQuestionBuilder
+                  questions={gigScreeningQuestions}
+                  onChange={setGigScreeningQuestions}
+                />
               </div>
 
               <div className="pt-4">
@@ -2504,11 +2609,11 @@ export default function GigsMarketplace({
       {/* Pitch / Application modal */}
       {showApplyModal && (
         <div id="pitch-apply-modal-dialog" className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-xs animate-fade-in pointer-events-auto">
-          <div className="w-full max-w-lg bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-none shadow-2xl p-6 space-y-4 animate-scale-up">
+          <div className="w-full max-w-lg bg-surface border-2 border-slate-300 dark:border-slate-700 rounded-none shadow-2xl p-6 space-y-4 animate-scale-up max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div className="flex items-center justify-between border-b border-slate-300 dark:border-slate-700 pb-3">
               <div>
                 <h3 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100">Apply to: {targetApplyGig?.title}</h3>
-                <p className="text-[11px] font-sans text-slate-600 dark:text-slate-400">Submit your pitch proposal and showcase work samples.</p>
+                <p className="text-[11px] font-sans text-slate-600 dark:text-slate-400">Submit your pitch proposal and answer screening questions.</p>
               </div>
               <button
                 type="button"
@@ -2519,6 +2624,93 @@ export default function GigsMarketplace({
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {/* Screening Questions Section */}
+            {targetApplyGig?.screeningQuestions && targetApplyGig.screeningQuestions.length > 0 && (
+              <div className="space-y-3 p-3 bg-slate-50/70 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-none">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
+                    <span>Screening Questions ({targetApplyGig.screeningQuestions.length})</span>
+                  </h4>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-sans">
+                    Answer all mandatory questions
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {targetApplyGig.screeningQuestions.map((sq, sqIdx) => {
+                    const currentAns = applyAnswers.find(a => (a.questionId && a.questionId === sq.id) || a.questionText === sq.question);
+                    const answerVal = currentAns ? currentAns.answer : '';
+
+                    return (
+                      <div key={sq.id || sqIdx} className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-none space-y-2">
+                        <label className="block text-xs font-headline font-bold text-slate-800 dark:text-slate-200">
+                          {sqIdx + 1}. {sq.question} {sq.required !== false && <span className="text-red-500">*</span>}
+                        </label>
+
+                        {sq.type === 'MCQ' ? (
+                          <div className="space-y-1.5 pt-1">
+                            {(sq.options || []).map((opt, optIdx) => {
+                              const isSelected = answerVal === opt;
+                              return (
+                                <label
+                                  key={optIdx}
+                                  className={`flex items-center gap-2 p-2 rounded-none border text-xs font-sans cursor-pointer transition-colors ${
+                                    isSelected
+                                      ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-600 text-emerald-900 dark:text-emerald-200 font-medium'
+                                      : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400'
+                                  }`}
+                                >
+                                  <input
+                                    type="radio"
+                                    name={`sq_${sq.id || sqIdx}`}
+                                    value={opt}
+                                    checked={isSelected}
+                                    onChange={() => {
+                                      setApplyAnswers(prev => {
+                                        const filtered = prev.filter(a => a.questionId !== sq.id && a.questionText !== sq.question);
+                                        return [...filtered, {
+                                          questionId: sq.id,
+                                          questionText: sq.question,
+                                          type: 'MCQ',
+                                          answer: opt
+                                        }];
+                                      });
+                                    }}
+                                    className="accent-emerald-700 w-3.5 h-3.5"
+                                  />
+                                  <span>{opt}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <textarea
+                            value={answerVal}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setApplyAnswers(prev => {
+                                const filtered = prev.filter(a => a.questionId !== sq.id && a.questionText !== sq.question);
+                                return [...filtered, {
+                                  questionId: sq.id,
+                                  questionText: sq.question,
+                                  type: 'LONG_ANSWER',
+                                  answer: val
+                                }];
+                              });
+                            }}
+                            rows={2}
+                            placeholder="Type your response here..."
+                            className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs font-sans text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 shadow-2xs"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100">Pitch Message / Cover Letter *</label>
@@ -3154,6 +3346,37 @@ export default function GigsMarketplace({
                           <div className="p-3 bg-slate-50 dark:bg-slate-900/40 rounded-none text-xs text-slate-800 dark:text-slate-200 leading-relaxed border border-slate-300 dark:border-slate-700">
                             {app.message}
                           </div>
+                          {app.answers && app.answers.length > 0 && (
+                            <div className="space-y-2 pt-2 border-t border-slate-300 dark:border-slate-700">
+                              <p className="text-[10px] font-headline font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 uppercase">
+                                <CheckCircle className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
+                                Screening Responses ({app.answers.length}):
+                              </p>
+                              <div className="space-y-1.5">
+                                {app.answers.map((ans, ansIdx) => (
+                                  <div key={ansIdx} className="p-2 bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-none text-[11px] space-y-1">
+                                    <div className="flex items-center justify-between gap-1.5 font-headline font-semibold text-slate-800 dark:text-slate-200">
+                                      <span>Q{ansIdx + 1}: {ans.questionText}</span>
+                                      {ans.type === 'MCQ' && (
+                                        <span className={`px-1.5 py-0.5 text-[9px] font-bold border ${
+                                          ans.isCorrect
+                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800'
+                                            : ans.isCorrect === false
+                                            ? 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800'
+                                            : 'bg-slate-200 text-slate-700 border-slate-300 dark:bg-slate-800'
+                                        }`}>
+                                          {ans.isCorrect ? '✓ Correct' : ans.isCorrect === false ? '✗ Incorrect' : 'MCQ'}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="font-sans text-slate-600 dark:text-slate-400">
+                                      <strong>Answer:</strong> {ans.answer}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                           {app.attachments?.length > 0 && (
                             <div className="space-y-1.5 pt-2 border-t border-slate-300 dark:border-slate-700">
                               <p className="text-[10px] font-headline font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
