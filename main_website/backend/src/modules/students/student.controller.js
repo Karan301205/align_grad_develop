@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { prisma } = require('../../infrastructure/database');
 const { TECHNICAL_SKILLS } = require('../../constants/technicalSkills');
 const {
@@ -7,12 +8,40 @@ const {
   calculateCandidateJobRecommendation
 } = require('../skills');
 const { purgeExpiredJobs } = require('../jobs/jobLifecycle.service');
+const { evaluateAnswers, toCandidateQuestions } = require('../jobs/screeningQuestions');
 const { deleteS3ObjectFromUrl } = require('../../services/fileCleanup.service');
 const testSessionRepo = require('../../services/questionBank/repositories/testSessionRepository');
 const questionRepo = require('../../services/questionBank/repositories/questionRepository');
 const assessmentRepo = require('../../services/questionBank/repositories/assessmentRepository');
 const { selectQuestions } = require('../../services/questionBank/selection');
-const { scoreAnswers } = require('../../services/questionBank/scoring');
+const { scoreAnswers, passMark, countUnanswered } = require('../../services/questionBank/scoring');
+
+// A candidate must fill every General-tab field and upload an intro video before
+// applying to jobs or taking skill tests (same rule as the frontend's
+// utils/profileCompleteness.js isProfileComplete). Returns the error for the
+// first missing piece, or null when the profile is complete.
+const REQUIRED_GENERAL_FIELDS = ['name', 'username', 'bio', 'gender', 'email', 'dob', 'phone'];
+function profileCompletionError(profile, action) {
+  const filled = (value) => typeof value === 'string' && value.trim().length > 0;
+  if (!REQUIRED_GENERAL_FIELDS.every((field) => filled(profile[field]))) {
+    return `Please complete all required fields in your profile General tab before ${action}.`;
+  }
+  if (!filled(profile.introVideoUrl)) {
+    return `Please upload an introduction video in your profile before ${action}.`;
+  }
+  return null;
+}
+exports._profileCompletionError = profileCompletionError;
+
+// The company fields a candidate may see with a job. Never the verification docs,
+// official email, owner id or posting quota (ISSUES S2).
+function publicCompany(company) {
+  if (!company) return null;
+  return { id: company.id, name: company.name, logoUrl: company.logoUrl || null, verified: company.verified === true };
+}
+
+// A candidate's own screening answers, without the server's MCQ right/wrong mark.
+const candidateAnswers = (answers) => (Array.isArray(answers) ? answers.map(({ isCorrect, ...answer }) => answer) : []);
 
 exports.getProfile = async (req, res) => {
   try {
@@ -181,12 +210,11 @@ exports.updateProfile = async (req, res) => {
         where: { userId: req.user.id },
         data: {
           name,
-          username: username ? username : null,
+          // Left out of the request → keep the saved username (an empty one clears it).
+          username: username === undefined ? undefined : username || null,
           profilePic,
           resumeUrl,
-          skills: skills ? {
-            set: reconcileSkills(skills, existingProfile.skills, skillsWithMCQs)
-          } : undefined,
+          skills: skills ? reconcileSkills(skills, existingProfile.skills, skillsWithMCQs) : undefined,
           bio,
           nationality,
           gender,
@@ -215,9 +243,7 @@ exports.updateProfile = async (req, res) => {
           username: username ? username : null,
           profilePic,
           resumeUrl,
-          skills: skills ? {
-            set: reconcileSkills(skills, [], skillsWithMCQs)
-          } : undefined,
+          skills: skills ? reconcileSkills(skills, [], skillsWithMCQs) : undefined,
           bio,
           nationality,
           gender,
@@ -278,6 +304,8 @@ exports.getJobs = async (req, res) => {
 
       return {
         ...job,
+        company: publicCompany(job.company),
+        screeningQuestions: toCandidateQuestions(job.screeningQuestions),
         matched: missingRequirements.length === 0,
         missingRequirements,
         requirementStatuses,
@@ -313,22 +341,9 @@ exports.applyJob = async (req, res) => {
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const isGeneralComplete = Boolean(
-      profile.name && profile.name.trim() &&
-      profile.username && profile.username.trim() &&
-      profile.bio && profile.bio.trim() &&
-      profile.gender && profile.gender.trim() &&
-      profile.email && profile.email.trim() &&
-      profile.dob && profile.dob.trim() &&
-      profile.phone && profile.phone.trim()
-    );
-
-    if (!isGeneralComplete) {
-      return res.status(400).json({ error: 'Please complete all required fields in your profile General tab before applying to opportunities.' });
-    }
-
-    if (!profile.introVideoUrl || !profile.introVideoUrl.trim()) {
-      return res.status(400).json({ error: 'Please upload an introduction video in your profile before applying to opportunities.' });
+    const incompleteError = profileCompletionError(profile, 'applying to opportunities');
+    if (incompleteError) {
+      return res.status(400).json({ error: incompleteError });
     }
 
     const job = await prisma.job.findUnique({
@@ -371,54 +386,20 @@ exports.applyJob = async (req, res) => {
           { roundNumber: 1, name: 'Resume Screening', status: 'PENDING', feedback: '' }
         ];
 
-    const { answers } = req.body || {};
-
-    // Process & validate Screening Questions
-    let evaluatedAnswers = [];
-    if (job.screeningQuestions && Array.isArray(job.screeningQuestions) && job.screeningQuestions.length > 0) {
-      const incomingAnswers = Array.isArray(answers) ? answers : [];
-
-      for (const sq of job.screeningQuestions) {
-        const userAns = incomingAnswers.find(a => 
-          (a.questionId && a.questionId === sq.id) || 
-          (a.questionText && a.questionText.trim().toLowerCase() === sq.question.trim().toLowerCase())
-        );
-        const answerText = userAns ? String(userAns.answer || '').trim() : '';
-
-        if (sq.required && !answerText) {
-          return res.status(400).json({
-            error: `Please answer the required screening question: "${sq.question}"`
-          });
-        }
-
-        let isCorrect = null;
-        if (sq.type === 'MCQ' && sq.correctAnswer) {
-          isCorrect = answerText.toLowerCase() === sq.correctAnswer.trim().toLowerCase();
-        }
-
-        if (answerText) {
-          evaluatedAnswers.push({
-            questionId: sq.id || null,
-            questionText: sq.question,
-            type: sq.type || 'LONG_ANSWER',
-            answer: answerText,
-            isCorrect
-          });
-        }
-      }
+    // Screening answers are checked per question type; MCQs are scored server-side.
+    const screening = evaluateAnswers(job.screeningQuestions, (req.body || {}).answers);
+    if (screening.error) {
+      return res.status(400).json({ error: screening.error });
     }
+    const evaluatedAnswers = screening.answers;
 
     const app = await prisma.application.create({
       data: {
         studentId: profile.id,
         jobId: job.id,
         status: 'APPLIED',
-        roundStatuses: {
-          set: roundStatuses
-        },
-        answers: evaluatedAnswers.length > 0 ? {
-          set: evaluatedAnswers
-        } : undefined
+        roundStatuses,
+        answers: evaluatedAnswers.length > 0 ? evaluatedAnswers : undefined
       }
     });
 
@@ -462,9 +443,17 @@ exports.getTechnicalSkills = async (req, res) => {
     });
     const skillsWithMCQs = new Set(activeQuestions.map(q => q.skillName.toLowerCase()));
 
+    // When each skill was last tested (newest attempt first).
+    const attempts = await prisma.testAttempt.findMany({ where: { profileId: profile.id }, orderBy: { createdAt: 'desc' } });
+    const testedAt = new Map();
+    attempts.forEach(a => {
+      const key = String(a.skillName || '').toLowerCase();
+      if (!testedAt.has(key)) testedAt.set(key, a.createdAt);
+    });
+
     // Filter skills locally using TECHNICAL_SKILLS Set
     const technicalSkills = skills
-      .filter(s => TECHNICAL_SKILLS.has(s.name.toLowerCase()))
+      .filter(s => s && s.name && TECHNICAL_SKILLS.has(s.name.toLowerCase()))
       .map(s => {
         const hasQuiz = skillsWithMCQs.has(s.name.toLowerCase());
         return {
@@ -473,7 +462,8 @@ exports.getTechnicalSkills = async (req, res) => {
           verifiedRating: s.verifiedRating || null,
           hasQuiz: hasQuiz,
           canTestNow: hasQuiz,
-          autoVerifiedForNow: !hasQuiz
+          autoVerifiedForNow: !hasQuiz,
+          testedAt: testedAt.get(s.name.toLowerCase()) || null
         };
       });
 
@@ -497,14 +487,42 @@ exports.getTechnicalSkills = async (req, res) => {
 async function buildSkillTest(skillName, opts = {}) {
   const pool = await questionRepo.findActiveBySkill(skillName);
   const picked = selectQuestions(pool, { count: 10, seed: opts.seed });
+  const shuffled = picked.map((q) => shuffleOptions(q.options || [], q.correctIndex));
 
   return {
-    questions: picked.map((q, i) => ({ id: i + 1, question: q.question, options: q.options })),
-    answerKey: picked.map((q) => q.correctIndex),
+    questions: picked.map((q, i) => ({ id: i + 1, question: q.question, options: shuffled[i].options })),
+    answerKey: shuffled.map((q) => q.correctIndex),
     questionIds: picked.map((q) => q.id),
   };
 }
 exports._buildSkillTest = buildSkillTest;
+
+// Options that only make sense where the author put them ("All of the above",
+// "Both A and B") keep their place when a question's options are shuffled.
+const PINNED_OPTION = /\b(all|none|both|neither) of the above\b|\bboth [a-d] and [a-d]\b/i;
+
+/**
+ * A fresh order of a question's options for one test, so the right answer can't be
+ * guessed from its position (in the bank most right answers are option A or B).
+ * Returns { options, correctIndex } with the key moved to the answer's new place.
+ */
+function shuffleOptions(options, correctIndex, randomInt = crypto.randomInt) {
+  const free = options.map((_, i) => i).filter((i) => !PINNED_OPTION.test(String(options[i])));
+  const order = [...free];
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = randomInt(i + 1);
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  const source = options.map((_, i) => i); // new position -> original position
+  free.forEach((slot, k) => {
+    source[slot] = order[k];
+  });
+  return { options: source.map((i) => options[i]), correctIndex: source.indexOf(correctIndex) };
+}
+exports._shuffleOptions = shuffleOptions;
+
+// Tests being scored right now (session ids), so a double click can't score twice.
+const submitsInFlight = new Set();
 
 exports.generateSkillTest = async (req, res) => {
   const { skillName } = req.body;
@@ -513,6 +531,17 @@ exports.generateSkillTest = async (req, res) => {
   }
 
   try {
+    // Skill tests unlock only once the General tab and intro video are done
+    // (the "Your Tests" tab is locked in the UI until then).
+    const profile = await prisma.profile.findUnique({ where: { userId: req.user.id } });
+    if (!profile) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    const incompleteError = profileCompletionError(profile, 'taking skill tests');
+    if (incompleteError) {
+      return res.status(403).json({ error: incompleteError });
+    }
+
     const { questions, answerKey, questionIds } = await buildSkillTest(skillName);
     // Bank-only (Phase 4): if the bank cannot supply a full test, fail rather than
     // generate dynamically.
@@ -549,6 +578,10 @@ exports.submitSkillTest = async (req, res) => {
   if (!sessionId || !Array.isArray(answers)) {
     return res.status(400).json({ error: 'sessionId and answers[] are required' });
   }
+  if (submitsInFlight.has(sessionId)) {
+    return res.status(409).json({ error: 'This test is already being scored.' });
+  }
+  submitsInFlight.add(sessionId);
 
   try {
     // Single-use, expiring, owned-by-caller session. Rejects fabricated,
@@ -558,8 +591,18 @@ exports.submitSkillTest = async (req, res) => {
       return res.status(400).json({ error: 'Invalid, expired, or already-used test session' });
     }
 
+    // Every served question must be answered. Checked before the session is
+    // burned, so the candidate can go back, finish the test and resubmit.
+    const unanswered = countUnanswered(session.answerKey, answers);
+    if (unanswered > 0) {
+      const total = (session.answerKey || []).length;
+      return res.status(400).json({
+        error: `Please answer all ${total} questions before submitting (${unanswered} unanswered).`,
+      });
+    }
+
     // Server-side scoring against the stored answer key.
-    const { score, passed, rating } = scoreAnswers(session.answerKey, answers);
+    const { correct, total, score, passed, rating } = scoreAnswers(session.answerKey, answers);
 
     // Classify every served question from the SERVER-SIDE key (frontend values are
     // never trusted). A missing answer or the -1 sentinel counts as a skip.
@@ -579,6 +622,24 @@ exports.submitSkillTest = async (req, res) => {
 
     // Burn the session before mutating anything so it can never be replayed.
     await testSessionRepo.markUsed(session.id, { score, passed });
+
+    // Right answers per subtopic, for the candidate's summary ("what to focus on").
+    // Best-effort: without it the result still shows the score.
+    const subtopicOf = new Map(
+      (await questionRepo.findSubtopics(ids).catch((e) => {
+        console.error('subtopic lookup failed:', e.message);
+        return [];
+      })).map((q) => [q.id, q.subtopic])
+    );
+    const byTopic = new Map();
+    results.forEach((r, i) => {
+      const name = subtopicOf.get(ids[i]);
+      if (!name) return;
+      const topic = byTopic.get(name) || { name, correct: 0, total: 0 };
+      topic.total += 1;
+      if (r.correct) topic.correct += 1;
+      byTopic.set(name, topic);
+    });
 
     // Atomically fold this attempt into the per-question counters. Best-effort:
     // a tracking failure must not fail the candidate's submission.
@@ -633,7 +694,7 @@ exports.submitSkillTest = async (req, res) => {
 
     await prisma.profile.update({
       where: { id: profile.id },
-      data: { skills: { set: updatedSkills } },
+      data: { skills: updatedSkills },
     });
 
     console.log('[assessment] submitted', {
@@ -646,15 +707,20 @@ exports.submitSkillTest = async (req, res) => {
     res.json({
       score,                 // percentage 0-100
       rating,                // 1-10 level (only applied to the profile when passed)
-      total: session.answerKey.length,
+      correct,               // number of correctly answered questions
+      total,                 // number of questions served
+      passMark: passMark(total), // correct answers needed to pass (7 of 10)
       passed,
       skillName: session.skillName,
       results,               // [{ correct: boolean }] aligned to served question order
+      topics: [...byTopic.values()], // [{ name, correct, total }] per subtopic served
       skills: updatedSkills,
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error submitting skill test' });
+  } finally {
+    submitsInFlight.delete(sessionId);
   }
 };
 
@@ -787,10 +853,12 @@ exports.getStudentApplications = async (req, res) => {
       });
       return {
         ...app,
+        answers: candidateAnswers(app.answers),
         job: {
           ...job,
-          companyName: company ? company.name : (job.companyName || 'Aether Corp'),
-          company: company
+          screeningQuestions: toCandidateQuestions(job.screeningQuestions),
+          companyName: company?.name || job.companyName || '',
+          company: publicCompany(company)
         }
       };
     }));
@@ -819,7 +887,7 @@ exports.getPublicJobBrief = async (req, res) => {
       return res.status(404).json({ error: 'Job not found or expired' });
     }
 
-    res.json(job);
+    res.json({ ...job, company: publicCompany(job.company), screeningQuestions: toCandidateQuestions(job.screeningQuestions) });
   } catch (err) {
     console.error('Error fetching public job brief:', err);
     res.status(500).json({ error: 'Server error fetching job brief' });

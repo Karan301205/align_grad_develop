@@ -95,15 +95,25 @@ export default function App() {
   const [showAllRecruiterSkills, setShowAllRecruiterSkills] = useState(false);
   const [showAllStudentSkills, setShowAllStudentSkills] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  // Plain message per section when its data couldn't be loaded (details are in the console).
+  const [loadErrors, setLoadErrors] = useState({});
+  const reportLoad = (section, failure) =>
+    setLoadErrors((prev) => ({ ...prev, [section]: failure ? failure.message || failure.error || 'Something went wrong on our side. Please try again in a moment.' : null }));
 
   const fetchDashboardStats = () => {
     return adminApi.getDashboardStats()
       .then(data => {
         if (data.success) {
           setStats(data.stats);
+          reportLoad('dashboard', null);
+        } else {
+          reportLoad('dashboard', data);
         }
       })
-      .catch(err => console.error('Error fetching admin stats:', err));
+      .catch(err => {
+        console.error('Error fetching admin stats:', err);
+        reportLoad('dashboard', err);
+      });
   };
 
   const fetchStudents = () => {
@@ -112,11 +122,15 @@ export default function App() {
       .then(data => {
         if (data.success) {
           setStudents(data.students);
+          reportLoad('students', null);
+        } else {
+          reportLoad('students', data);
         }
         setLoadingStudents(false);
       })
       .catch(err => {
         console.error('Error fetching students:', err);
+        reportLoad('students', err);
         setLoadingStudents(false);
       });
   };
@@ -127,11 +141,15 @@ export default function App() {
       .then(data => {
         if (data.success) {
           setRecruiters(data.recruiters);
+          reportLoad('recruiters', null);
+        } else {
+          reportLoad('recruiters', data);
         }
         setLoadingRecruiters(false);
       })
       .catch(err => {
         console.error('Error fetching recruiters:', err);
+        reportLoad('recruiters', err);
         setLoadingRecruiters(false);
       });
   };
@@ -142,11 +160,15 @@ export default function App() {
       .then(data => {
         if (data.success) {
           setJobs(data.jobs);
+          reportLoad('jobs', null);
+        } else {
+          reportLoad('jobs', data);
         }
         setLoadingJobs(false);
       })
       .catch(err => {
         console.error('Error fetching jobs:', err);
+        reportLoad('jobs', err);
         setLoadingJobs(false);
       });
   };
@@ -157,11 +179,15 @@ export default function App() {
       .then(data => {
         if (data.success) {
           setStorageInfo(data);
+          reportLoad('storage', null);
+        } else {
+          reportLoad('storage', data);
         }
         setLoadingStorage(false);
       })
       .catch(err => {
         console.error('Error fetching S3 metrics:', err);
+        reportLoad('storage', err);
         setLoadingStorage(false);
       });
   };
@@ -172,11 +198,15 @@ export default function App() {
       .then(data => {
         if (data.success) {
           setAnalyticsData(data);
+          reportLoad('analytics', null);
+        } else {
+          reportLoad('analytics', data);
         }
         setLoadingAnalytics(false);
       })
       .catch(err => {
         console.error('Error fetching analytics metrics:', err);
+        reportLoad('analytics', err);
         setLoadingAnalytics(false);
       });
   };
@@ -347,12 +377,12 @@ export default function App() {
     { id: 'analytics', label: 'Platform Analytics', icon: BarChart3 },
   ];
 
-  // Mock data for analytics
+  // Headline counts from GET /dashboard/stats
   const kpiStats = [
-    { label: 'Total Students', value: stats.totalStudents, change: '+12.5%', color: 'from-indigo-500 to-purple-500', icon: Users },
-    { label: 'Total Recruiters', value: stats.totalRecruiters, change: '+8.3%', color: 'from-blue-500 to-sky-500', icon: Building2 },
-    { label: 'Active Job Openings', value: stats.activeJobs, change: '+15.2%', color: 'from-emerald-500 to-teal-500', icon: Briefcase },
-    { label: 'Certifications Verified', value: stats.verifiedCerts, change: '+22.1%', color: 'from-amber-500 to-orange-500', icon: Award },
+    { label: 'Total Students', value: stats.totalStudents, color: 'from-indigo-500 to-purple-500', icon: Users },
+    { label: 'Total Recruiters', value: stats.totalRecruiters, color: 'from-blue-500 to-sky-500', icon: Building2 },
+    { label: 'Active Job Openings', value: stats.activeJobs, color: 'from-emerald-500 to-teal-500', icon: Briefcase },
+    { label: 'Certifications Verified', value: stats.verifiedCerts, color: 'from-amber-500 to-orange-500', icon: Award },
   ];
 
   if (!token) {
@@ -504,7 +534,7 @@ export default function App() {
             <div className="flex items-center justify-between text-xs font-semibold">
               <div className="flex items-center gap-2 text-slate-300">
                 <Server className="w-3.5 h-3.5 text-indigo-400" />
-                <span>MongoDB</span>
+                <span>PostgreSQL</span>
               </div>
               <span className="text-emerald-400 font-sans font-normal text-[10px]">Connected</span>
             </div>
@@ -514,7 +544,7 @@ export default function App() {
                 <HardDrive className="w-3.5 h-3.5 text-sky-400" />
                 <span>AWS S3</span>
               </div>
-              <span className="text-emerald-400 font-sans font-normal text-[10px]">{stats.storageSize}</span>
+              <span className="text-emerald-400 font-sans font-normal text-[10px]">{stats.storageSize ?? 'Unavailable'}</span>
             </div>
           </div>
         </div>
@@ -564,6 +594,19 @@ export default function App() {
           </div>
         </div>
 
+        {loadErrors[activeTab] && (
+          <div role="alert" className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-semibold">
+            <span>Couldn’t load this section. {loadErrors[activeTab]}</span>
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="self-start sm:self-auto px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 disabled:opacity-50 text-rose-200 text-[10px] font-headline font-medium tracking-wider"
+            >
+              Try again
+            </button>
+          </div>
+        )}
+
         {/* Tab content conditional routing */}
         {activeTab === 'dashboard' && (
           <div className="space-y-8">
@@ -578,7 +621,6 @@ export default function App() {
                       <span className="text-xs text-slate-400 font-medium tracking-wide">{kpi.label}</span>
                       <div className="flex items-baseline gap-2">
                         <span className="text-2xl font-extrabold text-white tracking-tight">{kpi.value}</span>
-                        <span className="text-[10px] font-bold text-emerald-400">{kpi.change}</span>
                       </div>
                     </div>
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${kpi.color} p-0.5 shadow-md shadow-indigo-500/5`}>
@@ -774,7 +816,7 @@ export default function App() {
                           <td className="py-4 text-slate-400 font-sans font-normal">{student.email}</td>
                           <td className="py-4">{student.skills}</td>
                           <td className="py-4">
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${student.status === 'Fully Verified'
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${student.status === 'Skills added'
                                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                 : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
                               }`}>
@@ -1016,9 +1058,9 @@ export default function App() {
                   Bucket: <span className="text-indigo-400">{storageInfo?.bucketName || '...'}</span> | Region: <span className="text-indigo-400">{storageInfo?.region || '...'}</span>
                 </p>
               </div>
-              {storageInfo?.isMock && (
+              {storageInfo?.s3Unavailable && (
                 <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-[9px] text-amber-400 font-headline font-medium rounded-lg  tracking-wider shrink-0">
-                  ⚠️ Local Sandbox Mode (Simulated Data)
+                  ⚠️ S3 details aren’t available right now
                 </span>
               )}
             </div>
@@ -1143,28 +1185,23 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* MongoDB Storage Explorer */}
+                {/* PostgreSQL Storage Explorer */}
                 <div className="pt-6 border-t border-slate-900/60 space-y-6">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                      <h3 className="text-base font-bold text-white tracking-wide">MongoDB Database Explorer</h3>
+                      <h3 className="text-base font-bold text-white tracking-wide">PostgreSQL Database Explorer</h3>
                       <p className="text-xs text-slate-400 font-sans font-normal mt-1">
-                        Database: <span className="text-indigo-400">{storageInfo?.mongoStats?.dbName || '...'}</span> | Total Documents: <span className="text-indigo-400">{storageInfo?.mongoStats?.totalDocuments || 0}</span>
+                        Database: <span className="text-indigo-400">{storageInfo?.databaseStats?.dbName || '...'}</span> | Total Rows: <span className="text-indigo-400">{storageInfo?.databaseStats?.totalDocuments || 0}</span>
                       </p>
                     </div>
-                    {storageInfo?.mongoStats?.isMock && (
-                      <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-[9px] text-amber-400 font-headline font-medium rounded-lg  tracking-wider shrink-0">
-                        ⚠️ Local Sandbox Mode (Simulated Data)
-                      </span>
-                    )}
                   </div>
 
-                  {/* MongoDB Metrics Cards */}
+                  {/* Database Metrics Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
                       <span className="text-[10px] text-slate-500 font-bold  tracking-wider block font-headline font-medium">Total DB Storage Size</span>
                       <div className="text-2xl font-black text-white leading-none font-sans font-normal">
-                        {storageInfo?.mongoStats?.formattedStorageSize || '0 Bytes'}
+                        {storageInfo?.databaseStats?.formattedStorageSize || '0 Bytes'}
                       </div>
                       <span className="text-[9px] text-slate-400 block leading-tight font-medium">Disk space allocated for database records</span>
                     </div>
@@ -1172,28 +1209,28 @@ export default function App() {
                     <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
                       <span className="text-[10px] text-slate-500 font-bold  tracking-wider block font-headline font-medium">Estimated Monthly DB Bill</span>
                       <div className="text-2xl font-black text-emerald-400 leading-none font-sans font-normal">
-                        ${storageInfo?.mongoStats?.estimatedMonthlyBill?.toFixed(4) || '0.0000'}
+                        ${storageInfo?.databaseStats?.estimatedMonthlyBill?.toFixed(4) || '0.0000'}
                       </div>
-                      <span className="text-[9px] text-slate-400 block leading-tight font-medium">Based on Atlas Serverless storage rate ($0.10/GB)</span>
+                      <span className="text-[9px] text-slate-400 block leading-tight font-medium">Estimated at a reference rate of $0.10/GB per month</span>
                     </div>
 
                     <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-2">
                       <span className="text-[10px] text-slate-500 font-bold  tracking-wider block font-headline font-medium">Total Index Size</span>
                       <div className="text-2xl font-black text-indigo-400 leading-none font-sans font-normal">
-                        {storageInfo?.mongoStats?.formattedIndexSize || '0 Bytes'}
+                        {storageInfo?.databaseStats?.formattedIndexSize || '0 Bytes'}
                       </div>
                       <span className="text-[9px] text-slate-400 block leading-tight font-medium">Total memory footprint of lookup indexes</span>
                     </div>
                   </div>
 
-                  {/* Collections Breakdown Table */}
+                  {/* Tables Breakdown */}
                   <div className="p-6 rounded-2xl bg-slate-950/40 border border-slate-900/60 backdrop-blur-md space-y-4">
-                    <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium ">Usage by Collection</h4>
+                    <h4 className="text-xs font-bold text-white tracking-wide font-headline font-medium ">Usage by Table</h4>
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs font-semibold text-slate-300">
                         <thead>
                           <tr className="border-b border-slate-900/80 text-[10px] text-slate-400  tracking-wider font-bold">
-                            <th className="py-3">Collection Name</th>
+                            <th className="py-3">Table Name</th>
                             <th className="py-3">Record Count</th>
                             <th className="py-3">Data Size</th>
                             <th className="py-3">Index Size</th>
@@ -1201,10 +1238,10 @@ export default function App() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-900/40 font-sans font-normal text-[11px]">
-                          {storageInfo?.mongoStats?.collections && storageInfo.mongoStats.collections.map((col, idx) => (
+                          {storageInfo?.databaseStats?.collections && storageInfo.databaseStats.collections.map((col, idx) => (
                             <tr key={idx} className="hover:bg-slate-900/10">
                               <td className="py-3.5 font-sans font-bold text-slate-200">{col.name}</td>
-                              <td className="py-3.5 text-slate-400">{col.count} documents</td>
+                              <td className="py-3.5 text-slate-400">{col.count} rows</td>
                               <td className="py-3.5 text-slate-300">{col.formattedSize}</td>
                               <td className="py-3.5 text-slate-500">{col.formattedIndexSize}</td>
                               <td className="py-3.5 text-right text-emerald-400 font-bold">${col.cost.toFixed(6)}</td>

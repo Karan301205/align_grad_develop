@@ -1,15 +1,12 @@
-import React from 'react';
 import { CheckCircle, Award, Send } from 'lucide-react';
 import PageHeader from '../../../components/ui/PageHeader';
 import Card from '../../../components/ui/Card';
 import Button from '../../../components/ui/Button';
-import { formatErrorMessage } from '../../../utils/errorFormatter';
 
 export default function StudentResume({
   profile,
   generatingPdf,
   handleDownloadGeneratedResume,
-  feedbackMsg,
   phone,
   profileEmail,
   nationality,
@@ -26,23 +23,6 @@ export default function StudentResume({
         title="Resume Management"
         subtitle="Instantly generate and download a clean PDF resume formatted with your current profile details and ratings"
       />
-
-      {feedbackMsg && (
-        <div className={`p-4 rounded-xl border text-sm flex items-start gap-3 w-full ${
-          feedbackMsg.includes('success')
-            ? 'bg-success-container border-success/30 text-on-success-container items-center'
-            : 'bg-error-container border-error/30 text-on-error-container'
-        }`}>
-          {feedbackMsg.includes('success') ? (
-            <>
-              <CheckCircle className="w-5 h-5 shrink-0 text-success" />
-              <span className="font-medium">{feedbackMsg}</span>
-            </>
-          ) : (
-            formatErrorMessage(feedbackMsg)
-          )}
-        </div>
-      )}
 
       <div className="max-w-2xl mx-auto">
         {/* Generated Resume Card */}

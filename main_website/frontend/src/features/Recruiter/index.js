@@ -1,10 +1,11 @@
 export { default as RecruiterLayout } from './pages/RecruiterLayout';
-export { default as RecruiterJobs } from './components/RecruiterJobs';
-export { default as RecruiterCandidates } from './components/RecruiterCandidates';
-export { default as RecruiterPostJob } from './components/RecruiterPostJob';
-export { default as RecruiterCompany } from './components/RecruiterCompany';
-export { default as RecruiterDashboard } from './components/RecruiterDashboard';
+export { default as JobsPage } from './jobs/JobsPage';
+export { default as ApplicationsPage } from './jobs/ApplicationsPage';
+export { default as CandidatesPage } from './candidates/CandidatesPage';
+export { default as PostJobPage } from './postJob/PostJobPage';
+export { default as CompanyProfilePage } from './companyProfile/CompanyProfilePage';
+export { default as BillingPage } from './billing/BillingPage';
+export { default as DashboardPage } from './dashboard/DashboardPage';
 export { default as CandidateProfileModal } from './components/CandidateProfileModal';
 export { default as EditJobModal } from './components/EditJobModal';
-export { default as RecruiterApplications } from './components/RecruiterApplications';
 export { default as ScreeningQuestionBuilder } from './components/ScreeningQuestionBuilder';

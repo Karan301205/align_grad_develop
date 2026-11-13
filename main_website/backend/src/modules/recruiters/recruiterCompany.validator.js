@@ -27,4 +27,12 @@ const updateCompanySchema = {
   })
 };
 
-module.exports = { updateCompanySchema };
+// Office gallery only (PUT /recruiter/company/photos). The controller caps how
+// many photos can be added; the schema bound just rejects absurd payloads.
+const updateCompanyPhotosSchema = {
+  body: z.object({
+    photos: z.array(z.string().url('Invalid photo URL')).max(50)
+  })
+};
+
+module.exports = { updateCompanySchema, updateCompanyPhotosSchema };

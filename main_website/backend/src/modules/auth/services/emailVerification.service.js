@@ -131,6 +131,7 @@ async function initiateVerification({ email, password, role, name }) {
     console.error(`[EmailVerificationService] Failed to send PIN email to ${normalizedEmail}:`, err.message);
     const mailError = new Error('Failed to send verification email. Please check your email address or try again later.');
     mailError.statusCode = 500;
+    mailError.expose = true; // written for users
     throw mailError;
   }
 
@@ -374,6 +375,7 @@ async function resendPin({ email, role }) {
     console.error(`[EmailVerificationService] Failed to resend PIN email to ${normalizedEmail}:`, err.message);
     const mailError = new Error('Failed to dispatch verification email. Please try again later.');
     mailError.statusCode = 500;
+    mailError.expose = true; // written for users
     throw mailError;
   }
 

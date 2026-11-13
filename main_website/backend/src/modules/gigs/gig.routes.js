@@ -10,6 +10,9 @@ const {
   updateGigSchema,
   applyGigSchema,
   sendMessageSchema,
+  getMessagesSchema,
+  candidateActionSchema,
+  gigStatusSchema,
   submitWorkSchema,
   reviewGigSchema
 } = require('./gig.validator');
@@ -18,13 +21,15 @@ const {
 router.get('/', authMiddleware, relaxedLimit, gigController.getGigs);
 router.post('/', authMiddleware, relaxedLimit, requireApprovedRecruiter, validate(createGigSchema), gigController.createGig);
 router.put('/:gigId', authMiddleware, relaxedLimit, validate(updateGigSchema), gigController.updateGig);
-router.patch('/:gigId/status', authMiddleware, relaxedLimit, gigController.updateGigStatus);
+router.patch('/:gigId/status', authMiddleware, relaxedLimit, validate(gigStatusSchema), gigController.updateGigStatus);
 router.delete('/:gigId', authMiddleware, relaxedLimit, gigController.deleteGig);
 router.get('/my-gigs', authMiddleware, relaxedLimit, gigController.getMyGigs);
 router.get('/:gigId', authMiddleware, relaxedLimit, gigController.getGigDetails);
 router.post('/:gigId/apply', authMiddleware, relaxedLimit, validate(applyGigSchema), gigController.applyToGig);
-router.post('/:gigId/hire', authMiddleware, relaxedLimit, gigController.hireCandidate);
-router.post('/:gigId/reject', authMiddleware, relaxedLimit, gigController.rejectCandidate);
+router.post('/:gigId/hire', authMiddleware, relaxedLimit, validate(candidateActionSchema), gigController.hireCandidate);
+router.post('/:gigId/reject', authMiddleware, relaxedLimit, validate(candidateActionSchema), gigController.rejectCandidate);
+// Chat: incremental reads (polled while a conversation is open) and sends.
+router.get('/:gigId/messages', authMiddleware, relaxedLimit, validate(getMessagesSchema), gigController.getMessages);
 router.post('/:gigId/messages', authMiddleware, relaxedLimit, validate(sendMessageSchema), gigController.sendMessage);
 router.post('/:gigId/submit', authMiddleware, relaxedLimit, validate(submitWorkSchema), gigController.submitWork);
 router.post('/:gigId/complete', authMiddleware, relaxedLimit, gigController.completeGig);

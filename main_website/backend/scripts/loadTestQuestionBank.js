@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 /**
  * Load test the assessment flow under concurrent usage (Phase 6). Runs against
- * the MOCK DB by default (force with DATABASE_URL=''), simulating many candidates
+ * the in-memory test DB (NODE_ENV=test, empty DATABASE_URL), simulating many candidates
  * taking assessments simultaneously. Verifies atomic counters, no duplicate
  * question selection within an assessment, no data corruption, and reports timing.
  *
  *   DATABASE_URL='' node scripts/loadTestQuestionBank.js [totalAssessments] [concurrency]
  *
  * NOTE: Node is single-threaded, so this exercises async interleaving + counting
- * correctness + latency, not OS-level parallelism. On real MongoDB, counter
+ * correctness + latency, not OS-level parallelism. On a real database, counter
  * updates use atomic $inc, which is race-safe across processes.
  */
+// Runs on the in-memory test store only (NODE_ENV=test + empty DATABASE_URL); the
+// server itself never falls back to it.
+process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL = process.env.DATABASE_URL || '';
 const path = require('path');
 const BE = __dirname + '/..';

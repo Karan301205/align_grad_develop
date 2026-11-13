@@ -3,6 +3,12 @@ import { Plus, Trash2, Briefcase, DollarSign, Calendar, MapPin, ListChecks, X, G
 import { ALL_SKILLS } from '../../../constants';
 import Button from '../../../components/ui/Button';
 import ScreeningQuestionBuilder from './ScreeningQuestionBuilder';
+import { validateScreeningQuestions } from '../../../constants/screeningQuestions';
+import { SelectControl } from './AccountControls';
+import { EXPERIENCE_OPTIONS, WORK_MODE_OPTIONS } from '../postJob/constants';
+
+// Same lists the post-a-job form saves; a job saved with an older value keeps it selectable.
+const withCurrent = (list, current) => (current && !list.includes(current) ? [current, ...list] : list).map((item) => [item, item]);
 
 export default function EditJobModal({ job, onClose, onUpdate }) {
   if (!job) return null;
@@ -38,6 +44,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
 
   // Screening questions
   const [screeningQuestions, setScreeningQuestions] = useState(job.screeningQuestions || []);
+  const [screeningError, setScreeningError] = useState(null);
 
   const [saving, setSaving] = useState(false);
 
@@ -76,6 +83,13 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
   const onSubmit = async (e) => {
     e.preventDefault();
     if (saving) return;
+
+    const screeningProblem = validateScreeningQuestions(screeningQuestions);
+    setScreeningError(screeningProblem);
+    if (screeningProblem) {
+      document.getElementById('edit-job-screening')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     setSaving(true);
     const updatedPayload = {
@@ -228,16 +242,13 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-[10px] font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">Type of Job *</label>
-                <select
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-semibold text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                <SelectControl
+                  size="sm"
+                  aria-label="Type of job"
                   value={workMode}
-                  onChange={e => setWorkMode(e.target.value)}
-                  required
-                >
-                  <option value="Work from office">Work from office</option>
-                  <option value="Remote">Remote</option>
-                  <option value="Hybrid">Hybrid</option>
-                </select>
+                  onChange={setWorkMode}
+                  options={withCurrent(WORK_MODE_OPTIONS, workMode)}
+                />
               </div>
 
               <div>
@@ -252,18 +263,13 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
 
               <div>
                 <label className="block text-[10px] font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">Desired Experience *</label>
-                <select
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-semibold text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                <SelectControl
+                  size="sm"
+                  aria-label="Desired experience"
                   value={desiredExperience}
-                  onChange={e => setDesiredExperience(e.target.value)}
-                  required
-                >
-                  <option value="Fresher">Fresher</option>
-                  <option value="1 Year">1 Year</option>
-                  <option value="2 Years">2 Years</option>
-                  <option value="3+ Years">3+ Years</option>
-                  <option value="Any years of experience">Any years of experience</option>
-                </select>
+                  onChange={setDesiredExperience}
+                  options={withCurrent(EXPERIENCE_OPTIONS, desiredExperience)}
+                />
               </div>
             </div>
 
@@ -288,12 +294,12 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                       className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
                     />
                     {isSkillDropdownOpen && (
-                      <div className="absolute top-full left-0 right-0 mt-1.5 bg-surface border border-slate-300 dark:border-slate-700 rounded-none shadow-2xl z-50 max-h-40 overflow-y-auto custom-scrollbar">
+                      <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-40 overflow-y-auto rounded-[8px] border border-[#E4E6EA] bg-white p-1 shadow-lg shadow-slate-300/50">
                         {ALL_SKILLS.filter(
                           s => s.skill.toLowerCase().includes(selectedReqSkill.toLowerCase()) &&
                                !reqs.some(exist => exist.skillName.toLowerCase() === s.skill.toLowerCase())
                         ).length === 0 ? (
-                          <div className="px-4 py-2 text-xs text-slate-600 dark:text-slate-400 font-sans font-medium">No matching skills</div>
+                          <div className="px-3 py-2 text-[13px] text-[#4B5563]">No matching skills</div>
                         ) : (
                           ALL_SKILLS.filter(
                             s => s.skill.toLowerCase().includes(selectedReqSkill.toLowerCase()) &&
@@ -306,10 +312,10 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                                 setSelectedReqSkill(s.skill);
                                 setIsSkillDropdownOpen(false);
                               }}
-                              className="w-full text-left px-4 py-2 text-xs text-slate-900 dark:text-slate-100 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-700 transition-all flex items-center justify-between"
+                              className="flex w-full items-center justify-between gap-3 rounded-[6px] px-3 py-2 text-left text-[13px] text-[#334155] transition-colors hover:bg-[#F8F8F6]"
                             >
-                              <span className="font-semibold">{s.skill}</span>
-                              <span className="text-[9px] text-slate-600 dark:text-slate-400 font-sans capitalize px-1.5 py-0.5 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700">
+                              <span>{s.skill}</span>
+                              <span className="text-xs capitalize text-[#4B5563]">
                                 {s.type}
                               </span>
                             </button>
@@ -633,11 +639,17 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
           </div>
 
           {/* SECTION 6: Screening Questions */}
-          <div className="bg-slate-50/80 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none p-5 space-y-4">
+          <div id="edit-job-screening" className="bg-slate-50/80 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none p-5 space-y-4">
             <ScreeningQuestionBuilder
               questions={screeningQuestions}
-              onChange={setScreeningQuestions}
+              onChange={(next) => {
+                setScreeningQuestions(next);
+                setScreeningError(null);
+              }}
             />
+            {screeningError && (
+              <p role="alert" className="text-xs font-sans font-medium text-rose-600">{screeningError}</p>
+            )}
           </div>
 
           {/* Action Row */}

@@ -1,11 +1,11 @@
 const { z } = require('zod');
 
-const objectIdRegex = /^[0-9a-fA-F]{24}$/;
-const objectIdSchema = z.string().regex(objectIdRegex, 'Invalid ID format');
+const idRegex = /^[0-9a-fA-F]{24}$/;
+const idSchema = z.string().regex(idRegex, 'Invalid ID format');
 
 const reviewVerificationSchema = {
   params: z.object({
-    recruiterId: objectIdSchema
+    recruiterId: idSchema
   }),
   body: z.object({
     decision: z.enum(['APPROVE', 'REJECT']),

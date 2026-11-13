@@ -31,12 +31,15 @@ app.get('/health', async (req, res) => {
     await prisma.user.count();
     res.json({ status: 'OK', services: { api: 'ACTIVE', database: 'ACTIVE' }, timestamp: new Date() });
   } catch (error) {
-    console.error('Database connection failed in health check:', error);
-    res.status(500).json({ 
-      status: 'ERROR', 
-      services: { api: 'ACTIVE', database: 'INACTIVE' }, 
-      error: error.message, 
-      timestamp: new Date() 
+    // The cause stays in the server log; callers only learn that the database is down.
+    // The frontend polls this every few seconds while waiting, so log one line (the
+    // cause), not the whole stack each time.
+    const cause = String(error?.message || error).split('\n').map((line) => line.trim()).filter(Boolean).pop();
+    console.error(`[health] Database check failed: ${cause}`);
+    res.status(503).json({
+      status: 'ERROR',
+      services: { api: 'ACTIVE', database: 'INACTIVE' },
+      timestamp: new Date()
     });
   }
 });
@@ -58,13 +61,6 @@ async function startServer() {
   // Non-fatal: an unseeded registry degrades to raw name matching.
   skillRegistry.load().catch((err) => {
     console.warn('[skill-registry] load failed, falling back to raw name matching:', err.message);
-  });
-
-  // Local dev only: load the pre-generated question bank into the in-memory mock so
-  // the skill quiz works without a real database. No-op unless the mock is active.
-  const { loadQuestionBankIntoMock } = require('./infrastructure/database/mock/loadQuestionBankMock');
-  loadQuestionBankIntoMock().catch((err) => {
-    console.warn('[question-bank] mock load skipped:', err.message);
   });
 
   const { ensureGlobalCommunity } = require('./modules/community/services/community.service');

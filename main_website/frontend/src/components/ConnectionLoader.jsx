@@ -12,6 +12,9 @@ export default function ConnectionLoader({ theme, onReady }) {
       const response = await fetch(`${rootUrl}/health`);
       const data = await response.json();
 
+      if (!response.ok || data.services?.database !== 'ACTIVE') {
+        console.error(`[health] Backend not ready (HTTP ${response.status}):`, data);
+      }
       if (response.ok && data.services?.database === 'ACTIVE') {
         setHasError(false);
         // Smooth delay so the loader is visible for at least 1.5s
@@ -22,6 +25,7 @@ export default function ConnectionLoader({ theme, onReady }) {
         setHasError(true);
       }
     } catch (err) {
+      console.error('[health] Could not reach the backend:', err);
       setHasError(true);
     }
   };

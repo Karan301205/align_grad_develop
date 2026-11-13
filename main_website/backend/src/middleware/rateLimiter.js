@@ -11,7 +11,9 @@ const rateLimiter = (options) => {
   return (req, res, next) => {
     const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const now = Date.now();
-    const storeKey = `${req.path}:${ip}`;
+    // Signed-in requests (the limiter runs after auth) count per user, so a class or
+    // office sharing one network address doesn't share one limit; the rest per IP.
+    const storeKey = `${req.path}:${req.user && req.user.id ? `user:${req.user.id}` : `ip:${ip}`}`;
 
     let record = ipStore.get(storeKey);
     if (!record || now > record.resetTime) {
@@ -137,7 +139,7 @@ setInterval(() => {
       failedAttemptsStore.delete(key);
     }
   }
-}, 60 * 1000); // Runs every 1 minute
+}, 60 * 1000).unref(); // Runs every 1 minute; never keeps the process alive on its own
 
 const authLimit = rateLimiter(rateLimitConfig.auth);
 const relaxedLimit = rateLimiter(rateLimitConfig.relaxed);

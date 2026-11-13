@@ -26,6 +26,9 @@ function mockRowMatches(row, where = {}) {
 }
 
 const mockClient = {
+  // Interactive and array transactions. The mock runs on one event loop, so the
+  // callback simply gets the mock client (no rollback).
+  $transaction: async (arg) => (typeof arg === 'function' ? arg(mockClient) : Promise.all(arg)),
   user: {
     findUnique: async ({ where }) => {
       const field = Object.keys(where)[0];
@@ -94,6 +97,7 @@ const mockClient = {
         const qVal = typeof usernameQuery === 'string' ? usernameQuery : (usernameQuery.equals || '');
         return mockDb.profiles.find(p => (p.username || '').toLowerCase() === qVal.toLowerCase()) || null;
       }
+      if (where.OR) return mockDb.profiles.find(p => mockRowMatches(p, where)) || null;
       const field = Object.keys(where)[0];
       return mockDb.profiles.find(p => p[field] === where[field]) || null;
     },
@@ -132,6 +136,9 @@ const mockClient = {
         if (data.introVideoUrl !== undefined) mockDb.profiles[idx].introVideoUrl = data.introVideoUrl;
         if (data.username !== undefined) mockDb.profiles[idx].username = data.username;
         if (data.profilePic !== undefined) mockDb.profiles[idx].profilePic = data.profilePic;
+        for (const key of ['preferredWorkModes', 'preferredWorkTypes', 'preferredLocations', 'openToAnyLocation', 'isOnboarded']) {
+          if (data[key] !== undefined) mockDb.profiles[idx][key] = data[key];
+        }
         return mockDb.profiles[idx];
       }
       throw new Error("Profile not found");
@@ -158,10 +165,14 @@ const mockClient = {
     update: async ({ where, data }) => {
       const idx = mockDb.companies.findIndex(c => c.userId === where.userId || c.id === where.id);
       if (idx !== -1) {
-        mockDb.companies[idx] = {
-          ...mockDb.companies[idx],
-          ...data
-        };
+        const next = { ...mockDb.companies[idx] };
+        // `{ increment: n }` as in Prisma (payment credits use it for jobPostingQuota).
+        for (const [key, value] of Object.entries(data)) {
+          next[key] = value && typeof value === 'object' && 'increment' in value
+            ? (next[key] || 0) + value.increment
+            : value;
+        }
+        mockDb.companies[idx] = next;
         return mockDb.companies[idx];
       }
       throw new Error("Company not found");
@@ -301,9 +312,13 @@ const mockClient = {
       mockDb.testAttempts.push(newAttempt);
       return newAttempt;
     },
-    findMany: async ({ where }) => {
+    findMany: async ({ where, orderBy } = {}) => {
       let filtered = mockDb.testAttempts;
-      if (where.profileId) filtered = filtered.filter(t => t.profileId === where.profileId);
+      if (where && where.profileId) filtered = filtered.filter(t => t.profileId === where.profileId);
+      if (orderBy && orderBy.createdAt) {
+        const dir = orderBy.createdAt === 'desc' ? -1 : 1;
+        filtered = [...filtered].sort((a, b) => dir * (new Date(a.createdAt) - new Date(b.createdAt)));
+      }
       return filtered;
     }
   },
@@ -487,8 +502,26 @@ const mockClient = {
       mockDb.gigMessages.push(newMessage);
       return newMessage;
     },
-    findMany: async ({ where }) => {
-      return mockDb.gigMessages.filter(m => m.gigId === where.gigId);
+    // Supports the chat queries: gigId, createdAt { gte | gt | lt | lte }, OR of
+    // senderId / receiverId (plain value or { in }), orderBy createdAt, take.
+    findMany: async ({ where = {}, orderBy, take } = {}) => {
+      const matches = (value, cond) => (cond && typeof cond === 'object' && Array.isArray(cond.in) ? cond.in.includes(value) : value === cond);
+      let result = mockDb.gigMessages.filter(m => m.gigId === where.gigId);
+      if (where.createdAt) {
+        const t = (m) => new Date(m.createdAt).getTime();
+        if (where.createdAt.gte) result = result.filter(m => t(m) >= new Date(where.createdAt.gte).getTime());
+        if (where.createdAt.gt) result = result.filter(m => t(m) > new Date(where.createdAt.gt).getTime());
+        if (where.createdAt.lt) result = result.filter(m => t(m) < new Date(where.createdAt.lt).getTime());
+        if (where.createdAt.lte) result = result.filter(m => t(m) <= new Date(where.createdAt.lte).getTime());
+      }
+      if (Array.isArray(where.OR)) {
+        result = result.filter(m => where.OR.some(cond => Object.entries(cond).every(([key, value]) => matches(m[key], value))));
+      }
+      if (orderBy && orderBy.createdAt) {
+        const dir = orderBy.createdAt === 'desc' ? -1 : 1;
+        result = [...result].sort((a, b) => dir * (new Date(a.createdAt) - new Date(b.createdAt)));
+      }
+      return typeof take === 'number' ? result.slice(0, take) : result;
     }
   },
   gigSubmission: {
@@ -503,8 +536,13 @@ const mockClient = {
       return newSubmission;
     },
     findFirst: async ({ where }) => {
-      return mockDb.gigSubmissions.find(s => s.gigId === where.gigId || s.id === where.id) || null;
+      const candidateMatches = (s) => {
+        if (where.candidateId === undefined) return true;
+        return where.candidateId && Array.isArray(where.candidateId.in) ? where.candidateId.in.includes(s.candidateId) : s.candidateId === where.candidateId;
+      };
+      return mockDb.gigSubmissions.find(s => (where.id ? s.id === where.id : s.gigId === where.gigId) && candidateMatches(s)) || null;
     },
+    findMany: async ({ where = {} } = {}) => mockDb.gigSubmissions.filter(s => mockRowMatches(s, where)),
     findUnique: async ({ where }) => {
       return mockDb.gigSubmissions.find(s => s.gigId === where.gigId || s.id === where.id) || null;
     },
@@ -597,6 +635,9 @@ const mockClient = {
       }
       if (where.reviewState !== undefined) {
         rows = rows.filter(q => q.reviewState === where.reviewState);
+      }
+      if (where.id && Array.isArray(where.id.in)) {
+        rows = rows.filter(q => where.id.in.includes(q.id));
       }
       return rows;
     },
@@ -959,10 +1000,13 @@ const mockClient = {
       if (where.id) return mockDb.paymentTransactions.find(t => t.id === where.id) || null;
       return null;
     },
-    findMany: async ({ where = {} }) => {
-      let items = mockDb.paymentTransactions;
-      if (where.userId) items = items.filter(t => t.userId === where.userId);
-      return items;
+    findMany: async ({ where = {}, orderBy, take } = {}) => {
+      let items = mockDb.paymentTransactions.filter(t => mockRowMatches(t, where));
+      const [sortKey, direction] = Object.entries(orderBy || {})[0] || [];
+      if (sortKey) {
+        items = [...items].sort((a, b) => (new Date(a[sortKey]) - new Date(b[sortKey])) * (direction === 'desc' ? -1 : 1));
+      }
+      return typeof take === 'number' ? items.slice(0, take) : items;
     },
     update: async ({ where, data }) => {
       let pt = mockDb.paymentTransactions.find(t => t.orderId === where.orderId || t.id === where.id);
@@ -970,6 +1014,12 @@ const mockClient = {
         applyData(pt, data);
       }
       return pt;
+    },
+    // Conditional claim used by payment verification (`status: 'CREATED'` → PAID).
+    updateMany: async ({ where = {}, data = {} }) => {
+      const rows = mockDb.paymentTransactions.filter(t => mockRowMatches(t, where));
+      rows.forEach(row => applyData(row, data));
+      return { count: rows.length };
     }
   },
   course: {

@@ -1,9 +1,9 @@
 export { default as StudentLayout } from './pages/StudentLayout';
-export { default as CandidateDashboard } from './components/CandidateDashboard';
-export { default as StudentDashboard } from './components/StudentDashboard';
-export { default as StudentProfile } from './components/StudentProfile';
-export { default as StudentProgress } from './components/StudentProgress';
+export { default as CandidateHome } from './home/CandidateHome';
+export { default as JobsPage } from './jobs/JobsPage';
+export { default as ProfilePage } from './profile/ProfilePage';
+export { default as ApplicationsPage } from './applications/ApplicationsPage';
 export { default as StudentResume } from './components/StudentResume';
-export { default as StudentShowcase } from './components/StudentShowcase';
-export { default as StudentSkillTests } from './components/StudentSkillTests';
+export { default as SkillsTestsPage } from './tests/SkillsTestsPage';
+export { default as LearnPage } from './learn/LearnPage';
 export { default as PublicJobBriefPage } from './pages/PublicJobBriefPage';

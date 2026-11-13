@@ -42,5 +42,5 @@ roadmap subtopics for those 107 skills (skill names are in git: `backend/src/ser
 
 ## DB persistence (human-only, do NOT run from agent)
 `node scripts/seedQuestionBank.js --commit` was the intended DB seed — that script was also deleted and
-must be recreated before committing to MongoDB (Atlas is production; read the mock-DB safeguards in MEMORY.md).
+must be recreated before committing to MongoDB (Atlas is production; read the mock-DB safeguards in all_mds/MEMORY.md).
 Phase 4 (lifecycle/replacement) remains BLOCKED pending explicit approval.

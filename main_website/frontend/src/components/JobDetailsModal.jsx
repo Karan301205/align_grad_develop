@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   X,
   Building,
   Globe,
   MapPin,
   Calendar,
-  DollarSign,
   Award,
   Users,
   Clock,
@@ -13,7 +12,6 @@ import {
   Send,
   Lock,
   CheckCircle,
-  BookOpen,
   Download,
   AlertCircle,
   Sparkles,
@@ -26,30 +24,8 @@ import Button from './ui/Button';
 import Badge from './ui/Badge';
 import { ALL_SKILLS } from '../constants';
 import { rankProjectsForJob } from '../utils/projectRelevance';
-
-const formatJoiningDate = (dateStr) => {
-  if (!dateStr) return 'Not specified';
-  // Check if it's YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-    } catch {
-      return dateStr;
-    }
-  }
-  // Check if it's YYYY-MM
-  if (/^\d{4}-\d{2}$/.test(dateStr)) {
-    try {
-      const [year, month] = dateStr.split('-');
-      const date = new Date(year, parseInt(month) - 1);
-      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long' });
-    } catch {
-      return dateStr;
-    }
-  }
-  return dateStr;
-};
+import ScreeningAnswerField from './screening/ScreeningAnswerField';
+import { compactAnswers, findUnansweredRequired, getAnswer, setAnswer } from '../constants/screeningQuestions';
 
 export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isStudent, onOpenCompanyProfile, candidateProjects = [] }) {
   const [promptSkill, setPromptSkill] = useState(null);
@@ -63,7 +39,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
         questionId: q.id,
         questionText: q.question,
         type: q.type || 'LONG_ANSWER',
-        answer: ''
+        answer: q.type === 'CHECKBOX' ? [] : ''
       })));
     } else {
       setScreeningAnswers([]);
@@ -71,18 +47,12 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
   }, [job]);
 
   const handleConfirmScreeningApply = () => {
-    if (job.screeningQuestions && Array.isArray(job.screeningQuestions)) {
-      for (const sq of job.screeningQuestions) {
-        if (sq.required !== false) {
-          const ans = screeningAnswers.find(a => (a.questionId && a.questionId === sq.id) || a.questionText === sq.question);
-          if (!ans || !String(ans.answer || '').trim()) {
-            alert(`Please answer the required question: "${sq.question}"`);
-            return;
-          }
-        }
-      }
+    const unanswered = findUnansweredRequired(job.screeningQuestions, screeningAnswers);
+    if (unanswered) {
+      alert(`Please answer the required question: "${unanswered.question}"`);
+      return;
     }
-    onApply(job.id, screeningAnswers);
+    onApply(job.id, compactAnswers(screeningAnswers));
     setShowScreeningModal(false);
     onClose();
   };
@@ -124,9 +94,9 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
     doc.setFont("helvetica", "normal");
     doc.setFontSize(12);
     doc.setTextColor(80, 80, 80);
-    doc.text(`Company: ${job.companyName || job.company?.name || 'Aether Corp'}`, 20, 35);
+    doc.text(`Company: ${job.companyName || job.company?.name || 'Not given'}`, 20, 35);
     doc.text(`Location: ${job.location || 'Not specified'}`, 20, 42);
-    doc.text(`Desired Experience: ${job.desiredExperience || 'Fresher'}`, 20, 49);
+    doc.text(`Desired Experience: ${job.desiredExperience || 'Not specified'}`, 20, 49);
 
     // Draw line separator
     doc.setDrawColor(200, 200, 200);
@@ -268,7 +238,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                     }}
                     className="font-bold text-on-surface hover:text-primary hover:underline transition-colors flex items-center gap-1 cursor-pointer"
                   >
-                    {(job.company?.name || job.companyName || 'Aether Corp').replace(/^c_/i, '')}
+                    {(job.company?.name || job.companyName || '').replace(/^c_/i, '')}
                     {job.company?.verified && (
                       <span className="text-[9px] bg-success-container border border-success/30 text-success px-1.5 py-0.5 rounded font-bold  tracking-wide flex items-center select-none scale-90">
                         ✓ Verified
@@ -277,7 +247,7 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
                   </button>
                 ) : (
                   <span className="font-bold text-on-surface">
-                    {(job.companyName || job.company?.name || 'Aether Corp').replace(/^c_/i, '')}
+                    {(job.companyName || job.company?.name || '').replace(/^c_/i, '')}
                   </span>
                 )}
                 {job.company?.companySize && (
@@ -801,75 +771,16 @@ export default function JobDetailsModal({ job, onClose, onApply, onUpgrade, isSt
               </div>
 
               <div className="space-y-4">
-                {(job.screeningQuestions || []).map((sq, sqIdx) => {
-                  const currentAns = screeningAnswers.find(a => (a.questionId && a.questionId === sq.id) || a.questionText === sq.question);
-                  const answerVal = currentAns ? currentAns.answer : '';
-
-                  return (
-                    <div key={sq.id || sqIdx} className="p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-none space-y-2">
-                      <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100">
-                        {sqIdx + 1}. {sq.question} {sq.required !== false && <span className="text-red-500">*</span>}
-                      </label>
-
-                      {sq.type === 'MCQ' ? (
-                        <div className="space-y-1.5 pt-1">
-                          {(sq.options || []).map((opt, optIdx) => {
-                            const isSelected = answerVal === opt;
-                            return (
-                              <label
-                                key={optIdx}
-                                className={`flex items-center gap-2 p-2 rounded-none border text-xs font-sans cursor-pointer transition-colors ${
-                                  isSelected
-                                    ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-600 text-emerald-900 dark:text-emerald-200 font-medium'
-                                    : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400'
-                                }`}
-                              >
-                                <input
-                                  type="radio"
-                                  name={`jd_modal_sq_${sq.id || sqIdx}`}
-                                  value={opt}
-                                  checked={isSelected}
-                                  onChange={() => {
-                                    setScreeningAnswers(prev => {
-                                      const filtered = prev.filter(a => a.questionId !== sq.id && a.questionText !== sq.question);
-                                      return [...filtered, {
-                                        questionId: sq.id,
-                                        questionText: sq.question,
-                                        type: 'MCQ',
-                                        answer: opt
-                                      }];
-                                    });
-                                  }}
-                                  className="accent-emerald-700 w-3.5 h-3.5"
-                                />
-                                <span>{opt}</span>
-                              </label>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <textarea
-                          value={answerVal}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setScreeningAnswers(prev => {
-                              const filtered = prev.filter(a => a.questionId !== sq.id && a.questionText !== sq.question);
-                              return [...filtered, {
-                                questionId: sq.id,
-                                questionText: sq.question,
-                                type: 'LONG_ANSWER',
-                                answer: val
-                              }];
-                            });
-                          }}
-                          rows={3}
-                          placeholder="Type your response here..."
-                          className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs font-sans text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 shadow-2xs"
-                        />
-                      )}
-                    </div>
-                  );
-                })}
+                {(job.screeningQuestions || []).map((sq, sqIdx) => (
+                  <ScreeningAnswerField
+                    key={sq.id || sqIdx}
+                    sq={sq}
+                    index={sqIdx}
+                    idPrefix="jd_modal_sq"
+                    value={getAnswer(screeningAnswers, sq)}
+                    onChange={(value) => setScreeningAnswers(prev => setAnswer(prev, sq, value))}
+                  />
+                ))}
               </div>
 
               <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">

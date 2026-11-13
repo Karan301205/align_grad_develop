@@ -26,10 +26,11 @@ import {
   Share2,
   Check
 } from 'lucide-react';
-import { jsPDF } from 'jspdf';
+import { downloadJobBrief } from '../jobs/jobBriefPdf';
 import { ALL_SKILLS } from '../../../constants';
-import OpportunityPager from '../../../components/OpportunityPager';
 import AddSkillWithoutTestModal from '../../../components/AddSkillWithoutTestModal';
+import ScreeningAnswerField from '../../../components/screening/ScreeningAnswerField';
+import { compactAnswers, findUnansweredRequired, getAnswer, setAnswer } from '../../../constants/screeningQuestions';
 
 const BG_COLORS = [
   'bg-blue-800',
@@ -128,9 +129,7 @@ export default function JobBriefPage({
   // ({ skillName, rating }) => Promise<{ success }>: adds a skill that has no test, without a test
   onAddSkillWithoutTest,
   onOpenCompanyProfile,
-  isPublic = false,
-  // { position, total, onPrev, onNext, freeLimitReached, totalInList, freeLimit, onUpgrade } from StudentLayout
-  navigation = null
+  isPublic = false
 }) {
   const [applying, setApplying] = useState(false);
   const [testPromptModal, setTestPromptModal] = useState(null);
@@ -276,7 +275,7 @@ export default function JobBriefPage({
         questionId: q.id,
         questionText: q.question,
         type: q.type || 'LONG_ANSWER',
-        answer: ''
+        answer: q.type === 'CHECKBOX' ? [] : ''
       })));
       setShowScreeningModal(true);
       return;
@@ -291,21 +290,15 @@ export default function JobBriefPage({
   };
 
   const handleConfirmScreeningApply = async () => {
-    if (job.screeningQuestions && Array.isArray(job.screeningQuestions)) {
-      for (const sq of job.screeningQuestions) {
-        if (sq.required !== false) {
-          const ans = screeningAnswers.find(a => (a.questionId && a.questionId === sq.id) || a.questionText === sq.question);
-          if (!ans || !String(ans.answer || '').trim()) {
-            alert(`Please answer the required question: "${sq.question}"`);
-            return;
-          }
-        }
-      }
+    const unanswered = findUnansweredRequired(job.screeningQuestions, screeningAnswers);
+    if (unanswered) {
+      alert(`Please answer the required question: "${unanswered.question}"`);
+      return;
     }
 
     setApplying(true);
     try {
-      const res = await onApply?.(job.id, screeningAnswers);
+      const res = await onApply?.(job.id, compactAnswers(screeningAnswers));
       if (res && res.success !== false) {
         setShowScreeningModal(false);
       }
@@ -319,104 +312,7 @@ export default function JobBriefPage({
       window.location.href = '/?auth_prompt=signup_required';
       return;
     }
-    const doc = new jsPDF();
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(20);
-    doc.setTextColor(15, 23, 42);
-    doc.text(job.title || job.designation || 'Job Brief', 20, 25);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.setTextColor(71, 85, 105);
-    doc.text(`Company: ${companyDisplayName}`, 20, 34);
-    doc.text(`Place for Work: ${locationText}`, 20, 41);
-    doc.text(`Compensation: ${stipendText}`, 20, 48);
-    doc.text(`Desired Experience: ${job.desiredExperience || 'Fresher'}`, 20, 55);
-
-    doc.setDrawColor(203, 213, 225);
-    doc.line(20, 62, 190, 62);
-
-    let y = 72;
-
-    // Summary
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.setTextColor(15, 23, 42);
-    doc.text("Opportunity Summary", 20, y);
-    y += 8;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(51, 65, 85);
-    const descLines = doc.splitTextToSize(job.description || 'No description provided.', 170);
-    doc.text(descLines, 20, y);
-    y += descLines.length * 5 + 10;
-
-    // Role & Responsibilities
-    if (job.roleResponsibilities) {
-      if (y > 240) {
-        doc.addPage();
-        y = 20;
-      }
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(13);
-      doc.setTextColor(15, 23, 42);
-      doc.text("Role & Responsibilities", 20, y);
-      y += 8;
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.setTextColor(51, 65, 85);
-      const respLines = doc.splitTextToSize(job.roleResponsibilities, 170);
-      doc.text(respLines, 20, y);
-      y += respLines.length * 5 + 10;
-    }
-
-    // Required Skills
-    if (job.requirements && job.requirements.length > 0) {
-      if (y > 240) {
-        doc.addPage();
-        y = 20;
-      }
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(13);
-      doc.setTextColor(15, 23, 42);
-      doc.text("Required Skill Thresholds", 20, y);
-      y += 8;
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.setTextColor(51, 65, 85);
-      job.requirements.forEach(req => {
-        doc.text(`• ${req.skillName}: Minimum Level ${req.minRating}/10`, 20, y);
-        y += 6;
-      });
-      y += 4;
-    }
-
-    // Selection Rounds
-    if (job.selectionProcess && job.selectionProcess.length > 0) {
-      if (y > 240) {
-        doc.addPage();
-        y = 20;
-      }
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(13);
-      doc.setTextColor(15, 23, 42);
-      doc.text("Selection Process", 20, y);
-      y += 8;
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.setTextColor(51, 65, 85);
-      job.selectionProcess.forEach(round => {
-        doc.text(`Round ${round.roundNumber}: ${round.name} - ${round.description}`, 20, y);
-        y += 6;
-      });
-    }
-
-    doc.save(`${companyDisplayName.replace(/\s+/g, '_')}_${(job.title || 'Job').replace(/\s+/g, '_')}_Brief.pdf`);
+    downloadJobBrief(job);
   };
 
   return (
@@ -874,7 +770,6 @@ export default function JobBriefPage({
       </div>
 
       {/* Previous / Next job at the bottom of the brief (free plan: limited to the first few jobs of the list) */}
-      {!isPublic && <OpportunityPager navigation={navigation} itemLabel="Job" />}
 
       {/* Add-skill confirmation for skills that have no test in the question bank */}
       <AddSkillWithoutTestModal
@@ -1080,75 +975,16 @@ export default function JobBriefPage({
 
             {/* Questions List */}
             <div className="space-y-4">
-              {(job.screeningQuestions || []).map((sq, sqIdx) => {
-                const currentAns = screeningAnswers.find(a => (a.questionId && a.questionId === sq.id) || a.questionText === sq.question);
-                const answerVal = currentAns ? currentAns.answer : '';
-
-                return (
-                  <div key={sq.id || sqIdx} className="p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-none space-y-2">
-                    <label className="block text-xs font-headline font-bold text-slate-900 dark:text-slate-100">
-                      {sqIdx + 1}. {sq.question} {sq.required !== false && <span className="text-red-500">*</span>}
-                    </label>
-
-                    {sq.type === 'MCQ' ? (
-                      <div className="space-y-1.5 pt-1">
-                        {(sq.options || []).map((opt, optIdx) => {
-                          const isSelected = answerVal === opt;
-                          return (
-                            <label
-                              key={optIdx}
-                              className={`flex items-center gap-2 p-2 rounded-none border text-xs font-sans cursor-pointer transition-colors ${
-                                isSelected
-                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-600 text-emerald-900 dark:text-emerald-200 font-medium'
-                                  : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400'
-                              }`}
-                            >
-                              <input
-                                type="radio"
-                                name={`modal_sq_${sq.id || sqIdx}`}
-                                value={opt}
-                                checked={isSelected}
-                                onChange={() => {
-                                  setScreeningAnswers(prev => {
-                                    const filtered = prev.filter(a => a.questionId !== sq.id && a.questionText !== sq.question);
-                                    return [...filtered, {
-                                      questionId: sq.id,
-                                      questionText: sq.question,
-                                      type: 'MCQ',
-                                      answer: opt
-                                    }];
-                                  });
-                                }}
-                                className="accent-emerald-700 w-3.5 h-3.5"
-                              />
-                              <span>{opt}</span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <textarea
-                        value={answerVal}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setScreeningAnswers(prev => {
-                            const filtered = prev.filter(a => a.questionId !== sq.id && a.questionText !== sq.question);
-                            return [...filtered, {
-                              questionId: sq.id,
-                              questionText: sq.question,
-                              type: 'LONG_ANSWER',
-                              answer: val
-                            }];
-                          });
-                        }}
-                        rows={3}
-                        placeholder="Type your response here..."
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs font-sans text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 shadow-2xs"
-                      />
-                    )}
-                  </div>
-                );
-              })}
+              {(job.screeningQuestions || []).map((sq, sqIdx) => (
+                <ScreeningAnswerField
+                  key={sq.id || sqIdx}
+                  sq={sq}
+                  index={sqIdx}
+                  idPrefix="modal_sq"
+                  value={getAnswer(screeningAnswers, sq)}
+                  onChange={(value) => setScreeningAnswers(prev => setAnswer(prev, sq, value))}
+                />
+              ))}
             </div>
 
             {/* Action Buttons */}

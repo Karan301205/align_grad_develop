@@ -3,7 +3,7 @@ const { prisma } = require('../../../config/db');
 // Sole Prisma access for the Question bank in the assessment path (Phase 4).
 // The `client` DI seam lets tests inject a fake/mock client.
 //
-// All counter mutations use MongoDB atomic `$inc` (Prisma `{ increment }`) so
+// All counter mutations use atomic Prisma `{ increment }` updates so
 // concurrent assessments never overwrite each other's counts. Reads never leak
 // the answer key or metadata to callers that forward to the client — the
 // controller is responsible for stripping to { id, question, options }.
@@ -64,4 +64,12 @@ async function setReviewStates(idsByState, client = prisma) {
   return out;
 }
 
-module.exports = { findActiveBySkill, recordServed, recordOutcomes, findForReview, setReviewStates };
+// The subtopic of each served question, for the candidate's result summary (no
+// answers, explanations or counters).
+async function findSubtopics(ids, client = prisma) {
+  const list = (ids || []).filter(Boolean);
+  if (list.length === 0) return [];
+  return client.question.findMany({ where: { id: { in: list } }, select: { id: true, subtopic: true } });
+}
+
+module.exports = { findActiveBySkill, findSubtopics, recordServed, recordOutcomes, findForReview, setReviewStates };

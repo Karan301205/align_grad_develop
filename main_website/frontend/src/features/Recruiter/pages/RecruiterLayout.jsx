@@ -1,25 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  Briefcase,
-  User,
-  Plus,
-  ShieldCheck,
-  LogOut,
-  RefreshCw,
-  Menu,
-  X,
-  ChevronRight,
-  ChevronLeft,
-  DollarSign,
-  LayoutDashboard,
-  Users,
-  Zap,
-  Search
-} from 'lucide-react';
-import { apiFetch } from '../../../services/apiClient';
-import { putFileToS3 } from '../../../services/uploadService';
-import SidebarNavItem from '../../../components/ui/SidebarNavItem';
-import ThemeToggle from '../../../components/ui/ThemeToggle';
+import { useState, useEffect, useRef } from 'react';
+import { RefreshCw } from 'lucide-react';
+import { apiFetch, userMessage, SERVER_MESSAGE } from '../../../services/apiClient';
 import { formatAlertMessage } from '../../../utils/errorFormatter';
 import {
   COMPANY_VERIFICATION_STATUS,
@@ -28,72 +9,112 @@ import {
 } from '../../../utils/companyVerification';
 
 // Import subcomponents
-import RecruiterDashboard from '../components/RecruiterDashboard';
-import RecruiterJobs from '../components/RecruiterJobs';
-import RecruiterCandidates from '../components/RecruiterCandidates';
-import RecruiterPostJob from '../components/RecruiterPostJob';
-import RecruiterCompany from '../components/RecruiterCompany';
-import RecruiterApplications from '../components/RecruiterApplications';
-import GigsMarketplace from '../../Gigs/GigsMarketplace';
-import CommunityLayout from '../../Community/CommunityLayout';
+import DashboardPage from '../dashboard/DashboardPage';
+import FirstRunHome from '../dashboard/FirstRunHome';
+import JobsPage from '../jobs/JobsPage';
+import ApplicationsPage from '../jobs/ApplicationsPage';
+import CandidatesPage from '../candidates/CandidatesPage';
+import PostJobPage from '../postJob/PostJobPage';
+import RecruiterSidebar from '../components/RecruiterSidebar';
+import CompanyProfilePage from '../companyProfile/CompanyProfilePage';
+import BillingPage from '../billing/BillingPage';
+import GigsPage from '../gigs/GigsPage';
+import { BRAND_GRADIENT_X } from '../components/accountStyles';
 
-export default function RecruiterLayout({ user, token, activeTab, setActiveTab, handleLogout, theme, toggleTheme }) {
+// Account pages stay open before approval.
+const ACCOUNT_TABS = ['verification', 'billing'];
+// Before approval the recruiter can use Home (the first-run page) and the account pages.
+const OPEN_BEFORE_APPROVAL = ['dashboard', ...ACCOUNT_TABS];
+// Pages that draw their own header, padding and background (the 2026-11 designs).
+const FULL_BLEED_TABS = [...ACCOUNT_TABS, 'dashboard', 'post-job', 'candidates', 'jobs', 'applications', 'gigs'];
+
+export default function RecruiterLayout({ user, token, activeTab, setActiveTab, handleLogout }) {
   const [company, setCompany] = useState(null);
+  const [companyError, setCompanyError] = useState(null);
   const [jobs, setJobs] = useState([]);
+  const [jobsError, setJobsError] = useState(null);
   const [candidates, setCandidates] = useState([]);
+  const [candidatesError, setCandidatesError] = useState(null);
+  const [topTalentsError, setTopTalentsError] = useState(null);
   const [topTalents, setTopTalents] = useState([]);
   const [demandProfile, setDemandProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [gigsSubTab, setGigsSubTab] = useState('browse');
-  // Open gig on the Gigs 'gig-detail' sub-tab; kept here because GigsMarketplace
-  // unmounts on tab switches.
+  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile drawer
+  // Desktop rail: open by default; the arrow collapses it to icons and the page reflows.
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Gigs view ('list' | 'post' | 'edit' | 'workspace') and the open gig, kept here so
+  // they survive switching to another tab and back.
+  const [gigsView, setGigsView] = useState('list');
   const [selectedGigId, setSelectedGigId] = useState(null);
-  const [isGigsOpen, setIsGigsOpen] = useState(true);
   const [selectedApplicationsJob, setSelectedApplicationsJob] = useState(null);
   const mainRef = useRef(null);
 
-  // Job Posting state
-  const [jobTitle, setJobTitle] = useState('');
-  const [jobDesc, setJobDesc] = useState('');
-  const [reqs, setReqs] = useState([]);
-  const [selectedReqSkill, setSelectedReqSkill] = useState('');
-  const [submittingJob, setSubmittingJob] = useState(false);
 
   // Verification state
-  const [docLink, setDocLink] = useState('');
-  const [submittingDoc, setSubmittingDoc] = useState(false);
   const [alertConfig, setAlertConfig] = useState(null);
 
-  const fetchRecruiterData = async () => {
-    setLoading(true);
+  // `silent` refreshes data in place without the full-page spinner, so the open
+  // section (e.g. the company profile form) is not unmounted mid-edit.
+  const fetchRecruiterData = async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true);
     try {
-      // Company Details
-      const compRes = await apiFetch('/recruiter/company', { token });
-      const compData = await compRes.json();
-      if (compRes.ok) setCompany(compData);
-      const companyApproved = compRes.ok &&
+      // Company Details (the company profile page shows this error if it fails)
+      let compData = null;
+      try {
+        const compRes = await apiFetch('/recruiter/company', { token });
+        const body = await compRes.json().catch(() => ({}));
+        if (compRes.ok) {
+          compData = body;
+          setCompany(body);
+          setCompanyError(null);
+        } else {
+          setCompanyError(body.error || SERVER_MESSAGE);
+        }
+      } catch (err) {
+        setCompanyError(userMessage(err));
+      }
+      const companyApproved = Boolean(compData) &&
         getCompanyVerificationStatus(compData) === COMPANY_VERIFICATION_STATUS.APPROVED;
 
-      // Company Jobs
-      const jobsRes = await apiFetch('/recruiter/jobs', { token });
-      const jobsData = await jobsRes.json();
-      if (jobsRes.ok) setJobs(jobsData);
+      // Company jobs, each with its applications. A failure is kept for the Jobs and
+      // Applications pages and doesn't stop the candidate data below from loading.
+      try {
+        const jobsRes = await apiFetch('/recruiter/jobs', { token });
+        const jobsData = await jobsRes.json().catch(() => ({}));
+        if (jobsRes.ok && Array.isArray(jobsData)) {
+          setJobs(jobsData);
+          setJobsError(null);
+        } else {
+          setJobsError(jobsData.error || SERVER_MESSAGE);
+        }
+      } catch (err) {
+        setJobsError(userMessage(err));
+      }
 
-      // Candidate data is only available once an admin has approved the company
+      // Candidate data is only available once an admin has approved the company.
+      // Failures are kept so the Candidates page can show them.
       if (companyApproved) {
-        // All Candidates
-        const candRes = await apiFetch('/recruiter/candidates', { token });
-        const candData = await candRes.json();
-        if (candRes.ok) setCandidates(candData);
-
-        // Top Matching Talents derived from Recruiter Demand Profile
-        const talentsRes = await apiFetch('/recruiter/top-talents?limit=500', { token });
-        const talentsData = await talentsRes.json();
-        if (talentsRes.ok) {
+        const readJson = async (path) => {
+          const res = await apiFetch(path, { token });
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(body.error || SERVER_MESSAGE);
+          return body;
+        };
+        try {
+          const candData = await readJson('/recruiter/candidates');
+          setCandidates(Array.isArray(candData) ? candData : []);
+          setCandidatesError(null);
+        } catch (err) {
+          setCandidatesError(userMessage(err));
+        }
+        // Top Matching Talents derived from Recruiter Demand Profile (recommended order)
+        try {
+          const talentsData = await readJson('/recruiter/top-talents?limit=500');
           setTopTalents(talentsData.topTalents || []);
           setDemandProfile(talentsData.demandProfile || null);
+          setTopTalentsError(null);
+        } catch (err) {
+          setTopTalentsError(userMessage(err));
         }
       }
     } catch (err) {
@@ -107,71 +128,22 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     fetchRecruiterData();
   }, [token]);
 
+  // Publishes a job from the post-a-job wizard (POST /recruiter/jobs). The wizard
+  // shows the returned error (and opens the credit pack on UPGRADE_REQUIRED).
   const handlePostJob = async (jobData) => {
-    setSubmittingJob(true);
     try {
-      let res;
-      if (jobData.opportunityType === 'GIG') {
-        let uploadedUrl = null;
-        if (jobData.attachmentFile) {
-          const urlRes = await apiFetch('/upload/request-url', {
-            token,
-            method: 'POST',
-            json: {
-              fileType: 'doc',
-              fileName: jobData.attachmentFile.name,
-              contentType: jobData.attachmentFile.type
-            }
-          });
-          if (urlRes.ok) {
-            const { uploadUrl, publicUrl } = await urlRes.json();
-            await putFileToS3(uploadUrl, jobData.attachmentFile, jobData.attachmentFile.type, token);
-            uploadedUrl = publicUrl;
-          }
-        }
-
-        const gigPayload = {
-          title: jobData.title,
-          description: jobData.description,
-          skills: jobData.skills,
-          budget: jobData.budget,
-          deliveryTime: jobData.deliveryTime,
-          attachments: uploadedUrl ? [uploadedUrl] : []
-        };
-
-        res = await apiFetch('/gigs', {
-          token,
-          method: 'POST',
-          json: gigPayload
-        });
-      } else {
-        res = await apiFetch('/recruiter/jobs', {
-          token,
-          method: 'POST',
-          json: jobData
-        });
-      }
-
+      const res = await apiFetch('/recruiter/jobs', { token, method: 'POST', json: jobData });
       if (res.ok) {
-        setAlertConfig({ message: jobData.opportunityType === 'GIG' ? 'Gig posted successfully in Marketplace!' : 'Job posted successfully!', type: 'success' });
+        setAlertConfig({ message: 'Job posted successfully!', type: 'success' });
         fetchRecruiterData();
-        setActiveTab(jobData.opportunityType === 'GIG' ? 'gigs' : 'dashboard');
+        setActiveTab('dashboard');
         return { success: true };
-      } else {
-        const d = await res.json().catch(() => ({}));
-        return { 
-          success: false, 
-          error: d.error || 'Failed to post opportunity',
-          code: d.code,
-          quota: d.quota,
-          currentJobsCount: d.currentJobsCount
-        };
       }
+      const d = await res.json().catch(() => ({}));
+      return { success: false, error: d.error || 'Failed to post the job', code: d.code };
     } catch (err) {
-      console.error('Error posting opportunity:', err);
-      return { success: false, error: err.message || 'Error posting opportunity' };
-    } finally {
-      setSubmittingJob(false);
+      console.error('Error posting job:', err);
+      return { success: false, error: userMessage(err, 'Could not reach the server to post the job') };
     }
   };
 
@@ -184,7 +156,8 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       });
       if (res.ok) {
         setAlertConfig({ message: 'Job updated successfully!', type: 'success' });
-        fetchRecruiterData();
+        // Silent, so the Jobs page keeps its tab, search and sort.
+        fetchRecruiterData({ silent: true });
         return true;
       } else {
         const d = await res.json();
@@ -192,7 +165,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
         return false;
       }
     } catch (err) {
-      setAlertConfig({ message: 'Error updating job', type: 'error' });
+      setAlertConfig({ message: `Couldn’t update the job. ${userMessage(err)}`, type: 'error' });
       return false;
     }
   };
@@ -213,7 +186,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
           message: nextPaused ? 'Job paused. It will no longer showcase to candidates.' : 'Job resumed and is now live for candidates!',
           type: 'success'
         });
-        fetchRecruiterData();
+        await fetchRecruiterData({ silent: true });
         return true;
       } else {
         const d = await res.json();
@@ -221,7 +194,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
         return false;
       }
     } catch (err) {
-      setAlertConfig({ message: 'Error updating job status', type: 'error' });
+      setAlertConfig({ message: `Couldn’t change the job status. ${userMessage(err)}`, type: 'error' });
       return false;
     }
   };
@@ -234,7 +207,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       });
       if (res.ok) {
         setAlertConfig({ message: 'Job deleted successfully.', type: 'success' });
-        fetchRecruiterData();
+        await fetchRecruiterData({ silent: true });
         return true;
       } else {
         const d = await res.json();
@@ -242,54 +215,20 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
         return false;
       }
     } catch (err) {
-      setAlertConfig({ message: 'Error deleting job', type: 'error' });
+      setAlertConfig({ message: `Couldn’t delete the job. ${userMessage(err)}`, type: 'error' });
       return false;
     }
   };
 
-  const handleVerification = async (docsOrFile, silent = false) => {
-    setSubmittingDoc(true);
+  // Queues the company for admin review with already-uploaded documents
+  // ([{ docType, docUrl, fileName }], uploaded by the company profile page).
+  const handleVerification = async (verificationDocs, silent = false) => {
     try {
-      let verificationDocs = [];
-      let primaryDocUrl = null;
-
-      if (Array.isArray(docsOrFile)) {
-        verificationDocs = docsOrFile;
-        primaryDocUrl = docsOrFile[0]?.docUrl || null;
-      } else if (docsOrFile) {
-        // Single file upload path
-        const file = docsOrFile;
-        const urlRes = await apiFetch('/upload/request-url', {
-          token,
-          method: 'POST',
-          json: {
-            fileType: 'doc',
-            fileName: file.name,
-            contentType: file.type
-          }
-        });
-
-        if (!urlRes.ok) {
-          throw new Error('Failed to request upload URL from server.');
-        }
-
-        const { uploadUrl, publicUrl } = await urlRes.json();
-        const s3Res = await putFileToS3(uploadUrl, file, file.type, token);
-
-        if (!s3Res.ok) {
-          throw new Error('Failed to upload verification document to S3.');
-        }
-
-        primaryDocUrl = publicUrl;
-        verificationDocs = [{ docType: 'Certificate of Incorporation', docUrl: publicUrl, fileName: file.name }];
-      }
-
-      // Submit document URLs to recruiter verification endpoint
       const res = await apiFetch('/recruiter/verify', {
         token,
         method: 'POST',
         json: {
-          docUrl: primaryDocUrl,
+          docUrl: verificationDocs[0]?.docUrl || null,
           verificationDocs
         }
       });
@@ -298,20 +237,17 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
         if (!silent) {
           setAlertConfig({ message: 'Verification documents submitted for admin review.', type: 'success' });
         }
-        if (primaryDocUrl) setDocLink(primaryDocUrl);
-        await fetchRecruiterData();
+        await fetchRecruiterData({ silent: true });
         return true;
       } else {
-        const d = await res.json();
+        const d = await res.json().catch(() => ({}));
         setAlertConfig({ message: d.error || 'Verification submission failed', type: 'error' });
         return false;
       }
     } catch (err) {
       console.error(err);
-      setAlertConfig({ message: err.message || 'Verification submission error', type: 'error' });
+      setAlertConfig({ message: userMessage(err, 'Verification submission error'), type: 'error' });
       return false;
-    } finally {
-      setSubmittingDoc(false);
     }
   };
 
@@ -327,10 +263,10 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
           message: customSuccessMsg || 'Company profile updated successfully!', 
           type: 'success' 
         });
-        await fetchRecruiterData();
+        await fetchRecruiterData({ silent: true });
         return true;
       } else {
-        const d = await res.json();
+        const d = await res.json().catch(() => ({}));
         setAlertConfig({ message: d.error || 'Failed to update company profile', type: 'error' });
         return false;
       }
@@ -341,52 +277,42 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     }
   };
 
-  const updateReqRating = (skillName, val) => {
-    setReqs(prev => prev.map(r => r.skillName === skillName ? { ...r, minRating: parseInt(val) } : r));
-  };
-
   const companyVerificationStatus = getCompanyVerificationStatus(company);
   const isCompanyApproved = companyVerificationStatus === COMPANY_VERIFICATION_STATUS.APPROVED;
   const portalLockedMessage = getPortalLockedMessage(companyVerificationStatus);
 
-  // Until an admin approves the company, keep the recruiter on the company profile section
+  // Until an admin approves the company, everything except Home and the account pages is locked.
   useEffect(() => {
-    if (!loading && !isCompanyApproved && activeTab !== 'verification') {
-      setActiveTab('verification');
+    if (!loading && !isCompanyApproved && !OPEN_BEFORE_APPROVAL.includes(activeTab)) {
+      setActiveTab('dashboard');
     }
   }, [loading, isCompanyApproved, activeTab]);
 
   const navItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', locked: !isCompanyApproved },
-    { id: 'jobs', icon: Briefcase, label: 'Active Jobs', locked: !isCompanyApproved },
-    { id: 'candidates', icon: User, label: 'Candidates', locked: !isCompanyApproved },
-    { id: 'post-job', icon: Plus, label: 'Post New Job', locked: !isCompanyApproved },
+    // Before approval this tab is "Home" (first-run page); afterwards the hiring dashboard.
+    { id: 'dashboard', icon: 'table-columns', label: isCompanyApproved ? 'Dashboard' : 'Home', locked: false },
+    { id: 'jobs', icon: 'briefcase', label: 'Active jobs', locked: !isCompanyApproved },
+    { id: 'candidates', icon: 'users', label: 'Candidates', locked: !isCompanyApproved },
+    { id: 'post-job', icon: 'plus', label: 'Post new job', locked: !isCompanyApproved },
+    // One entry: the Gigs page has its own list, Post a gig and workspace views.
+    { id: 'gigs', icon: 'bolt', label: 'Gigs', locked: !isCompanyApproved },
     {
-      id: 'gigs',
-      icon: Zap,
-      label: 'Gigs Marketplace',
-      locked: !isCompanyApproved,
-      subItems: [
-        { id: 'browse', label: 'Browse Gigs', icon: Search },
-        { id: 'post', label: 'Post a Gig', icon: Plus },
-        { id: 'my-gigs', label: 'My Gigs Workspace', icon: Briefcase },
-      ],
-      activeSubId: gigsSubTab,
-      onSubItemClick: (subId) => {
-        if (!isCompanyApproved) {
-          setAlertConfig({ message: portalLockedMessage, type: 'warning' });
-          return;
-        }
-        setGigsSubTab(subId);
-        setActiveTab('gigs');
-        setSidebarOpen(false);
-      }
+      id: 'verification',
+      icon: 'building',
+      label: 'Company profile',
+      locked: false,
+      group: 'Account',
+      // Amber dot until approved: "Under review" while pending, otherwise it needs action.
+      dot: isCompanyApproved ? null : companyVerificationStatus === COMPANY_VERIFICATION_STATUS.PENDING ? 'Under review' : 'Needs your action'
     },
-    { id: 'verification', icon: ShieldCheck, label: 'Company Profile', locked: false },
+    { id: 'billing', icon: 'file-invoice', label: 'Plan & billing', locked: false, group: 'Account' },
   ];
+  // Applications live under "Active jobs" in the sidebar.
+  const activeNavId = activeTab === 'applications' ? 'jobs' : activeTab;
+  const isFullBleedPage = FULL_BLEED_TABS.includes(activeTab);
 
   const goToTab = (tabId) => {
-    if (tabId !== 'verification' && !isCompanyApproved) {
+    if (!OPEN_BEFORE_APPROVAL.includes(tabId) && !isCompanyApproved) {
       setAlertConfig({ message: portalLockedMessage, type: 'warning' });
       return;
     }
@@ -404,159 +330,74 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
 
   return (
     <>
-      {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-surface-container border-b border-outline-variant flex items-center justify-between px-4 z-40">
-        <div className="flex items-center">
-          <img
-            src={theme === 'dark' ? '/a_g_logo_dark.webp' : '/a_g_logo.webp'}
-            alt="AlignGrade"
-            className="h-9 w-auto object-contain"
-          />
-        </div>
-        <button onClick={() => setSidebarOpen(true)} className="p-2 text-on-surface-variant hover:text-on-surface" aria-label="Open menu">
-          <Menu className="w-6 h-6" />
-        </button>
-      </div>
-
-      {/* Mobile drawer overlay */}
-      {sidebarOpen && (
-        <div className="md:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setSidebarOpen(false)}></div>
-      )}
-
-      {/* Sidebar */}
-      {(() => {
-        const isExpandedState = isExpanded || sidebarOpen;
-        return (
-          <aside
-            className={`h-screen fixed left-0 top-0 bg-surface flex flex-col py-6 px-3 border-r border-slate-300 dark:border-slate-700 z-50 transition-all duration-300 ${
-              isExpandedState ? 'w-64' : 'w-20'
-            } ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 shadow-2xs`}
-          >
-            <div className="mb-8 flex items-center justify-between px-1">
-              {!isExpandedState ? (
-                <div className="flex flex-col items-center gap-3 w-full">
-                  <img
-                    src="/a_g_l_Background_Removed.png"
-                    alt="AlignGrade"
-                    className="h-9 w-auto object-contain"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setIsExpanded(true)}
-                    className="p-1.5 rounded-none bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface border border-slate-300 dark:border-slate-700 transition-all cursor-pointer shadow-2xs flex items-center justify-center"
-                    title="Open sidebar"
-                    aria-label="Open sidebar"
-                  >
-                    <ChevronRight className="w-4 h-4 text-slate-700 dark:text-slate-300" />
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="flex flex-col gap-1 min-w-0">
-                    <img
-                      src={theme === 'dark' ? '/a_g_logo_dark.webp' : '/a_g_logo.webp'}
-                      alt="AlignGrade"
-                      className="h-10 w-auto object-contain self-start pl-1"
-                    />
-                    <p className="text-[10px] font-headline font-bold tracking-wider text-slate-500 dark:text-slate-400 px-1 animate-fade-in">Recruiter Hub</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsExpanded(false);
-                      setSidebarOpen(false);
-                    }}
-                    className="p-1.5 rounded-none bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface border border-slate-300 dark:border-slate-700 transition-all cursor-pointer shadow-2xs flex items-center justify-center shrink-0"
-                    title="Close sidebar"
-                    aria-label="Close sidebar"
-                  >
-                    <ChevronLeft className="w-4 h-4 text-slate-700 dark:text-slate-300" />
-                  </button>
-                </>
-              )}
-            </div>
-
-            <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar px-1">
-              {navItems.map(item => (
-                <SidebarNavItem
-                  key={item.id}
-                  icon={item.icon}
-                  label={item.label}
-                  active={activeTab === item.id}
-                  locked={item.locked}
-                  onClick={() => goToTab(item.id)}
-                  collapsed={!isExpandedState}
-                  subItems={item.subItems}
-                  isOpen={item.isOpen}
-                  onToggle={item.onToggle}
-                  activeSubId={item.activeSubId}
-                  onSubItemClick={item.onSubItemClick}
-                />
-              ))}
-            </nav>
-
-            <div className="mt-auto pt-5 border-t border-slate-300 dark:border-slate-700 space-y-3 px-1">
-              <div className="flex items-center gap-3 px-2">
-                <div className="w-10 h-10 rounded-none bg-blue-700 border border-blue-800 flex items-center justify-center text-white font-headline font-bold text-sm shrink-0 overflow-hidden shadow-2xs">
-                  {company?.logoUrl ? (
-                    <img src={company.logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                  ) : (
-                    company?.name?.charAt(0) || 'R'
-                  )}
-                </div>
-                {isExpandedState && (
-                  <div className="min-w-0 animate-fade-in">
-                    <p className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 truncate">{company?.name || user?.name || user?.email || 'Recruiter'}</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans font-medium truncate">Recruiter - {user?.regNo || 'REC001'}</p>
-                  </div>
-                )}
-              </div>
-              <button
-                onClick={handleLogout}
-                title={isExpandedState ? undefined : "Log Out"}
-                className="w-full flex items-center gap-3 px-3 py-2.5 text-rose-600 dark:text-rose-400 rounded-none font-headline font-bold hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 dark:hover:border-rose-900/60 transition-all text-xs cursor-pointer shadow-2xs"
-              >
-                <LogOut className="w-4 h-4 shrink-0" />
-                {isExpandedState && <span className="animate-fade-in truncate">Log Out</span>}
-              </button>
-            </div>
-          </aside>
-        );
-      })()}
+      <RecruiterSidebar
+        navItems={navItems}
+        activeItemId={activeNavId}
+        onNavigate={goToTab}
+        company={company}
+        user={user}
+        onLogout={handleLogout}
+        open={sidebarOpen}
+        onOpen={() => setSidebarOpen(true)}
+        onClose={() => setSidebarOpen(false)}
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={() => setSidebarCollapsed((prev) => !prev)}
+      />
 
       {/* Main stage */}
-      {/* Desktop: content margin tracks the sidebar width so expanding it pushes content instead of overlapping it */}
+      {/* The margin follows the sidebar width, so content reflows instead of sitting under it.
+          `relative` keeps absolutely positioned children (e.g. hidden file inputs) inside this
+          scroll area; without it they stretched the page and the whole window scrolled,
+          leaving an empty band at the bottom. */}
       <main
         ref={mainRef}
-        className={`${isExpanded ? 'md:ml-64' : 'md:ml-20'} transition-[margin] duration-300 ease-in-out flex-1 min-w-0 h-screen pt-24 md:pt-10 p-6 md:p-10 bg-background overflow-y-auto custom-scrollbar scroll-smooth`}
+        className={`relative flex-1 min-w-0 h-screen overflow-y-auto custom-scrollbar scroll-smooth transition-[margin] duration-300 ease-out ${
+          sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
+        } ${isFullBleedPage ? 'pt-16 md:pt-0 bg-[#F8F8F6]' : 'pt-24 md:pt-10 p-6 md:p-10 bg-background'}`}
       >
+        {/* Thin line in the logo gradient along the top of every page (desktop; the
+            mobile top bar carries its own). It takes no space and stays while scrolling. */}
+        <div aria-hidden="true" className="pointer-events-none sticky top-0 z-30 hidden h-0 md:block">
+          <div className={`h-[3px] ${BRAND_GRADIENT_X}`} />
+        </div>
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <RefreshCw className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
           <div key={activeTab}>
-            {activeTab === 'dashboard' && (
-              <RecruiterDashboard
+            {activeTab === 'dashboard' && !isCompanyApproved && <FirstRunHome company={company} user={user} goToTab={goToTab} />}
+
+            {activeTab === 'dashboard' && isCompanyApproved && (
+              <DashboardPage
                 company={company}
+                user={user}
                 jobs={jobs}
                 candidates={candidates}
+                candidatesError={candidatesError}
                 topTalents={topTalents}
+                topTalentsError={topTalentsError}
                 demandProfile={demandProfile}
+                token={token}
                 goToTab={goToTab}
-                onRefresh={fetchRecruiterData}
+                onViewApplications={(job) => {
+                  setSelectedApplicationsJob(job);
+                  setActiveTab('applications');
+                }}
               />
             )}
 
             {activeTab === 'jobs' && (
-              <RecruiterJobs 
-                jobs={jobs} 
-                company={company} 
+              <JobsPage
+                jobs={jobs}
+                loadError={jobsError}
                 token={token}
-                handleUpdateJob={handleUpdateJob} 
-                handleDeleteJob={handleDeleteJob} 
+                goToTab={goToTab}
+                handleUpdateJob={handleUpdateJob}
+                handleDeleteJob={handleDeleteJob}
                 handleTogglePauseJob={handleTogglePauseJob}
-                onRefresh={fetchRecruiterData}
+                onRefresh={() => fetchRecruiterData({ silent: true })}
+                setAlertConfig={setAlertConfig}
                 onViewApplications={(job) => {
                   setSelectedApplicationsJob(job);
                   setActiveTab('applications');
@@ -565,31 +406,39 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
             )}
 
             {activeTab === 'applications' && (
-              <RecruiterApplications
+              <ApplicationsPage
                 job={selectedApplicationsJob}
-                allJobs={jobs}
-                company={company}
+                jobs={jobs}
+                loadError={jobsError}
                 token={token}
+                setAlertConfig={setAlertConfig}
                 onBack={() => {
                   setSelectedApplicationsJob(null);
                   setActiveTab('jobs');
                 }}
-                onRefresh={fetchRecruiterData}
+                onRefresh={() => fetchRecruiterData({ silent: true })}
               />
             )}
 
             {activeTab === 'candidates' && (
-              <RecruiterCandidates candidates={candidates} topTalents={topTalents} />
+              <CandidatesPage
+                candidates={candidates}
+                loadError={candidatesError}
+                topTalents={topTalents}
+                topTalentsError={topTalentsError}
+                jobs={jobs}
+                token={token}
+                setAlertConfig={setAlertConfig}
+                onRetry={() => fetchRecruiterData()}
+              />
             )}
 
             {activeTab === 'post-job' && (
-              <RecruiterPostJob 
+              <PostJobPage
                 company={company}
                 user={user}
                 token={token}
-                submittingJob={submittingJob}
                 handlePostJob={handlePostJob}
-                recentJobs={jobs}
                 goToTab={goToTab}
                 setAlertConfig={setAlertConfig}
                 onRefresh={fetchRecruiterData}
@@ -597,29 +446,38 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
             )}
 
             {activeTab === 'gigs' && (
-              <GigsMarketplace
-                user={user}
-                token={token}
-                theme={theme}
-                profile={null}
-                onUpdateProfile={fetchRecruiterData}
-                activeSubTab={gigsSubTab}
-                onSubTabChange={setGigsSubTab}
+              <GigsPage
+                view={gigsView}
+                onView={setGigsView}
                 selectedGigId={selectedGigId}
-                onSelectedGigChange={setSelectedGigId}
+                onSelectGig={setSelectedGigId}
+                user={user}
+                company={company}
+                candidates={candidates}
+                token={token}
+                setAlertConfig={setAlertConfig}
               />
             )}
 
             {activeTab === 'verification' && (
-              <RecruiterCompany 
+              <CompanyProfilePage
                 company={company}
+                loadError={companyError}
+                onRetry={() => fetchRecruiterData()}
                 token={token}
-                docLink={docLink}
-                setDocLink={setDocLink}
-                submittingDoc={submittingDoc}
                 handleVerification={handleVerification}
                 handleUpdateCompany={handleUpdateCompany}
                 setAlertConfig={setAlertConfig}
+              />
+            )}
+
+            {activeTab === 'billing' && (
+              <BillingPage
+                token={token}
+                user={user}
+                jobs={jobs}
+                setAlertConfig={setAlertConfig}
+                onRefresh={fetchRecruiterData}
               />
             )}
           </div>

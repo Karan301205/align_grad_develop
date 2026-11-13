@@ -16,6 +16,7 @@ import ClickSpark from '../../../components/ui/ClickSpark';
 import AnimatedContent from '../../../components/ui/AnimatedContent';
 import { submitPasswordReset } from '../services/passwordResetApi';
 
+import { userMessage } from '../../../services/apiClient';
 export default function ResetPasswordPage({ theme = 'light', toggleTheme }) {
   const [token, setToken] = useState('');
   const [role, setRole] = useState('STUDENT');
@@ -95,7 +96,7 @@ export default function ResetPasswordPage({ theme = 'light', toggleTheme }) {
       });
       setIsSuccess(true);
     } catch (err) {
-      setError(err.message || 'Failed to reset password. Please try again.');
+      setError(userMessage(err, 'Failed to reset password. Please try again.'));
     } finally {
       setLoading(false);
     }

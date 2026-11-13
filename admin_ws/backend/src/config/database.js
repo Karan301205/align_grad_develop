@@ -1,43 +1,72 @@
-const { MongoClient } = require('mongodb');
+const { Pool } = require('pg');
 const env = require('./env');
 
-let client = null;
-let db = null;
+// PostgreSQL connection for the Admin Portal (raw `pg` driver; admin_ws stays
+// decoupled from main_website's Prisma client). Tables and columns follow
+// main_website/backend/prisma/schema.prisma: quoted model names ("User",
+// "Company", ...) and camelCase column names ("userId", "createdAt", ...).
 
-async function connectDB() {
-  if (db) return db;
-  try {
-    client = new MongoClient(env.DATABASE_URL);
-    await client.connect();
-    db = client.db();
-    console.log('MongoDB successfully connected for Admin Portal');
-    return db;
-  } catch (err) {
-    console.error('MongoDB database connection error:', err.message);
-    throw err;
-  }
+let pool = null;
+
+// Quotes a schema name for the `search_path` startup option. The value is
+// parsed twice by the server: first as a whitespace-separated options string
+// (backslash escapes), then as an identifier list (double-quote escapes).
+function quoteSearchPath(schema) {
+  const identifier = `"${schema.replace(/"/g, '""')}"`;
+  return identifier.replace(/\\/g, '\\\\').replace(/ /g, '\\ ');
 }
 
+// Prisma-style URLs carry `?schema=<name>`, which libpq/pg do not understand:
+// strip it from the connection string and apply it as the session search_path.
+function buildPoolConfig(databaseUrl) {
+  const url = new URL(databaseUrl);
+  const schema = url.searchParams.get('schema');
+  url.searchParams.delete('schema');
+
+  const config = {
+    connectionString: url.toString(),
+    max: 10,
+    connectionTimeoutMillis: 10000,
+    idleTimeoutMillis: 30000
+  };
+  if (schema) {
+    config.options = `-c search_path=${quoteSearchPath(schema)}`;
+  }
+  return { config, schema };
+}
+
+// Returns the shared pg.Pool, creating it on first use. The pool opens connections
+// per query, so it works as soon as PostgreSQL is reachable; while it isn't, every
+// query fails with the real cause (logged by the error handler). There is no
+// offline mode and no stand-in data.
 function getDB() {
-  if (!db) {
-    throw new Error('Database not initialized. Call connectDB first.');
+  if (pool) return pool;
+  if (!env.DATABASE_URL) {
+    throw new Error('[database] Database is not configured: set DB_HOST, DB_NAME, DB_USER, DB_PASSWORD (DB_PORT, DB_SCHEMA optional) in admin_ws/backend/.env.');
   }
-  return db;
+  const { config } = buildPoolConfig(env.DATABASE_URL);
+  pool = new Pool(config);
+  // An idle client losing its connection emits 'error' on the pool; without
+  // a listener that would crash the process.
+  pool.on('error', (err) => {
+    console.error('[database] PostgreSQL idle client error:', err.message);
+  });
+  return pool;
 }
 
-// Non-throwing accessor: returns the active db handle, or `null` when the
-// connection is not initialized. Lets controllers replace their repeated
-// try/catch-around-getDB guard while keeping their own fallback messaging.
-function getDbSafe() {
+// Startup check: reports whether PostgreSQL answers. A failure is logged, not hidden.
+async function connectDB() {
+  const db = getDB();
+  const { schema } = buildPoolConfig(env.DATABASE_URL);
   try {
-    return getDB();
-  } catch (e) {
-    return null;
+    await db.query('SELECT 1');
+    console.log(`PostgreSQL successfully connected for Admin Portal${schema ? ` (schema: ${schema})` : ''}`);
+  } catch (err) {
+    console.error('[database] PostgreSQL is not answering. Every request that needs it will fail until it is reachable again. Cause:', err.message);
   }
 }
 
 module.exports = {
   connectDB,
-  getDB,
-  getDbSafe
+  getDB
 };

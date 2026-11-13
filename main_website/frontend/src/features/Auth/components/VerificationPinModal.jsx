@@ -13,6 +13,7 @@ import {
 import Button from '../../../components/ui/Button';
 import { verifySignupPin, resendSignupPin } from '../services/authVerificationApi';
 
+import { userMessage } from '../../../services/apiClient';
 const PIN_LENGTH = 6;
 const EXPIRY_SECONDS = 10 * 60; // 10 minutes
 const RESEND_COOLDOWN_SECONDS = 60; // 60s cooldown
@@ -168,7 +169,7 @@ export default function VerificationPinModal({
         onSuccess?.(data);
       }, 700);
     } catch (err) {
-      setError(err.message || 'Verification failed. Please check the code and try again.');
+      setError(userMessage(err, 'Verification failed. Please check the code and try again.'));
       setPinDigits(Array(PIN_LENGTH).fill(''));
       inputRefs.current[0]?.focus();
     } finally {
@@ -191,7 +192,7 @@ export default function VerificationPinModal({
       setResendCooldown(RESEND_COOLDOWN_SECONDS);
       inputRefs.current[0]?.focus();
     } catch (err) {
-      setError(err.message || 'Failed to resend verification code. Please wait and try again.');
+      setError(userMessage(err, 'Failed to resend verification code. Please wait and try again.'));
     } finally {
       setResending(false);
     }

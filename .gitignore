@@ -41,24 +41,28 @@ Thumbs.db
 .claude/
 .agents/
 .superpowers/
+claude_ag/
 scratch/
 test-*.js
 
 # ─── Project Docs & Notes ──────────────────────────────────
-AlignGrade_Scale_Plan.md
-ANTIGRAVITY_HANDOFF.md
-auth.txt
+all_mds/AlignGrade_Scale_Plan.md
+all_mds/ANTIGRAVITY_HANDOFF.md
+all_mds/auth.txt
 CLAUDE.md
-commit.md
-CONTINUATION.md
-fileds.txt
-HANDOFF_TEMP_QUESTION_BANK.md
-MEMORY.md
-my_resume.pdf
+all_mds/commit.md
+all_mds/CONTINUATION.md
+all_mds/fileds.txt
+all_mds/HANDOFF_TEMP_QUESTION_BANK.md
+all_mds/MEMORY.md
+all_mds/my_resume.pdf
 README.md
-task.md
+all_mds/task.md
+all_mds/content.md
+all_mds/workpro.md
 docs/
 design_stitch/
+design/
 
 # ─── Certificates & Keys ───────────────────────────────────
 *.pem
@@ -66,3 +70,8 @@ cloudfront_private_key.pem
 cloudfront_public_key.pem
 
 
+
+# MongoDB export used for the Postgres migration (contains user PII / password hashes)
+align_grade_export/
+# Local .env backups (contain secrets)
+.env.*backup*

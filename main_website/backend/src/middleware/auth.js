@@ -17,7 +17,8 @@ module.exports = (req, res, next) => {
       return res.status(401).json({ error: 'Invalid token payload.' });
     }
 
-    // When connected to live MongoDB, ObjectIDs must be 24-character hexadecimal strings.
+    // On the real database every id is a 24-character hex string (original MongoDB ObjectIds
+    // were kept in PostgreSQL, and new rows get the same format from the column default).
     // If a stale mock token (e.g. "u_1790830586306") is provided, return 401 so the client re-authenticates.
     const mockActive = typeof isMock === 'function' ? isMock() : Boolean(isMock);
     if (!mockActive && !OBJECT_ID_REGEX.test(decoded.id)) {

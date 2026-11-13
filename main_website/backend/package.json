@@ -6,12 +6,14 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "dev:mock": "DATABASE_URL='' nodemon src/index.js",
     "test": "node --test \"tests/**/*.test.js\"",
     "bank": "node src/cli/bank.js",
     "bank:seed": "node scripts/seedQuestionBank.js",
     "bank:verify": "node scripts/verifyQuestionBank.js",
-    "bank:loadtest": "DATABASE_URL='' node scripts/loadTestQuestionBank.js"
+    "bank:loadtest": "DATABASE_URL='' node scripts/loadTestQuestionBank.js",
+    "db:migrate": "node scripts/db/prisma.js migrate deploy",
+    "db:import-mongo-export": "node scripts/migrate/importMongoExport.js",
+    "prisma": "node scripts/db/prisma.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.4",

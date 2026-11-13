@@ -46,10 +46,14 @@ const createGigSchema = {
   })
 };
 
+// Links in pitches, chat and submissions are rendered as <a href>, so only web
+// addresses are accepted (a "javascript:" URL would run script when clicked).
+const webUrl = (message) => z.string().url(message).refine((value) => /^https?:\/\//i.test(value), { message });
+
 const applyGigSchema = {
   body: z.object({
     message: z.string().max(1000, 'Cover message must not exceed 1000 characters').optional().nullable(),
-    attachments: z.array(z.string().url('Invalid attachment URL')).optional(),
+    attachments: z.array(webUrl('Invalid attachment URL')).max(3, 'Add up to 3 work samples').optional(),
     answers: z.array(questionAnswerSchema).optional().default([])
   })
 };
@@ -57,17 +61,43 @@ const applyGigSchema = {
 const sendMessageSchema = {
   body: z.object({
     text: z.string().max(2000, 'Message text must not exceed 2000 characters').optional().nullable(),
-    fileUrl: z.string().url('Invalid file URL').or(z.literal('')).optional().nullable(),
-    receiverId: z.string().optional().nullable()
-  }).refine(data => data.text || data.fileUrl, {
-    message: 'Either text or file attachment must be provided'
+    fileUrl: webUrl('Invalid file URL').or(z.literal('')).optional().nullable(),
+    receiverId: z.string().max(64).optional().nullable()
+  }).refine(data => (data.text && data.text.trim()) || data.fileUrl, {
+    message: 'Write a message or attach a file'
+  })
+};
+
+const isoTime = z.string().refine((value) => !Number.isNaN(Date.parse(value)), { message: 'Invalid time' });
+
+// GET /gigs/:gigId/messages
+const getMessagesSchema = {
+  query: z.object({
+    with: z.string().max(64).optional(),
+    after: isoTime.optional(),
+    before: isoTime.optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional()
+  })
+};
+
+// POST /gigs/:gigId/hire and /reject
+const candidateActionSchema = {
+  body: z.object({
+    candidateId: z.string().min(1, 'Choose a candidate').max(64)
+  })
+};
+
+// PATCH /gigs/:gigId/status
+const gigStatusSchema = {
+  body: z.object({
+    status: z.enum(['OPEN', 'PAUSED', 'CLOSED', 'IN_PROGRESS', 'COMPLETED'], { error: 'Invalid status value' })
   })
 };
 
 const submitWorkSchema = {
   body: z.object({
     text: z.string().max(2000, 'Submission description must not exceed 2000 characters').optional().nullable(),
-    fileUrl: z.string().url('Invalid submission file URL').or(z.literal('')).optional().nullable()
+    fileUrl: webUrl('Invalid submission file URL').or(z.literal('')).optional().nullable()
   }).refine(data => data.text || data.fileUrl, {
     message: 'Either text summary or file URL is required for submission'
   })
@@ -102,6 +132,9 @@ module.exports = {
   createGigSchema,
   applyGigSchema,
   sendMessageSchema,
+  getMessagesSchema,
+  candidateActionSchema,
+  gigStatusSchema,
   submitWorkSchema,
   reviewGigSchema,
   updateGigSchema

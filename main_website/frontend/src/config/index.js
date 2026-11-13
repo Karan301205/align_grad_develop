@@ -3,24 +3,20 @@
  * Centralizes all Vite environment variables with validation and path normalization.
  */
 
-const rawApiBase = import.meta.env.VITE_API_BASE_URL;
-
-// Detect if running on localhost / loopback in browser
-const isLocalhost = typeof window !== 'undefined' && 
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
-// In local browser testing on localhost, route to local backend (port 5001) unless explicitly configured with another localhost port
-let effectiveApiBase = rawApiBase;
-if (isLocalhost && (!rawApiBase || (!rawApiBase.includes('localhost') && !rawApiBase.includes('127.0.0.1')))) {
-  effectiveApiBase = 'http://localhost:5001/api';
-} else if (!effectiveApiBase && import.meta.env.DEV) {
-  effectiveApiBase = 'http://localhost:5001/api';
-}
+// The backend address comes ONLY from VITE_API_BASE_URL (no hardcoded or localhost fallback),
+// so a wrong or missing value shows up immediately instead of being silently replaced.
+const rawApiBase = (import.meta.env.VITE_API_BASE_URL || '').trim();
 
 // Normalize API base by stripping trailing slashes and ensuring '/api' path exists
-let normalizedApiBase = (effectiveApiBase || '').replace(/\/+$/, '');
+let normalizedApiBase = rawApiBase.replace(/\/+$/, '');
 if (normalizedApiBase && !normalizedApiBase.endsWith('/api')) {
   normalizedApiBase += '/api';
+}
+
+if (!normalizedApiBase) {
+  console.error('[config] VITE_API_BASE_URL is not set — API calls will fail. Set it in main_website/frontend/.env (e.g. https://backend.example.com/api) and restart/rebuild.');
+} else if (import.meta.env.DEV) {
+  console.info(`[config] API_BASE = ${normalizedApiBase}`);
 }
 
 export const API_BASE = normalizedApiBase;

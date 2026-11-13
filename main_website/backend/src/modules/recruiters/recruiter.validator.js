@@ -1,22 +1,22 @@
 const { z } = require('zod');
 
-const objectIdRegex = /^[0-9a-fA-F]{24}$/;
-const objectIdSchema = z.string().regex(objectIdRegex, 'Invalid ID format');
+const { SCREENING_TYPES, QUESTION_MAX, getQuestionProblem } = require('../jobs/screeningQuestions');
 
+const idRegex = /^[0-9a-fA-F]{24}$/;
+const idSchema = z.string().regex(idRegex, 'Invalid ID format');
+
+// Job screening questions: MCQ, short/long answer, checkboxes, date, time.
+// Per-type rules live in modules/jobs/screeningQuestions.js.
 const screeningQuestionSchema = z.object({
   id: z.string().optional(),
-  type: z.enum(['MCQ', 'LONG_ANSWER']),
-  question: z.string().min(1, 'Question text is required'),
-  options: z.array(z.string()).optional().default([]),
+  type: z.enum(SCREENING_TYPES),
+  question: z.string().min(1, 'Question text is required').max(QUESTION_MAX, `Questions can be at most ${QUESTION_MAX} characters`),
+  options: z.array(z.string().max(200, 'Options can be at most 200 characters')).optional().default([]),
   correctAnswer: z.string().optional().nullable(),
   required: z.boolean().optional().default(true)
-}).refine(data => {
-  if (data.type === 'MCQ') {
-    return Array.isArray(data.options) && data.options.length >= 2 && typeof data.correctAnswer === 'string' && data.correctAnswer.trim().length > 0;
-  }
-  return true;
-}, {
-  message: 'MCQ questions require at least 2 options and a specified correct answer'
+}).superRefine((question, ctx) => {
+  const problem = getQuestionProblem(question);
+  if (problem) ctx.addIssue({ code: 'custom', message: problem, path: ['options'] });
 });
 
 const verifyCompanySchema = {
@@ -63,7 +63,7 @@ const postJobSchema = {
       name: z.string().min(1, 'Round name is required'),
       description: z.string().min(1, 'Round description is required')
     })).optional().nullable(),
-    screeningQuestions: z.array(screeningQuestionSchema).optional().nullable().default([]),
+    screeningQuestions: z.array(screeningQuestionSchema).max(20, 'A job can have at most 20 screening questions').optional().nullable().default([]),
     status: z.string().optional().nullable(),
     isPaused: z.boolean().optional().nullable(),
     showSalary: z.boolean().optional().nullable()
@@ -72,14 +72,14 @@ const postJobSchema = {
 
 const updateJobSchema = {
   params: z.object({
-    jobId: objectIdSchema
+    jobId: idSchema
   }),
   body: postJobSchema.body
 };
 
 const toggleJobStatusSchema = {
   params: z.object({
-    jobId: objectIdSchema
+    jobId: idSchema
   }),
   body: z.object({
     status: z.enum(['ACTIVE', 'PAUSED', 'CLOSED']).optional().nullable(),
@@ -89,28 +89,41 @@ const toggleJobStatusSchema = {
 
 const deleteJobSchema = {
   params: z.object({
-    jobId: objectIdSchema
+    jobId: idSchema
   })
 };
 
 const updateApplicationRoundsSchema = {
   params: z.object({
-    applicationId: objectIdSchema
+    applicationId: idSchema
   }),
+  // Applications made before rounds were stored have none, so a status alone is
+  // enough; otherwise at least one round must be sent.
   body: z.object({
     status: z.enum(['APPLIED', 'SHORTLISTED', 'IN_PROGRESS', 'SCHEDULED', 'INTERVIEW', 'SELECTED', 'HIRED', 'REJECTED']).optional(),
     roundStatuses: z.array(z.object({
       roundNumber: z.number().int().min(1),
       name: z.string().min(1, 'Round name is required'),
       status: z.enum(['PENDING', 'IN_PROGRESS', 'SCHEDULED', 'CLEARED', 'QUALIFIED', 'REJECTED']),
-      feedback: z.string().optional().nullable()
-    })).min(1, 'At least one round status is required')
+      feedback: z.string().max(2000, 'Feedback can be at most 2000 characters').optional().nullable()
+    })).max(20).optional().default([])
+  }).refine((body) => body.status || body.roundStatuses.length > 0, { error: 'Choose a status or update at least one round' })
+};
+
+// Draft skill bars from the post-a-job form (same shape as postJobSchema.requirements).
+const eligibleCountSchema = {
+  body: z.object({
+    requirements: z.array(z.object({
+      skillName: z.string().trim().min(1, 'Skill name is required').max(100),
+      minRating: z.number().int().min(1).max(10)
+    })).max(30, 'A job can have at most 30 skills')
   })
 };
 
 module.exports = {
   verifyCompanySchema,
   postJobSchema,
+  eligibleCountSchema,
   updateJobSchema,
   toggleJobStatusSchema,
   deleteJobSchema,

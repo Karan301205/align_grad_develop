@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { X, ShieldCheck, Check, Sparkles, Lock, AlertCircle, ArrowRight } from 'lucide-react';
 import { createPaymentOrder, openRazorpayCheckout } from '../services/paymentService';
+import { formatInr } from '../utils/format';
 
 export default function PaymentModal({
   isOpen,
   onClose,
   planType = 'STUDENT_LIFETIME',
+  // Optional server offer from GET /payments/status ({ amount, jobCredits }); when
+  // given, the recruiter pack's price and credit count are shown from it.
+  offer = null,
   token,
   user = {},
   onSuccess,
@@ -17,6 +21,8 @@ export default function PaymentModal({
   if (!isOpen) return null;
 
   const isStudent = planType === 'STUDENT_LIFETIME';
+  const packPrice = offer?.amount ? formatInr(offer.amount) : '₹2,500';
+  const packCredits = offer?.jobCredits || 5;
 
   const planDetails = isStudent
     ? {
@@ -35,13 +41,13 @@ export default function PaymentModal({
         ]
       }
     : {
-        title: 'Recruiter 5-Job Pack',
+        title: `Recruiter ${packCredits}-Job Pack`,
         subtitle: 'Scale Your Hiring Pipeline with Verified Talent',
-        badge: '5 Job Postings • ₹2,500 Pack',
-        price: '₹2,500',
-        billingLabel: '5 Job Posting Credits • Repeatable Quota',
+        badge: `${packCredits} Job Postings • ${packPrice} Pack`,
+        price: packPrice,
+        billingLabel: `${packCredits} Job Posting Credits • Repeatable Quota`,
         features: [
-          'Publish up to 5 job openings using your purchased posting credits.',
+          `Publish up to ${packCredits} job openings using your purchased posting credits.`,
           'Define required skills and minimum proficiency levels for each role.',
           'Discover candidates whose verified skills align with your requirements.',
           'Review candidate profiles, skill ratings, and assessment results.',
@@ -187,7 +193,7 @@ export default function PaymentModal({
               </div>
               <div className="flex items-center justify-between text-on-surface">
                 <span className="text-on-surface-variant">Billing Type</span>
-                <span className="font-sans font-medium">{isStudent ? 'One-time Lifetime' : 'Pay-per-pack (5 jobs)'}</span>
+                <span className="font-sans font-medium">{isStudent ? 'One-time Lifetime' : `Pay-per-pack (${packCredits} jobs)`}</span>
               </div>
               <div className="flex items-center justify-between text-on-surface">
                 <span className="text-on-surface-variant">Taxes & Platform Fees</span>

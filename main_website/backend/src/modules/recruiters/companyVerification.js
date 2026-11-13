@@ -34,6 +34,15 @@ function withVerificationStatus(company) {
   return { ...company, verificationStatus: resolveVerificationStatus(company) };
 }
 
+// Route guard: caller must be signed in as a RECRUITER (any verification status).
+// Used by the company profile endpoints, which unapproved recruiters need too.
+function requireRecruiter(req, res, next) {
+  if (!req.user || req.user.role !== 'RECRUITER') {
+    return res.status(403).json({ error: 'This action is available to recruiters only.' });
+  }
+  next();
+}
+
 // Route guard: caller must be a RECRUITER whose company has been approved.
 // Attaches the company to req.company for downstream handlers.
 async function requireApprovedRecruiter(req, res, next) {
@@ -64,5 +73,6 @@ module.exports = {
   VERIFICATION_STATUS,
   resolveVerificationStatus,
   withVerificationStatus,
+  requireRecruiter,
   requireApprovedRecruiter
 };

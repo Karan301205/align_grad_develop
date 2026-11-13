@@ -28,6 +28,27 @@ import {
   X
 } from 'lucide-react';
 
+// Admin API answers carry `success`; a failed one becomes an error with the
+// server's plain message (the technical detail is already in the console).
+function ok(res, fallback) {
+  if (!res || !res.success) throw new Error((res && res.error) || fallback);
+  return res;
+}
+
+// Upload errors for the status line: the browser's own network messages
+// ("Failed to fetch") are replaced with a plain sentence.
+const uploadFailureText = (err) =>
+  err instanceof TypeError ? 'Check your connection and try again.' : err.message || 'Please try again.';
+
+// PUT a file to its presigned S3 URL; a refused upload is an error, not a success.
+async function putToStorage(url, file, contentType) {
+  const res = await fetch(url, { method: 'PUT', headers: { 'Content-Type': contentType }, body: file });
+  if (!res.ok) {
+    console.error(`[admin courses] S3 upload refused: HTTP ${res.status}`, await res.text().catch(() => ''));
+    throw new Error('The storage service refused the file. Please try again.');
+  }
+}
+
 export default function AdminCourses() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -97,11 +118,14 @@ export default function AdminCourses() {
       .then(res => {
         if (res.success) {
           setCourses(res.courses || []);
+        } else {
+          showStatus('error', `Couldn’t load the courses. ${res.error}`);
         }
         setLoading(false);
       })
       .catch(err => {
         console.error('Error fetching courses:', err);
+        showStatus('error', `Couldn’t load the courses. ${err.message}`);
         setLoading(false);
       });
   };
@@ -122,11 +146,14 @@ export default function AdminCourses() {
       .then(res => {
         if (res.success) {
           setSelectedCourse(res.course);
+        } else {
+          showStatus('error', `Couldn’t open the course. ${res.error}`);
         }
         setLoadingDetail(false);
       })
       .catch(err => {
         console.error('Error fetching course detail:', err);
+        showStatus('error', `Couldn’t open the course. ${err.message}`);
         setLoadingDetail(false);
       });
   };
@@ -144,17 +171,9 @@ export default function AdminCourses() {
         folder: 'course-thumbnails'
       });
 
-      if (!presignedRes.success || !presignedRes.uploadUrl) {
-        throw new Error(presignedRes.error || 'Failed to get upload authorization');
-      }
+      ok(presignedRes, 'Uploads are not available right now.');
 
-      await fetch(presignedRes.uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': file.type || 'image/jpeg'
-        },
-        body: file
-      });
+      await putToStorage(presignedRes.uploadUrl, file, file.type || 'image/jpeg');
 
       // Public or S3 URL
       const cleanUrl = presignedRes.uploadUrl.split('?')[0];
@@ -166,7 +185,7 @@ export default function AdminCourses() {
       showStatus('success', 'Thumbnail uploaded to S3 successfully!');
     } catch (err) {
       console.error('Thumbnail upload error:', err);
-      showStatus('error', `Thumbnail upload failed: ${err.message}`);
+      showStatus('error', `Thumbnail upload failed. ${uploadFailureText(err)}`);
     } finally {
       setUploadingThumbnail(false);
     }
@@ -186,17 +205,9 @@ export default function AdminCourses() {
         folder: 'course-videos'
       });
 
-      if (!presignedRes.success || !presignedRes.uploadUrl) {
-        throw new Error(presignedRes.error || 'Failed to get upload authorization');
-      }
+      ok(presignedRes, 'Uploads are not available right now.');
 
-      await fetch(presignedRes.uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': file.type || 'video/mp4'
-        },
-        body: file
-      });
+      await putToStorage(presignedRes.uploadUrl, file, file.type || 'video/mp4');
 
       const s3Url = presignedRes.uploadUrl.split('?')[0];
       setLessonForm(prev => ({
@@ -209,7 +220,7 @@ export default function AdminCourses() {
     } catch (err) {
       console.error('Video upload error:', err);
       setUploadProgress('Upload failed');
-      showStatus('error', `Video upload failed: ${err.message}`);
+      showStatus('error', `Video upload failed. ${uploadFailureText(err)}`);
     } finally {
       setUploadingVideo(false);
     }
@@ -221,7 +232,7 @@ export default function AdminCourses() {
     setSavingCourse(true);
     try {
       if (editingCourseId) {
-        const res = await adminApi.updateCourse(editingCourseId, courseForm);
+        const res = ok(await adminApi.updateCourse(editingCourseId, courseForm), 'Something went wrong. Please try again.');
         if (res.success) {
           showStatus('success', 'Course updated successfully!');
           setIsCourseModalOpen(false);
@@ -231,7 +242,7 @@ export default function AdminCourses() {
           }
         }
       } else {
-        const res = await adminApi.createCourse(courseForm);
+        const res = ok(await adminApi.createCourse(courseForm), 'Something went wrong. Please try again.');
         if (res.success) {
           showStatus('success', 'New course created successfully!');
           setIsCourseModalOpen(false);
@@ -249,7 +260,7 @@ export default function AdminCourses() {
   const handleDeleteCourse = async (courseId) => {
     if (!window.confirm('Are you sure you want to permanently delete this course and all its video lectures?')) return;
     try {
-      const res = await adminApi.deleteCourse(courseId);
+      const res = ok(await adminApi.deleteCourse(courseId), 'Something went wrong. Please try again.');
       if (res.success) {
         showStatus('success', 'Course deleted successfully');
         fetchCourses();
@@ -269,14 +280,14 @@ export default function AdminCourses() {
     setSavingModule(true);
     try {
       if (editingModuleId) {
-        const res = await adminApi.updateModule(selectedCourse.id, editingModuleId, { title: moduleTitle });
+        const res = ok(await adminApi.updateModule(selectedCourse.id, editingModuleId, { title: moduleTitle }), 'Something went wrong. Please try again.');
         if (res.success) {
           setSelectedCourse(prev => ({ ...prev, modules: res.modules }));
           setIsModuleModalOpen(false);
           showStatus('success', 'Module title updated');
         }
       } else {
-        const res = await adminApi.addModule(selectedCourse.id, { title: moduleTitle });
+        const res = ok(await adminApi.addModule(selectedCourse.id, { title: moduleTitle }), 'Something went wrong. Please try again.');
         if (res.success) {
           setSelectedCourse(prev => ({ ...prev, modules: res.modules }));
           setIsModuleModalOpen(false);
@@ -294,7 +305,7 @@ export default function AdminCourses() {
   const handleDeleteModule = async (moduleId) => {
     if (!window.confirm('Delete this module and all its contained lessons?')) return;
     try {
-      const res = await adminApi.deleteModule(selectedCourse.id, moduleId);
+      const res = ok(await adminApi.deleteModule(selectedCourse.id, moduleId), 'Something went wrong. Please try again.');
       if (res.success) {
         setSelectedCourse(prev => ({ ...prev, modules: res.modules }));
         showStatus('success', 'Module removed');
@@ -318,17 +329,9 @@ export default function AdminCourses() {
         folder: 'course-documents'
       });
 
-      if (!presignedRes.success || !presignedRes.uploadUrl) {
-        throw new Error(presignedRes.error || 'Failed to get upload authorization');
-      }
+      ok(presignedRes, 'Uploads are not available right now.');
 
-      await fetch(presignedRes.uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': file.type || 'application/pdf'
-        },
-        body: file
-      });
+      await putToStorage(presignedRes.uploadUrl, file, file.type || 'application/pdf');
 
       const docCleanUrl = presignedRes.uploadUrl.split('?')[0];
       setLessonForm(prev => ({
@@ -342,7 +345,7 @@ export default function AdminCourses() {
     } catch (err) {
       console.error('Doc upload error:', err);
       setDocProgress('Upload failed');
-      showStatus('error', `Document upload failed: ${err.message}`);
+      showStatus('error', `Document upload failed. ${uploadFailureText(err)}`);
     } finally {
       setUploadingDoc(false);
     }
@@ -419,14 +422,14 @@ export default function AdminCourses() {
     setSavingLesson(true);
     try {
       if (editingLessonId) {
-        const res = await adminApi.updateLesson(selectedCourse.id, activeModuleIdForLesson, editingLessonId, payload);
+        const res = ok(await adminApi.updateLesson(selectedCourse.id, activeModuleIdForLesson, editingLessonId, payload), 'Something went wrong. Please try again.');
         if (res.success) {
           setSelectedCourse(prev => ({ ...prev, modules: res.modules }));
           setIsLessonModalOpen(false);
           showStatus('success', 'Lesson updated successfully!');
         }
       } else {
-        const res = await adminApi.addLesson(selectedCourse.id, activeModuleIdForLesson, payload);
+        const res = ok(await adminApi.addLesson(selectedCourse.id, activeModuleIdForLesson, payload), 'Something went wrong. Please try again.');
         if (res.success) {
           setSelectedCourse(prev => ({ ...prev, modules: res.modules }));
           setIsLessonModalOpen(false);
@@ -444,7 +447,7 @@ export default function AdminCourses() {
   const handleDeleteLesson = async (moduleId, lessonId) => {
     if (!window.confirm('Delete this video lecture?')) return;
     try {
-      const res = await adminApi.deleteLesson(selectedCourse.id, moduleId, lessonId);
+      const res = ok(await adminApi.deleteLesson(selectedCourse.id, moduleId, lessonId), 'Something went wrong. Please try again.');
       if (res.success) {
         setSelectedCourse(prev => ({ ...prev, modules: res.modules }));
         showStatus('success', 'Lecture video deleted');

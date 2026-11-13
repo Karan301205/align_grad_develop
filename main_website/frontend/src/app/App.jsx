@@ -26,7 +26,6 @@ export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [testSkill, setTestSkill] = useState(null); // { skillName, targetRating, jobId }
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
@@ -113,7 +112,6 @@ export default function App() {
     setToken(null);
     setUser(null);
     setActiveTab('dashboard');
-    setTestSkill(null);
   };
 
   useEffect(() => {
@@ -325,8 +323,6 @@ export default function App() {
           token={token}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          testSkill={testSkill}
-          setTestSkill={setTestSkill}
           handleLogout={handleLogout}
           theme={theme}
           toggleTheme={toggleTheme}
@@ -355,11 +351,8 @@ export default function App() {
         onViewOpportunity={(id, type) => {
           if (user?.role === 'STUDENT') {
             setAutoSelectOpportunity({ id, type });
-            if (type === 'gig') {
-              setActiveTab('gigs');
-            } else {
-              setActiveTab('dashboard');
-            }
+            // Jobs open on the Jobs page (StudentLayout reads autoSelectOpportunity).
+            setActiveTab(type === 'gig' ? 'gigs' : 'opportunities');
           }
         }}
       />

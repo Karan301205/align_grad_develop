@@ -8,6 +8,30 @@ const {
   resolveVerificationStatus,
   withVerificationStatus
 } = require('./companyVerification');
+const {
+  MAX_OFFICE_PHOTOS,
+  getSubmissionProblems,
+  buildJobQuota,
+  isOwnUpload
+} = require('./companyProfile');
+const { getPublicUrl } = require('../../infrastructure/storage/s3');
+const { randomUUID } = require('crypto');
+const { normalizeQuestions } = require('../jobs/screeningQuestions');
+const { PLANS, formatInr } = require('../payments/plans');
+const { summarizePool } = require('../jobs/eligiblePool');
+
+const RECRUITER_PACK = PLANS.RECRUITER_5_PACK;
+
+// Job/internship posts count against the quota; gigs do not (same filter as postJob).
+const countQuotaJobs = (companyId) => prisma.job.count({
+  where: {
+    companyId,
+    OR: [
+      { opportunityType: null },
+      { opportunityType: { not: 'GIG' } }
+    ]
+  }
+});
 
 exports.getCompany = async (req, res) => {
   try {
@@ -36,7 +60,11 @@ exports.getCompany = async (req, res) => {
         };
       }
     }
-    res.json(withVerificationStatus(company));
+    const usedJobs = company.id ? await countQuotaJobs(company.id) : 0;
+    res.json({
+      ...withVerificationStatus(company),
+      jobQuota: buildJobQuota(company.jobPostingQuota, usedJobs)
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error fetching company' });
@@ -78,6 +106,50 @@ exports.updateCompany = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error updating company profile' });
+  }
+};
+
+// Office showcase gallery. Unlike the rest of the profile it stays editable
+// while the company is under review or approved: photos are not part of verification.
+exports.updateCompanyPhotos = async (req, res) => {
+  try {
+    const company = await prisma.company.findUnique({ where: { userId: req.user.id } });
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    const current = Array.isArray(company.photos) ? company.photos : [];
+    const photos = [...new Set(req.body.photos)];
+    const added = photos.filter((url) => !current.includes(url));
+    if (added.length > 0 && photos.length > MAX_OFFICE_PHOTOS) {
+      return res.status(400).json({ error: `You can add up to ${MAX_OFFICE_PHOTOS} office photos.` });
+    }
+
+    // New photos must be files this recruiter uploaded through /upload, so a
+    // later removal can never delete someone else's object.
+    const ownPrefixes = [getPublicUrl(`docs/${req.user.id}/`), getPublicUrl(`images/${req.user.id}/`)];
+    if (added.some((url) => !isOwnUpload(url, ownPrefixes))) {
+      return res.status(400).json({ error: 'Photos must be uploaded from this page.' });
+    }
+
+    const updated = await prisma.company.update({
+      where: { userId: req.user.id },
+      data: { photos }
+    });
+
+    const removed = current.filter((url) => !photos.includes(url) && isOwnUpload(url, ownPrefixes));
+    for (const url of removed) {
+      try {
+        await deleteS3ObjectFromUrl(url, 'company office photo');
+      } catch (deleteErr) {
+        console.error('Failed to delete removed office photo from S3:', deleteErr);
+      }
+    }
+
+    res.json({ photos: updated.photos });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error updating office photos' });
   }
 };
 
@@ -208,6 +280,13 @@ exports.verifyCompany = async (req, res) => {
       });
     }
 
+    // The saved profile and the submitted documents must be complete before an
+    // admin is asked to review them (the UI checks this too; this is the authority).
+    const problems = getSubmissionProblems(existingCompany, verificationDocs);
+    if (problems.length > 0) {
+      return res.status(400).json({ error: problems[0], problems });
+    }
+
     if (existingCompany.docUrl && primaryDocUrl && existingCompany.docUrl !== primaryDocUrl) {
       try {
         await deleteS3ObjectFromUrl(existingCompany.docUrl, 'company verification document');
@@ -296,7 +375,7 @@ exports.postJob = async (req, res) => {
 
     if (currentJobsCount >= quota) {
       return res.status(403).json({
-        error: `Job posting limit reached (${currentJobsCount}/${quota} jobs posted). Please purchase a 5-job pack for ₹2,500 to continue posting.`,
+        error: `Job posting limit reached (${currentJobsCount}/${quota} jobs posted). Please buy ${RECRUITER_PACK.jobCredits} more job credits for ${formatInr(RECRUITER_PACK.amount)} to continue posting.`,
         code: 'UPGRADE_REQUIRED',
         quota,
         currentJobsCount
@@ -325,22 +404,11 @@ exports.postJob = async (req, res) => {
         joiningMonth: joiningMonth || 'Immediate',
         openings: openings ? parseInt(openings, 10) : null,
         showSalary: showSalary !== undefined ? Boolean(showSalary) : true,
-        selectionProcess: selectionProcess ? {
-          set: selectionProcess
-        } : undefined,
-        screeningQuestions: screeningQuestions !== undefined ? {
-          set: (Array.isArray(screeningQuestions) ? screeningQuestions : []).map(q => ({
-            id: q.id || require('crypto').randomUUID(),
-            type: q.type || 'MCQ',
-            question: q.question,
-            options: Array.isArray(q.options) ? q.options : [],
-            correctAnswer: q.type === 'MCQ' ? (q.correctAnswer || null) : null,
-            required: q.required !== undefined ? Boolean(q.required) : true
-          }))
-        } : undefined,
-        requirements: {
-          set: requirements
-        }
+        selectionProcess: selectionProcess || undefined,
+        screeningQuestions: screeningQuestions !== undefined
+          ? normalizeQuestions(screeningQuestions, randomUUID)
+          : undefined,
+        requirements
       }
     });
 
@@ -348,6 +416,26 @@ exports.postJob = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error posting job' });
+  }
+};
+
+// Post-a-job sidebar: how many candidates meet the draft's skill bars today, which
+// bars actually gate applying, and which single one-point relaxation adds the most.
+exports.getEligibleCandidateCount = async (req, res) => {
+  try {
+    const [profiles, activeQuestions] = await Promise.all([
+      prisma.profile.findMany({ select: { skills: true } }),
+      prisma.question.findMany({
+        where: { status: 'ACTIVE' },
+        select: { skillName: true },
+        distinct: ['skillName']
+      })
+    ]);
+    const quizSkills = new Set(activeQuestions.map((q) => q.skillName.toLowerCase()));
+    res.json(summarizePool(req.body.requirements, profiles, quizSkills));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error counting matching candidates' });
   }
 };
 
@@ -485,22 +573,11 @@ exports.updateJob = async (req, res) => {
         joiningMonth: joiningMonth !== undefined ? joiningMonth : job.joiningMonth,
         openings: openings ? parseInt(openings, 10) : null,
         showSalary: showSalary !== undefined ? Boolean(showSalary) : job.showSalary,
-        selectionProcess: selectionProcess ? {
-          set: selectionProcess
-        } : undefined,
-        screeningQuestions: screeningQuestions !== undefined ? {
-          set: (Array.isArray(screeningQuestions) ? screeningQuestions : []).map(q => ({
-            id: q.id || require('crypto').randomUUID(),
-            type: q.type || 'MCQ',
-            question: q.question,
-            options: Array.isArray(q.options) ? q.options : [],
-            correctAnswer: q.type === 'MCQ' ? (q.correctAnswer || null) : null,
-            required: q.required !== undefined ? Boolean(q.required) : true
-          }))
-        } : undefined,
-        requirements: {
-          set: requirements
-        },
+        selectionProcess: selectionProcess || undefined,
+        screeningQuestions: screeningQuestions !== undefined
+          ? normalizeQuestions(screeningQuestions, randomUUID)
+          : undefined,
+        requirements,
         edited: true
       }
     });
@@ -555,6 +632,15 @@ exports.updateApplicationRounds = async (req, res) => {
       return res.status(404).json({ error: 'Application not found' });
     }
 
+    // Only the company that posted the job may move its applicants (ISSUES A4).
+    const [company, job] = await Promise.all([
+      prisma.company.findUnique({ where: { userId: req.user.id } }),
+      prisma.job.findUnique({ where: { id: application.jobId } })
+    ]);
+    if (!company || !job || job.companyId !== company.id) {
+      return res.status(403).json({ error: 'You can only update applications to your own jobs.' });
+    }
+
     let calculatedStatus = explicitStatus || application.status || 'APPLIED';
 
     if (roundStatuses && roundStatuses.length > 0) {
@@ -574,9 +660,7 @@ exports.updateApplicationRounds = async (req, res) => {
       where: { id: applicationId },
       data: {
         status: calculatedStatus,
-        roundStatuses: roundStatuses ? {
-          set: roundStatuses
-        } : undefined
+        roundStatuses: roundStatuses && roundStatuses.length > 0 ? roundStatuses : undefined
       }
     });
 

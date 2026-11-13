@@ -1,67 +1,29 @@
-const { getDbSafe } = require('../../config/database');
-const { ObjectId } = require('mongodb');
-const env = require('../../config/env');
+const { getDB } = require('../../config/database');
+const { jobPay, jobPlace, jobType } = require('../../utils/jobDisplay');
+const { isValidId, normalizeId } = require('../../utils/ids');
 
 exports.getAllJobs = async (req, res, next) => {
   try {
-    const db = getDbSafe();
-    if (!db) {
-      console.warn('[DB WARNING] Database connection not initialized. Using fallback data.');
-    }
-
-    if (!db) {
-      // Mock fallback data if DB is offline
-      return res.json({
-        success: true,
-        jobs: [
-          {
-            id: 'job_1',
-            title: 'SWE Intern',
-            description: 'Google Cloud console team internship. Work on building dashboards, API integration, and monitoring widgets.',
-            companyName: 'Google',
-            location: 'Remote',
-            salaryRange: '₹50,000 - ₹80,000 / month',
-            jobType: 'Full-time',
-            requirements: [{ skill: 'React', rating: 7 }, { skill: 'Node.js', rating: 7 }]
-          },
-          {
-            id: 'job_2',
-            title: 'Associate Product Manager',
-            description: 'Work on consumer facing services. Coordinate between development and design teams.',
-            companyName: 'Google',
-            location: 'Bangalore, India',
-            salaryRange: '₹12,00,000 - ₹18,00,000 / year',
-            jobType: 'Full-time',
-            requirements: [{ skill: 'Communication', rating: 8 }]
-          },
-          {
-            id: 'job_3',
-            title: 'SRE Intern',
-            description: 'Automating server monitoring systems. Setup alert notifications and recovery scripts.',
-            companyName: 'Microsoft',
-            location: 'Hyderabad, India',
-            salaryRange: '₹40,000 - ₹60,000 / month',
-            jobType: 'Internship',
-            requirements: [{ skill: 'Python', rating: 8 }, { skill: 'Docker', rating: 9 }]
-          }
-        ]
-      });
-    }
-
-    const jobs = await db.collection('Job').find({}).toArray();
+    const db = getDB();
+    // ORDER BY "id" approximates the previous natural (insertion) order: ids are
+    // time-prefixed hex strings.
+    const { rows: jobs } = await db.query('SELECT * FROM "Job" ORDER BY "id"');
     const companyIds = jobs.map(j => j.companyId);
-    const companies = await db.collection('Company').find({ _id: { $in: companyIds } }).toArray();
+    const { rows: companies } = await db.query(
+      'SELECT * FROM "Company" WHERE "id" = ANY($1::text[])',
+      [companyIds]
+    );
 
     const jobsWithCompany = jobs.map(job => {
-      const company = companies.find(c => c._id.toString() === job.companyId.toString());
+      const company = companies.find(c => c.id === job.companyId);
       return {
-        id: job._id.toString(),
+        id: job.id,
         title: job.title,
         description: job.description,
-        companyName: company?.name || job.companyName || 'Not Specified',
-        location: job.location || 'Remote',
-        salaryRange: job.salaryRange || 'Not Specified',
-        jobType: job.jobType || 'Full-time',
+        companyName: company?.name || job.companyName || 'Not specified',
+        location: jobPlace(job),
+        salaryRange: jobPay(job),
+        jobType: jobType(job),
         requirements: job.requirements || []
       };
     });
@@ -79,62 +41,38 @@ exports.getAllJobs = async (req, res, next) => {
 exports.getJobApplicants = async (req, res, next) => {
   try {
     const { jobId } = req.params;
-    const db = getDbSafe();
-    if (!db) {
-      console.warn('[DB WARNING] Database connection not initialized. Using fallback data.');
-    }
-
-    if (!db) {
-      // Mock fallback data if DB is offline
-      if (jobId === 'job_1') {
-        return res.json({
-          success: true,
-          applicants: [
-            {
-              id: 'mock_1',
-              email: 'aravind@gmail.com',
-              name: 'Aravind Sharma',
-              username: 'aravind_s',
-              bio: 'Software engineer focusing on full-stack development using Node.js and React.',
-              nationality: 'India',
-              gender: 'Male',
-              phone: '9876543210',
-              dob: '2000-05-15',
-              skills: [{ name: 'React', rating: 8 }, { name: 'Node.js', rating: 7 }],
-              education: [{ institute: 'IIT Delhi', degree: 'B.Tech', fieldOfStudy: 'Computer Science' }],
-              experience: [{ companyName: 'Google', designation: 'SWE Intern', description: 'Worked on Google Cloud console.' }],
-              certificates: [{ title: 'AWS Cloud Practitioner', org: 'Amazon Web Services' }],
-              projects: [{ title: 'E-commerce API', role: 'Backend Lead', description: 'Developed REST API with express.' }],
-              cocurricular: [{ activity: 'Hackathon Coordinator', description: 'Organized national level coding event.' }],
-              introVideoUrl: env.DEFAULT_DEMO_VIDEO_URL || ''
-            }
-          ]
-        });
-      }
-      return res.json({ success: true, applicants: [] });
-    }
-
+    const db = getDB();
     // Fetch applications
-    let jobObjectId;
-    try {
-      jobObjectId = new ObjectId(jobId);
-    } catch (e) {
+    if (!isValidId(jobId)) {
       return res.status(400).json({ error: 'Invalid Job ID format' });
     }
 
-    const applications = await db.collection('Application').find({ jobId: jobObjectId }).toArray();
+    const { rows: applications } = await db.query(
+      'SELECT "studentId" FROM "Application" WHERE "jobId" = $1',
+      [normalizeId(jobId)]
+    );
     if (applications.length === 0) {
       return res.json({ success: true, applicants: [] });
     }
 
-    const studentIds = applications.map(app => app.studentId);
-    const users = await db.collection('User').find({ _id: { $in: studentIds } }).toArray();
-    const profiles = await db.collection('Profile').find({ userId: { $in: studentIds } }).toArray();
+    // Application.studentId holds a Profile.id (not a User.id). Profiles are
+    // matched by id, and also by userId in case a row stores the User id
+    // instead; users are then resolved through the matched profiles.
+    const studentIds = [...new Set(applications.map(app => app.studentId))];
+    const { rows: profiles } = await db.query(
+      'SELECT * FROM "Profile" WHERE "id" = ANY($1::text[]) OR "userId" = ANY($1::text[])',
+      [studentIds]
+    );
+    const userIds = [...new Set([...profiles.map(p => p.userId), ...studentIds])];
+    const { rows: users } = await db.query(
+      'SELECT "id", "email" FROM "User" WHERE "id" = ANY($1::text[]) ORDER BY "id"',
+      [userIds]
+    );
 
     const applicants = users.map(user => {
-      const profile = profiles.find(p => p.userId.toString() === user._id.toString());
+      const profile = profiles.find(p => p.userId === user.id);
       return {
-        id: user._id.toString(),
+        id: user.id,
         email: user.email,
         name: profile?.name || 'Anonymous Student',
         username: profile?.username || 'N/A',

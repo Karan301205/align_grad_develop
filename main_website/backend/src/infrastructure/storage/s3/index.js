@@ -48,7 +48,10 @@ const deleteObject = async (key) => {
  * @returns {string} Public URL
  */
 const getPublicUrl = (key) => {
-  if (!bucketName) return `/storage/mock/${key}`;
+  // No made-up local path when storage isn't configured: the caller fails and the cause is logged.
+  if (!bucketName || !region) {
+    throw new Error('[storage] S3_BUCKET_NAME / AWS_REGION are not configured, so uploaded files have no URL.');
+  }
   return `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
 };
 

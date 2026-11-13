@@ -1,5 +1,20 @@
+// AlignGrad — PostgreSQL schema (migrated from MongoDB on 2026-11-06).
+//
+// Conventions carried over from the MongoDB era so existing data and code keep working:
+// - IDs are TEXT and keep the original 24-char hex Mongo ObjectId values. New rows get a
+//   24-char hex id from the database default (8 hex of unix time + 16 random hex), so code
+//   that validates /^[0-9a-f]{24}$/ ids still works.
+// - Former Mongo "composite types" (embedded documents) are JSONB columns. Their shapes are
+//   documented in the "JSON column shapes" block at the end of this file; Prisma does not
+//   apply defaults inside JSON, so writers must supply every field they rely on.
+// - Real foreign keys exist only where a Prisma @relation exists. Plain id fields
+//   (e.g. Application.studentId = Profile.id, TestSession.userId = User.id) are not FKs —
+//   historical rows reference deleted users and are kept as-is.
+// - DateTime columns are timestamptz. `updatedAt` columns also default to now() so raw-SQL
+//   inserts (admin_ws backend) work without supplying them.
+
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -8,206 +23,111 @@ generator client {
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
   email     String   @unique
   password  String
-  role      String   // "STUDENT" or "RECRUITER"
+  role      String // "STUDENT" or "RECRUITER"
   regNo     String?  @unique
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
 
   // Password Reset Fields
   resetPasswordToken    String?
-  resetPasswordExpires  DateTime?
+  resetPasswordExpires  DateTime? @db.Timestamptz(3)
   resetPasswordAttempts Int?      @default(0)
-  resetPasswordWindow   DateTime?
+  resetPasswordWindow   DateTime? @db.Timestamptz(3)
 
   // Email Verification Fields
-  emailVerified          Boolean?  @default(false)
-  verificationPinHash    String?
-  verificationPinExpiry  DateTime?
-  verificationAttempts   Int?      @default(0)
-  verificationResends    Int?      @default(0)
-  lastVerificationSent   DateTime?
-  pendingName            String?
-  pendingPasswordHash    String?
+  emailVerified         Boolean?  @default(false)
+  verificationPinHash   String?
+  verificationPinExpiry DateTime? @db.Timestamptz(3)
+  verificationAttempts  Int?      @default(0)
+  verificationResends   Int?      @default(0)
+  lastVerificationSent  DateTime? @db.Timestamptz(3)
+  pendingName           String?
+  pendingPasswordHash   String?
 
   // Subscription & Payments
-  plan                  String    @default("FREE")
-  planPurchasedAt       DateTime?
-  payments              PaymentTransaction[]
+  plan            String               @default("FREE")
+  planPurchasedAt DateTime?            @db.Timestamptz(3)
+  payments        PaymentTransaction[]
 
-  profile   Profile?
-  company   Company?
+  profile Profile?
+  company Company?
 }
 
 model Profile {
-  id           String        @id @default(auto()) @map("_id") @db.ObjectId
-  userId       String        @unique @db.ObjectId
-  user         User          @relation(fields: [userId], references: [id])
-  name         String
-  username     String?
-  profilePic   String?
-  resumeUrl    String?
-  skills       Skill[]
-  tests        TestAttempt[]
-  bio          String?
-  nationality  String?
-  gender       String?
-  email        String?
-  dob          String?
-  phone        String?
-  socialLinks  SocialLinks?
-  education    Education[]
-  experience   Experience[]
-  certificates Certificate[]
-  projects     Project[]
-  cocurricular Cocurricular[]
-  introVideoUrl String?
-  isOnboarded   Boolean?      @default(false)
-  preferredWorkModes String[] @default([])
-  preferredWorkTypes String[] @default([])
-  preferredLocations String[] @default([])
-  openToAnyLocation  Boolean? @default(false)
-}
-
-type Cocurricular {
-  activity    String?
-  link        String?
-  description String?
-}
-
-type Skill {
-  name           String
-  rating         Int
-  verifiedRating Int?
-}
-
-type SocialLinks {
-  linkedin         String?
-  github           String?
-  hackerEarth      String?
-  hackerRank       String?
-  codechef         String?
-  leetcode         String?
-  codeforces       String?
-  kaggle           String?
-  portfolio        String?
-  showLinkedin     Boolean?
-  showGithub       Boolean?
-  showHackerEarth  Boolean?
-  showHackerRank   Boolean?
-  showCodechef     Boolean?
-  showLeetcode     Boolean?
-  showCodeforces   Boolean?
-  showKaggle       Boolean?
-  showPortfolio    Boolean?
-}
-
-type Education {
-  eduType      String?
-  institute    String?
-  degree       String?
-  fieldOfStudy String?
-  startDate    String?
-  endDate      String?
-  gradeType    String?
-  gradeValue   String?
-}
-
-type Experience {
-  expType          String?
-  designation      String?
-  involvesTech     Boolean?
-  companyName      String?
-  domain           String?
-  startDate        String?
-  endDate          String?
-  currentlyWorking Boolean?
-  location         String?
-  description      String?
-}
-
-type Certificate {
-  title       String?
-  org         String?
-  startDate   String?
-  link        String?
-  certNumber  String?
-  description String?
-  attachment  String?
-}
-
-type Project {
-  title            String?
-  role             String?
-  codeUrl          String?
-  hostedUrl        String?
-  startDate        String?
-  endDate          String?
-  currentlyWorking Boolean?
-  description      String?
-  skills           String[] @default([])
-  videoUrl         String?
+  id                 String        @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  userId             String        @unique
+  user               User          @relation(fields: [userId], references: [id])
+  name               String
+  username           String?
+  profilePic         String?
+  resumeUrl          String?
+  skills             Json          @default("[]") // Skill[]
+  tests              TestAttempt[]
+  bio                String?
+  nationality        String?
+  gender             String?
+  email              String?
+  dob                String?
+  phone              String?
+  socialLinks        Json? // SocialLinks
+  education          Json          @default("[]") // Education[]
+  experience         Json          @default("[]") // Experience[]
+  certificates       Json          @default("[]") // Certificate[]
+  projects           Json          @default("[]") // Project[]
+  cocurricular       Json          @default("[]") // Cocurricular[]
+  introVideoUrl      String?
+  isOnboarded        Boolean?      @default(false)
+  preferredWorkModes String[]      @default([])
+  preferredWorkTypes String[]      @default([])
+  preferredLocations String[]      @default([])
+  openToAnyLocation  Boolean?      @default(false)
 }
 
 model Company {
-  id                   String              @id @default(auto()) @map("_id") @db.ObjectId
-  userId               String              @unique @db.ObjectId
-  user                 User                @relation(fields: [userId], references: [id])
-  name                 String
-  logoUrl              String?
-  description          String?
-  industry             String?
-  companySize          String?
-  website              String?
-  location             String?
-  foundedYear          String?
-  officialEmail        String?
-  recruiterName        String?
-  recruiterDesignation String?
-  socialLinks          CompanySocialLinks?
-  photos               String[]                 @default([])
-  docUrl               String?
-  verificationDocs     CompanyVerificationDoc[]
-  verified             Boolean                  @default(false)
+  id                      String    @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  userId                  String    @unique
+  user                    User      @relation(fields: [userId], references: [id])
+  name                    String
+  logoUrl                 String?
+  description             String?
+  industry                String?
+  companySize             String?
+  website                 String?
+  location                String?
+  foundedYear             String?
+  officialEmail           String?
+  recruiterName           String?
+  recruiterDesignation    String?
+  socialLinks             Json? // CompanySocialLinks
+  photos                  String[]  @default([])
+  docUrl                  String?
+  verificationDocs        Json      @default("[]") // CompanyVerificationDoc[]
+  verified                Boolean   @default(false)
   // Admin review lifecycle: "NOT_SUBMITTED" | "PENDING" | "APPROVED" | "REJECTED".
   // `verified` mirrors status === "APPROVED"; legacy rows without a status are
   // resolved by recruiters/companyVerification.js.
   verificationStatus      String?
   verificationNote        String?
-  verificationSubmittedAt DateTime?
-  verificationReviewedAt  DateTime?
+  verificationSubmittedAt DateTime? @db.Timestamptz(3)
+  verificationReviewedAt  DateTime? @db.Timestamptz(3)
   verificationReviewedBy  String?
-  jobPostingQuota      Int                      @default(1)
-  jobs                 Job[]
-}
-
-type CompanyVerificationDoc {
-  docType    String
-  docUrl     String
-  fileName   String?
-  uploadedAt DateTime? @default(now())
-}
-
-type CompanySocialLinks {
-  linkedin  String?
-  twitter   String?
-  github    String?
-  youtube   String?
-  facebook  String?
+  jobPostingQuota         Int       @default(1)
+  jobs                    Job[]
 }
 
 model Job {
-  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
-  companyId            String   @db.ObjectId
-  company              Company  @relation(fields: [companyId], references: [id])
+  id                   String        @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  companyId            String
+  company              Company       @relation(fields: [companyId], references: [id])
   title                String
   description          String
   companyName          String?
-  opportunityType      String?  @default("JOB")
-  workMode             String?  @default("Work from office")
-  status               String?  @default("ACTIVE")
-  isPaused             Boolean? @default(false)
+  opportunityType      String?       @default("JOB")
+  workMode             String?       @default("Work from office")
+  status               String?       @default("ACTIVE")
+  isPaused             Boolean?      @default(false)
   officialWebsite      String?
   preferredEducation   String?
   desiredExperience    String?
@@ -218,173 +138,144 @@ model Job {
   roleResponsibilities String?
   location             String?
   locationUrl          String?
-  edited               Boolean? @default(false)
-  activeDays           Int?     @default(30)
+  edited               Boolean?      @default(false)
+  activeDays           Int?          @default(30)
   joiningMonth         String?
-  showSalary           Boolean? @default(true)
+  showSalary           Boolean?      @default(true)
   openings             Int?
-  selectionProcess     ProcessRound[]
-  requirements         JobRequirement[]
-  screeningQuestions   ScreeningQuestion[]
+  selectionProcess     Json          @default("[]") // ProcessRound[]
+  requirements         Json          @default("[]") // JobRequirement[]
+  screeningQuestions   Json          @default("[]") // ScreeningQuestion[]
   applications         Application[]
-  createdAt            DateTime @default(now())
-}
+  createdAt            DateTime      @default(now()) @db.Timestamptz(3)
 
-type ScreeningQuestion {
-  id            String   @default(uuid())
-  type          String   // "MCQ" | "LONG_ANSWER"
-  question      String
-  options       String[] @default([]) // Choices for MCQ
-  correctAnswer String?  // Correct choice or answer string for MCQ
-  required      Boolean? @default(true)
-}
-
-type QuestionAnswer {
-  questionId   String?
-  questionText String
-  type         String   // "MCQ" | "LONG_ANSWER"
-  answer       String
-  isCorrect    Boolean? // Calculated server-side for MCQ
-}
-
-type ProcessRound {
-  roundNumber Int
-  name        String
-  description String
-}
-
-
-type JobRequirement {
-  skillName String
-  minRating Int
-}
-
-type ApplicationRoundStatus {
-  roundNumber Int
-  name        String
-  status      String   @default("PENDING")
-  feedback    String?
+  @@index([companyId])
 }
 
 model Application {
-  id            String                   @id @default(auto()) @map("_id") @db.ObjectId
-  jobId         String                   @db.ObjectId
-  job           Job                      @relation(fields: [jobId], references: [id])
-  studentId     String                   @db.ObjectId
-  status        String                   @default("APPLIED")
-  roundStatuses ApplicationRoundStatus[]
-  answers       QuestionAnswer[]
-  createdAt     DateTime                 @default(now())
+  id            String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  jobId         String
+  job           Job      @relation(fields: [jobId], references: [id])
+  studentId     String // Profile.id (not a User id)
+  status        String   @default("APPLIED")
+  roundStatuses Json     @default("[]") // ApplicationRoundStatus[]
+  answers       Json     @default("[]") // QuestionAnswer[]
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([jobId])
+  @@index([studentId])
 }
 
 model TestAttempt {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  profileId String   @db.ObjectId
+  id        String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  profileId String
   profile   Profile  @relation(fields: [profileId], references: [id])
   skillName String
   score     Int
   passed    Boolean
-  createdAt DateTime @default(now())
-}
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
 
-type GigRequirement {
-  skillName String
-  minRating Int
+  @@index([profileId])
 }
 
 model Gig {
-  id                  String          @id @default(auto()) @map("_id") @db.ObjectId
+  id                  String          @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
   title               String
   description         String
   category            String?
   categories          String[]        @default([])
   skills              String[]
-  requirements        GigRequirement[]
-  screeningQuestions  ScreeningQuestion[]
+  requirements        Json            @default("[]") // GigRequirement[]
+  screeningQuestions  Json            @default("[]") // ScreeningQuestion[]
   budget              Float
   currency            String          @default("INR")
   deliveryTime        String
   logo                String?
   attachments         String[]        @default([])
-  ownerId             String          @db.ObjectId
-  selectedCandidateId String?         @db.ObjectId
-  hiredCandidateIds   String[]        @default([]) @db.ObjectId
+  ownerId             String // User.id
+  selectedCandidateId String?
+  hiredCandidateIds   String[]        @default([])
   status              String          @default("OPEN") // "OPEN", "IN_PROGRESS", "COMPLETED"
   minRating           Int             @default(1)
   typingUserId        String?
-  createdAt           DateTime        @default(now())
+  createdAt           DateTime        @default(now()) @db.Timestamptz(3)
   applicants          GigApplicant[]
   messages            GigMessage[]
   reviews             GigReview[]
   submissions         GigSubmission[]
+
+  @@index([ownerId])
+  @@index([status])
 }
 
 model GigApplicant {
-  id          String           @id @default(auto()) @map("_id") @db.ObjectId
-  gigId       String           @db.ObjectId
-  gig         Gig              @relation(fields: [gigId], references: [id], onDelete: Cascade)
-  candidateId String           @db.ObjectId
+  id          String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  gigId       String
+  gig         Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  candidateId String
   message     String?
-  attachments String[]         @default([])
-  answers     QuestionAnswer[]
-  createdAt   DateTime         @default(now())
+  attachments String[] @default([])
+  answers     Json     @default("[]") // QuestionAnswer[]
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([gigId])
+  @@index([candidateId])
 }
 
 model GigMessage {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  gigId      String   @db.ObjectId
+  id         String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  gigId      String
   gig        Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
-  senderId   String   @db.ObjectId
-  receiverId String?  @db.ObjectId
+  senderId   String
+  receiverId String?
   text       String?
   fileUrl    String?
-  createdAt  DateTime @default(now())
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([gigId])
 }
 
 model GigSubmission {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  gigId        String   @db.ObjectId
-  gig          Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
-  candidateId  String   @db.ObjectId
-  text         String?
-  fileUrl      String?
-  status       String   @default("PENDING") // "PENDING", "ACCEPTED", "REJECTED"
-  createdAt    DateTime @default(now())
+  id          String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  gigId       String
+  gig         Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  candidateId String
+  text        String?
+  fileUrl     String?
+  status      String   @default("PENDING") // "PENDING", "ACCEPTED", "REJECTED"
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([gigId])
 }
 
 model GigReview {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  gigId       String   @db.ObjectId
-  gig         Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
-  reviewerId  String   @db.ObjectId
-  revieweeId  String   @db.ObjectId
-  rating      Int
-  review      String
-  createdAt   DateTime @default(now())
+  id         String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  gigId      String
+  gig        Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  reviewerId String
+  revieweeId String
+  rating     Int
+  review     String
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([gigId])
 }
 
 model SkillDefinition {
-  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                  String    @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
   canonicalName       String
-  slug                String   @unique
+  slug                String    @unique
   aliases             String[]
-  category            String   @default("technical")
-  tier                Int      @default(3)
-  status              String   @default("WAITING")
-  targetQuestionCount Int      @default(300)
-  counters            SkillCounters?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  deletedAt           DateTime?
+  category            String    @default("technical")
+  tier                Int       @default(3)
+  status              String    @default("WAITING")
+  targetQuestionCount Int       @default(300)
+  counters            Json? // SkillCounters
+  createdAt           DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+  deletedAt           DateTime? @db.Timestamptz(3)
 
   @@index([tier, status])
-}
-
-type SkillCounters {
-  totalQuestions Int @default(0)
-  validated      Int @default(0)
-  topicsReady    Int @default(0)
-  topicsTotal    Int @default(0)
 }
 
 // Pre-generated MCQ Question Bank. Interim rows seeded by scripts/seedQuestions.js;
@@ -392,11 +283,9 @@ type SkillCounters {
 // by scripts/generateQuestionBank.js and seeded by scripts/seedQuestionBank.js.
 // `correctIndex` (0-3) is the server-side answer key — TestSession scores against it
 // and strips it from the client payload; generateSkillTest converts it to an A-D
-// letter for the current frontend. The usage/review counters are INITIALIZED here
-// (Phase 3) and updated later by the assessment system (Phase 4+) — no update logic
-// exists yet.
+// letter for the current frontend.
 model Question {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  id              String    @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
   skillName       String
   subtopic        String
   difficulty      String    @default("Medium") // Medium | Medium-Hard | Hard
@@ -406,82 +295,74 @@ model Question {
   explanation     String    @default("")
   tags            String[]  @default([])
   version         Int       @default(1)
-  status          String    @default("ACTIVE") // ACTIVE | RETIRED | FLAGGED (service inclusion; only ACTIVE is served)
-  reviewState     String    @default("NONE")   // NONE | NEEDS_REVIEW | REPLACEMENT_CANDIDATE (Phase 5 maintenance flag; the question stays ACTIVE & servable until a replacement is approved)
+  status          String    @default("ACTIVE") // ACTIVE | RETIRED | FLAGGED (only ACTIVE is served)
+  reviewState     String    @default("NONE") // NONE | NEEDS_REVIEW | REPLACEMENT_CANDIDATE
   source          String    @default("temp-bank-groq")
   usageCount      Int       @default(0)
   correctCount    Int       @default(0)
   wrongCount      Int       @default(0)
   skipCount       Int       @default(0)
-  lastUsed        DateTime?
-  lastReviewed    DateTime?
-  lastRegenerated DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  lastUsed        DateTime? @db.Timestamptz(3)
+  lastReviewed    DateTime? @db.Timestamptz(3)
+  lastRegenerated DateTime? @db.Timestamptz(3)
+  createdAt       DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@index([skillName])
   @@index([skillName, subtopic])
-  @@index([skillName, status]) // hot path: assessment selection (findActiveBySkill) filters skillName + status=ACTIVE
+  @@index([skillName, status]) // hot path: assessment selection filters skillName + status=ACTIVE
   @@index([status])
   @@index([reviewState])
 }
 
 // Server-side assessment session. Holds the answer key so the client is never
-// sent it and never supplies its own score. Single-use and expiring:
-// `generateSkillTest` creates one (used=false); `submitSkillTest` scores the
-// submitted answers against `answerKey`, then marks it used. `answerKey[i]` is
-// the correct option index (0-3) for served question i.
+// sent it and never supplies its own score. Single-use and expiring.
+// `answerKey[i]` is the correct option index (0-3) for served question i.
 model TestSession {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String   @db.ObjectId
+  id          String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  userId      String // User.id
   skillName   String
   answerKey   Int[]
-  questionIds String[] @default([]) // served Question ids, parallel to answerKey; drives per-question usage tracking in submitSkillTest (Phase 4)
+  questionIds String[] @default([]) // served Question ids, parallel to answerKey
   used        Boolean  @default(false)
   score       Int?
   passed      Boolean?
-  createdAt   DateTime @default(now())
-  expiresAt   DateTime
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt   DateTime @db.Timestamptz(3)
 
   @@index([userId])
 }
 
-// Assessment-level analytics (Phase 5). One immutable record per completed
-// assessment, written by submitSkillTest. Feeds future recruiter reporting /
-// dashboards (built in a later phase). Never deleted — historical data is
-// preserved. `questionIds` records exactly which bank questions were served.
+// Assessment-level analytics. One immutable record per completed assessment,
+// written by submitSkillTest. Never deleted — historical data is preserved.
 model AssessmentRecord {
-  id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  candidateId       String   @db.ObjectId
-  skill             String
-  questionIds       String[]
-  startedAt         DateTime
-  endedAt           DateTime
-  totalQuestions    Int
-  correctAnswers    Int
-  wrongAnswers      Int
-  skippedQuestions  Int
-  finalScore        Int      // percentage 0-100
-  passed            Boolean
-  createdAt         DateTime @default(now())
+  id               String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  candidateId      String // User.id
+  skill            String
+  questionIds      String[]
+  startedAt        DateTime @db.Timestamptz(3)
+  endedAt          DateTime @db.Timestamptz(3)
+  totalQuestions   Int
+  correctAnswers   Int
+  wrongAnswers     Int
+  skippedQuestions Int
+  finalScore       Int // percentage 0-100
+  passed           Boolean
+  createdAt        DateTime @default(now()) @db.Timestamptz(3)
 
   @@index([candidateId])
   @@index([skill])
 }
 
 // Interview roadmap ("blueprint") for a technical skill: the ordered syllabus of
-// subtopics that later drives question generation (Phase 2). One record per
-// canonical skill from the registry. `popularityRank` (1 = highest hiring demand)
-// sets the order skills are generated in; `subtopics` are ordered foundational ->
-// advanced. Generated offline (Bedrock Claude -> Groq fallback), seeded by
-// scripts/seedRoadmaps.js. No MCQs are stored here.
+// subtopics that drives question generation. One record per canonical skill.
 model SkillRoadmap {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  id             String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
   skillName      String   @unique
   popularityRank Int
   subtopics      String[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@index([popularityRank])
 }
@@ -489,30 +370,30 @@ model SkillRoadmap {
 // --- Community System Models ---
 
 model Community {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  id           String    @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
   name         String
   description  String?
   logo         String?
   banner       String?
-  type         String   @default("PRIVATE") // "GLOBAL" | "PRIVATE"
+  type         String    @default("PRIVATE") // "GLOBAL" | "PRIVATE"
   passwordHash String?
-  ownerId      String   @db.ObjectId
-  deleted      Boolean  @default(false)
-  deletedAt    DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  ownerId      String
+  deleted      Boolean   @default(false)
+  deletedAt    DateTime? @db.Timestamptz(3)
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@index([type])
   @@index([deleted])
 }
 
 model CommunityMember {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  communityId String   @db.ObjectId
-  userId      String   @db.ObjectId
+  id          String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  communityId String
+  userId      String
   role        String   @default("MEMBER") // "OWNER" | "ADMIN" | "MEMBER" | "MODERATOR"
-  joinedAt    DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  joinedAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@unique([communityId, userId])
   @@index([communityId])
@@ -520,31 +401,31 @@ model CommunityMember {
 }
 
 model CommunityInvite {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
-  communityId    String    @db.ObjectId
+  id             String    @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  communityId    String
   token          String    @unique
-  expirationDate DateTime?
+  expirationDate DateTime? @db.Timestamptz(3)
   maxUses        Int?
   useCount       Int       @default(0)
   isActive       Boolean   @default(true)
-  createdById    String    @db.ObjectId
-  createdAt      DateTime  @default(now())
+  createdById    String
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
 
   @@index([communityId])
 }
 
 model Post {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  authorId    String    @db.ObjectId
-  authorRole  String    // "STUDENT" | "RECRUITER"
-  communityId String    @db.ObjectId
+  id          String    @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  authorId    String
+  authorRole  String // "STUDENT" | "RECRUITER"
+  communityId String
   content     String
   postType    String    @default("TEXT") // "TEXT" | "IMAGE" | "MULTI_IMAGE" | "VIDEO" | "PDF"
   edited      Boolean   @default(false)
   deleted     Boolean   @default(false)
-  deletedAt   DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime? @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@index([communityId, createdAt])
   @@index([authorId])
@@ -552,27 +433,27 @@ model Post {
 }
 
 model Media {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  postId          String   @db.ObjectId
+  id              String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  postId          String
   s3Key           String
   url             String
-  mediaType       String   // "IMAGE" | "VIDEO" | "PDF" | "THUMBNAIL"
+  mediaType       String // "IMAGE" | "VIDEO" | "PDF" | "THUMBNAIL"
   mimeType        String
   sizeBytes       Int
   durationSeconds Int?
   width           Int?
   height          Int?
-  createdAt       DateTime @default(now())
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
 
   @@index([postId])
 }
 
 model PostReaction {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  postId    String   @db.ObjectId
-  userId    String   @db.ObjectId
-  type      String   // "LIKE" | "LOVE" | "CELEBRATE" | "INSIGHTFUL" | "SUPPORT" | "FUNNY"
-  createdAt DateTime @default(now())
+  id        String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  postId    String
+  userId    String
+  type      String // "LIKE" | "LOVE" | "CELEBRATE" | "INSIGHTFUL" | "SUPPORT" | "FUNNY"
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
 
   @@unique([postId, userId])
   @@index([postId])
@@ -580,53 +461,53 @@ model PostReaction {
 }
 
 model PostComment {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId
-  postId          String    @db.ObjectId
-  authorId        String    @db.ObjectId
-  authorRole      String    // "STUDENT" | "RECRUITER"
-  parentCommentId String?   @db.ObjectId
+  id              String    @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  postId          String
+  authorId        String
+  authorRole      String // "STUDENT" | "RECRUITER"
+  parentCommentId String?
   content         String
   deleted         Boolean   @default(false)
-  deletedAt       DateTime?
-  createdAt       DateTime  @default(now())
+  deletedAt       DateTime? @db.Timestamptz(3)
+  createdAt       DateTime  @default(now()) @db.Timestamptz(3)
 
   @@index([postId, createdAt])
   @@index([parentCommentId])
 }
 
 model SavedPost {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
-  postId    String   @db.ObjectId
-  createdAt DateTime @default(now())
+  id        String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  userId    String
+  postId    String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
 
   @@unique([userId, postId])
   @@index([userId])
 }
 
 model PostView {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  postId    String   @db.ObjectId
-  userId    String   @db.ObjectId
-  createdAt DateTime @default(now())
+  id        String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  postId    String
+  userId    String
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
 
   @@unique([postId, userId])
   @@index([postId])
 }
 
 model PaymentTransaction {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String   @db.ObjectId
-  user        User     @relation(fields: [userId], references: [id])
-  orderId     String   @unique
-  paymentId   String?
-  signature   String?
-  amount      Int      // in paise, 250000 = ₹2,500.00
-  currency    String   @default("INR")
-  planType    String   // "STUDENT_LIFETIME" | "RECRUITER_5_PACK"
-  status      String   // "CREATED" | "PAID" | "FAILED"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  orderId   String   @unique
+  paymentId String?
+  signature String?
+  amount    Int // in paise, 250000 = ₹2,500.00
+  currency  String   @default("INR")
+  planType  String // "STUDENT_LIFETIME" | "RECRUITER_5_PACK"
+  status    String // "CREATED" | "PAID" | "FAILED"
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@index([userId])
 }
@@ -634,56 +515,69 @@ model PaymentTransaction {
 // --- Courses & Learning System Models ---
 
 model Course {
-  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  id           String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
   title        String
   description  String
-  category     String         @default("General")
-  instructor   String?        @default("AlignGrade Instructor")
+  category     String   @default("General")
+  instructor   String?  @default("AlignGrade Instructor")
   thumbnailUrl String?
   thumbnailKey String?
-  isPublished  Boolean        @default(true)
-  modules      CourseModule[]
-  tags         String[]       @default([])
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  isPublished  Boolean  @default(true)
+  modules      Json     @default("[]") // CourseModule[]
+  tags         String[] @default([])
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@index([isPublished])
   @@index([category])
 }
 
-type CourseModule {
-  id      String
-  title   String
-  order   Int            @default(0)
-  lessons CourseLesson[]
-}
-
-type CourseLesson {
-  id           String
-  title        String
-  subTopic     String?
-  description  String?
-  videoKey     String
-  videoUrl     String?
-  duration     String?        @default("10:00")
-  notes        String?
-  documentUrl  String?
-  documentName String?
-  quiz         Json?
-  order        Int            @default(0)
-}
-
 model CourseEnrollment {
-  id                   String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId               String    @db.ObjectId
-  courseId             String    @db.ObjectId
-  completedLessonIds   String[]  @default([])
+  id                   String   @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  userId               String
+  courseId             String
+  completedLessonIds   String[] @default([])
   lastAccessedLessonId String?
-  enrolledAt           DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  enrolledAt           DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
 }
 
+// ---------------------------------------------------------------------------
+// JSON column shapes (formerly MongoDB composite types). Not enforced by the DB.
+//
+// Skill                  { name: string, rating: int, verifiedRating?: int }
+// SocialLinks            { linkedin?, github?, hackerEarth?, hackerRank?, codechef?, leetcode?,
+//                          codeforces?, kaggle?, portfolio?: string,
+//                          showLinkedin?, showGithub?, ... showPortfolio?: boolean }
+// Education              { eduType?, institute?, degree?, fieldOfStudy?, startDate?, endDate?,
+//                          gradeType?, gradeValue?: string }
+// Experience             { expType?, designation?, companyName?, domain?, startDate?, endDate?,
+//                          location?, description?: string, involvesTech?, currentlyWorking?: boolean }
+// Certificate            { title?, org?, startDate?, link?, certNumber?, description?, attachment?: string }
+// Project                { title?, role?, codeUrl?, hostedUrl?, startDate?, endDate?, description?,
+//                          videoUrl?: string, currentlyWorking?: boolean, skills: string[] }
+// Cocurricular           { activity?, link?, description?: string }
+// CompanyVerificationDoc { docType: string, docUrl: string, fileName?: string, uploadedAt?: ISO date }
+// CompanySocialLinks     { linkedin?, twitter?, github?, youtube?, facebook?: string }
+// ScreeningQuestion      { id: string (uuid), type: "MCQ"|"SHORT_ANSWER"|"LONG_ANSWER"|"CHECKBOX"|"DATE"|"TIME"
+//                          (jobs; gigs still only "MCQ"|"LONG_ANSWER"), question: string,
+//                          options: string[] (MCQ/CHECKBOX only), correctAnswer?: string (MCQ only), required?: boolean }
+//                          correctAnswer is an answer key: strip it from candidate-facing responses
+//                          (modules/jobs/screeningQuestions.js toCandidateQuestions).
+// QuestionAnswer         { questionId?, questionText, type, answer: string, isCorrect?: boolean,
+//                          selectedOptions?: string[] (CHECKBOX; `answer` is then the options joined by ", ") }
+//                          DATE answers are "YYYY-MM-DD", TIME answers "HH:MM" (24h).
+// ProcessRound           { roundNumber: int, name: string, description: string }
+// JobRequirement         { skillName: string, minRating: int }
+// GigRequirement         { skillName: string, minRating: int }
+// ApplicationRoundStatus { roundNumber: int, name: string, status: string ("PENDING"...), feedback?: string }
+// SkillCounters          { totalQuestions, validated, topicsReady, topicsTotal: int }
+// CourseModule           { id: string, title: string, order: int, lessons: CourseLesson[] }
+// CourseLesson           { id, title, videoKey: string, subTopic?, description?, videoUrl?,
+//                          duration? ("10:00"), notes?, documentUrl?, documentName?: string,
+//                          quiz?: any, order: int }
+// ---------------------------------------------------------------------------

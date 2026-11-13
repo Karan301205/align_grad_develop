@@ -53,22 +53,22 @@ async function clearGigData() {
       }
     }
 
-    // 5. Delete all Mongo DB Collections via Prisma
-    console.log('Purging MongoDB collections...');
+    // 5. Delete all gig rows via Prisma
+    console.log('Purging gig tables...');
     const deletedSubmissions = await prisma.gigSubmission.deleteMany();
-    console.log(`Deleted ${deletedSubmissions.count} GigSubmissions from MongoDB.`);
+    console.log(`Deleted ${deletedSubmissions.count} GigSubmissions from the database.`);
 
     const deletedMessages = await prisma.gigMessage.deleteMany();
-    console.log(`Deleted ${deletedMessages.count} GigMessages from MongoDB.`);
+    console.log(`Deleted ${deletedMessages.count} GigMessages from the database.`);
 
     const deletedApplicants = await prisma.gigApplicant.deleteMany();
-    console.log(`Deleted ${deletedApplicants.count} GigApplicants from MongoDB.`);
+    console.log(`Deleted ${deletedApplicants.count} GigApplicants from the database.`);
 
     const deletedReviews = await prisma.gigReview.deleteMany();
-    console.log(`Deleted ${deletedReviews.count} GigReviews from MongoDB.`);
+    console.log(`Deleted ${deletedReviews.count} GigReviews from the database.`);
 
     const deletedGigs = await prisma.gig.deleteMany();
-    console.log(`Deleted ${deletedGigs.count} Gigs from MongoDB.`);
+    console.log(`Deleted ${deletedGigs.count} Gigs from the database.`);
 
     // 6. Reset in-memory mock collections if present
     if (mockDb) {

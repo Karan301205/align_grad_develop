@@ -45,7 +45,8 @@ export default function RecruiterCustomDropdown({
   }, [isOpen]);
 
   // Find currently selected option
-  const selectedOption = options.find(opt => String(opt.value) === String(value));
+  // Nothing picked ('' value): show the field name (defaultLabel), e.g. "Work mode".
+  const selectedOption = value === '' || value == null ? null : options.find(opt => String(opt.value) === String(value));
   const isActive = Boolean(value && value !== '' && value !== 'all');
   const displayLabel = selectedOption ? selectedOption.label : defaultLabel;
 
@@ -75,18 +76,18 @@ export default function RecruiterCustomDropdown({
       <button
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
-        className={`bg-white dark:bg-slate-900 border text-xs font-sans font-medium rounded-none px-3 py-2 flex items-center justify-between gap-2 transition-all cursor-pointer shadow-2xs hover:border-blue-700 focus:outline-none select-none ${
+        className={`h-9 bg-white border text-[13px] font-(family-name:--font-headline) font-normal rounded-[8px] px-2.5 flex items-center justify-between gap-2 transition-colors cursor-pointer hover:border-[#9CA3AF] focus:outline-none focus-visible:border-[#1447E6] focus-visible:ring-2 focus-visible:ring-[#1447E6]/20 select-none ${
           isActive
-            ? 'border-blue-600 text-blue-700 dark:text-blue-300 font-bold bg-blue-50/40 dark:bg-blue-950/40'
-            : 'border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+            ? 'border-[#1447E6] text-[#1447E6] font-semibold bg-[#EEF2FE]'
+            : 'border-[#D5D9E0] text-[#0F172A]'
         } ${buttonClassName}`}
       >
         <div className="flex items-center gap-1.5 min-w-0 truncate">
-          {Icon && <Icon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />}
+          {Icon && <Icon className="w-3.5 h-3.5 text-[#4B5563] shrink-0" />}
           <span className="truncate">{displayLabel}</span>
         </div>
         <ChevronDown
-          className={`w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0 transition-transform duration-150 ${
+          className={`w-4 h-4 text-[#4B5563] shrink-0 transition-transform duration-150 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
@@ -97,10 +98,10 @@ export default function RecruiterCustomDropdown({
         <div
           className={`absolute ${
             align === 'right' ? 'right-0' : 'left-0'
-          } mt-1 min-w-[170px] w-max max-w-[280px] max-h-64 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none shadow-xl z-50 py-1 text-left custom-scrollbar animate-scale-up ${menuClassName}`}
+          } mt-1 min-w-[170px] w-max max-w-[280px] max-h-64 overflow-y-auto bg-white border border-[#E4E6EA] rounded-[8px] shadow-lg shadow-slate-300/50 z-50 p-1 text-left font-(family-name:--font-headline) custom-scrollbar animate-scale-up ${menuClassName}`}
         >
           {searchable && (
-            <div className="p-2 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
+            <div className="p-1.5 border-b border-[#EEF0F3] sticky -top-1 bg-white z-10">
               <div className="relative">
                 <Search className="w-3 h-3 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
@@ -109,7 +110,7 @@ export default function RecruiterCustomDropdown({
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   onClick={e => e.stopPropagation()}
-                  className="w-full pl-7 pr-6 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-blue-700 font-sans rounded-none"
+                  className="w-full h-8 pl-7 pr-6 bg-white border border-[#D5D9E0] text-[13px] text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none focus:border-[#1447E6] focus:ring-2 focus:ring-[#1447E6]/20 rounded-[6px]"
                   autoFocus
                 />
                 {searchQuery && (
@@ -130,7 +131,7 @@ export default function RecruiterCustomDropdown({
 
           <div className="py-0.5">
             {groupedOptions.length === 0 ? (
-              <div className="px-3 py-2 text-xs text-slate-500 dark:text-slate-400 font-sans">
+              <div className="px-3 py-2 text-[13px] text-[#4B5563]">
                 No matching options
               </div>
             ) : (
@@ -139,7 +140,7 @@ export default function RecruiterCustomDropdown({
                   return (
                     <div
                       key={`group-${idx}`}
-                      className="px-3 py-1.5 text-[10px] font-headline font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/40 border-y border-slate-200 dark:border-slate-800 select-none"
+                      className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.04em] text-[#6B7280] select-none"
                     >
                       {opt.label}
                     </div>
@@ -155,15 +156,15 @@ export default function RecruiterCustomDropdown({
                       onChange(opt.value);
                       setIsOpen(false);
                     }}
-                    className={`px-3 py-2 text-xs font-sans font-medium hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer flex items-center justify-between gap-2 transition-colors ${
+                    className={`px-3 py-2 rounded-[6px] text-[13px] hover:bg-[#F8F8F6] cursor-pointer flex items-center justify-between gap-2 transition-colors ${
                       isSelected
-                        ? 'bg-blue-50 dark:bg-blue-950/70 text-blue-800 dark:text-blue-200 font-bold'
-                        : 'text-slate-800 dark:text-slate-200'
+                        ? 'bg-[#EEF2FE] text-[#1447E6] font-semibold hover:bg-[#EEF2FE]'
+                        : 'text-[#334155]'
                     }`}
                   >
                     <span className="truncate">{opt.label}</span>
                     {isSelected && (
-                      <Check className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400 shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-[#1447E6] shrink-0" />
                     )}
                   </div>
                 );

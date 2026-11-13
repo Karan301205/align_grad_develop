@@ -1,42 +1,36 @@
 const { ListObjectsV2Command } = require('@aws-sdk/client-s3');
 const { getS3Settings, createS3Client, getS3FileUrl } = require('../../../config/s3');
-const { getMockS3Files } = require('../../../mocks/storage.mock');
 const { formatBytes } = require('../../../utils/formatBytes');
 
-// Computes the S3 portion of the storage explorer report: lists bucket objects
-// (or falls back to mock fixtures), categorizes them, and estimates monthly S3
-// cost. Logic extracted verbatim from storage.controller.js.
+// Computes the S3 portion of the storage explorer report: lists bucket objects,
+// categorizes them, and estimates monthly S3 cost. When storage isn't configured
+// or listing fails, the report says so (`unavailable: true`, no files) and the
+// cause is logged; it never shows stand-in files.
 async function computeS3Storage() {
   const { bucketName, accessKeyId, secretAccessKey, region } = getS3Settings();
 
   let files = [];
-  let isMock = false;
+  let unavailable = false;
 
-  if (!accessKeyId || !secretAccessKey) {
-    isMock = true;
+  if (!bucketName || !accessKeyId || !secretAccessKey) {
+    console.error('[storage] S3 report unavailable: S3_BUCKET_NAME / AWS credentials are not configured in admin_ws/backend/.env.');
+    unavailable = true;
   } else {
     try {
       const s3 = createS3Client({ region, accessKeyId, secretAccessKey });
       const command = new ListObjectsV2Command({ Bucket: bucketName });
       const response = await s3.send(command);
 
-      if (response.Contents) {
-        files = response.Contents.map(item => ({
-          key: item.Key,
-          size: item.Size || 0,
-          lastModified: item.LastModified,
-          eTag: item.ETag
-        }));
-      }
+      files = (response.Contents || []).map(item => ({
+        key: item.Key,
+        size: item.Size || 0,
+        lastModified: item.LastModified,
+        eTag: item.ETag
+      }));
     } catch (err) {
-      console.warn('[S3 WARNING] Failed listing S3 bucket objects, using fallback mockup data:', err.message);
-      isMock = true;
+      console.error('[storage] S3 report unavailable: listing the bucket failed:', err);
+      unavailable = true;
     }
-  }
-
-  if (isMock) {
-    // Mock files representing resumes, video intros, and doc verifications matching seeded users
-    files = getMockS3Files();
   }
 
   // Initialize categories
@@ -96,7 +90,7 @@ async function computeS3Storage() {
     estimatedMonthlyBill: totalCost,
     categories,
     files: formattedFiles,
-    isMock
+    unavailable
   };
 }
 

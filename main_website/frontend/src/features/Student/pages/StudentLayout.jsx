@@ -2,105 +2,62 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Briefcase,
   User,
-  FileText,
-  CheckCircle,
   LogOut,
   BookOpen,
   RefreshCw,
-  Video,
-  Award,
   Menu,
-  X,
   ChevronRight,
   ChevronLeft,
-  Plus,
-  AlertCircle,
-  CheckCircle2,
   ClipboardList,
   Lock,
-  DollarSign,
-  Users,
   Zap,
-  Search,
   GraduationCap,
   LayoutDashboard
 } from 'lucide-react';
-import GigsMarketplace from '../../Gigs/GigsMarketplace';
-import { apiFetch } from '../../../services/apiClient';
-import { putFileToS3 } from '../../../services/uploadService';
+import GigsPage from '../gigs/GigsPage';
+import { apiFetch, userMessage } from '../../../services/apiClient';
 import { generateResumePdf } from '../../../services/resumePdf';
 import { formatAlertMessage } from '../../../utils/errorFormatter';
 import {
   hasGeneralInfo as hasGeneralInfoRule,
-  hasSkills as hasSkillsRule,
   hasIntroVideo as hasIntroVideoRule,
   isProfileComplete
 } from '../../../utils/profileCompleteness';
-import { isPremiumCandidate, getBriefNavigation } from '../../../utils/jobAccess';
-import PaymentModal from '../../../components/PaymentModal';
+import { isPremiumCandidate } from '../../../utils/jobAccess';
 import SidebarNavItem from '../../../components/ui/SidebarNavItem';
-import ThemeToggle from '../../../components/ui/ThemeToggle';
 
 // Import subcomponents
-import CandidateDashboard from '../components/CandidateDashboard';
-import StudentDashboard from '../components/StudentDashboard';
-import StudentProfile from '../components/StudentProfile';
+import CandidateHome from '../home/CandidateHome';
+import JobsPage from '../jobs/JobsPage';
 import StudentResume from '../components/StudentResume';
-import StudentSkillTests from '../components/StudentSkillTests';
-import StudentShowcase from '../components/StudentShowcase';
-import StudentProgress from '../components/StudentProgress';
-import StudentCourses from '../components/StudentCourses';
-import JobBriefPage from './JobBriefPage';
+import SkillsTestsPage from '../tests/SkillsTestsPage';
+import ApplicationsPage from '../applications/ApplicationsPage';
+import LearnPage from '../learn/LearnPage';
+import ProfilePage from '../profile/ProfilePage';
 
 
-export default function StudentLayout({ user, token, activeTab, setActiveTab, testSkill, setTestSkill, handleLogout, theme, toggleTheme, onOpenCompanyProfile, autoSelectOpportunity, setAutoSelectOpportunity }) {
+export default function StudentLayout({ user, token, activeTab, setActiveTab, handleLogout, theme, toggleTheme, onOpenCompanyProfile, autoSelectOpportunity, setAutoSelectOpportunity }) {
   const [profile, setProfile] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const mainRef = useRef(null);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [skillsList, setSkillsList] = useState([]);
-  const [selectedNewSkill, setSelectedNewSkill] = useState('');
   const [resumeUrl, setResumeUrl] = useState('');
-  const [submittingProfile, setSubmittingProfile] = useState(false);
-  const [feedbackMsg, setFeedbackMsg] = useState('');
-  const [profileTab, setProfileTab] = useState('general');
   const [wasComplete, setWasComplete] = useState(null);
   const [alertConfig, setAlertConfig] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [gigsSubTab, setGigsSubTab] = useState('browse');
-  // Open gig on the Gigs 'gig-detail' sub-tab; kept here because GigsMarketplace
-  // unmounts on tab switches and profile reloads.
-  const [selectedGigId, setSelectedGigId] = useState(null);
-  const [isGigsOpen, setIsGigsOpen] = useState(true);
-  const [opportunitiesSubTab, setOpportunitiesSubTab] = useState('all');
-  const [progressStageFilter, setProgressStageFilter] = useState('ALL');
-  const [selectedBriefJobId, setSelectedBriefJobId] = useState(() => {
-    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief')) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('id') || null;
-    }
-    return null;
-  });
-  // Ordered job ids the open brief can step through with Previous/Next, as
-  // handed over by the list it was opened from (null = default order).
-  const [briefJobSequence, setBriefJobSequence] = useState(null);
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  // Where the Gigs page starts ({ view: 'browse' | 'mine' }), a new object per link.
+  const [gigsFocus, setGigsFocus] = useState(null);
+  // List the Jobs page opens on when a link asks for one ('' = Can apply).
+  const [opportunitiesSubTab, setOpportunitiesSubTab] = useState('');
+  // Where the Applications page starts ({ stage, applicationId, jobId }), a new object per link.
+  const [progressFocus, setProgressFocus] = useState(null);
+  // A job to open on the Jobs page, from a Home card (company profiles use
+  // autoSelectOpportunity). A new object per request, so the page knows it's new.
+  // /job_brief links are handled by App.jsx (public job brief page).
+  const [jobsFocus, setJobsFocus] = useState(null);
 
-  useEffect(() => {
-    const handleUrlChange = () => {
-      if (window.location.pathname.startsWith('/job_brief')) {
-        const params = new URLSearchParams(window.location.search);
-        setSelectedBriefJobId(params.get('id') || null);
-      } else {
-        setSelectedBriefJobId(null);
-      }
-    };
-
-    window.addEventListener('popstate', handleUrlChange);
-    return () => window.removeEventListener('popstate', handleUrlChange);
-  }, []);
-  
   // General Section
   const [bio, setBio] = useState('');
   const [username, setUsername] = useState('');
@@ -144,41 +101,32 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   const [projectsList, setProjectsList] = useState([]);
   const [cocurricular, setCocurricular] = useState([]);
 
-  // Builders local states
-  const [newEdu, setNewEdu] = useState({ eduType: '', institute: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', gradeType: '', gradeValue: '' });
-  const [newExp, setNewExp] = useState({ expType: '', designation: '', involvesTech: false, companyName: '', domain: '', startDate: '', endDate: '', currentlyWorking: false, location: '', description: '' });
-  const [newCert, setNewCert] = useState({ title: '', org: '', startDate: '', link: '', certNumber: '', attachment: '', description: '' });
-  const [newProj, setNewProj] = useState({ title: '', role: '', codeUrl: '', hostedUrl: '', startDate: '', endDate: '', currentlyWorking: false, description: '', skills: [], videoUrl: '' });
-  const [newCocurricular, setNewCocurricular] = useState({ activity: '', link: '', description: '' });
-
   const [generatingPdf, setGeneratingPdf] = useState(false);
 
   const [techSkills, setTechSkills] = useState([]);
   const [loadingTechSkills, setLoadingTechSkills] = useState(false);
 
-  // Skill testing states
-  const [activeTestSkill, setActiveTestSkill] = useState(null);
-  const [testQuestions, setTestQuestions] = useState([]);
-  const [testSessionId, setTestSessionId] = useState(null);
-  const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [generatingTest, setGeneratingTest] = useState(false);
-  const [submittingTest, setSubmittingTest] = useState(false);
-  const [testResult, setTestResult] = useState(null);
+  // A test to open on the Skills & tests page ({ skill, need, opens }), a new object per request.
+  const [testFocus, setTestFocus] = useState(null);
+  const [learnFocus, setLearnFocus] = useState(null);
 
   const [applications, setApplications] = useState([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
+  const [applicationsError, setApplicationsError] = useState('');
 
   const fetchStudentApplications = async () => {
     setLoadingApplications(true);
     try {
       const res = await apiFetch('/student/applications', { token });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await res.json().catch(() => null);
+      if (res.ok && Array.isArray(data)) {
         setApplications(data);
+        setApplicationsError('');
+      } else {
+        setApplicationsError(res.status >= 500 || !data?.error ? 'Your applications couldn’t be loaded. Try again.' : data.error);
       }
     } catch (err) {
-      console.error('Error fetching applications:', err);
+      setApplicationsError(userMessage(err, 'Your applications couldn’t be loaded. Try again.'));
     } finally {
       setLoadingApplications(false);
     }
@@ -191,76 +139,85 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
   }, [activeTab, token]);
 
   const hasGeneralInfo = hasGeneralInfoRule(profile);
-  const hasSkills = hasSkillsRule(profile);
   const hasIntroVideo = hasIntroVideoRule(profile);
   const isComplete = isProfileComplete(profile);
 
-  const fetchProfileAndJobs = async () => {
-    setLoading(true);
+  // Copies a profile from the API into the layout state (used by the load and by
+  // saves, which answer with the updated profile).
+  const applyProfile = (profData) => {
+    setProfile(profData);
+    setResumeUrl(profData.resumeUrl || '');
+    setSkillsList(profData.skills || []);
+
+    setBio(profData.bio || '');
+    setUsername(profData.username || '');
+    setProfilePic(profData.profilePic || '');
+    setNationality(profData.nationality || '');
+    setGender(profData.gender || '');
+    setProfileEmail(profData.email || user?.email || '');
+    setDob(profData.dob || '');
+    setPhone(profData.phone || '');
+    setPreferredWorkModes(profData.preferredWorkModes || []);
+    setPreferredWorkTypes(profData.preferredWorkTypes || []);
+    setPreferredLocations(profData.preferredLocations || []);
+    setOpenToAnyLocation(Boolean(profData.openToAnyLocation));
+    setSocialLinks(profData.socialLinks || {
+      linkedin: '',
+      github: '',
+      hackerEarth: '',
+      hackerRank: '',
+      codechef: '',
+      leetcode: '',
+      codeforces: '',
+      kaggle: '',
+      portfolio: '',
+      showLinkedin: false,
+      showGithub: false,
+      showHackerEarth: false,
+      showHackerRank: false,
+      showCodechef: false,
+      showLeetcode: false,
+      showCodeforces: false,
+      showKaggle: false,
+      showPortfolio: false,
+    });
+    setEducationList(profData.education || []);
+    setExperienceList(profData.experience || []);
+    setCertificatesList(profData.certificates || []);
+    setProjectsList(profData.projects || []);
+    let cocurArr = [];
+    if (Array.isArray(profData.cocurricular)) {
+      cocurArr = profData.cocurricular;
+    } else if (profData.cocurricular) {
+      cocurArr = [{ activity: 'Co-curricular Activity', link: profData.cocurricular, description: '' }];
+    }
+    setCocurricular(cocurArr);
+  };
+
+  // Job matches depend on skills and preferences, so saves refresh them quietly.
+  const refreshJobs = async () => {
+    const jobsRes = await apiFetch('/student/jobs', { token });
+    const jobsData = await jobsRes.json();
+    if (jobsRes.ok) {
+      setJobs(jobsData);
+    }
+  };
+
+  // `options.silent` refreshes without the full-page spinner.
+  const fetchProfileAndJobs = async (options) => {
+    const silent = Boolean(options?.silent);
+    if (!silent) setLoading(true);
     try {
-      // Fetch Profile
       const profRes = await apiFetch('/student/profile', { token });
       const profData = await profRes.json();
       if (profRes.ok) {
-        setProfile(profData);
-        setResumeUrl(profData.resumeUrl || '');
-        setSkillsList(profData.skills || []);
-
-        setBio(profData.bio || '');
-        setUsername(profData.username || '');
-        setProfilePic(profData.profilePic || '');
-        setNationality(profData.nationality || '');
-        setGender(profData.gender || '');
-        setProfileEmail(profData.email || user?.email || '');
-        setDob(profData.dob || '');
-        setPhone(profData.phone || '');
-        setPreferredWorkModes(profData.preferredWorkModes || []);
-        setPreferredWorkTypes(profData.preferredWorkTypes || []);
-        setPreferredLocations(profData.preferredLocations || []);
-        setOpenToAnyLocation(Boolean(profData.openToAnyLocation));
-        setSocialLinks(profData.socialLinks || {
-          linkedin: '',
-          github: '',
-          hackerEarth: '',
-          hackerRank: '',
-          codechef: '',
-          leetcode: '',
-          codeforces: '',
-          kaggle: '',
-          portfolio: '',
-          showLinkedin: false,
-          showGithub: false,
-          showHackerEarth: false,
-          showHackerRank: false,
-          showCodechef: false,
-          showLeetcode: false,
-          showCodeforces: false,
-          showKaggle: false,
-          showPortfolio: false,
-        });
-        setEducationList(profData.education || []);
-        setExperienceList(profData.experience || []);
-        setCertificatesList(profData.certificates || []);
-        setProjectsList(profData.projects || []);
-        let cocurArr = [];
-        if (Array.isArray(profData.cocurricular)) {
-          cocurArr = profData.cocurricular;
-        } else if (profData.cocurricular) {
-          cocurArr = [{ activity: 'Co-curricular Activity', link: profData.cocurricular, description: '' }];
-        }
-        setCocurricular(cocurArr);
+        applyProfile(profData);
       }
-
-      // Fetch Jobs
-      const jobsRes = await apiFetch('/student/jobs', { token });
-      const jobsData = await jobsRes.json();
-      if (jobsRes.ok) {
-        setJobs(jobsData);
-      }
+      await refreshJobs();
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -286,7 +243,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       }
       setWasComplete(complete);
 
-      if (!complete && activeTab !== 'profile' && activeTab !== 'tests') {
+      if (!complete && activeTab !== 'profile') {
         setActiveTab('profile');
       }
     }
@@ -313,83 +270,77 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     }
   }, [activeTab]);
 
-  const handleStartSkillTest = async (skillName) => {
-    setActiveTestSkill(skillName);
-    setGeneratingTest(true);
-    setTestQuestions([]);
-    setCurrentQuestionIdx(0);
-    setSelectedAnswers({});
-    setTestResult(null);
-
-    try {
-      const res = await apiFetch('/student/tests/generate', {
-        token,
-        method: 'POST',
-        json: { skillName }
+  // Opens a skill test (its intro; the questions are fetched when the candidate presses
+  // Start). Tests stay locked until the General tab and intro video are done (the
+  // server checks the same on /student/tests/generate). A skill that isn't on the
+  // profile yet is added by the server with the score from the test.
+  const openTest = ({ skillName, need = 0, opens = '' }) => {
+    if (!isProfileComplete(profile)) {
+      setAlertConfig({
+        message: 'Please complete your **General profile** and upload your **Introduction video** to unlock skill tests.',
+        type: 'warning'
       });
-      if (res.ok) {
-        const data = await res.json();
-        setTestQuestions(data.questions || []);
-        setTestSessionId(data.sessionId || null); // server-side scoring session
-      } else {
-        const d = await res.json().catch(() => ({}));
-        // 502 + this message = the question bank has no test for the skill (generateSkillTest).
-        const noBankTest = res.status === 502 && /not enough questions/i.test(d.error || '');
-        setAlertConfig(noBankTest
-          ? { message: `A skill test for **${skillName}** isn't available yet. You can keep it on your profile as a self-rated skill.`, type: 'info' }
-          : { message: d.error || 'Failed to generate test. Please try again.', type: 'error' });
-        setActiveTestSkill(null);
-      }
-    } catch (err) {
-      console.error(err);
-      setAlertConfig({ message: 'Network error generating test.', type: 'error' });
-      setActiveTestSkill(null);
-    } finally {
-      setGeneratingTest(false);
+      setActiveTab('profile');
+      return;
     }
+    goToTab('tests');
+    setTestFocus({ skill: skillName, need, opens });
   };
 
-  useEffect(() => {
-    if (testSkill && testSkill.skillName) {
-      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief')) {
-        window.history.pushState({}, '', '/');
-      }
-      setSelectedBriefJobId(null);
-      setActiveTab('tests');
-      handleStartSkillTest(testSkill.skillName);
-      setTestSkill(null);
-    }
-  }, [testSkill]);
+  // PUT /student/profile replaces the profile, so every field is resent;
+  // `changes` overrides the fields being saved.
+  const buildProfilePayload = (changes = {}) => ({
+    name: profile?.name,
+    username,
+    profilePic,
+    resumeUrl,
+    skills: skillsList,
+    bio,
+    nationality,
+    gender,
+    email: profileEmail,
+    dob,
+    phone,
+    socialLinks,
+    education: educationList,
+    experience: experienceList,
+    certificates: certificatesList,
+    projects: projectsList,
+    cocurricular,
+    preferredWorkModes,
+    preferredWorkTypes,
+    preferredLocations,
+    openToAnyLocation,
+    ...changes
+  });
 
-  // Saves the full profile with an updated skills list (PUT /student/profile
-  // replaces the profile, so every field is resent).
+  // Saves the full profile with an updated skills list.
   const saveSkillsList = (updatedSkills) => apiFetch('/student/profile', {
     token,
     method: 'PUT',
-    json: {
-      name: profile?.name,
-      username,
-      profilePic,
-      resumeUrl,
-      skills: updatedSkills,
-      bio,
-      nationality,
-      gender,
-      email: profileEmail,
-      dob,
-      phone,
-      socialLinks,
-      education: educationList,
-      experience: experienceList,
-      certificates: certificatesList,
-      projects: projectsList,
-      cocurricular,
-      preferredWorkModes,
-      preferredWorkTypes,
-      preferredLocations,
-      openToAnyLocation
-    }
+    json: buildProfilePayload({ skills: updatedSkills })
   });
+
+  // Saves changes made on the Profile page. Resolves to { ok, error }; the layout
+  // state only changes once the server has accepted the save.
+  const saveProfileChanges = async (changes) => {
+    try {
+      const res = await apiFetch('/student/profile', {
+        token,
+        method: 'PUT',
+        json: buildProfilePayload(changes)
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return { ok: false, error: body.error || 'Your changes couldn’t be saved. Please try again.' };
+      }
+      applyProfile({ ...body, plan: profile?.plan });
+      refreshJobs().catch((err) => console.error('[profile] Could not refresh job matches:', err));
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: userMessage(err, 'Your changes couldn’t be saved. Please try again.') };
+    }
+  };
 
   // For required skills with no test in the question bank: add the skill as a
   // self-rated skill (the server accepts self-ratings only for untestable skills).
@@ -407,7 +358,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         setAlertConfig({ message: d.error || `Could not add **${skillName}** to your profile. Please try again.`, type: 'error' });
         return { success: false };
       }
-      await fetchProfileAndJobs();
+      await fetchProfileAndJobs({ silent: true });
       setAlertConfig({
         message: `**${skillName}** was added to your profile without a skill test (self-rated Level ${safeRating}/10).`,
         type: 'success'
@@ -420,199 +371,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     }
   };
 
-  const handleAddSkillAndUpgrade = async ({ skillName, targetRating, jobId }) => {
-    try {
-      const exists = (skillsList || []).some(
-        s => s.name?.toLowerCase() === skillName?.toLowerCase()
-      );
-      if (!exists) {
-        const updated = [...(skillsList || []), { name: skillName, rating: 1 }];
-        setSkillsList(updated);
-        await saveSkillsList(updated);
-        await fetchProfileAndJobs();
-      }
-      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief')) {
-        window.history.pushState({}, '', '/');
-      }
-      setSelectedBriefJobId(null);
-      setActiveTab('tests');
-      handleStartSkillTest(skillName);
-    } catch (err) {
-      console.error('Failed to add skill before starting test:', err);
-      if (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief')) {
-        window.history.pushState({}, '', '/');
-      }
-      setSelectedBriefJobId(null);
-      setActiveTab('tests');
-      handleStartSkillTest(skillName);
-    }
-  };
 
-  const handleSubmitSkillTest = async () => {
-    // Server-side scoring: submit the selected option index per question (in served
-    // order). The client no longer computes a score or sees the answer key.
-    const answers = testQuestions.map((_, idx) => (selectedAnswers[idx] !== undefined ? selectedAnswers[idx] : 0));
-
-    setSubmittingTest(true);
-    try {
-      const res = await apiFetch('/student/tests/submit', {
-        token,
-        method: 'POST',
-        json: {
-          sessionId: testSessionId,
-          answers
-        }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setTestResult({
-          skillName: activeTestSkill,
-          rating: data.rating,   // 1-10 level (applied to profile only when passed)
-          percent: data.score,   // 0-100
-          passed: data.passed,
-          results: data.results // [{ correct: boolean }] per served question; answer key is never sent
-        });
-        if (data.skills) {
-          setSkillsList(data.skills);
-          setProfile(prev => prev ? { ...prev, skills: data.skills } : prev);
-        }
-        fetchTechnicalSkills();
-      } else {
-        setAlertConfig({ message: 'Failed to submit test results.', type: 'error' });
-      }
-    } catch (err) {
-      console.error(err);
-      setAlertConfig({ message: 'Network error submitting test.', type: 'error' });
-    } finally {
-      setSubmittingTest(false);
-    }
-  };
-
-  const handleUpdateProfile = async (e, sectionName) => {
-    if (e && e.preventDefault) e.preventDefault();
-    setSubmittingProfile(true);
-    setFeedbackMsg('');
-    try {
-      const res = await apiFetch('/student/profile', {
-        token,
-        method: 'PUT',
-        json: {
-          name: profile.name,
-          username,
-          profilePic,
-          resumeUrl,
-          skills: skillsList,
-          bio,
-          nationality,
-          gender,
-          email: profileEmail,
-          dob,
-          phone,
-          socialLinks,
-          education: educationList,
-          experience: experienceList,
-          certificates: certificatesList,
-          projects: projectsList,
-          cocurricular,
-          preferredWorkModes,
-          preferredWorkTypes,
-          preferredLocations,
-          openToAnyLocation
-        }
-      });
-      if (res.ok) {
-        const msg = sectionName ? `"${sectionName}" updated successfully!` : 'Profile updated successfully!';
-        setFeedbackMsg(msg);
-        fetchProfileAndJobs();
-      } else {
-        const d = await res.json();
-        setFeedbackMsg(d.error || 'Failed to update profile');
-      }
-    } catch (err) {
-      setFeedbackMsg('Network error updating profile');
-    } finally {
-      setSubmittingProfile(false);
-    }
-  };
-
-
-
-  const handleResumeUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const allowedTypes = [
-      'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ];
-    if (!allowedTypes.includes(file.type)) {
-      setAlertConfig({ message: 'Please upload a valid PDF or DOCX file.', type: 'error' });
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      setAlertConfig({ message: 'File size exceeds the 10MB limit.', type: 'error' });
-      return;
-    }
-
-    try {
-      await executeResumeUploadAndParse(file, false);
-    } catch (err) {
-      setAlertConfig({ message: err.message || 'Error processing resume file.', type: 'error' });
-    }
-  };
-
-
-
-
-
-
-
-
-
-  const handleDownloadUploadedResume = () => {
-    if (!resumeUrl) return;
-    window.open(resumeUrl, '_blank');
-  };
-
-  const handleDeleteUploadedResume = async () => {
-    if (!window.confirm('Are you sure you want to delete your uploaded resume?')) return;
-    setResumeUrl('');
-
-    try {
-      const res = await apiFetch('/student/profile', {
-        token,
-        method: 'PUT',
-        json: {
-          name: profile?.name,
-          resumeUrl: '',
-          skills: skillsList,
-          bio,
-          nationality,
-          gender,
-          email: profileEmail,
-          dob,
-          phone,
-          socialLinks,
-          education: educationList,
-          experience: experienceList,
-          certificates: certificatesList,
-          projects: projectsList,
-          cocurricular
-        }
-      });
-      if (res.ok) {
-        const d = await res.json();
-        setProfile(d);
-        setFeedbackMsg('Resume deleted successfully.');
-      } else {
-        alert('Failed to update profile after deleting resume.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Network error deleting resume.');
-    }
-  };
 
   const handleDownloadGeneratedResume = async () => {
     setGeneratingPdf(true);
@@ -634,6 +393,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
     }
   };
 
+  // Sends an application. Resolves to { success, error }; the Jobs page shows the
+  // result in its apply dialog, then jobs and applications refresh quietly.
   const handleApply = async (jobId, answers = []) => {
     try {
       const res = await apiFetch(`/student/jobs/${jobId}/apply`, {
@@ -641,56 +402,25 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
         method: 'POST',
         json: { answers }
       });
-      if (res.ok) {
-        setAlertConfig({ message: 'Application submitted successfully!', type: 'success' });
-        await Promise.all([
-          fetchProfileAndJobs(),
-          fetchStudentApplications()
-        ]);
-        return { success: true };
-      } else {
-        const d = await res.json();
-        setAlertConfig({ message: d.error || 'Could not apply', type: 'error' });
-        return { success: false, error: d.error };
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        return { success: false, error: d.error || 'Your application couldn’t be sent. Try again.' };
       }
+      await Promise.all([fetchProfileAndJobs({ silent: true }), fetchStudentApplications()]);
+      return { success: true };
     } catch (err) {
-      setAlertConfig({ message: 'Error applying', type: 'error' });
-      return { success: false, error: 'Network error' };
+      return { success: false, error: userMessage(err, 'Your application couldn’t be sent. Try again.') };
     }
   };
-
-  const handleRatingChange = (name, val) => {
-    setSkillsList(prev => prev.map(s => s.name === name ? { ...s, rating: parseInt(val) } : s));
-  };
-
-  // Stats computation
-  const skillCount = profile?.skills?.length || 0;
-  const appliedCount = jobs.filter(j => j.applied).length;
 
   const navItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', locked: !isComplete },
     { id: 'opportunities', icon: Briefcase, label: 'Opportunities', locked: !isComplete },
     { id: 'profile', icon: User, label: 'Your Profile', locked: false },
-    { id: 'tests', icon: BookOpen, label: 'Your Tests', locked: false },
+    { id: 'tests', icon: BookOpen, label: 'Your Tests', locked: !isComplete },
     { id: 'progress', icon: ClipboardList, label: 'Your Job Progress', locked: !isComplete },
     { id: 'courses', icon: GraduationCap, label: 'Courses', locked: !isComplete },
-    {
-      id: 'gigs',
-      icon: Zap,
-      label: 'Gigs Marketplace',
-      locked: !isComplete,
-      subItems: [
-        { id: 'browse', label: 'Browse Gigs', icon: Search },
-        { id: 'my-gigs', label: 'My Gigs Workspace', icon: Briefcase },
-      ],
-      activeSubId: gigsSubTab,
-      onSubItemClick: (subId) => {
-        if (!isComplete) return;
-        setGigsSubTab(subId);
-        setActiveTab('gigs');
-        setSidebarOpen(false);
-      }
-    },
+    { id: 'gigs', icon: Zap, label: 'Gigs Marketplace', locked: !isComplete },
   ];
 
   const goToTab = (tabId, options = {}) => {
@@ -702,68 +432,84 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       });
       return;
     }
-    if (options.subTab) {
-      setOpportunitiesSubTab(options.subTab);
+    if (tabId === 'opportunities') {
+      setOpportunitiesSubTab(options.subTab || '');
     }
-    if (options.stage) {
-      setProgressStageFilter(options.stage);
+    if (tabId === 'gigs') {
+      setGigsFocus({ view: options.view === 'mine' ? 'mine' : 'browse' });
     }
-    if (selectedBriefJobId || (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief'))) {
-      window.history.pushState({}, '', '/');
-      setSelectedBriefJobId(null);
+    if (tabId === 'courses') {
+      setLearnFocus({ skill: options.skill || '' });
     }
+    if (tabId === 'progress') {
+      setProgressFocus({ stage: options.stage || 'ALL', applicationId: options.applicationId || null, jobId: options.jobId || null });
+    }
+    // A job or gig opened from elsewhere only applies to that visit of its page.
+    if (tabId !== 'opportunities') {
+      setJobsFocus(null);
+      if (autoSelectOpportunity?.type === 'job') setAutoSelectOpportunity?.(null);
+    }
+    if (tabId !== 'gigs' && autoSelectOpportunity?.type === 'gig') setAutoSelectOpportunity?.(null);
+    setTestFocus(null); // openTest sets its request right after this
     setActiveTab(tabId);
     setSidebarOpen(false);
   };
 
   const isPremium = isPremiumCandidate(profile, user);
+  // The Profile and Home pages paint their own background and padding; <main> must
+  // not be a scroll container there so the Profile section bar can stick to the top.
+  const isFullBleedPage = ['profile', 'dashboard', 'opportunities', 'progress', 'gigs', 'tests', 'courses'].includes(activeTab) && !loading;
 
-  const openJobBrief = (job, sequenceIds) => {
-    setBriefJobSequence(Array.isArray(sequenceIds) && sequenceIds.length > 0 ? sequenceIds : null);
-    setSelectedBriefJobId(job.id);
-  };
+  // The saved profile as the Profile page reads it (field names as the API uses them).
+  const profileData = useMemo(() => ({
+    ...profile,
+    name: profile?.name || '',
+    username,
+    profilePic,
+    bio,
+    gender,
+    email: profileEmail,
+    dob,
+    phone,
+    socialLinks,
+    resumeUrl,
+    preferredWorkModes,
+    preferredWorkTypes,
+    preferredLocations,
+    openToAnyLocation,
+    skills: skillsList,
+    education: educationList,
+    experience: experienceList,
+    certificates: certificatesList,
+    projects: projectsList,
+    cocurricular,
+    introVideoUrl: profile?.introVideoUrl || ''
+  }), [profile, username, profilePic, bio, gender, profileEmail, dob, phone, socialLinks, resumeUrl, preferredWorkModes, preferredWorkTypes, preferredLocations, openToAnyLocation, skillsList, educationList, experienceList, certificatesList, projectsList, cocurricular]);
 
-  const goToBriefJob = (jobId) => {
-    if (!jobId) return;
-    setSelectedBriefJobId(jobId);
-    // Keep a /job_brief URL pointing at the job on screen without adding history entries.
-    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/job_brief')) {
-      window.history.replaceState({}, '', `/job_brief?id=${jobId}`);
-    }
-  };
-
-  // Previous/Next for the job brief (free-plan cap and ordering live in utils/jobAccess.js).
-  const briefNavState = useMemo(
-    () => getBriefNavigation({ selectedJobId: selectedBriefJobId, sequenceIds: briefJobSequence, jobs, isPremium }),
-    [selectedBriefJobId, briefJobSequence, jobs, isPremium]
-  );
-  const briefNavigation = briefNavState && {
-    ...briefNavState,
-    onPrev: briefNavState.prevId ? () => goToBriefJob(briefNavState.prevId) : null,
-    onNext: briefNavState.nextId ? () => goToBriefJob(briefNavState.nextId) : null,
-    onUpgrade: () => setIsUpgradeModalOpen(true)
+  // Home cards open the job on the Jobs page.
+  const openJob = (job) => {
+    setJobsFocus({ id: job.id });
+    goToTab('opportunities');
   };
 
   // Smoothly scroll the main content area back to the top whenever the
   // active menu section or job brief changes or an alert is displayed, instead of jumping abruptly.
-  useEffect(() => {
+  // Not for alerts on the Profile page: it is one long scrolling page and its save
+  // messages would otherwise throw the candidate back to the top after every save.
+  const scrollToTop = () => {
     if (mainRef.current) {
       mainRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [activeTab, alertConfig, selectedBriefJobId]);
-
-  // Auto-dismiss feedback message after 2 seconds
+  };
+  useEffect(scrollToTop, [activeTab]);
   useEffect(() => {
-    if (feedbackMsg) {
-      const timer = setTimeout(() => {
-        setFeedbackMsg('');
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [feedbackMsg]);
+    if (alertConfig && !['profile', 'opportunities', 'gigs', 'tests', 'courses'].includes(activeTab)) scrollToTop();
+    // Only a new alert should scroll; tab changes are handled above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alertConfig]);
 
   return (
     <>
@@ -891,7 +637,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
       {/* Desktop: content margin tracks the sidebar width so expanding it pushes content instead of overlapping it */}
       <main
         ref={mainRef}
-        className={`${isExpanded ? 'md:ml-64' : 'md:ml-20'} transition-[margin] duration-300 ease-in-out flex-1 min-w-0 min-h-screen pt-24 md:pt-10 p-6 md:p-10 bg-background overflow-y-auto custom-scrollbar scroll-smooth`}
+        className={`${isExpanded ? 'md:ml-64' : 'md:ml-20'} ${isFullBleedPage ? 'bg-[#F4F6FE] pt-16 md:pt-0' : 'bg-background pt-24 md:pt-10 p-6 md:p-10 overflow-y-auto custom-scrollbar scroll-smooth'} relative transition-[margin] duration-300 ease-in-out flex-1 min-w-0 min-h-screen`}
       >
         {loading ? (
           <div className="flex items-center justify-center h-full">
@@ -899,147 +645,71 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
           </div>
         ) : (
           <div key={activeTab} className="animate-fade-in">
-            {/* Show profile complete banner if incomplete */}
-            {!isComplete && (
+            {/* Profile set-up reminder; the Profile page shows its own set-up card. */}
+            {!isComplete && activeTab !== 'profile' && (
               <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950/60 border border-blue-600 dark:border-blue-500 text-blue-900 dark:text-blue-200 rounded-none text-xs flex flex-col gap-2 shadow-2xs">
                 <div className="flex items-center gap-2 font-headline font-bold text-sm text-blue-800 dark:text-blue-300 tracking-wider">
                   <Lock className="w-4 h-4 shrink-0 text-blue-700 dark:text-blue-400" />
                   <span>Mandatory Profile Setup Incomplete</span>
                 </div>
                 <p className="text-slate-800 dark:text-slate-200 font-sans">
-                  To unlock Dashboard, Opportunities, Job Progress, Courses, and Gigs Marketplace, please complete the required fields in your profile:
+                  To unlock Dashboard, Opportunities, Your Tests, Job Progress, Courses, and Gigs Marketplace, please complete the required fields in your profile:
                 </p>
                 <ul className="list-disc pl-5 space-y-1 font-sans font-semibold text-slate-900 dark:text-slate-100">
-                  {!hasGeneralInfo && <li>Fill in all required fields in Your Profile &rarr; General tab (Name, Username, Professional Summary, Date of Birth, Phone Number, Email Address, Gender)</li>}
-                  {!hasIntroVideo && <li>Upload your Introduction Video in Your Profile &rarr; Introduction tab</li>}
+                  {!hasGeneralInfo && <li>Fill in About you on Your Profile (name, username, short intro, date of birth, mobile number, email and gender)</li>}
+                  {!hasIntroVideo && <li>Add your intro video on Your Profile</li>}
                 </ul>
               </div>
             )}
 
-            {selectedBriefJobId ? (
-              <JobBriefPage
-                key={selectedBriefJobId}
-                job={jobs.find(j => j.id === selectedBriefJobId)}
-                loading={loading}
-                profile={profile}
-                navigation={briefNavigation}
-                onBack={() => {
-                  setSelectedBriefJobId(null);
-                  setActiveTab('opportunities');
-                }}
-                onApply={handleApply}
-                onUpgrade={(upgradeData) => {
-                  setSelectedBriefJobId(null);
-                  setTestSkill(upgradeData);
-                }}
-                onAddSkillAndUpgrade={handleAddSkillAndUpgrade}
-                onAddSkillWithoutTest={handleAddSkillWithoutTest}
-                onOpenCompanyProfile={onOpenCompanyProfile}
-              />
-            ) : (
-              <>
+            <>
                 {activeTab === 'dashboard' && (
-                  <CandidateDashboard
+                  <CandidateHome
                     profile={profile}
                     user={user}
                     jobs={jobs}
                     applications={applications}
+                    techSkills={techSkills}
                     goToTab={goToTab}
-                    onSelectJob={openJobBrief}
-                    setTestSkill={setTestSkill}
+                    onSelectJob={openJob}
+                    onTakeTest={openTest}
                   />
                 )}
 
                 {activeTab === 'opportunities' && (
-                  <StudentDashboard
-                    profile={profile}
+                  <JobsPage
+                    profile={profileData}
                     user={user}
                     token={token}
                     jobs={jobs}
-                    applications={applications}
-                    skillCount={skillCount}
-                    appliedCount={appliedCount}
-                    handleApply={handleApply}
-                    setTestSkill={setTestSkill}
-                    onRefresh={async () => {
-                      await fetchProfileAndJobs();
-                      await fetchStudentApplications();
-                    }}
-                    onOpenCompanyProfile={onOpenCompanyProfile}
-                    autoSelectOpportunity={autoSelectOpportunity}
-                    setAutoSelectOpportunity={setAutoSelectOpportunity}
-                    onSelectJob={openJobBrief}
-                    goToTab={goToTab}
+                    isPremium={isPremium}
                     initialSubTab={opportunitiesSubTab}
+                    focus={autoSelectOpportunity?.type === 'job' ? autoSelectOpportunity : jobsFocus}
+                    onApply={handleApply}
+                    onTakeTest={openTest}
+                    onAddSkillWithoutTest={handleAddSkillWithoutTest}
+                    onOpenCompanyProfile={onOpenCompanyProfile}
+                    goToTab={goToTab}
+                    onPlanUpgraded={() => fetchProfileAndJobs({ silent: true })}
+                    onNotify={(message, type = 'success') => setAlertConfig({ message, type })}
                   />
                 )}
 
             {activeTab === 'profile' && (
-              <StudentProfile
-                profile={profile}
-                setProfile={setProfile}
-                username={username}
-                setUsername={setUsername}
-                profilePic={profilePic}
-                setProfilePic={setProfilePic}
+              <ProfilePage
+                data={profileData}
+                user={user}
                 token={token}
-                skillsList={skillsList}
-                setSkillsList={setSkillsList}
+                generalDone={hasGeneralInfo}
+                videoDone={hasIntroVideo}
                 techSkills={techSkills}
-                selectedNewSkill={selectedNewSkill}
-                setSelectedNewSkill={setSelectedNewSkill}
-                bio={bio}
-                setBio={setBio}
-                nationality={nationality}
-                setNationality={setNationality}
-                gender={gender}
-                setGender={setGender}
-                profileEmail={profileEmail}
-                setProfileEmail={setProfileEmail}
-                dob={dob}
-                setDob={setDob}
-                phone={phone}
-                setPhone={setPhone}
-                preferredWorkModes={preferredWorkModes}
-                setPreferredWorkModes={setPreferredWorkModes}
-                preferredWorkTypes={preferredWorkTypes}
-                setPreferredWorkTypes={setPreferredWorkTypes}
-                preferredLocations={preferredLocations}
-                setPreferredLocations={setPreferredLocations}
-                openToAnyLocation={openToAnyLocation}
-                setOpenToAnyLocation={setOpenToAnyLocation}
-                resumeUrl={resumeUrl}
-                setResumeUrl={setResumeUrl}
-                socialLinks={socialLinks}
-                setSocialLinks={setSocialLinks}
-                educationList={educationList}
-                setEducationList={setEducationList}
-                experienceList={experienceList}
-                setExperienceList={setExperienceList}
-                certificatesList={certificatesList}
-                setCertificatesList={setCertificatesList}
-                projectsList={projectsList}
-                setProjectsList={setProjectsList}
-                cocurricular={cocurricular}
-                setCocurricular={setCocurricular}
-                newEdu={newEdu}
-                setNewEdu={setNewEdu}
-                newExp={newExp}
-                setNewExp={setNewExp}
-                newCert={newCert}
-                setNewCert={setNewCert}
-                newProj={newProj}
-                setNewProj={setNewProj}
-                newCocurricular={newCocurricular}
-                setNewCocurricular={setNewCocurricular}
-                profileTab={profileTab}
-                setProfileTab={setProfileTab}
-                submittingProfile={submittingProfile}
-                feedbackMsg={feedbackMsg}
-                handleUpdateProfile={handleUpdateProfile}
-                handleRatingChange={handleRatingChange}
-                handleDownloadGeneratedResume={handleDownloadGeneratedResume}
+                jobsCount={jobs.length}
+                isPremium={isPremium}
                 generatingPdf={generatingPdf}
+                onDownloadResume={handleDownloadGeneratedResume}
+                onSaveProfile={saveProfileChanges}
+                onIntroVideoSaved={(url) => setProfile(prev => ({ ...prev, introVideoUrl: url || null }))}
+                onPlanUpgraded={() => fetchProfileAndJobs({ silent: true })}
                 onNotify={(message, type = 'success') => setAlertConfig({ message, type })}
               />
             )}
@@ -1058,7 +728,6 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
                 profile={profile}
                 generatingPdf={generatingPdf}
                 handleDownloadGeneratedResume={handleDownloadGeneratedResume}
-                feedbackMsg={feedbackMsg}
                 phone={phone}
                 profileEmail={profileEmail}
                 nationality={nationality}
@@ -1072,78 +741,58 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, te
             </div>
 
             {activeTab === 'tests' && (
-              <StudentSkillTests
+              <SkillsTestsPage
+                profile={profileData}
                 techSkills={techSkills}
-                loadingTechSkills={loadingTechSkills}
-                activeTestSkill={activeTestSkill}
-                generatingTest={generatingTest}
-                testQuestions={testQuestions}
-                testResult={testResult}
-                currentQuestionIdx={currentQuestionIdx}
-                selectedAnswers={selectedAnswers}
-                submittingTest={submittingTest}
-                handleStartSkillTest={handleStartSkillTest}
-                handleSubmitSkillTest={handleSubmitSkillTest}
-                setCurrentQuestionIdx={setCurrentQuestionIdx}
-                setSelectedAnswers={setSelectedAnswers}
-                setActiveTestSkill={setActiveTestSkill}
-                setTestResult={setTestResult}
+                loading={loadingTechSkills}
+                jobs={jobs}
+                token={token}
+                focus={testFocus}
+                onFinished={() => Promise.all([fetchProfileAndJobs({ silent: true }), fetchTechnicalSkills()])}
+                onSaveSkills={(skills) => saveProfileChanges({ skills })}
+                onOpenJob={openJob}
+                goToTab={goToTab}
+                onNotify={(message, type = 'success') => setAlertConfig({ message, type })}
               />
             )}
 
             {activeTab === 'progress' && (
-              <StudentProgress
+              <ApplicationsPage
                 applications={applications}
                 loading={loadingApplications}
-                initialStageFilter={progressStageFilter}
+                error={applicationsError}
+                onRetry={fetchStudentApplications}
+                profile={profileData}
+                jobs={jobs}
+                focus={progressFocus}
+                goToTab={goToTab}
               />
             )}
 
             {activeTab === 'courses' && (
-              <StudentCourses
-                user={user}
-                token={token}
-              />
+              <LearnPage profile={profileData} jobs={jobs} token={token} focus={learnFocus} onTakeTest={openTest} />
             )}
 
             {activeTab === 'gigs' && (
-              <GigsMarketplace
-                user={{ id: profile?.id, name: profile?.name, email: profileEmail, role: 'STUDENT' }}
+              <GigsPage
+                profile={profileData}
+                user={user}
                 token={token}
-                theme={theme}
-                profile={profile}
-                onUpdateProfile={fetchProfileAndJobs}
-                onNavigateToTests={() => goToTab('tests')}
-                onStartSkillTest={(skillName) => {
-                  goToTab('tests');
-                  handleStartSkillTest(skillName);
-                }}
-                onAddSkillAndUpgrade={handleAddSkillAndUpgrade}
+                isPremium={isPremium}
+                jobsCount={jobs.length}
+                focus={autoSelectOpportunity?.type === 'gig' ? autoSelectOpportunity : gigsFocus}
+                onTakeTest={openTest}
                 onAddSkillWithoutTest={handleAddSkillWithoutTest}
-                activeSubTab={gigsSubTab}
-                onSubTabChange={setGigsSubTab}
-                selectedGigId={selectedGigId}
-                onSelectedGigChange={setSelectedGigId}
+                onOpenCompanyProfile={onOpenCompanyProfile}
+                goToTab={goToTab}
+                onPlanUpgraded={() => fetchProfileAndJobs({ silent: true })}
+                onNotify={(message, type = 'success') => setAlertConfig({ message, type })}
               />
             )}
-              </>
-            )}
+            </>
           </div>
         )}
       </main>
-
-      {/* Student Pro upgrade, opened from the job brief's free-plan limit notice */}
-      <PaymentModal
-        isOpen={isUpgradeModalOpen}
-        onClose={() => setIsUpgradeModalOpen(false)}
-        planType="STUDENT_LIFETIME"
-        token={token}
-        user={user}
-        onSuccess={() => {
-          // Refetch so profile.plan becomes PREMIUM and the brief's free-plan cap lifts.
-          fetchProfileAndJobs();
-        }}
-      />
 
       {/* Top-Right Sliding Toast Notification */}
       {alertConfig && (

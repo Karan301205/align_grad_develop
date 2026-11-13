@@ -15,4 +15,7 @@ router.post('/verify', authMiddleware, relaxedLimit, validate(verifyPaymentSchem
 // Get Subscription & Quota Status
 router.get('/status', authMiddleware, relaxedLimit, paymentController.getPlanStatus);
 
+// Completed payments of the signed-in user
+router.get('/history', authMiddleware, relaxedLimit, paymentController.getPaymentHistory);
+
 module.exports = router;

@@ -1,11 +1,13 @@
+// Centralized error handler for the admin backend. The full error is always logged
+// on the server. Users get a plain message: 4xx errors keep theirs (they describe
+// what to fix); 5xx errors never expose internals. Outside production the technical
+// message is also sent as `detail`, which the admin frontend prints to the browser
+// console only.
 module.exports = (err, req, res, next) => {
-  // Log full error stack details on the server for debugging
-  console.error('[ERROR EXCEPTION]:', err.stack || err);
+  console.error(`[ERROR EXCEPTION] ${req.method} ${req.originalUrl}:`, err.stack || err);
 
   const statusCode = err.status || err.statusCode || 500;
-  const isProd = process.env.NODE_ENV === 'production';
 
-  // For 4xx client-side errors, we can expose the message directly
   if (statusCode < 500) {
     return res.status(statusCode).json({
       success: false,
@@ -13,14 +15,9 @@ module.exports = (err, req, res, next) => {
     });
   }
 
-  // Mask 5xx internal server exceptions in production
-  const responseMessage = isProd
-    ? 'An unexpected error occurred on the server. Please try again later.'
-    : err.message || 'Internal Server Error';
-
   res.status(statusCode).json({
     success: false,
-    error: responseMessage,
-    ...(isProd ? {} : { stack: err.stack })
+    error: 'Something went wrong on our side. Please try again in a moment.',
+    ...(process.env.NODE_ENV === 'production' ? {} : { detail: err.message })
   });
 };

@@ -1,11 +1,11 @@
-const { ObjectId } = require('mongodb');
-const { getDbSafe } = require('../../config/database');
-const { getS3FileUrl } = require('../../config/s3');
+const { getDB } = require('../../config/database');
+const { jobPay, jobPlace, jobType } = require('../../utils/jobDisplay');
+const { normalizeId } = require('../../utils/ids');
 const { sendMail } = require('../../config/mailer');
 const { getApprovalEmail, getRejectionEmail } = require('./recruiterVerificationEmail');
 
 // Company verification lifecycle shared with main_website through the Company
-// collection: "NOT_SUBMITTED" | "PENDING" | "APPROVED" | "REJECTED". Mirrors
+// table: "NOT_SUBMITTED" | "PENDING" | "APPROVED" | "REJECTED". Mirrors
 // main_website/backend/src/modules/recruiters/companyVerification.js (kept as a
 // copy because admin_ws must not import from main_website).
 const VERIFICATION_STATUS = {
@@ -35,6 +35,18 @@ function resolveVerificationStatus(company) {
   return VERIFICATION_STATUS.NOT_SUBMITTED;
 }
 
+// Job summary embedded in each recruiter entry.
+function formatCompanyJob(j) {
+  return {
+    id: j.id,
+    title: j.title,
+    description: j.description,
+    salaryRange: jobPay(j),
+    location: jobPlace(j),
+    jobType: jobType(j)
+  };
+}
+
 function formatRecruiter(recruiter, company, companyJobs = []) {
   const verificationStatus = resolveVerificationStatus(company);
   const docs = Array.isArray(company?.verificationDocs) && company.verificationDocs.length > 0
@@ -42,7 +54,7 @@ function formatRecruiter(recruiter, company, companyJobs = []) {
     : (company?.docUrl ? [{ docType: 'Verification Document', docUrl: company.docUrl, fileName: '' }] : []);
 
   return {
-    id: recruiter._id.toString(),
+    id: recruiter.id,
     email: recruiter.email,
     hasCompanyProfile: Boolean(company),
     companyName: company?.name || 'Recruiter (No Company Profile)',
@@ -73,69 +85,33 @@ function formatRecruiter(recruiter, company, companyJobs = []) {
 
 exports.getAllRecruiters = async (req, res, next) => {
   try {
-    const db = getDbSafe();
-    if (!db) {
-      console.warn('[DB WARNING] Database connection not initialized. Using fallback data.');
-    }
-
-    if (!db) {
-      const mockDocUrl = getS3FileUrl('docs/google_verify.pdf');
-
-      // Mock fallback data if DB is offline
-      return res.json({
-        success: true,
-        recruiters: [
-          {
-            id: 'mock_rec_1',
-            email: 'hr@google.com',
-            companyName: 'Google',
-            verified: true,
-            verificationStatus: 'APPROVED',
-            docUrl: mockDocUrl,
-            verificationDocs: [{ docType: 'Certificate of Incorporation', docUrl: mockDocUrl, fileName: 'google_verify.pdf' }],
-            jobs: [
-              { id: 'job_1', title: 'SWE Intern', description: 'Google Cloud console team internship.', salaryRange: '₹50,000 - ₹80,000 / month' },
-              { id: 'job_2', title: 'Associate Product Manager', description: 'Work on consumer facing services.', salaryRange: '₹12,00,000 - ₹18,00,000 / year' }
-            ]
-          },
-          {
-            id: 'mock_rec_2',
-            email: 'recruiting@microsoft.com',
-            companyName: 'Microsoft',
-            verified: false,
-            verificationStatus: 'NOT_SUBMITTED',
-            docUrl: '',
-            verificationDocs: [],
-            jobs: [
-              { id: 'job_3', title: 'SRE Intern', description: 'Automating server monitoring systems.', salaryRange: '₹40,000 - ₹60,000 / month' }
-            ]
-          }
-        ]
-      });
-    }
-
-    const recruiters = await db.collection('User').find({ role: 'RECRUITER' }).toArray();
+    const db = getDB();
+    // ORDER BY "id" approximates the previous natural (insertion) order: ids are
+    // time-prefixed hex strings. The final ordering is the status sort below.
+    const { rows: recruiters } = await db.query(
+      'SELECT "id", "email" FROM "User" WHERE "role" = $1 ORDER BY "id"',
+      ['RECRUITER']
+    );
     if (recruiters.length === 0) {
       return res.json({ success: true, recruiters: [] });
     }
 
-    const userIds = recruiters.map(r => r._id);
-    const companies = await db.collection('Company').find({ userId: { $in: userIds } }).toArray();
+    const userIds = recruiters.map(r => r.id);
+    const { rows: companies } = await db.query(
+      'SELECT * FROM "Company" WHERE "userId" = ANY($1::text[])',
+      [userIds]
+    );
 
-    const companyIds = companies.map(c => c._id);
-    const jobs = await db.collection('Job').find({ companyId: { $in: companyIds } }).toArray();
+    const companyIds = companies.map(c => c.id);
+    const { rows: jobs } = await db.query(
+      'SELECT * FROM "Job" WHERE "companyId" = ANY($1::text[]) ORDER BY "id"',
+      [companyIds]
+    );
 
     const recruitersWithJobs = recruiters.map(recruiter => {
-      const company = companies.find(c => c.userId.toString() === recruiter._id.toString());
-      const companyJobs = company 
-        ? jobs.filter(j => j.companyId.toString() === company._id.toString()).map(j => ({
-            id: j._id.toString(),
-            title: j.title,
-            description: j.description,
-            salaryRange: j.salaryRange || 'Not Specified',
-            location: j.location || 'Remote',
-            jobType: j.jobType || 'Full-time'
-          }))
+      const company = companies.find(c => c.userId === recruiter.id);
+      const companyJobs = company
+        ? jobs.filter(j => j.companyId === company.id).map(formatCompanyJob)
         : [];
 
       return formatRecruiter(recruiter, company, companyJobs);
@@ -160,21 +136,23 @@ exports.getAllRecruiters = async (req, res, next) => {
 // recruiter's company profile and email them the decision.
 exports.reviewRecruiterVerification = async (req, res, next) => {
   try {
-    const db = getDbSafe();
-    if (!db) {
-      return res.status(503).json({ success: false, error: 'Database not connected. Cannot update verification status.' });
-    }
-
+    const db = getDB();
     const { recruiterId } = req.params;
     const { decision, reason } = req.body;
-    const userId = new ObjectId(recruiterId);
+    const userId = normalizeId(recruiterId);
 
-    const recruiter = await db.collection('User').findOne({ _id: userId, role: 'RECRUITER' });
+    const { rows: [recruiter] } = await db.query(
+      'SELECT "id", "email" FROM "User" WHERE "id" = $1 AND "role" = $2',
+      [userId, 'RECRUITER']
+    );
     if (!recruiter) {
       return res.status(404).json({ success: false, error: 'Recruiter not found' });
     }
 
-    const company = await db.collection('Company').findOne({ userId });
+    const { rows: [company] } = await db.query(
+      'SELECT * FROM "Company" WHERE "userId" = $1',
+      [userId]
+    );
     if (!company) {
       return res.status(400).json({ success: false, error: 'This recruiter has not created a company profile yet.' });
     }
@@ -200,7 +178,24 @@ exports.reviewRecruiterVerification = async (req, res, next) => {
       verificationReviewedBy: req.user?.email || 'admin'
     };
 
-    await db.collection('Company').updateOne({ _id: company._id }, { $set: reviewUpdate });
+    // "Company" has no updatedAt column, so only the review fields are written.
+    await db.query(
+      `UPDATE "Company"
+          SET "verified" = $1,
+              "verificationStatus" = $2,
+              "verificationNote" = $3,
+              "verificationReviewedAt" = $4,
+              "verificationReviewedBy" = $5
+        WHERE "id" = $6`,
+      [
+        reviewUpdate.verified,
+        reviewUpdate.verificationStatus,
+        reviewUpdate.verificationNote,
+        reviewUpdate.verificationReviewedAt,
+        reviewUpdate.verificationReviewedBy,
+        company.id
+      ]
+    );
     const updatedCompany = { ...company, ...reviewUpdate };
 
     // The decision is persisted even if the notification email fails; the
@@ -219,18 +214,14 @@ exports.reviewRecruiterVerification = async (req, res, next) => {
       emailError = mailErr.message;
     }
 
-    const companyJobs = await db.collection('Job').find({ companyId: company._id }).toArray();
+    const { rows: companyJobs } = await db.query(
+      'SELECT * FROM "Job" WHERE "companyId" = $1 ORDER BY "id"',
+      [company.id]
+    );
 
     res.json({
       success: true,
-      recruiter: formatRecruiter(recruiter, updatedCompany, companyJobs.map(j => ({
-        id: j._id.toString(),
-        title: j.title,
-        description: j.description,
-        salaryRange: j.salaryRange || 'Not Specified',
-        location: j.location || 'Remote',
-        jobType: j.jobType || 'Full-time'
-      }))),
+      recruiter: formatRecruiter(recruiter, updatedCompany, companyJobs.map(formatCompanyJob)),
       emailSent,
       emailError
     });

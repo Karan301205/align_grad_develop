@@ -118,7 +118,7 @@ export default function SkillFilterDropdown({
   // Trigger label formatting
   const triggerLabel = useMemo(() => {
     if (!selectedSkills || selectedSkills.length === 0) {
-      return 'All Skills';
+      return 'Skills';
     }
     if (selectedSkills.length === 1) {
       const s = selectedSkills[0];
@@ -140,18 +140,18 @@ export default function SkillFilterDropdown({
       <button
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
-        className={`bg-white dark:bg-slate-900 border text-xs font-sans font-medium rounded-none px-3 py-2 flex items-center justify-between gap-2 transition-all cursor-pointer shadow-2xs hover:border-blue-700 focus:outline-none select-none max-w-[220px] ${
+        className={`h-9 bg-white border text-[13px] font-(family-name:--font-headline) font-normal rounded-[8px] px-2.5 flex items-center justify-between gap-2 transition-colors cursor-pointer hover:border-[#9CA3AF] focus:outline-none focus-visible:border-[#1447E6] focus-visible:ring-2 focus-visible:ring-[#1447E6]/20 select-none max-w-[220px] ${
           hasActiveSkills
-            ? 'border-blue-600 text-blue-700 dark:text-blue-300 font-bold bg-blue-50/40 dark:bg-blue-950/40'
-            : 'border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+            ? 'border-[#1447E6] text-[#1447E6] font-semibold bg-[#EEF2FE]'
+            : 'border-[#D5D9E0] text-[#0F172A]'
         }`}
         title="Filter by Skills"
       >
         <div className="flex items-center gap-1.5 min-w-0 truncate">
-          <Award className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
+          <Award className="w-3.5 h-3.5 text-[#4B5563] shrink-0" />
           <span className="truncate">{triggerLabel}</span>
           {selectedSkills.length > 1 && (
-            <span className="w-4 h-4 rounded-none bg-blue-700 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+            <span className="min-w-4 h-4 px-1 rounded-full bg-[#1447E6] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
               {selectedSkills.length}
             </span>
           )}
@@ -171,7 +171,7 @@ export default function SkillFilterDropdown({
             </span>
           )}
           <ChevronDown
-            className={`w-3.5 h-3.5 text-slate-500 dark:text-slate-400 transition-transform duration-150 ${
+            className={`w-4 h-4 text-[#4B5563] transition-transform duration-150 ${
               isOpen ? 'rotate-180' : ''
             }`}
           />
@@ -180,9 +180,9 @@ export default function SkillFilterDropdown({
 
       {/* Popover Menu */}
       {isOpen && (
-        <div className="absolute left-0 mt-1 w-80 sm:w-96 max-h-[500px] overflow-hidden bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none shadow-2xl z-50 flex flex-col text-left custom-scrollbar animate-scale-up">
+        <div className="absolute left-0 mt-1 w-80 sm:w-96 max-h-[500px] overflow-hidden bg-white border border-[#E4E6EA] rounded-[8px] shadow-lg shadow-slate-300/50 z-50 flex flex-col text-left font-(family-name:--font-headline) custom-scrollbar animate-scale-up">
           {/* Header & Search Bar */}
-          <div className="p-3 border-b border-slate-200 dark:border-slate-800 space-y-2.5 bg-slate-50/80 dark:bg-slate-900/90 shrink-0">
+          <div className="p-3 border-b border-[#EEF0F3] space-y-2.5 bg-white shrink-0">
             <div className="flex items-center justify-between">
               <span className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                 <Sliders className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
@@ -207,7 +207,7 @@ export default function SkillFilterDropdown({
                 placeholder="Search skills (e.g. React, Python, Communication)..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-7 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-blue-700 font-sans shadow-2xs"
+                className="w-full h-9 pl-8 pr-7 bg-white border border-[#D5D9E0] rounded-[8px] text-[13px] text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none focus:border-[#1447E6] focus:ring-2 focus:ring-[#1447E6]/20"
                 autoFocus
               />
               {searchQuery && (
@@ -223,7 +223,7 @@ export default function SkillFilterDropdown({
           </div>
 
           {/* Available Skills List */}
-          <div className="flex-1 overflow-y-auto p-1.5 divide-y divide-slate-100 dark:divide-slate-800/60 custom-scrollbar max-h-72">
+          <div className="flex-1 overflow-y-auto p-1 custom-scrollbar max-h-72">
             {filteredSkills.length === 0 ? (
               <div className="p-6 text-center text-xs text-slate-500 dark:text-slate-400 font-sans">
                 No skills matching "{searchQuery}"
@@ -237,19 +237,19 @@ export default function SkillFilterDropdown({
                   <div
                     key={item.name}
                     onClick={() => handleToggleSkill(item)}
-                    className={`px-2.5 py-2 text-xs font-sans hover:bg-blue-50 dark:hover:bg-blue-950/50 cursor-pointer flex items-center justify-between gap-2 transition-colors ${
+                    className={`px-2.5 py-2 rounded-[6px] text-[13px] hover:bg-[#F8F8F6] cursor-pointer flex items-center justify-between gap-2 transition-colors ${
                       isSelected
-                        ? 'bg-blue-50/70 dark:bg-blue-950/70 font-semibold text-blue-900 dark:text-blue-100'
+                        ? 'bg-[#EEF2FE] font-semibold text-[#1447E6] hover:bg-[#EEF2FE]'
                         : 'text-slate-800 dark:text-slate-200'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       {/* Checkbox Box */}
                       <div
-                        className={`w-3.5 h-3.5 rounded-none border flex items-center justify-center shrink-0 transition-colors ${
+                        className={`w-4 h-4 rounded-[4px] border flex items-center justify-center shrink-0 transition-colors ${
                           isSelected
-                            ? 'bg-blue-700 border-blue-700 text-white'
-                            : 'border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800'
+                            ? 'bg-[#1447E6] border-[#1447E6] text-white'
+                            : 'border-[#9CA3AF] bg-white'
                         }`}
                       >
                         {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
@@ -270,14 +270,14 @@ export default function SkillFilterDropdown({
           </div>
 
           {/* Footer Bar */}
-          <div className="p-2.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 flex items-center justify-between gap-2 shrink-0">
+          <div className="p-2.5 border-t border-[#EEF0F3] bg-white flex items-center justify-between gap-2 shrink-0">
             <span className="text-[11px] text-slate-600 dark:text-slate-400 font-sans">
               {selectedSkills.length} selected
             </span>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="px-3.5 py-1 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold text-xs rounded-none transition-colors cursor-pointer shadow-2xs"
+              className="h-8 px-3.5 bg-[#1447E6] hover:bg-[#0F38B8] text-white font-semibold text-[13px] rounded-[8px] transition-colors cursor-pointer"
             >
               Done
             </button>

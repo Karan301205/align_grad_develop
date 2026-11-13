@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { apiFetch } from '../../services/apiClient';
+import { apiFetch, userMessage } from '../../services/apiClient';
 import { GOOGLE_CLIENT_ID } from '../../config';
 
 export default function GoogleAuthButton({ role = 'STUDENT', onSuccess, onError }) {
@@ -35,7 +35,7 @@ export default function GoogleAuthButton({ role = 'STUDENT', onSuccess, onError 
         }
         callbacksRef.current.onSuccess?.(data);
       } catch (err) {
-        callbacksRef.current.onError?.(err.message || 'Google Sign-In failed');
+        callbacksRef.current.onError?.(userMessage(err, 'Google Sign-In failed'));
       }
     };
 

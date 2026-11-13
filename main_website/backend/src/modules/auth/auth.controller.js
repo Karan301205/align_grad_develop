@@ -4,6 +4,7 @@ const { prisma } = require('../../infrastructure/database');
 const { recordFailedAttempt, resetFailedAttempts } = require('../../middleware/rateLimiter');
 const env = require('../../config/env');
 const { passwordResetService, emailVerificationService } = require('./services');
+const { sendError } = require('../../shared/http/sendError');
 
 exports.signup = async (req, res) => {
   const { email, password, role, name } = req.body;
@@ -28,7 +29,7 @@ exports.signup = async (req, res) => {
     });
   } catch (err) {
     console.error('[AuthController] signup error:', err.message);
-    res.status(err.statusCode || 500).json({ error: err.message || 'Server error during registration' });
+    sendError(res, err, err.statusCode || 500, 'Server error during registration');
   }
 };
 
@@ -42,7 +43,7 @@ exports.verifyPin = async (req, res) => {
       res.setHeader('Retry-After', err.retryAfter);
     }
     console.error('[AuthController] verifyPin error:', err.message);
-    res.status(err.statusCode || 500).json({ error: err.message || 'Server error during verification' });
+    sendError(res, err, err.statusCode || 500, 'Server error during verification');
   }
 };
 
@@ -56,7 +57,7 @@ exports.resendPin = async (req, res) => {
       res.setHeader('Retry-After', err.retryAfter);
     }
     console.error('[AuthController] resendPin error:', err.message);
-    res.status(err.statusCode || 500).json({ error: err.message || 'Server error requesting verification code' });
+    sendError(res, err, err.statusCode || 500, 'Server error requesting verification code');
   }
 };
 
@@ -276,7 +277,7 @@ exports.forgotPassword = async (req, res) => {
       return res.status(429).json({ error: err.message });
     }
     console.error('[AuthController] forgotPassword error:', err);
-    res.status(err.statusCode || 500).json({ error: err.message || 'Server error processing password reset request' });
+    sendError(res, err, err.statusCode || 500, 'Server error processing password reset request');
   }
 };
 
@@ -287,6 +288,6 @@ exports.resetPassword = async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error('[AuthController] resetPassword error:', err);
-    res.status(err.statusCode || 500).json({ error: err.message || 'Server error resetting password' });
+    sendError(res, err, err.statusCode || 500, 'Server error resetting password');
   }
 };

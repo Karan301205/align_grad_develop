@@ -16,7 +16,7 @@ import {
   Sparkles,
   Award
 } from 'lucide-react';
-import { apiFetch } from '../../../services/apiClient';
+import { apiFetch, userMessage } from '../../../services/apiClient';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import ThemeToggle from '../../../components/ui/ThemeToggle';
@@ -84,7 +84,7 @@ export default function RecruiterAuth({ setToken, setUser, theme, toggleTheme, i
       setToken(data.token);
       setUser(data.user);
     } catch (err) {
-      setError(err.message);
+      setError(userMessage(err));
     } finally {
       setLoading(false);
     }

@@ -1,23 +1,29 @@
 const { z } = require('zod');
+const { PLAN_TYPES } = require('./plans');
 
-const createOrderSchema = z.object({
-  body: z.object({
-    planType: z.enum(['STUDENT_LIFETIME', 'RECRUITER_5_PACK'], {
-      errorMap: () => ({ message: 'planType must be STUDENT_LIFETIME or RECRUITER_5_PACK' })
-    })
-  })
+// middleware/validate.js reads schema.body / .params / .query, so each schema is
+// a plain object (a bare z.object would be skipped silently; ISSUES A7).
+
+const planTypeSchema = z.enum(PLAN_TYPES, {
+  error: `planType must be one of ${PLAN_TYPES.join(', ')}`
 });
 
-const verifyPaymentSchema = z.object({
+const createOrderSchema = {
   body: z.object({
-    razorpay_order_id: z.string().min(1, 'razorpay_order_id is required'),
-    razorpay_payment_id: z.string().min(1, 'razorpay_payment_id is required'),
-    razorpay_signature: z.string().min(1, 'razorpay_signature is required'),
-    planType: z.enum(['STUDENT_LIFETIME', 'RECRUITER_5_PACK'], {
-      errorMap: () => ({ message: 'planType must be STUDENT_LIFETIME or RECRUITER_5_PACK' })
-    })
+    planType: planTypeSchema
   })
-});
+};
+
+// planType is accepted for older clients but ignored: the plan always comes from
+// the stored order.
+const verifyPaymentSchema = {
+  body: z.object({
+    razorpay_order_id: z.string().trim().min(1, 'razorpay_order_id is required').max(100),
+    razorpay_payment_id: z.string().trim().min(1, 'razorpay_payment_id is required').max(100),
+    razorpay_signature: z.string().trim().min(1, 'razorpay_signature is required').max(256),
+    planType: planTypeSchema.optional()
+  })
+};
 
 module.exports = {
   createOrderSchema,

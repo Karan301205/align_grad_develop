@@ -3,7 +3,7 @@ const { prisma } = require('../../../../infrastructure/database');
 // Sole Prisma access for the Question bank in the assessment path (Phase 4).
 // The `client` DI seam lets tests inject a fake/mock client.
 //
-// All counter mutations use MongoDB atomic `$inc` (Prisma `{ increment }`) so
+// All counter mutations use atomic Prisma `{ increment }` updates so
 // concurrent assessments never overwrite each other's counts. Reads never leak
 // the answer key or metadata to callers that forward to the client — the
 // controller is responsible for stripping to { id, question, options }.

@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
+import { putFileToS3 } from '../../../services/uploadService';
 import { Image, Video, FileText, Send, X, AlertCircle, Loader2 } from 'lucide-react';
-import { apiFetch } from '../../../services/apiClient';
+import { apiFetch, userMessage } from '../../../services/apiClient';
 
 export default function PostComposer({ token, communityId, onPostCreated, userProfile }) {
   const [content, setContent] = useState('');
@@ -42,16 +43,9 @@ export default function PostComposer({ token, communityId, onPostCreated, userPr
         }
 
         // Upload binary file directly to S3
-        const s3Res = await fetch(data.uploadUrl, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': file.type
-          },
-          body: file
-        });
-
+        const s3Res = await putFileToS3(data.uploadUrl, file, file.type);
         if (!s3Res.ok) {
-          throw new Error(`Failed to upload ${file.name} to S3.`);
+          throw new Error(`Couldn’t upload ${file.name}. Please try again.`);
         }
 
         newMedia.push({
@@ -76,7 +70,7 @@ export default function PostComposer({ token, communityId, onPostCreated, userPr
       }
     } catch (err) {
       console.error('Media upload error:', err);
-      setErrorMsg(err.message || 'Error uploading file.');
+      setErrorMsg(userMessage(err, 'Error uploading file.'));
     } finally {
       setUploading(false);
       if (e.target) e.target.value = '';

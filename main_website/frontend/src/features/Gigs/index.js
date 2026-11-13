@@ -1,5 +1,3 @@
-export { default as GigsMarketplace } from './pages/GigsMarketplace';
-export { default as GigFilterSidebar } from './components/GigFilterSidebar';
-export { default as GigCard } from './components/GigCard';
-export { default as GigDetailPage } from './components/GigDetailPage';
+// Shared by the candidate (features/Student/gigs) and recruiter (features/Recruiter/gigs) Gigs pages.
 export * from './gigConstants';
+export { default as useGigChat, uploadGigFile, MESSAGE_MAX } from './useGigChat';

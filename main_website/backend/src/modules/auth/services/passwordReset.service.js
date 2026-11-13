@@ -101,7 +101,10 @@ async function requestPasswordReset({ email, role }) {
   } catch (mailError) {
     console.error('[PasswordResetService] Failed to send email via SMTP:', mailError);
     // Even if sending fails, we don't leak internals to client
-    throw new Error('Unable to send password reset email at this moment. Please try again later.');
+    const error = new Error('Unable to send password reset email at this moment. Please try again later.');
+    error.statusCode = 500;
+    error.expose = true; // written for users
+    throw error;
   }
 
   return {

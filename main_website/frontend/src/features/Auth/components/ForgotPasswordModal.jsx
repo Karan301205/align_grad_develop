@@ -4,6 +4,7 @@ import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import { sendForgotPasswordRequest } from '../services/passwordResetApi';
 
+import { userMessage } from '../../../services/apiClient';
 export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', role = 'STUDENT', theme = 'light' }) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,7 +42,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, initialEmail = ''
       if (err.status === 429) {
         setIsRateLimited(true);
       }
-      setError(err.message || 'Failed to send reset link. Please try again.');
+      setError(userMessage(err, 'Failed to send reset link. Please try again.'));
     } finally {
       setLoading(false);
     }

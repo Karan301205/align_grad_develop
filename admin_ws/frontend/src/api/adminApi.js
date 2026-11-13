@@ -27,30 +27,49 @@ function getHeaders() {
   return headers;
 }
 
+const NETWORK_MESSAGE = "Can't reach the admin server right now. Check your connection and try again.";
+
+// Every request goes through here. Failures are printed to the browser console with
+// the technical detail (status, path, server `detail`); the UI only ever gets the
+// plain `error` text from the server, or NETWORK_MESSAGE when the server can't be
+// reached.
+async function request(path, options = {}) {
+  const method = options.method || 'GET';
+  let res;
+  try {
+    res = await fetch(buildUrl(path), options);
+  } catch (err) {
+    console.error(`[admin api] ${method} ${path} could not reach the server:`, err);
+    throw new Error(NETWORK_MESSAGE);
+  }
+  if (res.status === 401) {
+    localStorage.removeItem('adminToken');
+    window.dispatchEvent(new Event('admin-unauthorized'));
+  }
+  const text = await res.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    console.error(`[admin api] ${method} ${path} → HTTP ${res.status}, response is not JSON:`, text.slice(0, 500));
+    data = { success: false, error: 'Something went wrong on our side. Please try again in a moment.' };
+  }
+  if (!res.ok || data.success === false) {
+    console.error(`[admin api] ${method} ${path} → HTTP ${res.status}:`, data.detail || data.error || data);
+    if (data.success === undefined) data.success = false;
+  }
+  return data;
+}
+
 function getJson(path) {
-  return fetch(buildUrl(path), {
-    headers: getHeaders()
-  }).then(res => {
-    if (res.status === 401) {
-      localStorage.removeItem('adminToken');
-      window.dispatchEvent(new Event('admin-unauthorized'));
-    }
-    return res.json();
-  });
+  return request(path, { headers: getHeaders() });
 }
 
 function sendJson(path, method, body) {
-  const headers = { ...getHeaders(), 'Content-Type': 'application/json' };
-  return fetch(buildUrl(path), {
+  return request(path, {
     method,
-    headers,
+    headers: { ...getHeaders(), 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined
-  }).then(res => {
-    if (res.status === 401) {
-      localStorage.removeItem('adminToken');
-      window.dispatchEvent(new Event('admin-unauthorized'));
-    }
-    return res.json();
   });
 }
 
@@ -60,22 +79,15 @@ function deleteJson(path) { return sendJson(path, 'DELETE'); }
 function patchJson(path, body) { return sendJson(path, 'PATCH', body); }
 
 export const adminApi = {
-  login: (email, password) => {
-    return fetch(buildUrl('/auth/login'), {
+  login: (email, password) =>
+    request('/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
-    }).then(res => {
-      if (!res.ok) {
-        return res.json().then(err => {
-          throw new Error(err.error || 'Authentication failed');
-        });
-      }
-      return res.json();
-    });
-  },
+    }).then((data) => {
+      if (data.success === false || data.error) throw new Error(data.error || 'Authentication failed');
+      return data;
+    }),
   getDashboardStats: () => getJson('/dashboard/stats'),
   getStudents: () => getJson('/student'),
   getRecruiters: () => getJson('/recruiter'),
