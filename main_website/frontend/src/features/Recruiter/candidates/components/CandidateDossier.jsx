@@ -21,8 +21,8 @@ const withHttp = (url) => (/^https?:\/\//i.test(url) ? url : `https://${url}`);
 function Section({ title, icon: Icon, children }) {
   return (
     <section className="flex flex-col gap-3 border-t border-[#EEF0F3] pt-[18px]">
-      <h3 className="m-0 flex items-center gap-2 text-[15px] leading-[1.45] tracking-normal text-[#0F172A]">
-        {Icon && <Icon className="size-4 text-[#1447E6]" aria-hidden="true" />}
+      <h3 className="m-0 flex items-center gap-2 text-[15px] leading-[1.45] tracking-normal text-[#023836]">
+        {Icon && <Icon className="size-4 text-[#0F7A55]" aria-hidden="true" />}
         <span className="font-semibold">{title}</span>
       </h3>
       {children}
@@ -37,7 +37,7 @@ function Item({ title, subtitle, aside, children }) {
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex min-w-0 flex-col">
           <span className="break-words font-semibold">{title}</span>
-          {subtitle && <span className="break-words text-[13px] text-[#1447E6]">{subtitle}</span>}
+          {subtitle && <span className="break-words text-[13px] text-[#0F7A55]">{subtitle}</span>}
         </div>
         {aside}
       </div>
@@ -54,7 +54,7 @@ function JobBars({ job, comparison }) {
     <div className="flex flex-col gap-3">
       <span className="font-semibold">Skills vs. {job.title}</span>
       {comparison.bars.map((bar) => {
-        const fill = bar.gates && bar.state === 'below' ? 'bg-[#C2410C]' : 'bg-[#1447E6]';
+        const fill = bar.gates && bar.state === 'below' ? 'bg-[#C2410C]' : 'bg-[#023836]';
         return (
           <div key={bar.skillName} className="flex items-center gap-3">
             <span className="w-[108px] shrink-0 break-words font-medium leading-tight">{bar.skillName}</span>
@@ -107,10 +107,10 @@ export default function CandidateDossier({ cand, job, onViewProfile, onPlayProje
         <div className="flex min-w-0 items-center gap-3.5">
           <CandidateAvatar candidate={cand} size={52} />
           <div className="flex min-w-0 flex-col gap-0.5">
-            <h2 className="m-0 break-words text-xl leading-[1.3] tracking-normal text-[#0F172A]">
+            <h2 className="m-0 break-words text-xl leading-[1.3] tracking-normal text-[#023836]">
               <span className="font-bold">{cand.name}</span>
             </h2>
-            {cand.username && <span className="text-[13px] font-medium text-[#1447E6]">@{cand.username}</span>}
+            {cand.username && <span className="text-[13px] font-medium text-[#0F7A55]">@{cand.username}</span>}
             {meta && <span className={MUTED}>{meta}</span>}
           </div>
         </div>
@@ -122,7 +122,7 @@ export default function CandidateDossier({ cand, job, onViewProfile, onPlayProje
 
       {job && cand.comparison && <JobBars job={job} comparison={cand.comparison} />}
 
-      <div className="flex flex-col gap-1 rounded-[10px] bg-[#F8F8F6] p-3.5">
+      <div className="flex flex-col gap-1 rounded-[10px] bg-[#F4F8F6] p-3.5">
         <span>
           <span className={MUTED}>Prefers</span> · {prefers.length ? prefers.join(' · ') : 'Not specified'}
         </span>
@@ -180,7 +180,7 @@ export default function CandidateDossier({ cand, job, onViewProfile, onPlayProje
           {(cand.skills || []).map((skill) => (
             <span key={skillName(skill)} className="inline-flex items-center gap-1.5 rounded-[8px] border border-[#E4E6EA] px-2.5 py-1 text-[13px]">
               {skillName(skill)}
-              <span className="font-semibold text-[#1447E6]">Level {skill.rating}/10</span>
+              <span className="font-semibold text-[#0F7A55]">Level {skill.rating}/10</span>
               {skill.verifiedRating > 0 && (
                 <Tag tone="green">
                   <ShieldCheck className="size-3" aria-hidden="true" />
@@ -239,7 +239,7 @@ export default function CandidateDossier({ cand, job, onViewProfile, onPlayProje
               {(proj.skills || []).length > 0 && (
                 <div className="flex flex-wrap gap-1 pt-1">
                   {proj.skills.map((skill) => (
-                    <Tag key={skill} tone={job?.requirements?.some((req) => req.skillName.toLowerCase() === skill.toLowerCase()) ? 'blue' : 'grey'}>
+                    <Tag key={skill} tone={job?.requirements?.some((req) => req.skillName.toLowerCase() === skill.toLowerCase()) ? 'brand' : 'grey'}>
                       {skill}
                     </Tag>
                   ))}
@@ -293,7 +293,7 @@ export default function CandidateDossier({ cand, job, onViewProfile, onPlayProje
                 href={withHttp(cand.socialLinks[key])}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between gap-2 rounded-[8px] border border-[#E4E6EA] px-3 py-2.5 font-semibold hover:border-[#1447E6] hover:text-[#1447E6]"
+                className="flex items-center justify-between gap-2 rounded-[8px] border border-[#E4E6EA] px-3 py-2.5 font-semibold hover:border-[#0F7A55] hover:text-[#0F7A55]"
               >
                 <span className="flex items-center gap-2">
                   <Icon className="size-4" aria-hidden="true" />

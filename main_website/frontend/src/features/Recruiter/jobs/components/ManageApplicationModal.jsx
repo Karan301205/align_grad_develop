@@ -49,7 +49,7 @@ function ScreeningAnswers({ answers }) {
       </h3>
       <ol className="m-0 flex list-none flex-col gap-2 p-0">
         {answers.map((answer, index) => (
-          <li key={answer.questionId || index} className="flex flex-col gap-1.5 rounded-[10px] border border-[#EEF0F3] bg-[#FAFAF9] px-3.5 py-3">
+          <li key={answer.questionId || index} className="flex flex-col gap-1.5 rounded-[10px] border border-[#EEF0F3] bg-[#F8FBFA] px-3.5 py-3">
             <div className="flex items-start justify-between gap-3">
               <span className="font-medium">
                 {index + 1}. {answer.questionText}
@@ -133,7 +133,7 @@ export default function ManageApplicationModal({ row, token, onClose, onSaved })
         </>
       }
     >
-      <div className="flex flex-col gap-2 rounded-[10px] border border-[#EEF0F3] bg-[#FAFAF9] p-3.5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 rounded-[10px] border border-[#EEF0F3] bg-[#F8FBFA] p-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-0.5">
           <label htmlFor="manage-status" className="font-semibold">
             Pipeline status
@@ -154,7 +154,7 @@ export default function ManageApplicationModal({ row, token, onClose, onSaved })
           <span className="font-semibold">Interview rounds</span>
         </h3>
         {rounds.length === 0 ? (
-          <p className={`m-0 rounded-[10px] border border-[#EEF0F3] bg-[#FAFAF9] px-3.5 py-3 ${MUTED}`}>
+          <p className={`m-0 rounded-[10px] border border-[#EEF0F3] bg-[#F8FBFA] px-3.5 py-3 ${MUTED}`}>
             This application has no interview rounds. Changing the pipeline status above is enough.
           </p>
         ) : (
@@ -180,7 +180,7 @@ export default function ManageApplicationModal({ row, token, onClose, onSaved })
                   maxLength={FEEDBACK_MAX}
                   onChange={(event) => updateRound(index, { feedback: event.target.value })}
                   rows={2}
-                  className="w-full resize-y rounded-[8px] border border-[#D5D9E0] bg-white px-3 py-2 text-sm text-[#0F172A] placeholder:text-[#6B7280] focus:border-[#1447E6] focus:outline-none focus:ring-2 focus:ring-[#1447E6]/20"
+                  className="w-full resize-y rounded-[8px] border border-[#D5D9E0] bg-white px-3 py-2 text-sm text-[#023836] placeholder:text-[#6B7280] focus:border-[#0F7A55] focus:outline-none focus:ring-2 focus:ring-[#0F7A55]/20"
                 />
               </label>
             </div>

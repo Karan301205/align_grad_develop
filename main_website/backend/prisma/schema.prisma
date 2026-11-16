@@ -538,6 +538,7 @@ model CourseEnrollment {
   courseId             String
   completedLessonIds   String[] @default([])
   lastAccessedLessonId String?
+  lessonProgress       Json     @default("{}") // { [lessonId]: LessonProgress }
   enrolledAt           DateTime @default(now()) @db.Timestamptz(3)
   updatedAt            DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
@@ -580,4 +581,7 @@ model CourseEnrollment {
 // CourseLesson           { id, title, videoKey: string, subTopic?, description?, videoUrl?,
 //                          duration? ("10:00"), notes?, documentUrl?, documentName?: string,
 //                          quiz?: any, order: int }
+// LessonProgress         { watchedSeconds: number (video time the server has counted), durationSeconds: int
+//                          (video length as the player reported it), quizAnswered: boolean,
+//                          lastReportAt?: ISO date (when watch time was last added) }
 // ---------------------------------------------------------------------------

@@ -4,16 +4,20 @@ import { BODY, CARD, GRADIENT_X, HEADING_FONT, INK, MUTED, PAGE, PRIMARY, SECOND
 import { ErrorBanner, Spinner } from '../profile/ui';
 import { downloadNotes, flatLessons, progressOf, request, startLesson, youTubeEmbed } from './learnData';
 
-/** Share of an uploaded video that has to be played (not skipped) to complete the lesson. */
+/** Share of an uploaded video that has to be watched to complete the lesson (the server counts it and decides). */
 const WATCHED_TO_COMPLETE = 0.5;
+const REPORT_EVERY_MS = 10000; // how often watch time is sent to the server
+const MAX_STEP = 30; // seconds of watch time sent in one report (the server's limit)
+const MAX_JUMP = 3; // a bigger jump between two time updates is a seek, not watching
 const MODULE_TONES = ['blue', 'violet', 'plum', 'peri', 'green', 'amber'].map((tone) => TONES[tone].icon);
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 /**
  * A course: the lesson video, its notes, quiz and description, and the course content
- * list. A lesson completes when half its uploaded video has been played, when it is
- * opened if there is nothing to watch (no video, or a YouTube link), or when its quiz
- * is submitted (lessons with a quiz and no video).
+ * list. A lesson completes when everything it asks for is done: half of its uploaded video
+ * watched (the player reports the time actually played and the server counts it, so
+ * skipping around makes no difference) and its quiz submitted. A lesson that asks for
+ * neither (no video and no quiz, or a YouTube link) completes when it is opened.
  */
 export default function CoursePlayer({ courseId, token, onBack }) {
   const [course, setCourse] = useState(null);
@@ -24,7 +28,9 @@ export default function CoursePlayer({ courseId, token, onBack }) {
   const [tab, setTab] = useState('notes');
   const [quizPrompt, setQuizPrompt] = useState(false);
   const [closed, setClosed] = useState({});
+  const [doc, setDoc] = useState({ busy: false, error: '' }); // opening the lesson's reference document
   const requested = useRef(new Set()); // lessons completed or with a request sent
+  const watching = useRef({ id: null, pending: 0, last: null, duration: 0, sending: false }); // playback not yet reported
   const streamFor = useRef(null); // the lesson whose video is wanted (late answers are ignored)
   const tabsRef = useRef(null);
 
@@ -36,11 +42,28 @@ export default function CoursePlayer({ courseId, token, onBack }) {
     else requested.current.delete(id); // tried again next time
   };
 
-  const openLesson = async (lesson, nextTab = 'notes') => {
+  // Sends the watch time not yet reported for a lesson (up to MAX_STEP at a time, the rest next time).
+  const sendWatch = async (current) => {
+    if (current.sending || current.pending < 1 || !current.id || !current.duration) return;
+    const seconds = Math.min(current.pending, MAX_STEP);
+    current.sending = true;
+    const { data } = await request(`/courses/${courseId}/lessons/${current.id}/watch`, { token, method: 'POST', json: { seconds, duration: current.duration } }, '');
+    current.sending = false;
+    if (!data) return; // stays pending and goes with the next report
+    current.pending -= seconds;
+    setCourse((prev) => (prev ? { ...prev, enrollment: data.enrollment } : prev));
+  };
+
+  const percentWatched = (saved) => (saved?.durationSeconds ? Math.min(100, Math.floor((saved.watchedSeconds / saved.durationSeconds) * 100)) : 0);
+
+  const openLesson = async (lesson, nextTab = 'notes', from = course) => {
+    sendWatch(watching.current); // what was played in the lesson being left
+    watching.current = { id: lesson.id, pending: 0, last: null, duration: 0, sending: false };
     setLessonId(lesson.id);
     setTab(nextTab);
     setQuizPrompt(false);
-    setWatched(0);
+    setWatched(percentWatched(from?.enrollment?.lessonProgress?.[lesson.id]));
+    setDoc({ busy: false, error: '' });
     streamFor.current = lesson.id;
     if (!lesson.hasVideo) {
       setStream({ state: 'none', url: '' });
@@ -52,7 +75,7 @@ export default function CoursePlayer({ courseId, token, onBack }) {
     if (streamFor.current !== lesson.id) return;
     const url = data?.streamUrl || '';
     setStream({ state: !data ? 'failed' : url ? 'ready' : 'none', url });
-    if (youTubeEmbed(url)) complete(lesson.id);
+    if (youTubeEmbed(url) && !lesson.quiz) complete(lesson.id); // a YouTube link can't be timed
   };
 
   const load = async () => {
@@ -62,7 +85,7 @@ export default function CoursePlayer({ courseId, token, onBack }) {
     requested.current = new Set(data.course.enrollment.completedLessonIds);
     setCourse(data.course);
     const first = startLesson(data.course);
-    if (first) openLesson(first);
+    if (first) openLesson(first, 'notes', data.course);
   };
 
   useEffect(() => {
@@ -70,6 +93,16 @@ export default function CoursePlayer({ courseId, token, onBack }) {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
+
+  // Watch time goes to the server every few seconds, and what is left over when the player closes.
+  useEffect(() => {
+    const timer = setInterval(() => sendWatch(watching.current), REPORT_EVERY_MS);
+    return () => {
+      clearInterval(timer);
+      sendWatch(watching.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseId, token]);
 
   const back = (
     <button type="button" onClick={onBack} className={`${SECONDARY} ${SMALL} self-start`}>
@@ -113,6 +146,23 @@ export default function CoursePlayer({ courseId, token, onBack }) {
   ].filter(Boolean);
   const shownTab = tabs.some((item) => item.id === tab) ? tab : 'notes';
 
+  // The document is in a private bucket, so each click asks the server for a fresh signed link. The tab is
+  // opened inside the click (so the browser allows it) and pointed at the link once it arrives.
+  const openDocument = async () => {
+    if (doc.busy) return;
+    setDoc({ busy: true, error: '' });
+    const tabWindow = window.open('', '_blank');
+    if (tabWindow) tabWindow.opener = null;
+    const { data, error: failed } = await request(`/courses/${courseId}/lessons/${lesson.id}/document`, { token }, 'The document couldn’t be opened. Try again.');
+    if (!data?.documentUrl) {
+      tabWindow?.close();
+      setDoc({ busy: false, error: failed || 'The document couldn’t be opened. Try again.' });
+      return;
+    }
+    if (tabWindow) tabWindow.location.href = data.documentUrl;
+    setDoc({ busy: false, error: tabWindow ? '' : 'Your browser blocked the new tab. Allow pop-ups for this site and try again.' });
+  };
+
   const showQuiz = (item) => {
     if (item.id === lessonId) setTab('quiz');
     else openLesson(item, 'quiz');
@@ -120,20 +170,29 @@ export default function CoursePlayer({ courseId, token, onBack }) {
     tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const onProgress = (event) => {
+  // Counts the time actually played: a jump from seeking (or going back) adds nothing.
+  const onTimeUpdate = (event) => {
     const video = event.currentTarget;
-    if (!Number.isFinite(video.duration) || video.duration <= 0) return;
-    let seconds = 0;
-    for (let i = 0; i < video.played.length; i++) seconds += video.played.end(i) - video.played.start(i);
-    setWatched(Math.min(100, Math.floor((seconds / video.duration) * 100)));
-    if (seconds >= video.duration * WATCHED_TO_COMPLETE) complete(lessonId);
+    const current = watching.current;
+    if (current.id !== lessonId) return;
+    if (Number.isFinite(video.duration) && video.duration > 0) current.duration = video.duration;
+    const step = video.currentTime - (current.last ?? video.currentTime);
+    current.last = video.currentTime;
+    if (!current.duration || course.enrollment.completedLessonIds.includes(lessonId)) return;
+    if (!video.paused && !video.seeking && step > 0 && step <= MAX_JUMP) current.pending += step;
+    const saved = course.enrollment.lessonProgress?.[lessonId]?.watchedSeconds || 0;
+    setWatched(Math.min(100, Math.floor(((saved + current.pending) / current.duration) * 100)));
   };
 
   let status = null;
   if (lesson && progress.done.has(lesson.id)) status = { text: 'Completed', icon: Check, tone: 'bg-[#E3F5EE] text-[#0B5E41]' };
   else if (stream.state === 'failed') status = { text: 'Video unavailable', icon: X, tone: 'bg-[#FDECEA] text-[#8C1D14]' };
-  else if (stream.state === 'ready' && !embed) status = { text: `${watched}% watched · completes at ${WATCHED_TO_COMPLETE * 100}%`, icon: Clock, tone: 'bg-[#E8EEFF] text-[#0B3FA8]' };
-  else if (stream.state === 'none' && lesson?.quiz) status = { text: 'Completes when you submit the quiz', icon: HelpCircle, tone: 'bg-[#F1ECFF] text-[#5B2AA6]' };
+  else if (stream.state === 'ready' && lesson?.watchRequired) {
+    const goal = WATCHED_TO_COMPLETE * 100;
+    const quizDone = Boolean(course.enrollment.lessonProgress?.[lesson.id]?.quizAnswered);
+    const watchPart = watched >= goal ? 'Watched enough' : `${watched}% watched · needs ${goal}%`;
+    status = { text: lesson.quiz ? `${watchPart} · quiz ${quizDone ? 'submitted' : 'not submitted'}` : `${watched}% watched · completes at ${goal}%`, icon: Clock, tone: 'bg-[#E8EEFF] text-[#0B3FA8]' };
+  } else if (lesson?.quiz && !lesson.watchRequired) status = { text: 'Completes when you submit the quiz', icon: HelpCircle, tone: 'bg-[#F1ECFF] text-[#5B2AA6]' };
 
   return (
     <div className={PAGE}>
@@ -182,8 +241,12 @@ export default function CoursePlayer({ courseId, token, onBack }) {
                     playsInline
                     controlsList="nodownload"
                     className="size-full bg-black object-contain"
-                    onTimeUpdate={onProgress}
-                    onEnded={() => lesson.quiz && setQuizPrompt(true)}
+                    onTimeUpdate={onTimeUpdate}
+                    onPause={() => sendWatch(watching.current)}
+                    onEnded={() => {
+                      sendWatch(watching.current);
+                      if (lesson.quiz) setQuizPrompt(true);
+                    }}
                     onError={() => setStream((current) => ({ ...current, state: 'failed' }))}
                   />
                 ) : (
@@ -281,18 +344,19 @@ export default function CoursePlayer({ courseId, token, onBack }) {
                       ) : (
                         <p className={`m-0 ${MUTED}`}>There are no notes for this lesson.</p>
                       )}
-                      {lesson.documentUrl && (
-                        <a href={lesson.documentUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-[12px] border border-[#D5DEFF] bg-[#F4F6FE] p-3.5 hover:border-[#0167F6]">
+                      {lesson.hasDocument && (
+                        <button type="button" onClick={openDocument} disabled={doc.busy} aria-busy={doc.busy} className="flex w-full items-center gap-3 rounded-[12px] border border-[#D5DEFF] bg-[#F4F6FE] p-3.5 text-left hover:border-[#0167F6] disabled:cursor-wait disabled:opacity-70">
                           <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-[#0167F6] text-white">
                             <FileText aria-hidden="true" className="size-5" />
                           </span>
                           <span className="flex min-w-0 flex-1 flex-col">
                             <span className={`truncate font-semibold ${INK}`}>{lesson.documentName || 'Lesson document'}</span>
-                            <span className={`text-[13.5px] ${MUTED}`}>Reference document</span>
+                            <span className={`text-[13.5px] ${MUTED}`}>{doc.busy ? 'Opening…' : 'Reference document'}</span>
                           </span>
                           <Download aria-hidden="true" className="size-5 shrink-0 text-[#0167F6]" />
-                        </a>
+                        </button>
                       )}
+                      <ErrorBanner message={doc.error} />
                     </div>
                   )}
                   {shownTab === 'quiz' && <LessonQuiz key={lesson.id} quiz={lesson.quiz} path={`/courses/${courseId}/lessons/${lesson.id}/quiz`} token={token} onScored={(enrollment) => setCourse((current) => ({ ...current, enrollment }))} />}

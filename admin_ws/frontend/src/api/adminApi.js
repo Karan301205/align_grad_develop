@@ -89,6 +89,7 @@ export const adminApi = {
       return data;
     }),
   getDashboardStats: () => getJson('/dashboard/stats'),
+  getOpportunityMetrics: () => getJson('/dashboard/opportunities'),
   getStudents: () => getJson('/student'),
   getRecruiters: () => getJson('/recruiter'),
   // decision: 'APPROVE' | 'REJECT'; reason required for rejections

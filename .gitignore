@@ -73,5 +73,18 @@ cloudfront_public_key.pem
 
 # MongoDB export used for the Postgres migration (contains user PII / password hashes)
 align_grade_export/
-# Local .env backups (contain secrets)
-.env.*backup*
+
+# ─── Any other .env variant (contain secrets); the .env.example templates stay tracked ───
+.env.*
+!.env.example
+
+# ─── Database dumps and local data ─────────────────────────
+*.dump
+*.sql.gz
+*.sqlite
+*.bak
+
+# ─── Tool caches ───────────────────────────────────────────
+coverage/
+.vite/
+*.tsbuildinfo

@@ -56,6 +56,7 @@ function formatRecruiter(recruiter, company, companyJobs = []) {
   return {
     id: recruiter.id,
     email: recruiter.email,
+    registeredAt: recruiter.createdAt || null,
     hasCompanyProfile: Boolean(company),
     companyName: company?.name || 'Recruiter (No Company Profile)',
     verified: verificationStatus === VERIFICATION_STATUS.APPROVED,
@@ -89,7 +90,7 @@ exports.getAllRecruiters = async (req, res, next) => {
     // ORDER BY "id" approximates the previous natural (insertion) order: ids are
     // time-prefixed hex strings. The final ordering is the status sort below.
     const { rows: recruiters } = await db.query(
-      'SELECT "id", "email" FROM "User" WHERE "role" = $1 ORDER BY "id"',
+      'SELECT "id", "email", "createdAt" FROM "User" WHERE "role" = $1 ORDER BY "id"',
       ['RECRUITER']
     );
     if (recruiters.length === 0) {
@@ -142,7 +143,7 @@ exports.reviewRecruiterVerification = async (req, res, next) => {
     const userId = normalizeId(recruiterId);
 
     const { rows: [recruiter] } = await db.query(
-      'SELECT "id", "email" FROM "User" WHERE "id" = $1 AND "role" = $2',
+      'SELECT "id", "email", "createdAt" FROM "User" WHERE "id" = $1 AND "role" = $2',
       [userId, 'RECRUITER']
     );
     if (!recruiter) {

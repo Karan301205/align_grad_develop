@@ -1,7 +1,6 @@
 import { ArrowUpDown, FileText, Mail, UserRound } from 'lucide-react';
 import { SelectControl } from '../../components/AccountControls';
 import { MUTED } from '../../components/accountStyles';
-import { CandidateAvatar } from '../../candidates/components/bits';
 import { formatLongDate, formatShortDate } from '../../../../utils/format';
 import { PAGE_SIZES, emailOf, locationOf, matchBand, stageLabel } from '../jobsData';
 
@@ -14,18 +13,18 @@ const MATCH_COLOUR = {
 };
 
 const STAGE_PILL = {
-  APPLIED: 'bg-[#EEF2FE] text-[#1447E6]',
+  APPLIED: 'bg-[#E3F1EE] text-[#0F7A55]',
   SHORTLISTED: 'bg-[#EFEAFC] text-[#5B3FB0]',
   INTERVIEW: 'bg-[#FBF1DC] text-[#B26A00]',
   HIRED: 'bg-[#E4F4EC] text-[#17794F]',
   REJECTED: 'bg-[#FDECEA] text-[#B3261E]'
 };
 
-const TH = 'whitespace-nowrap border-b border-[#E4E6EA] bg-[#F1F3F6] px-3 py-3 text-left text-xs font-bold uppercase tracking-[0.02em] text-[#0F172A]';
-const TD = 'whitespace-nowrap border-b border-[#EEF0F3] bg-white px-3 py-3.5 align-middle group-hover:bg-[#FBFBFA]';
+const TH = 'whitespace-nowrap border-b border-[#E4E6EA] bg-[#F1F3F6] px-3 py-3 text-left text-xs font-bold uppercase tracking-[0.02em] text-[#023836]';
+const TD = 'whitespace-nowrap border-b border-[#EEF0F3] bg-white px-3 py-3.5 align-middle group-hover:bg-[#F8FBFA]';
 // The actions column stays in view when the table scrolls sideways (narrow screens, open sidebar).
 const STICKY = 'sticky right-0 z-[1] shadow-[-1px_0_0_#E4E6EA]';
-const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]';
+const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]';
 
 /** Column header that sorts; `keys` is [descending, ascending] (or the reverse for names). */
 function SortHeader({ label, keys, sortBy, onSort, center, ascendingFirst }) {
@@ -37,10 +36,10 @@ function SortHeader({ label, keys, sortBy, onSort, center, ascendingFirst }) {
       <button
         type="button"
         onClick={() => onSort(sortBy === first ? second : first)}
-        className={`inline-flex items-center gap-1 rounded-[4px] font-(family-name:--font-headline) text-xs font-bold uppercase tracking-[0.02em] text-[#0F172A] ${FOCUS}`}
+        className={`inline-flex items-center gap-1 rounded-[4px] font-(family-name:--font-headline) text-xs font-bold uppercase tracking-[0.02em] text-[#023836] ${FOCUS}`}
       >
         {label}
-        <ArrowUpDown className={`size-[13px] ${active ? 'text-[#1447E6]' : 'text-[#6B7280]'}`} aria-hidden="true" />
+        <ArrowUpDown className={`size-[13px] ${active ? 'text-[#0F7A55]' : 'text-[#6B7280]'}`} aria-hidden="true" />
       </button>
     </th>
   );
@@ -54,19 +53,19 @@ function pageList(current, total) {
   return sorted.flatMap((p, i) => (i > 0 && p - sorted[i - 1] > 1 ? ['gap', p] : [p]));
 }
 
-const PAGER_BUTTON = `h-8 rounded-[8px] border border-[#E4E6EA] bg-white px-3 text-[12.5px] font-semibold text-[#0F172A] hover:bg-[#F8F8F6] disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS}`;
+const PAGER_BUTTON = `h-8 rounded-[8px] border border-[#E4E6EA] bg-white px-3 text-[12.5px] font-semibold text-[#023836] hover:bg-[#F4F8F6] disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS}`;
 
 function Pagination({ page, pages, pageSize, total, onPage, onPageSize }) {
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF0F3] bg-[#FAFAF9] px-[18px] py-3">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEF0F3] bg-[#F8FBFA] px-[18px] py-3">
       <span className={`text-[13px] ${MUTED}`} aria-live="polite">
         {total === 0 ? (
           'No applications to show'
         ) : (
           <>
-            Showing <b className="text-[#0F172A]">{from}</b>–<b className="text-[#0F172A]">{to}</b> of <b className="text-[#0F172A]">{total}</b> application{total === 1 ? '' : 's'}
+            Showing <b className="text-[#023836]">{from}</b>–<b className="text-[#023836]">{to}</b> of <b className="text-[#023836]">{total}</b> application{total === 1 ? '' : 's'}
           </>
         )}
       </span>
@@ -92,7 +91,7 @@ function Pagination({ page, pages, pageSize, total, onPage, onPageSize }) {
                 aria-current={p === page ? 'page' : undefined}
                 onClick={() => onPage(p)}
                 className={`h-[34px] min-w-[34px] rounded-[8px] border text-[13px] font-semibold ${FOCUS} ${
-                  p === page ? 'border-[#1447E6] bg-[#1447E6] text-white' : 'border-[#E4E6EA] bg-white text-[#0F172A] hover:bg-[#F8F8F6]'
+                  p === page ? 'border-[#0F7A55] bg-[#023836] text-white' : 'border-[#E4E6EA] bg-white text-[#023836] hover:bg-[#F4F8F6]'
                 }`}
               >
                 {p}
@@ -162,20 +161,17 @@ export default function ApplicationsTable({ rows, total, page, pages, pageSize, 
                       {formatShortDate(row.app.createdAt) || '—'}
                     </td>
                     <td className={`${TD} whitespace-normal`}>
-                      <div className="flex min-w-[170px] items-center gap-3">
-                        <CandidateAvatar candidate={s} size={36} />
-                        <div className="flex min-w-0 flex-col">
-                          <button type="button" onClick={() => onProfile(row)} disabled={!row.student} className={`self-start rounded-[4px] text-left font-semibold text-[#0F172A] hover:text-[#1447E6] disabled:hover:text-[#0F172A] ${FOCUS}`}>
-                            {name}
-                          </button>
-                          {s.username && <span className={`text-xs ${MUTED}`}>@{s.username}</span>}
-                          {showJob && <span className="mt-0.5 self-start rounded-[6px] bg-[#EEF2FE] px-1.5 py-px text-[11px] font-semibold text-[#1447E6]">{row.job.title}</span>}
-                        </div>
+                      <div className="flex min-w-[170px] flex-col">
+                        <button type="button" onClick={() => onProfile(row)} disabled={!row.student} className={`self-start rounded-[4px] text-left font-semibold text-[#023836] hover:text-[#0F7A55] disabled:hover:text-[#023836] ${FOCUS}`}>
+                          {name}
+                        </button>
+                        {s.username && <span className={`text-xs ${MUTED}`}>@{s.username}</span>}
+                        {showJob && <span className="mt-0.5 self-start rounded-[6px] bg-[#E3F1EE] px-1.5 py-px text-[11px] font-semibold text-[#0F7A55]">{row.job.title}</span>}
                       </div>
                     </td>
                     <td className={`${TD} ${MUTED}`}>
                       {email ? (
-                        <a href={`mailto:${email}`} title={email} className={`inline-flex max-w-[200px] items-center gap-1.5 rounded-[4px] hover:text-[#1447E6] hover:underline ${FOCUS}`}>
+                        <a href={`mailto:${email}`} title={email} className={`inline-flex max-w-[200px] items-center gap-1.5 rounded-[4px] hover:text-[#0F7A55] hover:underline ${FOCUS}`}>
                           <Mail className="size-3.5 shrink-0" aria-hidden="true" />
                           <span className="truncate">{email}</span>
                         </a>
@@ -201,7 +197,7 @@ export default function ApplicationsTable({ rows, total, page, pages, pageSize, 
                         onClick={() => onResume(row)}
                         disabled={!row.student || resumeBusyId === row.app.id}
                         aria-label={`Resume of ${name}`}
-                        className={`inline-flex items-center gap-1.5 rounded-[4px] font-semibold text-[#1447E6] hover:text-[#0F38B8] disabled:cursor-not-allowed disabled:opacity-50 ${FOCUS}`}
+                        className={`inline-flex items-center gap-1.5 rounded-[4px] font-semibold text-[#0F7A55] hover:text-[#023836] disabled:cursor-not-allowed disabled:opacity-50 ${FOCUS}`}
                       >
                         <FileText className="size-[15px]" aria-hidden="true" />
                         {resumeBusyId === row.app.id ? 'Opening…' : 'Resume'}
@@ -213,7 +209,7 @@ export default function ApplicationsTable({ rows, total, page, pages, pageSize, 
                           type="button"
                           onClick={() => onManage(row)}
                           aria-label={`Manage ${name}'s application`}
-                          className={`h-8 rounded-[8px] border border-[#C7D3FB] bg-[#EEF2FE] px-3 font-(family-name:--font-headline) text-[12.5px] font-semibold text-[#1447E6] hover:bg-[#E0E8FD] ${FOCUS}`}
+                          className={`h-8 rounded-[8px] border border-[#BFE0D8] bg-[#E3F1EE] px-3 font-(family-name:--font-headline) text-[12.5px] font-semibold text-[#0F7A55] hover:bg-[#D3E8E3] ${FOCUS}`}
                         >
                           Manage
                         </button>
@@ -223,7 +219,7 @@ export default function ApplicationsTable({ rows, total, page, pages, pageSize, 
                           disabled={!row.student}
                           aria-label={`View ${name}'s profile`}
                           title="View profile"
-                          className={`inline-flex size-8 items-center justify-center rounded-[8px] border border-[#E4E6EA] bg-white text-[#0F172A] hover:bg-[#F8F8F6] disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS}`}
+                          className={`inline-flex size-8 items-center justify-center rounded-[8px] border border-[#E4E6EA] bg-white text-[#023836] hover:bg-[#F4F8F6] disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS}`}
                         >
                           <UserRound className="size-[15px]" aria-hidden="true" />
                         </button>

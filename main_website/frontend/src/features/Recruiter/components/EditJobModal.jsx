@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Briefcase, DollarSign, Calendar, MapPin, ListChecks, X, Globe, Users, Clock, Lock, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
+import { Trash2, Briefcase, DollarSign, Calendar, ListChecks, X, Clock, Lock, Eye, EyeOff } from 'lucide-react';
 import { ALL_SKILLS } from '../../../constants';
-import Button from '../../../components/ui/Button';
 import ScreeningQuestionBuilder from './ScreeningQuestionBuilder';
 import { validateScreeningQuestions } from '../../../constants/screeningQuestions';
 import { SelectControl } from './AccountControls';
@@ -130,10 +129,10 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
         {/* Modal Header */}
         <div className="p-5 sm:p-6 border-b border-slate-300 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/80">
           <div>
-            <span className="inline-block px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-blue-100 dark:bg-blue-950/70 border border-blue-400 dark:border-blue-600 text-blue-900 dark:text-blue-200 mb-1.5">
+            <span className="inline-block px-2 py-0.5 text-[10px] font-headline font-bold tracking-wider rounded-none bg-[#CFE8E2] dark:bg-[#012624]/70 border border-[#7FD8C4] dark:border-[#0F7A55] text-[#023836] dark:text-[#7FD8C4] mb-1.5">
               Role Configuration
             </span>
-            <h3 className="text-xl font-headline font-bold text-slate-900 dark:text-slate-100">
+            <h3 className="text-xl font-headline font-bold text-[#023836] dark:text-slate-100">
               Edit Opportunity Specifications
             </h3>
           </div>
@@ -151,7 +150,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
           {/* SECTION 1: Role & Company Details (Locked & Read-Only) */}
           <div className="bg-slate-50/80 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-              <h4 className="text-xs font-headline font-bold tracking-wider text-blue-700 dark:text-blue-400 flex items-center gap-2">
+              <h4 className="text-xs font-headline font-bold tracking-wider text-[#0F7A55] dark:text-[#7FD8C4] flex items-center gap-2">
                 <Briefcase className="w-4 h-4" /> Role & Company Details
               </h4>
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-headline font-bold rounded-none bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300">
@@ -235,7 +234,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
 
           {/* SECTION 2: Prerequisites */}
           <div className="bg-slate-50/80 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none p-5 space-y-4">
-            <h4 className="text-xs font-headline font-bold tracking-wider text-blue-700 dark:text-blue-400 border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center gap-2">
+            <h4 className="text-xs font-headline font-bold tracking-wider text-[#0F7A55] dark:text-[#7FD8C4] border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center gap-2">
               <ListChecks className="w-4 h-4" /> Candidate Prerequisites
             </h4>
             
@@ -255,7 +254,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                 <label className="block text-[10px] font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">Preferred Education</label>
                 <input
                   type="text"
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-[#023836] dark:text-slate-100 focus:border-[#03443F] focus:outline-none shadow-2xs"
                   value={preferredEducation}
                   onChange={e => setPreferredEducation(e.target.value)}
                 />
@@ -291,7 +290,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                       onBlur={() => {
                         setTimeout(() => setIsSkillDropdownOpen(false), 200);
                       }}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-[#023836] dark:text-slate-100 focus:border-[#03443F] focus:outline-none shadow-2xs"
                     />
                     {isSkillDropdownOpen && (
                       <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-40 overflow-y-auto rounded-[8px] border border-[#E4E6EA] bg-white p-1 shadow-lg shadow-slate-300/50">
@@ -312,7 +311,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                                 setSelectedReqSkill(s.skill);
                                 setIsSkillDropdownOpen(false);
                               }}
-                              className="flex w-full items-center justify-between gap-3 rounded-[6px] px-3 py-2 text-left text-[13px] text-[#334155] transition-colors hover:bg-[#F8F8F6]"
+                              className="flex w-full items-center justify-between gap-3 rounded-[6px] px-3 py-2 text-left text-[13px] text-[#334155] transition-colors hover:bg-[#F4F8F6]"
                             >
                               <span>{s.skill}</span>
                               <span className="text-xs capitalize text-[#4B5563]">
@@ -342,7 +341,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                       setReqs(prev => [...prev, { skillName: match.skill, minRating: isTech ? 4 : 0 }]);
                       setSelectedReqSkill('');
                     }}
-                    className="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white border border-blue-800 font-headline font-bold rounded-none text-xs shadow-2xs cursor-pointer"
+                    className="px-4 py-2 bg-[#023836] hover:bg-[#03443F] text-white border border-[#03443F] font-headline font-bold rounded-none text-xs shadow-2xs cursor-pointer"
                   >
                     Add
                   </button>
@@ -358,7 +357,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                       return (
                         <div key={r.skillName} className="space-y-1.5 pb-2 border-b border-slate-200 dark:border-slate-800 last:border-b-0 last:pb-0">
                           <div className="flex justify-between items-center text-xs">
-                            <span className="font-headline font-bold text-slate-900 dark:text-slate-100">{r.skillName}</span>
+                            <span className="font-headline font-bold text-[#023836] dark:text-slate-100">{r.skillName}</span>
                             <div className="flex items-center gap-2">
                               {isTech ? (
                                 <span className="text-emerald-700 dark:text-emerald-400 font-headline font-bold text-[10px]">Min: Lvl {r.minRating}/10</span>
@@ -380,9 +379,9 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                                 type="range"
                                 min="1"
                                 max="10"
-                                className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-none appearance-none cursor-pointer accent-blue-700 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-blue-700 [&::-webkit-slider-thumb]:rounded-none [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white dark:[&::-webkit-slider-thumb]:border-slate-900 [&::-webkit-slider-thumb]:shadow-xs [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:bg-blue-700 [&::-moz-range-thumb]:rounded-none [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white dark:[&::-moz-range-thumb]:border-slate-900 [&::-moz-range-thumb]:shadow-xs [&::-moz-range-thumb]:cursor-pointer"
+                                className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-none appearance-none cursor-pointer accent-[#0F7A55] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-[#023836] [&::-webkit-slider-thumb]:rounded-none [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white dark:[&::-webkit-slider-thumb]:border-slate-900 [&::-webkit-slider-thumb]:shadow-xs [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:bg-[#023836] [&::-moz-range-thumb]:rounded-none [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white dark:[&::-moz-range-thumb]:border-slate-900 [&::-moz-range-thumb]:shadow-xs [&::-moz-range-thumb]:cursor-pointer"
                                 style={{
-                                  background: `linear-gradient(to right, #1d4ed8 0%, #1d4ed8 ${((r.minRating - 1) / 9) * 100}%, #cbd5e1 ${((r.minRating - 1) / 9) * 100}%, #cbd5e1 100%)`
+                                  background: `linear-gradient(to right, #0F7A55 0%, #0F7A55 ${((r.minRating - 1) / 9) * 100}%, #cbd5e1 ${((r.minRating - 1) / 9) * 100}%, #cbd5e1 100%)`
                                 }}
                                 value={r.minRating}
                                 onChange={e => updateReqRating(r.skillName, e.target.value)}
@@ -405,7 +404,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
 
           {/* SECTION 3: Compensation & Schedule */}
           <div className="bg-slate-50/80 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none p-5 space-y-4">
-            <h4 className="text-xs font-headline font-bold tracking-wider text-blue-700 dark:text-blue-400 border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center gap-2">
+            <h4 className="text-xs font-headline font-bold tracking-wider text-[#0F7A55] dark:text-[#7FD8C4] border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center gap-2">
               <DollarSign className="w-4 h-4" /> Compensation & Schedule
             </h4>
 
@@ -414,11 +413,11 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
                   {showSalary ? (
-                    <Eye className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                    <Eye className="w-4 h-4 text-[#0F7A55] dark:text-[#7FD8C4]" />
                   ) : (
                     <EyeOff className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                   )}
-                  <span className="text-[11px] font-headline font-bold text-slate-900 dark:text-slate-100">
+                  <span className="text-[11px] font-headline font-bold text-[#023836] dark:text-slate-100">
                     Candidate Salary Visibility
                   </span>
                   <span className={`text-[9px] font-headline font-bold px-1.5 py-0.5 rounded-none tracking-wider uppercase border ${
@@ -443,8 +442,8 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                   role="switch"
                   aria-checked={showSalary}
                   onClick={() => setShowSalary(prev => !prev)}
-                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-700 ${
-                    showSalary ? 'bg-blue-700' : 'bg-slate-300 dark:bg-slate-700'
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0F7A55] ${
+                    showSalary ? 'bg-[#023836]' : 'bg-slate-300 dark:bg-slate-700'
                   }`}
                 >
                   <span
@@ -466,7 +465,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                 </label>
                 <input
                   type="text"
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-[#023836] dark:text-slate-100 focus:border-[#03443F] focus:outline-none shadow-2xs"
                   value={stipendPartTime}
                   onChange={e => setStipendPartTime(e.target.value)}
                 />
@@ -478,7 +477,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                 </label>
                 <input
                   type="text"
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-[#023836] dark:text-slate-100 focus:border-[#03443F] focus:outline-none shadow-2xs"
                   value={stipendFullTime}
                   onChange={e => setStipendFullTime(e.target.value)}
                 />
@@ -489,7 +488,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                   <label className="block text-[10px] font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">Duration (Internship)</label>
                   <input
                     type="text"
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-[#023836] dark:text-slate-100 focus:border-[#03443F] focus:outline-none shadow-2xs"
                     value={duration}
                     onChange={e => setDuration(e.target.value)}
                   />
@@ -501,7 +500,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                 <input
                   type="text"
                   list="edit-joining-month-options"
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-[#023836] dark:text-slate-100 focus:border-[#03443F] focus:outline-none shadow-2xs"
                   placeholder="e.g. Immediate, May 2026, Next Month"
                   value={joiningMonth}
                   onChange={e => setJoiningMonth(e.target.value)}
@@ -530,7 +529,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
 
           {/* SECTION 4: Description & Selection Process */}
           <div className="bg-slate-50/80 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none p-5 space-y-4">
-            <h4 className="text-xs font-headline font-bold tracking-wider text-blue-700 dark:text-blue-400 border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center gap-2">
+            <h4 className="text-xs font-headline font-bold tracking-wider text-[#0F7A55] dark:text-[#7FD8C4] border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center gap-2">
               <Calendar className="w-4 h-4" /> Description & Recruitment Process
             </h4>
 
@@ -538,7 +537,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               <label className="block text-[10px] font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">Opportunity Summary *</label>
               <textarea
                 rows="3"
-                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-[#023836] dark:text-slate-100 focus:border-[#03443F] focus:outline-none shadow-2xs"
                 value={jobDesc}
                 onChange={e => setJobDesc(e.target.value)}
                 required
@@ -549,7 +548,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               <label className="block text-[10px] font-headline font-bold tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">Role & Responsibilities *</label>
               <textarea
                 rows="3"
-                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-[#023836] dark:text-slate-100 focus:border-[#03443F] focus:outline-none shadow-2xs"
                 value={roleResponsibilities}
                 onChange={e => setRoleResponsibilities(e.target.value)}
                 required
@@ -564,14 +563,14 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <input
                       type="text"
-                      className="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none font-sans font-medium"
+                      className="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs text-[#023836] dark:text-slate-100 focus:border-[#03443F] focus:outline-none font-sans font-medium"
                       placeholder="Round Title"
                       value={newRoundName}
                       onChange={e => setNewRoundName(e.target.value)}
                     />
                     <input
                       type="text"
-                      className="md:col-span-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none font-sans font-medium"
+                      className="md:col-span-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs text-[#023836] dark:text-slate-100 focus:border-[#03443F] focus:outline-none font-sans font-medium"
                       placeholder="Round description details"
                       value={newRoundDesc}
                       onChange={e => setNewRoundDesc(e.target.value)}
@@ -580,7 +579,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                   <button
                     type="button"
                     onClick={handleAddRound}
-                    className="px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white font-headline font-bold rounded-none text-xs shadow-2xs cursor-pointer"
+                    className="px-3.5 py-1.5 bg-[#023836] hover:bg-[#03443F] text-white font-headline font-bold rounded-none text-xs shadow-2xs cursor-pointer"
                   >
                     Add Round
                   </button>
@@ -593,8 +592,8 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                     {rounds.map((round, idx) => (
                       <div key={idx} className="flex items-start justify-between p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none">
                         <div className="space-y-0.5">
-                          <span className="text-[9px] font-headline font-bold text-blue-700 dark:text-blue-400">Round #{round.roundNumber}</span>
-                          <h5 className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100">{round.name}</h5>
+                          <span className="text-[9px] font-headline font-bold text-[#0F7A55] dark:text-[#7FD8C4]">Round #{round.roundNumber}</span>
+                          <h5 className="text-xs font-headline font-bold text-[#023836] dark:text-slate-100">{round.name}</h5>
                           <p className="text-[11px] text-slate-700 dark:text-slate-300 font-sans font-medium">{round.description}</p>
                         </div>
                         <button
@@ -614,7 +613,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
 
           {/* SECTION 5: Listing Duration */}
           <div className="bg-slate-50/80 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-none p-5 space-y-4">
-            <h4 className="text-xs font-headline font-bold tracking-wider text-blue-700 dark:text-blue-400 border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center gap-2">
+            <h4 className="text-xs font-headline font-bold tracking-wider text-[#0F7A55] dark:text-[#7FD8C4] border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center gap-2">
               <Clock className="w-4 h-4" /> Listing Duration Settings
             </h4>
             <div>
@@ -624,7 +623,7 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
                 min="1"
                 step="1"
                 required
-                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-slate-900 dark:text-slate-100 focus:border-blue-700 focus:outline-none shadow-2xs"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none px-3.5 py-2 text-xs font-sans font-medium text-[#023836] dark:text-slate-100 focus:border-[#03443F] focus:outline-none shadow-2xs"
                 value={activeDays}
                 onChange={e => {
                   const val = parseInt(e.target.value, 10);
@@ -658,14 +657,14 @@ export default function EditJobModal({ job, onClose, onUpdate }) {
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="px-4 py-2 text-xs font-headline font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none cursor-pointer transition-colors"
+              className="px-4 py-2 text-xs font-headline font-bold text-slate-700 dark:text-slate-300 hover:text-[#023836] dark:hover:text-slate-100 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none cursor-pointer transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 text-xs font-headline font-bold text-white bg-blue-700 hover:bg-blue-800 border border-blue-800 rounded-none shadow-2xs cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+              className="px-4 py-2 text-xs font-headline font-bold text-white bg-[#023836] hover:bg-[#03443F] border border-[#03443F] rounded-none shadow-2xs cursor-pointer active:scale-95 transition-all disabled:opacity-50"
             >
               {saving ? 'Saving updates...' : 'Save Updates'}
             </button>

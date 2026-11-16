@@ -152,13 +152,13 @@ export function SelectControl({ id, value, onChange, options, placeholder, disab
         {...aria}
         className={
           bare // inside a styled wrapper (e.g. "Compare with job"): no box of its own
-            ? `flex h-full w-full items-center justify-between gap-2 rounded-[6px] bg-transparent text-left font-(family-name:--font-headline) text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1447E6]/30`
-            : `flex w-full items-center justify-between gap-2 rounded-[8px] border bg-white text-left font-(family-name:--font-headline) font-normal transition-colors focus:outline-none focus-visible:border-[#1447E6] focus-visible:ring-2 focus-visible:ring-[#1447E6]/20 disabled:cursor-not-allowed disabled:bg-[#F8F8F6] ${SIZES[size]} ${
-                error ? 'border-[#DC2626]' : open ? 'border-[#1447E6] ring-2 ring-[#1447E6]/20' : 'border-[#D5D9E0] hover:border-[#9CA3AF]'
+            ? `flex h-full w-full items-center justify-between gap-2 rounded-[6px] bg-transparent text-left font-(family-name:--font-headline) text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F7A55]/30`
+            : `flex w-full items-center justify-between gap-2 rounded-[8px] border bg-white text-left font-(family-name:--font-headline) font-normal transition-colors focus:outline-none focus-visible:border-[#0F7A55] focus-visible:ring-2 focus-visible:ring-[#0F7A55]/20 disabled:cursor-not-allowed disabled:bg-[#F4F8F6] ${SIZES[size]} ${
+                error ? 'border-[#DC2626]' : open ? 'border-[#0F7A55] ring-2 ring-[#0F7A55]/20' : 'border-[#D5D9E0] hover:border-[#9CA3AF]'
               }`
         }
       >
-        <span className={`min-w-0 truncate ${selected ? 'text-[#0F172A]' : 'text-[#6B7280]'}`}>{selected ? selected[1] : placeholder || 'Select'}</span>
+        <span className={`min-w-0 truncate ${selected ? 'text-[#023836]' : 'text-[#6B7280]'}`}>{selected ? selected[1] : placeholder || 'Select'}</span>
         <AccountIcon name="chevron-down" size={16} strokeWidth={2} className={`${MUTED} transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
@@ -185,8 +185,8 @@ export function SelectControl({ id, value, onChange, options, placeholder, disab
                   onMouseEnter={() => setActive(index)}
                   onClick={() => choose(index)}
                   className={`flex cursor-pointer items-center justify-between gap-3 rounded-[6px] px-3 py-2 ${size === 'sm' ? 'text-[13px]' : 'text-sm'} ${
-                    isSelected ? 'bg-[#EEF2FE] font-semibold text-[#1447E6]' : index === active ? 'bg-[#F8F8F6] text-[#0F172A]' : 'text-[#334155]'
-                  } ${isSelected && index === active ? 'ring-1 ring-inset ring-[#1447E6]/30' : ''}`}
+                    isSelected ? 'bg-[#E3F1EE] font-semibold text-[#0F7A55]' : index === active ? 'bg-[#F4F8F6] text-[#023836]' : 'text-[#334155]'
+                  } ${isSelected && index === active ? 'ring-1 ring-inset ring-[#0F7A55]/30' : ''}`}
                 >
                   <span className="min-w-0 break-words">{label}</span>
                   {isSelected && <AccountIcon name="check" size={14} strokeWidth={2.5} />}

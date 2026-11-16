@@ -1,5 +1,5 @@
 const { getDB } = require('../../config/database');
-const { jobPay, jobPlace, jobType } = require('../../utils/jobDisplay');
+const { summarizeJob } = require('./jobSummary');
 const { isValidId, normalizeId } = require('../../utils/ids');
 
 exports.getAllJobs = async (req, res, next) => {
@@ -14,19 +14,7 @@ exports.getAllJobs = async (req, res, next) => {
       [companyIds]
     );
 
-    const jobsWithCompany = jobs.map(job => {
-      const company = companies.find(c => c.id === job.companyId);
-      return {
-        id: job.id,
-        title: job.title,
-        description: job.description,
-        companyName: company?.name || job.companyName || 'Not specified',
-        location: jobPlace(job),
-        salaryRange: jobPay(job),
-        jobType: jobType(job),
-        requirements: job.requirements || []
-      };
-    });
+    const jobsWithCompany = jobs.map(job => summarizeJob(job, companies.find(c => c.id === job.companyId)));
 
     res.json({
       success: true,

@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Award, BadgeCheck, Briefcase, CheckCircle2, Code2, Download, ExternalLink, FileText, FolderGit2, GraduationCap, Lock, Pencil, Play, Plus, Sparkles, Star, Trophy, Video } from 'lucide-react';
 import { cityName, eduLevelLabel, experienceTypeLabel, fullDate, initialOf, lines, monthRange, monthYear, parseHighSchool, skillHasTest, workModeLabel, workTypeLabel, yearRange } from './profileRules';
+import { PLATFORM_UNLOCK_PERCENT } from '../../../utils/profileCompleteness';
 import { BODY, CARD, GRADIENT, GRADIENT_X, HEADING_FONT, INK, MUTED, PAGE, PRIMARY, SECONDARY, SMALL, SOFT, TONES } from './profileTheme';
 import SectionBar from './SectionBar';
 import { Spinner } from './ui';
 
 // What each missing item from getProfileCompletionDetails asks the candidate to do.
 const TODO = {
-  'Introduction Video': ['Add an intro video', 'video'],
   'Full Name': ['Add your name', 'edit'],
   Username: ['Choose a username', 'edit'],
   'Describe Yourself': ['Write a short intro', 'edit'],
@@ -24,7 +24,8 @@ const TODO = {
   'Portfolio Link': ['Add a portfolio or website', 'edit'],
   Experience: ['Add experience', 'experience'],
   Certifications: ['Add a certificate', 'certificate'],
-  'Resume URL': ['Add your own resume link', 'resume']
+  'Resume URL': ['Add your own resume link', 'resume'],
+  'Introduction Video': ['Add an intro video', 'video']
 };
 const TODO_ORDER = Object.keys(TODO);
 
@@ -138,7 +139,7 @@ const attachmentName = (cert) => {
 };
 
 // Order of the sections on the page (and in the section bar).
-const ORDER = ['about', 'video', 'skills', 'projects', 'education', 'experience', 'certificates', 'activities', 'resume'];
+const ORDER = ['about', 'skills', 'projects', 'education', 'experience', 'certificates', 'activities', 'resume', 'video'];
 
 /**
  * The candidate's profile (design: Web — profile) as one scrolling page. The
@@ -146,7 +147,7 @@ const ORDER = ['about', 'video', 'skills', 'projects', 'education', 'experience'
  * Read-only; edits open the About-you page or a dialog. `scrollTarget`
  * ({ id }) scrolls to a section when it changes (e.g. back from the edit page).
  */
-export default function ProfileOverview({ data, sectionItems, scrollTarget, completion, generalDone, videoDone, isPremium, techSkills, generatingPdf, onAction, onEditItem, onPlayVideo, onDownloadResume }) {
+export default function ProfileOverview({ data, sectionItems, scrollTarget, completion, generalDone, videoDone, unlocked, isPremium, techSkills, generatingPdf, onAction, onEditItem, onPlayVideo, onDownloadResume }) {
   const [showAllTodo, setShowAllTodo] = useState(false);
   const [active, setActive] = useState('about');
   const barRef = useRef(null);
@@ -232,7 +233,6 @@ export default function ProfileOverview({ data, sectionItems, scrollTarget, comp
   const activities = data.cocurricular || [];
   const skills = data.skills || [];
   const links = data.socialLinks || {};
-  const complete = generalDone && videoDone;
 
   const topEducation = education.find((edu) => edu.eduType && edu.eduType !== 'High School') || education[0];
   const educationLine = topEducation ? [topEducation.eduType === 'High School' ? 'Class 12' : [topEducation.degree, topEducation.fieldOfStudy].filter(Boolean).join(' '), topEducation.institute, yearRange(null, topEducation.endDate)].filter(Boolean).join(' · ') : '';
@@ -316,7 +316,7 @@ export default function ProfileOverview({ data, sectionItems, scrollTarget, comp
           <h2 className="m-0 text-[16px]">
             <span className={`font-bold ${INK}`}>Intro video · not added</span>
           </h2>
-          <span className={BODY}>40 to 60 seconds about you. Recruiters watch it when they open your application.</span>
+          <span className={BODY}>40 to 60 seconds about you. You need it to apply to jobs and gigs; recruiters watch it when they open your application.</span>
         </div>
         <button type="button" onClick={() => onAction('video')} className={`${PRIMARY} h-10 px-4`}>
           Add video
@@ -535,7 +535,7 @@ export default function ProfileOverview({ data, sectionItems, scrollTarget, comp
           </button>
         </header>
 
-        {!complete && (
+        {!unlocked && (
           <section aria-labelledby="setup-title" className="relative overflow-hidden rounded-[18px] bg-white p-[1.5px] shadow-[0_14px_40px_-24px_rgba(99,120,249,0.7)]">
             <div className={`absolute inset-0 ${GRADIENT}`} aria-hidden="true" />
             <div className="relative flex flex-col gap-4 rounded-[16.5px] bg-white p-5 sm:p-6">
@@ -547,13 +547,13 @@ export default function ProfileOverview({ data, sectionItems, scrollTarget, comp
                   <h2 id="setup-title" className="m-0 text-[18px] leading-snug">
                     <span className={`${HEADING_FONT} font-bold ${INK}`}>Finish setting up your profile</span>
                   </h2>
-                  <p className={`m-0 ${BODY}`}>Jobs, skill tests, courses and gigs unlock once both steps are done.</p>
+                  <p className={`m-0 ${BODY}`}>Jobs, skill tests, courses and gigs unlock once both steps are done. The intro video can wait until you apply.</p>
                 </div>
               </div>
               <ol className="m-0 grid list-none gap-3 p-0 sm:grid-cols-2">
                 {[
                   { done: generalDone, step: 1, title: 'About you', text: 'Name, username, intro, phone, email, date of birth, gender', action: 'edit', cta: 'Fill in' },
-                  { done: videoDone, step: 2, title: 'Intro video', text: '40 to 60 seconds about you', action: 'video', cta: 'Add video' }
+                  { done: completion.percentage >= PLATFORM_UNLOCK_PERCENT, step: 2, title: `Reach ${PLATFORM_UNLOCK_PERCENT}%`, text: `You’re at ${completion.percentage}%. Add skills, education, projects and more.`, action: 'skills', cta: 'Add skills' }
                 ].map((item) => (
                   <li key={item.step} className={`flex items-center gap-3 rounded-[14px] border p-3.5 ${item.done ? 'border-[#BFE5D3] bg-[#F3FBF7]' : 'border-[#D9DEF5] bg-[#F7F8FF]'}`}>
                     <span aria-hidden="true" className={`flex size-9 shrink-0 items-center justify-center rounded-full text-[15px] font-bold ${item.done ? 'bg-[#0F7A55] text-white' : 'bg-white text-[#0167F6] ring-2 ring-[#0167F6]'}`}>

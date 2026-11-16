@@ -2,14 +2,14 @@ import AccountIcon from '../../components/AccountIcon';
 import { FieldError } from '../../components/AccountControls';
 import { CARD, MUTED, PRIMARY_BUTTON, SECONDARY_BUTTON } from '../../components/accountStyles';
 
-const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]';
+const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]';
 
 /** The main step card: 20px heading, intro line, then the step's fields. */
 export function StepPanel({ id, title, intro, children }) {
   return (
     <section aria-labelledby={id} className={`${CARD} flex min-w-0 grow-[999] basis-[560px] flex-col gap-[22px] p-5 sm:p-[26px]`}>
       <div className="flex flex-col gap-1.5">
-        <h2 id={id} className="m-0 text-xl leading-[1.3] tracking-normal text-[#0F172A]">
+        <h2 id={id} className="m-0 text-xl leading-[1.3] tracking-normal text-[#023836]">
           <span className="font-bold">{title}</span>
         </h2>
         {intro && <p className={`m-0 max-w-[620px] ${MUTED}`}>{intro}</p>}
@@ -24,7 +24,7 @@ export function SubSection({ id, title, note, intro, children, className = '' })
   return (
     <div className={`flex flex-col gap-3 border-t border-[#EEF0F3] pt-5 ${className}`}>
       <div className="flex flex-col gap-0.5">
-        <h3 id={id} className="m-0 text-base leading-[1.45] tracking-normal text-[#0F172A]">
+        <h3 id={id} className="m-0 text-base leading-[1.45] tracking-normal text-[#023836]">
           <span className="font-semibold">{title}</span>
           {note && <span className={`font-normal ${MUTED}`}> · {note}</span>}
         </h3>
@@ -62,19 +62,19 @@ export function Field({ id, label, required, optional, error, hint, className = 
 
 /** Input with a fixed prefix or suffix box (₹ / days / months). */
 export function AddonInput({ id, prefix, suffix, error, ...inputProps }) {
-  const addon = `flex h-full items-center bg-[#F8F8F6] px-3 ${MUTED}`;
+  const addon = `flex h-full items-center bg-[#F4F8F6] px-3 ${MUTED}`;
   return (
     <div
-      className={`flex h-11 overflow-hidden rounded-[8px] border bg-white focus-within:border-[#1447E6] focus-within:ring-2 focus-within:ring-[#1447E6]/20 ${
+      className={`flex h-11 overflow-hidden rounded-[8px] border bg-white focus-within:border-[#0F7A55] focus-within:ring-2 focus-within:ring-[#0F7A55]/20 ${
         error ? 'border-[#DC2626]' : 'border-[#D5D9E0]'
       }`}
     >
-      {prefix && <span className={`${addon} border-r border-[#D5D9E0] font-semibold text-[#0F172A]`}>{prefix}</span>}
+      {prefix && <span className={`${addon} border-r border-[#D5D9E0] font-semibold text-[#023836]`}>{prefix}</span>}
       <input
         id={id}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}
-        className="h-full min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none"
+        className="h-full min-w-0 flex-1 border-0 bg-transparent px-3 text-sm text-[#023836] placeholder:text-[#6B7280] focus:outline-none"
         {...inputProps}
       />
       {suffix && <span className={`${addon} border-l border-[#D5D9E0]`}>{suffix}</span>}
@@ -99,7 +99,7 @@ export function PillGroup({ label, options, value, onChange, required }) {
             aria-pressed={pressed}
             onClick={() => onChange(option)}
             className={`h-10 rounded-full border px-3.5 font-(family-name:--font-headline) text-sm font-semibold transition-colors ${FOCUS} ${
-              pressed ? 'border-[#1447E6] bg-[#1447E6] text-white' : 'border-[#D5D9E0] bg-white text-[#334155] hover:bg-[#F8F8F6]'
+              pressed ? 'border-[#0F7A55] bg-[#023836] text-white' : 'border-[#D5D9E0] bg-white text-[#334155] hover:bg-[#F4F8F6]'
             }`}
           >
             {option}
@@ -119,7 +119,7 @@ export function Switch({ checked, onChange, label }) {
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${FOCUS} ${checked ? 'bg-[#1447E6]' : 'bg-[#D1D5DB]'}`}
+      className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${FOCUS} ${checked ? 'bg-[#023836]' : 'bg-[#D1D5DB]'}`}
     >
       <span className={`absolute top-1 size-5 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-[left] ${checked ? 'left-6' : 'left-1'}`} />
     </button>
@@ -149,8 +149,8 @@ export function StepFooter({ backLabel = 'Back', onBack, nextLabel, onNext, chil
 }
 
 /** Text button (Edit / Remove / + Add option). */
-export function TextButton({ tone = 'blue', className = '', children, ...props }) {
-  const color = tone === 'red' ? 'text-[#B91C1C] hover:text-[#7F1D1D]' : 'text-[#1447E6] hover:text-[#0F38B8]';
+export function TextButton({ tone = 'green', className = '', children, ...props }) {
+  const color = tone === 'red' ? 'text-[#B91C1C] hover:text-[#7F1D1D]' : 'text-[#0F7A55] hover:text-[#023836]';
   return (
     <button type="button" className={`h-8 rounded-[6px] px-2 font-(family-name:--font-headline) text-[13px] font-semibold ${color} ${FOCUS} disabled:opacity-40 ${className}`} {...props}>
       {children}

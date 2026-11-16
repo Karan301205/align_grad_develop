@@ -7,7 +7,7 @@ import { formatShortDate } from '../../../utils/format';
 
 export const STATUS = {
   OPEN: { label: 'Open', pill: 'bg-[#E4F4EC] text-[#17794F]' },
-  IN_PROGRESS: { label: 'In progress', pill: 'bg-[#EEF2FE] text-[#1447E6]' },
+  IN_PROGRESS: { label: 'In progress', pill: 'bg-[#E3F1EE] text-[#0F7A55]' },
   PAUSED: { label: 'Paused', pill: 'bg-[#FBF1DC] text-[#9A6312]' },
   CLOSED: { label: 'Closed', pill: 'bg-[#ECEFF0] text-[#4F5D59]' },
   COMPLETED: { label: 'Completed', pill: 'bg-[#EFEAFC] text-[#5B3FB0]' }

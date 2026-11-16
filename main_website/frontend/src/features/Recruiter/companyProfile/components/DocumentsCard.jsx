@@ -22,7 +22,7 @@ function DocTile({ doc, submittedOn, onRemove }) {
         <button
           type="button"
           onClick={onRemove}
-          className="rounded-[4px] font-(family-name:--font-headline) text-sm font-semibold text-[#B91C1C] hover:text-[#7F1D1D] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]"
+          className="rounded-[4px] font-(family-name:--font-headline) text-sm font-semibold text-[#B91C1C] hover:text-[#7F1D1D] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]"
           aria-label={`Remove ${doc.docType}`}
         >
           Remove

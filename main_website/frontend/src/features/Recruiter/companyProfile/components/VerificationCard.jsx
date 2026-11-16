@@ -7,7 +7,7 @@ import { Card } from './ui';
 const { NOT_SUBMITTED, PENDING, APPROVED, REJECTED } = COMPANY_VERIFICATION_STATUS;
 
 const TONES = {
-  done: { bar: 'bg-[#1447E6]', label: '' },
+  done: { bar: 'bg-[#023836]', label: '' },
   current: { bar: 'bg-[#D97706]', label: 'text-[#92400E]' },
   todo: { bar: 'bg-[#E4E6EA]', label: 'text-[#4B5563]' },
   error: { bar: 'bg-[#DC2626]', label: 'text-[#B91C1C]' }
@@ -59,7 +59,7 @@ export default function VerificationCard({ status, company }) {
   return (
     <Card labelledBy="verification-title" className="gap-[18px]">
       <div className="flex max-w-[640px] flex-col gap-1">
-        <h2 id="verification-title" className="m-0 text-[17px] leading-[1.45] tracking-normal text-[#0F172A]">
+        <h2 id="verification-title" className="m-0 text-[17px] leading-[1.45] tracking-normal text-[#023836]">
           <span className="font-semibold">Verification</span>
         </h2>
         <p className={`m-0 ${MUTED}`}>{INTRO[status]}</p>

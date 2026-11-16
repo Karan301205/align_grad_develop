@@ -18,20 +18,20 @@ export default function Stepper({ step, furthest, onSelect }) {
               type="button"
               onClick={() => onSelect(index)}
               aria-current={current ? 'step' : undefined}
-              className={`flex w-full items-center gap-2.5 rounded-[10px] text-left font-(family-name:--font-headline) text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6] ${
-                current ? 'border-2 border-[#1447E6] bg-[#EEF2FE] px-[13px] py-[11px]' : 'border border-[#E4E6EA] bg-white px-3.5 py-3 hover:bg-[#F8F8F6]'
+              className={`flex w-full items-center gap-2.5 rounded-[10px] text-left font-(family-name:--font-headline) text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55] ${
+                current ? 'border-2 border-[#0F7A55] bg-[#E3F1EE] px-[13px] py-[11px]' : 'border border-[#E4E6EA] bg-white px-3.5 py-3 hover:bg-[#F4F8F6]'
               }`}
             >
               <span
                 aria-hidden="true"
                 className={`flex size-[26px] shrink-0 items-center justify-center rounded-full text-[13px] ${
-                  current || done ? 'bg-[#1447E6] font-bold text-white' : 'border-[1.5px] border-[#9CA3AF] font-semibold text-[#4B5563]'
+                  current || done ? 'bg-[#023836] font-bold text-white' : 'border-[1.5px] border-[#9CA3AF] font-semibold text-[#4B5563]'
                 }`}
               >
                 {done ? <AccountIcon name="check" size={13} strokeWidth={3} /> : index + 1}
               </span>
               <span className="flex min-w-0 flex-col">
-                <span className={`truncate font-semibold ${current ? 'text-[#1447E6]' : 'text-[#0F172A]'}`}>{item.title}</span>
+                <span className={`truncate font-semibold ${current ? 'text-[#0F7A55]' : 'text-[#023836]'}`}>{item.title}</span>
                 <span className={`truncate text-xs font-normal ${current ? 'text-[#334155]' : 'text-[#4B5563]'}`}>
                   {current ? 'In progress' : done ? 'Done' : item.hint}
                 </span>

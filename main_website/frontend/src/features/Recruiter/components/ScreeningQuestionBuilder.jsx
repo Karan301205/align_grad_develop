@@ -118,7 +118,7 @@ export default function ScreeningQuestionBuilder({ questions = [], onChange, dis
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
         <div className="min-w-0">
-          <h4 className="text-sm font-headline font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <h4 className="text-sm font-headline font-bold text-[#023836] dark:text-slate-100 flex items-center gap-2">
             <HelpCircle className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
             <span>Candidate Screening Questions</span>
           </h4>
@@ -172,7 +172,7 @@ export default function ScreeningQuestionBuilder({ questions = [], onChange, dis
               <div key={q.id || idx} className="p-4 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none shadow-2xs space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="w-6 h-6 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-headline font-bold text-xs flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-[#023836] dark:text-slate-100 font-headline font-bold text-xs flex items-center justify-center">
                       {idx + 1}
                     </span>
                     <TypeSelect id={`question-type-${idx}`} label={`Type of question ${idx + 1}`} value={q.type} types={types} disabled={disabled} onChange={(type) => changeType(idx, type)} />
@@ -190,10 +190,10 @@ export default function ScreeningQuestionBuilder({ questions = [], onChange, dis
 
                   {!disabled && (
                     <div className="flex items-center gap-1">
-                      <button type="button" disabled={idx === 0} onClick={() => move(idx, 'up')} className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 disabled:opacity-20 cursor-pointer" title="Move up" aria-label={`Move question ${idx + 1} up`}>
+                      <button type="button" disabled={idx === 0} onClick={() => move(idx, 'up')} className="p-1 text-slate-500 hover:text-[#023836] dark:hover:text-slate-100 disabled:opacity-20 cursor-pointer" title="Move up" aria-label={`Move question ${idx + 1} up`}>
                         <ChevronUp className="w-4 h-4" />
                       </button>
-                      <button type="button" disabled={idx === questions.length - 1} onClick={() => move(idx, 'down')} className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 disabled:opacity-20 cursor-pointer" title="Move down" aria-label={`Move question ${idx + 1} down`}>
+                      <button type="button" disabled={idx === questions.length - 1} onClick={() => move(idx, 'down')} className="p-1 text-slate-500 hover:text-[#023836] dark:hover:text-slate-100 disabled:opacity-20 cursor-pointer" title="Move down" aria-label={`Move question ${idx + 1} down`}>
                         <ChevronDown className="w-4 h-4" />
                       </button>
                       <button type="button" onClick={() => remove(idx)} className="p-1 text-red-600 hover:text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors ml-1 cursor-pointer" title="Delete question" aria-label={`Delete question ${idx + 1}`}>
@@ -215,7 +215,7 @@ export default function ScreeningQuestionBuilder({ questions = [], onChange, dis
                     value={q.question || ''}
                     onChange={(e) => update(idx, { question: e.target.value })}
                     placeholder={PLACEHOLDERS[q.type] || PLACEHOLDERS.LONG_ANSWER}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs font-sans text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-700 dark:focus:border-emerald-500 shadow-2xs"
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-none px-3 py-2 text-xs font-sans text-[#023836] dark:text-slate-100 focus:outline-none focus:border-emerald-700 dark:focus:border-emerald-500 shadow-2xs"
                   />
                 </div>
 
@@ -265,7 +265,7 @@ export default function ScreeningQuestionBuilder({ questions = [], onChange, dis
                                 onChange={(e) => changeOption(idx, optIdx, e.target.value)}
                                 placeholder={`Option ${letter}`}
                                 aria-label={`Question ${idx + 1} option ${letter}`}
-                                className={`w-full bg-white dark:bg-slate-900 border rounded-none px-3 py-1.5 text-xs font-sans text-slate-900 dark:text-slate-100 focus:outline-none shadow-2xs ${
+                                className={`w-full bg-white dark:bg-slate-900 border rounded-none px-3 py-1.5 text-xs font-sans text-[#023836] dark:text-slate-100 focus:outline-none shadow-2xs ${
                                   isCorrect ? 'border-emerald-600 ring-1 ring-emerald-600/30' : 'border-slate-300 dark:border-slate-700 focus:border-emerald-700'
                                 }`}
                               />

@@ -107,6 +107,8 @@ export default function ApplyDialog({ job, profile, bars, onApply, onClose, goTo
     onClose();
     goToTab?.(tab, options);
   };
+  // The intro video is what the company watches, so it is required to apply (the server checks too).
+  const needsVideo = !profile?.introVideoUrl;
 
   const send = async () => {
     const next = {};
@@ -168,7 +170,7 @@ export default function ApplyDialog({ job, profile, bars, onApply, onClose, goTo
           <button type="button" onClick={onClose} disabled={sending} className={`${SECONDARY} h-11 px-4`}>
             Cancel
           </button>
-          <button type="button" onClick={send} disabled={sending} className={`${PRIMARY} h-11 px-5`}>
+          <button type="button" onClick={send} disabled={sending || needsVideo} className={`${PRIMARY} h-11 px-5`}>
             {sending ? <Spinner /> : <Send aria-hidden="true" className="size-4" />}
             {sending ? 'Sending…' : 'Send application'}
           </button>
@@ -176,6 +178,14 @@ export default function ApplyDialog({ job, profile, bars, onApply, onClose, goTo
       }
     >
       <ErrorBanner message={error} />
+      {needsVideo && (
+        <div role="alert" className="flex flex-wrap items-center gap-3 rounded-[12px] bg-[#FFF3E8] px-4 py-3">
+          <span className="min-w-0 flex-1 font-semibold text-[#9A3412]">Add your intro video to apply. {company || 'The company'} watches it when they open your application.</span>
+          <button type="button" onClick={() => go('profile', { section: 'video' })} className={`${PRIMARY} h-10 px-4`}>
+            Add intro video
+          </button>
+        </div>
+      )}
       <section aria-labelledby="apply-seen" className="flex flex-col gap-3">
         <div className="flex flex-col gap-0.5">
           <h3 id="apply-seen" className="m-0 text-[16px]">
@@ -221,8 +231,8 @@ export default function ApplyDialog({ job, profile, bars, onApply, onClose, goTo
             label="Intro video"
             warn={!profile?.introVideoUrl}
             action={
-              !profile?.introVideoUrl && (
-                <button type="button" onClick={() => go('profile')} className="self-start text-[13.5px] font-semibold text-[#0167F6] hover:underline">
+              needsVideo && (
+                <button type="button" onClick={() => go('profile', { section: 'video' })} className="self-start text-[13.5px] font-semibold text-[#0167F6] hover:underline">
                   Add one
                 </button>
               )

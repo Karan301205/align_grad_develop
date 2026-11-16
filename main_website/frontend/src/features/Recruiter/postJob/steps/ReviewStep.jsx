@@ -99,7 +99,7 @@ export default function ReviewStep({ form, company, pool, credits, onBuyCredits 
         </ReviewRow>
       </div>
 
-      <p className="m-0 rounded-[10px] bg-[#F8F8F6] px-4 py-3.5 text-[#334155]">
+      <p className="m-0 rounded-[10px] bg-[#F4F8F6] px-4 py-3.5 text-[#334155]">
         Candidates below a bar that has a skill test can’t apply. They see which skills fall short and can take the test again to qualify.
       </p>
 
@@ -109,7 +109,7 @@ export default function ReviewStep({ form, company, pool, credits, onBuyCredits 
             type="checkbox"
             checked={v.confirmed}
             onChange={(event) => setField('confirmed', event.target.checked)}
-            className="mt-0.5 size-[18px] shrink-0 accent-[#1447E6]"
+            className="mt-0.5 size-[18px] shrink-0 accent-[#0F7A55]"
           />
           <span>
             This is a real, open position at {company?.name || 'your company'}, and candidates won’t be asked to pay anything to apply or join.

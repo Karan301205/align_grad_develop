@@ -2,6 +2,7 @@ const { getDB } = require('../../config/database');
 const { formatBytes } = require('../../utils/formatBytes');
 const { ListObjectsV2Command } = require('@aws-sdk/client-s3');
 const { createS3Client } = require('../../config/s3');
+const { QUERIES, shapeMetrics } = require('./opportunityMetrics');
 
 // Total size of the S3 bucket, e.g. "84.5 MB". `null` when storage isn't configured
 // or listing fails; the cause is logged and the dashboard shows it as unavailable.
@@ -90,5 +91,24 @@ exports.getStats = async (req, res, next) => {
 
   } catch (err) {
     next(err);
+  }
+};
+
+// GET /api/dashboard/opportunities: live job, internship and gig numbers for the dashboard
+// charts. Read-only. The aggregates run one after another on a single pooled connection
+// so a frequent poll never takes more than one slot from the database.
+exports.getOpportunityMetrics = async (req, res, next) => {
+  let client;
+  try {
+    client = await getDB().connect();
+    const results = {};
+    for (const [name, sql] of Object.entries(QUERIES)) {
+      results[name] = await client.query(sql);
+    }
+    res.json({ success: true, ...shapeMetrics(results) });
+  } catch (err) {
+    next(err);
+  } finally {
+    if (client) client.release();
   }
 };

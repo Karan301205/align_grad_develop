@@ -12,7 +12,7 @@ const DETAIL_FIELDS = ['name', 'industry', 'companySize', 'location', 'website',
 const filled = (value) => typeof value === 'string' && value.trim().length > 0;
 
 const STEP_STYLE = {
-  done: { tile: 'bg-[#F5F7FB]', mark: 'bg-[#1447E6] text-white', detail: MUTED },
+  done: { tile: 'bg-[#F5F7FB]', mark: 'bg-[#023836] text-white', detail: MUTED },
   current: { tile: 'border border-[#FCD34D] bg-[#FFFBEB]', mark: 'border-2 border-[#D97706] bg-white text-[#B45309]', detail: 'text-[#92400E]' },
   error: { tile: 'border border-[#FECACA] bg-[#FEF2F2]', mark: 'border-2 border-[#DC2626] bg-white text-[#B91C1C]', detail: 'text-[#B91C1C]' },
   todo: { tile: 'border border-[#E4E6EA] bg-white', mark: 'border-2 border-[#9CA3AF] text-[#4B5563]', detail: MUTED }
@@ -70,12 +70,12 @@ function WaitCard({ icon: Icon, title, children, action }) {
   return (
     <div className={`${CARD} flex min-w-0 flex-col gap-3.5 p-[22px]`}>
       {Icon && (
-        <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-[10px] bg-[#EEF2FE] text-[#1447E6]">
+        <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-[10px] bg-[#E3F1EE] text-[#0F7A55]">
           <Icon className="size-5" />
         </span>
       )}
       <div className="flex flex-col gap-1">
-        <h3 className="m-0 text-base leading-[1.45] tracking-normal text-[#0F172A]">
+        <h3 className="m-0 text-base leading-[1.45] tracking-normal text-[#023836]">
           <span className="font-semibold">{title}</span>
         </h3>
         {children}
@@ -171,7 +171,7 @@ export default function FirstRunHome({ company, user, goToTab }) {
         <section aria-labelledby="setup-title" className={`${CARD} flex flex-col gap-[22px] p-5 sm:p-6`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-col gap-0.5">
-              <h2 id="setup-title" className="m-0 text-[17px] leading-[1.45] tracking-normal text-[#0F172A]">
+              <h2 id="setup-title" className="m-0 text-[17px] leading-[1.45] tracking-normal text-[#023836]">
                 <span className="font-semibold">Account setup</span>
               </h2>
               <span className={MUTED}>
@@ -204,7 +204,7 @@ export default function FirstRunHome({ company, user, goToTab }) {
         </section>
 
         <section aria-labelledby="wait-title" className="flex flex-col gap-3.5">
-          <h2 id="wait-title" className="m-0 text-[17px] leading-[1.45] tracking-normal text-[#0F172A]">
+          <h2 id="wait-title" className="m-0 text-[17px] leading-[1.45] tracking-normal text-[#023836]">
             <span className="font-semibold">{status === PENDING ? 'While you wait' : 'Next steps'}</span>
           </h2>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] gap-4">
@@ -214,10 +214,10 @@ export default function FirstRunHome({ company, user, goToTab }) {
               <p className={`m-0 ${MUTED}`}>
                 When you post a job, you set a minimum score out of 10 for each skill. Candidates below a bar that has a skill test can’t apply until they reach it.
               </p>
-              <div className="mt-2.5 flex flex-col gap-2.5 rounded-[10px] bg-[#F8F8F6] p-3.5">
-                <ExampleBar label="Meets the bar" fill="80%" tone="bg-[#1447E6]" />
+              <div className="mt-2.5 flex flex-col gap-2.5 rounded-[10px] bg-[#F4F8F6] p-3.5">
+                <ExampleBar label="Meets the bar" fill="80%" tone="bg-[#0F7A55]" />
                 <ExampleBar label="Below the bar" fill="50%" tone="bg-[#C2410C]" />
-                <span className={`text-xs ${MUTED}`}>Black line = your bar. Blue = meets it. Orange = below it.</span>
+                <span className={`text-xs ${MUTED}`}>Black line = your bar. Green = meets it. Orange = below it.</span>
               </div>
             </WaitCard>
 
@@ -240,7 +240,7 @@ export default function FirstRunHome({ company, user, goToTab }) {
         </section>
 
         <section aria-labelledby="unlock-title" className={`${CARD} flex flex-col gap-3.5 px-5 py-[22px] sm:px-6`}>
-          <h2 id="unlock-title" className="m-0 text-[17px] leading-[1.45] tracking-normal text-[#0F172A]">
+          <h2 id="unlock-title" className="m-0 text-[17px] leading-[1.45] tracking-normal text-[#023836]">
             <span className="font-semibold">Unlocks after approval</span>
           </h2>
           <ul className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] gap-3 p-0">

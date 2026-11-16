@@ -38,7 +38,7 @@ export function PoolCard({ pool, showTip, note }) {
           </div>
           {showTip && pool.data.bestRelaxation && (
             <div className="flex gap-2.5 rounded-[10px] bg-[#F5F7FB] p-3 text-[#334155]">
-              <AccountIcon name="info" size={18} className="mt-px text-[#1447E6]" />
+              <AccountIcon name="info" size={18} className="mt-px text-[#0F7A55]" />
               <span>
                 Lowering {pool.data.bestRelaxation.skillName} to {pool.data.bestRelaxation.to} adds {nf(pool.data.bestRelaxation.adds)} candidate{pool.data.bestRelaxation.adds === 1 ? '' : 's'}.
               </span>

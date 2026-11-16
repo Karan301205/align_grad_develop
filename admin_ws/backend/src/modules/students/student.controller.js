@@ -1,4 +1,5 @@
 const { getDB } = require('../../config/database');
+const { QUERIES, withApplicationCounts } = require('./applicationCounts');
 
 exports.getAllStudents = async (req, res, next) => {
   try {
@@ -44,9 +45,13 @@ exports.getAllStudents = async (req, res, next) => {
       };
     });
 
+    // How many jobs, internships and gigs each candidate has applied to (read-only aggregates).
+    const counts = {};
+    for (const [name, sql] of Object.entries(QUERIES)) counts[name] = await db.query(sql);
+
     res.json({
       success: true,
-      students: studentsWithProfiles
+      students: withApplicationCounts(studentsWithProfiles, counts)
     });
   } catch (err) {
     next(err);

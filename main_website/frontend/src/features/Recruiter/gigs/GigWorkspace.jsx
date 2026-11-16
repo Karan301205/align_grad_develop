@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Clock, MessageSquare, Paperclip, Plus, Search, Users, Wallet } from 'lucide-react';
 import { SERVER_MESSAGE, apiFetch, userMessage } from '../../../services/apiClient';
-import CandidateProfileModal from '../components/CandidateProfileModal';
+import CandidateProfileDrawer from '../components/CandidateProfileDrawer';
 import { Spinner } from '../components/AccountControls';
 import { MUTED, PAGE_GLOW, SECONDARY_BUTTON } from '../components/accountStyles';
 import Dialog, { ConfirmDialog } from '../jobs/components/Dialog';
@@ -24,11 +24,19 @@ import {
 } from './gigsData';
 import GigChat from './components/GigChat';
 import GigSubmissions from './components/GigSubmissions';
+import ResizeHandle from './components/ResizeHandle';
+import useStoredSize from './useStoredSize';
 import TalentPanel, { PitchDialog } from './components/TalentPanel';
 
 const DETAILS_POLL_MS = 15000; // new pitches, submissions and status changes
+// Column widths (px) on desktop: defaults, and how far each side column can be dragged.
+const LEFT_DEFAULT = 252;
+const RIGHT_DEFAULT = 268;
+const LEFT_RANGE = [200, 440];
+const RIGHT_RANGE = [220, 460];
+const clampTo = ([min, max], value) => Math.round(Math.min(max, Math.max(min, value)));
 const PANEL = 'flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[16px] border border-[#E4E6EA] bg-white';
-const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]';
+const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]';
 
 function StatusPill({ gig, inverted }) {
   const s = statusOf(gig);
@@ -50,40 +58,43 @@ function GigList({ gigs, selectedId, onSelect, onBack, onNew }) {
     });
     return c;
   }, [gigs]);
-  const visible = gigs.filter((g) => (filter === 'ALL' || g.status === filter) && gigMatches(g, query));
+  // Most assigned talent first; gigs with the same count keep the list's newest-first order.
+  const visible = gigs
+    .filter((g) => (filter === 'ALL' || g.status === filter) && gigMatches(g, query))
+    .sort((a, b) => hiredIds(b).length - hiredIds(a).length);
 
   return (
     <section aria-label="All hosted gigs" className={`${PANEL} max-h-[480px] lg:max-h-none`}>
       <header className="shrink-0 border-b border-[#E4E6EA] px-[18px] pb-3.5 pt-4">
-        <button type="button" onClick={onBack} className={`mb-2 inline-flex items-center gap-1.5 rounded-[4px] text-[13px] font-semibold text-[#1447E6] hover:underline ${FOCUS}`}>
+        <button type="button" onClick={onBack} className={`mb-2 inline-flex items-center gap-1.5 rounded-[4px] text-[13px] font-semibold text-[#0F7A55] hover:underline ${FOCUS}`}>
           <ArrowLeft className="size-3.5" aria-hidden="true" />
           All gigs
         </button>
         <div className="flex items-center justify-between gap-2.5">
           <h2 className="m-0 flex items-center gap-2.5 text-[17px]">
             <span className="font-bold">All hosted gigs</span>
-            <span className="grid h-[22px] min-w-[26px] place-items-center rounded-full bg-[#EEF2FE] px-2 text-xs font-bold text-[#1447E6]">{gigs.length}</span>
+            <span className="grid h-[22px] min-w-[26px] place-items-center rounded-full bg-[#E3F1EE] px-2 text-xs font-bold text-[#0F7A55]">{gigs.length}</span>
           </h2>
-          <button type="button" onClick={onNew} aria-label="Post a new gig" className={`flex size-[38px] items-center justify-center rounded-[8px] bg-[#1447E6] text-white hover:bg-[#0F38B8] ${FOCUS}`}>
+          <button type="button" onClick={onNew} aria-label="Post a new gig" className={`flex size-[38px] items-center justify-center rounded-[8px] bg-[#023836] text-white hover:bg-[#03443F] ${FOCUS}`}>
             <Plus className="size-[18px]" aria-hidden="true" />
           </button>
         </div>
-        <label className={`mt-3.5 flex h-10 items-center gap-2 rounded-[10px] border border-[#E4E6EA] bg-[#F8F8F6] px-3 focus-within:border-[#1447E6] focus-within:bg-white ${MUTED}`}>
+        <label className={`mt-3.5 flex h-10 items-center gap-2 rounded-[10px] border border-[#E4E6EA] bg-[#F4F8F6] px-3 focus-within:border-[#0F7A55] focus-within:bg-white ${MUTED}`}>
           <Search className="size-4 shrink-0" aria-hidden="true" />
-          <input type="search" aria-label="Search gigs" placeholder="Search by title or category" value={query} onChange={(event) => setQuery(event.target.value)} className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none" />
+          <input type="search" aria-label="Search gigs" placeholder="Search by title or category" value={query} onChange={(event) => setQuery(event.target.value)} className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#023836] placeholder:text-[#6B7280] focus:outline-none" />
         </label>
         <div role="group" aria-label="Filter by status" className="mt-3 flex gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none]">
           {STATUS_FILTERS.filter(([value]) => value === 'ALL' || counts[value]).map(([value, label]) => {
             const on = filter === value;
             return (
-              <button key={value} type="button" aria-pressed={on} onClick={() => setFilter(value)} className={`inline-flex h-[30px] shrink-0 items-center gap-1.5 rounded-full border px-[11px] text-[13px] font-semibold ${FOCUS} ${on ? 'border-[#1447E6] bg-[#1447E6] text-white' : 'border-[#E4E6EA] bg-white text-[#4B5563] hover:bg-[#F8F8F6]'}`}>
-                {label} <b className={on ? 'text-white' : 'text-[#0F172A]'}>{counts[value] || 0}</b>
+              <button key={value} type="button" aria-pressed={on} onClick={() => setFilter(value)} className={`inline-flex h-[30px] shrink-0 items-center gap-1.5 rounded-full border px-[11px] text-[13px] font-semibold ${FOCUS} ${on ? 'border-[#0F7A55] bg-[#023836] text-white' : 'border-[#E4E6EA] bg-white text-[#4B5563] hover:bg-[#F4F8F6]'}`}>
+                {label} <b className={on ? 'text-white' : 'text-[#023836]'}>{counts[value] || 0}</b>
               </button>
             );
           })}
         </div>
       </header>
-      <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto bg-[#FBFBFA] p-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto bg-[#F8FBFA] p-3">
         {visible.length === 0 ? (
           <p className={`m-auto px-4 py-6 text-center ${MUTED}`}>No gigs match.</p>
         ) : (
@@ -95,25 +106,14 @@ function GigList({ gigs, selectedId, onSelect, onBack, onNew }) {
                 type="button"
                 aria-pressed={on}
                 onClick={() => onSelect(g.id)}
-                className={`flex w-full shrink-0 flex-col gap-2.5 rounded-[14px] border p-3.5 text-left transition-shadow ${FOCUS} ${on ? 'border-[#1447E6] bg-[#1447E6] text-white shadow-md' : 'border-[#E4E6EA] bg-white text-[#0F172A] hover:border-[#C7D3FB] hover:shadow-sm'}`}
+                className={`flex w-full shrink-0 flex-col gap-2.5 rounded-[14px] border p-3.5 text-left transition-shadow ${FOCUS} ${on ? 'border-[#0F7A55] bg-[#023836] text-white shadow-md' : 'border-[#E4E6EA] bg-white text-[#023836] hover:border-[#BFE0D8] hover:shadow-sm'}`}
               >
                 <span className="flex min-w-0 items-start justify-between gap-2.5">
                   <span className="min-w-0 truncate text-[15px] font-bold leading-tight">{g.title}</span>
                   <StatusPill gig={g} inverted={on} />
                 </span>
-                <span className={`-mt-1.5 truncate text-[12.5px] ${on ? 'text-white/75' : MUTED}`}>{categoryLine(g)}</span>
-                <span className={`grid grid-cols-2 gap-x-3 gap-y-2.5 border-t pt-3 ${on ? 'border-white/20' : 'border-[#E4E6EA]'}`}>
-                  {[
-                    ['Budget', money(g.budget, g.currency)],
-                    ['Delivery', deliveryLabel(g.deliveryTime)],
-                    ['Pitches', (g.applicants || []).length],
-                    ['Assigned', `${hiredIds(g).length} talent`]
-                  ].map(([label, value]) => (
-                    <span key={label} className="min-w-0">
-                      <span className={`block text-[11px] font-semibold tracking-[0.03em] ${on ? 'text-white/75' : MUTED}`}>{label}</span>
-                      <span className="block truncate text-sm font-bold">{value}</span>
-                    </span>
-                  ))}
+                <span className={`-mt-1.5 truncate text-[12.5px] ${on ? 'text-white/75' : MUTED}`}>
+                  {categoryLine(g)} · {(g.applicants || []).length} pitch{(g.applicants || []).length === 1 ? '' : 'es'}
                 </span>
               </button>
             );
@@ -129,7 +129,7 @@ function GigList({ gigs, selectedId, onSelect, onBack, onNew }) {
 
 function Metric({ icon: Icon, label, value }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1 rounded-[12px] bg-[#F8F8F6] px-3.5 py-3">
+    <div className="flex min-w-0 flex-col gap-1 rounded-[12px] bg-[#F4F8F6] px-3.5 py-3">
       <span className={`flex items-center gap-1.5 whitespace-nowrap text-xs font-semibold ${MUTED}`}>
         <Icon className="size-3.5" aria-hidden="true" />
         {label}
@@ -171,7 +171,7 @@ function BriefDialog({ gig, onClose }) {
         <div className="flex flex-col gap-1.5">
           <b className="text-sm">Files</b>
           {files.map((url) => (
-            <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 self-start font-semibold text-[#1447E6] hover:underline">
+            <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 self-start font-semibold text-[#0F7A55] hover:underline">
               <Paperclip className="size-4" aria-hidden="true" />
               {fileNameOf(url)}
             </a>
@@ -208,6 +208,8 @@ export default function GigWorkspace({ gigs, selectedId, onSelect, onBack, onNew
   const [dialog, setDialog] = useState(null); // { kind: 'hire'|'pass'|'pitch'|'brief'|'delete'|'close', app? }
   const [busyId, setBusyId] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [leftWidth, setLeftWidth] = useStoredSize('recruiter.gigs.listWidth', LEFT_DEFAULT);
+  const [rightWidth, setRightWidth] = useStoredSize('recruiter.gigs.talentWidth', RIGHT_DEFAULT);
 
   const summary = gigs.find((g) => g.id === selectedId) || null;
   const gig = details.id === selectedId ? details.gig : null;
@@ -330,14 +332,29 @@ export default function GigWorkspace({ gigs, selectedId, onSelect, onBack, onNew
     : [];
 
   return (
-    <div className={`min-h-full ${PAGE_GLOW} font-(family-name:--font-headline) text-sm text-[#0F172A] antialiased`}>
-      <div className="grid gap-4 px-4 py-5 sm:px-6 lg:h-screen lg:grid-cols-[236px_minmax(0,1fr)_248px] xl:grid-cols-[252px_minmax(0,1fr)_268px]">
+    <div className={`min-h-full ${PAGE_GLOW} font-(family-name:--font-headline) text-sm text-[#023836] antialiased`}>
+      {/* Desktop: list | bar | gig | bar | talent. The 16px bars are the old gap and can be dragged
+          (side columns are also capped at 32vw so the gig in the middle always keeps room). */}
+      <div
+        className="grid gap-4 px-4 py-5 sm:px-6 lg:h-screen lg:gap-0 lg:grid-cols-[min(var(--gw-left),32vw)_16px_minmax(0,1fr)_16px_min(var(--gw-right),32vw)]"
+        style={{ '--gw-left': `${leftWidth}px`, '--gw-right': `${rightWidth}px` }}
+      >
         <GigList gigs={gigs} selectedId={selectedId} onSelect={onSelect} onBack={onBack} onNew={onNew} />
+
+        <ResizeHandle
+          orientation="vertical"
+          label="Resize the gig list"
+          getStart={() => leftWidth}
+          value={leftWidth}
+          onChange={(width) => setLeftWidth(clampTo(LEFT_RANGE, width))}
+          onReset={() => setLeftWidth(LEFT_DEFAULT)}
+          className="hidden lg:block"
+        />
 
         <section aria-label="Selected gig" aria-busy={!gig && !loadError} className={`${PANEL} min-h-[640px] lg:min-h-0`}>
           {!summary && !gig ? (
             <div className={`m-auto max-w-[360px] p-8 text-center ${MUTED}`}>
-              <b className="block text-[17px] text-[#0F172A]">This gig isn’t in your list</b>
+              <b className="block text-[17px] text-[#023836]">This gig isn’t in your list</b>
               It may have been deleted.
             </div>
           ) : loadError && !gig ? (
@@ -349,7 +366,7 @@ export default function GigWorkspace({ gigs, selectedId, onSelect, onBack, onNew
             </div>
           ) : !gig ? (
             <div className={`m-auto flex items-center gap-2 ${MUTED}`}>
-              <Spinner className="border-[#1447E6]" />
+              <Spinner className="border-[#0F7A55]" />
               Opening {summary?.title}…
             </div>
           ) : (
@@ -399,10 +416,10 @@ export default function GigWorkspace({ gigs, selectedId, onSelect, onBack, onNew
                     role="tab"
                     aria-selected={tab === id}
                     onClick={() => setTab(id)}
-                    className={`-mb-px inline-flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-semibold ${FOCUS} ${tab === id ? 'border-[#1447E6] text-[#1447E6]' : 'border-transparent text-[#4B5563] hover:text-[#0F172A]'}`}
+                    className={`-mb-px inline-flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-semibold ${FOCUS} ${tab === id ? 'border-[#0F7A55] text-[#0F7A55]' : 'border-transparent text-[#4B5563] hover:text-[#023836]'}`}
                   >
                     {label}
-                    <span className="grid h-5 min-w-6 place-items-center rounded-full bg-[#EEF2FE] px-1.5 text-xs font-bold text-[#1447E6]">{count}</span>
+                    <span className="grid h-5 min-w-6 place-items-center rounded-full bg-[#E3F1EE] px-1.5 text-xs font-bold text-[#0F7A55]">{count}</span>
                   </button>
                 ))}
               </div>
@@ -410,12 +427,23 @@ export default function GigWorkspace({ gigs, selectedId, onSelect, onBack, onNew
                 {tab === 'messages' ? (
                   <GigChat gig={gig} hired={hired} partnerId={partnerId} onPartner={(id) => setPartnerFor({ gigId: gig.id, id })} currentUserId={user?.id} token={token} />
                 ) : (
-                  <GigSubmissions gig={gig} currentUserId={user?.id} token={token} onChanged={refresh} setAlertConfig={setAlertConfig} />
+                  <GigSubmissions gig={gig} currentUserId={user?.id} token={token} onChanged={refresh} onCloseGig={() => setDialog({ kind: 'close' })} setAlertConfig={setAlertConfig} />
                 )}
               </div>
             </>
           )}
         </section>
+
+        <ResizeHandle
+          orientation="vertical"
+          label="Resize assigned talent"
+          getStart={() => rightWidth}
+          value={rightWidth}
+          invert
+          onChange={(width) => setRightWidth(clampTo(RIGHT_RANGE, width))}
+          onReset={() => setRightWidth(RIGHT_DEFAULT)}
+          className="hidden lg:block"
+        />
 
         <aside aria-label="Assigned talent and awaiting review" className={`${PANEL} min-h-[420px] lg:min-h-0`}>
           {gig ? (
@@ -423,6 +451,7 @@ export default function GigWorkspace({ gigs, selectedId, onSelect, onBack, onNew
               gig={gig}
               canHire={canHire}
               busyId={busyId}
+              chattingId={tab === 'messages' ? partnerId : null}
               onMessage={(id) => {
                 setPartnerFor({ gigId: gig.id, id });
                 setTab('messages');
@@ -433,7 +462,7 @@ export default function GigWorkspace({ gigs, selectedId, onSelect, onBack, onNew
               onPass={(app) => setDialog({ kind: 'pass', app })}
             />
           ) : (
-            <p className={`m-4 rounded-[12px] border border-dashed border-[#C7D3FB] p-4 text-center text-[13.5px] ${MUTED}`}>Open a gig to see its assigned talent and pitches.</p>
+            <p className={`m-4 rounded-[12px] border border-dashed border-[#BFE0D8] p-4 text-center text-[13.5px] ${MUTED}`}>Open a gig to see its assigned talent and pitches.</p>
           )}
         </aside>
       </div>
@@ -462,7 +491,7 @@ export default function GigWorkspace({ gigs, selectedId, onSelect, onBack, onNew
       )}
       {gig && dialog?.kind === 'close' && (
         <ConfirmDialog title="Close this gig?" confirmLabel="Close gig" busyLabel="Closing…" busy={busyId === 'status'} onConfirm={() => changeStatus('CLOSED')} onClose={() => setDialog(null)}>
-          <p className="m-0">It stops taking pitches and no one else can be hired. Chats and submissions stay open, and you can reopen it later.</p>
+          <p className="m-0">It stops taking pitches and no one else can be hired. Chats stay open and you can still review work that was already submitted, but freelancers who haven’t submitted yet can no longer do so. You can reopen it later.</p>
         </ConfirmDialog>
       )}
       {gig && dialog?.kind === 'delete' && (
@@ -474,7 +503,7 @@ export default function GigWorkspace({ gigs, selectedId, onSelect, onBack, onNew
       )}
       {gig && dialog?.kind === 'brief' && <BriefDialog gig={gig} onClose={() => setDialog(null)} />}
 
-      <CandidateProfileModal candidate={profile} onClose={() => setProfile(null)} />
+      <CandidateProfileDrawer candidate={profile} onClose={() => setProfile(null)} />
     </div>
   );
 }

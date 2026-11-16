@@ -54,7 +54,7 @@ function Options({ q, index, update }) {
                 onChange={() => update({ correctAnswer: option })}
                 aria-label={`Mark option ${optIndex + 1} as correct`}
                 title={option.trim() ? 'Mark as the correct answer' : 'Type the option first'}
-                className="size-[18px] shrink-0 accent-[#1447E6]"
+                className="size-[18px] shrink-0 accent-[#0F7A55]"
               />
             ) : (
               <span aria-hidden="true" className="size-4 shrink-0 rounded-[3px] border-2 border-[#9CA3AF]" />
@@ -74,7 +74,7 @@ function Options({ q, index, update }) {
                 type="button"
                 onClick={() => removeOption(optIndex)}
                 aria-label={`Remove option ${optIndex + 1}`}
-                className={`flex size-8 shrink-0 items-center justify-center rounded-[6px] hover:bg-[#F8F8F6] hover:text-[#B91C1C] ${MUTED}`}
+                className={`flex size-8 shrink-0 items-center justify-center rounded-[6px] hover:bg-[#F4F8F6] hover:text-[#B91C1C] ${MUTED}`}
               >
                 <AccountIcon name="close" size={14} strokeWidth={2} />
               </button>
@@ -125,13 +125,13 @@ export default function ScreeningEditor({ questions, onChange, types }) {
             </span>
             <div className="flex flex-wrap items-center gap-1">
               <label className="mr-2 inline-flex cursor-pointer items-center gap-1.5 text-[13px] font-medium">
-                <input type="checkbox" checked={q.required !== false} onChange={(event) => update(index, { required: event.target.checked })} className="size-4 accent-[#1447E6]" />
+                <input type="checkbox" checked={q.required !== false} onChange={(event) => update(index, { required: event.target.checked })} className="size-4 accent-[#0F7A55]" />
                 Must answer
               </label>
-              <button type="button" disabled={index === 0} onClick={() => move(index, index - 1)} aria-label={`Move question ${index + 1} up`} className={`flex size-8 items-center justify-center rounded-[6px] hover:bg-[#F8F8F6] disabled:opacity-30 ${MUTED}`}>
+              <button type="button" disabled={index === 0} onClick={() => move(index, index - 1)} aria-label={`Move question ${index + 1} up`} className={`flex size-8 items-center justify-center rounded-[6px] hover:bg-[#F4F8F6] disabled:opacity-30 ${MUTED}`}>
                 <AccountIcon name="chevron-up" size={16} />
               </button>
-              <button type="button" disabled={index === questions.length - 1} onClick={() => move(index, index + 1)} aria-label={`Move question ${index + 1} down`} className={`flex size-8 items-center justify-center rounded-[6px] hover:bg-[#F8F8F6] disabled:opacity-30 ${MUTED}`}>
+              <button type="button" disabled={index === questions.length - 1} onClick={() => move(index, index + 1)} aria-label={`Move question ${index + 1} down`} className={`flex size-8 items-center justify-center rounded-[6px] hover:bg-[#F4F8F6] disabled:opacity-30 ${MUTED}`}>
                 <AccountIcon name="chevron-down" size={16} />
               </button>
               <TextButton tone="red" onClick={() => onChange(questions.filter((_, i) => i !== index))} aria-label={`Remove question ${index + 1}`}>

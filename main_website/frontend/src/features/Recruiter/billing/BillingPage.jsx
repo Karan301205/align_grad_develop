@@ -17,14 +17,14 @@ function CreditMeter({ used, total }) {
     return (
       <div role="img" aria-label={label} className="grid gap-1" style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>
         {Array.from({ length: total }, (_, index) => (
-          <div key={index} className={`h-2 rounded-[4px] ${index < filled ? 'bg-[#1447E6]' : 'bg-[#E4E6EA]'}`} />
+          <div key={index} className={`h-2 rounded-[4px] ${index < filled ? 'bg-[#023836]' : 'bg-[#E4E6EA]'}`} />
         ))}
       </div>
     );
   }
   return (
     <div role="img" aria-label={label} className="h-2 overflow-hidden rounded-[4px] bg-[#E4E6EA]">
-      <div className="h-full rounded-[4px] bg-[#1447E6]" style={{ width: `${total > 0 ? (filled / total) * 100 : 0}%` }} />
+      <div className="h-full rounded-[4px] bg-[#023836]" style={{ width: `${total > 0 ? (filled / total) * 100 : 0}%` }} />
     </div>
   );
 }
@@ -68,7 +68,7 @@ function BuyCard({ offer, onBuy }) {
     );
   }
   return (
-    <section aria-labelledby="buy-title" className="flex min-w-0 flex-col gap-3.5 rounded-[12px] border-2 border-[#1447E6] bg-white p-[23px]">
+    <section aria-labelledby="buy-title" className="flex min-w-0 flex-col gap-3.5 rounded-[12px] border-2 border-[#0F7A55] bg-white p-[23px]">
       <h2 id="buy-title" className={CARD_HEADING}>
         <span className="font-semibold">Buy more</span>
       </h2>
@@ -90,7 +90,7 @@ function PaymentsCard({ payments }) {
   return (
     <section aria-labelledby="payments-title" className={`${CARD} min-w-0`}>
       <div className="px-[22px] py-[18px]">
-        <h2 id="payments-title" className="m-0 text-base leading-[1.45] tracking-normal text-[#0F172A]">
+        <h2 id="payments-title" className="m-0 text-base leading-[1.45] tracking-normal text-[#023836]">
           <span className="font-semibold">Payment history</span>
         </h2>
       </div>
@@ -164,7 +164,7 @@ export default function BillingPage({ token, user, jobs, setAlertConfig, onRefre
           </div>
         ) : loading && !status ? (
           <div role="status" className={`${CARD} flex items-center gap-3 px-6 py-[22px] ${MUTED}`}>
-            <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-[#1447E6] border-t-transparent" />
+            <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-[#0F7A55] border-t-transparent" />
             Loading your billing details…
           </div>
         ) : !status?.quotaInfo ? (

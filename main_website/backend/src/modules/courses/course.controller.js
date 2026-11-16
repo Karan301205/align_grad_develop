@@ -15,6 +15,8 @@ module.exports = {
   listCourses: handle(async () => ({ courses: await courseService.listCourses() })),
   getCourse: handle(async (req) => ({ course: await courseService.getCourseById(req.params.id, req.user.id) })),
   getLessonStream: handle((req) => courseService.getLessonStreamUrl(req.params.id, req.params.lessonId)),
+  getLessonDocument: handle((req) => courseService.getLessonDocumentUrl(req.params.id, req.params.lessonId)),
+  reportWatch: handle(async (req) => ({ enrollment: await courseService.reportWatchTime(req.user.id, req.params.id, req.params.lessonId, req.body) })),
   markProgress: handle(async (req) => ({ enrollment: await courseService.markLessonProgress(req.user.id, req.params.id, req.params.lessonId) })),
   submitQuiz: handle((req) => courseService.scoreQuiz(req.user.id, req.params.id, req.params.lessonId, req.body?.answers))
 };

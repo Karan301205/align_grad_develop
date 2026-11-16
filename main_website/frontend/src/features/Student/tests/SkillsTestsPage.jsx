@@ -34,7 +34,7 @@ function Bar({ score, need, tone = 'bg-[linear-gradient(90deg,#0167F6,#6378F9)]'
  * skills (no test yet), tests to take next, and the test itself (TestRunner).
  * `focus` ({ skill, need, opens }) is a new object when another page starts a test.
  */
-export default function SkillsTestsPage({ profile, techSkills = [], loading, jobs = [], token, focus, onFinished, onSaveSkills, onOpenJob, goToTab, onNotify }) {
+export default function SkillsTestsPage({ profile, techSkills = [], loading, jobs = [], token, focus, sidebarExpanded, onFinished, onSaveSkills, onOpenJob, goToTab, onNotify }) {
   const [test, setTest] = useState(focus?.skill ? focus : null);
   const [handledFocus, setHandledFocus] = useState(focus);
   const [filter, setFilter] = useState('all');
@@ -300,6 +300,7 @@ export default function SkillsTestsPage({ profile, techSkills = [], loading, job
           testedAt={currentInfo?.testedAt || null}
           token={token}
           jobs={jobs}
+          sidebarExpanded={sidebarExpanded}
           onClose={() => setTest(null)}
           onFinished={onFinished}
           onOpenJob={(job) => {

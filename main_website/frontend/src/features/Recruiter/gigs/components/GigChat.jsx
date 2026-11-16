@@ -5,7 +5,7 @@ import { MUTED } from '../../components/accountStyles';
 import { fileNameOf, personFor, safeLink } from '../gigsData';
 import useGigChat, { MESSAGE_MAX } from '../../../Gigs/useGigChat';
 
-const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]';
+const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]';
 const NEAR_BOTTOM_PX = 96;
 
 function timeLabel(value) {
@@ -19,7 +19,7 @@ function Attachment({ url, mine }) {
   const href = safeLink(url);
   if (!href) return null;
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className={`mt-1.5 flex items-center gap-1.5 rounded-[8px] px-2 py-1.5 text-[13px] font-semibold underline-offset-2 hover:underline ${mine ? 'bg-white/15 text-white' : 'bg-[#F1F3F6] text-[#1447E6]'}`}>
+    <a href={href} target="_blank" rel="noopener noreferrer" className={`mt-1.5 flex items-center gap-1.5 rounded-[8px] px-2 py-1.5 text-[13px] font-semibold underline-offset-2 hover:underline ${mine ? 'bg-white/15 text-white' : 'bg-[#F1F3F6] text-[#0F7A55]'}`}>
       <Paperclip className="size-3.5 shrink-0" aria-hidden="true" />
       <span className="truncate">{fileNameOf(href)}</span>
     </a>
@@ -28,14 +28,14 @@ function Attachment({ url, mine }) {
 
 function Bubble({ message, mine, author }) {
   if (message.text?.startsWith('[SYSTEM:')) {
-    return <div className="self-center rounded-full bg-[#EEF2FE] px-3 py-1 text-center text-xs text-[#334155]">{message.text}</div>;
+    return <div className="self-center rounded-full bg-[#E3F1EE] px-3 py-1 text-center text-xs text-[#334155]">{message.text}</div>;
   }
   return (
     <div className={`flex max-w-[78%] flex-col ${mine ? 'self-end items-end' : 'self-start items-start'}`}>
       {!mine && <span className={`mb-0.5 px-1 text-xs ${MUTED}`}>{author}</span>}
       <div
         className={`whitespace-pre-wrap break-words rounded-[14px] px-3.5 py-2.5 text-sm ${
-          mine ? 'rounded-br-[4px] bg-[#1447E6] text-white' : 'rounded-bl-[4px] border border-[#E4E6EA] bg-white text-[#0F172A]'
+          mine ? 'rounded-br-[4px] bg-[#023836] text-white' : 'rounded-bl-[4px] border border-[#E4E6EA] bg-white text-[#023836]'
         }`}
       >
         {message.text}
@@ -52,7 +52,7 @@ function PendingBubble({ item, onRetry, onDiscard }) {
   const failed = item.status === 'failed';
   return (
     <div className="flex max-w-[78%] flex-col items-end self-end">
-      <div className={`whitespace-pre-wrap break-words rounded-[14px] rounded-br-[4px] px-3.5 py-2.5 text-sm ${failed ? 'border border-[#FECACA] bg-[#FEF2F2] text-[#7F1D1D]' : 'bg-[#1447E6]/70 text-white'}`}>
+      <div className={`whitespace-pre-wrap break-words rounded-[14px] rounded-br-[4px] px-3.5 py-2.5 text-sm ${failed ? 'border border-[#FECACA] bg-[#FEF2F2] text-[#7F1D1D]' : 'bg-[#023836]/70 text-white'}`}>
         {item.text}
         {item.file && (
           <span className="mt-1.5 flex items-center gap-1.5 text-[13px] font-semibold">
@@ -64,7 +64,7 @@ function PendingBubble({ item, onRetry, onDiscard }) {
       {failed ? (
         <div role="alert" className="mt-1 flex flex-wrap items-center justify-end gap-2 px-1 text-xs text-[#B91C1C]">
           <span>Not sent. {item.error}</span>
-          <button type="button" onClick={() => onRetry(item.tempId)} className={`inline-flex items-center gap-1 rounded-[4px] font-semibold text-[#1447E6] hover:underline ${FOCUS}`}>
+          <button type="button" onClick={() => onRetry(item.tempId)} className={`inline-flex items-center gap-1 rounded-[4px] font-semibold text-[#0F7A55] hover:underline ${FOCUS}`}>
             <RotateCcw className="size-3" aria-hidden="true" />
             Retry
           </button>
@@ -122,7 +122,7 @@ function Composer({ partnerName, onSend }) {
         </div>
       )}
       <div className="flex items-end gap-2">
-        <label className={`relative flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-[#D5D9E0] bg-white text-[#334155] hover:bg-[#F8F8F6] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#1447E6]`} title="Attach a file">
+        <label className={`relative flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-[#D5D9E0] bg-white text-[#334155] hover:bg-[#F4F8F6] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#0F7A55]`} title="Attach a file">
           <Paperclip className="size-[18px]" aria-hidden="true" />
           <span className="sr-only">Attach a file</span>
           <input ref={fileRef} type="file" className="sr-only" onChange={(event) => setFile(event.target.files?.[0] || null)} />
@@ -144,13 +144,13 @@ function Composer({ partnerName, onSend }) {
           }}
           placeholder={`Message ${partnerName}…`}
           aria-invalid={tooLong}
-          className={`min-h-11 flex-1 resize-none rounded-[10px] border bg-white px-3.5 py-[11px] text-sm leading-5 text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#1447E6]/20 ${tooLong ? 'border-[#DC2626]' : 'border-[#D5D9E0] focus:border-[#1447E6]'}`}
+          className={`min-h-11 flex-1 resize-none rounded-[10px] border bg-white px-3.5 py-[11px] text-sm leading-5 text-[#023836] placeholder:text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#0F7A55]/20 ${tooLong ? 'border-[#DC2626]' : 'border-[#D5D9E0] focus:border-[#0F7A55]'}`}
         />
         <button
           type="submit"
           disabled={tooLong || (!text.trim() && !file)}
           aria-label="Send message"
-          className={`flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-[#1447E6] text-white hover:bg-[#0F38B8] disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS}`}
+          className={`flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-[#023836] text-white hover:bg-[#03443F] disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS}`}
         >
           <SendHorizontal className="size-[18px]" aria-hidden="true" />
         </button>
@@ -202,7 +202,7 @@ export default function GigChat({ gig, hired, partnerId, onPartner, currentUserI
   if (hired.length === 0) {
     return (
       <div className="m-auto flex max-w-[360px] flex-col items-center gap-2 px-6 py-12 text-center">
-        <span className="flex size-14 items-center justify-center rounded-[16px] bg-[#EEF2FE] text-[#1447E6]">
+        <span className="flex size-14 items-center justify-center rounded-[16px] bg-[#E3F1EE] text-[#0F7A55]">
           <MessageSquare className="size-6" aria-hidden="true" />
         </span>
         <h3 className="m-0 text-base">
@@ -226,7 +226,7 @@ export default function GigChat({ gig, hired, partnerId, onPartner, currentUserI
                 aria-pressed={on}
                 onClick={() => onPartner(id)}
                 className={`inline-flex h-8 items-center gap-2 rounded-full border px-3 font-(family-name:--font-headline) text-[13px] font-semibold ${FOCUS} ${
-                  on ? 'border-[#1447E6] bg-[#1447E6] text-white' : 'border-[#E4E6EA] bg-white text-[#0F172A] hover:bg-[#F8F8F6]'
+                  on ? 'border-[#0F7A55] bg-[#023836] text-white' : 'border-[#E4E6EA] bg-white text-[#023836] hover:bg-[#F4F8F6]'
                 }`}
               >
                 {personFor(gig, id).name}
@@ -253,16 +253,16 @@ export default function GigChat({ gig, hired, partnerId, onPartner, currentUserI
           role="log"
           aria-live="polite"
           aria-label={`Conversation with ${partner?.name || 'freelancer'}`}
-          className="flex min-h-[220px] flex-1 flex-col gap-2.5 overflow-y-auto rounded-[10px] bg-[#FAFAF9] p-3"
+          className="flex min-h-[220px] flex-1 flex-col gap-2.5 overflow-y-auto rounded-[10px] bg-[#F8FBFA] p-3"
         >
           {chat.hasMore && (
-            <button type="button" onClick={chat.loadOlder} disabled={chat.loadingOlder} className={`self-center rounded-full border border-[#E4E6EA] bg-white px-3 py-1 text-xs font-semibold text-[#334155] hover:bg-[#F8F8F6] disabled:opacity-60 ${FOCUS}`}>
+            <button type="button" onClick={chat.loadOlder} disabled={chat.loadingOlder} className={`self-center rounded-full border border-[#E4E6EA] bg-white px-3 py-1 text-xs font-semibold text-[#334155] hover:bg-[#F4F8F6] disabled:opacity-60 ${FOCUS}`}>
               {chat.loadingOlder ? 'Loading…' : 'Load earlier messages'}
             </button>
           )}
           {chat.loading ? (
             <div className={`m-auto flex items-center gap-2 ${MUTED}`}>
-              <Spinner className="border-[#1447E6]" />
+              <Spinner className="border-[#0F7A55]" />
               Loading messages…
             </div>
           ) : chat.error && items.length === 0 ? (
@@ -271,7 +271,7 @@ export default function GigChat({ gig, hired, partnerId, onPartner, currentUserI
             </p>
           ) : items.length === 0 && chat.pending.length === 0 ? (
             <div className={`m-auto max-w-[320px] text-center ${MUTED}`}>
-              <b className="block text-[15px] text-[#0F172A]">No messages yet</b>
+              <b className="block text-[15px] text-[#023836]">No messages yet</b>
               Say hello to {partner?.name} to start the conversation.
             </div>
           ) : (
@@ -293,7 +293,7 @@ export default function GigChat({ gig, hired, partnerId, onPartner, currentUserI
               if (el) el.scrollTop = el.scrollHeight;
               setUnseenFor(null);
             }}
-            className={`absolute bottom-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[#1447E6] px-3 py-1.5 text-xs font-semibold text-white shadow-md ${FOCUS}`}
+            className={`absolute bottom-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[#023836] px-3 py-1.5 text-xs font-semibold text-white shadow-md ${FOCUS}`}
           >
             <ArrowDown className="size-3.5" aria-hidden="true" />
             New messages

@@ -81,22 +81,22 @@ export default function TestimonialsSection({
             <span aria-hidden="true" className={`absolute -right-20 -top-[60px] h-[230px] w-[320px] opacity-30 ${SLAB} ${GRADIENT}`} />
             <VideoTile item={item} playing={playing} onToggle={() => setPlaying((value) => !value)} />
 
-            <div className="relative flex min-w-0 flex-col gap-6 py-[22px] max-[900px]:gap-[18px] max-[900px]:pb-4 max-[900px]:pl-1 max-[900px]:pr-1 max-[900px]:pt-1">
-              <div className="flex items-center justify-between gap-3">
-                <Pill tone="glass">{item.tag}</Pill>
-                <span className={`${SORA} text-[14px] font-medium text-white/90`}>{index + 1} / {items.length}</span>
-              </div>
-              <p className={`${SORA} text-[clamp(21px,2vw,29px)] font-normal leading-[1.32] tracking-[-.03em] text-pretty`}>“{item.quote}”</p>
-              <div className="mt-auto flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5">
+            <div className="relative flex min-w-0 flex-col gap-5 py-[22px] max-[900px]:gap-[18px] max-[900px]:pb-4 max-[900px]:pl-1 max-[900px]:pr-1 max-[900px]:pt-1">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3.5">
                   <span className={`flex size-11 flex-none items-center justify-center bg-white text-[15px] font-semibold ${SORA}`} style={{ color: item.bg }}>
                     {item.initials}
                   </span>
-                  <div>
+                  <div className="min-w-0">
                     <div className="text-[16px] font-semibold text-white">{item.name}</div>
                     <div className="text-[14px] font-medium text-white">{item.role}</div>
                   </div>
                 </div>
+                <Pill tone="glass">{item.tag}</Pill>
+              </div>
+              <p className={`${SORA} text-[clamp(16px,1.35vw,19px)] font-normal leading-[1.55] tracking-[-.01em] text-pretty`}>“{item.quote}”</p>
+              <div className="mt-auto flex flex-wrap items-center justify-between gap-4">
+                <span className={`${SORA} text-[14px] font-medium text-white/90`}>{index + 1} / {items.length}</span>
                 <div className="flex gap-2">
                   <button type="button" aria-label="Previous review" onClick={() => show(index - 1)} className="inline-flex size-12 cursor-pointer items-center justify-center rounded-[14px] border-0 bg-white/14 text-white transition-colors duration-200 hover:bg-white/24">
                     <Icon name="arrowLeft" />

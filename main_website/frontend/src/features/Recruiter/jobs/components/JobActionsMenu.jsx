@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 
-const ITEM = 'flex w-full items-center rounded-[6px] px-3 py-2 text-left text-sm text-[#334155] hover:bg-[#F8F8F6] hover:text-[#0F172A] focus:bg-[#F8F8F6] focus:text-[#0F172A] focus:outline-none';
+const ITEM = 'flex w-full items-center rounded-[6px] px-3 py-2 text-left text-sm text-[#334155] hover:bg-[#F4F8F6] hover:text-[#023836] focus:bg-[#F4F8F6] focus:text-[#023836] focus:outline-none';
 
 /**
  * "⋯" menu on a job card. `items` is a list of { id, label, onSelect, danger }.
@@ -49,7 +49,7 @@ export default function JobActionsMenu({ label, items }) {
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((value) => !value)}
-        className="flex size-10 items-center justify-center rounded-[8px] border border-[#D5D9E0] bg-white text-[#334155] transition-colors hover:bg-[#F8F8F6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]"
+        className="flex size-10 items-center justify-center rounded-[8px] border border-[#D5D9E0] bg-white text-[#334155] transition-colors hover:bg-[#F4F8F6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <circle cx="5" cy="12" r="1.6" />

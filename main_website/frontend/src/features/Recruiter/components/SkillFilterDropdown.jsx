@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import {
   ChevronDown,
   Check,
@@ -140,10 +140,10 @@ export default function SkillFilterDropdown({
       <button
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
-        className={`h-9 bg-white border text-[13px] font-(family-name:--font-headline) font-normal rounded-[8px] px-2.5 flex items-center justify-between gap-2 transition-colors cursor-pointer hover:border-[#9CA3AF] focus:outline-none focus-visible:border-[#1447E6] focus-visible:ring-2 focus-visible:ring-[#1447E6]/20 select-none max-w-[220px] ${
+        className={`h-9 bg-white border text-[13px] font-(family-name:--font-headline) font-normal rounded-[8px] px-2.5 flex items-center justify-between gap-2 transition-colors cursor-pointer hover:border-[#9CA3AF] focus:outline-none focus-visible:border-[#0F7A55] focus-visible:ring-2 focus-visible:ring-[#0F7A55]/20 select-none max-w-[220px] ${
           hasActiveSkills
-            ? 'border-[#1447E6] text-[#1447E6] font-semibold bg-[#EEF2FE]'
-            : 'border-[#D5D9E0] text-[#0F172A]'
+            ? 'border-[#0F7A55] text-[#0F7A55] font-semibold bg-[#E3F1EE]'
+            : 'border-[#D5D9E0] text-[#023836]'
         }`}
         title="Filter by Skills"
       >
@@ -151,7 +151,7 @@ export default function SkillFilterDropdown({
           <Award className="w-3.5 h-3.5 text-[#4B5563] shrink-0" />
           <span className="truncate">{triggerLabel}</span>
           {selectedSkills.length > 1 && (
-            <span className="min-w-4 h-4 px-1 rounded-full bg-[#1447E6] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+            <span className="min-w-4 h-4 px-1 rounded-full bg-[#023836] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
               {selectedSkills.length}
             </span>
           )}
@@ -184,8 +184,8 @@ export default function SkillFilterDropdown({
           {/* Header & Search Bar */}
           <div className="p-3 border-b border-[#EEF0F3] space-y-2.5 bg-white shrink-0">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-headline font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                <Sliders className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
+              <span className="text-xs font-headline font-bold text-[#023836] dark:text-slate-100 flex items-center gap-1.5">
+                <Sliders className="w-3.5 h-3.5 text-[#0F7A55] dark:text-[#7FD8C4]" />
                 <span>Filter by Skills</span>
               </span>
               {hasActiveSkills && (
@@ -207,7 +207,7 @@ export default function SkillFilterDropdown({
                 placeholder="Search skills (e.g. React, Python, Communication)..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full h-9 pl-8 pr-7 bg-white border border-[#D5D9E0] rounded-[8px] text-[13px] text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none focus:border-[#1447E6] focus:ring-2 focus:ring-[#1447E6]/20"
+                className="w-full h-9 pl-8 pr-7 bg-white border border-[#D5D9E0] rounded-[8px] text-[13px] text-[#023836] placeholder:text-[#6B7280] focus:outline-none focus:border-[#0F7A55] focus:ring-2 focus:ring-[#0F7A55]/20"
                 autoFocus
               />
               {searchQuery && (
@@ -237,9 +237,9 @@ export default function SkillFilterDropdown({
                   <div
                     key={item.name}
                     onClick={() => handleToggleSkill(item)}
-                    className={`px-2.5 py-2 rounded-[6px] text-[13px] hover:bg-[#F8F8F6] cursor-pointer flex items-center justify-between gap-2 transition-colors ${
+                    className={`px-2.5 py-2 rounded-[6px] text-[13px] hover:bg-[#F4F8F6] cursor-pointer flex items-center justify-between gap-2 transition-colors ${
                       isSelected
-                        ? 'bg-[#EEF2FE] font-semibold text-[#1447E6] hover:bg-[#EEF2FE]'
+                        ? 'bg-[#E3F1EE] font-semibold text-[#0F7A55] hover:bg-[#E3F1EE]'
                         : 'text-slate-800 dark:text-slate-200'
                     }`}
                   >
@@ -248,7 +248,7 @@ export default function SkillFilterDropdown({
                       <div
                         className={`w-4 h-4 rounded-[4px] border flex items-center justify-center shrink-0 transition-colors ${
                           isSelected
-                            ? 'bg-[#1447E6] border-[#1447E6] text-white'
+                            ? 'bg-[#023836] border-[#0F7A55] text-white'
                             : 'border-[#9CA3AF] bg-white'
                         }`}
                       >
@@ -277,7 +277,7 @@ export default function SkillFilterDropdown({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="h-8 px-3.5 bg-[#1447E6] hover:bg-[#0F38B8] text-white font-semibold text-[13px] rounded-[8px] transition-colors cursor-pointer"
+              className="h-8 px-3.5 bg-[#023836] hover:bg-[#03443F] text-white font-semibold text-[13px] rounded-[8px] transition-colors cursor-pointer"
             >
               Done
             </button>

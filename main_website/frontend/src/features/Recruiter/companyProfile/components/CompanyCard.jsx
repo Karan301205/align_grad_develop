@@ -9,10 +9,10 @@ import { Card, CardTitle, Details, Field, LockedNote } from './ui';
 import { SelectControl, Spinner } from '../../components/AccountControls';
 import { controlClass, errorProps } from '../../components/formControls';
 
-/** 64px company mark: the uploaded logo, or the first letter of the name on blue. */
+/** 64px company mark: the uploaded logo, or the first letter of the name on pine green. */
 function CompanyMark({ name, logoUrl, uploading }) {
   return (
-    <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-[#1447E6] text-[26px] font-bold text-white">
+    <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-[#023836] text-[26px] font-bold text-white">
       {logoUrl ? (
         <img src={logoUrl} alt="Company logo" className="size-full border border-[#E4E6EA] bg-white object-contain p-1" />
       ) : (
@@ -20,7 +20,7 @@ function CompanyMark({ name, logoUrl, uploading }) {
       )}
       {uploading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/70">
-          <Spinner className="border-[#1447E6]" />
+          <Spinner className="border-[#0F7A55]" />
         </div>
       )}
     </div>

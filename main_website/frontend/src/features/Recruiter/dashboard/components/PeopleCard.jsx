@@ -34,7 +34,7 @@ export default function PeopleCard({ id, title, subtitle, people, aside, empty, 
               <button
                 type="button"
                 onClick={() => onViewProfile(person)}
-                className="h-9 shrink-0 rounded-[8px] border border-[#C7D3FB] bg-[#EEF2FE] px-3 font-(family-name:--font-headline) text-[13px] font-semibold text-[#1447E6] hover:bg-[#E0E8FD] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]"
+                className="h-9 shrink-0 rounded-[8px] border border-[#BFE0D8] bg-[#E3F1EE] px-3 font-(family-name:--font-headline) text-[13px] font-semibold text-[#0F7A55] hover:bg-[#D3E8E3] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]"
               >
                 View profile
               </button>

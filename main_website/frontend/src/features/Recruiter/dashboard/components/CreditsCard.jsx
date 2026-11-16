@@ -32,12 +32,12 @@ export default function CreditsCard({ credits, onBuy }) {
             (total <= MAX_SEGMENTS ? (
               <div role="img" aria-label={`${used} of ${total} credits used`} className="grid gap-1" style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>
                 {Array.from({ length: total }, (_, index) => (
-                  <div key={index} className={`h-1.5 rounded-[3px] ${index < used ? 'bg-[#1447E6]' : 'bg-[#E4E6EA]'}`} />
+                  <div key={index} className={`h-1.5 rounded-[3px] ${index < used ? 'bg-[#023836]' : 'bg-[#E4E6EA]'}`} />
                 ))}
               </div>
             ) : (
               <div role="img" aria-label={`${used} of ${total} credits used`} className="h-1.5 overflow-hidden rounded-[3px] bg-[#E4E6EA]">
-                <div className="h-full bg-[#1447E6]" style={{ width: `${(used / total) * 100}%` }} />
+                <div className="h-full bg-[#023836]" style={{ width: `${(used / total) * 100}%` }} />
               </div>
             ))}
         </>

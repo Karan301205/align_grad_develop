@@ -24,9 +24,9 @@ const DOC_LIMIT = 10 * 1024 * 1024;
 const IMAGE_LIMIT = 2 * 1024 * 1024;
 const GIG_QUESTION_TYPES = ['MCQ', 'LONG_ANSWER']; // what the gig API accepts
 
-const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]';
+const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]';
 const PILL = `inline-flex h-10 items-center rounded-full border px-3.5 font-(family-name:--font-headline) text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS}`;
-const pillClass = (on) => `${PILL} ${on ? 'border-[#1447E6] bg-[#1447E6] text-white' : 'border-[#D5D9E0] bg-white text-[#334155] hover:bg-[#F8F8F6]'}`;
+const pillClass = (on) => `${PILL} ${on ? 'border-[#0F7A55] bg-[#023836] text-white' : 'border-[#D5D9E0] bg-white text-[#334155] hover:bg-[#F4F8F6]'}`;
 const kb = (bytes) => (bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
 
 function initialValues(gig) {
@@ -135,7 +135,7 @@ function CategoryPicker({ value, onChange, error }) {
           ))}
         </div>
       )}
-      <label className={`flex h-10 items-center gap-2 rounded-[8px] border px-3 focus-within:border-[#1447E6] focus-within:ring-2 focus-within:ring-[#1447E6]/20 ${error ? 'border-[#DC2626]' : 'border-[#D5D9E0]'} ${MUTED}`}>
+      <label className={`flex h-10 items-center gap-2 rounded-[8px] border px-3 focus-within:border-[#0F7A55] focus-within:ring-2 focus-within:ring-[#0F7A55]/20 ${error ? 'border-[#DC2626]' : 'border-[#D5D9E0]'} ${MUTED}`}>
         <Search className="size-4 shrink-0" aria-hidden="true" />
         <input
           type="search"
@@ -154,13 +154,13 @@ function CategoryPicker({ value, onChange, error }) {
               }
             }
           }}
-          className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none disabled:cursor-not-allowed"
+          className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#023836] placeholder:text-[#6B7280] focus:outline-none disabled:cursor-not-allowed"
         />
       </label>
       {!full && (
         <div className="flex max-h-[148px] flex-wrap gap-2 overflow-y-auto pr-1">
           {custom && (
-            <button type="button" onClick={() => { toggle(custom); setQuery(''); }} className={`${PILL} border-dashed border-[#1447E6] bg-[#EEF2FE] text-[#1447E6]`}>
+            <button type="button" onClick={() => { toggle(custom); setQuery(''); }} className={`${PILL} border-dashed border-[#0F7A55] bg-[#E3F1EE] text-[#0F7A55]`}>
               + Use “{custom}”
             </button>
           )}
@@ -203,7 +203,7 @@ function SkillsEditor({ requirements, gatesBySkill, onChange, error }) {
                         <span className="text-[15px] font-semibold">{req.skillName}</span>
                         {!selfDeclared && (
                           <span className={`text-[13px] ${MUTED}`}>
-                            Minimum <strong className="font-bold text-[#0F172A]">{req.minRating}</strong> / 10 · {levelLabel(req.minRating)}
+                            Minimum <strong className="font-bold text-[#023836]">{req.minRating}</strong> / 10 · {levelLabel(req.minRating)}
                           </span>
                         )}
                       </div>
@@ -239,14 +239,14 @@ function Preview({ v, company, gatesBySkill }) {
       </h2>
       <div className="flex flex-col gap-3 rounded-[12px] border border-[#E4E6EA] p-4">
         <div className="flex items-start gap-3">
-          <div aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-[#1447E6] text-lg font-bold text-white">
+          <div aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-[#023836] text-lg font-bold text-white">
             {logo ? <img src={logo} alt="" className="size-full object-cover" /> : name.charAt(0).toUpperCase()}
           </div>
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="break-words text-[15px] font-bold">{v.title.trim() || 'Your gig title'}</span>
             <span className={`text-[13px] ${MUTED}`}>
               {name}
-              {company?.verificationStatus === 'APPROVED' && <span className="font-semibold text-[#1E3A8A]"> · Verified</span>}
+              {company?.verificationStatus === 'APPROVED' && <span className="font-semibold text-[#03443F]"> · Verified</span>}
               {company?.location && ` · ${company.location}`}
             </span>
           </div>
@@ -254,7 +254,7 @@ function Preview({ v, company, gatesBySkill }) {
         {v.categories.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {v.categories.map((cat) => (
-              <span key={cat} className="rounded-full bg-[#EEF2FE] px-2.5 py-0.5 text-xs font-semibold text-[#1E3A8A]">
+              <span key={cat} className="rounded-full bg-[#E3F1EE] px-2.5 py-0.5 text-xs font-semibold text-[#03443F]">
                 {cat}
               </span>
             ))}
@@ -279,7 +279,7 @@ function Preview({ v, company, gatesBySkill }) {
             ))}
           </div>
         )}
-        <span aria-hidden="true" className="flex h-10 items-center justify-center rounded-[8px] bg-[#1447E6] font-semibold text-white opacity-85">
+        <span aria-hidden="true" className="flex h-10 items-center justify-center rounded-[8px] bg-[#023836] font-semibold text-white opacity-85">
           Pitch for this gig
         </span>
       </div>
@@ -384,7 +384,7 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
       <div className="mx-auto flex max-w-[1240px] flex-col gap-[22px]">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <button type="button" onClick={onCancel} className={`inline-flex items-center gap-1.5 self-start rounded-[4px] font-medium ${MUTED} hover:text-[#0F172A] ${FOCUS}`}>
+            <button type="button" onClick={onCancel} className={`inline-flex items-center gap-1.5 self-start rounded-[4px] font-medium ${MUTED} hover:text-[#023836] ${FOCUS}`}>
               <ArrowLeft className="size-4" aria-hidden="true" />
               Gigs
             </button>
@@ -412,7 +412,7 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
                   value={v.title}
                   disabled={editing}
                   onChange={(event) => set('title')(event.target.value)}
-                  className={controlClass(errors.title, `h-11 px-3 ${editing ? 'cursor-not-allowed bg-[#F8F8F6] text-[#4B5563]' : ''}`)}
+                  className={controlClass(errors.title, `h-11 px-3 ${editing ? 'cursor-not-allowed bg-[#F4F8F6] text-[#4B5563]' : ''}`)}
                 />
                 {errors.title ? <FieldError id="title-error">{errors.title}</FieldError> : <span className={`text-[13px] ${MUTED}`}>Say what you’ll receive, e.g. “Excel dashboard”, not “Need help with data”.</span>}
               </div>
@@ -461,7 +461,7 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
                         <span className="font-medium">{item.name}</span>
                         {item.size ? <span className={MUTED}> · {kb(item.size)}</span> : null}
                       </span>
-                      <button type="button" onClick={() => set('files')((prev) => prev.filter((_, i) => i !== index))} aria-label={`Remove ${item.name}`} className={`flex size-8 items-center justify-center rounded-[6px] hover:bg-[#F8F8F6] ${MUTED} ${FOCUS}`}>
+                      <button type="button" onClick={() => set('files')((prev) => prev.filter((_, i) => i !== index))} aria-label={`Remove ${item.name}`} className={`flex size-8 items-center justify-center rounded-[6px] hover:bg-[#F4F8F6] ${MUTED} ${FOCUS}`}>
                         <X className="size-4" />
                       </button>
                     </div>
@@ -469,7 +469,7 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
                   {v.files.length < MAX_FILES && (
                     // Same drop zone as the cover image while empty; a slim button once files are added.
                     <label
-                      className={`relative flex cursor-pointer items-center justify-center gap-1 rounded-[8px] border border-dashed border-[#9CA3AF] bg-[#F8F8F6] font-semibold text-[#334155] hover:bg-[#F1F3F6] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#1447E6] ${
+                      className={`relative flex cursor-pointer items-center justify-center gap-1 rounded-[8px] border border-dashed border-[#9CA3AF] bg-[#F4F8F6] font-semibold text-[#334155] hover:bg-[#F1F3F6] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#0F7A55] ${
                         v.files.length ? 'h-10' : 'h-[98px] flex-col'
                       }`}
                     >
@@ -483,14 +483,14 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
                 <div id="field-logo" className="flex flex-col gap-2">
                   <Label optional>Cover image</Label>
                   {v.logo ? (
-                    <div className="relative flex h-[98px] items-center justify-center overflow-hidden rounded-[8px] border border-[#E4E6EA] bg-[#F8F8F6]">
+                    <div className="relative flex h-[98px] items-center justify-center overflow-hidden rounded-[8px] border border-[#E4E6EA] bg-[#F4F8F6]">
                       <img src={v.logo.preview || v.logo.url} alt="Cover" className="size-full object-cover" />
-                      <button type="button" onClick={() => set('logo')(null)} aria-label="Remove cover image" className={`absolute right-2 top-2 flex size-8 items-center justify-center rounded-full bg-white/90 text-[#0F172A] shadow ${FOCUS}`}>
+                      <button type="button" onClick={() => set('logo')(null)} aria-label="Remove cover image" className={`absolute right-2 top-2 flex size-8 items-center justify-center rounded-full bg-white/90 text-[#023836] shadow ${FOCUS}`}>
                         <X className="size-4" />
                       </button>
                     </div>
                   ) : (
-                    <label className="relative flex h-[98px] cursor-pointer flex-col items-center justify-center gap-1 rounded-[8px] border border-dashed border-[#9CA3AF] bg-[#F8F8F6] font-semibold text-[#334155] hover:bg-[#F1F3F6] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#1447E6]">
+                    <label className="relative flex h-[98px] cursor-pointer flex-col items-center justify-center gap-1 rounded-[8px] border border-dashed border-[#9CA3AF] bg-[#F4F8F6] font-semibold text-[#334155] hover:bg-[#F1F3F6] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#0F7A55]">
                       <ImagePlus className="size-5" aria-hidden="true" />
                       Upload image
                       <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="sr-only" onChange={(event) => { pickLogo(event.target.files?.[0]); event.target.value = ''; }} />
@@ -507,8 +507,8 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
                   <Label htmlFor="gig-budget" required>
                     Fixed budget
                   </Label>
-                  <div className={`flex h-11 items-stretch overflow-hidden rounded-[8px] border focus-within:border-[#1447E6] focus-within:ring-2 focus-within:ring-[#1447E6]/20 ${errors.budget ? 'border-[#DC2626]' : 'border-[#D5D9E0]'}`}>
-                    <div className="w-[104px] shrink-0 border-r border-[#D5D9E0] bg-[#F8F8F6] px-2.5">
+                  <div className={`flex h-11 items-stretch overflow-hidden rounded-[8px] border focus-within:border-[#0F7A55] focus-within:ring-2 focus-within:ring-[#0F7A55]/20 ${errors.budget ? 'border-[#DC2626]' : 'border-[#D5D9E0]'}`}>
+                    <div className="w-[104px] shrink-0 border-r border-[#D5D9E0] bg-[#F4F8F6] px-2.5">
                       <SelectControl bare className="h-full" aria-label="Currency" value={v.currency} onChange={set('currency')} options={SUPPORTED_CURRENCIES.map((c) => [c.code, `${c.symbol} ${c.code}`])} menuMinWidth={140} />
                     </div>
                     <input
@@ -517,7 +517,7 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
                       inputMode="numeric"
                       value={v.budget ? Number(v.budget).toLocaleString('en-IN') : ''}
                       onChange={(event) => set('budget')(event.target.value.replace(/\D/g, '').slice(0, 9))}
-                      className="h-full min-w-0 flex-1 border-0 bg-white px-3 text-sm text-[#0F172A] focus:outline-none"
+                      className="h-full min-w-0 flex-1 border-0 bg-white px-3 text-sm text-[#023836] focus:outline-none"
                     />
                   </div>
                   {errors.budget ? <FieldError id="budget-error">{errors.budget}</FieldError> : <span className={`text-[13px] ${MUTED}`}>Candidates see the full amount.</span>}
@@ -596,7 +596,7 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
               ) : pool.status === 'error' ? (
                 <span className="text-[#B91C1C]">
                   Couldn’t count candidates. {pool.error}{' '}
-                  <button type="button" onClick={pool.retry} className="font-semibold text-[#1447E6] hover:underline">
+                  <button type="button" onClick={pool.retry} className="font-semibold text-[#0F7A55] hover:underline">
                     Try again
                   </button>
                 </span>

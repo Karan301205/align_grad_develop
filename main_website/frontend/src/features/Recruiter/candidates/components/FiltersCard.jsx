@@ -56,7 +56,7 @@ export default function FiltersCard({ filter, skillCounts, popularSkills, educat
   return (
     <section aria-label="Search and filters" className={`${CARD} flex flex-col gap-3.5 p-4`}>
       <div className="flex flex-wrap gap-2.5">
-        <label className={`flex h-11 min-w-0 flex-[1_1_280px] items-center gap-2.5 rounded-[8px] border border-[#D5D9E0] bg-white px-3.5 focus-within:border-[#1447E6] focus-within:ring-2 focus-within:ring-[#1447E6]/20 ${MUTED}`}>
+        <label className={`flex h-11 min-w-0 flex-[1_1_280px] items-center gap-2.5 rounded-[8px] border border-[#D5D9E0] bg-white px-3.5 focus-within:border-[#0F7A55] focus-within:ring-2 focus-within:ring-[#0F7A55]/20 ${MUTED}`}>
           <Search className="size-[18px] shrink-0" aria-hidden="true" />
           <input
             type="search"
@@ -64,16 +64,16 @@ export default function FiltersCard({ filter, skillCounts, popularSkills, educat
             placeholder="Name, @username, college, role or skill"
             value={f.search}
             onChange={(event) => set('search')(event.target.value)}
-            className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none"
+            className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#023836] placeholder:text-[#6B7280] focus:outline-none"
           />
           {f.search && (
-            <button type="button" onClick={() => set('search')('')} aria-label="Clear search" className="rounded-[4px] p-0.5 hover:text-[#0F172A]">
+            <button type="button" onClick={() => set('search')('')} aria-label="Clear search" className="rounded-[4px] p-0.5 hover:text-[#023836]">
               <X className="size-4" />
             </button>
           )}
         </label>
-        <div className="flex h-11 min-w-0 flex-[1_1_280px] items-center gap-2.5 rounded-[8px] border-2 border-[#1447E6] bg-[#EEF2FE] pl-3.5 pr-2">
-          <span id="compare-label" className="whitespace-nowrap font-semibold text-[#1E3A8A]">
+        <div className="flex h-11 min-w-0 flex-[1_1_280px] items-center gap-2.5 rounded-[8px] border-2 border-[#0F7A55] bg-[#E3F1EE] pl-3.5 pr-2">
+          <span id="compare-label" className="whitespace-nowrap font-semibold text-[#03443F]">
             Compare with job
           </span>
           <SelectControl
@@ -105,12 +105,12 @@ export default function FiltersCard({ filter, skillCounts, popularSkills, educat
           onClick={onToggleAdvanced}
           aria-expanded={showAdvanced}
           className={`inline-flex h-9 items-center gap-1.5 rounded-[8px] border px-2.5 font-(family-name:--font-headline) text-[13px] transition-colors ${
-            showAdvanced || filter.advancedCount > 0 ? 'border-[#1447E6] bg-[#EEF2FE] font-semibold text-[#1447E6]' : 'border-[#D5D9E0] text-[#0F172A] hover:border-[#9CA3AF]'
+            showAdvanced || filter.advancedCount > 0 ? 'border-[#0F7A55] bg-[#E3F1EE] font-semibold text-[#0F7A55]' : 'border-[#D5D9E0] text-[#023836] hover:border-[#9CA3AF]'
           }`}
         >
           <SlidersHorizontal className="size-3.5" aria-hidden="true" />
           More filters
-          {filter.advancedCount > 0 && <span className="min-w-4 rounded-full bg-[#1447E6] px-1 text-[10px] font-bold text-white">{filter.advancedCount}</span>}
+          {filter.advancedCount > 0 && <span className="min-w-4 rounded-full bg-[#023836] px-1 text-[10px] font-bold text-white">{filter.advancedCount}</span>}
         </button>
       </div>
 
@@ -140,7 +140,7 @@ export default function FiltersCard({ filter, skillCounts, popularSkills, educat
       {popularSkills.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
           <span className={`mr-1 inline-flex items-center gap-1 text-[13px] ${MUTED}`}>
-            <Sparkles className="size-3.5 text-[#1447E6]" aria-hidden="true" />
+            <Sparkles className="size-3.5 text-[#0F7A55]" aria-hidden="true" />
             Popular skills:
           </span>
           {popularSkills.map((name) => {
@@ -152,7 +152,7 @@ export default function FiltersCard({ filter, skillCounts, popularSkills, educat
                 aria-pressed={on}
                 onClick={() => toggleSkill(name)}
                 className={`h-8 rounded-full border px-3 font-(family-name:--font-headline) text-[13px] font-semibold transition-colors ${
-                  on ? 'border-[#1447E6] bg-[#1447E6] text-white' : 'border-[#D5D9E0] bg-white text-[#334155] hover:bg-[#F8F8F6]'
+                  on ? 'border-[#0F7A55] bg-[#023836] text-white' : 'border-[#D5D9E0] bg-white text-[#334155] hover:bg-[#F4F8F6]'
                 }`}
               >
                 {name}
@@ -165,7 +165,7 @@ export default function FiltersCard({ filter, skillCounts, popularSkills, educat
       <div className={`flex flex-wrap items-center justify-between gap-2 border-t border-[#EEF0F3] pt-3 text-[13px] ${MUTED}`}>
         <div className="flex flex-wrap items-center gap-1.5">
           <span>
-            Active filters: <strong className="font-semibold text-[#1447E6]">{filter.activeCount}</strong>
+            Active filters: <strong className="font-semibold text-[#0F7A55]">{filter.activeCount}</strong>
           </span>
           {f.skills.map((skill) => (
             <ActiveSkillChip
@@ -192,7 +192,7 @@ export default function FiltersCard({ filter, skillCounts, popularSkills, educat
           )}
         </div>
         <span>
-          Matching candidates: <strong className="font-semibold text-[#1447E6]">{shownCount}</strong> / {totalCount}
+          Matching candidates: <strong className="font-semibold text-[#0F7A55]">{shownCount}</strong> / {totalCount}
         </span>
       </div>
     </section>

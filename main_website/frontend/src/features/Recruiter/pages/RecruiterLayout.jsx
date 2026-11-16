@@ -128,6 +128,13 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     fetchRecruiterData();
   }, [token]);
 
+  // Switches on the recruiter theme in styles/index.css (landing greens and Inter) for the whole
+  // document, so modals rendered outside this layout get it too.
+  useEffect(() => {
+    document.body.classList.add('recruiter-app');
+    return () => document.body.classList.remove('recruiter-app');
+  }, []);
+
   // Publishes a job from the post-a-job wizard (POST /recruiter/jobs). The wizard
   // shows the returned error (and opens the credit pack on UPGRADE_REQUIRED).
   const handlePostJob = async (jobData) => {
@@ -353,7 +360,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
         ref={mainRef}
         className={`relative flex-1 min-w-0 h-screen overflow-y-auto custom-scrollbar scroll-smooth transition-[margin] duration-300 ease-out ${
           sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
-        } ${isFullBleedPage ? 'pt-16 md:pt-0 bg-[#F8F8F6]' : 'pt-24 md:pt-10 p-6 md:p-10 bg-background'}`}
+        } ${isFullBleedPage ? 'pt-16 md:pt-0 bg-[#F4F8F6]' : 'pt-24 md:pt-10 p-6 md:p-10 bg-background'}`}
       >
         {/* Thin line in the logo gradient along the top of every page (desktop; the
             mobile top bar carries its own). It takes no space and stays while scrolling. */}

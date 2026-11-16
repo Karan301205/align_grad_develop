@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { formatViewedTime, getRecentlyViewedCandidates } from '../../../utils/recentCandidateViews';
 import { ACCOUNT_PAGE, MUTED, PAGE_TITLE } from '../components/accountStyles';
-import CandidateProfileModal from '../components/CandidateProfileModal';
+import CandidateProfileDrawer from '../components/CandidateProfileDrawer';
 import useJobCredits from '../postJob/useJobCredits';
 import { candidateId, educationLine } from '../candidates/candidateData';
 import { attentionItems, dashboardMetrics, greeting, liveJobs } from './dashboardData';
@@ -68,7 +68,7 @@ export default function DashboardPage({ company, user, jobs, candidates = [], ca
   return (
     <div className={ACCOUNT_PAGE}>
       <div className="mx-auto flex max-w-[1240px] flex-col gap-6">
-        <label className={`flex h-11 w-full max-w-[480px] items-center gap-2.5 rounded-[8px] border border-[#E4E6EA] bg-white px-3.5 focus-within:border-[#1447E6] focus-within:ring-2 focus-within:ring-[#1447E6]/20 ${MUTED}`}>
+        <label className={`flex h-11 w-full max-w-[480px] items-center gap-2.5 rounded-[8px] border border-[#E4E6EA] bg-white px-3.5 focus-within:border-[#0F7A55] focus-within:ring-2 focus-within:ring-[#0F7A55]/20 ${MUTED}`}>
           <Search className="size-[18px] shrink-0" aria-hidden="true" />
           <input
             type="search"
@@ -76,10 +76,10 @@ export default function DashboardPage({ company, user, jobs, candidates = [], ca
             placeholder="Search jobs and candidates on this page"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none"
+            className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#023836] placeholder:text-[#6B7280] focus:outline-none"
           />
           {query && (
-            <button type="button" onClick={() => setQuery('')} aria-label="Clear search" className="rounded-[4px] p-0.5 hover:text-[#0F172A]">
+            <button type="button" onClick={() => setQuery('')} aria-label="Clear search" className="rounded-[4px] p-0.5 hover:text-[#023836]">
               <X className="size-4" />
             </button>
           )}
@@ -106,6 +106,7 @@ export default function DashboardPage({ company, user, jobs, candidates = [], ca
           </div>
 
           <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-6">
+            <CreditsCard credits={credits} onBuy={() => goToTab('billing')} />
             <PeopleCard
               id="top-matches-title"
               title="Top matches who haven’t applied"
@@ -113,7 +114,7 @@ export default function DashboardPage({ company, user, jobs, candidates = [], ca
               people={topMatches}
               error={topTalentsError ? `Couldn’t load recommendations. ${topTalentsError}` : candidatesError ? `Couldn’t load candidates. ${candidatesError}` : null}
               empty={live.length === 0 ? 'Post a job with skill bars to get recommendations.' : q ? 'No matches for this search.' : 'No new matches for your live jobs yet.'}
-              aside={(person) => <span className="font-semibold text-[#1447E6]">{person.matchScore}% match</span>}
+              aside={(person) => <span className="font-semibold text-[#0F7A55]">{person.matchScore}% match</span>}
               footer={{ label: 'See all candidates', onClick: () => goToTab('candidates') }}
               onViewProfile={setProfile}
             />
@@ -126,12 +127,11 @@ export default function DashboardPage({ company, user, jobs, candidates = [], ca
               aside={(person) => <span className={MUTED}>Viewed {formatViewedTime(person.viewedAt).toLowerCase()}</span>}
               onViewProfile={setProfile}
             />
-            <CreditsCard credits={credits} onBuy={() => goToTab('billing')} />
           </div>
         </div>
       </div>
 
-      <CandidateProfileModal candidate={profile} onClose={() => setProfile(null)} />
+      <CandidateProfileDrawer candidate={profile} onClose={() => setProfile(null)} />
     </div>
   );
 }

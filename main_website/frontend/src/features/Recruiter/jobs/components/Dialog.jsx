@@ -45,11 +45,11 @@ export default function Dialog({ title, subtitle, onClose, busy = false, width =
         aria-labelledby={titleId}
         tabIndex={-1}
         onMouseDown={(event) => event.stopPropagation()}
-        className={`${CARD} flex max-h-[90vh] w-full ${width} flex-col font-(family-name:--font-headline) text-sm text-[#0F172A] shadow-xl focus:outline-none`}
+        className={`${CARD} flex max-h-[90vh] w-full ${width} flex-col font-(family-name:--font-headline) text-sm text-[#023836] shadow-xl focus:outline-none`}
       >
         <div className="flex items-start justify-between gap-4 border-b border-[#EEF0F3] px-5 py-4">
           <div className="flex min-w-0 flex-col gap-0.5">
-            <h2 id={titleId} className="m-0 text-[17px] leading-snug text-[#0F172A]">
+            <h2 id={titleId} className="m-0 text-[17px] leading-snug text-[#023836]">
               <span className="font-semibold">{title}</span>
             </h2>
             {subtitle && <span className={`text-[13px] ${MUTED}`}>{subtitle}</span>}
@@ -59,7 +59,7 @@ export default function Dialog({ title, subtitle, onClose, busy = false, width =
             onClick={onClose}
             disabled={busy}
             aria-label="Close"
-            className="rounded-[8px] p-1.5 text-[#4B5563] hover:bg-[#F8F8F6] hover:text-[#0F172A] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]"
+            className="rounded-[8px] p-1.5 text-[#4B5563] hover:bg-[#F4F8F6] hover:text-[#023836] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]"
           >
             <AccountIcon name="close" size={18} strokeWidth={2} />
           </button>

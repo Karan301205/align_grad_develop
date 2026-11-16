@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Check, Search, X } from 'lucide-react';
 
 /**
@@ -76,10 +76,10 @@ export default function RecruiterCustomDropdown({
       <button
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
-        className={`h-9 bg-white border text-[13px] font-(family-name:--font-headline) font-normal rounded-[8px] px-2.5 flex items-center justify-between gap-2 transition-colors cursor-pointer hover:border-[#9CA3AF] focus:outline-none focus-visible:border-[#1447E6] focus-visible:ring-2 focus-visible:ring-[#1447E6]/20 select-none ${
+        className={`h-9 bg-white border text-[13px] font-(family-name:--font-headline) font-normal rounded-[8px] px-2.5 flex items-center justify-between gap-2 transition-colors cursor-pointer hover:border-[#9CA3AF] focus:outline-none focus-visible:border-[#0F7A55] focus-visible:ring-2 focus-visible:ring-[#0F7A55]/20 select-none ${
           isActive
-            ? 'border-[#1447E6] text-[#1447E6] font-semibold bg-[#EEF2FE]'
-            : 'border-[#D5D9E0] text-[#0F172A]'
+            ? 'border-[#0F7A55] text-[#0F7A55] font-semibold bg-[#E3F1EE]'
+            : 'border-[#D5D9E0] text-[#023836]'
         } ${buttonClassName}`}
       >
         <div className="flex items-center gap-1.5 min-w-0 truncate">
@@ -110,7 +110,7 @@ export default function RecruiterCustomDropdown({
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   onClick={e => e.stopPropagation()}
-                  className="w-full h-8 pl-7 pr-6 bg-white border border-[#D5D9E0] text-[13px] text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none focus:border-[#1447E6] focus:ring-2 focus:ring-[#1447E6]/20 rounded-[6px]"
+                  className="w-full h-8 pl-7 pr-6 bg-white border border-[#D5D9E0] text-[13px] text-[#023836] placeholder:text-[#6B7280] focus:outline-none focus:border-[#0F7A55] focus:ring-2 focus:ring-[#0F7A55]/20 rounded-[6px]"
                   autoFocus
                 />
                 {searchQuery && (
@@ -156,15 +156,15 @@ export default function RecruiterCustomDropdown({
                       onChange(opt.value);
                       setIsOpen(false);
                     }}
-                    className={`px-3 py-2 rounded-[6px] text-[13px] hover:bg-[#F8F8F6] cursor-pointer flex items-center justify-between gap-2 transition-colors ${
+                    className={`px-3 py-2 rounded-[6px] text-[13px] hover:bg-[#F4F8F6] cursor-pointer flex items-center justify-between gap-2 transition-colors ${
                       isSelected
-                        ? 'bg-[#EEF2FE] text-[#1447E6] font-semibold hover:bg-[#EEF2FE]'
+                        ? 'bg-[#E3F1EE] text-[#0F7A55] font-semibold hover:bg-[#E3F1EE]'
                         : 'text-[#334155]'
                     }`}
                   >
                     <span className="truncate">{opt.label}</span>
                     {isSelected && (
-                      <Check className="w-3.5 h-3.5 text-[#1447E6] shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-[#0F7A55] shrink-0" />
                     )}
                   </div>
                 );

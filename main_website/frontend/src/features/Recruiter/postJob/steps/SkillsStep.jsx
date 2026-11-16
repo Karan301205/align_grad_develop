@@ -44,7 +44,7 @@ export function SkillSearch({ requirements, onAdd, noun = 'job', label = 'Skills
       <div className="flex gap-2">
         <div className="relative min-w-0 flex-1">
           <label
-            className={`flex h-11 items-center gap-2.5 rounded-[8px] border px-3.5 focus-within:border-[#1447E6] focus-within:ring-2 focus-within:ring-[#1447E6]/20 ${MUTED} ${
+            className={`flex h-11 items-center gap-2.5 rounded-[8px] border px-3.5 focus-within:border-[#0F7A55] focus-within:ring-2 focus-within:ring-[#0F7A55]/20 ${MUTED} ${
               problem ? 'border-[#DC2626]' : 'border-[#D5D9E0]'
             }`}
           >
@@ -72,7 +72,7 @@ export function SkillSearch({ requirements, onAdd, noun = 'job', label = 'Skills
                 }
                 if (event.key === 'Escape') setOpen(false);
               }}
-              className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none"
+              className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#023836] placeholder:text-[#6B7280] focus:outline-none"
             />
           </label>
           {open && term && (
@@ -87,7 +87,7 @@ export function SkillSearch({ requirements, onAdd, noun = 'job', label = 'Skills
                       tabIndex={-1}
                       onMouseDown={(event) => event.preventDefault()}
                       onClick={() => add(s.skill)}
-                      className="flex w-full items-center justify-between gap-3 rounded-[6px] px-3 py-2 text-left font-(family-name:--font-headline) text-sm text-[#334155] hover:bg-[#F8F8F6]"
+                      className="flex w-full items-center justify-between gap-3 rounded-[6px] px-3 py-2 text-left font-(family-name:--font-headline) text-sm text-[#334155] hover:bg-[#F4F8F6]"
                     >
                       <span>{s.skill}</span>
                       <span className={`text-xs capitalize ${MUTED}`}>{s.type}</span>
@@ -119,8 +119,8 @@ export function LevelBar({ skillName, value, onChange }) {
             type="button"
             aria-pressed={pressed}
             onClick={() => onChange(level)}
-            className={`h-10 rounded-[6px] font-(family-name:--font-headline) text-[13px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#1447E6] ${
-              pressed ? 'bg-[#1447E6] text-white' : level < value ? 'bg-[#DCE5FD] text-[#1E3A8A] hover:bg-[#C9D6FB]' : 'bg-[#F1F3F6] text-[#4B5563] hover:bg-[#E4E6EA]'
+            className={`h-10 rounded-[6px] font-(family-name:--font-headline) text-[13px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#0F7A55] ${
+              pressed ? 'bg-[#023836] text-white' : level < value ? 'bg-[#E3F1EE] text-[#03443F] hover:bg-[#D3E8E3]' : 'bg-[#F1F3F6] text-[#4B5563] hover:bg-[#E4E6EA]'
             }`}
           >
             {level}
@@ -139,7 +139,7 @@ function SkillRow({ requirement, first, gates, onLevel, onRemove }) {
         <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5">
           <span className="text-[15px] font-semibold">{skillName}</span>
           <span className={`text-[13px] ${MUTED}`}>
-            Minimum <strong className="font-bold text-[#0F172A]">{minRating}</strong> / 10 · {levelLabel(minRating)}
+            Minimum <strong className="font-bold text-[#023836]">{minRating}</strong> / 10 · {levelLabel(minRating)}
           </span>
         </div>
         <TextButton tone="red" onClick={onRemove} aria-label={`Remove ${skillName}`}>
@@ -191,7 +191,7 @@ export default function SkillsStep({ form, pool }) {
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(140px,100%),1fr))] gap-2 text-[13px]">
         {LEVEL_BANDS.map((band) => (
-          <div key={band.label} className="rounded-[8px] bg-[#F8F8F6] px-3 py-2.5">
+          <div key={band.label} className="rounded-[8px] bg-[#F4F8F6] px-3 py-2.5">
             <strong className="font-semibold">
               {band.range} {band.label}
             </strong>

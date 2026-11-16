@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { RefreshCw, Search, X } from 'lucide-react';
-import JobDetailsModal from '../../../components/JobDetailsModal';
+import JobDetailsDrawer from './components/JobDetailsDrawer';
 import EditJobModal from '../components/EditJobModal';
 import AccountIcon from '../components/AccountIcon';
 import { SelectControl } from '../components/AccountControls';
@@ -157,8 +157,8 @@ export default function JobsPage({ jobs = [], loadError, token, goToTab, onViewA
                   role="tab"
                   aria-selected={selected}
                   onClick={() => setTab(id)}
-                  className={`-mb-px h-11 border-b-2 px-3.5 font-(family-name:--font-headline) text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#1447E6] ${
-                    selected ? 'border-[#1447E6] text-[#1447E6]' : 'border-transparent text-[#334155] hover:text-[#0F172A]'
+                  className={`-mb-px h-11 border-b-2 px-3.5 font-(family-name:--font-headline) text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#0F7A55] ${
+                    selected ? 'border-[#0F7A55] text-[#0F7A55]' : 'border-transparent text-[#334155] hover:text-[#023836]'
                   }`}
                 >
                   {label} <span className="font-medium text-[#4B5563]">{counts[id]}</span>
@@ -167,7 +167,7 @@ export default function JobsPage({ jobs = [], loadError, token, goToTab, onViewA
             })}
           </div>
           <div className="flex flex-wrap gap-2 pb-2">
-            <label className={`flex h-10 items-center gap-2 rounded-[8px] border border-[#E4E6EA] bg-white px-3 focus-within:border-[#1447E6] focus-within:ring-2 focus-within:ring-[#1447E6]/20 ${MUTED}`}>
+            <label className={`flex h-10 items-center gap-2 rounded-[8px] border border-[#E4E6EA] bg-white px-3 focus-within:border-[#0F7A55] focus-within:ring-2 focus-within:ring-[#0F7A55]/20 ${MUTED}`}>
               <Search className="size-4 shrink-0" aria-hidden="true" />
               <input
                 type="search"
@@ -175,15 +175,15 @@ export default function JobsPage({ jobs = [], loadError, token, goToTab, onViewA
                 placeholder="Search jobs"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                className="h-full w-40 min-w-0 border-0 bg-transparent text-sm text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none"
+                className="h-full w-40 min-w-0 border-0 bg-transparent text-sm text-[#023836] placeholder:text-[#6B7280] focus:outline-none"
               />
               {query && (
-                <button type="button" onClick={() => setQuery('')} aria-label="Clear search" className="rounded-[4px] p-0.5 hover:text-[#0F172A]">
+                <button type="button" onClick={() => setQuery('')} aria-label="Clear search" className="rounded-[4px] p-0.5 hover:text-[#023836]">
                   <X className="size-4" />
                 </button>
               )}
             </label>
-            <div className="flex h-10 items-center gap-2 rounded-[8px] border border-[#E4E6EA] bg-white pl-3 pr-2 focus-within:border-[#1447E6]">
+            <div className="flex h-10 items-center gap-2 rounded-[8px] border border-[#E4E6EA] bg-white pl-3 pr-2 focus-within:border-[#0F7A55]">
               <span id="jobs-sort-label" className={MUTED}>
                 Sort
               </span>
@@ -194,7 +194,7 @@ export default function JobsPage({ jobs = [], loadError, token, goToTab, onViewA
 
         {jobs.length === 0 && !loadError ? (
           <div className={`${CARD} flex flex-col items-center gap-2 px-6 py-14 text-center`}>
-            <span className="flex size-14 items-center justify-center rounded-[16px] bg-[#EEF2FE] text-[#1447E6]">
+            <span className="flex size-14 items-center justify-center rounded-[16px] bg-[#E3F1EE] text-[#0F7A55]">
               <AccountIcon name="plus" size={24} strokeWidth={2} />
             </span>
             <h2 className="m-0 text-base">
@@ -234,7 +234,7 @@ export default function JobsPage({ jobs = [], loadError, token, goToTab, onViewA
         )}
       </div>
 
-      {detailsJob && <JobDetailsModal job={detailsJob} onClose={() => setDetailsJob(null)} isStudent={false} />}
+      {detailsJob && <JobDetailsDrawer job={detailsJob} onClose={() => setDetailsJob(null)} />}
       {editingJob && <EditJobModal job={editingJob} onClose={() => setEditingJob(null)} onUpdate={handleUpdateJob} />}
 
       {confirm?.kind === 'delete' && (

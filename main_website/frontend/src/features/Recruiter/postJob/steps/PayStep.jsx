@@ -12,7 +12,7 @@ export default function PayStep({ form }) {
 
   return (
     <StepPanel id="step-title" title="Pay and dates" intro="Showing pay helps freshers decide quickly. You can hide it if you prefer.">
-      <div className="flex items-center justify-between gap-4 rounded-[10px] border border-[#E4E6EA] bg-[#F8F8F6] px-4 py-3">
+      <div className="flex items-center justify-between gap-4 rounded-[10px] border border-[#E4E6EA] bg-[#F4F8F6] px-4 py-3">
         <div className="flex flex-col">
           <span className="font-semibold">Show {meta.pay.toLowerCase()} to candidates</span>
           <span className={`text-[13px] ${MUTED}`}>

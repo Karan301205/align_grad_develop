@@ -1,15 +1,14 @@
 import { Award, Star, Target, UserX, Users, Video } from 'lucide-react';
 import { CARD, MUTED } from '../../components/accountStyles';
 
-// Accent per card, from design/jobs_recruiter/candidate-applications.html
-// (the first card uses the recruiter blue instead of the design's green).
+// Accent per card, from the landing-page palette (blue, violet, orchid, green) plus amber and red.
 const TONES = {
-  blue: { bar: 'bg-[#1447E6]', tile: 'bg-[#EEF2FE] text-[#1447E6]' },
-  purple: { bar: 'bg-[#5B3FB0]', tile: 'bg-[#EFEAFC] text-[#5B3FB0]' },
+  blue: { bar: 'bg-[#0167F6]', tile: 'bg-[#E7EDFF] text-[#0052C8]' },
+  violet: { bar: 'bg-[#7B3FD0]', tile: 'bg-[#EFE8FB] text-[#5B3FB0]' },
   amber: { bar: 'bg-[#B26A00]', tile: 'bg-[#FBF1DC] text-[#B26A00]' },
-  green: { bar: 'bg-[#17794F]', tile: 'bg-[#E4F4EC] text-[#17794F]' },
+  green: { bar: 'bg-[#0F7A55]', tile: 'bg-[#E3F5EE] text-[#0F7A55]' },
   red: { bar: 'bg-[#B3261E]', tile: 'bg-[#FDECEA] text-[#B3261E]' },
-  teal: { bar: 'bg-[#0F6B52]', tile: 'bg-[#E0F2EC] text-[#0F6B52]' }
+  plum: { bar: 'bg-[#B42FB8]', tile: 'bg-[#FBE9FC] text-[#B42FB8]' }
 };
 
 function Kpi({ tone, icon: Icon, label, value, note }) {
@@ -34,12 +33,12 @@ export default function ApplicationKpis({ counts, average, allJobs, hasBars }) {
   return (
     <section aria-label="Application summary" className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 xl:grid-cols-6">
       <Kpi tone="blue" icon={Users} label="Total applicants" value={counts.ALL} note={allJobs ? 'Across all your jobs' : 'Applied to this job'} />
-      <Kpi tone="purple" icon={Star} label="Shortlisted" value={counts.SHORTLISTED} note="Moved forward" />
+      <Kpi tone="violet" icon={Star} label="Shortlisted" value={counts.SHORTLISTED} note="Moved forward" />
       <Kpi tone="amber" icon={Video} label="In interviews" value={counts.INTERVIEW} note="Scheduled or in progress" />
       <Kpi tone="green" icon={Award} label="Hires" value={counts.HIRED} note="Hired or selected" />
       <Kpi tone="red" icon={UserX} label="Rejected" value={counts.REJECTED} note="Not moving forward" />
       <Kpi
-        tone="teal"
+        tone="plum"
         icon={Target}
         label="Avg. match"
         value={average == null ? '—' : `${average}%`}

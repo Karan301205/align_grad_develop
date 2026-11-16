@@ -6,6 +6,6 @@ export { default as PostJobPage } from './postJob/PostJobPage';
 export { default as CompanyProfilePage } from './companyProfile/CompanyProfilePage';
 export { default as BillingPage } from './billing/BillingPage';
 export { default as DashboardPage } from './dashboard/DashboardPage';
-export { default as CandidateProfileModal } from './components/CandidateProfileModal';
+export { default as CandidateProfileDrawer } from './components/CandidateProfileDrawer';
 export { default as EditJobModal } from './components/EditJobModal';
 export { default as ScreeningQuestionBuilder } from './components/ScreeningQuestionBuilder';

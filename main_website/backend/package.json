@@ -11,7 +11,7 @@
     "bank:seed": "node scripts/seedQuestionBank.js",
     "bank:verify": "node scripts/verifyQuestionBank.js",
     "bank:loadtest": "DATABASE_URL='' node scripts/loadTestQuestionBank.js",
-    "db:migrate": "node scripts/db/prisma.js migrate deploy",
+    "db:migrate": "node scripts/db/migrateAll.js",
     "db:import-mongo-export": "node scripts/migrate/importMongoExport.js",
     "prisma": "node scripts/db/prisma.js"
   },

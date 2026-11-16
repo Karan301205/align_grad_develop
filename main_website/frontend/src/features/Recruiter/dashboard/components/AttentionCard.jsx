@@ -2,7 +2,7 @@ import { Clock, CreditCard, Plus, UserPlus } from 'lucide-react';
 import { CARD, CARD_TITLE, MUTED, PRIMARY_BUTTON, SECONDARY_BUTTON } from '../../components/accountStyles';
 
 const ICONS = { review: UserPlus, clock: Clock, card: CreditCard, post: Plus };
-const TILE = { blue: 'bg-[#EEF2FE] text-[#1447E6]', orange: 'bg-[#FFF1E8] text-[#C2410C]' };
+const TILE = { brand: 'bg-[#E3F1EE] text-[#0F7A55]', orange: 'bg-[#FFF1E8] text-[#C2410C]' };
 const ACTION_LABEL = { review: 'Review applicants', jobs: 'Manage job', billing: 'Plan & billing', post: 'Post a job' };
 
 /** "Needs your attention": items derived in dashboardData.attentionItems. */

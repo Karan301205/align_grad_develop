@@ -22,8 +22,16 @@ export function hasIntroVideo(profile) {
   return !!(profile?.introVideoUrl && profile.introVideoUrl.trim());
 }
 
+/** Share of the profile (getProfileCompletionDetails) at which the rest of the portal unlocks. */
+export const PLATFORM_UNLOCK_PERCENT = 70;
+
+/**
+ * Jobs, tests, courses and gigs unlock once the General tab is filled in and the profile is at
+ * least PLATFORM_UNLOCK_PERCENT complete. The intro video is not part of that gate: it is only
+ * needed to apply to a job or pitch for a gig (the server checks it too).
+ */
 export function isProfileComplete(profile) {
-  return hasGeneralInfo(profile) && hasIntroVideo(profile);
+  return hasGeneralInfo(profile) && getProfileCompletionDetails(profile).percentage >= PLATFORM_UNLOCK_PERCENT;
 }
 
 export function isCompanyProfileComplete(company) {

@@ -41,9 +41,9 @@ export function Details({ items }) {
         <div key={label} className={`flex min-w-0 flex-col gap-1.5 ${wide ? 'md:col-span-2' : ''}`}>
           <dt className="font-semibold">{label}</dt>
           <dd
-            className={`m-0 flex min-w-0 rounded-[8px] border border-[#D5D9E0] bg-[#F8F8F6] px-3 break-words ${
+            className={`m-0 flex min-w-0 rounded-[8px] border border-[#D5D9E0] bg-[#F4F8F6] px-3 break-words ${
               multiline ? 'min-h-[92px] items-start whitespace-pre-line py-2.5 leading-relaxed' : 'min-h-11 items-center py-2'
-            } ${value ? 'text-[#0F172A]' : 'text-[#6B7280]'}`}
+            } ${value ? 'text-[#023836]' : 'text-[#6B7280]'}`}
           >
             {!value ? 'Not added' : href ? (
               <a href={href} target="_blank" rel="noopener noreferrer" className={`${LINK} min-w-0 break-all`}>

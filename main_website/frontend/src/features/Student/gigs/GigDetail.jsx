@@ -369,6 +369,14 @@ export default function GigDetail({ gig, profile, token, onPitch, onTakeTest, on
               </div>
             ) : !open ? (
               <div className="rounded-[12px] bg-[#EEF0F6] px-3.5 py-3 font-semibold text-[#3B4A6B]">This gig isn’t taking pitches right now.</div>
+            ) : missing.length === 0 && !profile?.introVideoUrl ? (
+              <div className="flex flex-col gap-2.5 rounded-[12px] border border-[#FED7AA] bg-[#FFF3E8] px-3.5 py-3">
+                <span className="font-bold text-[#9A3412]">Add your intro video to pitch</span>
+                <span className={`text-[14px] ${BODY}`}>The recruiter watches it when they open your pitch.</span>
+                <button type="button" onClick={() => goToTab?.('profile', { section: 'video' })} className={`${PRIMARY} h-11`}>
+                  Add intro video
+                </button>
+              </div>
             ) : missing.length === 0 ? (
               <div className="flex flex-col gap-2.5 rounded-[12px] bg-[#EEF2FF] px-3.5 py-3">
                 <span className="font-bold text-[#0B3FA8]">You can pitch for this gig</span>

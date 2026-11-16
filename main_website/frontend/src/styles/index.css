@@ -198,6 +198,32 @@
   --c-on-primary-container: #DBEAFE;
 }
 
+/* ─── Signed-in app fonts and recruiter theme ───
+   RecruiterLayout / StudentLayout add `recruiter-app` / `candidate-app` to <body> while that
+   person is signed in (so portalled modals and the full-screen test layer are covered too).
+   Both apps use Inter instead of Geist; sizes and weights are untouched. The recruiter app also
+   takes the landing-page greens (RecruiterLanding THEME_VARS) in place of the blue tokens. */
+body.recruiter-app,
+body.candidate-app {
+  --font-sans: "Inter", sans-serif;
+}
+body.recruiter-app {
+  --c-background: #F4F8F6;
+  --c-heading: #023836;
+  --c-primary: #023836;
+  --c-primary-container: #E3F1EE;
+  --c-on-primary-container: #03443F;
+  --c-secondary: #0F7A55;
+  --c-secondary-container: #E3F5EE;
+  --c-on-secondary-container: #0F7A55;
+  --brand-gradient: linear-gradient(135deg, #0F7A55 0%, #023836 100%);
+}
+/* `@theme inline` bakes Geist into the font-sans utility, so point it at the scoped variable. */
+body.recruiter-app .font-sans,
+body.candidate-app .font-sans {
+  font-family: var(--font-sans);
+}
+
 @theme inline {
   --color-background: var(--c-background);
   --color-surface: var(--c-surface);
@@ -480,6 +506,32 @@
 
 .animate-scale-up {
   animation: scale-up 0.2s ease-out;
+}
+
+/* Right-hand drawer (recruiter candidate profile): panel slides in, backdrop fades in. */
+@keyframes drawer-in {
+  from { translate: 100% 0; }
+  to { translate: 0 0; }
+}
+
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-drawer-in {
+  animation: drawer-in 0.2s ease-out;
+}
+
+.animate-backdrop-in {
+  animation: backdrop-in 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-drawer-in,
+  .animate-backdrop-in {
+    animation: none;
+  }
 }
 
 /* Connection Loader Custom Animated SVG Styles */

@@ -428,7 +428,7 @@ export default function IntroVideoDialog({ token, currentUrl, onSaved, onClose }
 
       {confirmRemove && (
         <ConfirmDialog title="Remove your intro video?" tone="danger" confirmLabel="Remove video" busyLabel="Removing…" busy={busy} onConfirm={removeVideo} onClose={() => setConfirmRemove(false)}>
-          Your profile needs an intro video to unlock jobs, tests, courses and gigs. You can add a new one any time.
+          You need an intro video to apply to jobs and gigs. You can add a new one any time.
         </ConfirmDialog>
       )}
     </Dialog>

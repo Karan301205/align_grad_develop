@@ -4,6 +4,7 @@ import { CheckCircle2, ChevronLeft, Camera, X } from 'lucide-react';
 import { INDIAN_STATES } from '../../../constants/indianStates';
 import { apiFetch, userMessage } from '../../../services/apiClient';
 import { DOB_MIN, toDateInputValue, todayInputValue } from '../../../utils/dateInput';
+import { PLATFORM_UNLOCK_PERCENT } from '../../../utils/profileCompleteness';
 import {
   COUNTRY_CODES,
   GENDERS,
@@ -370,7 +371,7 @@ export default function ProfileEdit({ data, token, sections, onNavigate, firstTi
           <h1 className="m-0 text-[26px] leading-tight sm:text-[28px]">
             <span className={`${HEADING_FONT} font-bold ${INK}`}>{firstTime ? 'Set up your profile' : 'About you and job preferences'}</span>
           </h1>
-          {firstTime && <p className={`m-0 ${MUTED}`}>Fill this in, then add a short intro video. That unlocks jobs, skill tests, courses and gigs.</p>}
+          {firstTime && <p className={`m-0 ${MUTED}`}>Fill this in, then add the rest of your profile. At {PLATFORM_UNLOCK_PERCENT}% it unlocks jobs, skill tests, courses and gigs.</p>}
         </header>
 
         <SectionBar items={sections} active="about" onSelect={(id) => id !== 'about' && leave(() => onNavigate(id))} />

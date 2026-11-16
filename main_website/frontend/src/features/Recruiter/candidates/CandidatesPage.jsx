@@ -7,7 +7,7 @@ import { ACCOUNT_PAGE, CARD, MUTED, PAGE_TITLE, SECONDARY_BUTTON } from '../comp
 import useEligiblePool from '../postJob/useEligiblePool';
 import { candidateId, comparableJobs, educationOptions, externalResumeUrl, skillName } from './candidateData';
 import useCandidateFilters from './useCandidateFilters';
-import CandidateProfileModal from '../components/CandidateProfileModal';
+import CandidateProfileDrawer from '../components/CandidateProfileDrawer';
 import FiltersCard from './components/FiltersCard';
 import CandidateCard from './components/CandidateCard';
 import CandidateDossier from './components/CandidateDossier';
@@ -31,10 +31,10 @@ function ProjectVideo({ video, onClose }) {
       <div role="dialog" aria-modal="true" aria-label={video.title || 'Project video'} className={`${CARD} flex w-full max-w-3xl flex-col gap-3 p-4 sm:p-5`} onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center justify-between gap-3">
           <span className="flex items-center gap-2 font-semibold">
-            <Video className="size-4 text-[#1447E6]" aria-hidden="true" />
+            <Video className="size-4 text-[#0F7A55]" aria-hidden="true" />
             {video.title || 'Project demo'}
           </span>
-          <button type="button" onClick={onClose} aria-label="Close video" className="rounded-[8px] p-1.5 text-[#4B5563] hover:bg-[#F8F8F6]">
+          <button type="button" onClick={onClose} aria-label="Close video" className="rounded-[8px] p-1.5 text-[#4B5563] hover:bg-[#F4F8F6]">
             <X className="size-4" />
           </button>
         </div>
@@ -170,13 +170,13 @@ export default function CandidatesPage({ candidates = [], loadError, topTalents,
                       type="checkbox"
                       checked={filter.filters.onlyMeets}
                       onChange={(event) => filter.set('onlyMeets')(event.target.checked)}
-                      className="size-[18px] accent-[#1447E6]"
+                      className="size-[18px] accent-[#0F7A55]"
                     />
                     Only people who meet all bars
                   </label>
                 <span className={`flex flex-wrap gap-x-3.5 gap-y-1.5 text-[13px] ${MUTED}`}>
                   {[
-                    ['bg-[#EEF2FE] border-[#C7D4FB]', 'above bar'],
+                    ['bg-[#E3F1EE] border-[#BFE0D8]', 'above bar'],
                     ['bg-[#F1F3F6] border-[#D5D9E0]', 'meets bar'],
                     ['bg-[#FFF1E8] border-[#FED7AA]', 'below bar']
                   ].map(([swatch, label]) => (
@@ -242,7 +242,7 @@ export default function CandidatesPage({ candidates = [], loadError, topTalents,
       {projectVideo && <ProjectVideo video={projectVideo} onClose={() => setProjectVideo(null)} />}
 
       {/* "View profile": the full candidate profile used across the recruiter portal (resume download inside). */}
-      <CandidateProfileModal candidate={profileCandidate} job={job} onClose={() => setProfileCandidate(null)} />
+      <CandidateProfileDrawer candidate={profileCandidate} job={job} onClose={() => setProfileCandidate(null)} />
     </div>
   );
 }

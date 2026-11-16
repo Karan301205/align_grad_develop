@@ -75,7 +75,7 @@ export function attentionItems({ jobs, quota, now = Date.now() }) {
   if (totalWaiting > 0) {
     items.push({
       id: 'review',
-      tone: 'blue',
+      tone: 'brand',
       icon: 'review',
       title: `${plural(totalWaiting, 'applicant')} waiting for review`,
       detail: waiting.slice(0, 3).map((entry) => `${entry.job.title} (${entry.count})`).join(' · '),
@@ -105,7 +105,7 @@ export function attentionItems({ jobs, quota, now = Date.now() }) {
   }
 
   if (live.length === 0) {
-    items.push({ id: 'post', tone: 'blue', icon: 'post', title: 'You have no live jobs', detail: 'Post a job to start receiving applicants who meet your skill bars.', action: 'post' });
+    items.push({ id: 'post', tone: 'brand', icon: 'post', title: 'You have no live jobs', detail: 'Post a job to start receiving applicants who meet your skill bars.', action: 'post' });
   }
   return items;
 }

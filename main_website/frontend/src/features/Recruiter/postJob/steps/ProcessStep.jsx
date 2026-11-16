@@ -32,7 +32,7 @@ function Rounds({ rounds, onChange }) {
         <ol className="m-0 flex list-none flex-col gap-2 p-0">
           {rounds.map((round, index) => (
             <li key={`${round.name}-${index}`} className="flex items-start gap-3 rounded-[10px] border border-[#E4E6EA] px-4 py-3">
-              <span className="pt-px text-[13px] font-bold text-[#1447E6]">#{index + 1}</span>
+              <span className="pt-px text-[13px] font-bold text-[#0F7A55]">#{index + 1}</span>
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="break-words font-semibold">{round.name}</span>
                 <span className={`break-words text-[13px] ${MUTED}`}>{round.description}</span>

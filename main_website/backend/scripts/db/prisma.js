@@ -1,10 +1,11 @@
 /**
- * Runs the Prisma CLI with DATABASE_URL built from the DB_* variables in .env
+ * Runs the Prisma CLI against the default database from .env (DB_TARGET picks
+ * LOCAL_DATABASE_URL or the server built from the DB_* variables)
  * (DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT, DB_SCHEMA). Prisma's schema reads
  * env("DATABASE_URL"), which the CLI can't assemble from parts on its own.
  *
  *   npm run prisma -- migrate status
- *   npm run db:migrate                     # = prisma migrate deploy
+ *   npm run db:migrate                     # migrate deploy on local AND server (scripts/db/migrateAll.js)
  *
  * A DATABASE_URL set in the shell still wins (useful for one-off targets).
  */

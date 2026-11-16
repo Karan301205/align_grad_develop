@@ -4,8 +4,8 @@ import { ACCOUNT_PAGE, CARD, LINK, MUTED, PAGE_TITLE, PRIMARY_BUTTON, SECONDARY_
 import { STATUS_FILTERS, categoryLine, createdLabel, deliveryLabel, gigMatches, hiredIds, money, statusOf } from './gigsData';
 
 const PAGE_SIZE = 8;
-const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]';
-const TH = 'whitespace-nowrap border-b border-[#E4E6EA] bg-[#F1F3F6] px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.03em] text-[#0F172A]';
+const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]';
+const TH = 'whitespace-nowrap border-b border-[#E4E6EA] bg-[#F1F3F6] px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.03em] text-[#023836]';
 const TD = 'whitespace-nowrap border-b border-[#EEF0F3] px-4 py-3.5 align-middle';
 
 function Stat({ label, value }) {
@@ -98,7 +98,7 @@ export default function GigsDirectory({ gigs, loading, loadError, onRetry, refre
 
         <section aria-label="All gigs" className={`${CARD} overflow-hidden`}>
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E4E6EA] px-[18px] py-4">
-            <label className={`flex h-10 min-w-0 max-w-[380px] flex-[1_1_260px] items-center gap-2 rounded-[10px] border border-[#E4E6EA] bg-[#F8F8F6] px-3 focus-within:border-[#1447E6] focus-within:bg-white ${MUTED}`}>
+            <label className={`flex h-10 min-w-0 max-w-[380px] flex-[1_1_260px] items-center gap-2 rounded-[10px] border border-[#E4E6EA] bg-[#F4F8F6] px-3 focus-within:border-[#0F7A55] focus-within:bg-white ${MUTED}`}>
               <Search className="size-4 shrink-0" aria-hidden="true" />
               <input
                 type="search"
@@ -109,7 +109,7 @@ export default function GigsDirectory({ gigs, loading, loadError, onRetry, refre
                   setQuery(event.target.value);
                   setPage(1);
                 }}
-                className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none"
+                className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#023836] placeholder:text-[#6B7280] focus:outline-none"
               />
             </label>
             <div role="group" aria-label="Filter by status" className="flex flex-wrap gap-1.5">
@@ -124,9 +124,9 @@ export default function GigsDirectory({ gigs, loading, loadError, onRetry, refre
                       setFilter(value);
                       setPage(1);
                     }}
-                    className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold ${FOCUS} ${on ? 'border-[#1447E6] bg-[#1447E6] text-white' : 'border-[#E4E6EA] bg-white text-[#4B5563] hover:bg-[#F8F8F6]'}`}
+                    className={`inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold ${FOCUS} ${on ? 'border-[#0F7A55] bg-[#023836] text-white' : 'border-[#E4E6EA] bg-white text-[#4B5563] hover:bg-[#F4F8F6]'}`}
                   >
-                    {label} <b className={on ? 'text-white' : 'text-[#0F172A]'}>{counts[value] || 0}</b>
+                    {label} <b className={on ? 'text-white' : 'text-[#023836]'}>{counts[value] || 0}</b>
                   </button>
                 );
               })}
@@ -138,7 +138,7 @@ export default function GigsDirectory({ gigs, loading, loadError, onRetry, refre
           ) : gigs.length === 0 ? (
             !loadError && (
               <div className="flex flex-col items-center gap-2 px-6 py-[52px] text-center">
-                <span className="mb-1.5 flex size-[60px] items-center justify-center rounded-[16px] bg-[#EEF2FE] text-[#1447E6]">
+                <span className="mb-1.5 flex size-[60px] items-center justify-center rounded-[16px] bg-[#E3F1EE] text-[#0F7A55]">
                   <Briefcase className="size-[26px]" aria-hidden="true" />
                 </span>
                 <h2 className="m-0 text-[17px]">
@@ -194,26 +194,26 @@ export default function GigsDirectory({ gigs, loading, loadError, onRetry, refre
                               onOpen(g);
                             }
                           }}
-                          className="group cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#1447E6]"
+                          className="group cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#0F7A55]"
                         >
-                          <td className={`${TD} group-hover:bg-[#FBFBFA]`}>
+                          <td className={`${TD} group-hover:bg-[#F8FBFA]`}>
                             <div className="flex max-w-[360px] flex-col">
                               <b className="truncate text-[15px] font-semibold">{g.title}</b>
                               <span className={`truncate text-[13px] ${MUTED}`}>{categoryLine(g)}</span>
                             </div>
                           </td>
-                          <td className={`${TD} group-hover:bg-[#FBFBFA]`}>
+                          <td className={`${TD} group-hover:bg-[#F8FBFA]`}>
                             <span className={`inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-bold uppercase tracking-[0.06em] ${status.pill}`}>
                               <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
                               {status.label}
                             </span>
                           </td>
-                          <td className={`${TD} tabular-nums group-hover:bg-[#FBFBFA]`}>{money(g.budget, g.currency)}</td>
-                          <td className={`${TD} group-hover:bg-[#FBFBFA]`}>{deliveryLabel(g.deliveryTime)}</td>
-                          <td className={`${TD} tabular-nums group-hover:bg-[#FBFBFA]`}>{(g.applicants || []).length}</td>
-                          <td className={`${TD} tabular-nums group-hover:bg-[#FBFBFA]`}>{hiredIds(g).length}</td>
-                          <td className={`${TD} ${MUTED} group-hover:bg-[#FBFBFA]`}>{createdLabel(g)}</td>
-                          <td className={`${TD} w-8 ${MUTED} group-hover:bg-[#FBFBFA]`}>
+                          <td className={`${TD} tabular-nums group-hover:bg-[#F8FBFA]`}>{money(g.budget, g.currency)}</td>
+                          <td className={`${TD} group-hover:bg-[#F8FBFA]`}>{deliveryLabel(g.deliveryTime)}</td>
+                          <td className={`${TD} tabular-nums group-hover:bg-[#F8FBFA]`}>{(g.applicants || []).length}</td>
+                          <td className={`${TD} tabular-nums group-hover:bg-[#F8FBFA]`}>{hiredIds(g).length}</td>
+                          <td className={`${TD} ${MUTED} group-hover:bg-[#F8FBFA]`}>{createdLabel(g)}</td>
+                          <td className={`${TD} w-8 ${MUTED} group-hover:bg-[#F8FBFA]`}>
                             <ChevronRight className="size-[18px]" aria-hidden="true" />
                           </td>
                         </tr>
@@ -222,7 +222,7 @@ export default function GigsDirectory({ gigs, loading, loadError, onRetry, refre
                   </tbody>
                 </table>
               </div>
-              <div className={`flex flex-wrap items-center justify-between gap-3 border-t border-[#E4E6EA] bg-[#FAFAF9] px-[18px] py-3 text-[13px] ${MUTED}`}>
+              <div className={`flex flex-wrap items-center justify-between gap-3 border-t border-[#E4E6EA] bg-[#F8FBFA] px-[18px] py-3 text-[13px] ${MUTED}`}>
                 <span>
                   Showing {from}–{Math.min(current * PAGE_SIZE, visible.length)} of {visible.length}
                 </span>
@@ -243,7 +243,7 @@ export default function GigsDirectory({ gigs, loading, loadError, onRetry, refre
                           aria-label={`Page ${p}`}
                           aria-current={p === current ? 'page' : undefined}
                           onClick={() => setPage(p)}
-                          className={`h-[34px] min-w-[34px] rounded-[8px] border text-[13px] font-semibold ${FOCUS} ${p === current ? 'border-[#1447E6] bg-[#1447E6] text-white' : 'border-[#E4E6EA] bg-white text-[#0F172A] hover:bg-[#F8F8F6]'}`}
+                          className={`h-[34px] min-w-[34px] rounded-[8px] border text-[13px] font-semibold ${FOCUS} ${p === current ? 'border-[#0F7A55] bg-[#023836] text-white' : 'border-[#E4E6EA] bg-white text-[#023836] hover:bg-[#F4F8F6]'}`}
                         >
                           {p}
                         </button>

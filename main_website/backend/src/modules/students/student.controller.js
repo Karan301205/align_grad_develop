@@ -16,17 +16,17 @@ const assessmentRepo = require('../../services/questionBank/repositories/assessm
 const { selectQuestions } = require('../../services/questionBank/selection');
 const { scoreAnswers, passMark, countUnanswered } = require('../../services/questionBank/scoring');
 
-// A candidate must fill every General-tab field and upload an intro video before
-// applying to jobs or taking skill tests (same rule as the frontend's
-// utils/profileCompleteness.js isProfileComplete). Returns the error for the
-// first missing piece, or null when the profile is complete.
+// A candidate must fill every General-tab field before applying to jobs or taking skill
+// tests, and upload an intro video before applying (`needsVideo`). The rest of the portal
+// unlocks in the frontend at 70% of the profile (utils/profileCompleteness.js), and the video
+// is not needed for that. Returns the error for the first missing piece, or null.
 const REQUIRED_GENERAL_FIELDS = ['name', 'username', 'bio', 'gender', 'email', 'dob', 'phone'];
-function profileCompletionError(profile, action) {
+function profileCompletionError(profile, action, { needsVideo = false } = {}) {
   const filled = (value) => typeof value === 'string' && value.trim().length > 0;
   if (!REQUIRED_GENERAL_FIELDS.every((field) => filled(profile[field]))) {
     return `Please complete all required fields in your profile General tab before ${action}.`;
   }
-  if (!filled(profile.introVideoUrl)) {
+  if (needsVideo && !filled(profile.introVideoUrl)) {
     return `Please upload an introduction video in your profile before ${action}.`;
   }
   return null;
@@ -341,7 +341,7 @@ exports.applyJob = async (req, res) => {
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const incompleteError = profileCompletionError(profile, 'applying to opportunities');
+    const incompleteError = profileCompletionError(profile, 'applying to opportunities', { needsVideo: true });
     if (incompleteError) {
       return res.status(400).json({ error: incompleteError });
     }
@@ -531,8 +531,8 @@ exports.generateSkillTest = async (req, res) => {
   }
 
   try {
-    // Skill tests unlock only once the General tab and intro video are done
-    // (the "Your Tests" tab is locked in the UI until then).
+    // Skill tests need the General tab filled in (the "Your Tests" tab is locked in the UI
+    // until 70% of the profile is done). The intro video is only needed to apply.
     const profile = await prisma.profile.findUnique({ where: { userId: req.user.id } });
     if (!profile) {
       return res.status(404).json({ error: 'Profile not found' });

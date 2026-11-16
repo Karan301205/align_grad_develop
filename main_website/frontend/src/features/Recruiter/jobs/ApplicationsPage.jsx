@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { ArrowLeft, Download, RefreshCw, Search, Users, X } from 'lucide-react';
 import ResumePdfTemplate from '../../../components/ResumePdfTemplate';
 import { openResumePdfInNewTab } from '../../../services/resumePdf';
-import CandidateProfileModal from '../components/CandidateProfileModal';
+import CandidateProfileDrawer from '../components/CandidateProfileDrawer';
 import { SelectControl } from '../components/AccountControls';
 import { ACCOUNT_PAGE, LINK, MUTED, PAGE_TITLE, SECONDARY_BUTTON } from '../components/accountStyles';
 import { externalResumeUrl } from '../candidates/candidateData';
@@ -27,13 +27,13 @@ import ApplicationKpis from './components/ApplicationKpis';
 import ApplicationsTable from './components/ApplicationsTable';
 import ManageApplicationModal from './components/ManageApplicationModal';
 
-const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]';
+const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]';
 const resumeElementId = (row) => `applications-resume-${row.app.id}`;
 
 function EmptyState({ title, text, children }) {
   return (
     <div className="flex flex-col items-center gap-2 px-6 py-14 text-center whitespace-normal">
-      <span className="mb-1.5 flex size-14 items-center justify-center rounded-[16px] bg-[#EEF2FE] text-[#1447E6]">
+      <span className="mb-1.5 flex size-14 items-center justify-center rounded-[16px] bg-[#E3F1EE] text-[#0F7A55]">
         <Users className="size-6" aria-hidden="true" />
       </span>
       <h3 className="m-0 text-base">
@@ -163,7 +163,7 @@ export default function ApplicationsPage({ job: initialJob = null, jobs = [], lo
         text={job ? 'Candidates who apply for this job will appear here. Share the job link to start receiving applications.' : 'Candidates who apply for your jobs will appear here.'}
       >
         {job && (
-          <button type="button" onClick={copyLink} className={`h-8 rounded-[8px] border border-[#C7D3FB] bg-[#EEF2FE] px-3 text-[12.5px] font-semibold text-[#1447E6] hover:bg-[#E0E8FD] ${FOCUS}`}>
+          <button type="button" onClick={copyLink} className={`h-8 rounded-[8px] border border-[#BFE0D8] bg-[#E3F1EE] px-3 text-[12.5px] font-semibold text-[#0F7A55] hover:bg-[#D3E8E3] ${FOCUS}`}>
             Copy job link
           </button>
         )}
@@ -188,7 +188,7 @@ export default function ApplicationsPage({ job: initialJob = null, jobs = [], lo
               type="button"
               onClick={onBack}
               aria-label="Back to jobs"
-              className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-[12px] border border-[#E4E6EA] bg-white text-[#0F172A] hover:bg-[#F8F8F6] ${FOCUS}`}
+              className={`mt-1 flex size-10 shrink-0 items-center justify-center rounded-[12px] border border-[#E4E6EA] bg-white text-[#023836] hover:bg-[#F4F8F6] ${FOCUS}`}
             >
               <ArrowLeft className="size-[18px]" aria-hidden="true" />
             </button>
@@ -204,7 +204,7 @@ export default function ApplicationsPage({ job: initialJob = null, jobs = [], lo
                 <span aria-hidden="true" className="text-[#9CA3AF]">
                   /
                 </span>
-                <span aria-current="page" className="font-semibold text-[#1447E6]">
+                <span aria-current="page" className="font-semibold text-[#0F7A55]">
                   Applications
                 </span>
               </nav>
@@ -212,7 +212,7 @@ export default function ApplicationsPage({ job: initialJob = null, jobs = [], lo
                 <h1 className={PAGE_TITLE}>
                   <span className="font-bold">Candidate applications</span>
                 </h1>
-                {job && <span className="inline-flex h-6 items-center rounded-full bg-[#EEF2FE] px-2.5 text-xs font-semibold text-[#1447E6]">{typeLabel(job)}</span>}
+                {job && <span className="inline-flex h-6 items-center rounded-full bg-[#E3F1EE] px-2.5 text-xs font-semibold text-[#0F7A55]">{typeLabel(job)}</span>}
               </div>
             </div>
           </div>
@@ -240,7 +240,7 @@ export default function ApplicationsPage({ job: initialJob = null, jobs = [], lo
 
         <section aria-label="Filters" className="flex flex-col gap-3.5 rounded-[12px] border border-[#E4E6EA] bg-white px-[18px] py-4">
           <div className="flex flex-wrap items-center gap-2.5">
-            <label className={`flex h-11 min-w-0 flex-[1_1_360px] items-center gap-2.5 rounded-[8px] border border-[#E4E6EA] bg-[#F8F8F6] px-3.5 focus-within:border-[#1447E6] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#1447E6]/20 ${MUTED}`}>
+            <label className={`flex h-11 min-w-0 flex-[1_1_360px] items-center gap-2.5 rounded-[8px] border border-[#E4E6EA] bg-[#F4F8F6] px-3.5 focus-within:border-[#0F7A55] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0F7A55]/20 ${MUTED}`}>
               <Search className="size-[18px] shrink-0" aria-hidden="true" />
               <span className="sr-only">Search applicants</span>
               <input
@@ -248,10 +248,10 @@ export default function ApplicationsPage({ job: initialJob = null, jobs = [], lo
                 value={query}
                 onChange={(event) => update(setQuery)(event.target.value)}
                 placeholder="Search by name, username, title, email, phone or skill"
-                className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#0F172A] placeholder:text-[#6B7280] focus:outline-none"
+                className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-[#023836] placeholder:text-[#6B7280] focus:outline-none"
               />
               {query && (
-                <button type="button" onClick={() => update(setQuery)('')} aria-label="Clear search" className="rounded-[4px] p-0.5 hover:text-[#0F172A]">
+                <button type="button" onClick={() => update(setQuery)('')} aria-label="Clear search" className="rounded-[4px] p-0.5 hover:text-[#023836]">
                   <X className="size-4" />
                 </button>
               )}
@@ -274,7 +274,7 @@ export default function ApplicationsPage({ job: initialJob = null, jobs = [], lo
                   aria-selected={selected}
                   onClick={() => update(setStage)(id)}
                   className={`inline-flex h-9 items-center gap-2 rounded-[8px] border px-3 font-(family-name:--font-headline) text-[13px] font-semibold transition-colors ${FOCUS} ${
-                    selected ? 'border-[#1447E6] bg-[#1447E6] text-white' : 'border-[#E4E6EA] bg-white text-[#334155] hover:bg-[#F8F8F6]'
+                    selected ? 'border-[#0F7A55] bg-[#023836] text-white' : 'border-[#E4E6EA] bg-white text-[#334155] hover:bg-[#F4F8F6]'
                   }`}
                 >
                   {label}
@@ -318,7 +318,7 @@ export default function ApplicationsPage({ job: initialJob = null, jobs = [], lo
           ))}
       </div>
 
-      <CandidateProfileModal candidate={profile?.candidate || null} job={profile?.job || null} onClose={() => setProfile(null)} />
+      <CandidateProfileDrawer candidate={profile?.candidate || null} job={profile?.job || null} onClose={() => setProfile(null)} />
 
       {managing && <ManageApplicationModal key={managing.app.id} row={managing} token={token} onClose={() => setManagingId(null)} onSaved={onSaved} />}
     </div>

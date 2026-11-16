@@ -28,7 +28,7 @@ export default function CandidatePreview({ values: v, company }) {
           {company?.logoUrl ? (
             <img src={company.logoUrl} alt="" className="size-12 shrink-0 rounded-[10px] border border-[#E4E6EA] bg-white object-contain p-1" />
           ) : (
-            <div aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center rounded-[10px] bg-[#1447E6] text-xl font-bold text-white">
+            <div aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center rounded-[10px] bg-[#023836] text-xl font-bold text-white">
               {(company?.name || '?').trim().charAt(0).toUpperCase()}
             </div>
           )}
@@ -39,7 +39,7 @@ export default function CandidatePreview({ values: v, company }) {
               {company?.verified && (
                 <>
                   {' · '}
-                  <span className="font-semibold text-[#1E3A8A]">Verified</span>
+                  <span className="font-semibold text-[#03443F]">Verified</span>
                 </>
               )}
               {v.location.trim() && ` · ${v.location.trim()}`}
@@ -64,7 +64,7 @@ export default function CandidatePreview({ values: v, company }) {
               <div key={req.skillName} className="flex items-center gap-2.5 text-[13px]">
                 <span className="w-[104px] shrink-0 break-words font-semibold leading-tight">{req.skillName}</span>
                 <div role="img" aria-label={`${req.skillName}: minimum ${req.minRating} of 10`} className="relative h-2 flex-1 rounded-[4px] bg-[#EEF0F3]">
-                  <div className="absolute inset-y-0 left-0 rounded-[4px] bg-[#DCE5FD]" style={{ width: `${req.minRating * 10}%` }} />
+                  <div className="absolute inset-y-0 left-0 rounded-[4px] bg-[#E3F1EE]" style={{ width: `${req.minRating * 10}%` }} />
                   <div className="absolute -inset-y-1 w-0.5 bg-[#0F172A]" style={{ left: `calc(${req.minRating * 10}% - 1px)` }} />
                 </div>
                 <span className="w-[52px] shrink-0 text-right tabular-nums">

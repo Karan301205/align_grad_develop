@@ -7,26 +7,9 @@ import { Field, PillGroup, RequiredMark, StepFooter, StepPanel } from '../compon
 
 const asOptions = (list) => list.map((item) => [item, item]);
 
-/** "W  WhiteScholars · Software & IT · Hyderabad" from the company profile. */
-function CompanyChip({ company }) {
-  const line = [company?.name, company?.industry, company?.location].filter(Boolean).join(' · ');
-  return (
-    <span className="inline-flex items-center gap-2 self-start rounded-[8px] bg-[#F8F8F6] px-2.5 py-1.5 text-[13px] text-[#334155]">
-      {company?.logoUrl ? (
-        <img src={company.logoUrl} alt="" className="size-5 rounded-[5px] border border-[#E4E6EA] bg-white object-contain" />
-      ) : (
-        <span aria-hidden="true" className="flex size-5 items-center justify-center rounded-[5px] bg-[#1447E6] text-[11px] font-bold text-white">
-          {(company?.name || '?').trim().charAt(0).toUpperCase()}
-        </span>
-      )}
-      {line}
-    </span>
-  );
-}
-
 function OpeningsStepper({ value, onChange, error }) {
   const count = Number(value) || 0;
-  const stepButton = 'size-11 rounded-[8px] border border-[#D5D9E0] bg-white font-(family-name:--font-headline) text-lg font-semibold hover:bg-[#F8F8F6] disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]';
+  const stepButton = 'size-11 rounded-[8px] border border-[#D5D9E0] bg-white font-(family-name:--font-headline) text-lg font-semibold hover:bg-[#F4F8F6] disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]';
   return (
     <div className="flex items-center gap-2">
       <button type="button" aria-label="Fewer openings" disabled={count <= 1} onClick={() => onChange(String(Math.max(1, count - 1)))} className={stepButton}>
@@ -48,13 +31,11 @@ function OpeningsStepper({ value, onChange, error }) {
   );
 }
 
-export default function BasicsStep({ form, company, onCancel }) {
+export default function BasicsStep({ form, onCancel }) {
   const { values: v, setField, errors } = form;
   return (
     <StepPanel id="step-title" title="What are you hiring for?">
-      <div className="-mt-3.5">
-        {/* <CompanyChip company={company} /> */}
-      </div>
+      <div className="-mt-3.5" />
 
       <fieldset className="m-0 flex flex-col gap-2.5 border-0 p-0">
         <legend className="mb-2.5 p-0 font-semibold">
@@ -70,8 +51,8 @@ export default function BasicsStep({ form, company, onCancel }) {
                 type="button"
                 aria-pressed={pressed}
                 onClick={() => setField('opportunityType', type.value)}
-                className={`flex flex-col items-start gap-0.5 rounded-[10px] text-left font-(family-name:--font-headline) text-sm text-[#0F172A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6] ${
-                  pressed ? 'border-2 border-[#1447E6] bg-[#EEF2FE] px-[13px] py-[11px]' : 'border border-[#D5D9E0] bg-white px-3.5 py-3 hover:bg-[#F8F8F6]'
+                className={`flex flex-col items-start gap-0.5 rounded-[10px] text-left font-(family-name:--font-headline) text-sm text-[#023836] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55] ${
+                  pressed ? 'border-2 border-[#0F7A55] bg-[#E3F1EE] px-[13px] py-[11px]' : 'border border-[#D5D9E0] bg-white px-3.5 py-3 hover:bg-[#F4F8F6]'
                 }`}
               >
                 <span className="font-semibold">{type.title}</span>

@@ -19,7 +19,7 @@ function PhotoTile({ url, index, removing, onRemove }) {
         onClick={() => onRemove(url)}
         disabled={removing}
         aria-label={`Remove office photo ${index + 1}`}
-        className="absolute right-2 top-2 flex size-8 items-center justify-center rounded-full bg-white/95 text-[#B91C1C] opacity-0 shadow-sm transition-opacity hover:bg-white focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-[#1447E6] group-hover:opacity-100 disabled:opacity-100"
+        className="absolute right-2 top-2 flex size-8 items-center justify-center rounded-full bg-white/95 text-[#B91C1C] opacity-0 shadow-sm transition-opacity hover:bg-white focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-[#0F7A55] group-hover:opacity-100 disabled:opacity-100"
       >
         {removing ? <Spinner className="border-[#B91C1C]" /> : <AccountIcon name="close" size={16} strokeWidth={2} />}
       </button>
@@ -40,7 +40,7 @@ export default function ShowcaseCard({ linkedin, onLinkedinChange, linkedinError
   return (
     <Card labelledBy="showcase-title" className="gap-4">
       <div className="flex flex-col gap-0.5">
-        <h2 id="showcase-title" className="m-0 text-base leading-[1.45] tracking-normal text-[#0F172A]">
+        <h2 id="showcase-title" className="m-0 text-base leading-[1.45] tracking-normal text-[#023836]">
           <span className="font-semibold">Show candidates where they’ll work</span>
         </h2>
         <span className={MUTED}>Office photos save straight away and can be changed any time, even during review.</span>
@@ -76,9 +76,9 @@ export default function ShowcaseCard({ linkedin, onLinkedinChange, linkedinError
                 type="button"
                 onClick={() => fileInput.current?.click()}
                 disabled={uploading}
-                className="flex h-[110px] w-full flex-col items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-[#9CA3AF] bg-[#F8F8F6] font-(family-name:--font-headline) text-sm font-semibold text-[#334155] transition-colors hover:bg-[#F1F3F6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6] disabled:cursor-wait"
+                className="flex h-[110px] w-full flex-col items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-[#9CA3AF] bg-[#F4F8F6] font-(family-name:--font-headline) text-sm font-semibold text-[#334155] transition-colors hover:bg-[#F1F3F6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55] disabled:cursor-wait"
               >
-                {uploading ? <Spinner className="size-5 border-[#1447E6]" /> : <AccountIcon name="plus" size={22} />}
+                {uploading ? <Spinner className="size-5 border-[#0F7A55]" /> : <AccountIcon name="plus" size={22} />}
                 {uploading ? 'Uploading…' : 'Add photos'}
               </button>
             </li>

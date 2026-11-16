@@ -4,7 +4,7 @@ import { Spinner } from '../../components/AccountControls';
 
 function CheckMark({ done }) {
   return done ? (
-    <span aria-hidden="true" className="flex size-[22px] shrink-0 items-center justify-center rounded-full bg-[#1447E6] text-white">
+    <span aria-hidden="true" className="flex size-[22px] shrink-0 items-center justify-center rounded-full bg-[#023836] text-white">
       <AccountIcon name="check" size={12} strokeWidth={3.5} />
     </span>
   ) : (
@@ -23,7 +23,7 @@ export default function ChecklistCard({ items, formId, editable, submitting, res
       aria-labelledby="checklist-title"
       className="flex min-w-0 grow basis-[280px] flex-col gap-3.5 rounded-[12px] border border-[#E4E6EA] bg-white p-[22px] lg:sticky lg:top-8"
     >
-      <h2 id="checklist-title" className="m-0 text-base leading-[1.45] tracking-normal text-[#0F172A]">
+      <h2 id="checklist-title" className="m-0 text-base leading-[1.45] tracking-normal text-[#023836]">
         <span className="font-semibold">Profile checklist</span>
       </h2>
       <span className={MUTED}>

@@ -41,11 +41,12 @@ function CodeBlock({ lang, code }) {
 /**
  * One skill test, full screen (design: Web — skill test start, questions, result):
  * the intro, ten questions one at a time (every one must be answered; the server
- * checks too), then the score with how each subtopic went. Questions come from
+ * checks too), then the score with how each subtopic went, as a popup over the questions
+ * while the sidebar slides back into view. Questions come from
  * POST /student/tests/generate (no answers) and are scored by POST /student/tests/submit.
  * `onFinished()` refreshes the profile, skills and jobs after a result.
  */
-export default function TestRunner({ test, previous, testedAt, token, jobs, onClose, onFinished, onOpenJob, goToTab }) {
+export default function TestRunner({ test, previous, testedAt, token, jobs, sidebarExpanded, onClose, onFinished, onOpenJob, goToTab }) {
   const skill = test.skill;
   const [stage, setStage] = useState('intro'); // intro | loading | asking | done
   const [error, setError] = useState('');
@@ -59,11 +60,13 @@ export default function TestRunner({ test, previous, testedAt, token, jobs, onCl
   const [now, setNow] = useState(() => Date.now());
   const [matchedBefore] = useState(() => new Set(jobs.filter((job) => job.matched).map((job) => job.id)));
   const questionRef = useRef(null);
+  const dialogRef = useRef(null);
 
   const total = quiz?.questions.length || 10;
   const answered = answers.filter((answer) => answer !== null).length;
   const timeLeft = quiz ? quiz.startedAt + TEST_MINUTES * 60000 - now : TEST_MINUTES * 60000;
   const expired = stage === 'asking' && timeLeft <= 0;
+  const done = stage === 'done';
 
   useEffect(() => {
     if (stage !== 'asking') return undefined;
@@ -74,6 +77,10 @@ export default function TestRunner({ test, previous, testedAt, token, jobs, onCl
   useEffect(() => {
     if (stage === 'asking') questionRef.current?.focus({ preventScroll: false });
   }, [stage, index]);
+
+  useEffect(() => {
+    if (done) dialogRef.current?.focus();
+  }, [done]);
 
   const start = async () => {
     setStage('loading');
@@ -195,7 +202,7 @@ export default function TestRunner({ test, previous, testedAt, token, jobs, onCl
         </div>
       </section>
     );
-  } else if (stage === 'asking') {
+  } else {
     body = (
       <div className="flex w-full max-w-[1140px] flex-wrap items-start justify-center gap-6">
         <section className={`${PANEL} flex min-w-0 max-w-[800px] flex-[1_1_560px] flex-col gap-5 p-5 sm:p-8`}>
@@ -290,7 +297,11 @@ export default function TestRunner({ test, previous, testedAt, token, jobs, onCl
         </aside>
       </div>
     );
-  } else {
+  }
+
+  // Result popup over the questions; the layer below it is inert, so only the popup takes input.
+  let resultDialog = null;
+  if (done) {
     const score = result.rating;
     const before = quiz?.before || 0;
     const diff = before > 0 ? score - before : null;
@@ -299,114 +310,124 @@ export default function TestRunner({ test, previous, testedAt, token, jobs, onCl
     const opened = jobs.filter((job) => job.matched && !job.applied && !matchedBefore.has(job.id));
     const percent = Math.round((result.correct / result.total) * 100);
     const headline = diff === null ? `${skill} is now ${score}/10.` : diff > 0 ? `${skill} is now ${score}. Nice work.` : diff === 0 ? `${skill} stays at ${score}.` : `${skill} is now ${score}.`;
-    body = (
-      <section className={`${PANEL} flex w-full max-w-[820px] flex-wrap gap-8 p-6 sm:p-9`}>
-        <div className="flex flex-[0_0_auto] flex-col items-center gap-2">
-          <div role="img" aria-label={`${result.correct} out of ${result.total} right`} className="flex size-40 items-center justify-center rounded-full" style={{ background: `conic-gradient(#0167F6 0%, #6378F9 ${percent}%, #E8EEFF ${percent}% 100%)` }}>
-            <span className="flex size-32 flex-col items-center justify-center rounded-full bg-white">
-              <span className={`${HEADING_FONT} text-[46px] font-bold leading-none ${INK}`}>{result.correct}</span>
-              <span className={`text-[14px] ${MUTED}`}>out of {result.total}</span>
-            </span>
-          </div>
-          <span className={`rounded-full px-2.5 py-[3px] text-[13px] font-bold ${diff === null ? 'bg-[#E8EEFF] text-[#0B3FA8]' : diff > 0 ? 'bg-[#E3F5EE] text-[#0B5E41]' : diff < 0 ? 'bg-[#FFF3E0] text-[#8A3F06]' : 'bg-[#EEF0F6] text-[#3B4A6B]'}`}>
-            {diff === null ? 'First test' : diff > 0 ? `+${diff} from ${before}` : diff < 0 ? `−${-diff} from ${before}` : 'Same as before'}
-          </span>
-        </div>
-        <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-4">
-          <h1 className="m-0 text-[26px] leading-tight">
-            <span className={`${HEADING_FONT} font-bold ${INK}`}>{headline}</span>
-          </h1>
-          <p className={`m-0 ${BODY}`}>
-            You got {result.correct} of {result.total} questions right. Your profile now shows {skill} {score}/10 · tested {formatShortDate(new Date())}.
-          </p>
-          <p className={`m-0 rounded-[12px] px-4 py-3 font-semibold ${result.passed ? 'bg-[#E3F5EE] text-[#0B5E41]' : 'bg-[#FFF3E0] text-[#8A3F06]'}`}>
-            {result.passed ? `${result.passMark || PASS_MARK} or more right, so recruiters see ${skill} as verified.` : `Verified needs ${result.passMark || PASS_MARK} right. Practise the topics below and take it again.`}
-          </p>
-
-          {topics.length > 0 && (
-            <section aria-labelledby="by-topic" className="flex flex-col gap-2.5">
-              <h2 id="by-topic" className="m-0 text-[16px]">
-                <span className={`${HEADING_FONT} font-bold ${INK}`}>How you did by topic</span>
-              </h2>
-              <ul className="m-0 flex list-none flex-col gap-2 p-0">
-                {topics.map((topic) => (
-                  <li key={topic.name} className="grid grid-cols-[minmax(0,1fr)_120px_52px] items-center gap-3">
-                    <span className={`min-w-0 truncate font-semibold ${INK}`}>{topic.name}</span>
-                    <span aria-hidden="true" className="h-2 rounded-full bg-[#E8EEFF]">
-                      <span className={`block h-2 rounded-full ${topic.correct === topic.total ? 'bg-[#0F7A55]' : topic.correct === 0 ? 'bg-[#C8281C]' : 'bg-[#E0782F]'}`} style={{ width: `${(topic.correct / topic.total) * 100}%` }} />
-                    </span>
-                    <span className={`text-right tabular-nums text-[14px] font-semibold ${BODY}`}>
-                      {topic.correct}/{topic.total}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              {focus.length > 0 ? (
-                <div className="flex flex-col gap-1.5 rounded-[12px] border border-[#FED7AA] bg-[#FFF8F1] px-4 py-3">
-                  <span className="font-bold text-[#9A3412]">Focus on</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {focus.map((topic) => (
-                      <span key={topic.name} className="rounded-full bg-white px-2.5 py-1 text-[13.5px] font-semibold text-[#8A3F06] ring-1 ring-[#FED7AA]">
-                        {topic.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <p className="m-0 font-semibold text-[#0B5E41]">Every topic right. Well done.</p>
-              )}
-            </section>
-          )}
-
-          {opened.length > 0 && (
-            <div className="flex flex-col gap-2.5 rounded-[14px] bg-[linear-gradient(135deg,#E8EEFF,#F1ECFF)] p-4">
-              <span className="text-[12.5px] font-bold uppercase tracking-[0.05em] text-[#0B3FA8]">{opened.length === 1 ? 'New job open to you' : `${opened.length} new jobs open to you`}</span>
-              <span className="flex items-center gap-3">
-                <span aria-hidden="true" style={{ background: tileColor(companyOf(opened[0]) || opened[0].title) }} className="flex size-10 shrink-0 items-center justify-center rounded-[10px] font-bold text-white">
-                  {initialOf(companyOf(opened[0]) || opened[0].title)}
+    resultDialog = (
+      <div className="absolute inset-0 z-20 overflow-y-auto bg-[#0E1B3D]/45 animate-backdrop-in">
+        <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
+          <section ref={dialogRef} role="dialog" aria-labelledby="test-result-title" tabIndex={-1} className={`${PANEL} flex w-full max-w-[720px] flex-wrap gap-6 p-5 outline-none animate-scale-up sm:p-7`}>
+            <div className="flex flex-[0_0_auto] flex-col items-center gap-2">
+              <div role="img" aria-label={`${result.correct} out of ${result.total} right`} className="flex size-32 items-center justify-center rounded-full" style={{ background: `conic-gradient(#0167F6 0%, #6378F9 ${percent}%, #E8EEFF ${percent}% 100%)` }}>
+                <span className="flex size-[102px] flex-col items-center justify-center rounded-full bg-white">
+                  <span className={`${HEADING_FONT} text-[38px] font-bold leading-none ${INK}`}>{result.correct}</span>
+                  <span className={`text-[14px] ${MUTED}`}>out of {result.total}</span>
                 </span>
-                <span className="flex min-w-0 flex-col">
-                  <span className={`font-bold ${INK}`}>{[opened[0].title, companyOf(opened[0])].filter(Boolean).join(' · ')}</span>
-                  <span className={`text-[14px] ${BODY}`}>{[placeText(opened[0]), payText(opened[0]), 'you now meet every bar'].filter(Boolean).join(' · ')}</span>
-                </span>
+              </div>
+              <span className={`rounded-full px-2.5 py-[3px] text-[13px] font-bold ${diff === null ? 'bg-[#E8EEFF] text-[#0B3FA8]' : diff > 0 ? 'bg-[#E3F5EE] text-[#0B5E41]' : diff < 0 ? 'bg-[#FFF3E0] text-[#8A3F06]' : 'bg-[#EEF0F6] text-[#3B4A6B]'}`}>
+                {diff === null ? 'First test' : diff > 0 ? `+${diff} from ${before}` : diff < 0 ? `−${-diff} from ${before}` : 'Same as before'}
               </span>
-              <button type="button" onClick={() => onOpenJob?.(opened[0])} className={`${PRIMARY} h-11 self-start px-5`}>
-                View and apply
-              </button>
             </div>
-          )}
+            <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-4">
+              <h2 id="test-result-title" className="m-0 text-[24px] leading-tight">
+                <span className={`${HEADING_FONT} font-bold ${INK}`}>{headline}</span>
+              </h2>
+              <p className={`m-0 ${BODY}`}>
+                You got {result.correct} of {result.total} questions right. Your profile now shows {skill} {score}/10 · tested {formatShortDate(new Date())}.
+              </p>
+              <p className={`m-0 rounded-[12px] px-4 py-3 font-semibold ${result.passed ? 'bg-[#E3F5EE] text-[#0B5E41]' : 'bg-[#FFF3E0] text-[#8A3F06]'}`}>
+                {result.passed ? `${result.passMark || PASS_MARK} or more right, so recruiters see ${skill} as verified.` : `Verified needs ${result.passMark || PASS_MARK} right. Practise the topics below and take it again.`}
+              </p>
 
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={onClose} className={`${PRIMARY} h-11 px-5`}>
-              Back to skills
-            </button>
-            <button type="button" onClick={restart} className={`${SECONDARY} h-11 px-4`}>
-              <RotateCcw aria-hidden="true" className="size-4" /> Retake test
-            </button>
-            {!result.passed && (
-              <button type="button" onClick={() => goToTab?.('courses', { skill })} className={`${SECONDARY} h-11 px-4`}>
-                <GraduationCap aria-hidden="true" className="size-4" /> Learn {skill}
-              </button>
-            )}
-          </div>
+              {topics.length > 0 && (
+                <section aria-labelledby="by-topic" className="flex flex-col gap-2.5">
+                  <h2 id="by-topic" className="m-0 text-[16px]">
+                    <span className={`${HEADING_FONT} font-bold ${INK}`}>How you did by topic</span>
+                  </h2>
+                  <ul className="m-0 flex list-none flex-col gap-2 p-0">
+                    {topics.map((topic) => (
+                      <li key={topic.name} className="grid grid-cols-[minmax(0,1fr)_120px_52px] items-center gap-3">
+                        <span className={`min-w-0 truncate font-semibold ${INK}`}>{topic.name}</span>
+                        <span aria-hidden="true" className="h-2 rounded-full bg-[#E8EEFF]">
+                          <span className={`block h-2 rounded-full ${topic.correct === topic.total ? 'bg-[#0F7A55]' : topic.correct === 0 ? 'bg-[#C8281C]' : 'bg-[#E0782F]'}`} style={{ width: `${(topic.correct / topic.total) * 100}%` }} />
+                        </span>
+                        <span className={`text-right tabular-nums text-[14px] font-semibold ${BODY}`}>
+                          {topic.correct}/{topic.total}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {focus.length > 0 ? (
+                    <div className="flex flex-col gap-1.5 rounded-[12px] border border-[#FED7AA] bg-[#FFF8F1] px-4 py-3">
+                      <span className="font-bold text-[#9A3412]">Focus on</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {focus.map((topic) => (
+                          <span key={topic.name} className="rounded-full bg-white px-2.5 py-1 text-[13.5px] font-semibold text-[#8A3F06] ring-1 ring-[#FED7AA]">
+                            {topic.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="m-0 font-semibold text-[#0B5E41]">Every topic right. Well done.</p>
+                  )}
+                </section>
+              )}
+
+              {opened.length > 0 && (
+                <div className="flex flex-col gap-2.5 rounded-[14px] bg-[linear-gradient(135deg,#E8EEFF,#F1ECFF)] p-4">
+                  <span className="text-[12.5px] font-bold uppercase tracking-[0.05em] text-[#0B3FA8]">{opened.length === 1 ? 'New job open to you' : `${opened.length} new jobs open to you`}</span>
+                  <span className="flex items-center gap-3">
+                    <span aria-hidden="true" style={{ background: tileColor(companyOf(opened[0]) || opened[0].title) }} className="flex size-10 shrink-0 items-center justify-center rounded-[10px] font-bold text-white">
+                      {initialOf(companyOf(opened[0]) || opened[0].title)}
+                    </span>
+                    <span className="flex min-w-0 flex-col">
+                      <span className={`font-bold ${INK}`}>{[opened[0].title, companyOf(opened[0])].filter(Boolean).join(' · ')}</span>
+                      <span className={`text-[14px] ${BODY}`}>{[placeText(opened[0]), payText(opened[0]), 'you now meet every bar'].filter(Boolean).join(' · ')}</span>
+                    </span>
+                  </span>
+                  <button type="button" onClick={() => onOpenJob?.(opened[0])} className={`${PRIMARY} h-11 self-start px-5`}>
+                    View and apply
+                  </button>
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={onClose} className={`${PRIMARY} h-11 px-5`}>
+                  Back to skills
+                </button>
+                <button type="button" onClick={restart} className={`${SECONDARY} h-11 px-4`}>
+                  <RotateCcw aria-hidden="true" className="size-4" /> Retake test
+                </button>
+                {!result.passed && (
+                  <button type="button" onClick={() => goToTab?.('courses', { skill })} className={`${SECONDARY} h-11 px-4`}>
+                    <GraduationCap aria-hidden="true" className="size-4" /> Learn {skill}
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
     );
   }
 
+  // Once the test is over the layer's left edge slides to the sidebar's edge, which reveals the sidebar.
+  const layerLeft = done ? (sidebarExpanded ? 'left-0 md:left-64' : 'left-0 md:left-20') : 'left-0';
+
   return createPortal(
-    <div role="region" aria-label={`${skill} test`} className="fixed inset-0 z-[80] flex flex-col overflow-y-auto bg-[#F4F6FE] bg-[radial-gradient(900px_320px_at_100%_-140px,rgba(250,145,253,0.18),transparent_70%),radial-gradient(800px_300px_at_0%_-120px,rgba(1,103,246,0.12),transparent_70%)] bg-no-repeat text-[15px] text-[#0E1B3D]">
-      <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-4 border-b border-[#E1E5F2] bg-white/95 px-4 py-3 backdrop-blur sm:px-8">
-        <div className="flex items-center gap-4">
-          <img src="/a_g_logo.webp" alt="AlignGrad" className="h-8 w-auto" />
-          <span aria-hidden="true" className="h-6 w-px bg-[#E1E5F2]" />
-          <span className={`font-bold ${INK}`}>{skill} test</span>
-        </div>
-        <button type="button" onClick={stage === 'done' ? onClose : leave} disabled={submitting} className={`${SECONDARY} h-10 px-4 text-[14px]!`}>
-          {stage === 'done' ? 'Back to skills' : 'Leave test'}
-        </button>
-      </header>
-      <main className="flex flex-1 items-start justify-center px-4 py-8 sm:px-6 sm:py-12">{body}</main>
+    <div role="region" aria-label={`${skill} test`} className={`fixed inset-y-0 right-0 z-[80] overflow-hidden bg-[#F4F6FE] bg-[radial-gradient(900px_320px_at_100%_-140px,rgba(250,145,253,0.18),transparent_70%),radial-gradient(800px_300px_at_0%_-120px,rgba(1,103,246,0.12),transparent_70%)] bg-no-repeat text-[15px] text-[#0E1B3D] transition-[left] duration-500 ease-in-out motion-reduce:transition-none ${layerLeft}`}>
+      <div inert={done} className="flex h-full flex-col overflow-y-auto">
+        <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-4 border-b border-[#E1E5F2] bg-white/95 px-4 py-3 backdrop-blur sm:px-8">
+          <div className="flex items-center gap-4">
+            <img src="/a_g_logo.webp" alt="AlignGrad" className="h-8 w-auto" />
+            <span aria-hidden="true" className="h-6 w-px bg-[#E1E5F2]" />
+            <span className={`font-bold ${INK}`}>{skill} test</span>
+          </div>
+          <button type="button" onClick={leave} disabled={submitting} className={`${SECONDARY} h-10 px-4 text-[14px]!`}>
+            Leave test
+          </button>
+        </header>
+        <main className="flex flex-1 items-start justify-center px-4 py-8 sm:px-6 sm:py-12">{body}</main>
+      </div>
+      {resultDialog}
       {leaving && (
         <ConfirmDialog title="Leave the test?" confirmLabel="Leave test" tone="danger" onConfirm={onClose} onClose={() => setLeaving(false)}>
           Your answers won’t be saved and nothing changes on your profile.{previous > 0 ? ` ${skill} stays at ${previous}/10.` : ''}

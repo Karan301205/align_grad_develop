@@ -63,7 +63,7 @@ export default function PostJobPage({ company, user, token, handlePostJob, goToT
           <button
             type="button"
             onClick={() => goToTab('jobs')}
-            className={`inline-flex items-center gap-1.5 self-start rounded-[4px] font-(family-name:--font-headline) text-sm font-medium ${MUTED} hover:text-[#0F172A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]`}
+            className={`inline-flex items-center gap-1.5 self-start rounded-[4px] font-(family-name:--font-headline) text-sm font-medium ${MUTED} hover:text-[#023836] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]`}
           >
             <AccountIcon name="chevron-left" size={16} strokeWidth={2} />
             Jobs
@@ -76,7 +76,7 @@ export default function PostJobPage({ company, user, token, handlePostJob, goToT
         <Stepper step={form.step} furthest={form.furthest} onSelect={form.goTo} />
 
         <div className="flex flex-wrap items-start gap-6">
-          {stepId === 'basics' && <BasicsStep form={form} company={company} onCancel={() => goToTab('jobs')} />}
+          {stepId === 'basics' && <BasicsStep form={form} onCancel={() => goToTab('jobs')} />}
           {stepId === 'skills' && <SkillsStep form={form} pool={pool} />}
           {stepId === 'pay' && <PayStep form={form} />}
           {stepId === 'process' && <ProcessStep form={form} />}

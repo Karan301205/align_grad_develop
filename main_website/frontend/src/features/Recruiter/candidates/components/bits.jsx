@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { BRAND_TINT } from '../../components/accountStyles';
+import { avatarTint } from '../../components/accountStyles';
 import { Check, ChevronDown, ShieldCheck, X } from 'lucide-react';
 import { hasSkillMcq } from '../../../../constants';
 
@@ -21,7 +21,7 @@ export function CandidateAvatar({ candidate, size = 38 }) {
     <div
       aria-hidden="true"
       style={{ width: size, height: size }}
-      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold ${BRAND_TINT} ${size > 40 ? 'text-[17px] font-bold' : 'text-[13px]'}`}
+      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold ${avatarTint(candidate?.name)} ${size > 40 ? 'text-[17px] font-bold' : 'text-[13px]'}`}
     >
       {showPhoto ? <img src={src} alt="" onError={() => setFailedSrc(src)} className="size-full object-cover" /> : initialsOf(candidate?.name)}
     </div>
@@ -29,7 +29,7 @@ export function CandidateAvatar({ candidate, size = 38 }) {
 }
 
 const BAR_CHIP = {
-  above: 'bg-[#EEF2FE] font-semibold text-[#1E3A8A]',
+  above: 'bg-[#E3F1EE] font-semibold text-[#03443F]',
   meets: 'bg-[#F1F3F6] font-medium text-[#334155]',
   below: 'bg-[#FFF1E8] font-semibold text-[#9A3412]'
 };
@@ -49,7 +49,7 @@ export function BarChip({ bar }) {
 export function Tag({ tone = 'grey', title, children }) {
   const tones = {
     grey: 'bg-[#F1F3F6] text-[#334155]',
-    blue: 'bg-[#EEF2FE] text-[#1E3A8A]',
+    brand: 'bg-[#E3F1EE] text-[#03443F]',
     green: 'bg-[#DCFCE7] text-[#166534]'
   };
   return (
@@ -83,7 +83,7 @@ export function ActiveSkillChip({ skill, onUpdateRating, onRemove }) {
       key={label}
       type="button"
       onClick={onClick}
-      className={`flex w-full items-center justify-between gap-2 rounded-[6px] px-2.5 py-1.5 text-left text-[13px] ${active ? 'bg-[#EEF2FE] font-semibold text-[#1447E6]' : 'text-[#334155] hover:bg-[#F8F8F6]'}`}
+      className={`flex w-full items-center justify-between gap-2 rounded-[6px] px-2.5 py-1.5 text-left text-[13px] ${active ? 'bg-[#E3F1EE] font-semibold text-[#0F7A55]' : 'text-[#334155] hover:bg-[#F4F8F6]'}`}
     >
       <span className="flex items-center gap-1.5">
         {icon}
@@ -94,14 +94,14 @@ export function ActiveSkillChip({ skill, onUpdateRating, onRemove }) {
   );
 
   return (
-    <span ref={ref} className="relative inline-flex items-center gap-1.5 rounded-[6px] bg-[#EEF2FE] py-0.5 pl-2 pr-1 text-xs font-semibold text-[#1E3A8A]">
+    <span ref={ref} className="relative inline-flex items-center gap-1.5 rounded-[6px] bg-[#E3F1EE] py-0.5 pl-2 pr-1 text-xs font-semibold text-[#03443F]">
       {skill.name}
       {tested && (
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
           aria-expanded={open}
-          className={`inline-flex items-center gap-0.5 rounded-[4px] px-1.5 py-px text-[11px] font-semibold ${levelSet ? 'bg-[#1447E6] text-white' : 'bg-white text-[#1447E6]'}`}
+          className={`inline-flex items-center gap-0.5 rounded-[4px] px-1.5 py-px text-[11px] font-semibold ${levelSet ? 'bg-[#023836] text-white' : 'bg-white text-[#0F7A55]'}`}
         >
           {levelLabel}
           <ChevronDown className={`size-3 transition-transform ${open ? 'rotate-180' : ''}`} />

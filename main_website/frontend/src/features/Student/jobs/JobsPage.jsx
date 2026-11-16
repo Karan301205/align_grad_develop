@@ -33,6 +33,7 @@ import {
   tileColor
 } from './jobsData';
 
+const PAGE_SIZE = 10; // jobs shown at a time in the list
 const LOCATIONS = ['Remote', ...INDIAN_STATES];
 const SKILL_NAMES = [...new Set(ALL_SKILLS.map((item) => item.skill))];
 // Old Opportunities sub-tabs (Home links still pass them).
@@ -105,6 +106,7 @@ export default function JobsPage({ profile, user, token, jobs = [], isPremium, i
   // and the panel moves on, but the dialog must stay to show "Application sent".
   const [applyJob, setApplyJob] = useState(null);
   const detailRef = useRef(null);
+  const [paging, setPaging] = useState({ key: '', extra: 0 }); // jobs shown beyond PAGE_SIZE for one tab + filter set
 
   // A new focus request while the page is open (e.g. "view job" on a company page).
   if (focus !== handledFocus) {
@@ -123,6 +125,11 @@ export default function JobsPage({ profile, user, token, jobs = [], isPremium, i
   const free = !isPremium && tab !== 'applied';
   const visible = free ? list.slice(0, FREE_PLAN_JOB_LIMIT) : list;
   const lockedCount = list.length - visible.length;
+  // PAGE_SIZE jobs, then PAGE_SIZE more each time "Show more" is pressed; a new tab or filter starts over.
+  const pageKey = `${tab}|${JSON.stringify(filters)}`;
+  const extra = paging.key === pageKey ? paging.extra : 0;
+  const shown = visible.slice(0, PAGE_SIZE + extra);
+  const moreCount = visible.length - shown.length;
   const selected = list.find((job) => job.id === selectedId) || visible[0] || null;
   const selectedLocked = Boolean(selected && free && !visible.includes(selected));
   const filterCount = activeFilterCount(filters);
@@ -289,9 +296,10 @@ export default function JobsPage({ profile, user, token, jobs = [], isPremium, i
           </div>
         ) : (
           <div className="flex flex-wrap items-start gap-5">
-            <div className="flex min-w-0 max-w-full flex-[1_1_340px] flex-col gap-2.5 lg:max-w-[440px]">
+            {/* On desktop the list scrolls on its own beside the job, so the page ends with the job's details. */}
+            <div className="custom-scrollbar flex min-w-0 max-w-full flex-[1_1_340px] flex-col gap-2.5 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:max-w-[440px] lg:overflow-y-auto lg:pb-1 lg:pr-1.5">
               <ul aria-label="Jobs" className="m-0 flex list-none flex-col gap-2.5 p-0">
-                {visible.map((job) => {
+                {shown.map((job) => {
                   const on = job.id === selected?.id;
                   const company = companyOf(job);
                   return (
@@ -319,6 +327,11 @@ export default function JobsPage({ profile, user, token, jobs = [], isPremium, i
                   );
                 })}
               </ul>
+              {moreCount > 0 && (
+                <button type="button" onClick={() => setPaging({ key: pageKey, extra: extra + PAGE_SIZE })} className={`${SECONDARY} h-11 w-full shrink-0`}>
+                  Show {Math.min(PAGE_SIZE, moreCount)} more · {moreCount} left
+                </button>
+              )}
               {lockedCount > 0 && (
                 <div className={`${CARD} relative flex flex-col gap-2.5 overflow-hidden p-[18px]`}>
                   <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 ${GRADIENT}`} />

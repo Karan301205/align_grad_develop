@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Award, BadgeCheck, Briefcase, FileText, FolderGit2, GraduationCap, Trophy, User, Video } from 'lucide-react';
-import { getProfileCompletionDetails } from '../../../utils/profileCompleteness';
+import { PLATFORM_UNLOCK_PERCENT, getProfileCompletionDetails } from '../../../utils/profileCompleteness';
 import ActivityDialog from './dialogs/ActivityDialog';
 import CertificateDialog from './dialogs/CertificateDialog';
 import EducationDialog from './dialogs/EducationDialog';
@@ -34,20 +34,23 @@ const scrollToTop = () => {
 
 /**
  * Candidate profile (designs in design/candidate_side_design/candidate_profile_design).
- * `generalDone` / `videoDone` come from the saved profile (utils/profileCompleteness).
+ * `generalDone` / `videoDone` / `unlocked` come from the saved profile (utils/profileCompleteness).
  * Shows the profile, the "About you" edit page and the add/edit dialogs. Every
  * save goes through `onSaveProfile(changes)` → { ok, error }, so the layout's
  * state only changes after the server accepts it.
  *
- * First visit: About you opens straight away (step 1); saving it opens the intro
- * video dialog (step 2). Those two are what unlock the rest of the portal.
+ * First visit: About you opens straight away (step 1); then the candidate fills in the rest
+ * until the profile reaches the unlock level (step 2). The intro video is the last section:
+ * it is not needed to unlock the portal, only to apply to jobs and gigs.
+ * `focus` ({ section: 'video' }) opens the intro video dialog when another page sends the
+ * candidate here to add it.
  */
-export default function ProfilePage({ data, user, token, generalDone, videoDone, techSkills, jobsCount, isPremium, generatingPdf, onDownloadResume, onSaveProfile, onIntroVideoSaved, onPlanUpgraded, onNotify }) {
+export default function ProfilePage({ data, user, token, focus, generalDone, videoDone, unlocked, techSkills, jobsCount, isPremium, generatingPdf, onDownloadResume, onSaveProfile, onIntroVideoSaved, onPlanUpgraded, onNotify }) {
   const [view, setView] = useState(() => (generalDone ? 'overview' : 'edit'));
   // { id, smooth } — the profile scrolls to this section when it changes.
-  const [scrollTarget, setScrollTarget] = useState(null);
+  const [scrollTarget, setScrollTarget] = useState(() => (focus?.section === 'video' ? { id: 'video' } : null));
   const [firstTime] = useState(() => !generalDone);
-  const [dialog, setDialog] = useState(null); // { type, index }
+  const [dialog, setDialog] = useState(() => (focus?.section === 'video' ? { type: 'video', index: null } : null)); // { type, index }
   const [player, setPlayer] = useState(null); // { url, title }
 
   const completion = useMemo(() => getProfileCompletionDetails(data), [data]);
@@ -69,14 +72,14 @@ export default function ProfilePage({ data, user, token, generalDone, videoDone,
   // Same order as the sections on the page (ProfileOverview ORDER).
   const sectionItems = [
     { id: 'about', label: 'About you', icon: User, status: generalDone ? 'done' : 'todo' },
-    { id: 'video', label: 'Intro video', icon: Video, status: videoDone ? 'done' : 'todo' },
     { id: 'skills', label: 'Skills', icon: BadgeCheck, count: count(data.skills) },
     { id: 'projects', label: 'Projects', icon: FolderGit2, count: count(data.projects) },
     { id: 'education', label: 'Education', icon: GraduationCap, count: count(data.education) },
     { id: 'experience', label: 'Experience', icon: Briefcase, count: count(data.experience) },
     { id: 'certificates', label: 'Certificates', icon: Award, count: count(data.certificates) },
     { id: 'activities', label: 'Activities', icon: Trophy, count: count(data.cocurricular) },
-    { id: 'resume', label: 'Resume', icon: FileText }
+    { id: 'resume', label: 'Resume', icon: FileText },
+    { id: 'video', label: 'Intro video', icon: Video, status: videoDone ? 'done' : 'todo' }
   ];
 
   // From the About-you page: another section closes it (after its unsaved-changes
@@ -111,14 +114,8 @@ export default function ProfilePage({ data, user, token, generalDone, videoDone,
   const saveAbout = async (changes) => {
     const result = await onSaveProfile(changes);
     if (result.ok) {
-      if (firstTime && !videoDone) {
-        leaveEdit('video');
-        onNotify('Step 1 done. Now add a short intro video to unlock everything.', 'success');
-        open('video');
-      } else {
-        leaveEdit('about');
-        onNotify('Your profile is saved.', 'success');
-      }
+      leaveEdit('about');
+      onNotify(firstTime && !unlocked ? `Step 1 done. Add more to your profile to reach ${PLATFORM_UNLOCK_PERCENT}% and unlock the rest of the portal.` : 'Your profile is saved.', 'success');
     }
     return result;
   };
@@ -143,6 +140,7 @@ export default function ProfilePage({ data, user, token, generalDone, videoDone,
           completion={completion}
           generalDone={generalDone}
           videoDone={videoDone}
+          unlocked={unlocked}
           isPremium={isPremium}
           techSkills={techSkills}
           generatingPdf={generatingPdf}

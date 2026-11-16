@@ -13,7 +13,7 @@ function SkillPreview({ cand, filteredSkills }) {
   return (
     <>
       {shown.map((skill) => (
-        <Tag key={skillName(skill)} tone={wanted.has(skillName(skill).toLowerCase()) ? 'blue' : 'grey'} title={skill.verifiedRating > 0 ? `Test-verified level ${skill.verifiedRating}` : undefined}>
+        <Tag key={skillName(skill)} tone={wanted.has(skillName(skill).toLowerCase()) ? 'brand' : 'grey'} title={skill.verifiedRating > 0 ? `Test-verified level ${skill.verifiedRating}` : undefined}>
           {skillName(skill)} {skill.verifiedRating > 0 ? skill.verifiedRating : skill.rating}
           {skill.verifiedRating > 0 && <ShieldCheck className="size-3 text-[#166534]" aria-label="verified" />}
         </Tag>
@@ -34,13 +34,13 @@ export default function CandidateCard({ cand, selected, onSelect, onResume, gene
   const gating = comparison ? comparison.bars.filter((bar) => bar.gates).length : 0;
 
   return (
-    <li className={`relative rounded-[12px] bg-white ${selected ? 'border-2 border-[#1447E6]' : 'border border-[#E4E6EA] hover:border-[#C9CED6]'}`}>
+    <li className={`relative rounded-[12px] bg-white ${selected ? 'border-2 border-[#0F7A55]' : 'border border-[#E4E6EA] hover:border-[#C9CED6]'}`}>
       <button
         type="button"
         onClick={onSelect}
         aria-pressed={selected}
         aria-label={`Show ${cand.name}`}
-        className="absolute inset-0 rounded-[12px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]"
+        className="absolute inset-0 rounded-[12px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]"
       />
       <div className={`pointer-events-none relative flex gap-3 ${selected ? 'px-[15px] py-[13px]' : 'px-4 py-3.5'}`}>
         <CandidateAvatar candidate={cand} />
@@ -48,13 +48,13 @@ export default function CandidateCard({ cand, selected, onSelect, onResume, gene
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 flex-col">
               <span className="truncate text-[15px] font-semibold">{cand.name}</span>
-              {cand.username && <span className="truncate text-[13px] font-medium text-[#1447E6]">@{cand.username}</span>}
+              {cand.username && <span className="truncate text-[13px] font-medium text-[#0F7A55]">@{cand.username}</span>}
             </div>
             <button
               type="button"
               onClick={onResume}
               disabled={generating}
-              className="pointer-events-auto inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-[#D5D9E0] bg-white px-2.5 font-(family-name:--font-headline) text-[13px] font-semibold text-[#0F172A] hover:bg-[#F8F8F6] disabled:opacity-60"
+              className="pointer-events-auto inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] border border-[#D5D9E0] bg-white px-2.5 font-(family-name:--font-headline) text-[13px] font-semibold text-[#023836] hover:bg-[#F4F8F6] disabled:opacity-60"
             >
               {generating ? <Loader2 className="size-3.5 animate-spin" /> : <FileText className="size-3.5" />}
               {generating ? 'Opening…' : 'Resume'}
@@ -64,13 +64,13 @@ export default function CandidateCard({ cand, selected, onSelect, onResume, gene
 
           <div className="flex flex-wrap gap-1">
             {cand.matchScore != null && (
-              <span title="Match with your active jobs (recommended order)" className={`${PILL} bg-[#EEF2FE] text-[#1E3A8A]`}>
+              <span title="Match with your active jobs (recommended order)" className={`${PILL} bg-[#E3F1EE] text-[#03443F]`}>
                 {cand.matchScore}% match
               </span>
             )}
             {comparison ? (
               <>
-                <span className={`${PILL} ${comparison.meetsAll ? 'bg-[#EEF2FE] text-[#1E3A8A]' : 'bg-[#FFF1E8] text-[#9A3412]'}`}>
+                <span className={`${PILL} ${comparison.meetsAll ? 'bg-[#E3F1EE] text-[#03443F]' : 'bg-[#FFF1E8] text-[#9A3412]'}`}>
                   {!comparison.meetsAll
                     ? `${comparison.short} skill${comparison.short === 1 ? '' : 's'} short`
                     : gating === 0
@@ -86,7 +86,7 @@ export default function CandidateCard({ cand, selected, onSelect, onResume, gene
             ) : (
               <>
                 {cand.introVideoUrl && (
-                  <Tag tone="blue">
+                  <Tag tone="brand">
                     <Video className="size-3" aria-hidden="true" />
                     Video
                   </Tag>

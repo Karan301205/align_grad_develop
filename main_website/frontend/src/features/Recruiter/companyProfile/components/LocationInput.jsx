@@ -56,7 +56,7 @@ export default function LocationInput({ id, value, onChange, readOnly, error }) 
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => choose(place)}
                   className={`w-full rounded-[6px] px-3 py-2 text-left font-(family-name:--font-headline) text-sm transition-colors ${
-                    place === value ? 'bg-[#EEF2FE] font-semibold text-[#1447E6]' : 'font-normal text-[#334155] hover:bg-[#F8F8F6]'
+                    place === value ? 'bg-[#E3F1EE] font-semibold text-[#0F7A55]' : 'font-normal text-[#334155] hover:bg-[#F4F8F6]'
                   }`}
                 >
                   {place}

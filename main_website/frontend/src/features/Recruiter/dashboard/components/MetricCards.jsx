@@ -1,13 +1,13 @@
 import { Award, Briefcase, Calendar, UserCheck, Users } from 'lucide-react';
 import { CARD, MUTED } from '../../components/accountStyles';
 
-// Same colour per stage as the cards that used to sit on the Jobs page.
+// One accent per stage, taken from the landing-page palette (mint, blue, violet, green) plus amber for interviews.
 const TONES = {
-  blue: { bar: 'bg-[#1447E6]', tile: 'bg-[#EEF2FE] text-[#1447E6]', note: 'text-[#1447E6]' },
-  sky: { bar: 'bg-[#0284C7]', tile: 'bg-[#E0F2FE] text-[#0369A1]', note: 'text-[#0369A1]' },
-  indigo: { bar: 'bg-[#4F46E5]', tile: 'bg-[#EEF2FF] text-[#4338CA]', note: 'text-[#4338CA]' },
+  mint: { bar: 'bg-[#2FB594]', tile: 'bg-[#DDF4EE] text-[#0B6B55]', note: 'text-[#0B6B55]' },
+  blue: { bar: 'bg-[#0167F6]', tile: 'bg-[#E7EDFF] text-[#0052C8]', note: 'text-[#0052C8]' },
+  violet: { bar: 'bg-[#7B3FD0]', tile: 'bg-[#EFE8FB] text-[#5B3FB0]', note: 'text-[#5B3FB0]' },
   amber: { bar: 'bg-[#D97706]', tile: 'bg-[#FEF3C7] text-[#B45309]', note: 'text-[#B45309]' },
-  green: { bar: 'bg-[#15803D]', tile: 'bg-[#DCFCE7] text-[#15803D]', note: 'text-[#15803D]' }
+  green: { bar: 'bg-[#0F7A55]', tile: 'bg-[#E3F5EE] text-[#0F7A55]', note: 'text-[#0F7A55]' }
 };
 
 function Metric({ tone, icon: Icon, label, value, unit, note }) {
@@ -36,7 +36,7 @@ export default function MetricCards({ metrics: m }) {
   return (
     <section aria-label="Hiring overview" className="grid grid-cols-[repeat(auto-fit,minmax(min(190px,100%),1fr))] gap-3">
       <Metric
-        tone="blue"
+        tone="mint"
         icon={Briefcase}
         label="Live jobs"
         value={m.liveRoles}
@@ -44,14 +44,14 @@ export default function MetricCards({ metrics: m }) {
         note={{ text: m.pausedRoles ? `${m.pausedRoles} paused` : 'Visible to candidates now' }}
       />
       <Metric
-        tone="sky"
+        tone="blue"
         icon={Users}
         label="Applicants"
         value={m.applicants}
         unit="total"
         note={m.newApplicants ? { text: `${m.newApplicants} new in the last 7 days`, highlight: true } : { text: 'Across all your jobs' }}
       />
-      <Metric tone="indigo" icon={UserCheck} label="Shortlisted" value={m.shortlisted} unit="screened" note={{ text: m.applicants ? `${pct}% of applicants` : 'Passed screening' }} />
+      <Metric tone="violet" icon={UserCheck} label="Shortlisted" value={m.shortlisted} unit="screened" note={{ text: m.applicants ? `${pct}% of applicants` : 'Passed screening' }} />
       <Metric tone="amber" icon={Calendar} label="Interviews" value={m.interviews} unit="active" note={{ text: 'In or past interview rounds' }} />
       <Metric
         tone="green"

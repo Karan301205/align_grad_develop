@@ -46,12 +46,12 @@ export default function ActiveJobsCard({ jobs, onOpenJob, onViewAll }) {
                   <tr key={job.id} className={rowBorder}>
                     <td className="px-5 py-3.5">
                       <div className="flex flex-col gap-0.5">
-                        <button type="button" onClick={() => onOpenJob(job)} className="self-start rounded-[4px] text-left font-semibold text-[#0F172A] hover:text-[#1447E6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1447E6]">
+                        <button type="button" onClick={() => onOpenJob(job)} className="self-start rounded-[4px] text-left font-semibold text-[#023836] hover:text-[#0F7A55] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F7A55]">
                           {job.title}
                         </button>
                         <span className={`text-[13px] ${MUTED}`}>
                           {typeLine(job)}
-                          {counts.newApplicants > 0 && <span className="font-semibold text-[#1447E6]"> · {counts.newApplicants} new this week</span>}
+                          {counts.newApplicants > 0 && <span className="font-semibold text-[#0F7A55]"> · {counts.newApplicants} new this week</span>}
                         </span>
                       </div>
                     </td>

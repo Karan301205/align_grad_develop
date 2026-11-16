@@ -19,6 +19,8 @@ import { apiFetch, userMessage } from '../../../services/apiClient';
 import { generateResumePdf } from '../../../services/resumePdf';
 import { formatAlertMessage } from '../../../utils/errorFormatter';
 import {
+  PLATFORM_UNLOCK_PERCENT,
+  getProfileCompletionDetails,
   hasGeneralInfo as hasGeneralInfoRule,
   hasIntroVideo as hasIntroVideoRule,
   isProfileComplete
@@ -109,6 +111,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
   // A test to open on the Skills & tests page ({ skill, need, opens }), a new object per request.
   const [testFocus, setTestFocus] = useState(null);
   const [learnFocus, setLearnFocus] = useState(null);
+  const [profileFocus, setProfileFocus] = useState(null); // { section: 'video' } opens the intro video dialog
 
   const [applications, setApplications] = useState([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
@@ -141,6 +144,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
   const hasGeneralInfo = hasGeneralInfoRule(profile);
   const hasIntroVideo = hasIntroVideoRule(profile);
   const isComplete = isProfileComplete(profile);
+  const profilePercent = getProfileCompletionDetails(profile).percentage;
+  const unlockMessage = `Please fill in **About you** and complete **${PLATFORM_UNLOCK_PERCENT}%** of your profile to unlock this section. You’re at ${profilePercent}%.`;
 
   // Copies a profile from the API into the layout state (used by the load and by
   // saves, which answer with the updated profile).
@@ -227,6 +232,13 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
     fetchStudentApplications();
   }, [token]);
 
+  // Switches on the candidate font (Inter, styles/index.css) for the whole document, so modals
+  // and the full-screen test layer get it too.
+  useEffect(() => {
+    document.body.classList.add('candidate-app');
+    return () => document.body.classList.remove('candidate-app');
+  }, []);
+
   useEffect(() => {
     if (user?.email && !profileEmail) {
       setProfileEmail(user.email);
@@ -238,8 +250,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
       const complete = isProfileComplete(profile);
       
       if (wasComplete === false && complete === true) {
-        // Just completed profile, redirect to dashboard
-        setActiveTab('dashboard');
+        // The profile just reached the unlock level; stay on the Profile page and say so.
+        setAlertConfig({ message: `Your profile is ${PLATFORM_UNLOCK_PERCENT}% complete, so jobs, tests, courses and gigs are unlocked.`, type: 'success' });
       }
       setWasComplete(complete);
 
@@ -271,13 +283,13 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
   }, [activeTab]);
 
   // Opens a skill test (its intro; the questions are fetched when the candidate presses
-  // Start). Tests stay locked until the General tab and intro video are done (the
-  // server checks the same on /student/tests/generate). A skill that isn't on the
+  // Start). Tests stay locked until the profile reaches the unlock level (the server also
+  // checks the General tab on /student/tests/generate). A skill that isn't on the
   // profile yet is added by the server with the score from the test.
   const openTest = ({ skillName, need = 0, opens = '' }) => {
-    if (!isProfileComplete(profile)) {
+    if (!isComplete) {
       setAlertConfig({
-        message: 'Please complete your **General profile** and upload your **Introduction video** to unlock skill tests.',
+        message: unlockMessage,
         type: 'warning'
       });
       setActiveTab('profile');
@@ -427,7 +439,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
     const item = navItems.find(i => i.id === tabId);
     if (item && item.locked) {
       setAlertConfig({
-        message: 'Please complete your **General profile** and upload your **Introduction video** to unlock this section.',
+        message: unlockMessage,
         type: 'warning'
       });
       return;
@@ -440,6 +452,9 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
     }
     if (tabId === 'courses') {
       setLearnFocus({ skill: options.skill || '' });
+    }
+    if (tabId === 'profile') {
+      setProfileFocus({ section: options.section || '' });
     }
     if (tabId === 'progress') {
       setProgressFocus({ stage: options.stage || 'ALL', applicationId: options.applicationId || null, jobId: options.jobId || null });
@@ -653,11 +668,11 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
                   <span>Mandatory Profile Setup Incomplete</span>
                 </div>
                 <p className="text-slate-800 dark:text-slate-200 font-sans">
-                  To unlock Dashboard, Opportunities, Your Tests, Job Progress, Courses, and Gigs Marketplace, please complete the required fields in your profile:
+                  To unlock Dashboard, Opportunities, Your Tests, Job Progress, Courses, and Gigs Marketplace, please finish your profile:
                 </p>
                 <ul className="list-disc pl-5 space-y-1 font-sans font-semibold text-slate-900 dark:text-slate-100">
                   {!hasGeneralInfo && <li>Fill in About you on Your Profile (name, username, short intro, date of birth, mobile number, email and gender)</li>}
-                  {!hasIntroVideo && <li>Add your intro video on Your Profile</li>}
+                  <li>Complete {PLATFORM_UNLOCK_PERCENT}% of your profile (you’re at {profilePercent}%)</li>
                 </ul>
               </div>
             )}
@@ -700,8 +715,10 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
                 data={profileData}
                 user={user}
                 token={token}
+                focus={profileFocus}
                 generalDone={hasGeneralInfo}
                 videoDone={hasIntroVideo}
+                unlocked={isComplete}
                 techSkills={techSkills}
                 jobsCount={jobs.length}
                 isPremium={isPremium}
@@ -748,6 +765,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
                 jobs={jobs}
                 token={token}
                 focus={testFocus}
+                sidebarExpanded={isExpanded}
                 onFinished={() => Promise.all([fetchProfileAndJobs({ silent: true }), fetchTechnicalSkills()])}
                 onSaveSkills={(skills) => saveProfileChanges({ skills })}
                 onOpenJob={openJob}
