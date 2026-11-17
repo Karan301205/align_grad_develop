@@ -8,45 +8,56 @@ const env = require('../../config/env');
 // to candidates: published courses, lessons without S3 keys or quiz answers, signed
 // video streams, progress and quiz scoring.
 
-// CloudFront Configuration
-const cloudfrontDomain = process.env.CLOUDFRONT_DOMAIN || ''; // no hardcoded fallback
-const cloudfrontKeyId = process.env.CLOUDFRONT_KEY_ID || ''; // no hardcoded fallback
-if (!cloudfrontDomain || !cloudfrontKeyId) {
-  console.warn('[config] CLOUDFRONT_DOMAIN / CLOUDFRONT_KEY_ID not set — course video streaming will fail.');
-}
+const httpError = (status, message) => Object.assign(new Error(message), { status });
 
 // Ownership check built from env (S3_BUCKET_NAME) — no hardcoded bucket.
 function isOwnS3Url(url) {
   return Boolean(url && env.S3_BUCKET_NAME && url.includes(`${env.S3_BUCKET_NAME}.s3.`));
 }
-const configuredPrivateKeyPath = process.env.CLOUDFRONT_PRIVATE_KEY_PATH || '../../cloudfront_private_key.pem';
 
-let cachedPrivateKey = null;
+// --- CloudFront signing --------------------------------------------------------------------------
+// Lesson videos and documents sit in a private bucket behind CloudFront, which refuses any link without
+// a valid signature (403 MissingKey), so a link is only ever handed out signed. The settings are read on
+// each use (no hardcoded fallbacks):
+//   CLOUDFRONT_DOMAIN, CLOUDFRONT_KEY_ID, and the private key, either as text in CLOUDFRONT_PRIVATE_KEY
+//   (newlines may be written as \n, for env boxes that take one line) or as a file named by
+//   CLOUDFRONT_PRIVATE_KEY_PATH (absolute, or relative to main_website/backend).
+// The key file is gitignored, so a server deployed from git has no key until one is configured there.
+const BACKEND_DIR = path.resolve(__dirname, '../../..');
+let loadedKey = { source: null, key: null }; // the last key that loaded, and where it came from
 
-function getPrivateKey() {
-  if (cachedPrivateKey) return cachedPrivateKey;
-
-  // Try configured path relative to project root or backend
-  const candidates = [
-    path.resolve(__dirname, '../../..', configuredPrivateKeyPath),
-    path.resolve(__dirname, '../../../..', 'cloudfront_private_key.pem'),
-    path.resolve(process.cwd(), 'cloudfront_private_key.pem'),
-    path.resolve(process.cwd(), '../cloudfront_private_key.pem'),
-    path.resolve(process.cwd(), '../../cloudfront_private_key.pem')
-  ];
-
-  for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
-      try {
-        cachedPrivateKey = fs.readFileSync(candidate, 'utf8');
-        return cachedPrivateKey;
-      } catch (e) {
-        console.warn(`[CloudFront] Could not read private key from ${candidate}:`, e.message);
-      }
-    }
+// { key } when the configured key loads, else { problem } saying what is wrong (never the key itself).
+function loadPrivateKey() {
+  const text = String(process.env.CLOUDFRONT_PRIVATE_KEY || '').trim();
+  const file = String(process.env.CLOUDFRONT_PRIVATE_KEY_PATH || '').trim();
+  if (!text && !file) return { problem: 'no private key (set CLOUDFRONT_PRIVATE_KEY or CLOUDFRONT_PRIVATE_KEY_PATH)' };
+  const source = text ? `text:${text}` : `file:${file}`;
+  if (loadedKey.source === source) return { key: loadedKey.key };
+  const filePath = file && path.resolve(BACKEND_DIR, file);
+  try {
+    const key = crypto.createPrivateKey(text ? text.replace(/\\n/g, '\n') : fs.readFileSync(filePath, 'utf8'));
+    loadedKey = { source, key }; // only a key that loaded is kept, so a fixed setting is picked up without a restart
+    return { key };
+  } catch (err) {
+    return {
+      problem: text
+        ? `CLOUDFRONT_PRIVATE_KEY is not a usable PEM private key (${err.message})`
+        : `the CLOUDFRONT_PRIVATE_KEY_PATH key file can't be used: ${filePath} (${err.code || err.message})`
+    };
   }
+}
 
-  return null;
+function signingSetup() {
+  const domain = String(process.env.CLOUDFRONT_DOMAIN || '').trim();
+  const keyId = String(process.env.CLOUDFRONT_KEY_ID || '').trim();
+  const { key, problem } = loadPrivateKey();
+  const problems = [!domain && 'CLOUDFRONT_DOMAIN is not set', !keyId && 'CLOUDFRONT_KEY_ID is not set', problem].filter(Boolean);
+  return { domain, keyId, key, problems };
+}
+
+const bootSigningProblems = signingSetup().problems;
+if (bootSigningProblems.length > 0) {
+  console.warn(`[config] CloudFront signing is not set up, so course videos and documents won't open: ${bootSigningProblems.join('; ')}.`);
 }
 
 function toBase64Url(str) {
@@ -54,50 +65,26 @@ function toBase64Url(str) {
 }
 
 /**
- * Generates a signed CloudFront playback URL for a given S3 video key.
+ * A signed CloudFront URL for an S3 key (canned policy, RSA-SHA1). Throws a 503 when signing isn't
+ * set up: an unsigned link would only be refused by CloudFront.
  * @param {string} videoKey S3 object key
  * @param {number} expiresInSeconds Lifetime in seconds (default 4 hours)
  */
 function getCloudFrontSignedUrl(videoKey, expiresInSeconds = 4 * 3600) {
   if (!videoKey) return null;
+  const { domain, keyId, key, problems } = signingSetup();
+  if (problems.length > 0) throw httpError(503, `CloudFront signing is not set up: ${problems.join('; ')}`);
 
   // Clean key in case it includes leading slashes or full URL
-  let cleanKey = videoKey.replace(/^https?:\/\/[^/]+\//, '').replace(/^\/+/, '');
-  const targetUrl = `https://${cloudfrontDomain}/${cleanKey}`;
+  const cleanKey = videoKey.replace(/^https?:\/\/[^/]+\//, '').replace(/^\/+/, '');
+  const targetUrl = `https://${domain}/${cleanKey}`;
   const expiresEpoch = Math.floor((Date.now() + expiresInSeconds * 1000) / 1000);
-
-  const privateKey = getPrivateKey();
-  if (!privateKey || !cloudfrontKeyId) {
-    console.warn('[CloudFront Warning] Private key or Key-Pair-Id missing, falling back to unsigned URL');
-    return targetUrl;
-  }
-
-  try {
-    const cannedPolicy = JSON.stringify({
-      Statement: [
-        {
-          Resource: targetUrl,
-          Condition: {
-            DateLessThan: {
-              'AWS:EpochTime': expiresEpoch
-            }
-          }
-        }
-      ]
-    });
-
-    const sign = crypto.createSign('RSA-SHA1');
-    sign.update(cannedPolicy);
-    const signature = toBase64Url(sign.sign(privateKey, 'base64'));
-
-    return `${targetUrl}?Expires=${expiresEpoch}&Signature=${signature}&Key-Pair-Id=${cloudfrontKeyId}`;
-  } catch (err) {
-    console.error('[CloudFront Signer Error]:', err.message);
-    return targetUrl;
-  }
+  const cannedPolicy = JSON.stringify({
+    Statement: [{ Resource: targetUrl, Condition: { DateLessThan: { 'AWS:EpochTime': expiresEpoch } } }]
+  });
+  const signature = toBase64Url(crypto.createSign('RSA-SHA1').update(cannedPolicy).sign(key, 'base64'));
+  return `${targetUrl}?Expires=${expiresEpoch}&Signature=${signature}&Key-Pair-Id=${keyId}`;
 }
-
-const httpError = (status, message) => Object.assign(new Error(message), { status });
 const byOrder = (items) => [...(items || [])].sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
 const lessonsOf = (course) => (course.modules || []).flatMap((mod) => mod.lessons || []);
 const quizQuestions = (lesson) => (Array.isArray(lesson?.quiz?.questions) ? lesson.quiz.questions : []);
