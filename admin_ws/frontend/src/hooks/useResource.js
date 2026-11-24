@@ -45,10 +45,12 @@ export default function useResource(fetcher, select = (json) => json) {
     };
   }, [reload]);
 
-  const setData = useCallback(
-    (update) => setState((current) => ({ ...current, data: typeof update === 'function' ? update(current.data) : update })),
-    []
-  );
+  // Data the caller just got from the server (e.g. after saving) is newer than any load still in
+  // flight, so those older responses are dropped instead of overwriting it.
+  const setData = useCallback((update) => {
+    latest.current += 1;
+    setState((current) => ({ ...current, loading: false, data: typeof update === 'function' ? update(current.data) : update }));
+  }, []);
 
   return { ...state, reload, setData };
 }

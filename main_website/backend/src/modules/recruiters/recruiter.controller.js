@@ -1,7 +1,9 @@
 const { prisma } = require('../../infrastructure/database');
-const { purgeExpiredJobs } = require('../jobs/jobLifecycle.service');
+const { expiryFrom, isJobOpen } = require('../jobs/jobLifecycle.service');
 const { deleteS3ObjectFromUrl } = require('../../services/fileCleanup.service');
 const { getTopMatchingTalents } = require('../skills/skillMatching.service');
+const { redactCandidateContact } = require('./candidateContact');
+const { toCandidateQuestions } = require('../jobs/screeningQuestions');
 const { rankProjectsByRequirements } = require('../skills/projectRelevance.service');
 const {
   VERIFICATION_STATUS,
@@ -22,16 +24,32 @@ const { summarizePool } = require('../jobs/eligiblePool');
 
 const RECRUITER_PACK = PLANS.RECRUITER_5_PACK;
 
-// Job/internship posts count against the quota; gigs do not (same filter as postJob).
-const countQuotaJobs = (companyId) => prisma.job.count({
-  where: {
-    companyId,
-    OR: [
-      { opportunityType: null },
-      { opportunityType: { not: 'GIG' } }
-    ]
-  }
-});
+// Job/internship posts made so far (gigs excluded). Stored on the company and only ever counted
+// up (see postJob), so closing, slimming or deleting a job never gives a credit back.
+const usedJobCredits = (company) => company.jobsPosted ?? 0;
+
+// Profile ids of candidates who applied to one of this company's jobs: only for them are contact
+// details shown to the recruiter (ISSUES A3).
+async function applicantProfileIdsFor(companyId) {
+  if (!companyId) return new Set();
+  const jobs = await prisma.job.findMany({ where: { companyId }, select: { id: true } });
+  if (jobs.length === 0) return new Set();
+  const applications = await prisma.application.findMany({
+    where: { jobId: { in: jobs.map((job) => job.id) } },
+    select: { studentId: true }
+  });
+  return new Set(applications.map((application) => application.studentId));
+}
+
+// Company fields only the company's own account may see (verification paperwork, the official
+// email and review notes). Anyone else gets the rest (ISSUES S2, G3).
+const PRIVATE_COMPANY_FIELDS = [
+  'verificationDocs', 'docUrl', 'verificationNote', 'verificationReviewedBy',
+  'verificationReviewedAt', 'verificationSubmittedAt', 'officialEmail'
+];
+const withoutFields = (row, fields) => Object.fromEntries(Object.entries(row).filter(([key]) => !fields.includes(key)));
+// Job and gig rows for other people: the screening questions without their answer keys.
+const withCandidateQuestions = (row) => ({ ...row, screeningQuestions: toCandidateQuestions(row.screeningQuestions) });
 
 exports.getCompany = async (req, res) => {
   try {
@@ -60,7 +78,7 @@ exports.getCompany = async (req, res) => {
         };
       }
     }
-    const usedJobs = company.id ? await countQuotaJobs(company.id) : 0;
+    const usedJobs = usedJobCredits(company);
     res.json({
       ...withVerificationStatus(company),
       jobQuota: buildJobQuota(company.jobPostingQuota, usedJobs)
@@ -92,7 +110,7 @@ exports.updateCompany = async (req, res) => {
 
     if (req.body.logoUrl && existingCompany.logoUrl && existingCompany.logoUrl !== req.body.logoUrl) {
       try {
-        await deleteS3ObjectFromUrl(existingCompany.logoUrl, 'company logo');
+        await deleteS3ObjectFromUrl(existingCompany.logoUrl, 'company logo', [req.user.id, existingCompany.id]);
       } catch (deleteErr) {
         console.error('Failed to delete old company logo from S3:', deleteErr);
       }
@@ -140,7 +158,7 @@ exports.updateCompanyPhotos = async (req, res) => {
     const removed = current.filter((url) => !photos.includes(url) && isOwnUpload(url, ownPrefixes));
     for (const url of removed) {
       try {
-        await deleteS3ObjectFromUrl(url, 'company office photo');
+        await deleteS3ObjectFromUrl(url, 'company office photo', [req.user.id, company.id]);
       } catch (deleteErr) {
         console.error('Failed to delete removed office photo from S3:', deleteErr);
       }
@@ -180,10 +198,11 @@ exports.getCompanyById = async (req, res) => {
       where: { ownerId: company.userId }
     });
 
-    // 3. Active Openings
+    // 3. Active Openings (jobs past their end date stay in the table now, so leave them out)
     const activeJobs = await prisma.job.count({
       where: {
         companyId,
+        expiresAt: { gt: new Date() },
         OR: [
           { opportunityType: null },
           { opportunityType: { not: 'GIG' } }
@@ -232,9 +251,10 @@ exports.getCompanyById = async (req, res) => {
 
     const quota = company.jobPostingQuota ?? 1;
     const remainingJobs = Math.max(0, quota - totalJobs);
+    const isOwner = Boolean(req.user) && req.user.id === company.userId;
 
     res.json({
-      ...company,
+      ...(isOwner ? company : withoutFields(company, PRIVATE_COMPANY_FIELDS)),
       jobPostingQuota: quota,
       stats: {
         totalJobs,
@@ -245,8 +265,8 @@ exports.getCompanyById = async (req, res) => {
         remainingJobs
       },
       opportunities: {
-        jobs: companyJobs,
-        gigs: companyGigs
+        jobs: isOwner ? companyJobs : companyJobs.map(withCandidateQuestions),
+        gigs: isOwner ? companyGigs : companyGigs.map(withCandidateQuestions)
       }
     });
   } catch (err) {
@@ -289,7 +309,7 @@ exports.verifyCompany = async (req, res) => {
 
     if (existingCompany.docUrl && primaryDocUrl && existingCompany.docUrl !== primaryDocUrl) {
       try {
-        await deleteS3ObjectFromUrl(existingCompany.docUrl, 'company verification document');
+        await deleteS3ObjectFromUrl(existingCompany.docUrl, 'company verification document', [req.user.id, existingCompany.id]);
       } catch (deleteErr) {
         console.error('Failed to delete old company doc from S3:', deleteErr);
       }
@@ -361,28 +381,23 @@ exports.postJob = async (req, res) => {
       return res.status(404).json({ error: 'Company profile not found' });
     }
 
-    // Check job quota limit (1 free job, +5 for each purchased pack)
+    // Job quota (1 free job, +5 for each purchased pack). Each job/internship uses one credit for
+    // good; gigs posted here use none but still need a credit left, as before.
     const quota = company.jobPostingQuota ?? 1;
-    const currentJobsCount = await prisma.job.count({
-      where: {
-        companyId: company.id,
-        OR: [
-          { opportunityType: null },
-          { opportunityType: { not: 'GIG' } }
-        ]
-      }
+    const limitReached = (used) => res.status(403).json({
+      error: `Job posting limit reached (${used}/${quota} jobs posted). Please buy ${RECRUITER_PACK.jobCredits} more job credits for ${formatInr(RECRUITER_PACK.amount)} to continue posting.`,
+      code: 'UPGRADE_REQUIRED',
+      quota,
+      currentJobsCount: used
     });
-
-    if (currentJobsCount >= quota) {
-      return res.status(403).json({
-        error: `Job posting limit reached (${currentJobsCount}/${quota} jobs posted). Please buy ${RECRUITER_PACK.jobCredits} more job credits for ${formatInr(RECRUITER_PACK.amount)} to continue posting.`,
-        code: 'UPGRADE_REQUIRED',
-        quota,
-        currentJobsCount
-      });
+    if (usedJobCredits(company) >= quota) {
+      return limitReached(usedJobCredits(company));
     }
 
-    const job = await prisma.job.create({
+    const usesCredit = (opportunityType || 'JOB') !== 'GIG';
+    const days = activeDays ? parseInt(activeDays, 10) : 30;
+    const postedAt = new Date();
+    const createJob = (client) => client.job.create({
       data: {
         companyId: company.id,
         opportunityType: opportunityType || "JOB",
@@ -400,7 +415,9 @@ exports.postJob = async (req, res) => {
         roleResponsibilities,
         location,
         locationUrl,
-        activeDays: activeDays ? parseInt(activeDays, 10) : 30,
+        activeDays: days,
+        createdAt: postedAt,
+        expiresAt: expiryFrom(postedAt, days),
         joiningMonth: joiningMonth || 'Immediate',
         openings: openings ? parseInt(openings, 10) : null,
         showSalary: showSalary !== undefined ? Boolean(showSalary) : true,
@@ -411,6 +428,22 @@ exports.postJob = async (req, res) => {
         requirements
       }
     });
+
+    let job;
+    if (usesCredit) {
+      // Claim the credit and create the job together. The claim only succeeds while a credit is
+      // left, so two posts at the same moment can't both use the last one.
+      job = await prisma.$transaction(async (tx) => {
+        const claim = await tx.company.updateMany({
+          where: { id: company.id, jobsPosted: { lt: quota } },
+          data: { jobsPosted: { increment: 1 } }
+        });
+        return claim.count === 1 ? createJob(tx) : null;
+      });
+      if (!job) return limitReached(quota);
+    } else {
+      job = await createJob(prisma);
+    }
 
     res.status(201).json(job);
   } catch (err) {
@@ -432,7 +465,7 @@ exports.getEligibleCandidateCount = async (req, res) => {
       })
     ]);
     const quizSkills = new Set(activeQuestions.map((q) => q.skillName.toLowerCase()));
-    res.json(summarizePool(req.body.requirements, profiles, quizSkills));
+    res.json(summarizePool(req.body.requirements, profiles, quizSkills, { forGig: req.body.forGig === true }));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error counting matching candidates' });
@@ -441,9 +474,6 @@ exports.getEligibleCandidateCount = async (req, res) => {
 
 exports.getCompanyJobs = async (req, res) => {
   try {
-    // Auto-delete expired jobs
-    await purgeExpiredJobs(prisma);
-
     const company = await prisma.company.findUnique({
       where: { userId: req.user.id }
     });
@@ -494,8 +524,12 @@ exports.getCompanyJobs = async (req, res) => {
 
 exports.getCandidates = async (req, res) => {
   try {
-    const profiles = await prisma.profile.findMany();
-    res.json(profiles);
+    const company = await prisma.company.findUnique({ where: { userId: req.user.id } });
+    const [profiles, applicantIds] = await Promise.all([
+      prisma.profile.findMany(),
+      applicantProfileIdsFor(company?.id)
+    ]);
+    res.json(profiles.map((profile) => redactCandidateContact(profile, applicantIds)));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error fetching candidates' });
@@ -551,6 +585,11 @@ exports.updateJob = async (req, res) => {
       return res.status(403).json({ error: 'Unauthorized to update this job' });
     }
 
+    // The listing ends `days` after it was first posted. Without a new value the current one stays.
+    const days = activeDays ? parseInt(activeDays, 10) : (job.activeDays || 30);
+    const expiresAt = expiryFrom(job.createdAt, days);
+    const liveAgain = expiresAt.getTime() > Date.now();
+
     const updatedJob = await prisma.job.update({
       where: { id: jobId },
       data: {
@@ -569,7 +608,10 @@ exports.updateJob = async (req, res) => {
         roleResponsibilities,
         location,
         locationUrl,
-        activeDays: activeDays ? parseInt(activeDays, 10) : 30,
+        activeDays: days,
+        expiresAt,
+        // Extending a listing past today makes it live again, so it leaves the retention stages.
+        ...(liveAgain ? { archivedAt: null, retainedAt: null } : {}),
         joiningMonth: joiningMonth !== undefined ? joiningMonth : job.joiningMonth,
         openings: openings ? parseInt(openings, 10) : null,
         showSalary: showSalary !== undefined ? Boolean(showSalary) : job.showSalary,
@@ -718,9 +760,6 @@ exports.toggleJobPause = async (req, res) => {
 
 exports.getTopMatchingTalents = async (req, res) => {
   try {
-    // Purge expired jobs first so only active jobs are used for demand matching
-    await purgeExpiredJobs(prisma);
-
     const company = await prisma.company.findFirst({
       where: { OR: [{ userId: req.user.id }, { id: req.user.id }] }
     });
@@ -735,21 +774,19 @@ exports.getTopMatchingTalents = async (req, res) => {
       where: { companyId: company.id }
     });
 
-    // Exclude closed, paused, or expired jobs and Gigs
-    const activeJobs = allJobs.filter(job => {
-      if (job.opportunityType === 'GIG') return false;
-      if (job.status === 'CLOSED' || job.status === 'PAUSED' || job.isPaused) return false;
-      const activeDays = job.activeDays || 30;
-      const expiryTime = new Date(job.createdAt).getTime() + activeDays * 24 * 60 * 60 * 1000;
-      return Date.now() <= expiryTime;
-    });
+    // Only live jobs and internships (not gigs) shape the demand profile.
+    const activeJobs = allJobs.filter((job) => job.opportunityType !== 'GIG' && isJobOpen(job));
 
     const candidates = await prisma.profile.findMany();
 
     const limit = req.query.limit ? parseInt(req.query.limit, 10) : 500;
     const recommendationResult = getTopMatchingTalents(activeJobs, candidates, limit);
 
-    res.json(recommendationResult);
+    const applicantIds = await applicantProfileIdsFor(company.id);
+    res.json({
+      ...recommendationResult,
+      topTalents: (recommendationResult.topTalents || []).map((talent) => redactCandidateContact(talent, applicantIds))
+    });
   } catch (err) {
     console.error('Error computing top matching talents:', err);
     res.status(500).json({ error: 'Server error retrieving matching talents' });

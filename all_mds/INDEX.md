@@ -12,6 +12,7 @@ Everything that used to sit loose in the repository root. Only `CLAUDE.md`, `REA
 | [ISSUES.md](ISSUES.md) | Bug/security audit from 2026-10-30 with exact `path:line` locations and IDs (`A1`, `S6`, `G1`…). Check before touching auth, uploads, payments, assessments, gigs, community or courses. The only file here tracked in git. |
 | [content.md](content.md) | Page-by-page map of every piece of user-facing content, with navigation between pages. |
 | [workpro.md](workpro.md) | How users move through the product: flows, free vs paid. Companion to `content.md`. |
+| [systemdesign.md](systemdesign.md) | Server-side design rules and the high-load plan (stateless API, DB pooling, Redis, caching, uploads, workers), with the current gaps to fix first. |
 
 ## History & handoffs (reference only, not maintained)
 

@@ -51,8 +51,9 @@ model User {
   planPurchasedAt DateTime?            @db.Timestamptz(3)
   payments        PaymentTransaction[]
 
-  profile Profile?
-  company Company?
+  profile        Profile?
+  company        Company?
+  supportTickets SupportTicket[]
 }
 
 model Profile {
@@ -114,6 +115,9 @@ model Company {
   verificationReviewedAt  DateTime? @db.Timestamptz(3)
   verificationReviewedBy  String?
   jobPostingQuota         Int       @default(1)
+  // Job/internship posts made so far (gigs excluded). Credits are checked against this, so
+  // closing, slimming or deleting a job never gives a credit back.
+  jobsPosted              Int       @default(0)
   jobs                    Job[]
 }
 
@@ -148,8 +152,15 @@ model Job {
   screeningQuestions   Json          @default("[]") // ScreeningQuestion[]
   applications         Application[]
   createdAt            DateTime      @default(now()) @db.Timestamptz(3)
+  // Lifecycle (modules/jobs/jobLifecycle.service.js): live until expiresAt (createdAt + activeDays),
+  // slimmed (archivedAt) JOB_ARCHIVE_AFTER_DAYS later, deleted JOB_DELETE_AFTER_DAYS after that,
+  // unless someone was hired from it: then the slim row and the hired applications stay (retainedAt).
+  expiresAt            DateTime?     @db.Timestamptz(3)
+  archivedAt           DateTime?     @db.Timestamptz(3)
+  retainedAt           DateTime?     @db.Timestamptz(3)
 
   @@index([companyId])
+  @@index([expiresAt])
 }
 
 model Application {
@@ -545,6 +556,45 @@ model CourseEnrollment {
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
+}
+
+// --- Help & support ---
+// A candidate or recruiter raises a ticket in main_website (modules/support); admins
+// answer it in admin_ws (modules/support, raw SQL). Both sides email the requester.
+
+model SupportTicket {
+  id            String           @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  // Shown to people as "SUP-<number>".
+  number        Int              @unique @default(autoincrement())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // The requester's role when the ticket was raised: "STUDENT" | "RECRUITER".
+  role          String
+  // A key from modules/support/supportRules.js CATEGORIES (mirrored in admin_ws).
+  category      String
+  subject       String
+  // "OPEN" (waiting on AlignGrad) | "PENDING" (AlignGrad replied, waiting on the requester) | "RESOLVED".
+  status        String           @default("OPEN")
+  lastMessageAt DateTime         @default(now()) @db.Timestamptz(3)
+  resolvedAt    DateTime?        @db.Timestamptz(3)
+  createdAt     DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime         @default(now()) @updatedAt @db.Timestamptz(3)
+  messages      SupportMessage[]
+
+  @@index([userId])
+  @@index([status, lastMessageAt])
+}
+
+model SupportMessage {
+  id        String        @id @default(dbgenerated("lpad(to_hex(floor(extract(epoch from clock_timestamp()))::bigint), 8, '0') || substr(md5(random()::text || clock_timestamp()::text), 1, 16)"))
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  // "USER" (the requester) | "ADMIN" (AlignGrad support).
+  author    String
+  body      String
+  createdAt DateTime      @default(now()) @db.Timestamptz(3)
+
+  @@index([ticketId, createdAt])
 }
 
 // ---------------------------------------------------------------------------

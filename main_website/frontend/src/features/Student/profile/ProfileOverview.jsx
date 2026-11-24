@@ -489,9 +489,9 @@ export default function ProfileOverview({ data, sectionItems, scrollTarget, comp
       <SectionCard title="Resume" subtitle="Sent with your applications" icon={FileText} tone="green">
         <div className="flex flex-col divide-y divide-[#EEF0F6] border-t border-[#EEF0F6]">
           <div className="flex flex-wrap items-center gap-3 px-5 py-4 sm:px-6">
-            <span aria-hidden="true" className="flex h-11 w-9 shrink-0 items-center justify-center rounded-[6px] border border-[#E1E5F2] bg-[#F4F6FE] text-[10px] font-bold text-[#0B3FA8]">
+            {/* <span aria-hidden="true" className="flex h-11 w-9 shrink-0 items-center justify-center rounded-[6px] border border-[#E1E5F2] bg-[#F4F6FE] text-[10px] font-bold text-[#0B3FA8]">
               PDF
-            </span>
+            </span> */}
             <span className="flex min-w-0 flex-1 flex-col">
               <span className={`font-semibold ${INK}`}>AlignGrad resume</span>
               <span className={`text-[14px] ${MUTED}`}>Built from this profile</span>
@@ -502,16 +502,16 @@ export default function ProfileOverview({ data, sectionItems, scrollTarget, comp
             </button>
           </div>
           <div className="flex flex-wrap items-center gap-3 px-5 py-4 sm:px-6">
-            <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-[#E3F5EE] text-[#0F7A55]">
+            {/* <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-[#E3F5EE] text-[#0F7A55]">
               <FileText className="size-5" />
-            </span>
+            </span> */}
             <span className="flex min-w-0 flex-1 flex-col">
-              <span className={`font-semibold ${INK}`}>Your own resume</span>
+              <span className={`font-semibold ${INK}`}>Pre build resume</span>
               <span className={`text-[14px] ${MUTED}`}>{safeHref(data.resumeUrl) ? 'Google Drive link' : 'Add a Google Drive link to your resume'}</span>
             </span>
             {safeHref(data.resumeUrl) && <ActionLink href={safeHref(data.resumeUrl)} icon={ExternalLink}>Open</ActionLink>}
             <button type="button" onClick={() => onAction('resume')} className={`${SECONDARY} ${SMALL}`}>
-              {data.resumeUrl ? 'Change link' : 'Use my own'}
+              {data.resumeUrl ? 'Change link' : 'Add Resume'}
             </button>
           </div>
         </div>

@@ -29,7 +29,9 @@ const mockDb = {
   postViews: [],
   paymentTransactions: [],
   courses: [],
-  courseEnrollments: []
+  courseEnrollments: [],
+  supportTickets: [],
+  supportMessages: []
 };
 
 module.exports = { mockDb };

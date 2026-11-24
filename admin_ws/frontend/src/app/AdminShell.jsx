@@ -12,6 +12,7 @@ import CoursesPage from '../features/courses/CoursesPage.jsx';
 import DashboardPage from '../features/dashboard/DashboardPage.jsx';
 import JobsPage from '../features/jobs/JobsPage.jsx';
 import StoragePage from '../features/storage/StoragePage.jsx';
+import SupportPage from '../features/support/SupportPage.jsx';
 
 // Screen id (see navigation.js) → page. Pages are added here as they are built.
 const PAGES = {
@@ -19,6 +20,7 @@ const PAGES = {
   companies: CompaniesPage,
   candidates: CandidatesPage,
   jobs: JobsPage,
+  support: SupportPage,
   courses: CoursesPage,
   analytics: AnalyticsPage,
   storage: StoragePage
@@ -26,11 +28,12 @@ const PAGES = {
 
 export default function AdminShell({ onLogout }) {
   const { stack, current, switchTo } = useNavigation();
-  const { recruiters } = useAdminData();
+  const { recruiters, supportTickets } = useAdminData();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false); // open on every visit; the arrow collapses it to icons (desktop only)
 
   const pendingCompanies = (recruiters.data || []).filter((c) => c.verificationStatus === 'PENDING').length;
+  const ticketsNeedingReply = (supportTickets.data || []).filter((t) => t.status === 'OPEN').length;
 
   // A new screen starts at the top of the page.
   useEffect(() => {
@@ -43,7 +46,7 @@ export default function AdminShell({ onLogout }) {
         section={current.section}
         open={drawerOpen}
         collapsed={collapsed}
-        badges={{ companies: pendingCompanies }}
+        badges={{ companies: pendingCompanies, support: ticketsNeedingReply }}
         onClose={() => setDrawerOpen(false)}
         onLogout={onLogout}
         onSelect={(id) => {

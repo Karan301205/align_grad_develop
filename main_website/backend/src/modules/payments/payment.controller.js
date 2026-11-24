@@ -25,19 +25,12 @@ function isValidSignature(orderId, paymentId, signature) {
   return given.length === wanted.length && crypto.timingSafeEqual(given, wanted);
 }
 
-// Job/internship posts use credits; gigs do not (same filter as recruiter postJob).
+// Job/internship posts use credits; gigs do not. `jobsPosted` is counted up when a job is
+// posted (recruiter postJob) and never down, so closing or deleting a job returns no credit.
 async function buildQuotaInfo(userId) {
   const company = await prisma.company.findUnique({ where: { userId } });
   const quota = company?.jobPostingQuota ?? 1;
-  const totalJobs = company ? await prisma.job.count({
-    where: {
-      companyId: company.id,
-      OR: [
-        { opportunityType: null },
-        { opportunityType: { not: 'GIG' } }
-      ]
-    }
-  }) : 0;
+  const totalJobs = company?.jobsPosted ?? 0;
   return {
     jobPostingQuota: quota,
     totalJobs,

@@ -10,6 +10,7 @@ const gigRoutes = require('../modules/gigs/gig.routes');
 const communityRoutes = require('../modules/community/community.routes');
 const paymentRoutes = require('../modules/payments/payment.routes');
 const coursesRoutes = require('../modules/courses/course.routes');
+const supportRoutes = require('../modules/support/support.routes');
 
 // Mount domain routes under identical URI namespaces
 router.use('/auth', authRoutes);
@@ -20,5 +21,6 @@ router.use('/gigs', gigRoutes);
 router.use('/community', communityRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/courses', coursesRoutes);
+router.use('/support', supportRoutes);
 
 module.exports = router;

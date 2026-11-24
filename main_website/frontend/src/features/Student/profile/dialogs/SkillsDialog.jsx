@@ -133,7 +133,6 @@ export default function SkillsDialog({ skills, techSkills, onSave, onClose }) {
                       id={`skill-rating-${skill.name.replace(/[^\w-]/g, '_')}`}
                       ariaLabel={`Self-rating for ${skill.name}`}
                       size="sm"
-                      columns={5}
                       className="w-[88px]"
                       value={skill.rating || 1}
                       options={RATING_OPTIONS}

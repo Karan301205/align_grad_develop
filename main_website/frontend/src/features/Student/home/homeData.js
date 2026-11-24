@@ -66,6 +66,7 @@ export const oneSkillAwayJobs = (jobs) => openJobs(jobs).filter((job) => Array.i
 export function gapText(missing) {
   if (!missing) return '';
   const current = Number(missing.currentRating) || 0;
+  if (missing.hasQuiz === false) return `${missing.skillName} not on your profile`;
   return current > 0 ? `${missing.skillName} ${current}, needs ${missing.requiredRating}` : `${missing.skillName} not on your profile, needs ${missing.requiredRating}`;
 }
 

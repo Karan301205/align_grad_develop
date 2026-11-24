@@ -1,7 +1,7 @@
 const { z } = require('zod');
 
 const gigRequirementSchema = z.object({
-  skillName: z.string().min(1, 'Skill name must not be empty'),
+  skillName: z.string().trim().min(1, 'Skill name must not be empty').max(100),
   minRating: z.number().int().min(0).max(10)
 });
 

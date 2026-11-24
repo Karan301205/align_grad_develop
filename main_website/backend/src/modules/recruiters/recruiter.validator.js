@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const env = require('../../config/env');
 
 const { SCREENING_TYPES, QUESTION_MAX, getQuestionProblem } = require('../jobs/screeningQuestions');
 
@@ -51,11 +52,16 @@ const postJobSchema = {
     roleResponsibilities: z.string().optional().nullable(),
     location: z.string().optional().nullable(),
     locationUrl: z.string().url().or(z.literal('')).optional().nullable(),
-    activeDays: z.number().int().min(1).optional().nullable().or(z.string().regex(/^\d+$/).transform(val => parseInt(val, 10))),
+    // How many days the listing stays live: 1 to JOB_MAX_ACTIVE_DAYS (server setting, default 90).
+    activeDays: z
+      .union([z.number(), z.string().regex(/^\d+$/, 'Listing length must be a whole number of days').transform((val) => parseInt(val, 10))])
+      .pipe(z.number().int().min(1, 'Keep the listing open for at least 1 day').max(env.JOB_MAX_ACTIVE_DAYS, `A listing can stay open for at most ${env.JOB_MAX_ACTIVE_DAYS} days`))
+      .optional()
+      .nullable(),
     joiningMonth: z.string().optional().nullable(),
     openings: z.number().int().min(1).optional().nullable().or(z.string().regex(/^\d+$/).transform(val => parseInt(val, 10))),
     requirements: z.array(z.object({
-      skillName: z.string().min(1, 'Skill name is required'),
+      skillName: z.string().trim().min(1, 'Skill name is required').max(100),
       minRating: z.number().int().min(1).max(10)
     })).min(1, 'At least one requirement is required'),
     selectionProcess: z.array(z.object({
@@ -116,7 +122,9 @@ const eligibleCountSchema = {
     requirements: z.array(z.object({
       skillName: z.string().trim().min(1, 'Skill name is required').max(100),
       minRating: z.number().int().min(1).max(10)
-    })).max(30, 'A job can have at most 30 skills')
+    })).max(30, 'A job can have at most 30 skills'),
+    // The post-a-gig form counts with the gig rule (jobs/eligiblePool.js gigSkillGaps).
+    forGig: z.boolean().optional()
   })
 };
 

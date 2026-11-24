@@ -158,7 +158,7 @@ export default function CandidateDossier({ cand, job, onViewProfile, onPlayProje
               {cand.phone}
             </span>
           )}
-          {!cand.email && !cand.phone && <span className={MUTED}>No contact details on the profile.</span>}
+          {!cand.email && !cand.phone && <span className={MUTED}>Contact details show once the candidate applies to one of your jobs.</span>}
         </div>
       </Section>
 

@@ -5,6 +5,7 @@ const { recordFailedAttempt, resetFailedAttempts } = require('../../middleware/r
 const env = require('../../config/env');
 const { passwordResetService, emailVerificationService } = require('./services');
 const { sendError } = require('../../shared/http/sendError');
+const { googleTokenProblem } = require('./googleToken');
 
 exports.signup = async (req, res) => {
   const { email, password, role, name } = req.body;
@@ -144,12 +145,18 @@ exports.googleAuth = async (req, res) => {
   }
 
   const requestedRole = (role || 'STUDENT').toUpperCase();
+  if (!['STUDENT', 'RECRUITER'].includes(requestedRole)) {
+    return res.status(400).json({ error: 'Choose a valid account type.' });
+  }
+  if (!env.GOOGLE_CLIENT_ID) {
+    return res.status(503).json({ error: 'Google sign-in is not configured on the server. Please use email sign-up.' });
+  }
 
   try {
-    // Verify Google ID token via Google's tokeninfo API
+    // Verify Google ID token via Google's tokeninfo API, then check it was issued for this app (ISSUES A1).
     let googleUser;
     try {
-      const gRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+      const gRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
       if (!gRes.ok) {
         throw new Error('Failed to verify Google token');
       }
@@ -157,6 +164,10 @@ exports.googleAuth = async (req, res) => {
     } catch (gErr) {
       console.error('Google token verification error:', gErr);
       return res.status(400).json({ error: 'Google Sign-In verification failed. Please try again or use email registration.' });
+    }
+    const problem = googleTokenProblem(googleUser, env.GOOGLE_CLIENT_ID);
+    if (problem) {
+      return res.status(401).json({ error: problem });
     }
 
     const { email, name, picture, sub } = googleUser;

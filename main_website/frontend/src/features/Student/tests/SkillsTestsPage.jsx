@@ -209,7 +209,7 @@ export default function SkillsTestsPage({ profile, techSkills = [], loading, job
                         <span className={`text-[12.5px] ${MUTED}`}>{skill.technical ? 'Test coming soon' : 'No test for this skill'}</span>
                       </span>
                       <span className="flex items-center gap-1.5">
-                        <Dropdown id={`self-${skill.name}`} ariaLabel={`Your rating for ${skill.name}`} size="sm" columns={5} value={String(skill.rating || 1)} onChange={(value) => saveRating(skill.name, value)} options={RATINGS} disabled={Boolean(saving)} className="w-[68px]" />
+                        <Dropdown id={`self-${skill.name}`} ariaLabel={`Your rating for ${skill.name}`} size="sm" value={String(skill.rating || 1)} onChange={(value) => saveRating(skill.name, value)} options={RATINGS} disabled={Boolean(saving)} className="w-[68px]" />
                         <span className={MUTED}>/10</span>
                       </span>
                     </li>

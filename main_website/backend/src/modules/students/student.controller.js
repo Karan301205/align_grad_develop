@@ -7,7 +7,7 @@ const {
   getRequirementStatuses,
   calculateCandidateJobRecommendation
 } = require('../skills');
-const { purgeExpiredJobs } = require('../jobs/jobLifecycle.service');
+const { isJobOpen, isJobExpired } = require('../jobs/jobLifecycle.service');
 const { evaluateAnswers, toCandidateQuestions } = require('../jobs/screeningQuestions');
 const { deleteS3ObjectFromUrl } = require('../../services/fileCleanup.service');
 const testSessionRepo = require('../../services/questionBank/repositories/testSessionRepository');
@@ -270,9 +270,6 @@ exports.updateProfile = async (req, res) => {
 
 exports.getJobs = async (req, res) => {
   try {
-    // Auto-delete expired jobs
-    await purgeExpiredJobs(prisma);
-
     const profile = await prisma.profile.findUnique({
       where: { userId: req.user.id }
     });
@@ -281,7 +278,8 @@ exports.getJobs = async (req, res) => {
     }
 
     const allJobs = await prisma.job.findMany({ include: { company: true } });
-    const jobs = allJobs.filter(job => job.status !== 'PAUSED' && !job.isPaused && job.status !== 'CLOSED');
+    // Only live jobs (not paused, closed or past their recruiter-chosen end date).
+    const jobs = allJobs.filter((job) => isJobOpen(job));
     const applications = await prisma.application.findMany({
       where: { studentId: profile.id }
     });
@@ -352,6 +350,9 @@ exports.applyJob = async (req, res) => {
     if (!job) {
       return res.status(404).json({ error: 'Job not found' });
     }
+    if (!isJobOpen(job)) {
+      return res.status(409).json({ error: 'This job is no longer accepting applications.' });
+    }
 
     const activeQuestions = await prisma.question.findMany({
       where: { status: 'ACTIVE' },
@@ -362,10 +363,14 @@ exports.applyJob = async (req, res) => {
 
     const studentSkills = buildStudentSkillMap(profile);
 
-    const hasMissing = getMissingRequirements(job, studentSkills, skillsWithQuestionsSet).length > 0;
+    const [missing] = getMissingRequirements(job, studentSkills, skillsWithQuestionsSet);
 
-    if (hasMissing) {
-      return res.status(400).json({ error: 'You do not meet the minimum rating requirements for this job.' });
+    if (missing) {
+      return res.status(400).json({
+        error: missing.hasQuiz === false
+          ? `Add ${missing.skillName} to your profile to apply to this job.`
+          : 'You do not meet the minimum rating requirements for this job.'
+      });
     }
 
     const existingApps = await prisma.application.findMany({
@@ -739,7 +744,7 @@ exports.saveIntroVideo = async (req, res) => {
     // 2. If there is an old video URL and it's different from the new one, delete the old file
     if (profile.introVideoUrl && profile.introVideoUrl !== introVideoUrl) {
       try {
-        await deleteS3ObjectFromUrl(profile.introVideoUrl, 'video file');
+        await deleteS3ObjectFromUrl(profile.introVideoUrl, 'video file', [req.user.id, profile.id]);
       } catch (deleteErr) {
         console.error('Failed to parse and delete old video from S3:', deleteErr);
       }
@@ -883,7 +888,7 @@ exports.getPublicJobBrief = async (req, res) => {
       include: { company: true }
     });
 
-    if (!job || job.status === 'CLOSED') {
+    if (!job || job.status === 'CLOSED' || isJobExpired(job)) {
       return res.status(404).json({ error: 'Job not found or expired' });
     }
 

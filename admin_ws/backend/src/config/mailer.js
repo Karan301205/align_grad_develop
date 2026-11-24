@@ -19,7 +19,12 @@ function getTransporter() {
       auth: {
         user: env.SMTP_USER,
         pass: env.SMTP_PASS
-      }
+      },
+      // Fail within seconds instead of nodemailer's minutes-long defaults; callers report
+      // a failed email to the admin (emailSent: false).
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 30000
     });
   }
   return transporter;

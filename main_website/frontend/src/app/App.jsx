@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // Import features
+import { disconnectRealtime } from '../services/realtime';
 import { AuthView, CandidateAuth, RecruiterAuth, ResetPasswordPage } from '../features/Auth';
 import { StudentLayout, PublicJobBriefPage } from '../features/Student';
 import { RecruiterLayout } from '../features/Recruiter';
@@ -25,7 +26,8 @@ export default function App() {
   const [isReady, setIsReady] = useState(false);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  // Support emails link to `/?open=support`, which opens Help & support (after sign-in if needed).
+  const [activeTab, setActiveTab] = useState(() => (new URLSearchParams(window.location.search).get('open') === 'support' ? 'support' : 'dashboard'));
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
@@ -34,6 +36,12 @@ export default function App() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    // `open=support` was read into activeTab above; drop it so a reload or a later login doesn't reopen it.
+    if (params.get('open') === 'support') {
+      params.delete('open');
+      const rest = params.toString();
+      window.history.replaceState({}, '', `${window.location.pathname}${rest ? `?${rest}` : ''}`);
+    }
     if (
       params.get('auth_prompt') === 'signup_required' ||
       params.get('prompt') === 'signup' ||
@@ -109,6 +117,7 @@ export default function App() {
   const toggleTheme = () => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
 
   const handleLogout = () => {
+    disconnectRealtime();
     setToken(null);
     setUser(null);
     setActiveTab('dashboard');
@@ -128,7 +137,7 @@ export default function App() {
 
   // Standalone public job brief view (unauthenticated or direct share link access)
   if (currentPath.startsWith('/job_brief')) {
-    return <PublicJobBriefPage theme={theme} toggleTheme={toggleTheme} />;
+    return <PublicJobBriefPage />;
   }
 
   // Standalone password reset view (unauthenticated or link access)

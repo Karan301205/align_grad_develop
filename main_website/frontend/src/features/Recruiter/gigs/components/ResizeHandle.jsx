@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { GripHorizontal, GripVertical } from 'lucide-react';
 
 const KEY_STEP = 16; // px per arrow-key press
 
@@ -7,6 +8,7 @@ const KEY_STEP = 16; // px per arrow-key press
  * width); `"horizontal"` is a flat bar you drag up or down (changes a height). Arrow keys nudge it and a
  * double-click resets it. `getStart` returns the current size in px, `onChange` receives the new one
  * (clamp it there), and `invert` flips the direction for panels that grow when the bar moves the other way.
+ * A grip in the middle is always shown, so people can see the bar can be dragged.
  */
 export default function ResizeHandle({ orientation, label, getStart, value, onChange, onReset, invert = false, className = '' }) {
   const drag = useRef(null);
@@ -56,6 +58,15 @@ export default function ResizeHandle({ orientation, label, getStart, value, onCh
           vertical ? 'inset-y-0 left-1/2 w-1 -translate-x-1/2' : 'inset-x-0 top-1/2 h-1 -translate-y-1/2'
         }`}
       />
+      <span
+        aria-hidden="true"
+        className={`absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center text-[#6B7280] transition-colors group-hover:border-[#0F7A55] group-hover:text-[#0F7A55] group-focus-visible:border-[#0F7A55] group-focus-visible:text-[#0F7A55] group-active:border-[#0F7A55] group-active:text-[#0F7A55] ${
+          // The flat bar sits inside a white panel: a white grip breaks the line around the dots.
+          vertical ? 'h-10 w-4' : 'h-4 w-10 bg-white'
+        }`}
+      >
+        {vertical ? <GripVertical className="size-3.5" /> : <GripHorizontal className="size-3.5" />}
+      </span>
     </div>
   );
 }

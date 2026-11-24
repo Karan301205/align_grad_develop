@@ -26,13 +26,13 @@ test('counts only candidates who clear every gating bar', () => {
   assert.deepStrictEqual(result.bestRelaxation, { skillName: 'SQL', from: 7, to: 6, adds: 1 });
 });
 
-test('bars on soft skills or skills without bank questions never gate, as when applying', () => {
+test('soft skills or skills without bank questions only need to be on the profile, as when applying', () => {
   const result = summarizePool(
     [{ skillName: 'Communication', minRating: 9 }, { skillName: 'Excel', minRating: 9 }],
-    [person({}), person({ Excel: 2 })],
+    [person({}), person({ Excel: 2 }), person({ Communication: 1, Excel: 2 })],
     quiz
   );
-  assert.strictEqual(result.eligible, 2);
+  assert.strictEqual(result.eligible, 1, 'only the candidate with both skills, whatever the score');
   assert.deepStrictEqual(result.requirements.map((r) => r.gates), [false, false]);
   assert.strictEqual(result.bestRelaxation, null);
 });
@@ -55,4 +55,19 @@ test('controller runs against the mock DB and returns only aggregate numbers', a
   assert.strictEqual(res.statusCode, 200);
   assert.deepStrictEqual(Object.keys(res.body).sort(), ['bestRelaxation', 'eligible', 'requirements', 'total']);
   assert.strictEqual(res.body.total, (await prisma.profile.findMany()).length);
+});
+
+test('a gig counts its own (untested) skills against the candidate\'s self-rating', () => {
+  const self = (skills) => ({ skills: Object.entries(skills).map(([name, rating]) => ({ name, rating })) });
+  const profiles = [
+    self({ A2A: 6 }), // meets the bar
+    self({ a2a: 5 }), // same skill, other case, one short
+    self({ Excel: 9 }) // doesn't have it
+  ];
+  const bars = [{ skillName: 'A2A', minRating: 6 }];
+  assert.strictEqual(summarizePool(bars, profiles, quiz).eligible, 2, 'a job only needs it on the profile');
+  const gig = summarizePool(bars, profiles, quiz, { forGig: true });
+  assert.strictEqual(gig.eligible, 1);
+  assert.deepStrictEqual(gig.bestRelaxation, { skillName: 'A2A', from: 6, to: 5, adds: 1 });
+  assert.strictEqual(gig.requirements[0].gates, false, 'still reported as having no test');
 });

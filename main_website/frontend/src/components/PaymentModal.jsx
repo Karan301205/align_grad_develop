@@ -10,6 +10,8 @@ export default function PaymentModal({
   // Optional server offer from GET /payments/status ({ amount, jobCredits }); when
   // given, the recruiter pack's price and credit count are shown from it.
   offer = null,
+  // Optional reason the modal opened (e.g. the server's "free plan includes one gig" message).
+  notice = '',
   token,
   user = {},
   onSuccess,
@@ -43,11 +45,11 @@ export default function PaymentModal({
     : {
         title: `Recruiter ${packCredits}-Job Pack`,
         subtitle: 'Scale Your Hiring Pipeline with Verified Talent',
-        badge: `${packCredits} Job Postings • ${packPrice} Pack`,
+        badge: `${packCredits} Jobs + ${packCredits} Gigs • ${packPrice} Pack`,
         price: packPrice,
-        billingLabel: `${packCredits} Job Posting Credits • Repeatable Quota`,
+        billingLabel: `${packCredits} Job Posts + ${packCredits} Gig Posts • Repeatable Quota`,
         features: [
-          `Publish up to ${packCredits} job openings using your purchased posting credits.`,
+          `Publish up to ${packCredits} more job openings and ${packCredits} more gigs.`,
           'Define required skills and minimum proficiency levels for each role.',
           'Discover candidates whose verified skills align with your requirements.',
           'Review candidate profiles, skill ratings, and assessment results.',
@@ -118,6 +120,12 @@ export default function PaymentModal({
         {/* Left Column: Plan Benefits & Unlocked Points */}
         <div className="flex-1 p-6 md:p-8 flex flex-col justify-between bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent">
           <div>
+            {notice && (
+              <p role="alert" className="mb-4 mr-8 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
+                {notice}
+              </p>
+            )}
+
             {/* Plan Badge */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-headline font-semibold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800/80 mb-3.5">
               <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -193,7 +201,7 @@ export default function PaymentModal({
               </div>
               <div className="flex items-center justify-between text-on-surface">
                 <span className="text-on-surface-variant">Billing Type</span>
-                <span className="font-sans font-medium">{isStudent ? 'One-time Lifetime' : `Pay-per-pack (${packCredits} jobs)`}</span>
+                <span className="font-sans font-medium">{isStudent ? 'One-time Lifetime' : `Pay-per-pack (${packCredits} jobs + ${packCredits} gigs)`}</span>
               </div>
               <div className="flex items-center justify-between text-on-surface">
                 <span className="text-on-surface-variant">Taxes & Platform Fees</span>

@@ -7,9 +7,10 @@
 
 const WEEKS = 8;
 
-// A posting candidates can currently see: not paused or closed (the same rule the
-// main app uses for its job list).
-const OPEN_JOB = `coalesce("status", 'ACTIVE') NOT IN ('PAUSED', 'CLOSED') AND coalesce("isPaused", false) = false`;
+// A posting candidates can currently see: not paused, closed or past its end date (the same
+// rule as main_website modules/jobs/jobLifecycle.service.js isJobOpen). Expired jobs stay in
+// the table for a while now instead of being deleted at once, so the date check matters.
+const OPEN_JOB = `coalesce("status", 'ACTIVE') NOT IN ('PAUSED', 'CLOSED') AND coalesce("isPaused", false) = false AND ("expiresAt" IS NULL OR "expiresAt" > now())`;
 const IS_JOB = `coalesce("opportunityType", 'JOB') = 'JOB'`;
 const IS_INTERNSHIP = `"opportunityType" = 'INTERNSHIP'`;
 

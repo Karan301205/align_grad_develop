@@ -298,11 +298,13 @@ function calculateCandidateJobRecommendation(job, profile, studentSkills, applic
   const preferenceScore = calculatePreferenceMatch(job, profile);
   const contextScore = calculateContextSignals(job, profile, applications);
 
-  // 3-Layer Composite Formula: 50% Skills + 30% Preferences + 20% Context
+  // 3-Layer Composite Formula: 50% Skills + 30% Preferences + 20% Context.
+  // Preferences and context count only in proportion to the job's skills the candidate
+  // has, so a candidate with none of them gets 0%, not a score from location alone.
+  const coverage = coveragePercent / 100;
   const compositeScore = Math.round(
     0.50 * skillScore +
-    0.30 * preferenceScore +
-    0.20 * contextScore
+    coverage * (0.30 * preferenceScore + 0.20 * contextScore)
   );
 
   const recommendationScore = Math.min(100, Math.max(0, compositeScore));

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SERVER_MESSAGE, apiFetch, userMessage } from '../../services/apiClient';
 import { putFileToS3 } from '../../services/uploadService';
+import { getRealtime } from '../../services/realtime';
 
 const POLL_MS = 3000; // a new message shows within ~3 s while people are talking
 const IDLE_POLL_MS = [6000, 10000]; // a quiet conversation is checked less often…
@@ -66,6 +67,7 @@ export default function useGigChat({ gigId, partnerId, token, enabled }) {
   const queueRef = useRef(Promise.resolve());
   const tempSeq = useRef(0);
   const wakeRef = useRef(null); // speeds polling back up (set by the polling effect)
+  const nudgeRef = useRef(null); // fetches now, when the realtime connection says the chat changed
 
   const current = thread.key === conversation ? thread : EMPTY_THREAD;
   const st = status.key === conversation ? status : EMPTY_STATUS;
@@ -104,6 +106,7 @@ export default function useGigChat({ gigId, partnerId, token, enabled }) {
     let quiet = 0; // polls in a row with nothing new
     let inFlight = false;
     let loaded = false;
+    let nudged = false; // a realtime signal arrived while a fetch was running
 
     const schedule = (ms) => {
       clearTimeout(timer);
@@ -149,7 +152,12 @@ export default function useGigChat({ gigId, partnerId, token, enabled }) {
         patchStatus(key, loaded ? { reconnecting: true } : { error: userMessage(err) });
       } finally {
         inFlight = false;
-        schedule(delay);
+        if (nudged) {
+          nudged = false;
+          schedule(0);
+        } else {
+          schedule(delay);
+        }
       }
     }
 
@@ -161,6 +169,17 @@ export default function useGigChat({ gigId, partnerId, token, enabled }) {
       }
     };
     wakeRef.current = wake;
+    // A realtime "chat changed" signal: fetch right away (after any fetch already running).
+    const nudge = () => {
+      quiet = 0;
+      if (inFlight) {
+        nudged = true;
+        return;
+      }
+      delay = POLL_MS;
+      schedule(0);
+    };
+    nudgeRef.current = nudge;
     const onVisibility = () => {
       if (!document.hidden && loaded) {
         quiet = 0;
@@ -174,9 +193,23 @@ export default function useGigChat({ gigId, partnerId, token, enabled }) {
       stopped = true;
       clearTimeout(timer);
       if (wakeRef.current === wake) wakeRef.current = null;
+      if (nudgeRef.current === nudge) nudgeRef.current = null;
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [conversation, path, token, applyMessages, patchStatus]);
+
+  // The other person wrote in this gig: fetch now instead of waiting for the next poll. Polling stays
+  // on as the fallback if the connection is down.
+  useEffect(() => {
+    if (!enabled || !gigId || !token) return undefined;
+    const socket = getRealtime(token);
+    if (!socket) return undefined;
+    const onChanged = (payload) => {
+      if (String(payload?.gigId) === String(gigId)) nudgeRef.current?.();
+    };
+    socket.on('gig:chat-changed', onChanged);
+    return () => socket.off('gig:chat-changed', onChanged);
+  }, [enabled, gigId, token]);
 
   const loadOlder = useCallback(async () => {
     const key = conversationRef.current;

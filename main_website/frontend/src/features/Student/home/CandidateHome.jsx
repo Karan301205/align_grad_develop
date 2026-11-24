@@ -112,8 +112,10 @@ export default function CandidateHome({ profile, user, jobs = [], applications =
       const current = Number(missing.currentRating) || 0;
       const company = companyOf(target);
       const pay = payText(target);
+      // No test for this skill: it only has to be on the profile.
+      const noTest = missing.hasQuiz === false;
       return {
-        title: current > 0 ? `Raise ${missing.skillName} from ${current} to ${missing.requiredRating}` : `Add ${missing.skillName} and score ${missing.requiredRating}`,
+        title: noTest ? `Add ${missing.skillName} to your profile` : current > 0 ? `Raise ${missing.skillName} from ${current} to ${missing.requiredRating}` : `Add ${missing.skillName} and score ${missing.requiredRating}`,
         text: (
           <>
             That opens <strong className="text-white">{target.title}</strong>
@@ -121,7 +123,7 @@ export default function CandidateHome({ profile, user, jobs = [], applications =
             {pay && pay !== 'Pay not shown' && ` (${pay})`}. It’s the only bar you’re short of.
           </>
         ),
-        primary: { label: `Take ${missing.skillName} test`, onClick: () => raiseSkill(target, missing) },
+        primary: noTest ? { label: 'Add it to your profile', onClick: () => goToTab?.('profile') } : { label: `Take ${missing.skillName} test`, onClick: () => raiseSkill(target, missing) },
         secondary: { label: `Learn ${missing.skillName} first`, onClick: () => goToTab?.('courses', { skill: missing.skillName }) }
       };
     }
@@ -257,9 +259,15 @@ export default function CandidateHome({ profile, user, jobs = [], applications =
                         <span className={`text-[15px] font-semibold ${INK} hover:text-[#0167F6]`}>{[job.title, company].filter(Boolean).join(' · ')}</span>
                         <span className="font-semibold text-[#9A3412]">{gapText(missing)}</span>
                       </button>
-                      <button type="button" onClick={() => raiseSkill(job, missing)} className={`${SECONDARY} ${SMALL}`}>
-                        {(Number(missing.currentRating) || 0) > 0 ? 'Retake' : 'Take'} {missing.skillName} test
-                      </button>
+                      {missing.hasQuiz === false ? (
+                        <button type="button" onClick={() => goToTab?.('profile')} className={`${SECONDARY} ${SMALL}`}>
+                          Add {missing.skillName} to profile
+                        </button>
+                      ) : (
+                        <button type="button" onClick={() => raiseSkill(job, missing)} className={`${SECONDARY} ${SMALL}`}>
+                          {(Number(missing.currentRating) || 0) > 0 ? 'Retake' : 'Take'} {missing.skillName} test
+                        </button>
+                      )}
                       <button type="button" onClick={() => goToTab?.('courses', { skill: missing.skillName })} className={`${SOFT} ${SMALL}`}>
                         <GraduationCap aria-hidden="true" className="size-4" /> Courses
                       </button>

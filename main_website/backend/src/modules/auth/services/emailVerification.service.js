@@ -119,8 +119,9 @@ async function initiateVerification({ email, password, role, name }) {
   }
 
   // Dispatch email with 6-digit PIN
+  let delivery;
   try {
-    await sendVerificationPinEmail({
+    delivery = await sendVerificationPinEmail({
       to: normalizedEmail,
       name: trimmedName,
       pin: rawPin,
@@ -137,7 +138,9 @@ async function initiateVerification({ email, password, role, name }) {
 
   return {
     success: true,
-    message: `A 6-digit verification code has been sent to ${normalizedEmail}.`,
+    message: delivery?.queued
+      ? `A 6-digit verification code is on its way to ${normalizedEmail}. It can take up to a minute to arrive.`
+      : `A 6-digit verification code has been sent to ${normalizedEmail}.`,
     email: normalizedEmail,
     role: requestedRole
   };
@@ -363,8 +366,9 @@ async function resendPin({ email, role }) {
 
   const displayName = user.pendingName || (user.role === 'STUDENT' ? 'Candidate' : 'Recruiter');
 
+  let delivery;
   try {
-    await sendVerificationPinEmail({
+    delivery = await sendVerificationPinEmail({
       to: normalizedEmail,
       name: displayName,
       pin: rawPin,
@@ -381,7 +385,9 @@ async function resendPin({ email, role }) {
 
   return {
     success: true,
-    message: `A new verification code has been sent to ${normalizedEmail}.`
+    message: delivery?.queued
+      ? `A new verification code is on its way to ${normalizedEmail}. It can take up to a minute to arrive.`
+      : `A new verification code has been sent to ${normalizedEmail}.`
   };
 }
 

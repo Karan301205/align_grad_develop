@@ -1,4 +1,5 @@
 const { sendMail, getTransporter } = require('./emailTransport');
+const { deliverEmail } = require('./emailQueue');
 const { getPasswordResetTemplate, getVerificationPinTemplate } = require('./emailTemplates');
 
 /**
@@ -42,7 +43,8 @@ async function sendVerificationPinEmail({ to, name, pin, role, expireMinutes = 1
     expireMinutes
   });
 
-  return sendMail({
+  // Through the Redis queue when REDIS_URL is set (returns { queued }), otherwise sent directly.
+  return deliverEmail({
     to,
     subject,
     html,

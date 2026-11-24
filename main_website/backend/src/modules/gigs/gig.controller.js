@@ -1,6 +1,10 @@
 const { prisma } = require('../../infrastructure/database');
 const { buildStudentSkillMap, getRequirementStatuses } = require('../skills');
 const { toCandidateQuestions } = require('../jobs/screeningQuestions');
+const { gigSkillGaps } = require('../jobs/eligiblePool');
+const { identityIds } = require('./gigIdentity');
+const { notifyGigChat } = require('./gigRealtime');
+const { offerForRole } = require('../payments/plans');
 
 // Skills that have an active test. Gig pages are polled while open, so the set is
 // cached for a minute instead of scanning the question bank on every poll.
@@ -38,22 +42,10 @@ async function buildGigRequirementStatuses(gig, candidateProfile) {
  * bank has a test that can raise it.
  */
 function gigShortfalls(gig, profile, statuses = []) {
-  const skills = (profile && profile.skills) || [];
-  return gigRequirements(gig)
-    .filter(r => r && r.skillName && r.minRating > 1)
-    .map(r => {
-      const mine = skills.find(s => s && s.name && s.name.toLowerCase() === r.skillName.toLowerCase());
-      const currentRating = mine ? (mine.verifiedRating > 0 ? mine.verifiedRating : (mine.rating || 0)) : 0;
-      const status = statuses.find(st => String(st.skillName || '').toLowerCase() === r.skillName.toLowerCase());
-      return {
-        skillName: r.skillName,
-        requiredRating: r.minRating,
-        currentRating,
-        onProfile: Boolean(mine),
-        hasTest: Boolean(status && status.isTech !== false && status.hasQuiz !== false)
-      };
-    })
-    .filter(r => r.currentRating < r.requiredRating);
+  return gigSkillGaps(gigRequirements(gig), profile).map(gap => {
+    const status = statuses.find(st => String(st.skillName || '').toLowerCase() === gap.skillName.toLowerCase());
+    return { ...gap, hasTest: Boolean(status && status.isTech !== false && status.hasQuiz !== false) };
+  });
 }
 
 // Company fields a candidate sees with a gig: never the verification docs, official
@@ -102,20 +94,6 @@ async function studentIdentity(userId) {
 
 // Everyone hired for the gig (older rows keep the first hire in selectedCandidateId).
 const hiredIdsOf = (gig) => Array.from(new Set([...(gig.hiredCandidateIds || []), gig.selectedCandidateId].filter(Boolean)));
-
-// The ids a user can appear under on gig rows: their User id, plus their Profile id
-// (students) or Company id (recruiters) for rows written before ids were unified.
-async function identityIds(user) {
-  const ids = [user.id];
-  if (user.role === 'STUDENT') {
-    const profile = await prisma.profile.findFirst({ where: { OR: [{ userId: user.id }, { id: user.id }] } });
-    if (profile) ids.push(profile.id, profile.userId);
-  } else if (user.role === 'RECRUITER') {
-    const company = await prisma.company.findFirst({ where: { OR: [{ userId: user.id }, { id: user.id }] } });
-    if (company) ids.push(company.id, company.userId);
-  }
-  return Array.from(new Set(ids.filter(Boolean)));
-}
 
 /**
  * Who may use a gig's chat. The owner talks privately with each hired freelancer
@@ -239,6 +217,18 @@ exports.createGig = async (req, res) => {
   try {
     if (req.user.role !== 'RECRUITER') {
       return res.status(403).json({ error: 'Only recruiters can create gigs' });
+    }
+    // Gig posts allowed = job credits bought (1 free, +5 per pack; see payments/plans.js).
+    // Every gig the recruiter still has counts, finished ones too.
+    const company = await prisma.company.findUnique({ where: { userId: req.user.id } });
+    const allowed = company?.jobPostingQuota ?? 1;
+    const posted = await prisma.gig.count({ where: { ownerId: req.user.id } });
+    if (posted >= allowed) {
+      const pack = offerForRole('RECRUITER')?.jobCredits;
+      return res.status(403).json({
+        error: `${allowed === 1 ? 'The free plan includes one gig.' : `You have used all ${allowed} of your gig posts.`}${pack ? ` Buy a credit pack to post ${pack} more gigs and ${pack} more jobs.` : ''}`,
+        code: 'UPGRADE_REQUIRED'
+      });
     }
     const { title, description, category, categories, skills, requirements, screeningQuestions, budget, currency, deliveryTime, minRating, attachments, logo } = req.body;
     const parsedMinRating = minRating !== undefined ? (parseInt(minRating, 10) || 1) : 1;
@@ -741,6 +731,9 @@ exports.sendMessage = async (req, res) => {
         fileUrl: fileUrl || null
       }
     });
+
+    // Tell both parties to fetch the new message now (the message itself is never pushed).
+    notifyGigChat(message);
 
     res.status(201).json(message);
   } catch (err) {

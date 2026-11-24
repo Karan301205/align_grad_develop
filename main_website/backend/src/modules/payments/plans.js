@@ -21,6 +21,10 @@ const PLANS = {
 
 const PLAN_TYPES = Object.keys(PLANS);
 
+// Recruiters get as many gig posts as job posts: one of each on the free plan, and each
+// pack adds `jobCredits` of each. So Company.jobPostingQuota is the allowance for both
+// (recruiter postJob counts jobs, gigs/gig.controller.js createGig counts gigs).
+
 /** The plan a user with `role` can buy, as sent to the client (null if none). */
 function offerForRole(role) {
   const planType = PLAN_TYPES.find((type) => PLANS[type].role === role);

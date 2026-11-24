@@ -70,7 +70,7 @@ export default function PayStep({ form }) {
         </Field>
       </div>
 
-      <StepFooter onBack={form.back} nextLabel="Continue to hiring process" onNext={form.next} />
+      <StepFooter onBack={form.back} nextLabel="Continue" onNext={form.next} />
     </StepPanel>
   );
 }

@@ -6,9 +6,10 @@ const DEBOUNCE_MS = 400;
 /**
  * Live "candidates who meet all your bars" from POST /recruiter/jobs/eligible-count.
  * Requests are debounced while bars change; replies for an older set of bars are ignored.
+ * `forGig` counts with the gig rule (every bar above 1 blocks, untested skills by self-rating).
  * @returns {{ status: 'idle'|'loading'|'ready'|'error', data: object|null, error: string|null, retry: () => void }}
  */
-export default function useEligiblePool(token, requirements) {
+export default function useEligiblePool(token, requirements, { forGig = false } = {}) {
   const key = JSON.stringify(requirements.map(({ skillName, minRating }) => [skillName, minRating]));
   const [result, setResult] = useState({ key: null, data: null, error: null });
   const [attempt, setAttempt] = useState(0);
@@ -21,7 +22,7 @@ export default function useEligiblePool(token, requirements) {
     latest.current = requestId;
     const timer = setTimeout(async () => {
       try {
-        const res = await apiFetch('/recruiter/jobs/eligible-count', { token, method: 'POST', json: { requirements: bars } });
+        const res = await apiFetch('/recruiter/jobs/eligible-count', { token, method: 'POST', json: { requirements: bars, ...(forGig ? { forGig: true } : {}) } });
         const body = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(body.error || SERVER_MESSAGE);
         if (latest.current === requestId) setResult({ key, data: body, error: null });
@@ -30,7 +31,7 @@ export default function useEligiblePool(token, requirements) {
       }
     }, DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [key, token, attempt]);
+  }, [key, token, attempt, forGig]);
 
   const retry = () => {
     setResult((prev) => ({ ...prev, key: null }));

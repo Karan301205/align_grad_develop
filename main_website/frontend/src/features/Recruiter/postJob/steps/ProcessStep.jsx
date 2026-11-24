@@ -116,7 +116,7 @@ export default function ProcessStep({ form }) {
         </div>
       </SubSection>
 
-      <StepFooter onBack={form.back} nextLabel="Continue to review" onNext={form.next} />
+      <StepFooter onBack={form.back} nextLabel="Continue" onNext={form.next} />
     </StepPanel>
   );
 }

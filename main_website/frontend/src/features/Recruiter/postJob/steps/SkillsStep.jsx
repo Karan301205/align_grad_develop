@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ALL_SKILLS } from '../../../../constants';
+import { cleanSkill } from '../../../Student/profile/profileRules';
 import AccountIcon from '../../components/AccountIcon';
 import { FieldError } from '../../components/AccountControls';
 import { MUTED, SECONDARY_BUTTON } from '../../components/accountStyles';
@@ -8,7 +9,11 @@ import { RequiredMark, StepFooter, StepPanel, TextButton } from '../components/u
 
 const MAX_SUGGESTIONS = 8;
 
-/** Skill search with suggestions from ALL_SKILLS (shared with the post-a-gig page). */
+/**
+ * Skill search with suggestions from ALL_SKILLS (shared with the post-a-gig page).
+ * A name that isn't on the list is added as the recruiter's own skill. It uses the
+ * candidate profile's skill-name rule (cleanSkill), so candidates can add the same name.
+ */
 export function SkillSearch({ requirements, onAdd, noun = 'job', label = 'Skills and minimum scores', placeholder = 'Add a skill, e.g. Power BI, Tableau, Statistics' }) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
@@ -22,13 +27,19 @@ export function SkillSearch({ requirements, onAdd, noun = 'job', label = 'Skills
         .sort((a, b) => rank(a.skill.toLowerCase()) - rank(b.skill.toLowerCase()))
         .slice(0, MAX_SUGGESTIONS)
     : [];
+  const listed = ALL_SKILLS.some((s) => s.skill.toLowerCase() === term);
+  const offerOwn = term && !listed && !taken.has(term);
 
-  const add = (name) => {
-    const match = ALL_SKILLS.find((s) => s.skill.toLowerCase() === (name || query).trim().toLowerCase());
-    if (!match) return setProblem('Pick a skill from the suggestions list.');
-    if (taken.has(match.skill.toLowerCase())) return setProblem(`${match.skill} is already on this ${noun}.`);
+  const add = (name = query) => {
+    const typed = name.trim();
+    if (!typed) return setProblem('Type a skill to add.');
+    if (!/[\p{L}\p{N}]/u.test(typed)) return setProblem('A skill name needs at least one letter or number.');
+    // A name on the list (any case) is added as listed, so it matches tests and profiles.
+    const match = ALL_SKILLS.find((s) => s.skill.toLowerCase() === typed.toLowerCase());
+    const skillName = match ? match.skill : typed;
+    if (taken.has(skillName.toLowerCase())) return setProblem(`${skillName} is already on this ${noun}.`);
     if (requirements.length >= MAX_SKILLS) return setProblem(`A ${noun} can have at most ${MAX_SKILLS} skills.`);
-    onAdd(match.skill);
+    onAdd(skillName);
     setQuery('');
     setProblem('');
     setOpen(false);
@@ -59,7 +70,7 @@ export function SkillSearch({ requirements, onAdd, noun = 'job', label = 'Skills
               placeholder={placeholder}
               value={query}
               onChange={(event) => {
-                setQuery(event.target.value);
+                setQuery(cleanSkill(event.target.value));
                 setOpen(true);
                 setProblem('');
               }}
@@ -68,7 +79,7 @@ export function SkillSearch({ requirements, onAdd, noun = 'job', label = 'Skills
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
                   event.preventDefault();
-                  add(suggestions.length === 1 ? suggestions[0].skill : query);
+                  add();
                 }
                 if (event.key === 'Escape') setOpen(false);
               }}
@@ -77,7 +88,7 @@ export function SkillSearch({ requirements, onAdd, noun = 'job', label = 'Skills
           </label>
           {open && term && (
             <ul id="skill-suggestions" role="listbox" className="absolute inset-x-0 top-full z-30 mt-1 max-h-64 overflow-y-auto rounded-[8px] border border-[#E4E6EA] bg-white p-1 shadow-lg shadow-slate-200/60">
-              {suggestions.length === 0 ? (
+              {suggestions.length === 0 && !offerOwn ? (
                 <li className={`px-3 py-2 ${MUTED}`}>No matching skills.</li>
               ) : (
                 suggestions.map((s) => (
@@ -95,10 +106,26 @@ export function SkillSearch({ requirements, onAdd, noun = 'job', label = 'Skills
                   </li>
                 ))
               )}
+              {offerOwn && (
+                <li role="option" aria-selected="false">
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => add()}
+                    className="flex w-full items-center justify-between gap-3 rounded-[6px] px-3 py-2 text-left font-(family-name:--font-headline) text-sm text-[#334155] hover:bg-[#F4F8F6]"
+                  >
+                    <span>
+                      Add “<strong className="font-semibold text-[#023836]">{query.trim()}</strong>” as your own skill
+                    </span>
+                    <span className={`text-xs ${MUTED}`}>no test</span>
+                  </button>
+                </li>
+              )}
             </ul>
           )}
         </div>
-        <button type="button" onClick={() => add(query)} className={`${SECONDARY_BUTTON} h-11 shrink-0 px-[18px]`}>
+        <button type="button" onClick={() => add()} className={`${SECONDARY_BUTTON} h-11 shrink-0 px-[18px]`}>
           Add skill
         </button>
       </div>
@@ -148,7 +175,7 @@ function SkillRow({ requirement, first, gates, onLevel, onRemove }) {
       </div>
       <LevelBar skillName={skillName} value={minRating} onChange={onLevel} />
       {gates === false && (
-        <span className={`text-[13px] ${MUTED}`}>No skill test exists for {skillName} yet, so this bar is shown to candidates but doesn’t stop anyone applying.</span>
+        <span className={`text-[13px] ${MUTED}`}>No skill test exists for {skillName} yet. Candidates need it on their profile to apply; the score is shown as a guide.</span>
       )}
     </div>
   );
@@ -201,7 +228,7 @@ export default function SkillsStep({ form, pool }) {
         ))}
       </div>
 
-      <StepFooter onBack={form.back} nextLabel="Continue to pay & dates" onNext={form.next} />
+      <StepFooter onBack={form.back} nextLabel="Continue" onNext={form.next} />
     </StepPanel>
   );
 }

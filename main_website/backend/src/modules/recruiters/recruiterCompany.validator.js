@@ -22,11 +22,12 @@ const updateCompanySchema = {
       github: z.string().url("Invalid GitHub URL").or(z.string().length(0)).nullable().optional(),
       youtube: z.string().url("Invalid YouTube URL").or(z.string().length(0)).nullable().optional(),
       facebook: z.string().url("Invalid Facebook URL").or(z.string().length(0)).nullable().optional()
-    }).optional(),
-    photos: z.array(z.string().url("Invalid photo URL")).optional()
+    }).optional()
   })
 };
 
+// Office photos are not part of this form: they go through PUT /recruiter/company/photos, which checks
+// that each photo was uploaded by the recruiter (a `photos` field here would bypass that check).
 // Office gallery only (PUT /recruiter/company/photos). The controller caps how
 // many photos can be added; the schema bound just rejects absurd payloads.
 const updateCompanyPhotosSchema = {

@@ -9,6 +9,10 @@ let transporter = null;
 function getTransporter() {
   if (!transporter) {
     transporter = nodemailer.createTransport({
+      // Reuse a few open connections instead of opening (and logging in) a new one per email.
+      // Up to EMAIL_QUEUE_CONCURRENCY at once; further emails wait for a free connection.
+      pool: true,
+      maxConnections: env.EMAIL_QUEUE_CONCURRENCY,
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
       secure: env.SMTP_SECURE, // true for port 465, false for other ports
@@ -18,7 +22,12 @@ function getTransporter() {
       },
       tls: {
         rejectUnauthorized: false // Avoid self-signed certificate rejection issues in various environments
-      }
+      },
+      // Fail within seconds instead of nodemailer's minutes-long defaults, so a stuck mail
+      // server can't hold a request open (callers report a failed email to the user).
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 30000
     });
   }
   return transporter;

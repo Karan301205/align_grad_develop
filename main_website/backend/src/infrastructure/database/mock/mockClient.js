@@ -16,11 +16,29 @@ function applyData(row, data = {}) {
 
 // Minimal Prisma-style `where` matcher for the shapes controllers use:
 // { field: value }, { field: { in: [...] } } and { OR: [ ...clauses ] }.
+// Also { field: null } (missing counts as null), { field: { not: x } } and the
+// comparisons { lt, lte, gt, gte } (numbers or dates).
+const COMPARE = {
+  lt: (a, b) => a < b,
+  lte: (a, b) => a <= b,
+  gt: (a, b) => a > b,
+  gte: (a, b) => a >= b
+};
+const comparable = (value) => (value instanceof Date || (typeof value === 'string' && !Number.isNaN(Date.parse(value))) ? new Date(value).getTime() : value);
 function mockRowMatches(row, where = {}) {
   if (!where || Object.keys(where).length === 0) return true;
   return Object.entries(where).every(([key, cond]) => {
     if (key === 'OR') return Array.isArray(cond) && cond.some(clause => mockRowMatches(row, clause));
-    if (cond && typeof cond === 'object' && Array.isArray(cond.in)) return cond.in.includes(row[key]);
+    if (cond === null) return row[key] === null || row[key] === undefined;
+    if (cond && typeof cond === 'object' && !(cond instanceof Date)) {
+      if (Array.isArray(cond.in)) return cond.in.includes(row[key]);
+      if ('not' in cond) return cond.not === null ? row[key] !== null && row[key] !== undefined : row[key] !== cond.not;
+      const ops = Object.keys(cond).filter(op => COMPARE[op]);
+      if (ops.length) {
+        if (row[key] === null || row[key] === undefined) return false;
+        return ops.every(op => COMPARE[op](comparable(row[key]), comparable(cond[op])));
+      }
+    }
     return row[key] === cond;
   });
 }
@@ -158,7 +176,7 @@ const mockClient = {
       return null;
     },
     create: async ({ data }) => {
-      const newCompany = { id: generateHexId(), verified: false, jobs: [], ...data };
+      const newCompany = { id: generateHexId(), verified: false, jobPostingQuota: 1, jobsPosted: 0, jobs: [], ...data };
       mockDb.companies.push(newCompany);
       return newCompany;
     },
@@ -176,6 +194,12 @@ const mockClient = {
         return mockDb.companies[idx];
       }
       throw new Error("Company not found");
+    },
+    // Conditional claim used by postJob (`jobsPosted: { lt: quota }` → increment).
+    updateMany: async ({ where = {}, data = {} }) => {
+      const rows = (mockDb.companies || []).filter(c => mockRowMatches(c, where));
+      rows.forEach(row => applyData(row, data));
+      return { count: rows.length };
     }
   },
   job: {
@@ -199,10 +223,20 @@ const mockClient = {
       return filtered.length;
     },
     findMany: async (args = {}) => {
-      return mockDb.jobs.map(j => {
+      let jobs = args.where ? mockDb.jobs.filter(j => mockRowMatches(j, args.where)) : mockDb.jobs;
+      const [sortKey, direction] = Object.entries(args.orderBy || {})[0] || [];
+      if (sortKey) jobs = [...jobs].sort((a, b) => (comparable(a[sortKey]) - comparable(b[sortKey])) * (direction === 'desc' ? -1 : 1));
+      if (typeof args.take === 'number') jobs = jobs.slice(0, args.take);
+      return jobs.map(j => {
         const company = mockDb.companies.find(c => c.id === j.companyId) || j.company || { name: "Mock Company", verified: true };
         return { ...j, company };
       });
+    },
+    // Retention (modules/jobs/jobLifecycle.service.js).
+    updateMany: async ({ where = {}, data = {} }) => {
+      const rows = mockDb.jobs.filter(j => mockRowMatches(j, where));
+      rows.forEach(row => Object.assign(row, data));
+      return { count: rows.length };
     },
     create: async ({ data }) => {
       const newJob = { id: generateHexId(), createdAt: new Date(), ...data };
@@ -234,7 +268,8 @@ const mockClient = {
           'preferredEducation', 'desiredExperience', 'designation',
           'stipendPartTime', 'stipendFullTime', 'duration',
           'roleResponsibilities', 'location', 'locationUrl', 'joiningMonth',
-          'openings', 'edited', 'activeDays', 'opportunityType', 'showSalary'
+          'openings', 'edited', 'activeDays', 'opportunityType', 'showSalary',
+          'expiresAt', 'archivedAt', 'retainedAt', 'workMode'
         ];
         fields.forEach(field => {
           if (data[field] !== undefined) {
@@ -278,7 +313,8 @@ const mockClient = {
     findMany: async ({ where }) => {
       let filtered = mockDb.applications;
       if (where.studentId) filtered = filtered.filter(a => a.studentId === where.studentId);
-      if (where.jobId) filtered = filtered.filter(a => a.jobId === where.jobId);
+      if (where.jobId && Array.isArray(where.jobId.in)) filtered = filtered.filter(a => where.jobId.in.includes(a.jobId));
+      else if (where.jobId) filtered = filtered.filter(a => a.jobId === where.jobId);
       return filtered.map(a => {
         const job = mockDb.jobs.find(j => j.id === a.jobId);
         return { ...a, job };
@@ -302,6 +338,8 @@ const mockClient = {
       const initialCount = mockDb.applications.length;
       if (where && where.jobId) {
         mockDb.applications = mockDb.applications.filter(a => a.jobId !== where.jobId);
+      } else if (where && where.id && Array.isArray(where.id.in)) {
+        mockDb.applications = mockDb.applications.filter(a => !where.id.in.includes(a.id));
       }
       return { count: initialCount - mockDb.applications.length };
     }
@@ -1110,8 +1148,69 @@ const mockClient = {
         return item;
       }
     }
+  },
+  // Help & support (modules/support). Supports the shapes the controller uses:
+  // nested `messages: { create: [...] }` on create, `include: { messages: ... }` (oldest
+  // first), `where` via mockRowMatches (incl. `{ status: { in: [...] } }`).
+  supportTicket: {
+    create: async ({ data, include }) => {
+      const { messages, ...fields } = data;
+      const now = new Date();
+      const number = mockDb.supportTickets.reduce((max, t) => Math.max(max, t.number), 0) + 1;
+      const ticket = {
+        id: generateHexId(),
+        number,
+        status: 'OPEN',
+        resolvedAt: null,
+        createdAt: now,
+        updatedAt: now,
+        lastMessageAt: now,
+        ...fields
+      };
+      mockDb.supportTickets.push(ticket);
+      for (const message of messages?.create || []) {
+        await mockClient.supportMessage.create({ data: { ...message, ticketId: ticket.id } });
+      }
+      return withSupportMessages(ticket, include);
+    },
+    findMany: async ({ where = {}, include } = {}) =>
+      mockDb.supportTickets.filter(t => mockRowMatches(t, where)).map(t => withSupportMessages(t, include)),
+    findFirst: async ({ where = {}, include } = {}) => {
+      const ticket = mockDb.supportTickets.find(t => mockRowMatches(t, where));
+      return ticket ? withSupportMessages(ticket, include) : null;
+    },
+    findUnique: async ({ where, include }) => {
+      const ticket = mockDb.supportTickets.find(t => t.id === where.id || (where.number !== undefined && t.number === where.number));
+      return ticket ? withSupportMessages(ticket, include) : null;
+    },
+    count: async ({ where = {} } = {}) => mockDb.supportTickets.filter(t => mockRowMatches(t, where)).length,
+    update: async ({ where, data, include }) => {
+      const ticket = mockDb.supportTickets.find(t => t.id === where.id);
+      if (!ticket) throw new Error('Record to update not found.');
+      applyData(ticket, data);
+      return withSupportMessages(ticket, include);
+    }
+  },
+  supportMessage: {
+    create: async ({ data }) => {
+      const message = { id: generateHexId(), createdAt: new Date(), ...data };
+      mockDb.supportMessages.push(message);
+      return message;
+    },
+    findMany: async ({ where = {} } = {}) =>
+      mockDb.supportMessages.filter(m => mockRowMatches(m, where)).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
   }
 };
+
+// A copy of a support ticket, with its messages (oldest first) when `include.messages` is asked for.
+function withSupportMessages(ticket, include) {
+  if (!include || !include.messages) return { ...ticket };
+  const messages = mockDb.supportMessages
+    .filter(m => m.ticketId === ticket.id)
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+    .map(m => ({ ...m }));
+  return { ...ticket, messages };
+}
 
 module.exports = { mockClient };
 

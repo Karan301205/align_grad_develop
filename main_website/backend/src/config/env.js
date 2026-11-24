@@ -38,6 +38,10 @@ const env = {
   DATABASE_URL: process.env.DATABASE_URL || '',
   JWT_SECRET: process.env.JWT_SECRET || '',
   CLIENT_URL: normalizedClientUrl,
+  // Optional sign-in pages per role, for links in support emails when candidates and recruiters
+  // use different hosts (VITE_CANDIDATE_URL / VITE_RECRUITER_URL). Empty → CLIENT_URL.
+  CANDIDATE_PORTAL_URL: (process.env.CANDIDATE_PORTAL_URL || '').trim(),
+  RECRUITER_PORTAL_URL: (process.env.RECRUITER_PORTAL_URL || '').trim(),
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
   AWS_REGION: process.env.AWS_REGION || '',
@@ -52,7 +56,22 @@ const env = {
   SMTP_FROM_NAME: process.env.SMTP_FROM_NAME || 'AlignGrad Team',
   VERIFICATION_PIN_EXPIRY_MINUTES: parseInt(process.env.VERIFICATION_PIN_EXPIRY_MINUTES || '10', 10),
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || '',
-  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || ''
+  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || '',
+  // Optional Redis (e.g. redis://:password@host:6379). Empty → no queue: emails are sent
+  // directly inside the request, as before. There is no built-in address.
+  REDIS_URL: (process.env.REDIS_URL || '').trim(),
+  // Google sign-in: the OAuth client ID that tokens must be issued for (same value as VITE_GOOGLE_CLIENT_ID).
+  // No built-in value: without it Google sign-in is refused with a clear message.
+  GOOGLE_CLIENT_ID: (process.env.GOOGLE_CLIENT_ID || '').trim(),
+  // Job lifecycle (modules/jobs/jobLifecycle.service.js): the longest listing a recruiter may choose,
+  // how long after closing a job is slimmed, and how long after that it is deleted.
+  JOB_MAX_ACTIVE_DAYS: parseInt(process.env.JOB_MAX_ACTIVE_DAYS, 10) || 90,
+  JOB_ARCHIVE_AFTER_DAYS: parseInt(process.env.JOB_ARCHIVE_AFTER_DAYS, 10) || 30,
+  JOB_DELETE_AFTER_DAYS: parseInt(process.env.JOB_DELETE_AFTER_DAYS, 10) || 365,
+  // Email sending tuning.
+  // Emails sent at the same time: the queue's worker count and the SMTP pool's open connections.
+  EMAIL_QUEUE_CONCURRENCY: parseInt(process.env.EMAIL_QUEUE_CONCURRENCY, 10) || 5,
+  EMAIL_QUEUE_ATTEMPTS: parseInt(process.env.EMAIL_QUEUE_ATTEMPTS, 10) || 3 // tries per email before giving up
 };
 
 module.exports = env;

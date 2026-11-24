@@ -291,3 +291,20 @@ describe('skillMatching.service', () => {
     });
   });
 });
+
+it('a candidate without a no-test job skill must add it, and with none of the skills scores 0%', () => {
+  const { buildStudentSkillMap } = require('../../src/modules/skills/skillMatching.service');
+  const { calculateCandidateJobRecommendation } = require('../../src/modules/skills/candidateRecommendation.service');
+  const job = { requirements: [{ skillName: 'Communication Skills', minRating: 1 }], createdAt: new Date() };
+  const empty = { skills: [], preferredLocations: [], preferredWorkModes: [] };
+
+  const missing = getMissingRequirements(job, buildStudentSkillMap(empty), new Set());
+  assert.equal(missing.length, 1);
+  assert.equal(missing[0].hasQuiz, false);
+  assert.equal(missing[0].isMissingFromProfile, true);
+  assert.equal(calculateCandidateJobRecommendation(job, empty, buildStudentSkillMap(empty)).recommendationScore, 0);
+
+  const withSkill = { ...empty, skills: [{ name: 'Communication Skills', rating: 1 }] };
+  assert.equal(getMissingRequirements(job, buildStudentSkillMap(withSkill), new Set()).length, 0, 'any rating will do');
+  assert.ok(calculateCandidateJobRecommendation(job, withSkill, buildStudentSkillMap(withSkill)).recommendationScore > 50);
+});

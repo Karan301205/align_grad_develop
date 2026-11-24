@@ -1,3 +1,4 @@
+const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const env = require('./config/env');
@@ -65,7 +66,18 @@ async function startServer() {
 
   const { ensureGlobalCommunity } = require('./modules/community/services/community.service');
 
-  app.listen(PORT, () => {
+  // Job retention (slims and later deletes old jobs; never on a user's request).
+  require('./modules/jobs/jobLifecycle.service').startJobRetention(prisma);
+
+  // Email queue worker (only when REDIS_URL is set; otherwise emails are sent directly).
+  require('./infrastructure/email/emailQueue').startEmailQueue();
+
+  // One HTTP server for the API and the realtime (Socket.IO) connections, on the same port.
+  const { attachRealtime } = require('./modules/gigs/gigRealtime');
+  const server = http.createServer(app);
+  attachRealtime(server);
+
+  server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     // Initialize Global Community at application startup
     ensureGlobalCommunity().catch(err => {

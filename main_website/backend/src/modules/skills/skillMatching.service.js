@@ -26,17 +26,33 @@ function buildStudentSkillMap(profile) {
   return studentSkills;
 }
 
-// Returns the list of technical requirements the candidate falls short on.
-// A requirement is only satisfied if the candidate has passed the verification test
-// (verifiedRating >= minRating) OR if the skill does not have a quiz generated yet
-// in the Question Bank (in which case it is temporarily auto-verified for now).
+// A skill with no test (soft skills, skills without bank questions, a recruiter's own
+// skills) only needs to be on the candidate's profile; its score never blocks. Reported
+// with hasQuiz: false so the candidate is told to add it, not to take a test.
+const notOnProfile = (reqSkill) => ({
+  skillName: reqSkill.skillName,
+  requiredRating: reqSkill.minRating,
+  currentRating: 0,
+  selfRating: 0,
+  isMissingFromProfile: true,
+  isUnverified: false,
+  hasQuiz: false,
+  autoVerifiedForNow: false
+});
+
+// Returns the list of requirements the candidate falls short on.
+// A tested requirement is only satisfied if the candidate's score reaches it
+// (verifiedRating >= minRating). A requirement without a test in the Question Bank
+// is satisfied by having the skill on the profile at any rating (see notOnProfile).
 function getMissingRequirements(job, studentSkills, skillsWithQuestionsSet = null) {
   const missingRequirements = [];
   if (job && job.requirements) {
     job.requirements.forEach(reqSkill => {
       const canonical = registryCache.resolve(reqSkill.skillName).toLowerCase();
       const isTech = TECHNICAL_SKILLS.has(canonical);
-      if (isTech) {
+      if (!isTech) {
+        if (!studentSkills[canonical]) missingRequirements.push(notOnProfile(reqSkill));
+      } else {
         const studentSkillData = studentSkills[canonical];
         const isPresent = Boolean(studentSkillData);
         const verifiedRating = typeof studentSkillData === 'object'
@@ -51,21 +67,21 @@ function getMissingRequirements(job, studentSkills, skillsWithQuestionsSet = nul
         // Check if question bank has MCQs generated for this skill yet
         const hasQuizInBank = skillsWithQuestionsSet ? skillsWithQuestionsSet.has(canonical) : true;
 
-        // If candidate lacks required rating AND the skill has an active quiz in the bank,
-        // it gates the application. If the skill has NO quiz in the bank yet, it is auto-verified for now.
-        if (effectiveRating < reqSkill.minRating) {
-          if (hasQuizInBank) {
-            missingRequirements.push({
-              skillName: reqSkill.skillName,
-              requiredRating: reqSkill.minRating,
-              currentRating: effectiveRating,
-              selfRating: selfRating,
-              isMissingFromProfile: !isPresent,
-              isUnverified: isPresent && (!effectiveRating || effectiveRating < reqSkill.minRating),
-              hasQuiz: true,
-              autoVerifiedForNow: false
-            });
-          }
+        // With an active quiz in the bank the score gates the application; without one
+        // the skill only has to be on the profile.
+        if (!hasQuizInBank) {
+          if (!isPresent) missingRequirements.push(notOnProfile(reqSkill));
+        } else if (effectiveRating < reqSkill.minRating) {
+          missingRequirements.push({
+            skillName: reqSkill.skillName,
+            requiredRating: reqSkill.minRating,
+            currentRating: effectiveRating,
+            selfRating: selfRating,
+            isMissingFromProfile: !isPresent,
+            isUnverified: isPresent && (!effectiveRating || effectiveRating < reqSkill.minRating),
+            hasQuiz: true,
+            autoVerifiedForNow: false
+          });
         }
       }
     });

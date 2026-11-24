@@ -19,10 +19,11 @@ import RecruiterSidebar from '../components/RecruiterSidebar';
 import CompanyProfilePage from '../companyProfile/CompanyProfilePage';
 import BillingPage from '../billing/BillingPage';
 import GigsPage from '../gigs/GigsPage';
+import SupportPage from '../../Support/SupportPage';
 import { BRAND_GRADIENT_X } from '../components/accountStyles';
 
-// Account pages stay open before approval.
-const ACCOUNT_TABS = ['verification', 'billing'];
+// Account pages (company profile, billing, Help & support) stay open before approval.
+const ACCOUNT_TABS = ['verification', 'billing', 'support'];
 // Before approval the recruiter can use Home (the first-run page) and the account pages.
 const OPEN_BEFORE_APPROVAL = ['dashboard', ...ACCOUNT_TABS];
 // Pages that draw their own header, padding and background (the 2026-11 designs).
@@ -313,6 +314,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       dot: isCompanyApproved ? null : companyVerificationStatus === COMPANY_VERIFICATION_STATUS.PENDING ? 'Under review' : 'Needs your action'
     },
     { id: 'billing', icon: 'file-invoice', label: 'Plan & billing', locked: false, group: 'Account' },
+    { id: 'support', icon: 'circle-question', label: 'Help & support', locked: false, group: 'Account' },
   ];
   // Applications live under "Active jobs" in the sidebar.
   const activeNavId = activeTab === 'applications' ? 'jobs' : activeTab;
@@ -475,6 +477,15 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                 handleVerification={handleVerification}
                 handleUpdateCompany={handleUpdateCompany}
                 setAlertConfig={setAlertConfig}
+              />
+            )}
+
+            {activeTab === 'support' && (
+              <SupportPage
+                token={token}
+                user={user}
+                theme="recruiter"
+                onNotify={(message, type = 'success') => setAlertConfig({ message, type })}
               />
             )}
 

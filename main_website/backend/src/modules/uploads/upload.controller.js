@@ -1,6 +1,8 @@
 const { getPublicUrl, uploadBuffer } = require('../../infrastructure/storage/s3');
 const uploadConfig = require('../../config/upload.config');
 const { validateMagicBytes } = require('../../shared/utils/fileSignature');
+const { identityIds } = require('../gigs/gigIdentity');
+const { isOwnedKey } = require('./ownership');
 
 /**
  * Handles requesting a pre-signed upload URL. Redirects to local server proxy to intercept file body.
@@ -57,6 +59,18 @@ exports.securePut = async (req, res) => {
 
   if (!fileType || !key || !contentType) {
     return res.status(400).json({ error: 'Missing query parameters: fileType, key, contentType' });
+  }
+
+  // The file must go into the caller's own folder (ISSUES U1). Student videos use the profile id.
+  let ownerIds;
+  try {
+    ownerIds = await identityIds(req.user);
+  } catch (err) {
+    console.error('Error checking upload ownership:', err);
+    return res.status(500).json({ error: 'Failed to check where this file may be stored.' });
+  }
+  if (!isOwnedKey(key, ownerIds)) {
+    return res.status(403).json({ error: 'You can only upload files to your own folder.' });
   }
 
   const buffer = req.body;

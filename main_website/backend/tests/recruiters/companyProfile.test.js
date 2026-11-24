@@ -102,9 +102,13 @@ test('requireRecruiter blocks students and lets recruiters through', () => {
 });
 
 test('GET /recruiter/company includes the job quota, excluding gigs', async () => {
-  const { company, user } = await makeCompany({ jobPostingQuota: 6 });
-  await prisma.job.create({ data: { companyId: company.id, title: 'Frontend developer', description: 'Build UI', opportunityType: 'JOB' } });
-  await prisma.job.create({ data: { companyId: company.id, title: 'Logo design', description: 'Gig', opportunityType: 'GIG' } });
+  const { user } = await makeCompany({ jobPostingQuota: 6 });
+  // Credits are counted when a job is posted, so post through the handler.
+  for (const opportunityType of ['JOB', 'GIG']) {
+    const posted = fakeRes();
+    await controller.postJob({ user, body: { title: `${opportunityType} post`, description: 'Details', requirements: [], opportunityType } }, posted);
+    assert.strictEqual(posted.statusCode, 201);
+  }
 
   const res = fakeRes();
   await controller.getCompany({ user }, res);

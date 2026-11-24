@@ -12,7 +12,8 @@ import {
   Lock,
   Zap,
   GraduationCap,
-  LayoutDashboard
+  LayoutDashboard,
+  LifeBuoy
 } from 'lucide-react';
 import GigsPage from '../gigs/GigsPage';
 import { apiFetch, userMessage } from '../../../services/apiClient';
@@ -36,6 +37,7 @@ import SkillsTestsPage from '../tests/SkillsTestsPage';
 import ApplicationsPage from '../applications/ApplicationsPage';
 import LearnPage from '../learn/LearnPage';
 import ProfilePage from '../profile/ProfilePage';
+import SupportPage from '../../Support/SupportPage';
 
 
 export default function StudentLayout({ user, token, activeTab, setActiveTab, handleLogout, theme, toggleTheme, onOpenCompanyProfile, autoSelectOpportunity, setAutoSelectOpportunity }) {
@@ -255,7 +257,8 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
       }
       setWasComplete(complete);
 
-      if (!complete && activeTab !== 'profile') {
+      // Help & support stays open so someone stuck on their profile can still ask for help.
+      if (!complete && activeTab !== 'profile' && activeTab !== 'support') {
         setActiveTab('profile');
       }
     }
@@ -433,6 +436,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
     { id: 'progress', icon: ClipboardList, label: 'Your Job Progress', locked: !isComplete },
     { id: 'courses', icon: GraduationCap, label: 'Courses', locked: !isComplete },
     { id: 'gigs', icon: Zap, label: 'Gigs Marketplace', locked: !isComplete },
+    { id: 'support', icon: LifeBuoy, label: 'Help & support', locked: false },
   ];
 
   const goToTab = (tabId, options = {}) => {
@@ -473,7 +477,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
   const isPremium = isPremiumCandidate(profile, user);
   // The Profile and Home pages paint their own background and padding; <main> must
   // not be a scroll container there so the Profile section bar can stick to the top.
-  const isFullBleedPage = ['profile', 'dashboard', 'opportunities', 'progress', 'gigs', 'tests', 'courses'].includes(activeTab) && !loading;
+  const isFullBleedPage = ['profile', 'dashboard', 'opportunities', 'progress', 'gigs', 'tests', 'courses', 'support'].includes(activeTab) && !loading;
 
   // The saved profile as the Profile page reads it (field names as the API uses them).
   const profileData = useMemo(() => ({
@@ -521,7 +525,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
   };
   useEffect(scrollToTop, [activeTab]);
   useEffect(() => {
-    if (alertConfig && !['profile', 'opportunities', 'gigs', 'tests', 'courses'].includes(activeTab)) scrollToTop();
+    if (alertConfig && !['profile', 'opportunities', 'gigs', 'tests', 'courses', 'support'].includes(activeTab)) scrollToTop();
     // Only a new alert should scroll; tab changes are handled above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertConfig]);
@@ -661,7 +665,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
         ) : (
           <div key={activeTab} className="animate-fade-in">
             {/* Profile set-up reminder; the Profile page shows its own set-up card. */}
-            {!isComplete && activeTab !== 'profile' && (
+            {!isComplete && activeTab !== 'profile' && activeTab !== 'support' && (
               <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950/60 border border-blue-600 dark:border-blue-500 text-blue-900 dark:text-blue-200 rounded-none text-xs flex flex-col gap-2 shadow-2xs">
                 <div className="flex items-center gap-2 font-headline font-bold text-sm text-blue-800 dark:text-blue-300 tracking-wider">
                   <Lock className="w-4 h-4 shrink-0 text-blue-700 dark:text-blue-400" />
@@ -784,6 +788,15 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
                 jobs={jobs}
                 focus={progressFocus}
                 goToTab={goToTab}
+              />
+            )}
+
+            {activeTab === 'support' && (
+              <SupportPage
+                token={token}
+                user={user}
+                theme="candidate"
+                onNotify={(message, type = 'success') => setAlertConfig({ message, type })}
               />
             )}
 

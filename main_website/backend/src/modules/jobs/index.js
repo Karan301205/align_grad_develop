@@ -1,5 +1,5 @@
-const { purgeExpiredJobs } = require('./jobLifecycle.service');
+const lifecycle = require('./jobLifecycle.service');
 
 module.exports = {
-  purgeExpiredJobs
+  ...lifecycle
 };

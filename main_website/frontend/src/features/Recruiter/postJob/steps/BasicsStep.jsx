@@ -115,7 +115,7 @@ export default function BasicsStep({ form, onCancel }) {
         </Field>
       </div>
 
-      <StepFooter backLabel="Cancel" onBack={onCancel} nextLabel="Continue to skills & bars" onNext={form.next} />
+      <StepFooter backLabel="Cancel" onBack={onCancel} nextLabel="Continue" onNext={form.next} />
     </StepPanel>
   );
 }

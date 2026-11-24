@@ -100,6 +100,17 @@ export const adminApi = {
   getAnalytics: () => getJson('/analytics'),
   getJobApplicants: (jobId) => getJson(`/job/${jobId}/applicants`),
 
+  // Help & support tickets raised by candidates and recruiters
+  getSupportTickets: () => getJson('/support/tickets'),
+  getSupportTicket: (ticketId) => getJson(`/support/tickets/${ticketId}`),
+  // Emails the reply to the requester; `resolve` also closes the ticket. `seenLastMessageAt` is the
+  // conversation the admin is looking at: the server refuses (409, `stale`) if the requester wrote since.
+  replyToSupportTicket: (ticketId, message, resolve = false, seenLastMessageAt) =>
+    postJson(`/support/tickets/${ticketId}/reply`, { message, resolve, seenLastMessageAt }),
+  // status: 'OPEN' | 'PENDING' | 'RESOLVED' (RESOLVED emails the requester)
+  updateSupportTicketStatus: (ticketId, status, seenLastMessageAt) =>
+    patchJson(`/support/tickets/${ticketId}/status`, { status, seenLastMessageAt }),
+
   // Course & Lecture Video Management
   getCourses: () => getJson('/courses'),
   getCourse: (id) => getJson(`/courses/${id}`),

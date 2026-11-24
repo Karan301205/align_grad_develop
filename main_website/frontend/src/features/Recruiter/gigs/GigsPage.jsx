@@ -50,6 +50,7 @@ export default function GigsPage({ view, onView, selectedGigId, onSelectGig, use
         key={view === 'edit' ? `edit-${editing.id}` : 'new'}
         gig={view === 'edit' ? editing : null}
         company={company}
+        user={user}
         token={token}
         setAlertConfig={setAlertConfig}
         onCancel={() => onView(view === 'edit' ? 'workspace' : 'list')}

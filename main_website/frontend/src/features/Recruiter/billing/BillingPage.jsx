@@ -74,7 +74,7 @@ function BuyCard({ offer, onBuy }) {
       </h2>
       <div className="flex flex-wrap items-baseline gap-2.5">
         <span className="text-[32px] font-bold leading-none">{formatInr(offer.amount)}</span>
-        <span className={MUTED}>for {offer.jobCredits} job posts</span>
+        <span className={MUTED}>for {offer.jobCredits} job posts and {offer.jobCredits} gigs</span>
       </div>
       <span className={MUTED}>{formatInr(offer.amount / offer.jobCredits)} per job post</span>
       <button type="button" onClick={onBuy} className={`${PRIMARY_BUTTON} h-11 px-4`}>

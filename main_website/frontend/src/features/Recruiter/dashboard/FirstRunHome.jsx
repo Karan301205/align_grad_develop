@@ -1,7 +1,6 @@
 import { Building2, Check, Clock, CreditCard, Lock } from 'lucide-react';
 import { COMPANY_VERIFICATION_STATUS, getCompanyVerificationStatus } from '../../../utils/companyVerification';
 import { formatShortDate } from '../../../utils/format';
-import { SUPPORT_EMAIL } from '../../RecruiterLanding/content';
 import { ACCOUNT_PAGE, CARD, LINK, MUTED, PAGE_TITLE, PRIMARY_BUTTON, SECONDARY_BUTTON } from '../components/accountStyles';
 import { REQUIRED_DOCS } from '../companyProfile/constants';
 
@@ -257,9 +256,9 @@ export default function FirstRunHome({ company, user, goToTab }) {
           </ul>
           <p className={`m-0 mt-1 ${MUTED}`}>
             Questions about verification?{' '}
-            <a href={`mailto:${SUPPORT_EMAIL}`} className={LINK}>
+            <button type="button" onClick={() => goToTab('support')} className={`${LINK} cursor-pointer border-0 bg-transparent p-0 font-(family-name:--font-headline) text-[length:inherit]`}>
               Contact support
-            </a>
+            </button>
           </p>
         </section>
       </div>

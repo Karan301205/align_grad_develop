@@ -56,8 +56,11 @@ const env = {
   SMTP_USER: process.env.SMTP_USER || '',
   SMTP_PASS: process.env.SMTP_PASS || '',
   SMTP_FROM_NAME: process.env.SMTP_FROM_NAME || 'AlignGrad',
-  // Recruiter login page linked from verification emails (main_website frontend)
-  RECRUITER_PORTAL_URL: process.env.RECRUITER_PORTAL_URL || ''
+  // Recruiter login page linked from verification and support emails (main_website frontend)
+  RECRUITER_PORTAL_URL: process.env.RECRUITER_PORTAL_URL || '',
+  // Candidate sign-in page linked from support emails (main_website frontend). Optional:
+  // without it, emails to candidates have no "Open Help & support" button.
+  CANDIDATE_PORTAL_URL: process.env.CANDIDATE_PORTAL_URL || ''
 };
 
 module.exports = env;

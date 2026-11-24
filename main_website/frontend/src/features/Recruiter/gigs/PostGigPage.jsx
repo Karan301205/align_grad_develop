@@ -12,6 +12,8 @@ import ScreeningEditor from '../postJob/components/ScreeningEditor';
 import { RequiredMark, TextButton } from '../postJob/components/ui';
 import { NEW_SKILL_LEVEL, levelLabel } from '../postJob/constants';
 import useEligiblePool from '../postJob/useEligiblePool';
+import useJobCredits from '../postJob/useJobCredits';
+import PaymentModal from '../../../components/PaymentModal';
 import { deliveryDays, fileNameOf } from './gigsData';
 
 const MAX_CATEGORIES = 3;
@@ -193,7 +195,9 @@ function SkillsEditor({ requirements, gatesBySkill, onChange, error }) {
         ) : (
           <div className="flex flex-col rounded-[12px] border border-[#E4E6EA]">
             {requirements.map((req, index) => {
-              const selfDeclared = gatesBySkill.get(req.skillName) === false;
+              // No AlignGrad test (a listed skill without one, or the recruiter's own skill):
+              // candidates rate themselves, and the bar is checked against that rating.
+              const selfRated = gatesBySkill.get(req.skillName) === false;
               const remove = () => onChange(requirements.filter((_, i) => i !== index));
               return (
                 <div key={req.skillName} className={`flex flex-col gap-3 px-[18px] py-4 ${index ? 'border-t border-[#EEF0F3]' : ''}`}>
@@ -201,22 +205,24 @@ function SkillsEditor({ requirements, gatesBySkill, onChange, error }) {
                     <div className="flex flex-col gap-0.5">
                       <div className="flex flex-wrap items-baseline gap-x-2.5">
                         <span className="text-[15px] font-semibold">{req.skillName}</span>
-                        {!selfDeclared && (
-                          <span className={`text-[13px] ${MUTED}`}>
-                            Minimum <strong className="font-bold text-[#023836]">{req.minRating}</strong> / 10 · {levelLabel(req.minRating)}
-                          </span>
-                        )}
+                        <span className={`text-[13px] ${MUTED}`}>
+                          Minimum <strong className="font-bold text-[#023836]">{req.minRating}</strong> / 10 · {levelLabel(req.minRating)}
+                        </span>
                       </div>
-                      {selfDeclared && <span className={`text-[13px] ${MUTED}`}>No AlignGrad test for this yet — shown as a preference, candidates self-declare it.</span>}
+                      {selfRated && (
+                        <span className={`text-[13px] ${MUTED}`}>
+                          No AlignGrad test for this yet. Candidates rate themselves on it{req.minRating > 1 ? ' and need at least this score to pitch' : ''}.
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
-                      {selfDeclared && <span className="rounded-full bg-[#F1F3F6] px-2.5 py-0.5 text-xs font-semibold text-[#334155]">Self-declared</span>}
+                      {selfRated && <span className="rounded-full bg-[#F1F3F6] px-2.5 py-0.5 text-xs font-semibold text-[#334155]">Self-rated</span>}
                       <TextButton tone="red" onClick={remove} aria-label={`Remove ${req.skillName}`}>
                         Remove
                       </TextButton>
                     </div>
                   </div>
-                  {!selfDeclared && <LevelBar skillName={req.skillName} value={req.minRating} onChange={(level) => onChange(requirements.map((r, i) => (i === index ? { ...r, minRating: level } : r)))} />}
+                  <LevelBar skillName={req.skillName} value={req.minRating} onChange={(level) => onChange(requirements.map((r, i) => (i === index ? { ...r, minRating: level } : r)))} />
                 </div>
               );
             })}
@@ -228,7 +234,7 @@ function SkillsEditor({ requirements, gatesBySkill, onChange, error }) {
   );
 }
 
-function Preview({ v, company, gatesBySkill }) {
+function Preview({ v, company }) {
   const name = company?.name || 'Your company';
   const days = deliveryOf(v);
   const logo = v.logo?.preview || v.logo?.url || company?.logoUrl;
@@ -274,7 +280,7 @@ function Preview({ v, company, gatesBySkill }) {
           <div className="flex flex-wrap gap-1">
             {v.requirements.map((req) => (
               <span key={req.skillName} className="rounded-[6px] bg-[#F1F3F6] px-2 py-0.5 text-xs font-medium text-[#334155]">
-                {gatesBySkill.get(req.skillName) === false ? req.skillName : `${req.skillName} ≥ ${req.minRating}`}
+                {req.minRating > 1 ? `${req.skillName} ≥ ${req.minRating}` : req.skillName}
               </span>
             ))}
           </div>
@@ -293,19 +299,22 @@ function Preview({ v, company, gatesBySkill }) {
  * server enforces). Publishes with POST /gigs or PUT /gigs/:id; files go through
  * the usual upload flow first.
  */
-export default function PostGigPage({ gig = null, company, token, onCancel, onSaved, setAlertConfig }) {
+export default function PostGigPage({ gig = null, company, user, token, onCancel, onSaved, setAlertConfig }) {
   const editing = Boolean(gig);
   const [v, setV] = useState(() => initialValues(gig));
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  // Out of gig posts: the server's message, shown on the credit pack payment modal.
+  const credits = useJobCredits(token);
+  const [limitNotice, setLimitNotice] = useState('');
   const set = (field) => (value) => {
     setV((prev) => ({ ...prev, [field]: typeof value === 'function' ? value(prev[field]) : value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const poolBars = useMemo(() => v.requirements.map(({ skillName, minRating }) => ({ skillName, minRating })), [v.requirements]);
-  const pool = useEligiblePool(token, poolBars);
+  const pool = useEligiblePool(token, poolBars, { forGig: true });
   const gatesBySkill = useMemo(() => new Map((pool.data?.requirements || []).map((req) => [req.skillName, req.gates])), [pool.data]);
 
   // Cover image previews are object URLs: release them when replaced or on leaving.
@@ -344,8 +353,7 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
       const attachments = [];
       for (const item of v.files) attachments.push(item.url || (await upload(item.file, 'doc', token)));
       const logo = v.logo ? v.logo.url || (await upload(v.logo.file, 'image', token)) : null;
-      // Skills without a test can't be checked, so they're sent as preferences (no bar).
-      const requirements = v.requirements.map(({ skillName, minRating }) => ({ skillName, minRating: gatesBySkill.get(skillName) === false ? 1 : minRating }));
+      const requirements = v.requirements.map(({ skillName, minRating }) => ({ skillName, minRating }));
       const days = deliveryOf(v);
       const payload = {
         description: v.description.trim(),
@@ -367,6 +375,10 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
       };
       const res = await apiFetch(editing ? `/gigs/${gig.id}` : '/gigs', { token, method: editing ? 'PUT' : 'POST', json: payload });
       const body = await res.json().catch(() => ({}));
+      if (body.code === 'UPGRADE_REQUIRED' && credits.offer?.jobCredits > 0) {
+        setLimitNotice(body.error);
+        return;
+      }
       if (!res.ok) throw new Error(body.error || SERVER_MESSAGE);
       setAlertConfig({ message: editing ? 'Gig updated.' : 'Gig published. Candidates who meet your bars can pitch now.', type: 'success' });
       onSaved(body);
@@ -556,7 +568,7 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
               </div>
             </Section>
 
-            <Section id="gig-skills" title="Skills needed" step={3} intro="Set a minimum score for skills AlignGrad tests. Candidates below a bar can’t pitch.">
+            <Section id="gig-skills" title="Skills needed" step={3} intro="Set a minimum score for each skill. Candidates below a bar can’t pitch. Pick a skill from the list or add your own.">
               <SkillsEditor requirements={v.requirements} gatesBySkill={gatesBySkill} onChange={set('requirements')} error={errors.requirements} />
             </Section>
 
@@ -611,7 +623,7 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
               )}
             </section>
 
-            <Preview v={v} company={company} gatesBySkill={gatesBySkill} />
+            <Preview v={v} company={company} />
 
             <section aria-labelledby="gig-tips" className={`${CARD} flex flex-col gap-2.5 p-[22px]`}>
               <h2 id="gig-tips" className={`m-0 text-[15px] ${MUTED}`}>
@@ -626,6 +638,27 @@ export default function PostGigPage({ gig = null, company, token, onCancel, onSa
           </div>
         </div>
       </div>
+
+      {credits.offer?.jobCredits > 0 && (
+        <PaymentModal
+          isOpen={Boolean(limitNotice)}
+          onClose={() => setLimitNotice('')}
+          notice={limitNotice}
+          planType={credits.offer.planType}
+          offer={credits.offer}
+          token={token}
+          user={user}
+          onSuccess={(result) => {
+            setAlertConfig({
+              message: result?.alreadyProcessed
+                ? 'This payment was already added to your account.'
+                : `Credit pack added: ${credits.offer.jobCredits} more gigs and ${credits.offer.jobCredits} more jobs. Press Publish gig to post it.`,
+              type: 'success'
+            });
+          }}
+          onFailure={(err) => setAlertConfig({ message: err?.message || 'Payment failed', type: 'error' })}
+        />
+      )}
     </div>
   );
 }

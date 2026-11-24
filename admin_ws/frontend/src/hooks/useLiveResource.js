@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { usePageActive } from '../app/PageActiveContext.js';
+import useAutoRefresh from './useAutoRefresh.js';
 import useResource from './useResource.js';
 
 /**
@@ -19,18 +20,7 @@ export default function useLiveResource(fetcher, select, { intervalMs = 30000 } 
     arrived.current = true;
   }, [active, reload]);
 
-  useEffect(() => {
-    if (!active) return undefined;
-    const refresh = () => {
-      if (document.visibilityState === 'visible') reload({ silent: true });
-    };
-    const timer = setInterval(refresh, intervalMs);
-    document.addEventListener('visibilitychange', refresh);
-    return () => {
-      clearInterval(timer);
-      document.removeEventListener('visibilitychange', refresh);
-    };
-  }, [active, intervalMs, reload]);
+  useAutoRefresh(reload, { intervalMs, active });
 
   return resource;
 }

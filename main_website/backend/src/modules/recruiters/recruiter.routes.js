@@ -25,10 +25,10 @@ router.post('/verify', authMiddleware, relaxedLimit, requireRecruiter, validate(
 router.post('/jobs', authMiddleware, relaxedLimit, requireApprovedRecruiter, validate(postJobSchema), recruiterController.postJob);
 // Count of candidates who meet a draft job's skill bars (no candidate data returned)
 router.post('/jobs/eligible-count', authMiddleware, relaxedLimit, requireApprovedRecruiter, validate(eligibleCountSchema), recruiterController.getEligibleCandidateCount);
-router.put('/jobs/:jobId', authMiddleware, relaxedLimit, validate(updateJobSchema), recruiterController.updateJob);
-router.patch('/jobs/:jobId/status', authMiddleware, relaxedLimit, validate(toggleJobStatusSchema), recruiterController.toggleJobPause);
-router.delete('/jobs/:jobId', authMiddleware, relaxedLimit, validate(deleteJobSchema), recruiterController.deleteJob);
-router.get('/jobs', authMiddleware, relaxedLimit, recruiterController.getCompanyJobs);
+router.put('/jobs/:jobId', authMiddleware, relaxedLimit, requireRecruiter, validate(updateJobSchema), recruiterController.updateJob);
+router.patch('/jobs/:jobId/status', authMiddleware, relaxedLimit, requireRecruiter, validate(toggleJobStatusSchema), recruiterController.toggleJobPause);
+router.delete('/jobs/:jobId', authMiddleware, relaxedLimit, requireRecruiter, validate(deleteJobSchema), recruiterController.deleteJob);
+router.get('/jobs', authMiddleware, relaxedLimit, requireRecruiter, recruiterController.getCompanyJobs);
 router.get('/candidates', authMiddleware, relaxedLimit, requireApprovedRecruiter, recruiterController.getCandidates);
 router.get('/top-talents', authMiddleware, relaxedLimit, requireApprovedRecruiter, recruiterController.getTopMatchingTalents);
 router.put('/applications/:applicationId/rounds', authMiddleware, relaxedLimit, requireApprovedRecruiter, validate(updateApplicationRoundsSchema), recruiterController.updateApplicationRounds);
