@@ -7,7 +7,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 const redisStore = require('../../src/infrastructure/redis');
 const { rateLimiter, checkLoginLock, recordFailedAttempt, resetFailedAttempts } = require('../../src/middleware/rateLimiter');
-const { runOncePer } = require('../../src/infrastructure/redis');
+const { runOncePer, pingRedis } = require('../../src/infrastructure/redis');
 
 function run(limit, req) {
   let status = 200;
@@ -107,4 +107,19 @@ test('routes with a shared bucket share one count (sign-up, resend and reset ema
   const emails = rateLimiter({ windowMs: 60000, maxRequests: 2, bucket: 'email-send-test' });
   const at = (path) => ({ ip: '10.0.0.9', path, headers: {}, socket: {} });
   assert.deepStrictEqual([run(emails, at('/signup/initiate')), run(emails, at('/forgot-password')), run(emails, at('/signup/resend-pin'))], [200, 200, 429]);
+});
+
+test('the health check reports Redis as not configured, working or not working', async () => {
+  const { EventEmitter } = require('node:events');
+  const client = (status, ping) => Object.assign(new EventEmitter(), { status, ping });
+  assert.strictEqual(await pingRedis(50, null), null, 'no REDIS_URL');
+  assert.strictEqual(await pingRedis(50, client('ready', async () => 'PONG')), true);
+  assert.strictEqual(await pingRedis(50, client('ready', async () => { throw new Error('down'); })), false);
+  assert.strictEqual(await pingRedis(50, client('ready', () => new Promise(() => {}))), false, 'no answer in time');
+  const connecting = client('connecting', async () => 'PONG');
+  assert.strictEqual(await pingRedis(50, connecting), false, 'never connected');
+  assert.strictEqual(connecting.listenerCount('ready'), 0, 'no listener left behind');
+  const late = client('connecting', async () => 'PONG');
+  setTimeout(() => { late.status = 'ready'; late.emit('ready'); }, 10);
+  assert.strictEqual(await pingRedis(200, late), true, 'connected while waiting');
 });

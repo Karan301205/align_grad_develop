@@ -29,11 +29,20 @@ app.use(express.urlencoded({ limit: '1mb', extended: true }));
 app.use('/api', apiRoutes);
 app.use('/', apiRoutes);
 
+// Redis is optional (the site keeps working without it), so it is reported here but never
+// turns the status to ERROR: configured = REDIS_URL is set, working = Redis answered PING.
+const { pingRedis } = require('./infrastructure/redis');
+const redisStatus = async () => {
+  const working = await pingRedis();
+  return { configured: working !== null, working: working === true };
+};
+
 app.get('/health', async (req, res) => {
+  const redis = redisStatus();
   try {
     // Cheapest possible database round trip. The frontend polls this, so it must not scan a table.
     await prisma.$queryRaw`SELECT 1`;
-    res.json({ status: 'OK', services: { api: 'ACTIVE', database: 'ACTIVE' }, timestamp: new Date() });
+    res.json({ status: 'OK', services: { api: 'ACTIVE', database: 'ACTIVE' }, redis: await redis, timestamp: new Date() });
   } catch (error) {
     // The cause stays in the server log; callers only learn that the database is down.
     // The frontend polls this every few seconds while waiting, so log one line (the
@@ -43,6 +52,7 @@ app.get('/health', async (req, res) => {
     res.status(503).json({
       status: 'ERROR',
       services: { api: 'ACTIVE', database: 'INACTIVE' },
+      redis: await redis,
       timestamp: new Date()
     });
   }

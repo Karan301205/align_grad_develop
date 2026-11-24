@@ -54,6 +54,40 @@ async function runOncePer(name, ttlMs, redis = getRedis()) {
   }
 }
 
+/** Resolves true once `redis` is connected, false if that takes longer than `ms`. */
+function waitUntilReady(redis, ms) {
+  if (redis.status === 'ready') return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const finish = (ready) => {
+      clearTimeout(timer);
+      redis.off('ready', onReady);
+      resolve(ready);
+    };
+    const onReady = () => finish(true);
+    const timer = setTimeout(() => finish(false), ms);
+    redis.on('ready', onReady);
+  });
+}
+
+/**
+ * For GET /health: null when REDIS_URL isn't set, true when Redis answers PING within
+ * `ms`, false otherwise. Never throws. `redis` can be passed in tests.
+ */
+async function pingRedis(ms = 1000, redis = getRedis()) {
+  if (!redis) return null;
+  try {
+    if (!(await waitUntilReady(redis, ms))) return false;
+    let timer;
+    const timeout = new Promise((resolve) => {
+      timer = setTimeout(() => resolve('timeout'), ms);
+    });
+    const answer = await Promise.race([redis.ping(), timeout]).finally(() => clearTimeout(timer));
+    return answer === 'PONG';
+  } catch {
+    return false;
+  }
+}
+
 async function closeRedis() {
   if (!client) return;
   const closing = client;
@@ -61,4 +95,4 @@ async function closeRedis() {
   await closing.quit().catch(() => closing.disconnect());
 }
 
-module.exports = { getRedis, runOncePer, reportFallback, closeRedis };
+module.exports = { getRedis, runOncePer, pingRedis, reportFallback, closeRedis };
