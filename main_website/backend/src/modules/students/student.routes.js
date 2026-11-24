@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../../middleware/auth');
-const { relaxedLimit } = require('../../middleware/rateLimiter');
+const { relaxedLimit, costlyLimit } = require('../../middleware/rateLimiter');
 const validate = require('../../middleware/validate');
 const studentController = require('./student.controller');
 const {
@@ -24,7 +24,8 @@ router.get('/jobs', authMiddleware, relaxedLimit, studentController.getJobs);
 router.post('/jobs/:jobId/apply', authMiddleware, relaxedLimit, validate(applyJobSchema), studentController.applyJob);
 router.post('/tests', authMiddleware, relaxedLimit, validate(submitTestSchema), studentController.submitTest);
 router.get('/tests/skills', authMiddleware, relaxedLimit, studentController.getTechnicalSkills);
-router.post('/tests/generate', authMiddleware, relaxedLimit, validate(generateTestSchema), studentController.generateSkillTest);
+// costlyLimit: each start picks questions and opens a test session (30 an hour per user by default).
+router.post('/tests/generate', authMiddleware, relaxedLimit, costlyLimit, validate(generateTestSchema), studentController.generateSkillTest);
 router.post('/tests/submit', authMiddleware, relaxedLimit, validate(submitSkillTestSchema), studentController.submitSkillTest);
 router.get('/applications', authMiddleware, relaxedLimit, studentController.getStudentApplications);
 router.post('/intro-video', authMiddleware, relaxedLimit, validate(saveIntroVideoSchema), studentController.saveIntroVideo);

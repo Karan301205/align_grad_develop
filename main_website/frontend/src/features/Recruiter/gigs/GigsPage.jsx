@@ -11,7 +11,7 @@ import { newestFirst } from './gigsData';
  * or 'workspace' (one gig: chat, submissions, pitches).
  * Data: GET /gigs/my-gigs, keeping the gigs this recruiter owns.
  */
-export default function GigsPage({ view, onView, selectedGigId, onSelectGig, user, company, candidates, token, setAlertConfig }) {
+export default function GigsPage({ view, onView, selectedGigId, onSelectGig, user, company, token, setAlertConfig }) {
   const [list, setList] = useState({ gigs: [], loaded: false, error: null });
   const [refreshing, setRefreshing] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -77,7 +77,6 @@ export default function GigsPage({ view, onView, selectedGigId, onSelectGig, use
         }}
         onListChanged={load}
         user={user}
-        candidates={candidates}
         token={token}
         setAlertConfig={setAlertConfig}
       />

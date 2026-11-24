@@ -57,8 +57,9 @@ const env = {
   VERIFICATION_PIN_EXPIRY_MINUTES: parseInt(process.env.VERIFICATION_PIN_EXPIRY_MINUTES || '10', 10),
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || '',
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || '',
-  // Optional Redis (e.g. redis://:password@host:6379). Empty → no queue: emails are sent
-  // directly inside the request, as before. There is no built-in address.
+  // Optional Redis (e.g. redis://:password@host:6379): email queue, shared rate limits and
+  // login lockouts, and the run-once lock for the hourly job clean-up. Empty → all of that stays
+  // inside this one process (emails are sent directly). There is no built-in address.
   REDIS_URL: (process.env.REDIS_URL || '').trim(),
   // Google sign-in: the OAuth client ID that tokens must be issued for (same value as VITE_GOOGLE_CLIENT_ID).
   // No built-in value: without it Google sign-in is refused with a clear message.
@@ -68,6 +69,12 @@ const env = {
   JOB_MAX_ACTIVE_DAYS: parseInt(process.env.JOB_MAX_ACTIVE_DAYS, 10) || 90,
   JOB_ARCHIVE_AFTER_DAYS: parseInt(process.env.JOB_ARCHIVE_AFTER_DAYS, 10) || 30,
   JOB_DELETE_AFTER_DAYS: parseInt(process.env.JOB_DELETE_AFTER_DAYS, 10) || 365,
+  // Most open jobs a candidate's job list returns (newest first). Keeps that request bounded.
+  JOB_LIST_LIMIT: parseInt(process.env.JOB_LIST_LIMIT, 10) || 500,
+  // Frontend origins allowed to call this API from a browser, comma separated
+  // (e.g. https://aligngrad.com,https://candidate.aligngrad.com). The origins of CLIENT_URL and the
+  // portal URLs are always added. Empty → every origin is allowed (with a startup warning).
+  CORS_ORIGINS: (process.env.CORS_ORIGINS || '').split(',').map((origin) => origin.trim()).filter(Boolean),
   // Email sending tuning.
   // Emails sent at the same time: the queue's worker count and the SMTP pool's open connections.
   EMAIL_QUEUE_CONCURRENCY: parseInt(process.env.EMAIL_QUEUE_CONCURRENCY, 10) || 5,

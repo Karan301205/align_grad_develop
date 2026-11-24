@@ -8,6 +8,10 @@ const {
   calculateCandidateJobRecommendation
 } = require('../skills');
 const { isJobOpen, isJobExpired } = require('../jobs/jobLifecycle.service');
+const { cached } = require('../../shared/cache/ttlCache');
+const { getQuizSkills } = require('../skills/quizSkills');
+const { UploadProblem, startVideoUpload } = require('../uploads/directUpload');
+const env = require('../../config/env');
 const { evaluateAnswers, toCandidateQuestions } = require('../jobs/screeningQuestions');
 const { deleteS3ObjectFromUrl } = require('../../services/fileCleanup.service');
 const testSessionRepo = require('../../services/questionBank/repositories/testSessionRepository');
@@ -196,12 +200,7 @@ exports.updateProfile = async (req, res) => {
 
     let skillsWithMCQs = new Set();
     if (skills) {
-      const activeQuestions = await prisma.question.findMany({
-        where: { status: 'ACTIVE' },
-        select: { skillName: true },
-        distinct: ['skillName']
-      });
-      skillsWithMCQs = new Set(activeQuestions.map(q => q.skillName.toLowerCase()));
+      skillsWithMCQs = await getQuizSkills();
     }
 
     let profile;
@@ -268,6 +267,26 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
+// The candidate job list's shared part: open jobs (newest first, at most JOB_LIST_LIMIT) with
+// only public company fields and no answer keys, cached for 30 s. Recruiter job writes clear it
+// (invalidate('jobs:')); other server processes catch up within the 30 s.
+const JOB_LIST_TTL_MS = 30 * 1000;
+function openJobsForCandidates() {
+  return cached('jobs:open', JOB_LIST_TTL_MS, async () => {
+    const jobs = await prisma.job.findMany({
+      where: { OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
+      include: { company: true },
+      orderBy: { createdAt: 'desc' },
+      take: env.JOB_LIST_LIMIT
+    });
+    return jobs.map((job) => ({
+      ...job,
+      company: publicCompany(job.company),
+      screeningQuestions: toCandidateQuestions(job.screeningQuestions)
+    }));
+  });
+}
+
 exports.getJobs = async (req, res) => {
   try {
     const profile = await prisma.profile.findUnique({
@@ -277,19 +296,14 @@ exports.getJobs = async (req, res) => {
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const allJobs = await prisma.job.findMany({ include: { company: true } });
+    // Open jobs are the same for every candidate: shared, briefly cached (openJobsForCandidates).
     // Only live jobs (not paused, closed or past their recruiter-chosen end date).
-    const jobs = allJobs.filter((job) => isJobOpen(job));
-    const applications = await prisma.application.findMany({
-      where: { studentId: profile.id }
-    });
-
-    const activeQuestions = await prisma.question.findMany({
-      where: { status: 'ACTIVE' },
-      select: { skillName: true },
-      distinct: ['skillName']
-    });
-    const skillsWithQuestionsSet = new Set(activeQuestions.map(q => q.skillName.toLowerCase()));
+    const [openJobs, applications, skillsWithQuestionsSet] = await Promise.all([
+      openJobsForCandidates(),
+      prisma.application.findMany({ where: { studentId: profile.id } }),
+      getQuizSkills()
+    ]);
+    const jobs = openJobs.filter((job) => isJobOpen(job));
 
     const studentSkills = buildStudentSkillMap(profile);
 
@@ -302,8 +316,6 @@ exports.getJobs = async (req, res) => {
 
       return {
         ...job,
-        company: publicCompany(job.company),
-        screeningQuestions: toCandidateQuestions(job.screeningQuestions),
         matched: missingRequirements.length === 0,
         missingRequirements,
         requirementStatuses,
@@ -354,12 +366,7 @@ exports.applyJob = async (req, res) => {
       return res.status(409).json({ error: 'This job is no longer accepting applications.' });
     }
 
-    const activeQuestions = await prisma.question.findMany({
-      where: { status: 'ACTIVE' },
-      select: { skillName: true },
-      distinct: ['skillName']
-    });
-    const skillsWithQuestionsSet = new Set(activeQuestions.map(q => q.skillName.toLowerCase()));
+    const skillsWithQuestionsSet = await getQuizSkills();
 
     const studentSkills = buildStudentSkillMap(profile);
 
@@ -410,6 +417,8 @@ exports.applyJob = async (req, res) => {
 
     res.status(201).json(app);
   } catch (err) {
+    // The (jobId, studentId) unique rule caught a second application sent at the same moment.
+    if (err?.code === 'P2002') return res.status(400).json({ error: 'You have already applied to this job.' });
     console.error(err);
     res.status(500).json({ error: 'Server error applying for job' });
   }
@@ -441,12 +450,7 @@ exports.getTechnicalSkills = async (req, res) => {
       return res.json({ technicalSkills: [] });
     }
 
-    const activeQuestions = await prisma.question.findMany({
-      where: { status: 'ACTIVE' },
-      select: { skillName: true },
-      distinct: ['skillName']
-    });
-    const skillsWithMCQs = new Set(activeQuestions.map(q => q.skillName.toLowerCase()));
+    const skillsWithMCQs = await getQuizSkills();
 
     // When each skill was last tested (newest attempt first).
     const attempts = await prisma.testAttempt.findMany({ where: { profileId: profile.id }, orderBy: { createdAt: 'desc' } });
@@ -777,23 +781,13 @@ exports.requestVideoUploadUrl = async (req, res) => {
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const fileExt = fileName.split('.').pop() || 'webm';
-    const isProjectVideo = category === 'project';
-    const prefix = isProjectVideo ? 'proj' : 'showcase';
     // Project walkthroughs get a larger size limit (see config/upload.config.js).
-    const fileType = isProjectVideo ? 'projectVideo' : 'video';
-    const key = `videos/${profile.id}/${prefix}_${Date.now()}.${fileExt}`;
-
-    const { getPublicUrl } = require('../../infrastructure/storage/s3');
-    const uploadUrl = `${req.protocol}://${req.get('host')}/api/upload/secure-put?fileType=${fileType}&key=${encodeURIComponent(key)}&contentType=${encodeURIComponent(contentType)}`;
-    const publicUrl = getPublicUrl(key);
-
-    res.json({
-      signedUrl: uploadUrl,
-      publicUrl: publicUrl
-    });
+    const fileType = category === 'project' ? 'projectVideo' : 'video';
+    // The browser posts the file straight to S3, then calls POST /upload/verify (uploads/directUpload.js).
+    res.json(await startVideoUpload({ folderId: profile.id, fileType, fileName, contentType }));
 
   } catch (err) {
+    if (err instanceof UploadProblem) return res.status(err.status).json({ error: err.message });
     console.error('Error generating S3 pre-signed upload URL for video:', err);
     res.status(500).json({ error: 'Failed to generate S3 pre-signed upload URL for video' });
   }
@@ -883,16 +877,17 @@ exports.getPublicJobBrief = async (req, res) => {
       return res.status(404).json({ error: 'Job not found or expired' });
     }
 
-    const job = await prisma.job.findUnique({
-      where: { id: jobId },
-      include: { company: true }
+    // Shared links can be opened by many people at once: the public view is cached for 30 s.
+    const job = await cached(`jobs:brief:${jobId}`, JOB_LIST_TTL_MS, async () => {
+      const row = await prisma.job.findUnique({ where: { id: jobId }, include: { company: true } });
+      return row ? { ...row, company: publicCompany(row.company), screeningQuestions: toCandidateQuestions(row.screeningQuestions) } : null;
     });
 
     if (!job || job.status === 'CLOSED' || isJobExpired(job)) {
       return res.status(404).json({ error: 'Job not found or expired' });
     }
 
-    res.json({ ...job, company: publicCompany(job.company), screeningQuestions: toCandidateQuestions(job.screeningQuestions) });
+    res.json(job);
   } catch (err) {
     console.error('Error fetching public job brief:', err);
     res.status(500).json({ error: 'Server error fetching job brief' });

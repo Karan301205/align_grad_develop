@@ -8,6 +8,18 @@ const { buildStudentSkillMap, getMissingRequirements } = require('../skills/skil
 const { TECHNICAL_SKILLS } = require('../skills/technicalSkills');
 const registryCache = require('../assessments/question-bank/skills/registryCache');
 
+// A candidate's skill lookup, built once per profile object. The profiles come from a short
+// cache (recruiter.controller candidateSkills), so repeated counts reuse the same maps.
+const skillMaps = new WeakMap();
+function skillMapOf(profile) {
+  let map = skillMaps.get(profile);
+  if (!map) {
+    map = buildStudentSkillMap(profile);
+    skillMaps.set(profile, map);
+  }
+  return map;
+}
+
 /** True when a bar on `skillName` can stop a candidate from applying. */
 function gatesApplying(skillName, quizSkills) {
   const canonical = registryCache.resolve(skillName).toLowerCase();
@@ -50,7 +62,7 @@ function summarizePool(requirements, profiles, quizSkills, { forGig = false } = 
   const oneBelow = new Map();
 
   for (const profile of profiles) {
-    const missing = forGig ? gigSkillGaps(requirements, profile) : getMissingRequirements(job, buildStudentSkillMap(profile), quizSkills);
+    const missing = forGig ? gigSkillGaps(requirements, profile) : getMissingRequirements(job, skillMapOf(profile), quizSkills);
     if (missing.length === 0) {
       eligible += 1;
     } else if (missing.length === 1) {

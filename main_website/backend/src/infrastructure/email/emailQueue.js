@@ -93,4 +93,12 @@ async function deliverEmail(mail, { queue: target = getQueue() } = {}) {
   return { queued: false };
 }
 
-module.exports = { deliverEmail, startEmailQueue };
+/** Lets the worker finish the emails it is sending, then closes the Redis connections (shutdown). */
+async function stopEmailQueue() {
+  const closing = [worker, queue].filter(Boolean);
+  worker = null;
+  queue = null;
+  await Promise.all(closing.map((item) => item.close().catch((err) => console.error('[email-queue] close failed:', err.message))));
+}
+
+module.exports = { deliverEmail, startEmailQueue, stopEmailQueue };

@@ -84,3 +84,21 @@ test('the public job brief carries the public company only', async () => {
   assert.deepStrictEqual(Object.keys(res.body.company).sort(), ['id', 'logoUrl', 'name', 'verified']);
   assert.strictEqual(res.body.company.verified, true);
 });
+
+test('a second application sent at the same moment gets "already applied", not a server error', async (t) => {
+  const userId = 'beef00000000000000000009';
+  await prisma.profile.create({
+    data: {
+      userId, name: 'Quick Clicker', username: 'quick', bio: 'Builds reports', gender: 'F', email: 'quick@x.example',
+      dob: '2000-01-01', phone: '9999999999', introVideoUrl: 'https://example.com/v.mp4', skills: []
+    }
+  });
+  const company = await prisma.company.create({ data: { userId: 'beef00000000000000000010', name: 'Race Co', photos: [] } });
+  const job = await prisma.job.create({ data: { companyId: company.id, title: 'Open role', description: 'x', status: 'ACTIVE', requirements: [], expiresAt: new Date(Date.now() + 86400000) } });
+  // The other request already inserted its row: the unique rule (jobId, studentId) refuses this one.
+  t.mock.method(prisma.application, 'create', async () => { throw Object.assign(new Error('Unique constraint failed'), { code: 'P2002' }); });
+  const res = fakeRes();
+  await controller.applyJob({ user: { id: userId, role: 'STUDENT' }, params: { jobId: job.id }, body: {} }, res);
+  assert.strictEqual(res.statusCode, 400);
+  assert.match(res.body.error, /already applied/);
+});

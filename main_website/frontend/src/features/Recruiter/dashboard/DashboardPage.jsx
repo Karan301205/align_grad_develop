@@ -5,6 +5,7 @@ import { ACCOUNT_PAGE, MUTED, PAGE_TITLE } from '../components/accountStyles';
 import CandidateProfileDrawer from '../components/CandidateProfileDrawer';
 import useJobCredits from '../postJob/useJobCredits';
 import { candidateId, educationLine } from '../candidates/candidateData';
+import { useCandidateProfiles, useCandidateSearch } from '../candidates/useCandidates';
 import { attentionItems, dashboardMetrics, greeting, liveJobs } from './dashboardData';
 import MetricCards from './components/MetricCards';
 import AttentionCard from './components/AttentionCard';
@@ -20,10 +21,12 @@ const matches = (query, ...fields) => !query || fields.some((field) => String(fi
 /**
  * Recruiter Home (design: design/Home — recruiter dashboard-html). Hiring metrics
  * (moved from the Jobs page) sit on top; then what needs attention, live jobs,
- * top matches, recently viewed candidates and job credits. Data comes from the
- * layout (jobs, candidates, top talents) and GET /payments/status.
+ * top matches, recently viewed candidates and job credits. Jobs come from the layout; the two
+ * people lists ask the server for just those few candidates (POST /recruiter/candidates/search),
+ * and "View profile" loads the full profile (GET /recruiter/candidates/:id). Candidate data is
+ * only asked for once the company is approved (`canSeeCandidates`).
  */
-export default function DashboardPage({ company, user, jobs, candidates = [], candidatesError, topTalents, topTalentsError, demandProfile, token, goToTab, onViewApplications }) {
+export default function DashboardPage({ company, user, jobs, canSeeCandidates, token, goToTab, onViewApplications }) {
   const credits = useJobCredits(token);
   const [query, setQuery] = useState('');
   const [profile, setProfile] = useState(null);
@@ -41,18 +44,31 @@ export default function DashboardPage({ company, user, jobs, candidates = [], ca
   const attention = attentionItems({ jobs, quota: credits.quota });
   const q = query.trim().toLowerCase();
 
-  // Latest saved profile for each id, so the lists show current data.
-  const byId = useMemo(() => new Map(candidates.map((cand) => [candidateId(cand), cand])), [candidates]);
-  const applicantIds = useMemo(() => new Set((jobs || []).flatMap((job) => (job.applications || []).map((app) => app.studentId))), [jobs]);
+  // Top matches: best match % for the active jobs, people who haven't applied yet, filtered by the search box.
+  const top = useCandidateSearch(
+    token,
+    canSeeCandidates ? { sort: 'recommended', match: 'any', excludeApplicants: true, q, pageSize: TOP_MATCH_LIMIT, countTotal: false } : null,
+    { debounceMs: 300 }
+  );
+  const topMatches = top.items;
 
-  const topMatches = (Array.isArray(topTalents) ? topTalents : [])
-    .filter((talent) => talent.matchScore > 0 && !applicantIds.has(candidateId(talent)))
-    .map((talent) => ({ ...(byId.get(candidateId(talent)) || talent), matchScore: talent.matchScore }))
-    .filter((cand) => matches(q, cand.name, cand.username, educationLine(cand)))
-    .slice(0, TOP_MATCH_LIMIT);
+  // Recently viewed: this browser's list, refreshed with each person's current card from the server.
+  const recentIds = useMemo(() => recent.map((entry) => candidateId(entry)).filter(Boolean), [recent]);
+  const fresh = useCandidateSearch(token, canSeeCandidates && recentIds.length > 0 ? { ids: recentIds, sort: 'newest', pageSize: RECENT_LIMIT, countTotal: false } : null);
+  const freshById = useMemo(() => new Map(fresh.items.map((cand) => [candidateId(cand), cand])), [fresh.items]);
   const recentPeople = recent
-    .map((entry) => ({ ...(byId.get(candidateId(entry)) || entry), viewedAt: entry.viewedAt }))
+    .map((entry) => ({ ...entry, ...(freshById.get(candidateId(entry)) || {}), viewedAt: entry.viewedAt }))
     .filter((cand) => matches(q, cand.name, cand.username, educationLine(cand)));
+
+  // "View profile": show the card at once, then the full profile when it arrives.
+  const { load: loadProfile } = useCandidateProfiles(token);
+  const openProfile = (person) => {
+    const id = candidateId(person);
+    setProfile(person);
+    loadProfile(id)
+      .then((full) => setProfile((current) => (current && candidateId(current) === id ? { ...full, matchScore: person.matchScore } : current)))
+      .catch((err) => console.error('[dashboard] Could not load the full profile:', err));
+  };
   const shownJobs = live.filter((job) => matches(q, job.title, job.workMode, job.location));
 
   const name = company?.recruiterName || user?.name || company?.name || '';
@@ -110,13 +126,13 @@ export default function DashboardPage({ company, user, jobs, candidates = [], ca
             <PeopleCard
               id="top-matches-title"
               title="Top matches who haven’t applied"
-              subtitle={demandProfile?.totalActiveJobs ? `Ranked by skill match across your ${demandProfile.totalActiveJobs} active job${demandProfile.totalActiveJobs === 1 ? '' : 's'}` : null}
+              subtitle={top.demand?.totalActiveJobs ? `Ranked by skill match across your ${top.demand.totalActiveJobs} active job${top.demand.totalActiveJobs === 1 ? '' : 's'}` : null}
               people={topMatches}
-              error={topTalentsError ? `Couldn’t load recommendations. ${topTalentsError}` : candidatesError ? `Couldn’t load candidates. ${candidatesError}` : null}
-              empty={live.length === 0 ? 'Post a job with skill bars to get recommendations.' : q ? 'No matches for this search.' : 'No new matches for your live jobs yet.'}
+              error={top.status === 'error' ? `Couldn’t load recommendations. ${top.error}` : null}
+              empty={top.status === 'loading' ? 'Loading matches…' : live.length === 0 ? 'Post a job with skill bars to get recommendations.' : q ? 'No matches for this search.' : 'No new matches for your live jobs yet.'}
               aside={(person) => <span className="font-semibold text-[#0F7A55]">{person.matchScore}% match</span>}
               footer={{ label: 'See all candidates', onClick: () => goToTab('candidates') }}
-              onViewProfile={setProfile}
+              onViewProfile={openProfile}
             />
             <PeopleCard
               id="recent-title"
@@ -125,7 +141,7 @@ export default function DashboardPage({ company, user, jobs, candidates = [], ca
               people={recentPeople}
               empty={q ? 'No recently viewed candidates match this search.' : 'Profiles you open from Candidates or this page will show up here.'}
               aside={(person) => <span className={MUTED}>Viewed {formatViewedTime(person.viewedAt).toLowerCase()}</span>}
-              onViewProfile={setProfile}
+              onViewProfile={openProfile}
             />
           </div>
         </div>

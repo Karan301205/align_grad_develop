@@ -88,10 +88,17 @@ async function runJobRetention(prisma, {
   return { slimmed: slimmed.count, deleted, retained };
 }
 
-/** Runs the retention pass a minute after start-up and then hourly. Never on a user's request. */
-function startJobRetention(prisma) {
+/**
+ * Runs the retention pass a minute after start-up and then hourly. Never on a user's request.
+ * With several server processes and REDIS_URL set, only one of them runs each hour
+ * (infrastructure/redis runOncePer); without Redis every process runs it (safe to repeat).
+ * Returns a function that stops the timers (used on shutdown).
+ */
+function startJobRetention(prisma, { runOncePer = require('../../infrastructure/redis').runOncePer } = {}) {
   const run = async () => {
     try {
+      // Hold the turn a minute less than the interval, so the next hour is free again.
+      if (!(await runOncePer('job-retention', RUN_EVERY_MS - 60 * 1000))) return;
       const result = await runJobRetention(prisma);
       if (result.slimmed || result.deleted || result.retained) {
         console.log(`[jobs] retention: ${result.slimmed} slimmed, ${result.deleted} deleted, ${result.retained} kept for their hires`);
@@ -100,8 +107,12 @@ function startJobRetention(prisma) {
       console.error('[jobs] retention run failed:', err.message);
     }
   };
-  setTimeout(run, 60 * 1000).unref();
-  setInterval(run, RUN_EVERY_MS).unref();
+  const first = setTimeout(run, 60 * 1000).unref();
+  const hourly = setInterval(run, RUN_EVERY_MS).unref();
+  return () => {
+    clearTimeout(first);
+    clearInterval(hourly);
+  };
 }
 
 module.exports = { expiryFrom, jobExpiry, isJobExpired, isJobOpen, runJobRetention, startJobRetention };

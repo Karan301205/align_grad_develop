@@ -34,11 +34,6 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
   const [companyError, setCompanyError] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [jobsError, setJobsError] = useState(null);
-  const [candidates, setCandidates] = useState([]);
-  const [candidatesError, setCandidatesError] = useState(null);
-  const [topTalentsError, setTopTalentsError] = useState(null);
-  const [topTalents, setTopTalents] = useState([]);
-  const [demandProfile, setDemandProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false); // mobile drawer
   // Desktop rail: open by default; the arrow collapses it to icons and the page reflows.
@@ -60,12 +55,10 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
     if (!silent) setLoading(true);
     try {
       // Company Details (the company profile page shows this error if it fails)
-      let compData = null;
       try {
         const compRes = await apiFetch('/recruiter/company', { token });
         const body = await compRes.json().catch(() => ({}));
         if (compRes.ok) {
-          compData = body;
           setCompany(body);
           setCompanyError(null);
         } else {
@@ -74,8 +67,6 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
       } catch (err) {
         setCompanyError(userMessage(err));
       }
-      const companyApproved = Boolean(compData) &&
-        getCompanyVerificationStatus(compData) === COMPANY_VERIFICATION_STATUS.APPROVED;
 
       // Company jobs, each with its applications. A failure is kept for the Jobs and
       // Applications pages and doesn't stop the candidate data below from loading.
@@ -92,32 +83,8 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
         setJobsError(userMessage(err));
       }
 
-      // Candidate data is only available once an admin has approved the company.
-      // Failures are kept so the Candidates page can show them.
-      if (companyApproved) {
-        const readJson = async (path) => {
-          const res = await apiFetch(path, { token });
-          const body = await res.json().catch(() => ({}));
-          if (!res.ok) throw new Error(body.error || SERVER_MESSAGE);
-          return body;
-        };
-        try {
-          const candData = await readJson('/recruiter/candidates');
-          setCandidates(Array.isArray(candData) ? candData : []);
-          setCandidatesError(null);
-        } catch (err) {
-          setCandidatesError(userMessage(err));
-        }
-        // Top Matching Talents derived from Recruiter Demand Profile (recommended order)
-        try {
-          const talentsData = await readJson('/recruiter/top-talents?limit=500');
-          setTopTalents(talentsData.topTalents || []);
-          setDemandProfile(talentsData.demandProfile || null);
-          setTopTalentsError(null);
-        } catch (err) {
-          setTopTalentsError(userMessage(err));
-        }
-      }
+      // Candidates are not loaded here: each page asks the server for the few it shows
+      // (candidates/useCandidates.js), once the company is approved.
     } catch (err) {
       console.error(err);
     } finally {
@@ -382,11 +349,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                 company={company}
                 user={user}
                 jobs={jobs}
-                candidates={candidates}
-                candidatesError={candidatesError}
-                topTalents={topTalents}
-                topTalentsError={topTalentsError}
-                demandProfile={demandProfile}
+                canSeeCandidates={isCompanyApproved}
                 token={token}
                 goToTab={goToTab}
                 onViewApplications={(job) => {
@@ -430,16 +393,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
             )}
 
             {activeTab === 'candidates' && (
-              <CandidatesPage
-                candidates={candidates}
-                loadError={candidatesError}
-                topTalents={topTalents}
-                topTalentsError={topTalentsError}
-                jobs={jobs}
-                token={token}
-                setAlertConfig={setAlertConfig}
-                onRetry={() => fetchRecruiterData()}
-              />
+              <CandidatesPage jobs={jobs} token={token} setAlertConfig={setAlertConfig} />
             )}
 
             {activeTab === 'post-job' && (
@@ -462,7 +416,6 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                 onSelectGig={setSelectedGigId}
                 user={user}
                 company={company}
-                candidates={candidates}
                 token={token}
                 setAlertConfig={setAlertConfig}
               />

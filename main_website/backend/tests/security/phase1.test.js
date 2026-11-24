@@ -149,9 +149,13 @@ test('recruiters see contact details only for candidates who applied to their co
   const job = await prisma.job.create({ data: { companyId: company.id, title: 'Dev', description: 'x', requirements: [] } });
   await prisma.application.create({ data: { jobId: job.id, studentId: applicant.profile.id } });
 
-  const res = fakeRes();
-  await recruiter.getCandidates({ user }, res);
-  const byName = Object.fromEntries(res.body.map((p) => [p.name, p]));
+  const detail = async (candidateId) => {
+    const res = fakeRes();
+    await recruiter.getCandidateDetail({ user, params: { candidateId } }, res);
+    assert.strictEqual(res.statusCode, 200);
+    return res.body;
+  };
+  const byName = { Applicant: await detail(applicant.profile.id), Stranger: await detail(stranger.user.id) };
   assert.strictEqual(byName.Applicant.phone, '9999999999');
   assert.strictEqual(byName.Applicant.email, applicant.user.email);
   for (const field of ['phone', 'dob', 'email', 'nationality', 'gender']) {

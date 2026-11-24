@@ -15,6 +15,20 @@ module.exports = {
       maxDelayMs: parseInt(process.env.AUTH_BACKOFF_MAX_DELAY_MS) || 15 * 60 * 1000 // Max lock 15 minutes
     }
   },
+  // Routes that send an email (sign-up code, code resend, password reset), counted together per
+  // network address, so one machine can't make us mail hundreds of addresses and use up the
+  // SMTP quota. Each address also has its own limits in the database (auth/services).
+  // A campus signing up together shares one address: raise this for a placement drive.
+  email: {
+    windowMs: parseInt(process.env.RATE_LIMIT_EMAIL_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+    maxRequests: parseInt(process.env.RATE_LIMIT_EMAIL_MAX_REQUESTS) || 50,
+    bucket: 'email-send'
+  },
+  // Costly actions per signed-in user: starting a skill test, creating a payment order.
+  costly: {
+    windowMs: parseInt(process.env.RATE_LIMIT_COSTLY_WINDOW_MS) || 60 * 60 * 1000, // 1 hour
+    maxRequests: parseInt(process.env.RATE_LIMIT_COSTLY_MAX_REQUESTS) || 30
+  },
   // Moderate limits (Public / future general endpoints)
   moderate: {
     windowMs: parseInt(process.env.RATE_LIMIT_MODERATE_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes

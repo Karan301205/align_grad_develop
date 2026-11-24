@@ -40,8 +40,11 @@ export async function generateResumePdfBlob(element) {
   return pdf.output('blob');
 }
 
-export async function openResumePdfInNewTab(element, title = 'Candidate Resume') {
-  // Pre-open new tab synchronously on click to prevent browser popup blockers
+/**
+ * Opens a tab showing "Generating Resume PDF…". Call it synchronously in the click handler,
+ * before any await, or the browser's pop-up blocker refuses the tab.
+ */
+export function openPendingResumeTab(title = 'Candidate Resume') {
   const newTab = window.open('about:blank', '_blank');
   if (newTab) {
     try {
@@ -64,8 +67,20 @@ export async function openResumePdfInNewTab(element, title = 'Candidate Resume')
         </html>
       `);
       newTab.document.close();
-    } catch (_) {}
+    } catch {
+      // The "generating" message is a nicety; the PDF still replaces the tab.
+    }
   }
+  return newTab;
+}
+
+/**
+ * Builds the PDF from `element` and shows it in a new tab. Pass `pendingTab` (from
+ * openPendingResumeTab) when something async had to happen first, such as loading the profile.
+ */
+export async function openResumePdfInNewTab(element, title = 'Candidate Resume', pendingTab = undefined) {
+  // Pre-open new tab synchronously on click to prevent browser popup blockers
+  const newTab = pendingTab === undefined ? openPendingResumeTab(title) : pendingTab;
 
   try {
     const blob = await generateResumePdfBlob(element);

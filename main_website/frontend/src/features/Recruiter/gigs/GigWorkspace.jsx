@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Clock, MessageSquare, Paperclip, Plus, Search, Users, Wallet } from 'lucide-react';
 import { SERVER_MESSAGE, apiFetch, userMessage } from '../../../services/apiClient';
 import CandidateProfileDrawer from '../components/CandidateProfileDrawer';
+import { fetchCandidateDetail } from '../candidates/useCandidates';
 import { Spinner } from '../components/AccountControls';
 import { MUTED, PAGE_GLOW, SECONDARY_BUTTON } from '../components/accountStyles';
 import Dialog, { ConfirmDialog } from '../jobs/components/Dialog';
@@ -201,7 +202,7 @@ function BriefDialog({ gig, onClose }) {
  * Data: GET /gigs/:id (re-read every 15 s while the tab is visible) and the chat
  * endpoints through GigChat.
  */
-export default function GigWorkspace({ gigs, selectedId, onSelect, onBack, onNew, onEdit, onListChanged, user, candidates = [], token, setAlertConfig }) {
+export default function GigWorkspace({ gigs, selectedId, onSelect, onBack, onNew, onEdit, onListChanged, user, token, setAlertConfig }) {
   const [details, setDetails] = useState({ id: null, gig: null, error: null });
   const [tab, setTab] = useState('messages');
   const [partnerFor, setPartnerFor] = useState({ gigId: null, id: null });
@@ -313,10 +314,14 @@ export default function GigWorkspace({ gigs, selectedId, onSelect, onBack, onNew
     }
   };
 
+  // Shows what the pitch carries at once, then the full profile (GET /recruiter/candidates/:id,
+  // a profile or user id) when it arrives.
   const openProfile = (candidateId) => {
-    const full = candidates.find((c) => c.userId === candidateId || c.id === candidateId);
     const person = personFor(gig, candidateId);
-    setProfile(full || { id: candidateId, name: person.name, username: person.username, profilePic: person.avatar, bio: person.bio });
+    setProfile({ id: candidateId, name: person.name, username: person.username, profilePic: person.avatar, bio: person.bio });
+    fetchCandidateDetail(token, candidateId)
+      .then((full) => setProfile((current) => (current && current.id === candidateId ? full : current)))
+      .catch((err) => console.error('[gigs] Could not load the full profile:', err));
   };
 
   const menu = gig

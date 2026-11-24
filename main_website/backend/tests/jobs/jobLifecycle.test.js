@@ -146,3 +146,33 @@ test('retention slims old jobs, deletes older ones, and keeps a job someone was 
   // Running again changes nothing.
   assert.deepStrictEqual(await runJobRetention(prisma, { now, archiveAfterDays: 30, deleteAfterDays: 365 }), { slimmed: 0, deleted: 0, retained: 0 });
 });
+
+test('the candidate job list is cached, cleared when a recruiter posts, and leaves out expired jobs', async () => {
+  const { invalidate } = require('../../src/shared/cache/ttlCache');
+  const { user } = await makeRecruiter({ quota: 5 });
+  const candidate = await prisma.user.create({ data: { email: `list${seq}@x.example`, password: 'x', role: 'STUDENT' } });
+  await prisma.profile.create({ data: { userId: candidate.id, name: 'Lister', skills: [] } });
+  const list = async () => {
+    const res = fakeRes();
+    await student.getJobs({ user: { id: candidate.id, role: 'STUDENT' } }, res);
+    assert.strictEqual(res.statusCode, 200);
+    return res.body.map((job) => job.title);
+  };
+
+  invalidate();
+  const before = await list();
+  await post(user, { title: 'Posted through the app' });
+  assert.ok((await list()).includes('Posted through the app'), 'posting clears the cache');
+
+  const { company } = await makeRecruiter();
+  await prisma.job.create({ data: { companyId: company.id, title: 'Written straight to the DB', description: 'x', expiresAt: new Date(Date.now() + DAY) } });
+  assert.ok(!(await list()).includes('Written straight to the DB'), 'cached for a moment');
+  invalidate('jobs:');
+  const after = await list();
+  assert.ok(after.includes('Written straight to the DB'));
+
+  await prisma.job.create({ data: { companyId: company.id, title: 'Already over', description: 'x', expiresAt: new Date(Date.now() - DAY) } });
+  invalidate('jobs:');
+  assert.ok(!(await list()).includes('Already over'));
+  assert.ok(after.length > before.length);
+});

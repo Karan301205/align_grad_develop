@@ -4,10 +4,11 @@ const authMiddleware = require('../../middleware/auth');
 const { relaxedLimit } = require('../../middleware/rateLimiter');
 const validate = require('../../middleware/validate');
 const uploadController = require('./upload.controller');
-const { requestUploadUrlSchema } = require('./upload.validator');
+const { requestUploadUrlSchema, verifyUploadSchema } = require('./upload.validator');
 
 // File Upload Routes
 router.post('/request-url', authMiddleware, relaxedLimit, validate(requestUploadUrlSchema), uploadController.requestUploadUrl);
 router.put('/secure-put', authMiddleware, uploadController.securePut);
+router.post('/verify', authMiddleware, relaxedLimit, validate(verifyUploadSchema), uploadController.verifyUpload);
 
 module.exports = router;

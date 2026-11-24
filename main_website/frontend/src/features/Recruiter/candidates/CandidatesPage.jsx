@@ -1,19 +1,20 @@
-import { useMemo, useState } from 'react';
-import { Video, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Loader2, Video, X } from 'lucide-react';
 import ResumePdfTemplate from '../../../components/ResumePdfTemplate';
-import { openResumePdfInNewTab } from '../../../services/resumePdf';
+import { openPendingResumeTab, openResumePdfInNewTab } from '../../../services/resumePdf';
 import { recordViewedCandidate } from '../../../utils/recentCandidateViews';
 import { ACCOUNT_PAGE, CARD, MUTED, PAGE_TITLE, SECONDARY_BUTTON } from '../components/accountStyles';
-import useEligiblePool from '../postJob/useEligiblePool';
-import { candidateId, comparableJobs, educationOptions, externalResumeUrl, skillName } from './candidateData';
+import { candidateId, comparableJobs, externalResumeUrl } from './candidateData';
 import useCandidateFilters from './useCandidateFilters';
+import { useCandidateFacets, useCandidateProfiles, useCandidateSearch } from './useCandidates';
 import CandidateProfileDrawer from '../components/CandidateProfileDrawer';
 import FiltersCard from './components/FiltersCard';
 import CandidateCard from './components/CandidateCard';
 import CandidateDossier from './components/CandidateDossier';
 
 const PAGE_SIZE = 20;
-const NO_BARS = [];
+const NO_EDUCATION = { colleges: [], degrees: [], years: [] };
+const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
 function Notice({ tone = 'error', children, action }) {
   const tones = { error: 'border-[#FECACA] bg-[#FEF2F2] text-[#7F1D1D]', info: 'border-[#E4E6EA] bg-white text-[#334155]' };
@@ -47,54 +48,51 @@ function ProjectVideo({ video, onClose }) {
 }
 
 /**
- * Candidates (design: design/Candidates — talent search matched to a job-html), keeping
- * everything the previous talent directory did. Data: candidates and the recommended
- * order from the layout (GET /recruiter/candidates, /recruiter/top-talents), the
- * recruiter's jobs for "Compare with job", and which bars have a skill test from
- * POST /recruiter/jobs/eligible-count.
+ * Candidates (design: design/Candidates — talent search matched to a job-html). Search, filters,
+ * sort, the recommended order and "Compare with job" run on the server
+ * (POST /recruiter/candidates/search), which returns 20 cards at a time; "Load more" asks for the
+ * next 20. The selected candidate's full profile comes from GET /recruiter/candidates/:id, and the
+ * filter menus from GET /recruiter/candidates/facets. The recruiter's jobs come from the layout.
  */
-export default function CandidatesPage({ candidates = [], loadError, topTalents, topTalentsError, jobs, token, setAlertConfig, onRetry }) {
+export default function CandidatesPage({ jobs, token, setAlertConfig }) {
   const [compareJobId, setCompareJobId] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  const [page, setPage] = useState({ key: '', count: PAGE_SIZE });
   const [generatingId, setGeneratingId] = useState(null);
+  const [resumeCandidate, setResumeCandidate] = useState(null);
   const [projectVideo, setProjectVideo] = useState(null);
   const [profileCandidate, setProfileCandidate] = useState(null);
 
   const compareJobs = useMemo(() => comparableJobs(jobs), [jobs]);
   const job = compareJobs.find((item) => item.id === compareJobId) || null;
-  const pool = useEligiblePool(token, job ? job.requirements : NO_BARS);
-  const comparison = useMemo(() => {
-    if (!job) return null;
-    return { job, gatesBySkill: new Map((pool.data?.requirements || []).map((req) => [req.skillName, req.gates])) };
-  }, [job, pool.data]);
-  const filter = useCandidateFilters({ candidates, topTalents, comparison });
+  const filter = useCandidateFilters({ compareJobId: job ? job.id : '' });
+  const request = useMemo(() => ({ ...filter.request, pageSize: PAGE_SIZE }), [filter.request]);
+  const search = useCandidateSearch(token, request);
+  const facets = useCandidateFacets(token);
+  const profiles = useCandidateProfiles(token);
 
-  const { skillCounts, popularSkills } = useMemo(() => {
-    const counts = {};
-    candidates.forEach((cand) => (cand.skills || []).forEach((skill) => {
-      const name = skillName(skill);
-      if (name) counts[name] = (counts[name] || 0) + 1;
-    }));
-    return { skillCounts: counts, popularSkills: Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, 8) };
-  }, [candidates]);
-  const education = useMemo(() => educationOptions(candidates), [candidates]);
-
-  // "Load more": the page restarts whenever the filters or the compared job change.
-  const pageKey = JSON.stringify([filter.filters, compareJobId]);
-  const visibleCount = page.key === pageKey ? page.count : PAGE_SIZE;
-  const results = filter.results;
-  const visible = results.slice(0, visibleCount);
+  const results = search.items;
+  const totalCount = facets.data?.total ?? 0;
   const active = results.find((cand) => candidateId(cand) === selectedId) || results[0] || null;
-  const meetsCount = job ? results.filter((cand) => cand.comparison?.meetsAll).length : 0;
+  const activeId = active ? candidateId(active) : null;
+  const activeEntry = activeId ? profiles.entries[activeId] : null;
+  // The panel shows the full profile, with this search's comparison bars and match %.
+  const activeProfile = activeEntry?.data ? { ...activeEntry.data, comparison: active.comparison, matchScore: active.matchScore } : null;
+  const isRecommendedOrder = filter.filters.sort === 'recommended' && filter.isUnfiltered && search.recommended;
+  const loading = search.status === 'loading';
+
+  const { load: loadProfile } = profiles;
+  useEffect(() => {
+    if (activeId) loadProfile(activeId).catch(() => {});
+  }, [activeId, loadProfile]);
 
   const select = (cand) => {
     setSelectedId(candidateId(cand));
     recordViewedCandidate(cand);
   };
 
-  // Drive/Docs/Dropbox links open directly; otherwise the standard resume is built from the profile.
+  // Drive/Docs/Dropbox links open directly; otherwise the standard resume is built from the full
+  // profile. The tab opens on the click itself (pop-up blockers), then the profile loads.
   const openResume = async (event, cand) => {
     event?.stopPropagation?.();
     const external = externalResumeUrl(cand);
@@ -102,20 +100,28 @@ export default function CandidatesPage({ candidates = [], loadError, topTalents,
       window.open(external, '_blank', 'noopener,noreferrer');
       return;
     }
-    const element = document.getElementById(`candidates-page-resume-${candidateId(cand)}`);
-    if (!element) {
-      setAlertConfig({ message: 'The resume is still being prepared. Please try again in a moment.', type: 'warning' });
-      return;
-    }
-    setGeneratingId(candidateId(cand));
+    const id = candidateId(cand);
+    const tab = openPendingResumeTab(`${cand.name || 'Candidate'}_Resume`);
+    setGeneratingId(id);
     try {
-      await openResumePdfInNewTab(element, `${cand.name || 'Candidate'}_Resume`);
+      const full = await loadProfile(id);
+      setResumeCandidate(full);
+      await nextFrame();
+      const element = document.getElementById(`candidates-page-resume-${id}`);
+      if (!element) throw new Error('The resume layout was not ready.');
+      await openResumePdfInNewTab(element, `${cand.name || 'Candidate'}_Resume`, tab);
     } catch (err) {
+      if (tab && !tab.closed) tab.close();
       console.error('[resume] Could not open the resume PDF:', err);
       setAlertConfig({ message: 'Couldn’t open the resume. Allow pop-ups for AlignGrad and try again.', type: 'error' });
     } finally {
       setGeneratingId(null);
+      setResumeCandidate(null);
     }
+  };
+
+  const viewProfile = () => {
+    if (activeProfile) setProfileCandidate(activeProfile);
   };
 
   return (
@@ -130,35 +136,42 @@ export default function CandidatesPage({ candidates = [], loadError, topTalents,
 
         <FiltersCard
           filter={filter}
-          skillCounts={skillCounts}
-          popularSkills={popularSkills}
-          education={education}
+          skillCounts={facets.data?.skillCounts || {}}
+          popularSkills={facets.data?.popularSkills || []}
+          education={facets.data?.education || NO_EDUCATION}
           jobs={compareJobs}
           compareJobId={compareJobId}
           onCompareJob={setCompareJobId}
           showAdvanced={showAdvanced}
           onToggleAdvanced={() => setShowAdvanced((open) => !open)}
-          shownCount={results.length}
-          totalCount={candidates.length}
+          shownCount={search.total}
+          totalCount={totalCount}
         />
 
-        {loadError ? (
-          <Notice action={<button type="button" onClick={onRetry} className={`${SECONDARY_BUTTON} h-9 px-3`}>Try again</button>}>
-            Couldn’t load candidates. {loadError}
+        {facets.status === 'error' && (
+          <Notice tone="info" action={<button type="button" onClick={facets.retry} className={`${SECONDARY_BUTTON} h-9 px-3`}>Try again</button>}>
+            Couldn’t load the skill and college lists for the filters. {facets.error}
+          </Notice>
+        )}
+
+        {search.status === 'error' ? (
+          <Notice action={<button type="button" onClick={search.retry} className={`${SECONDARY_BUTTON} h-9 px-3`}>Try again</button>}>
+            Couldn’t load candidates. {search.error}
           </Notice>
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-              <span className="text-[15px]">
+              <span className="inline-flex items-center gap-2 text-[15px]">
+                {loading && <Loader2 className="size-4 animate-spin text-[#0F7A55]" aria-label="Updating" />}
                 <strong className="font-bold">
-                  {results.length.toLocaleString('en-IN')} candidate{results.length === 1 ? '' : 's'}
+                  {search.total.toLocaleString('en-IN')} candidate{search.total === 1 ? '' : 's'}
                 </strong>{' '}
                 <span className={MUTED}>
                   {job
                     ? filter.filters.onlyMeets
                       ? `meet all bars for ${job.title}`
-                      : `compared with ${job.title} · ${meetsCount.toLocaleString('en-IN')} meet all bars`
-                    : filter.isRecommendedOrder
+                      : `compared with ${job.title} · ${(search.meetsCount ?? 0).toLocaleString('en-IN')} meet all bars`
+                    : isRecommendedOrder
                       ? 'in recommended order for your active jobs'
                       : ''}
                 </span>
@@ -190,23 +203,25 @@ export default function CandidatesPage({ candidates = [], loadError, topTalents,
               )}
             </div>
 
-            {job && pool.status === 'error' && (
-              <Notice action={<button type="button" onClick={pool.retry} className={`${SECONDARY_BUTTON} h-9 px-3`}>Try again</button>}>
-                Couldn’t check which skills have a test ({pool.error}). Until it loads, every bar counts.
-              </Notice>
-            )}
-            {!job && topTalentsError && <Notice tone="info">Recommended order isn’t available right now: {topTalentsError}</Notice>}
 
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
-              <div className="flex w-full min-w-0 flex-col gap-2 lg:w-[360px] lg:shrink-0 xl:w-[400px]">
+              <div className={`flex w-full min-w-0 flex-col gap-2 transition-opacity lg:w-[360px] lg:shrink-0 xl:w-[400px] ${loading && results.length > 0 ? 'opacity-60' : ''}`} aria-busy={loading}>
                 {results.length === 0 ? (
                   <div className={`${CARD} flex flex-col items-center gap-1 px-6 py-10 text-center`}>
-                    <span className="font-semibold">No candidates found</span>
-                    <span className={MUTED}>{candidates.length === 0 ? 'No candidate profiles yet.' : 'Try fewer filters or a different search.'}</span>
+                    {loading ? (
+                      <span className={`inline-flex items-center gap-2 ${MUTED}`}>
+                        <Loader2 className="size-4 animate-spin" aria-hidden="true" /> Loading candidates…
+                      </span>
+                    ) : (
+                      <>
+                        <span className="font-semibold">No candidates found</span>
+                        <span className={MUTED}>{facets.status === 'ready' && totalCount === 0 ? 'No candidate profiles yet.' : 'Try fewer filters or a different search.'}</span>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <ul aria-label="Candidates" className="m-0 flex list-none flex-col gap-2 p-0">
-                    {visible.map((cand) => (
+                    {results.map((cand) => (
                       <CandidateCard
                         key={candidateId(cand)}
                         cand={cand}
@@ -219,25 +234,38 @@ export default function CandidatesPage({ candidates = [], loadError, topTalents,
                     ))}
                   </ul>
                 )}
-                {results.length > visibleCount && (
-                  <button type="button" onClick={() => setPage({ key: pageKey, count: visibleCount + PAGE_SIZE })} className={`${SECONDARY_BUTTON} h-11`}>
-                    Load more ({(results.length - visibleCount).toLocaleString('en-IN')} left)
+                {search.hasMore && (
+                  <button type="button" onClick={search.loadMore} disabled={search.loadingMore} className={`${SECONDARY_BUTTON} h-11 disabled:opacity-60`}>
+                    {search.loadingMore ? 'Loading…' : `Load more (${(search.total - results.length).toLocaleString('en-IN')} left)`}
                   </button>
+                )}
+                {search.moreError && (
+                  <Notice action={<button type="button" onClick={search.loadMore} className={`${SECONDARY_BUTTON} h-9 px-3`}>Try again</button>}>
+                    Couldn’t load more candidates. {search.moreError}
+                  </Notice>
                 )}
               </div>
 
               <div className="min-w-0 flex-1 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:rounded-[12px]">
-                <CandidateDossier cand={active} job={job} onViewProfile={() => setProfileCandidate(active)} onPlayProjectVideo={setProjectVideo} />
+                {active && activeEntry?.status === 'error' ? (
+                  <Notice action={<button type="button" onClick={() => loadProfile(activeId).catch(() => {})} className={`${SECONDARY_BUTTON} h-9 px-3`}>Try again</button>}>
+                    Couldn’t load {active.name ? `${active.name}’s` : 'this'} profile. {activeEntry.error}
+                  </Notice>
+                ) : active && !activeProfile ? (
+                  <section aria-label="Selected candidate" aria-busy="true" className={`${CARD} flex items-center justify-center gap-2 p-10 ${MUTED}`}>
+                    <Loader2 className="size-4 animate-spin" aria-hidden="true" /> Loading {active.name ? `${active.name}’s` : 'the'} profile…
+                  </section>
+                ) : (
+                  <CandidateDossier cand={activeProfile} job={job} onViewProfile={viewProfile} onPlayProjectVideo={setProjectVideo} />
+                )}
               </div>
             </div>
           </>
         )}
       </div>
 
-      {/* Off-screen resume layouts for the cards on screen, used to build the PDF. */}
-      {visible.map((cand) => (
-        <ResumePdfTemplate key={`template-${candidateId(cand)}`} id={`candidates-page-resume-${candidateId(cand)}`} candidate={cand} />
-      ))}
+      {/* Off-screen resume layout for the resume being built (full profile), used to make the PDF. */}
+      {resumeCandidate && <ResumePdfTemplate id={`candidates-page-resume-${candidateId(resumeCandidate)}`} candidate={resumeCandidate} />}
 
       {projectVideo && <ProjectVideo video={projectVideo} onClose={() => setProjectVideo(null)} />}
 

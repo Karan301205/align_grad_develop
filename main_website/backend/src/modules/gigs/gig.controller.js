@@ -2,24 +2,13 @@ const { prisma } = require('../../infrastructure/database');
 const { buildStudentSkillMap, getRequirementStatuses } = require('../skills');
 const { toCandidateQuestions } = require('../jobs/screeningQuestions');
 const { gigSkillGaps } = require('../jobs/eligiblePool');
+const { getQuizSkills } = require('../skills/quizSkills');
 const { identityIds } = require('./gigIdentity');
 const { notifyGigChat } = require('./gigRealtime');
 const { offerForRole } = require('../payments/plans');
 
-// Skills that have an active test. Gig pages are polled while open, so the set is
-// cached for a minute instead of scanning the question bank on every poll.
-const QUIZ_SKILLS_TTL_MS = 60 * 1000;
-let quizSkillsCache = { at: 0, skills: null };
-async function quizSkills() {
-  if (quizSkillsCache.skills && Date.now() - quizSkillsCache.at < QUIZ_SKILLS_TTL_MS) return quizSkillsCache.skills;
-  const activeQuestions = await prisma.question.findMany({
-    where: { status: 'ACTIVE' },
-    select: { skillName: true },
-    distinct: ['skillName']
-  });
-  quizSkillsCache = { at: Date.now(), skills: new Set(activeQuestions.map(q => q.skillName.toLowerCase())) };
-  return quizSkillsCache.skills;
-}
+// Skills that have an active test (cached for a minute; gig pages are polled while open).
+const quizSkills = () => getQuizSkills();
 
 // The skill bars of a gig (older gigs only list skill names, all at gig.minRating).
 const gigRequirements = (gig) => ((gig.requirements && gig.requirements.length > 0)
@@ -572,6 +561,8 @@ exports.applyToGig = async (req, res) => {
     
     res.status(201).json(ownPitch(applicant));
   } catch (err) {
+    // The (gigId, candidateId) unique rule caught a second pitch sent at the same moment.
+    if (err?.code === 'P2002') return res.status(400).json({ error: 'You have already applied to this gig' });
     console.error('Error applying to gig:', err);
     res.status(500).json({ error: 'Failed to submit application to gig' });
   } finally {

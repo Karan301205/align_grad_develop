@@ -3,6 +3,7 @@ const uploadConfig = require('../../config/upload.config');
 const { validateMagicBytes } = require('../../shared/utils/fileSignature');
 const { identityIds } = require('../gigs/gigIdentity');
 const { isOwnedKey } = require('./ownership');
+const { VIDEO_FILE_TYPES, checkUploadedFile } = require('./directUpload');
 
 /**
  * Handles requesting a pre-signed upload URL. Redirects to local server proxy to intercept file body.
@@ -15,9 +16,10 @@ exports.requestUploadUrl = async (req, res) => {
     return res.status(400).json({ error: 'Missing required parameters: fileType, fileName, contentType' });
   }
 
-  const allowedTypes = ['resume', 'video', 'doc', 'image'];
+  // Videos upload straight to S3 (POST /student/video-upload-url, then POST /upload/verify).
+  const allowedTypes = ['resume', 'doc', 'image'];
   if (!allowedTypes.includes(fileType)) {
-    return res.status(400).json({ error: 'Invalid fileType. Must be one of: resume, video, doc, image' });
+    return res.status(400).json({ error: 'Invalid fileType. Must be one of: resume, doc, image' });
   }
 
   try {
@@ -27,8 +29,6 @@ exports.requestUploadUrl = async (req, res) => {
 
     if (fileType === 'resume') {
       key = `resumes/${userId}/resume_${Date.now()}.${ext}`;
-    } else if (fileType === 'video') {
-      key = `videos/${userId}/intro_${Date.now()}.${ext}`;
     } else if (fileType === 'doc') {
       key = `docs/${userId}/doc_${Date.now()}.${ext}`;
     } else if (fileType === 'image') {
@@ -59,6 +59,10 @@ exports.securePut = async (req, res) => {
 
   if (!fileType || !key || !contentType) {
     return res.status(400).json({ error: 'Missing query parameters: fileType, key, contentType' });
+  }
+  // This proxy buffers the file in memory, so it only takes the small types (see src/index.js).
+  if (VIDEO_FILE_TYPES.includes(fileType) || !uploadConfig.limits[fileType]) {
+    return res.status(400).json({ error: 'This file type can’t be uploaded here.' });
   }
 
   // The file must go into the caller's own folder (ISSUES U1). Student videos use the profile id.
@@ -103,5 +107,25 @@ exports.securePut = async (req, res) => {
   } catch (err) {
     console.error('Error uploading secure file to S3:', err);
     res.status(500).json({ error: 'Internal server error while storing file in S3.' });
+  }
+};
+
+/**
+ * POST /upload/verify — after the browser put a video straight into S3: checks the stored
+ * file's size, type and signature, deletes it if it fails, and returns its public URL.
+ */
+exports.verifyUpload = async (req, res) => {
+  const { key, fileType } = req.body;
+  try {
+    const ownerIds = await identityIds(req.user);
+    if (!key.startsWith('videos/') || !isOwnedKey(key, ownerIds)) {
+      return res.status(403).json({ error: 'You can only check files in your own folder.' });
+    }
+    const problem = await checkUploadedFile(key, fileType);
+    if (problem) return res.status(problem.status).json({ error: problem.error });
+    res.json({ ok: true, publicUrl: getPublicUrl(key) });
+  } catch (err) {
+    console.error('[upload] Could not check an uploaded video (the storage user needs s3:GetObject on videos/):', err);
+    res.status(500).json({ error: 'We couldn’t check the uploaded video. Please try again.' });
   }
 };

@@ -41,6 +41,11 @@ const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '5002', 10),
   DATABASE_URL: process.env.DATABASE_URL || '',
+  // Connection pool (src/config/database.js): most open connections and seconds to wait for one.
+  // The admin portal connects straight to Postgres (it sets search_path per session, which
+  // PgBouncer's transaction mode doesn't keep), so count DB_POOL_MAX in the connection budget.
+  DB_POOL_MAX: parseInt(process.env.DB_POOL_MAX, 10) || 10,
+  DB_POOL_TIMEOUT: parseInt(process.env.DB_POOL_TIMEOUT, 10) || 10,
   JWT_SECRET: process.env.JWT_SECRET,
   ADMIN_FRONTEND_URL: process.env.ADMIN_FRONTEND_URL || '',
   REDIS_URL: process.env.REDIS_URL || '',

@@ -84,6 +84,26 @@ model Profile {
   preferredWorkTypes String[]      @default([])
   preferredLocations String[]      @default([])
   openToAnyLocation  Boolean?      @default(false)
+  candidateSkills    CandidateSkill[]
+}
+
+// One row per candidate skill, for recruiter search and ranking (indexed, unlike the
+// skills JSON). Written ONLY by the database trigger candidate_skills_sync (migration
+// 20261124130000_candidate_skills) whenever Profile.skills changes, so it can't drift
+// from the profile. Never write it from code.
+//   normKey: the name lower-cased with punctuation folded (same rule as the skill registry's
+//            normalizeToken), so "Next.js" and "next js" share a key
+//   score:   verifiedRating when above 0, otherwise the self rating
+model CandidateSkill {
+  profileId      String
+  profile        Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  normKey        String
+  name           String
+  score          Int     @default(0)
+  verifiedRating Int     @default(0)
+
+  @@id([profileId, normKey])
+  @@index([normKey, score])
 }
 
 model Company {
@@ -175,6 +195,7 @@ model Application {
 
   @@index([jobId])
   @@index([studentId])
+  @@unique([jobId, studentId]) // one application per candidate per job, even on a double-click
 }
 
 model TestAttempt {
@@ -231,6 +252,7 @@ model GigApplicant {
 
   @@index([gigId])
   @@index([candidateId])
+  @@unique([gigId, candidateId]) // one pitch per candidate per gig, even on a double-click
 }
 
 model GigMessage {

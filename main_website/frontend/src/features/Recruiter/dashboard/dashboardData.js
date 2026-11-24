@@ -1,6 +1,6 @@
 // Pure helpers for the recruiter Home dashboard. Everything is derived from the
-// layout's data: jobs (GET /recruiter/jobs, with applications), candidates and
-// top talents (GET /recruiter/candidates, /recruiter/top-talents).
+// layout's jobs (GET /recruiter/jobs, with applications). The dashboard's candidate lists come
+// from POST /recruiter/candidates/search, asked for by DashboardPage itself.
 import { calculateHiringProgressSnapshot, getApplicationStage } from '../../../utils/hiringProgress';
 
 const DAY_MS = 24 * 60 * 60 * 1000;

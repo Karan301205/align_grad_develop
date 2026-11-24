@@ -25,8 +25,8 @@ function buildPoolConfig(databaseUrl) {
 
   const config = {
     connectionString: url.toString(),
-    max: 10,
-    connectionTimeoutMillis: 10000,
+    max: env.DB_POOL_MAX,
+    connectionTimeoutMillis: env.DB_POOL_TIMEOUT * 1000,
     idleTimeoutMillis: 30000
   };
   if (schema) {

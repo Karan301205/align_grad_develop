@@ -10,6 +10,7 @@
 const { PrismaClient } = require('@prisma/client');
 const dotenv = require('dotenv');
 const { ensureDatabaseUrl } = require('../../config/databaseUrl');
+const { withPoolSettings } = require('./poolSettings');
 
 dotenv.config();
 ensureDatabaseUrl(); // build DATABASE_URL from the DB_* parts before PrismaClient reads it
@@ -20,7 +21,10 @@ if (!useTestStore && !process.env.DATABASE_URL) {
   throw new Error('[database] DATABASE_URL is not configured. Set DB_HOST, DB_NAME, DB_USER and DB_PASSWORD (DB_PORT, DB_SCHEMA optional) in main_website/backend/.env.');
 }
 
-const client = useTestStore ? require('./mock/mockClient').mockClient : new PrismaClient();
+// Pool size, wait time and the optional PgBouncer port come from env (./poolSettings.js).
+const client = useTestStore
+  ? require('./mock/mockClient').mockClient
+  : new PrismaClient({ datasources: { db: { url: withPoolSettings(process.env.DATABASE_URL) } } });
 
 /**
  * Startup check. Logs whether PostgreSQL answers; a failure is reported, not hidden,

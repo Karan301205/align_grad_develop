@@ -1,7 +1,8 @@
 const { prisma } = require('../../infrastructure/database');
 const { expiryFrom, isJobOpen } = require('../jobs/jobLifecycle.service');
 const { deleteS3ObjectFromUrl } = require('../../services/fileCleanup.service');
-const { getTopMatchingTalents } = require('../skills/skillMatching.service');
+const { buildRecruiterDemandProfile } = require('../skills/skillMatching.service');
+const { searchCandidates: searchCandidateCards, candidateFacets } = require('./candidateSearch.service');
 const { redactCandidateContact } = require('./candidateContact');
 const { toCandidateQuestions } = require('../jobs/screeningQuestions');
 const { rankProjectsByRequirements } = require('../skills/projectRelevance.service');
@@ -21,6 +22,8 @@ const { randomUUID } = require('crypto');
 const { normalizeQuestions } = require('../jobs/screeningQuestions');
 const { PLANS, formatInr } = require('../payments/plans');
 const { summarizePool } = require('../jobs/eligiblePool');
+const { cached, invalidate } = require('../../shared/cache/ttlCache');
+const { getQuizSkills } = require('../skills/quizSkills');
 
 const RECRUITER_PACK = PLANS.RECRUITER_5_PACK;
 
@@ -445,6 +448,7 @@ exports.postJob = async (req, res) => {
       job = await createJob(prisma);
     }
 
+    invalidate('jobs:'); // candidates' cached job list (student.controller openJobsForCandidates)
     res.status(201).json(job);
   } catch (err) {
     console.error(err);
@@ -454,17 +458,14 @@ exports.postJob = async (req, res) => {
 
 // Post-a-job sidebar: how many candidates meet the draft's skill bars today, which
 // bars actually gate applying, and which single one-point relaxation adds the most.
+// Every candidate's skills, read once a minute instead of on each draft change (the form asks
+// as the recruiter edits bars). A count up to a minute old is fine for this sidebar.
+const CANDIDATE_SKILLS_TTL_MS = 60 * 1000;
+const candidateSkills = () => cached('profiles:skills', CANDIDATE_SKILLS_TTL_MS, () => prisma.profile.findMany({ select: { skills: true } }));
+
 exports.getEligibleCandidateCount = async (req, res) => {
   try {
-    const [profiles, activeQuestions] = await Promise.all([
-      prisma.profile.findMany({ select: { skills: true } }),
-      prisma.question.findMany({
-        where: { status: 'ACTIVE' },
-        select: { skillName: true },
-        distinct: ['skillName']
-      })
-    ]);
-    const quizSkills = new Set(activeQuestions.map((q) => q.skillName.toLowerCase()));
+    const [profiles, quizSkills] = await Promise.all([candidateSkills(), getQuizSkills()]);
     res.json(summarizePool(req.body.requirements, profiles, quizSkills, { forGig: req.body.forGig === true }));
   } catch (err) {
     console.error(err);
@@ -522,17 +523,75 @@ exports.getCompanyJobs = async (req, res) => {
   }
 };
 
-exports.getCandidates = async (req, res) => {
+// Candidates for the recruiter's Candidates page, dashboard and gig workspace: one page of
+// cards from the database (candidateSearch.service.js), never the whole pool. Contact details
+// are not on cards; GET /recruiter/candidates/:id gives them only for the company's applicants.
+exports.searchCandidates = async (req, res) => {
   try {
+    const body = req.body;
     const company = await prisma.company.findUnique({ where: { userId: req.user.id } });
-    const [profiles, applicantIds] = await Promise.all([
-      prisma.profile.findMany(),
+    const [jobs, applicantIds, quizSkills] = await Promise.all([
+      company ? prisma.job.findMany({ where: { companyId: company.id } }) : [],
+      body.excludeApplicants ? applicantProfileIdsFor(company?.id) : null,
+      getQuizSkills()
+    ]);
+    let job = null;
+    if (body.compareJobId) {
+      job = jobs.find((item) => item.id === body.compareJobId) || null;
+      if (!job) return res.status(404).json({ error: 'That job isn’t one of yours.' });
+    }
+    // "Recommended": ranked by the skills this company's live jobs and internships ask for.
+    const demand = buildRecruiterDemandProfile(jobs.filter((item) => item.opportunityType !== 'GIG' && isJobOpen(item)));
+    const result = await searchCandidateCards({
+      filters: body,
+      page: body.page,
+      pageSize: body.pageSize,
+      demand,
+      job,
+      quizSkills,
+      ids: body.ids || null,
+      excludeProfileIds: applicantIds ? [...applicantIds] : null,
+      countTotal: body.countTotal
+    });
+    res.json({
+      ...result,
+      page: body.page,
+      pageSize: body.pageSize,
+      hasMore: result.total === null ? result.items.length === body.pageSize : body.page * body.pageSize < result.total,
+      recommended: demand.skillList.length > 0,
+      demand: { totalActiveJobs: demand.totalActiveJobs }
+    });
+  } catch (err) {
+    console.error('[candidates] search failed:', err);
+    res.status(500).json({ error: 'Server error searching candidates' });
+  }
+};
+
+// Filter menus for the Candidates page (skills with counts, colleges, degrees, years, total).
+exports.getCandidateFacets = async (req, res) => {
+  try {
+    res.json(await candidateFacets());
+  } catch (err) {
+    console.error('[candidates] facets failed:', err);
+    res.status(500).json({ error: 'Server error loading candidate filters' });
+  }
+};
+
+// One candidate's full profile (by profile id or user id). Contact details only when the
+// candidate applied to one of this company's jobs (ISSUES A3).
+exports.getCandidateDetail = async (req, res) => {
+  try {
+    const { candidateId } = req.params;
+    const company = await prisma.company.findUnique({ where: { userId: req.user.id } });
+    const [profile, applicantIds] = await Promise.all([
+      prisma.profile.findFirst({ where: { OR: [{ id: candidateId }, { userId: candidateId }] } }),
       applicantProfileIdsFor(company?.id)
     ]);
-    res.json(profiles.map((profile) => redactCandidateContact(profile, applicantIds)));
+    if (!profile) return res.status(404).json({ error: 'Candidate not found' });
+    res.json(redactCandidateContact(profile, applicantIds));
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error fetching candidates' });
+    console.error('[candidates] detail failed:', err);
+    res.status(500).json({ error: 'Server error loading the candidate' });
   }
 };
 
@@ -624,6 +683,7 @@ exports.updateJob = async (req, res) => {
       }
     });
 
+    invalidate('jobs:');
     res.json(updatedJob);
   } catch (err) {
     console.error(err);
@@ -654,6 +714,7 @@ exports.deleteJob = async (req, res) => {
     await prisma.application.deleteMany({ where: { jobId } });
     await prisma.job.delete({ where: { id: jobId } });
 
+    invalidate('jobs:');
     res.json({ message: 'Job deleted successfully' });
   } catch (err) {
     console.error(err);
@@ -751,6 +812,7 @@ exports.toggleJobPause = async (req, res) => {
       }
     });
 
+    invalidate('jobs:');
     res.json(updatedJob);
   } catch (err) {
     console.error('Error toggling job pause status:', err);
@@ -758,37 +820,3 @@ exports.toggleJobPause = async (req, res) => {
   }
 };
 
-exports.getTopMatchingTalents = async (req, res) => {
-  try {
-    const company = await prisma.company.findFirst({
-      where: { OR: [{ userId: req.user.id }, { id: req.user.id }] }
-    });
-    if (!company) {
-      return res.json({
-        demandProfile: { totalActiveJobs: 0, skills: {}, skillList: [] },
-        topTalents: []
-      });
-    }
-
-    const allJobs = await prisma.job.findMany({
-      where: { companyId: company.id }
-    });
-
-    // Only live jobs and internships (not gigs) shape the demand profile.
-    const activeJobs = allJobs.filter((job) => job.opportunityType !== 'GIG' && isJobOpen(job));
-
-    const candidates = await prisma.profile.findMany();
-
-    const limit = req.query.limit ? parseInt(req.query.limit, 10) : 500;
-    const recommendationResult = getTopMatchingTalents(activeJobs, candidates, limit);
-
-    const applicantIds = await applicantProfileIdsFor(company.id);
-    res.json({
-      ...recommendationResult,
-      topTalents: (recommendationResult.topTalents || []).map((talent) => redactCandidateContact(talent, applicantIds))
-    });
-  } catch (err) {
-    console.error('Error computing top matching talents:', err);
-    res.status(500).json({ error: 'Server error retrieving matching talents' });
-  }
-};

@@ -3,6 +3,7 @@ const { Server } = require('socket.io');
 const env = require('../../config/env');
 const { isMock } = require('../../infrastructure/database');
 const { identityIds } = require('./gigIdentity');
+const { corsOrigin } = require('../../config/cors');
 
 // Realtime for gig chat (Socket.IO). The server never pushes message text: when a message
 // is saved it sends a small "chat changed" signal to the two people in that conversation,
@@ -20,8 +21,8 @@ let io = null;
 /** Attaches Socket.IO to the HTTP server. Connections must present the same JWT as the HTTP API. */
 function attachRealtime(httpServer) {
   io = new Server(httpServer, {
-    // The token travels in the handshake, not in a cookie, so any origin may connect (as the HTTP API allows).
-    cors: { origin: true }
+    // Same browser origins as the HTTP API (config/cors.js); the token travels in the handshake.
+    cors: { origin: corsOrigin() }
   });
 
   io.use((socket, next) => {
@@ -63,4 +64,12 @@ function notifyGigChat(message) {
   }
 }
 
-module.exports = { attachRealtime, notifyGigChat, roomFor };
+/** Disconnects every socket and stops accepting new ones (graceful shutdown). */
+async function closeRealtime() {
+  if (!io) return;
+  const closing = io;
+  io = null;
+  await new Promise((resolve) => closing.close(() => resolve()));
+}
+
+module.exports = { attachRealtime, closeRealtime, notifyGigChat, roomFor };

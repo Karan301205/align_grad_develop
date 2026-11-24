@@ -128,7 +128,49 @@ const eligibleCountSchema = {
   })
 };
 
+// Recruiter candidate search (candidateSearch.service.js). Every field is optional; empty
+// strings mean "any". One page of at most 50 cards per request.
+const text = (max) => z.string().trim().max(max).optional().default('');
+const candidateSearchSchema = {
+  body: z.object({
+    q: text(100),
+    skills: z.array(z.object({
+      name: z.string().trim().min(1).max(100),
+      minRating: z.number().int().min(0).max(10).optional().default(0),
+      verifiedOnly: z.boolean().optional().default(false)
+    })).max(10).optional().default([]),
+    workMode: text(50),
+    workType: text(50),
+    location: text(100),
+    college: text(200),
+    degree: text(200),
+    year: z.string().trim().regex(/^(\d{4})?$/, 'Year must be four digits').optional().default(''),
+    credential: z.enum(['', 'verified_skills', 'has_video', 'has_resume']).optional().default(''),
+    experience: z.enum(['', 'experienced', 'fresher']).optional().default(''),
+    match: z.enum(['', '70', '50', 'any']).optional().default(''),
+    sort: z.enum(['recommended', 'verified_desc', 'skills_count', 'name_asc', 'newest']).optional().default('recommended'),
+    onlyMeets: z.boolean().optional().default(false),
+    // One of the recruiter's own jobs to compare candidates with ('' = none).
+    compareJobId: z.union([idSchema, z.literal('')]).optional().default(''),
+    // Just these candidates (profile or user ids), e.g. the dashboard's recently viewed.
+    ids: z.array(z.string().trim().min(1).max(64)).max(50).optional(),
+    // Leave out people who already applied to one of the recruiter's jobs.
+    excludeApplicants: z.boolean().optional().default(false),
+    // false: skip counting every match (a short list such as the dashboard's top 5).
+    countTotal: z.boolean().optional().default(true),
+    page: z.number().int().min(1).max(10000).optional().default(1),
+    pageSize: z.number().int().min(1).max(50).optional().default(20)
+  })
+};
+
+// One candidate's full profile: a profile id or that candidate's user id.
+const candidateIdSchema = {
+  params: z.object({ candidateId: z.string().trim().min(1).max(64) })
+};
+
 module.exports = {
+  candidateSearchSchema,
+  candidateIdSchema,
   verifyCompanySchema,
   postJobSchema,
   eligibleCountSchema,

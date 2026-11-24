@@ -150,6 +150,19 @@ Never cache per-user private data in a shared key, and never cache anything cont
 
 ---
 
+### Status (2026-11-24)
+
+Done in code (details: `all_mds/MEMORY.md` §44): gaps 1 (Redis-backed limits, memory fallback),
+2 (videos upload straight to S3; the proxy now only takes files up to 10 MB), 3 (hourly retention
+timer, run once per hour across servers with Redis), 4 (pool limits from env; PgBouncer via
+`DB_POOLER_PORT` once it's installed), 5 (`SELECT 1`), 6 (`CORS_ORIGINS` allow-list), plus short
+caches for the job list, shared job page and recruiter count, graceful shutdown, and a k6 script in
+`main_website/backend/loadtest/`. Still to do on servers: set `REDIS_URL` and `CORS_ORIGINS`,
+install PgBouncer if running several processes, add the S3 bucket CORS rule and `s3:GetObject`,
+and run the load test on staging. Gap 7 is partly done (OTP emails queue when Redis is set).
+Recruiter candidate search moved to the server on 2026-11-24 (MEMORY §45): one page per request,
+250–420 ms at 100,000 candidates. The post-a-job candidate count is the remaining full scan.
+
 ## 6. Checklist for any new feature
 
 - [ ] Role + ownership checked server-side; input validated with a `{ body, params, query }` schema

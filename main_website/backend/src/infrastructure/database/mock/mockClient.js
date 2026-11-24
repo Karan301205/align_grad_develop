@@ -47,6 +47,11 @@ const mockClient = {
   // Interactive and array transactions. The mock runs on one event loop, so the
   // callback simply gets the mock client (no rollback).
   $transaction: async (arg) => (typeof arg === 'function' ? arg(mockClient) : Promise.all(arg)),
+  // Raw SQL (recruiter candidate search, /health) needs the real PostgreSQL: the test store
+  // can't run it, so a test that reaches it fails with this message instead of a vague error.
+  $queryRaw: async () => {
+    throw new Error('The in-memory test store cannot run raw SQL; test that code against PostgreSQL.');
+  },
   user: {
     findUnique: async ({ where }) => {
       const field = Object.keys(where)[0];

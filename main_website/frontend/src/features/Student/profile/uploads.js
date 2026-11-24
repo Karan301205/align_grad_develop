@@ -1,6 +1,7 @@
 // Uploads used by the candidate profile. The server checks type, size and the
-// file's magic bytes (PUT /upload/secure-put); these client checks only give a
-// quicker, clearer message. Limits must match backend src/config/upload.config.js.
+// file's magic bytes (PUT /upload/secure-put for photos; POST /upload/verify after a
+// video goes straight to storage); these client checks only give a quicker, clearer
+// message. Limits must match backend src/config/upload.config.js.
 import { apiFetch } from '../../../services/apiClient';
 import { putFileToS3 } from '../../../services/uploadService';
 
@@ -33,13 +34,19 @@ export function readVideoDuration(file) {
   });
 }
 
+/** S3's own error text (an XML <Message>), for the console. */
+const storageMessage = (xml) => (String(xml || '').match(/<Message>([^<]*)<\/Message>/) || [])[1] || String(xml || '').slice(0, 300);
+
 /**
- * Gets an upload URL for a video (category 'project' → project demo, otherwise
- * the intro video) and PUTs the file with progress. Resolves to the public URL.
+ * Uploads a video (category 'project' → project demo, otherwise the intro video) straight
+ * to storage with progress, then has the server check it. Resolves to the public URL.
+ * Steps: POST /student/video-upload-url (a presigned form) → POST the file to S3 →
+ * POST /upload/verify (size, type and file signature; the server deletes a bad file).
  */
 export async function uploadVideo(file, { token, category, onProgress = () => {} }) {
   const contentType = file.type || 'video/webm';
   const extension = (file.name && file.name.includes('.') ? file.name.split('.').pop() : contentType.split('/')[1] || 'webm').toLowerCase();
+  const fileType = category === 'project' ? 'projectVideo' : 'video';
   const res = await apiFetch('/student/video-upload-url', {
     token,
     method: 'POST',
@@ -47,36 +54,37 @@ export async function uploadVideo(file, { token, category, onProgress = () => {}
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'We couldn’t start the upload. Please try again.');
-  onProgress(10);
+  onProgress(5);
+
+  const form = new FormData();
+  Object.entries(data.upload.fields).forEach(([name, value]) => form.append(name, value));
+  form.append('file', file); // S3 needs the file last
 
   await new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('PUT', data.signedUrl);
-    xhr.setRequestHeader('Content-Type', contentType);
-    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.open('POST', data.upload.url);
     xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) onProgress(10 + Math.round((event.loaded / event.total) * 85));
+      if (event.lengthComputable) onProgress(5 + Math.round((event.loaded / event.total) * 85));
     };
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) return resolve();
-      let message = 'The upload didn’t finish. Please try again.';
-      try {
-        const body = JSON.parse(xhr.responseText);
-        if (body?.error && xhr.status < 500) message = body.error;
-      } catch {
-        /* keep the plain message */
-      }
-      console.error(`[upload] Video upload failed with status ${xhr.status}:`, xhr.responseText);
-      reject(new Error(message));
+      console.error(`[upload] Storage refused the video (HTTP ${xhr.status}):`, storageMessage(xhr.responseText));
+      reject(new Error(/EntityTooLarge/.test(xhr.responseText) ? `The video must be ${Math.round(data.maxBytes / MB)} MB or smaller.` : 'The upload didn’t finish. Please try again.'));
     };
     xhr.onerror = () => {
-      console.error('[upload] Network error while uploading a video.');
+      // Also what a missing CORS rule on the bucket looks like from the browser.
+      console.error('[upload] Could not reach storage while uploading a video (network, or the bucket\'s CORS rules).');
       reject(new Error('The upload stopped because the connection dropped. Check your internet and try again.'));
     };
-    xhr.send(file);
+    xhr.send(form);
   });
+  onProgress(92);
+
+  const check = await apiFetch('/upload/verify', { token, method: 'POST', json: { key: data.key, fileType } });
+  const checked = await check.json().catch(() => ({}));
+  if (!check.ok) throw new Error(checked.error || 'We couldn’t check the uploaded video. Please try again.');
   onProgress(100);
-  return data.publicUrl;
+  return checked.publicUrl;
 }
 
 function loadImage(file) {

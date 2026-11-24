@@ -11,7 +11,9 @@ const {
   updateJobSchema,
   toggleJobStatusSchema,
   deleteJobSchema,
-  updateApplicationRoundsSchema
+  updateApplicationRoundsSchema,
+  candidateSearchSchema,
+  candidateIdSchema
 } = require('./recruiter.validator');
 const { updateCompanySchema, updateCompanyPhotosSchema } = require('./recruiterCompany.validator');
 const { requireRecruiter, requireApprovedRecruiter } = require('./companyVerification');
@@ -29,8 +31,10 @@ router.put('/jobs/:jobId', authMiddleware, relaxedLimit, requireRecruiter, valid
 router.patch('/jobs/:jobId/status', authMiddleware, relaxedLimit, requireRecruiter, validate(toggleJobStatusSchema), recruiterController.toggleJobPause);
 router.delete('/jobs/:jobId', authMiddleware, relaxedLimit, requireRecruiter, validate(deleteJobSchema), recruiterController.deleteJob);
 router.get('/jobs', authMiddleware, relaxedLimit, requireRecruiter, recruiterController.getCompanyJobs);
-router.get('/candidates', authMiddleware, relaxedLimit, requireApprovedRecruiter, recruiterController.getCandidates);
-router.get('/top-talents', authMiddleware, relaxedLimit, requireApprovedRecruiter, recruiterController.getTopMatchingTalents);
+// Candidates: one page of cards per search, the filter menus, and one full profile.
+router.post('/candidates/search', authMiddleware, relaxedLimit, requireApprovedRecruiter, validate(candidateSearchSchema), recruiterController.searchCandidates);
+router.get('/candidates/facets', authMiddleware, relaxedLimit, requireApprovedRecruiter, recruiterController.getCandidateFacets);
+router.get('/candidates/:candidateId', authMiddleware, relaxedLimit, requireApprovedRecruiter, validate(candidateIdSchema), recruiterController.getCandidateDetail);
 router.put('/applications/:applicationId/rounds', authMiddleware, relaxedLimit, requireApprovedRecruiter, validate(updateApplicationRoundsSchema), recruiterController.updateApplicationRounds);
 
 module.exports = router;
