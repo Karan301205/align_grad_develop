@@ -48,7 +48,10 @@ const env = {
   DB_POOL_TIMEOUT: parseInt(process.env.DB_POOL_TIMEOUT, 10) || 10,
   JWT_SECRET: process.env.JWT_SECRET,
   ADMIN_FRONTEND_URL: process.env.ADMIN_FRONTEND_URL || '',
-  REDIS_URL: process.env.REDIS_URL || '',
+  // Optional Redis (redis://:password@host:6379): request limits shared by every admin server
+  // process. Empty → each process counts in its own memory. Can be the same Redis as the main site
+  // (admin keys start with "admin:").
+  REDIS_URL: (process.env.REDIS_URL || '').trim(),
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
   AWS_REGION: process.env.AWS_REGION || '',

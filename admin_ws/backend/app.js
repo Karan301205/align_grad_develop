@@ -37,9 +37,16 @@ app.use(express.json());
 // Apply global rate limiting across all administrative API endpoints
 app.use(rateLimiter(rateLimitConfig.relaxed));
 
-// Routes placeholder
-app.get('/health', (req, res) => {
-  res.json({ success: true, message: 'Admin API Server is healthy' });
+// Health check. Redis is optional (limits fall back to memory without it), so it is reported
+// but never marks the server unhealthy: configured = REDIS_URL is set, working = it answered PING.
+const { pingRedis } = require('./src/config/redis');
+app.get('/health', async (req, res) => {
+  const working = await pingRedis();
+  res.json({
+    success: true,
+    message: 'Admin API Server is healthy',
+    redis: { configured: working !== null, working: working === true }
+  });
 });
 
 // Auth Routes (unprotected)
