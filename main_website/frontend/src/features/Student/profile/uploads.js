@@ -74,7 +74,7 @@ export async function uploadVideo(file, { token, category, onProgress = () => {}
     xhr.onerror = () => {
       // Also what a missing CORS rule on the bucket looks like from the browser.
       console.error('[upload] Could not reach storage while uploading a video (network, or the bucket\'s CORS rules).');
-      reject(new Error('The upload stopped because the connection dropped. Check your internet and try again.'));
+      reject(new Error('We couldn’t reach file storage, so the video didn’t upload. Please try again in a moment.'));
     };
     xhr.send(form);
   });

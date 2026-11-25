@@ -405,12 +405,12 @@ export default function ProfileEdit({ data, token, sections, onNavigate, firstTi
                 <TextInput id="edit-first-name" autoComplete="given-name" value={draft.firstName} onChange={set('firstName')} clean={cleanName} maxLength={LIMITS.name} error={errors.firstName} placeholder="e.g. Sneha" />
               </Field>
               <Field id="edit-last-name" label="Last name" required error={errors.lastName}>
-                <TextInput id="edit-last-name" autoComplete="family-name" value={draft.lastName} onChange={set('lastName')} clean={cleanName} maxLength={LIMITS.name} error={errors.lastName} placeholder="e.g. Reddy" />
+                <TextInput id="edit-last-name" autoComplete="family-name" value={draft.lastName} onChange={set('lastName')} clean={cleanName} maxLength={LIMITS.name} error={errors.lastName} placeholder="e.g. Rawat" />
               </Field>
               <Field id="edit-username" label="Username" required error={errors.username} hint={usernameHint}>
                 <div className="relative">
                   <span className={`pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 ${MUTED}`}>@</span>
-                  <TextInput id="edit-username" autoComplete="username" value={draft.username} onChange={changeUsername} clean={cleanUsername} maxLength={15} error={errors.username} hint="username" className="pl-8" placeholder="e.g. sneha_reddy" />
+                  <TextInput id="edit-username" autoComplete="username" value={draft.username} onChange={changeUsername} clean={cleanUsername} maxLength={15} error={errors.username} hint="username" className="pl-8" placeholder="e.g. krn_rwt" />
                 </div>
               </Field>
               <Field id="edit-email" label="Email" required error={errors.email}>
