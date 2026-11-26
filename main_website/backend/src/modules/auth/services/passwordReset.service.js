@@ -164,7 +164,8 @@ async function resetPassword({ token, newPassword }) {
 
   return {
     success: true,
-    message: 'Your password has been reset successfully. You can now log in.'
+    message: 'Your password has been reset successfully. You can now log in.',
+    email: user.email // for the controller (clears sign-in locks); not sent to the browser
   };
 }
 

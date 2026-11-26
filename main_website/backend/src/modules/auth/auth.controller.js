@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { prisma } = require('../../infrastructure/database');
-const { recordFailedAttempt, resetFailedAttempts } = require('../../middleware/rateLimiter');
+const { recordFailedAttempt, resetFailedAttempts, lockSignupCode } = require('../../middleware/rateLimiter');
 const env = require('../../config/env');
 const { passwordResetService, emailVerificationService } = require('./services');
 const { sendError } = require('../../shared/http/sendError');
@@ -40,6 +40,7 @@ exports.verifyPin = async (req, res) => {
     const result = await emailVerificationService.verifyPin({ email, pin, role });
     res.status(200).json(result);
   } catch (err) {
+    if (err.lockSignup) lockSignupCode(email);
     if (err.statusCode === 429 && err.retryAfter) {
       res.setHeader('Retry-After', err.retryAfter);
     }
@@ -295,7 +296,9 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { token, password } = req.body;
-    const result = await passwordResetService.resetPassword({ token, newPassword: password });
+    const { email, ...result } = await passwordResetService.resetPassword({ token, newPassword: password });
+    // A new password ends any sign-in lock on the account, so the person can sign in right away.
+    resetFailedAttempts(email);
     res.json(result);
   } catch (err) {
     console.error('[AuthController] resetPassword error:', err);

@@ -1,12 +1,12 @@
 const rateLimitConfig = require('../config/rateLimit.config');
 const redisStore = require('../infrastructure/redis');
 
-// Request limits and failed-login backoff.
+// Request limits, failed-login locks and sign-up code locks.
 //
 // With REDIS_URL set the counts live in Redis, so every server process sees the same totals
 // and a restart doesn't reset them. Without Redis, or while Redis can't answer, each process
 // counts in its own memory (correct for a single process). Redis keys: rl:<path>:<who> for
-// request windows, auth-fail:<ip|email>:<value> for failed logins.
+// request windows, auth-fail:<ip|email|code>:<value> for failed logins and sign-up codes.
 
 const ipStore = new Map();
 const failedAttemptsStore = new Map();
@@ -77,23 +77,19 @@ const rateLimiter = (options) => {
   };
 };
 
-/* ---------------------------------------------------------- failed logins */
+/* ----------------------------------------------- failed sign-ins and sign-up codes */
 
-const failureKeys = (email, ip) => [ip && `ip:${ip}`, email && `email:${String(email).toLowerCase().trim()}`].filter(Boolean);
+const emailKey = (email) => String(email).toLowerCase().trim();
+const failureKeys = (email, ip) => [ip && `ip:${ip}`, email && `email:${emailKey(email)}`].filter(Boolean);
+const codeKeys = (email) => (email ? [`code:${emailKey(email)}`] : []);
 
-/** The record after one more failed attempt, with a lock once the threshold is reached. */
-function withFailure(record, now = Date.now()) {
-  const config = rateLimitConfig.auth.backoff;
-  // If no record, or if the tracking window has fully passed, start fresh
-  const next = !record || now > record.resetTime
-    ? { count: 1, resetTime: now + FAILURE_WINDOW_MS }
-    : { ...record, count: record.count + 1, resetTime: now + FAILURE_WINDOW_MS };
-
-  if (next.count >= config.maxFailedAttempts) {
-    const exponent = next.count - config.maxFailedAttempts;
-    const delay = Math.min(config.baseDelayMs * Math.pow(config.multiplier, exponent), config.maxDelayMs);
-    next.lockedUntil = now + delay;
-  }
+/** The record after one more failed sign-in, locked once the key's limit is reached. */
+function withFailure(key, record, now = Date.now()) {
+  const { maxFailedAttempts, ipMaxFailedAttempts, lockMs } = rateLimitConfig.auth.backoff;
+  // Start over when there's no record, the last failure was long ago, or an earlier lock has ended.
+  const fresh = !record || now > record.resetTime || (record.lockedUntil && now >= record.lockedUntil);
+  const next = { count: fresh ? 1 : record.count + 1, resetTime: now + FAILURE_WINDOW_MS };
+  if (next.count >= (key.startsWith('ip:') ? ipMaxFailedAttempts : maxFailedAttempts)) next.lockedUntil = now + lockMs;
   return next;
 }
 
@@ -117,63 +113,71 @@ async function readFailures(keys) {
   }
 }
 
-/**
- * Middleware that checks lock status for login request (both IP and Email)
- */
-const checkLoginLock = (req, res, next) => {
-  const ip = clientIp(req);
-  const { email } = req.body;
-  const keys = failureKeys(email, ip);
-
-  const decide = ([ipRecord, emailRecord]) => {
-    const now = Date.now();
-    // 1. Check IP lock
-    if (ipRecord && ipRecord.lockedUntil && now < ipRecord.lockedUntil) {
-      const retryAfter = Math.ceil((ipRecord.lockedUntil - now) / 1000);
-      res.setHeader('Retry-After', retryAfter);
-      return res.status(429).json({
-        error: `Too many failed login attempts. Please wait ${retryAfter} second${retryAfter === 1 ? '' : 's'} before trying again.`
-      });
-    }
-    // 2. Check Email lock
-    if (emailRecord && emailRecord.lockedUntil && now < emailRecord.lockedUntil) {
-      const retryAfter = Math.ceil((emailRecord.lockedUntil - now) / 1000);
-      res.setHeader('Retry-After', retryAfter);
-      return res.status(429).json({
-        error: `Account is temporarily locked due to repeated failed login attempts. Please try again in ${retryAfter} seconds.`
-      });
-    }
-    return next();
-  };
-
-  // keys is [ip, email] (either may be missing); line the records up with that shape.
-  const shape = (records) => (ip ? records : [undefined, ...records]);
-  if (!redisStore.getRedis()) return decide(shape(keys.map((key) => failedAttemptsStore.get(key))));
-  readFailures(keys).then((records) => decide(shape(records))).catch(next);
-};
-
-/**
- * Record a failed login attempt for both IP and Email, applying progressive/exponential backoff.
- * Callers don't wait for it; with Redis it finishes in the background and never throws.
- */
-const recordFailedAttempt = (email, ip) => {
-  const keys = failureKeys(email, ip);
+/** Replaces each key's record with `nextRecord(key, oldRecord)`. Never throws. */
+function updateFailures(keys, nextRecord) {
   const redis = redisStore.getRedis();
   if (!redis) {
-    keys.forEach((key) => failedAttemptsStore.set(key, withFailure(failedAttemptsStore.get(key))));
+    keys.forEach((key) => failedAttemptsStore.set(key, nextRecord(key, failedAttemptsStore.get(key))));
     return Promise.resolve();
   }
   return Promise.all(keys.map(async (key) => {
     try {
-      const record = withFailure(parseRecord(await redis.get(`auth-fail:${key}`)));
+      const record = nextRecord(key, parseRecord(await redis.get(`auth-fail:${key}`)));
       const keepMs = Math.max(record.resetTime, record.lockedUntil || 0) - Date.now();
       await redis.set(`auth-fail:${key}`, JSON.stringify(record), 'PX', Math.max(1000, keepMs));
     } catch (err) {
       redisStore.reportFallback('login backoff', err);
-      failedAttemptsStore.set(key, withFailure(failedAttemptsStore.get(key)));
+      failedAttemptsStore.set(key, nextRecord(key, failedAttemptsStore.get(key)));
     }
   }));
+}
+
+const LOCK_MESSAGES = {
+  ip: 'Too many failed sign-in attempts from this network.',
+  email: 'Too many failed sign-in attempts for this account.',
+  code: 'Too many wrong verification codes for this email.'
 };
+
+/** "10 minutes", "1 minute", "45 seconds". */
+function waitText(ms) {
+  const seconds = Math.max(1, Math.ceil(ms / 1000));
+  if (seconds < 60) return `${seconds} second${seconds === 1 ? '' : 's'}`;
+  const minutes = Math.ceil(seconds / 60);
+  return `${minutes} minute${minutes === 1 ? '' : 's'}`;
+}
+
+/** Middleware answering 429 while any of the request's keys is locked. */
+const lockCheck = (keysOf) => (req, res, next) => {
+  const keys = keysOf(req);
+  const decide = (records) => {
+    const now = Date.now();
+    const index = records.findIndex((record) => record?.lockedUntil && now < record.lockedUntil);
+    if (index === -1) return next();
+    const waitMs = records[index].lockedUntil - now;
+    res.setHeader('Retry-After', Math.ceil(waitMs / 1000));
+    return res.status(429).json({ error: `${LOCK_MESSAGES[keys[index].split(':')[0]]} Please try again in ${waitText(waitMs)}.` });
+  };
+  if (!redisStore.getRedis()) return decide(keys.map((key) => failedAttemptsStore.get(key)));
+  readFailures(keys).then(decide).catch(next);
+};
+
+/** Login: blocked while this network address or this email is locked. */
+const checkLoginLock = lockCheck((req) => failureKeys(req.body?.email, clientIp(req)));
+
+/** Sign-up (start, verify, resend): blocked while this email's sign-up is locked. */
+const checkCodeLock = lockCheck((req) => codeKeys(req.body?.email));
+
+/**
+ * Records a failed sign-in for the address and the email. Callers don't wait for it; with
+ * Redis it finishes in the background and never throws.
+ */
+const recordFailedAttempt = (email, ip) => updateFailures(failureKeys(email, ip), withFailure);
+
+/** Locks sign-up for `email` after its emailed code was guessed wrong too many times. */
+const lockSignupCode = (email) => updateFailures(codeKeys(email), () => {
+  const lockedUntil = Date.now() + rateLimitConfig.auth.backoff.lockMs;
+  return { count: 0, resetTime: lockedUntil, lockedUntil };
+});
 
 /**
  * Reset failed attempts tracker on successful login
@@ -217,6 +221,8 @@ module.exports = {
   emailLimit,
   costlyLimit,
   checkLoginLock,
+  checkCodeLock,
+  lockSignupCode,
   recordFailedAttempt,
   resetFailedAttempts
 };

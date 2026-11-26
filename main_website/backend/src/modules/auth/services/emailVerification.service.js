@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { prisma } = require('../../../infrastructure/database');
 const { sendVerificationPinEmail } = require('../../../infrastructure/email');
 const env = require('../../../config/env');
+const rateLimitConfig = require('../../../config/rateLimit.config');
 
 const PIN_EXPIRY_MINUTES = env.VERIFICATION_PIN_EXPIRY_MINUTES || 10;
 const PIN_EXPIRY_MS = PIN_EXPIRY_MINUTES * 60 * 1000;
@@ -213,11 +214,17 @@ async function verifyPin({ email, pin, role }) {
     });
 
     const remaining = MAX_VERIFY_ATTEMPTS - newAttempts;
+    const lockMinutes = Math.ceil(rateLimitConfig.auth.backoff.lockMs / 60000);
     const msg = remaining > 0
       ? `Incorrect verification code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
-      : 'Incorrect verification code. Maximum attempts reached. Please request a new code.';
+      : `Incorrect verification code. You’ve used all ${MAX_VERIFY_ATTEMPTS} attempts. Please wait ${lockMinutes} minute${lockMinutes === 1 ? '' : 's'}, then request a new code.`;
     const error = new Error(msg);
     error.statusCode = remaining > 0 ? 400 : 429;
+    if (remaining <= 0) {
+      // The controller locks every sign-up step for this email (auth.routes checkCodeLock).
+      error.lockSignup = true;
+      error.retryAfter = Math.ceil(rateLimitConfig.auth.backoff.lockMs / 1000);
+    }
     throw error;
   }
 

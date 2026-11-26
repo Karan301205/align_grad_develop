@@ -7,12 +7,14 @@ module.exports = {
   auth: {
     windowMs: parseInt(process.env.RATE_LIMIT_AUTH_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
     maxRequests: parseInt(process.env.RATE_LIMIT_AUTH_MAX_REQUESTS) || 200, // 200 requests per IP per window
-    // Failed login backoff settings
+    // Failed sign-ins: after `maxFailedAttempts` wrong tries for one email, signing in to it is
+    // locked for `lockMs`, then the count starts over. One network address is locked after
+    // `ipMaxFailedAttempts` (higher, because a whole college or office can share one address).
+    // A sign-up whose emailed code was guessed wrong 5 times is locked for `lockMs` too.
     backoff: {
-      maxFailedAttempts: parseInt(process.env.AUTH_BACKOFF_MAX_FAILED_ATTEMPTS) || 10, // Lock starts after 10 failed attempts
-      baseDelayMs: parseInt(process.env.AUTH_BACKOFF_BASE_DELAY_MS) || 3000, // 3 seconds initial lock
-      multiplier: parseFloat(process.env.AUTH_BACKOFF_MULTIPLIER) || 2, // Exponential backoff multiplier: 3s, 6s, 12s...
-      maxDelayMs: parseInt(process.env.AUTH_BACKOFF_MAX_DELAY_MS) || 15 * 60 * 1000 // Max lock 15 minutes
+      maxFailedAttempts: parseInt(process.env.AUTH_BACKOFF_MAX_FAILED_ATTEMPTS) || 5,
+      ipMaxFailedAttempts: parseInt(process.env.AUTH_BACKOFF_IP_MAX_FAILED_ATTEMPTS) || 25,
+      lockMs: parseInt(process.env.AUTH_BACKOFF_LOCK_MS) || 10 * 60 * 1000 // 10 minutes
     }
   },
   // Routes that send an email (sign-up code, code resend, password reset), counted together per
