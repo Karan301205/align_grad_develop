@@ -1,4 +1,3 @@
-import { jsPDF } from 'jspdf';
 import { ALL_SKILLS } from '../../../constants';
 import { safeFileName } from './jobsData';
 
@@ -8,7 +7,8 @@ const isTechnical = (skillName) => {
 };
 
 /** Saves the job description as a PDF: summary, responsibilities, skill bars and selection rounds. */
-export default function downloadJobDescriptionPdf(job) {
+export default async function downloadJobDescriptionPdf(job) {
+  const { jsPDF } = await import('jspdf'); // large: loaded only when a PDF is downloaded
   const doc = new jsPDF();
   const title = job.title || job.designation || 'Job';
   let y = 70;

@@ -1,9 +1,9 @@
 // "Download" on a job: a one-page PDF brief built in the browser (shared by the
 // Jobs page and the public job brief).
-import { jsPDF } from 'jspdf';
 import { companyOf, payText, placeText } from '../home/homeData';
 
-export function downloadJobBrief(job) {
+export async function downloadJobBrief(job) {
+  const { jsPDF } = await import('jspdf'); // large: loaded only when a brief is downloaded
   const doc = new jsPDF();
   const company = companyOf(job);
   let y = 25;

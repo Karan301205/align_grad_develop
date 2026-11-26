@@ -1,10 +1,12 @@
-import html2canvas from 'html2canvas-pro';
-import { jsPDF } from 'jspdf';
+// The PDF libraries are large (~600 KB), so they load only when a PDF is actually made.
+const loadPdfLibraries = () => Promise.all([import('html2canvas-pro'), import('jspdf')])
+  .then(([canvasModule, pdfModule]) => ({ html2canvas: canvasModule.default, jsPDF: pdfModule.jsPDF }));
 
 // Renders a DOM element to an A4 PDF and triggers a download. Extracted from
 // StudentLayout so the heavy html2canvas/jsPDF concern is isolated from the
 // layout component. Behavior (scale, quality, sizing, filename) is unchanged.
 export async function generateResumePdf(element, fileName) {
+  const { html2canvas, jsPDF } = await loadPdfLibraries();
   const canvas = await html2canvas(element, {
     scale: 2.5,
     useCORS: true,
@@ -23,6 +25,7 @@ export async function generateResumePdf(element, fileName) {
 }
 
 export async function generateResumePdfBlob(element) {
+  const { html2canvas, jsPDF } = await loadPdfLibraries();
   const canvas = await html2canvas(element, {
     scale: 2.5,
     useCORS: true,

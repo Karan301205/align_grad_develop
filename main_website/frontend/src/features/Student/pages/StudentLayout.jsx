@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { Suspense, useState, useEffect, useRef, useMemo } from 'react';
 import {
   Briefcase,
   User,
@@ -15,7 +15,6 @@ import {
   LayoutDashboard,
   LifeBuoy
 } from 'lucide-react';
-import GigsPage from '../gigs/GigsPage';
 import { apiFetch, userMessage } from '../../../services/apiClient';
 import { generateResumePdf } from '../../../services/resumePdf';
 import { formatAlertMessage } from '../../../utils/errorFormatter';
@@ -30,14 +29,19 @@ import { isPremiumCandidate } from '../../../utils/jobAccess';
 import SidebarNavItem from '../../../components/ui/SidebarNavItem';
 
 // Import subcomponents
-import CandidateHome from '../home/CandidateHome';
-import JobsPage from '../jobs/JobsPage';
-import StudentResume from '../components/StudentResume';
-import SkillsTestsPage from '../tests/SkillsTestsPage';
-import ApplicationsPage from '../applications/ApplicationsPage';
-import LearnPage from '../learn/LearnPage';
-import ProfilePage from '../profile/ProfilePage';
-import SupportPage from '../../Support/SupportPage';
+import StudentResume from '../components/StudentResume'; // always drawn off-screen for PDF downloads
+import { lazyPage } from '../../../app/lazyPage';
+import { PageLoader } from '../../../components/PageLoader';
+
+// Each tab loads the first time it's opened.
+const CandidateHome = lazyPage(() => import('../home/CandidateHome'));
+const JobsPage = lazyPage(() => import('../jobs/JobsPage'));
+const SkillsTestsPage = lazyPage(() => import('../tests/SkillsTestsPage'));
+const ApplicationsPage = lazyPage(() => import('../applications/ApplicationsPage'));
+const LearnPage = lazyPage(() => import('../learn/LearnPage'));
+const ProfilePage = lazyPage(() => import('../profile/ProfilePage'));
+const SupportPage = lazyPage(() => import('../../Support/SupportPage'));
+const GigsPage = lazyPage(() => import('../gigs/GigsPage'));
 
 
 export default function StudentLayout({ user, token, activeTab, setActiveTab, handleLogout, theme, toggleTheme, onOpenCompanyProfile, autoSelectOpportunity, setAutoSelectOpportunity }) {
@@ -681,7 +685,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
               </div>
             )}
 
-            <>
+            <Suspense fallback={<PageLoader />}>
                 {activeTab === 'dashboard' && (
                   <CandidateHome
                     profile={profile}
@@ -820,7 +824,7 @@ export default function StudentLayout({ user, token, activeTab, setActiveTab, ha
                 onNotify={(message, type = 'success') => setAlertConfig({ message, type })}
               />
             )}
-            </>
+            </Suspense>
           </div>
         )}
       </main>

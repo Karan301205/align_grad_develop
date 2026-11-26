@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { apiFetch, userMessage, SERVER_MESSAGE } from '../../../services/apiClient';
 import { formatAlertMessage } from '../../../utils/errorFormatter';
@@ -9,18 +9,22 @@ import {
 } from '../../../utils/companyVerification';
 
 // Import subcomponents
-import DashboardPage from '../dashboard/DashboardPage';
-import FirstRunHome from '../dashboard/FirstRunHome';
-import JobsPage from '../jobs/JobsPage';
-import ApplicationsPage from '../jobs/ApplicationsPage';
-import CandidatesPage from '../candidates/CandidatesPage';
-import PostJobPage from '../postJob/PostJobPage';
 import RecruiterSidebar from '../components/RecruiterSidebar';
-import CompanyProfilePage from '../companyProfile/CompanyProfilePage';
-import BillingPage from '../billing/BillingPage';
-import GigsPage from '../gigs/GigsPage';
-import SupportPage from '../../Support/SupportPage';
+import { lazyPage } from '../../../app/lazyPage';
+import { PageLoader } from '../../../components/PageLoader';
 import { BRAND_GRADIENT_X } from '../components/accountStyles';
+
+// Each tab loads the first time it's opened.
+const DashboardPage = lazyPage(() => import('../dashboard/DashboardPage'));
+const FirstRunHome = lazyPage(() => import('../dashboard/FirstRunHome'));
+const JobsPage = lazyPage(() => import('../jobs/JobsPage'));
+const ApplicationsPage = lazyPage(() => import('../jobs/ApplicationsPage'));
+const CandidatesPage = lazyPage(() => import('../candidates/CandidatesPage'));
+const PostJobPage = lazyPage(() => import('../postJob/PostJobPage'));
+const CompanyProfilePage = lazyPage(() => import('../companyProfile/CompanyProfilePage'));
+const BillingPage = lazyPage(() => import('../billing/BillingPage'));
+const GigsPage = lazyPage(() => import('../gigs/GigsPage'));
+const SupportPage = lazyPage(() => import('../../Support/SupportPage'));
 
 // Account pages (company profile, billing, Help & support) stay open before approval.
 const ACCOUNT_TABS = ['verification', 'billing', 'support'];
@@ -342,6 +346,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
           </div>
         ) : (
           <div key={activeTab}>
+            <Suspense fallback={<PageLoader />}>
             {activeTab === 'dashboard' && !isCompanyApproved && <FirstRunHome company={company} user={user} goToTab={goToTab} />}
 
             {activeTab === 'dashboard' && isCompanyApproved && (
@@ -451,6 +456,7 @@ export default function RecruiterLayout({ user, token, activeTab, setActiveTab, 
                 onRefresh={fetchRecruiterData}
               />
             )}
+            </Suspense>
           </div>
         )}
       </main>

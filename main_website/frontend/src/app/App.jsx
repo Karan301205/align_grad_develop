@@ -2,12 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 // Import features
 import { disconnectRealtime } from '../services/realtime';
-import { AuthView, CandidateAuth, RecruiterAuth, ResetPasswordPage } from '../features/Auth';
-import { StudentLayout, PublicJobBriefPage } from '../features/Student';
-import { RecruiterLayout } from '../features/Recruiter';
-import { RecruiterLandingPage } from '../features/RecruiterLanding';
-import { CommonLandingPage } from '../features/CommonLanding';
-import { PrivacyPolicyPage, TermsAndConditionsPage } from '../features/legal';
+import { lazyPage } from './lazyPage';
 import ConnectionLoader from '../components/ConnectionLoader';
 import CompanyProfileModal from '../components/CompanyProfileModal';
 import EmeraldSignupToast from '../components/EmeraldSignupToast';
@@ -21,6 +16,17 @@ import {
   CANDIDATE_LANDING_PATH,
   RECRUITER_LANDING_PATH
 } from '../config';
+
+// Each screen loads the first time it's shown (main.jsx wraps App in <Suspense>).
+const AuthView = lazyPage(() => import('../features/Auth/pages/AuthView'));
+const ResetPasswordPage = lazyPage(() => import('../features/Auth/pages/ResetPasswordPage'));
+const StudentLayout = lazyPage(() => import('../features/Student/pages/StudentLayout'));
+const PublicJobBriefPage = lazyPage(() => import('../features/Student/pages/PublicJobBriefPage'));
+const RecruiterLayout = lazyPage(() => import('../features/Recruiter/pages/RecruiterLayout'));
+const RecruiterLandingPage = lazyPage(() => import('../features/RecruiterLanding/pages/RecruiterLandingPage'));
+const CommonLandingPage = lazyPage(() => import('../features/CommonLanding/pages/CommonLandingPage'));
+const PrivacyPolicyPage = lazyPage(() => import('../features/legal/pages/PrivacyPolicyPage'));
+const TermsAndConditionsPage = lazyPage(() => import('../features/legal/pages/TermsAndConditionsPage'));
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
